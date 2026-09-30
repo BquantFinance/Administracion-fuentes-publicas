@@ -33,8 +33,8 @@ Cada línea que no ahorre una búsqueda, una prueba fallida o una hora de depura
    Si falta un valor, se añade al vocabulario en el mismo commit, no se improvisa.
 7. **Castellano en valores, inglés en claves.** Sin markdown dentro de los valores. Sin dos puntos seguidos de
    espacio en valores sin comillas, porque rompe el YAML.
-8. **Fuente única de verdad.** Solo se editan `sources/**/*.yaml`, `indices/*.yaml`, `guides/*.md`, `schema/` y
-   `scripts/`. `catalog.json`, `llms.txt`, `llms-full.txt`, `indices/README.md`, los `README.md` de sector y la
+8. **Fuente única de verdad.** Solo se editan `sources/**/*.yaml`, `indices/*.yaml`, `guides/*.md`, `schema/`,
+   `scripts/` y `evals/`. `catalog.json`, `llms.txt`, `llms-full.txt`, `indices/README.md`, los `README.md` de sector y la
    tabla del README raíz se regeneran con `python scripts/build.py` y se suben en el mismo commit.
 9. **No borrar fichas.** Una fuente muerta pasa a `status: deprecated` con la sustituta en `gotchas`.
 10. **Rendimientos decrecientes.** Si un sector solo tiene portales sin API y datos que ya da el INE, una

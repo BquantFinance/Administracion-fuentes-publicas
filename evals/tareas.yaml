@@ -1,0 +1,188 @@
+# Batería de 20 tareas para medir lo que aporta el repo a un agente (ver evals/README.md).
+# Cada tarea: ask (lo que pediría un usuario), expected (qué debe contener una respuesta correcta), sources (fichas que la
+# resuelven), check (llamada que da el valor de referencia en el momento de la prueba) y trap (lo que falla sin el repo).
+
+- id: ipc-ultimo
+  ask: "¿Cuál es el último dato publicado del IPC general nacional (índice) y de qué mes es?"
+  expected: "El valor de Valor y Anyo con T3_Periodo del último elemento no vacío de Data en DATOS_SERIE/IPC290751 (con tip=A); el mes debe coincidir con el último publicado, no con el corriente"
+  sources: [ine-api-tempus]
+  check:
+    url: "https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/IPC290751?nult=2&tip=A"
+    contains: "IPC290751"
+  trap: "nult=1 devuelve Data vacío cuando el mes corriente aún no está publicado; la tabla se pide por Id numérico (24077), no por código"
+
+- id: paro-municipio
+  ask: "Paro registrado en Abengibre (Albacete) en agosto de 2026, por sexo"
+  expected: "Cifras tomadas del fichero xls mensual del SEPE por comunidad (Muniacteco_20-45_CASTILLA-LA MANCHA), no de la EPA del INE ni de un agregado provincial"
+  sources: [sepe-estadisticas]
+  check:
+    url: "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios-20-45.html"
+    contains: "municipios"
+  trap: "El paro por municipio es del SEPE (xls por CCAA y mes, con User-Agent de navegador); la EPA del INE no baja de provincia"
+
+- id: gasolinera-mas-barata
+  ask: "Gasolinera más barata en gasóleo A hoy en la provincia de Cuenca"
+  expected: "Rótulo, municipio y precio del mínimo de Precio Gasoleo A entre las estaciones de FiltroProvinciaProducto/16/4; el precio es texto con coma y hay que descartar los vacíos"
+  sources: [minetur-precios-carburantes]
+  check:
+    url: "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroProvinciaProducto/16/4"
+    contains: "ListaEESSPrecio"
+  trap: "IDProducto 4 es Gasóleo A habitual y IDProvincia es el código INE; los precios llegan como texto con coma decimal y los vacíos son cadenas vacías"
+
+- id: prediccion-cuenca
+  ask: "Predicción del tiempo para mañana en Cuenca capital (máxima, mínima y probabilidad de lluvia)"
+  expected: "Valores de prediccion.dia[1] (temperatura.maxima, temperatura.minima, probPrecipitacion) del fichero datos de prediccion/especifica/municipio/diaria/16078 con clave de AEMET"
+  sources: [aemet-opendata]
+  check:
+    url: "https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/16078"
+    headers: {"api_key": "${AEMET_KEY}"}
+    contains: "datos"
+  trap: "Clave gratuita obligatoria, respuesta en dos pasos (URL en datos), fichero en ISO-8859-15, errores con HTTP 200 y estado 404 en el cuerpo, código INE sin dígito de control"
+
+- id: boe-disposiciones-dia
+  ask: "¿Qué disposiciones generales (sección I) publicó el BOE el 29 de septiembre de 2026?"
+  expected: "Lista de identificador y titulo de los item de la sección con codigo 1 del sumario de 20260929, con sus url_xml"
+  sources: [boe-api-sumario]
+  check:
+    url: "https://www.boe.es/datosabiertos/api/boe/sumario/20260929"
+    headers: {"Accept": "application/json"}
+    contains: "BOE-S-2026"
+  trap: "Sin Accept application/json el servidor responde 400; departamento, epigrafe e item llegan como objeto cuando hay uno solo"
+
+- id: constitucion-articulo
+  ask: "Texto vigente del artículo 1 de la Constitución Española"
+  expected: "Texto de los tres apartados tomado de legislacion-consolidada/id/BOE-A-1978-31229/texto/bloque/a1, no de un buscador ni de un PDF"
+  sources: [boe-api-legislacion-consolidada]
+  check:
+    url: "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/bloque/a1"
+    headers: {"Accept": "application/xml"}
+    contains: "Artículo 1"
+  trap: "El id de bloque (a1, preambulo, da1) sale de /texto/indice; el texto completo de una norma larga pesa megabytes"
+
+- id: borme-alava
+  ask: "Sociedades con actos inscritos en Álava publicados en el BORME del 2 de enero de 2024"
+  expected: "Pares p.articulo (número y denominación) con su p.parrafo del documento BORME-A-2024-1-01 en XML"
+  sources: [borme-api-sumario]
+  check:
+    url: "https://www.boe.es/diario_borme/xml.php?id=BORME-A-2024-1-01"
+    contains: "ANSOARAN"
+  trap: "El identificador de la sección A lleva la provincia (BORME-A-AAAA-NNN-PP, 01 Álava); el sumario JSON exige Accept"
+
+- id: bdns-concesion
+  ask: "¿Quién recibió la subvención de la convocatoria BDNS 931918 y por qué importe?"
+  expected: "beneficiario G50653179 FUNDACION PARA LA CONSERVACION... e importe 70000, de concesiones/busqueda?numeroConvocatoria=931918"
+  sources: [bdns-api]
+  check:
+    url: "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=50&numeroConvocatoria=931918"
+    headers: {"Accept": "application/json"}
+    contains: "G50653179"
+  trap: "beneficiario mezcla NIF y nombre en una cadena; la paginación es Spring (content, totalElements) y sin Accept JSON algunos despliegues devuelven XML"
+
+- id: licitaciones-obras-hoy
+  ask: "Licitaciones de obras (CPV que empieza por 45) publicadas hoy con presupuesto sin IVA superior a un millón de euros"
+  expected: "ContractFolderID, nombre del órgano (PartyName) y TaxExclusiveAmount filtrados en el Atom de sindicacion_643 por ItemClassificationCode y BudgetAmount"
+  sources: [placsp-datos-abiertos]
+  check:
+    url: "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom"
+    contains: "ContractFolderStatus"
+  trap: "El feed usa espacios de nombres CODICE (cac, cbc, cac-place-ext); el importe está en TaxExclusiveAmount; el histórico va en zips mensuales, no en el feed"
+
+- id: cima-suministro-ibuprofeno
+  ask: "Medicamentos con ibuprofeno que tienen ahora un problema de suministro activo"
+  expected: "Cruce de medicamentos?nombre=ibuprofeno (o presentaciones por cn) con psuministro filtrando activo true; cn y nregistro son distintos"
+  sources: [aemps-cima-api]
+  check:
+    url: "https://cima.aemps.es/cima/rest/psuministro"
+    contains: "tipoProblemaSuministro"
+  trap: "psuministro no filtra por nombre y pagina de 200 en 200 (882 filas); las fechas son epoch en milisegundos"
+
+- id: euribor-ultimo
+  ask: "Último valor del euríbor a un año publicado por el Banco de España"
+  expected: "valor y fechaValor de la serie D_1NBAF472 en favoritas (o último elemento de listaSeries)"
+  sources: [bde-estadisticas]
+  check:
+    url: "https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472"
+    contains: "D_1NBAF472"
+  trap: "El cuerpo llega comprimido en gzip sin Content-Encoding; el código de serie no se adivina, sale del catálogo CSV"
+
+- id: deuda-pde-aapp
+  ask: "Deuda según el Protocolo de Déficit Excesivo de las Administraciones Públicas en porcentaje del PIB, último trimestre"
+  expected: "Primer par fechas[0] y valores[0] de listaSeries?series=DTNPDE2010_P0000P_PS_APU (orden descendente)"
+  sources: [bde-estadisticas]
+  check:
+    url: "https://app.bde.es/bierest/resources/srdatosapp/listaSeries?idioma=es&series=DTNPDE2010_P0000P_PS_APU&rango=MAX"
+    contains: "DTNPDE2010_P0000P_PS_APU"
+  trap: "fechas y valores van del más reciente al más antiguo; tomar el último elemento da 1995"
+
+- id: omie-precio-dia
+  ask: "Precio del mercado diario de electricidad en España el 29 de septiembre de 2026 en el periodo 3"
+  expected: "Tercera fila del fichero marginalpdbc_20260929.1 (2026;09;29;3;...); en 2026 hay 96 periodos cuarto-horarios"
+  sources: [omie-mercado]
+  check:
+    url: "https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_20260929.1"
+    contains: "MARGINALPDBC"
+  trap: "La URL exige carpeta y nombre de fichero con sufijo de versión; la respuesta es texto con punto y coma y una fila final con asterisco"
+
+- id: poblacion-abengibre
+  ask: "Población de Abengibre (Albacete) según el último padrón publicado"
+  expected: "Valor de DATOS_TABLA/29005?nult=1&tv=19:6124 (753 habitantes en 2025) citando que 6124 es el Id del INE, no el código de municipio"
+  sources: [ine-api-tempus, ine-codigos-territoriales]
+  check:
+    url: "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/29005?nult=1&tv=19:6124"
+    contains: "Abengibre"
+  trap: "El filtro tv usa el Id interno del INE (VALORES_VARIABLEOPERACION/19/22), no el código INE 02001; sin tv la tabla devuelve los 8.000 municipios"
+
+- id: renta-abengibre
+  ask: "Renta neta media por persona en Abengibre según el Atlas de distribución de renta de los hogares"
+  expected: "Valor de la tabla 30656 (Atlas, Albacete) filtrada con tv=19:6124; una tabla por provincia dentro de la operación ADRH (Id 353)"
+  sources: [ine-api-tempus]
+  check:
+    url: "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/30656?nult=1&tv=19:6124"
+    contains: "Renta neta media"
+  trap: "El Atlas no tiene una tabla nacional por municipio; hay que localizar la tabla de la provincia (TABLAS_OPERACION/353)"
+
+- id: exportaciones-trigo
+  ask: "Exportaciones de trigo (TARIC 1001) desde la provincia de Madrid a Países Bajos en el último mes disponible"
+  expected: "Fila con id_pais 003 y euros y kilos (texto con coma) de ObtenerDatos?f=E&pe=LastM&pa=003&ta=1001&pr=28 con token de sesión"
+  sources: [datacomex]
+  check:
+    url: "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=003&ta=1001&pr=28"
+    status: 401
+  trap: "Cuenta gratuita y token con prefijo token: que hay que recortar; el país es numérico (003), no ISO; pe es sensible a mayúsculas (LastM)"
+
+- id: direccion-a-codigo-ine
+  ask: "Código INE del municipio y provincia de la dirección calle Alcalá 50, Madrid"
+  expected: "muniCode 28079 y provinceCode 28 de geocoder/find de CartoCiudad, con lat y lng"
+  sources: [cnig-centro-descargas]
+  check:
+    url: "https://www.cartociudad.es/geocoder/api/geocoder/find?q=Calle%20Alcala%2050%20Madrid"
+    contains: "28079"
+  trap: "El Catastro bloquea la IP tras unas 15 peticiones seguidas; CartoCiudad devuelve el código INE sin registro ni clave"
+
+- id: sigpac-recinto-punto
+  ask: "Uso SIGPAC y superficie del recinto situado en longitud -3,9 y latitud 40,3"
+  expected: "uso_sigpac (ZU) y superficie del primer elemento de recinfobypoint/4326/-3.9/40.3.json"
+  sources: [mapa-sigpac]
+  check:
+    url: "https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfobypoint/4326/-3.9/40.3.json"
+    contains: "uso_sigpac"
+  trap: "El orden es srid/x/y (longitud antes que latitud); la respuesta es una lista aunque haya un solo recinto"
+
+- id: dir3-ayuntamiento-madrid
+  ask: "Código DIR3 del Ayuntamiento de Madrid y sus unidades tramitadoras de facturas"
+  expected: "administration.code L01280796 y las unidades (oc, og, ut con code DIR3) de relations?fulltext=Ayuntamiento de Madrid en FACe"
+  sources: [face-facturas, dir3-directorio]
+  check:
+    url: "https://proveedores.face.gob.es/api/v1/relations?fulltext=Ayuntamiento%20de%20Madrid&limit=5&page=1"
+    contains: "L01280796"
+  trap: "La descarga del directorio DIR3 exige cookies y User-Agent de navegador; FACe da la jerarquía de unidades en JSON sin registro"
+
+- id: momo-andalucia
+  ask: "Defunciones observadas en Andalucía el 1 de enero de 2015 en hombres de 65 años o más según MoMo"
+  expected: "108.88 en la fila ambito ccaa, cod_ine_ambito 1, cod_sexo 1, cod_gedad +65 del CSV de MoMo"
+  sources: [isciii-cne]
+  check:
+    url: "https://momo.isciii.es/public/momo/data"
+    contains: "defunciones_observadas"
+    read_bytes: 4000
+  trap: "El servidor ignora Range y sirve el CSV completo (decenas de MB); cod_ine_ambito usa el código INE de la comunidad"
