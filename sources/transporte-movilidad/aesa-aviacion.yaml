@@ -32,6 +32,6 @@ gotchas:
   - Aena es una sociedad mercantil estatal (51 por ciento público) que publica datos por cuenta propia; sus condiciones de reutilización no son las de la AGE.
   - Los datos estructurados de tráfico aéreo en abierto están fuera de estas webs (Eurostat y las estadísticas del INE de transporte aéreo); para el registro de aeronaves no localicé descarga pública.
 tips: []
-related: [dgt-estadisticas, ine-api-tempus]
+related: [dgt-estadisticas, ine-api-tempus, mitma-boletin-estadistico-online]
 status: degraded
 verified: "2026-09-30"

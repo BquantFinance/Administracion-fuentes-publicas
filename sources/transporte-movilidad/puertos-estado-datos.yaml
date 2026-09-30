@@ -36,6 +36,6 @@ gotchas:
   - No localicé serie histórica en xlsx en la web nueva; hay que descargar los cuadros mes a mes y apilarlos.
   - La API de Portus (portussvr/api) no está documentada y sus rutas se construyen en el código; las probadas a mano responden 404. Los históricos oceanográficos se piden por formulario según el manual de descarga.
 tips: []
-related: [mapa-pesca, aemet-opendata]
+related: [mapa-pesca, aemet-opendata, mitma-boletin-estadistico-online]
 status: active
 verified: "2026-09-30"

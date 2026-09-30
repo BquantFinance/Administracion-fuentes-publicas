@@ -2,7 +2,7 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 78 · Generado: 2026-09-30 · Formato: un bloque por fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
+Fuentes: 79 · Generado: 2026-09-30 · Formato: un bloque por fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
 
 # SECTOR legislacion-boletines: Legislación y boletines oficiales
 
@@ -1675,7 +1675,7 @@ quirks: js-rendered, session-required
 ! En Aena los enlaces de descarga se generan con JavaScript y la aplicación gestiona un token de sesión (cookie JWT); con curl no aparece ningún href a PDF o Excel, así que no se pudo verificar ningún fichero.
 ! Aena es una sociedad mercantil estatal (51 por ciento público) que publica datos por cuenta propia; sus condiciones de reutilización no son las de la AGE.
 ! Los datos estructurados de tráfico aéreo en abierto están fuera de estas webs (Eurostat y las estadísticas del INE de transporte aéreo); para el registro de aeronaves no localicé descarga pública.
-related: dgt-estadisticas, ine-api-tempus
+related: dgt-estadisticas, ine-api-tempus, mitma-boletin-estadistico-online
 
 ## dgt-datex-trafico
 DGT – NAP de tráfico y ficheros DATEX II (incidencias, detectores, cámaras, ZBE) | Dirección General de Tráfico (DGT)
@@ -1735,6 +1735,28 @@ ids: ine-municipio, ine-provincia
 + Para series mensuales de matriculaciones por marca o combustible, los ZIP mensuales (export_mensual_mat) evitan descargar 30 diarios.
 related: dgt-datex-trafico, ine-codigos-territoriales
 
+## mitma-boletin-estadistico-online
+Transportes – Boletín estadístico online (aviación, puertos, carretera, ferrocarril) | Subdirección General de Estudios Económicos y Estadísticas, Ministerio de Transportes y Movilidad Sostenible
+summary: Capítulos del Boletín estadístico del ministerio: licitación y adjudicaciones de obra, aviación civil (tráfico por aeropuerto), Puertos del Estado, mercancías por carretera, autopistas de peaje, ferrocarril, índices de costes de la construcción y visados. Cada tabla en XLS con URL fija por código.
+access: download, portal | auth: none | formats: xls, html | update: monthly | status: active | verified: 2026-09-30
+coverage: Series mensuales largas por tabla (la de tráfico aeroportuario total tiene 498 filas); segunda aplicación con encuestas EPTMC y MOVILIA por año
+license: Reutilización libre con cita de la fuente
+base_url: https://apps.fomento.gob.es/BoletinOnline/
+docs_url: https://www.transportes.gob.es/informacion-para-el-ciudadano/informacion-estadistica/BoletinEstadistico
+- https://apps.fomento.gob.es/BoletinOnline/?nivel=2&orden={CC}000000 :: Índice de tablas del capítulo; 01 licitación, 02 adjudicaciones, 03 aviación civil, 04 puertos, 05 carretera, 06 autopistas de peaje, 07 ferrocarril
+  ej: curl -s "https://apps.fomento.gob.es/BoletinOnline/?nivel=2&orden=03000000" | grep -o 'sedal/[0-9]*\.XLS'
+- https://apps.fomento.gob.es/BoletinOnline/sedal/{CCAATT00}.XLS :: Tabla en Excel 97 (capítulo, apartado y tabla; 03010100 tráfico aeroportuario total); una hoja con título y cabecera PERIODO, TOTAL, NACIONAL, INTERNACIONAL
+  ej: curl -sO "https://apps.fomento.gob.es/BoletinOnline/sedal/03010100.XLS"
+- https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden={CC}000000 :: Segunda aplicación (capítulos 25 a 46), encuesta de mercancías por carretera por año, MOVILIA, índices antiguos y vivienda (mivau-precios-vivienda-alquiler)
+quirks: static-html
+! Los códigos de tabla no son secuenciales (08010000 existe y 08201000 no); tomar los href sedal/ del índice del capítulo en vez de construirlos.
+! Excel 97 binario (application/vnd.ms-excel, 550 KB la tabla 03010100); xlrd lo abre; la hoja se llama como el código y la cabecera PERIODO está en la fila 8, tras el título.
+! La aplicación vive en el dominio antiguo apps.fomento.gob.es y transportes.gob.es solo enlaza a ella; el anuario estadístico por capítulos (capitulos-{AAAA}) se publica solo en PDF.
+! Los capítulos 09, 10, 13, 15 y 19 son visados, licencias e índices de construcción con bases antiguas; mirar el título del capítulo antes de usarlos.
++ pd.read_excel(url, header=None) y localizar la fila cuyo primer valor es PERIODO para fijar la cabecera.
++ Tráfico por aeropuerto mensual aquí (Aena publica las mismas cifras en una web con sesión, aesa-aviacion); tráfico portuario mensual más detallado en puertos-estado-datos.
+related: aesa-aviacion, puertos-estado-datos, mivau-precios-vivienda-alquiler, dgt-estadisticas, renfe-datos-abiertos
+
 ## mitma-opendata-movilidad
 Ministerio de Transportes – Estudio de movilidad con big data (Open Data) | Secretaría General de Transportes y Movilidad Sostenible
 summary: Matrices diarias de viajes origen-destino entre distritos, municipios y grandes áreas urbanas, por hora, distancia y motivo, estimadas con telefonía móvil desde 2020, en CSV comprimidos diarios más zonificaciones. El servidor de datos respondió 403 desde este entorno; las páginas del ministerio sí.
@@ -1775,7 +1797,7 @@ quirks: js-rendered, url-drift
 ! El cuadro mensual tiene hojas Portada, Cálculo y Resumen general antes de las tablas, con cabeceras en varias filas; localizar la fila de cabecera por hoja.
 ! No localicé serie histórica en xlsx en la web nueva; hay que descargar los cuadros mes a mes y apilarlos.
 ! La API de Portus (portussvr/api) no está documentada y sus rutas se construyen en el código; las probadas a mano responden 404. Los históricos oceanográficos se piden por formulario según el manual de descarga.
-related: mapa-pesca, aemet-opendata
+related: mapa-pesca, aemet-opendata, mitma-boletin-estadistico-online
 
 ## renfe-datos-abiertos
 Renfe – Datos abiertos (GTFS, GTFS-RT, estaciones, viajeros) | Renfe Viajeros (Grupo Renfe)
@@ -1809,25 +1831,29 @@ related: dgt-datex-trafico, puertos-estado-datos, mitma-opendata-movilidad
 
 ## datacomex
 DataComex – Estadísticas de comercio exterior de España (portal y API con token) | Secretaría de Estado de Comercio
-summary: Exportaciones e importaciones mensuales de Aduanas por producto TARIC, país y provincia. Portal de consulta interactiva con cuadros de mando y API REST JSON (DatacomexAPI) con token obtenido por usuario y contraseña gratuitos; la descarga masiva también exige iniciar sesión.
+summary: Exportaciones e importaciones de Aduanas por producto TARIC (2 a 8 dígitos), país y provincia, mensuales y anuales desde 1995, en JSON por API con token gratuito (usuario y contraseña) y en el portal de consulta con cuadros de mando. Definitivos hasta 2023 y provisionales después.
 access: api-rest, portal, download | auth: registration | formats: json, csv, xlsx, html | update: monthly | status: active | verified: 2026-09-30
-coverage: Series mensuales y anuales de Aduanas
+coverage: Anual y mensual desde 1995; definitivos hasta 2023, provisionales en adelante (julio de 2026 el 30/09/2026)
 license: Reutilización libre con cita de la fuente
 base_url: https://datacomex.comercio.es/
 docs_url: https://datacomex.comercio.es/Data/AyudaApi
-- https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion :: POST con JSON de usuario y contraseña; devuelve el token de acceso (GET responde 405, credenciales vacías 403)
-  ej: curl -s -X POST -H "Content-Type: application/json" -d "{\"Usuario\":\"$DATACOMEX_USER\",\"Pass\":\"$DATACOMEX_PASS\"}" "https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion"
-- https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f={I|E|I/E}&pe={periodo}&pa={pais}&ta={taric}&pr={provincia} :: Datos en JSON; pe admite AAAA, AAAAMM, LastY, LastM, ALL y ALLM, pa=ALL todos los países; token por access_token o cabecera Authorization
+- https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion :: POST con JSON {"Usuario", "Pass"}; devuelve 200 text/plain con una cadena entrecomillada "token:eyJ..." (JWT); credenciales vacías o malas dan 403 con texto
+  ej: curl -s -X POST -H "Content-Type: application/json" -d "{\"Usuario\":\"$DATACOMEX_USER\",\"Pass\":\"$DATACOMEX_PASS\"}" "https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion" | sed 's/^"token://; s/"$//'
+- https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f={E|I|I/E}&pe={periodo}&pa={pais}&ta={taric}&pr={provincia} :: Datos en JSON (Resultados con flujo, periodo, pais, id_pais, prov, id_prov, taric, euros, kilos, mensaje); los cinco parámetros son obligatorios [pe en AAAA, AAAAMM, LastM, LastY, ALL (anual desde 1995) o ALLM (mensual desde 1995); pa código numérico de país (001 Francia) o ALL; ta TARIC de 2 a 8 dígitos o ALL; pr INE de 2 dígitos o ALL]
   ej: curl -s -H "Authorization: Bearer $DATACOMEX_TOKEN" "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=ALL&ta=1001&pr=28"
-- https://datacomex.comercio.es/Metadata/Index :: Metadatos y clasificaciones del portal
+- https://datacomex.comercio.es/Metadata/{Comex|Empresas|UEAnual|UEMensual} :: Metadatos y clasificaciones de cada base (aplicación JavaScript); no localicé descarga de la tabla de códigos de país
 - https://datacomex_v6.comercio.es/ :: Versión anterior del portal, todavía en línea
-quirks: session-required, js-rendered
+quirks: session-required, js-rendered, errors-html-or-xml
 ids: ine-provincia
-! Sin token, ObtenerDatos responde 401 con JSON (Se ha denegado la autorización). El registro de usuario es gratuito y se hace en el portal (/User).
-! La consulta interactiva pequeña funciona sin cuenta, pero DESCARGA MASIVA y la API exigen sesión; los cuadros de mando de la portada son Power BI incrustado, sin descarga programática.
-! Los códigos de provincia son los del INE de dos dígitos (pr=28 Madrid) y el TARIC se pasa como prefijo (ta=1001, dos a ocho dígitos).
-! Los datos provisionales de los últimos meses se revisan; los definitivos llegan con retraso de meses. La fuente primaria es la AEAT (Aduanas).
-+ Guardar el token y reutilizarlo en las llamadas de la sesión; un bucle por pe=AAAAMM y pa=ALL descarga la serie completa de un TARIC sin pasar por el portal.
+! Sin token, ObtenerDatos responde 401 con XML (Se ha denegado la autorización); con un token inválido, 500 con cuerpo vacío. El token va en la cabecera Authorization Bearer o en el parámetro access_token.
+! El registro (nombre, correo y contraseña, sin captcha) envía un correo de activación; hasta activar la cuenta no hay token. La descarga masiva del portal también exige sesión.
+! Si falta cualquiera de los cinco parámetros la API responde 200 con un único registro cuyo mensaje es "Error de sintaxis. Faltan parámetros"; comprobar mensaje antes de parsear.
+! pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error.
+! Los valores de pe distinguen mayúsculas (lastm da un mensaje Catch de que la cadena no se puede convertir al tipo date); ta=ALL devuelve capítulos de 2 dígitos.
+! euros y kilos llegan como texto con coma decimal; periodo es texto ("Julio de 2026", "2025"); mensaje indica dato definitivo, provisional o provisional acumulado hasta el mes.
+! Los códigos de provincia son los del INE de dos dígitos (pr=28 Madrid); la fuente primaria es la AEAT (Aduanas).
++ Guardar el token y reutilizarlo; una llamada con pe=ALLM, un TARIC y un país devuelve toda la serie mensual desde 1995 (379 filas en 2 segundos), mejor que iterar por meses.
++ pd.DataFrame(r.json()['Resultados']) y convertir euros y kilos con str.replace(',', '.').astype(float).
 related: datainvex, aeat-estadisticas
 
 ## datainvex
@@ -2011,7 +2037,7 @@ quirks: url-drift, js-rendered
 ! No localicé descarga masiva ni API pública de SERPAVI; el índice por sección censal solo se consulta en la web. Se construye con datos fiscales y excluye País Vasco y Navarra.
 ! Las transacciones proceden del Consejo General del Notariado y el valor tasado de las sociedades de tasación; el ministerio agrega y publica con retraso trimestral.
 + Para una serie municipal de transacciones, localizar en el capítulo 34 la tabla por municipios (código 3401xxxx) y leerla con pandas.read_excel(engine='xlrd' o 'calamine').
-related: catastro-ovc, ine-api-tempus, ine-codigos-territoriales
+related: catastro-ovc, ine-api-tempus, ine-codigos-territoriales, mitma-boletin-estadistico-online
 
 # SECTOR consumo-seguridad-alimentaria: Consumo y seguridad alimentaria
 

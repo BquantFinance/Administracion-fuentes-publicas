@@ -6,37 +6,43 @@ level: age
 sector: comercio-industria-propiedad
 tags: [comercio-exterior, exportaciones, importaciones, aduanas, taric, paises, provincias, api]
 summary: >-
-  Exportaciones e importaciones mensuales de Aduanas por producto TARIC, país y provincia. Portal de consulta
-  interactiva con cuadros de mando y API REST JSON (DatacomexAPI) con token obtenido por usuario y contraseña
-  gratuitos; la descarga masiva también exige iniciar sesión.
+  Exportaciones e importaciones de Aduanas por producto TARIC (2 a 8 dígitos), país y provincia, mensuales y
+  anuales desde 1995, en JSON por API con token gratuito (usuario y contraseña) y en el portal de consulta con
+  cuadros de mando. Definitivos hasta 2023 y provisionales después.
 access: [api-rest, portal, download]
 auth: registration
 formats: [json, csv, xlsx, html]
 update: monthly
-coverage: "Series mensuales y anuales de Aduanas"
+coverage: "Anual y mensual desde 1995; definitivos hasta 2023, provisionales en adelante (julio de 2026 el 30/09/2026)"
 license: Reutilización libre con cita de la fuente
 base_url: https://datacomex.comercio.es/
 docs_url: https://datacomex.comercio.es/Data/AyudaApi
 endpoints:
   - path: https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion
-    desc: POST con JSON de usuario y contraseña; devuelve el token de acceso (GET responde 405, credenciales vacías 403)
-    example: 'curl -s -X POST -H "Content-Type: application/json" -d "{\"Usuario\":\"$DATACOMEX_USER\",\"Pass\":\"$DATACOMEX_PASS\"}" "https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion"'
-  - path: https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f={I|E|I/E}&pe={periodo}&pa={pais}&ta={taric}&pr={provincia}
-    desc: Datos en JSON; pe admite AAAA, AAAAMM, LastY, LastM, ALL y ALLM, pa=ALL todos los países; token por access_token o cabecera Authorization
+    desc: POST con JSON {"Usuario", "Pass"}; devuelve 200 text/plain con una cadena entrecomillada "token:eyJ..." (JWT); credenciales vacías o malas dan 403 con texto
+    example: |-
+      curl -s -X POST -H "Content-Type: application/json" -d "{\"Usuario\":\"$DATACOMEX_USER\",\"Pass\":\"$DATACOMEX_PASS\"}" "https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion" | sed 's/^"token://; s/"$//'
+  - path: https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f={E|I|I/E}&pe={periodo}&pa={pais}&ta={taric}&pr={provincia}
+    desc: Datos en JSON (Resultados con flujo, periodo, pais, id_pais, prov, id_prov, taric, euros, kilos, mensaje); los cinco parámetros son obligatorios
+    params: "pe en AAAA, AAAAMM, LastM, LastY, ALL (anual desde 1995) o ALLM (mensual desde 1995); pa código numérico de país (001 Francia) o ALL; ta TARIC de 2 a 8 dígitos o ALL; pr INE de 2 dígitos o ALL"
     example: 'curl -s -H "Authorization: Bearer $DATACOMEX_TOKEN" "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=ALL&ta=1001&pr=28"'
-  - path: https://datacomex.comercio.es/Metadata/Index
-    desc: Metadatos y clasificaciones del portal
+  - path: https://datacomex.comercio.es/Metadata/{Comex|Empresas|UEAnual|UEMensual}
+    desc: Metadatos y clasificaciones de cada base (aplicación JavaScript); no localicé descarga de la tabla de códigos de país
   - path: https://datacomex_v6.comercio.es/
     desc: Versión anterior del portal, todavía en línea
-quirks: [session-required, js-rendered]
+quirks: [session-required, js-rendered, errors-html-or-xml]
 ids: [ine-provincia]
 gotchas:
-  - Sin token, ObtenerDatos responde 401 con JSON (Se ha denegado la autorización). El registro de usuario es gratuito y se hace en el portal (/User).
-  - La consulta interactiva pequeña funciona sin cuenta, pero DESCARGA MASIVA y la API exigen sesión; los cuadros de mando de la portada son Power BI incrustado, sin descarga programática.
-  - Los códigos de provincia son los del INE de dos dígitos (pr=28 Madrid) y el TARIC se pasa como prefijo (ta=1001, dos a ocho dígitos).
-  - Los datos provisionales de los últimos meses se revisan; los definitivos llegan con retraso de meses. La fuente primaria es la AEAT (Aduanas).
+  - Sin token, ObtenerDatos responde 401 con XML (Se ha denegado la autorización); con un token inválido, 500 con cuerpo vacío. El token va en la cabecera Authorization Bearer o en el parámetro access_token.
+  - El registro (nombre, correo y contraseña, sin captcha) envía un correo de activación; hasta activar la cuenta no hay token. La descarga masiva del portal también exige sesión.
+  - Si falta cualquiera de los cinco parámetros la API responde 200 con un único registro cuyo mensaje es "Error de sintaxis. Faltan parámetros"; comprobar mensaje antes de parsear.
+  - pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error.
+  - Los valores de pe distinguen mayúsculas (lastm da un mensaje Catch de que la cadena no se puede convertir al tipo date); ta=ALL devuelve capítulos de 2 dígitos.
+  - euros y kilos llegan como texto con coma decimal; periodo es texto ("Julio de 2026", "2025"); mensaje indica dato definitivo, provisional o provisional acumulado hasta el mes.
+  - Los códigos de provincia son los del INE de dos dígitos (pr=28 Madrid); la fuente primaria es la AEAT (Aduanas).
 tips:
-  - Guardar el token y reutilizarlo en las llamadas de la sesión; un bucle por pe=AAAAMM y pa=ALL descarga la serie completa de un TARIC sin pasar por el portal.
+  - Guardar el token y reutilizarlo; una llamada con pe=ALLM, un TARIC y un país devuelve toda la serie mensual desde 1995 (379 filas en 2 segundos), mejor que iterar por meses.
+  - "pd.DataFrame(r.json()['Resultados']) y convertir euros y kilos con str.replace(',', '.').astype(float)."
 related: [datainvex, aeat-estadisticas]
 status: active
 verified: "2026-09-30"

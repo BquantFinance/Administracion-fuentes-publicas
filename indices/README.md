@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 41 recetas, 102 necesidades, 19 identificadores, 58 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 42 recetas, 103 necesidades, 19 identificadores, 58 rutas muertas.
 
 ## Recetas por intención
 
@@ -49,6 +49,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 | `medicamento-precio-financiado` | Precio de venta, precio de referencia y aportación de un medicamento financiado, con su ficha técnica | sanidad-nomenclator-facturacion, aemps-cima-api | 2026-09-30 |
 | `geometria-seccion-censal` | Geometría de las secciones censales, distritos o municipios de un año para mapear datos del INE | ine-cartografia-censal, ine-api-tempus | 2026-09-30 |
 | `horarios-tren-gtfs` | Horarios y paradas de Cercanías y de alta velocidad en GTFS, con las coordenadas de las estaciones | renfe-datos-abiertos | 2026-09-30 |
+| `comercio-exterior-por-producto` | Exportaciones o importaciones de un producto TARIC por país y provincia, mensuales o anuales desde 1995 | datacomex, aeat-estadisticas | 2026-09-30 |
 
 ### Pasos
 
@@ -530,6 +531,19 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
    ```
 - salida: ZIP GTFS y CSV de estaciones
 
+**comercio-exterior-por-producto** · Exportaciones o importaciones de un producto TARIC por país y provincia, mensuales o anuales desde 1995
+- entrada: ine-provincia
+1. `datacomex`: Registrarse una vez en datacomex.comercio.es (correo y contraseña, activación por correo) y obtener el token con POST a IniciarSesion; la respuesta es la cadena "token:eyJ...", quitar el prefijo token: y las comillas
+   ```
+   curl -s -X POST -H "Content-Type: application/json" -d "{\"Usuario\":\"$DATACOMEX_USER\",\"Pass\":\"$DATACOMEX_PASS\"}" "https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion"
+   ```
+2. `datacomex`: GET ObtenerDatos con los cinco parámetros (f, pe, pa, ta, pr); pe=ALLM da la serie mensual completa y pe=ALL la anual; pa es el código numérico de país (001 Francia) o ALL; comprobar mensaje en cada fila (provisional, definitivo, error de sintaxis)
+   ```
+   curl -s -H "Authorization: Bearer $DATACOMEX_TOKEN" "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=ALLM&pa=001&ta=2204&pr=ALL"
+   ```
+3. `aeat-estadisticas`: Para agregados de comercio exterior sin registro, las estadísticas de la AEAT (Aduanas) en el anuario; la fuente primaria de DataComex
+- salida: JSON con Resultados (flujo, periodo, país, provincia, taric, euros y kilos como texto con coma decimal)
+
 ## Dónde está cada cosa
 
 **Legislación y boletines oficiales**
@@ -648,10 +662,11 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Matrices origen-destino de movilidad por telefonía móvil → `mitma-opendata-movilidad` (el host de datos respondió 403 desde el entorno de verificación)
 - Horarios de trenes (GTFS), estaciones con coordenadas y posiciones en tiempo real → `renfe-datos-abiertos` (GTFS-RT no verificado desde el entorno; Adif sin portal localizado)
 - Tráfico portuario mensual por autoridad portuaria → `puertos-estado-datos`
-- Tráfico aéreo por aeropuerto y registro de aeronaves → `aesa-aviacion` (degradada; sin ficheros verificados)
+- Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra → `mitma-boletin-estadistico-online` (XLS por tabla con URL fija; la web de Aena (aesa-aviacion) exige sesión)
+- Registro de aeronaves y operadores de drones → `aesa-aviacion` (degradada; sin ficheros verificados)
 
 **Comercio exterior, industria y propiedad industrial**
-- Comercio exterior por producto, país y provincia → `datacomex` (API con token de usuario gratuito)
+- Comercio exterior por producto TARIC, país y provincia desde 1995 → `datacomex` (API verificada con cuenta gratuita; códigos de país numéricos, no ISO)
 - Inversión extranjera en España y española en el exterior → `datainvex` (aplicación ASP.NET con viewstate; sin API)
 - Estadísticas de industria, series BADASE y datos turísticos (DATAESTUR) → `mincotur-industria-turismo`
 - Patentes, marcas y Boletín de la Propiedad Industrial → `oepm-invenes` (bloqueado por el cortafuegos de la OEPM desde el entorno de verificación)

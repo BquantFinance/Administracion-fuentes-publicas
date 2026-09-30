@@ -2,7 +2,7 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 78 · Recetas: 41 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
+Fuentes: 79 · Recetas: 42 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
 
 ## Cómo usar este repo
 
@@ -110,8 +110,9 @@ Fuentes: 78 · Recetas: 41 · Alcance actual: Administración General del Estado
 - Matrices origen-destino de movilidad por telefonía móvil → mitma-opendata-movilidad (el host de datos respondió 403 desde el entorno de verificación)
 - Horarios de trenes (GTFS), estaciones con coordenadas y posiciones en tiempo real → renfe-datos-abiertos (GTFS-RT no verificado desde el entorno; Adif sin portal localizado)
 - Tráfico portuario mensual por autoridad portuaria → puertos-estado-datos
-- Tráfico aéreo por aeropuerto y registro de aeronaves → aesa-aviacion (degradada; sin ficheros verificados)
-- Comercio exterior por producto, país y provincia → datacomex (API con token de usuario gratuito)
+- Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra → mitma-boletin-estadistico-online (XLS por tabla con URL fija; la web de Aena (aesa-aviacion) exige sesión)
+- Registro de aeronaves y operadores de drones → aesa-aviacion (degradada; sin ficheros verificados)
+- Comercio exterior por producto TARIC, país y provincia desde 1995 → datacomex (API verificada con cuenta gratuita; códigos de país numéricos, no ISO)
 - Inversión extranjera en España y española en el exterior → datainvex (aplicación ASP.NET con viewstate; sin API)
 - Estadísticas de industria, series BADASE y datos turísticos (DATAESTUR) → mincotur-industria-turismo
 - Patentes, marcas y Boletín de la Propiedad Industrial → oepm-invenes (bloqueado por el cortafuegos de la OEPM desde el entorno de verificación)
@@ -174,6 +175,7 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 - medicamento-precio-financiado: Precio de venta, precio de referencia y aportación de un medicamento financiado, con su ficha técnica → sanidad-nomenclator-facturacion, aemps-cima-api
 - geometria-seccion-censal: Geometría de las secciones censales, distritos o municipios de un año para mapear datos del INE → ine-cartografia-censal, ine-api-tempus
 - horarios-tren-gtfs: Horarios y paradas de Cercanías y de alta velocidad en GTFS, con las coordenadas de las estaciones → renfe-datos-abiertos
+- comercio-exterior-por-producto: Exportaciones o importaciones de un producto TARIC por país y provincia, mensuales o anuales desde 1995 → datacomex, aeat-estadisticas
 
 ## Sectores
 
@@ -191,7 +193,7 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 - [Sanidad y medicamentos](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/sanidad-medicamentos/README.md): aemps-cima-api, aemps-otros-registros, isciii-cne, sanidad-nomenclator-facturacion, sanidad-portal-estadistico
 - [Ciencia e investigación (biología, química, geología, oceanografía)](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/ciencia-investigacion/README.md): aei-convocatorias, csic-digital, fecyt-recolecta, gbif-es, ieo-datos-oceanograficos, igme-geologia, ign-sismologia
 - [Agricultura, pesca y alimentación](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/agricultura-pesca-alimentacion/README.md): fega-beneficiarios-pac, mapa-estadisticas-agrarias, mapa-pesca, mapa-sigpac
-- [Transporte y movilidad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/transporte-movilidad/README.md): aesa-aviacion, dgt-datex-trafico, dgt-estadisticas, mitma-opendata-movilidad, puertos-estado-datos, renfe-datos-abiertos
+- [Transporte y movilidad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/transporte-movilidad/README.md): aesa-aviacion, dgt-datex-trafico, dgt-estadisticas, mitma-boletin-estadistico-online, mitma-opendata-movilidad, puertos-estado-datos, renfe-datos-abiertos
 - [Comercio exterior, industria y propiedad industrial](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/comercio-industria-propiedad/README.md): datacomex, datainvex, mincotur-industria-turismo, oepm-invenes
 - [Educación y universidades](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/educacion-universidades/README.md): educacion-estadisticas-ruct
 - [Justicia, interior y seguridad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/justicia-interior-seguridad/README.md): interior-criminalidad

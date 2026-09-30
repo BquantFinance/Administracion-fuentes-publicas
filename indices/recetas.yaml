@@ -863,3 +863,25 @@
       read_bytes: 4096
       retries: 3
   verified: "2026-09-30"
+
+- id: comercio-exterior-por-producto
+  intent: Exportaciones o importaciones de un producto TARIC por país y provincia, mensuales o anuales desde 1995
+  inputs: [ine-provincia]
+  steps:
+    - source: datacomex
+      do: "Registrarse una vez en datacomex.comercio.es (correo y contraseña, activación por correo) y obtener el token con POST a IniciarSesion; la respuesta es la cadena \"token:eyJ...\", quitar el prefijo token: y las comillas"
+      example: |-
+        curl -s -X POST -H "Content-Type: application/json" -d "{\"Usuario\":\"$DATACOMEX_USER\",\"Pass\":\"$DATACOMEX_PASS\"}" "https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion"
+    - source: datacomex
+      do: "GET ObtenerDatos con los cinco parámetros (f, pe, pa, ta, pr); pe=ALLM da la serie mensual completa y pe=ALL la anual; pa es el código numérico de país (001 Francia) o ALL; comprobar mensaje en cada fila (provisional, definitivo, error de sintaxis)"
+      example: 'curl -s -H "Authorization: Bearer $DATACOMEX_TOKEN" "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=ALLM&pa=001&ta=2204&pr=ALL"'
+    - source: aeat-estadisticas
+      do: "Para agregados de comercio exterior sin registro, las estadísticas de la AEAT (Aduanas) en el anuario; la fuente primaria de DataComex"
+  output: JSON con Resultados (flujo, periodo, país, provincia, taric, euros y kilos como texto con coma decimal)
+  checks:
+    - url: https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=ALL&ta=1001&pr=28
+      status: 401
+    - url: https://datacomex.comercio.es/Data/AyudaApi
+      contains: IniciarSesion
+      read_bytes: 200000
+  verified: "2026-09-30"

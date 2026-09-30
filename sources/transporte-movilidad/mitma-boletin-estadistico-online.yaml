@@ -1,0 +1,41 @@
+id: mitma-boletin-estadistico-online
+name: Transportes – Boletín estadístico online (aviación, puertos, carretera, ferrocarril)
+org: Subdirección General de Estudios Económicos y Estadísticas, Ministerio de Transportes y Movilidad Sostenible
+ministry: Transportes y Movilidad Sostenible
+level: age
+sector: transporte-movilidad
+tags: [boletin-estadistico, aviacion-civil, aeropuertos, puertos, carretera, autopistas-peaje, ferrocarril, licitacion, construccion, xls]
+summary: >-
+  Capítulos del Boletín estadístico del ministerio: licitación y adjudicaciones de obra, aviación civil
+  (tráfico por aeropuerto), Puertos del Estado, mercancías por carretera, autopistas de peaje, ferrocarril,
+  índices de costes de la construcción y visados. Cada tabla en XLS con URL fija por código.
+access: [download, portal]
+auth: none
+formats: [xls, html]
+update: monthly
+coverage: "Series mensuales largas por tabla (la de tráfico aeroportuario total tiene 498 filas); segunda aplicación con encuestas EPTMC y MOVILIA por año"
+license: Reutilización libre con cita de la fuente
+base_url: https://apps.fomento.gob.es/BoletinOnline/
+docs_url: https://www.transportes.gob.es/informacion-para-el-ciudadano/informacion-estadistica/BoletinEstadistico
+endpoints:
+  - path: https://apps.fomento.gob.es/BoletinOnline/?nivel=2&orden={CC}000000
+    desc: Índice de tablas del capítulo; 01 licitación, 02 adjudicaciones, 03 aviación civil, 04 puertos, 05 carretera, 06 autopistas de peaje, 07 ferrocarril
+    example: curl -s "https://apps.fomento.gob.es/BoletinOnline/?nivel=2&orden=03000000" | grep -o 'sedal/[0-9]*\.XLS'
+  - path: https://apps.fomento.gob.es/BoletinOnline/sedal/{CCAATT00}.XLS
+    desc: Tabla en Excel 97 (capítulo, apartado y tabla; 03010100 tráfico aeroportuario total); una hoja con título y cabecera PERIODO, TOTAL, NACIONAL, INTERNACIONAL
+    example: curl -sO "https://apps.fomento.gob.es/BoletinOnline/sedal/03010100.XLS"
+  - path: https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden={CC}000000
+    desc: Segunda aplicación (capítulos 25 a 46), encuesta de mercancías por carretera por año, MOVILIA, índices antiguos y vivienda (mivau-precios-vivienda-alquiler)
+quirks: [static-html]
+ids: []
+gotchas:
+  - Los códigos de tabla no son secuenciales (08010000 existe y 08201000 no); tomar los href sedal/ del índice del capítulo en vez de construirlos.
+  - Excel 97 binario (application/vnd.ms-excel, 550 KB la tabla 03010100); xlrd lo abre; la hoja se llama como el código y la cabecera PERIODO está en la fila 8, tras el título.
+  - La aplicación vive en el dominio antiguo apps.fomento.gob.es y transportes.gob.es solo enlaza a ella; el anuario estadístico por capítulos (capitulos-{AAAA}) se publica solo en PDF.
+  - Los capítulos 09, 10, 13, 15 y 19 son visados, licencias e índices de construcción con bases antiguas; mirar el título del capítulo antes de usarlos.
+tips:
+  - "pd.read_excel(url, header=None) y localizar la fila cuyo primer valor es PERIODO para fijar la cabecera."
+  - Tráfico por aeropuerto mensual aquí (Aena publica las mismas cifras en una web con sesión, aesa-aviacion); tráfico portuario mensual más detallado en puertos-estado-datos.
+related: [aesa-aviacion, puertos-estado-datos, mivau-precios-vivienda-alquiler, dgt-estadisticas, renfe-datos-abiertos]
+status: active
+verified: "2026-09-30"

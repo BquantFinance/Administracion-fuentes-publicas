@@ -39,6 +39,6 @@ gotchas:
   - Las transacciones proceden del Consejo General del Notariado y el valor tasado de las sociedades de tasación; el ministerio agrega y publica con retraso trimestral.
 tips:
   - "Para una serie municipal de transacciones, localizar en el capítulo 34 la tabla por municipios (código 3401xxxx) y leerla con pandas.read_excel(engine='xlrd' o 'calamine')."
-related: [catastro-ovc, ine-api-tempus, ine-codigos-territoriales]
+related: [catastro-ovc, ine-api-tempus, ine-codigos-territoriales, mitma-boletin-estadistico-online]
 status: active
 verified: "2026-09-30"

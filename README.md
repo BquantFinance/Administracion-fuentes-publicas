@@ -4,7 +4,7 @@ Catálogo de fuentes de datos de la Administración pública española, pensado 
 
 **Para agentes:** empieza por [`llms.txt`](llms.txt). Todo el catálogo cabe en [`catalog.json`](catalog.json) o en [`llms-full.txt`](llms-full.txt).
 
-Fuentes catalogadas: <!-- AUTO:count -->78<!-- /AUTO:count -->. Alcance actual: Administración General del Estado. Después: comunidades autónomas, entidades locales, Cortes y Poder Judicial, Unión Europea.
+Fuentes catalogadas: <!-- AUTO:count -->79<!-- /AUTO:count -->. Alcance actual: Administración General del Estado. Después: comunidades autónomas, entidades locales, Cortes y Poder Judicial, Unión Europea.
 
 ## Principios
 
@@ -33,7 +33,7 @@ Fuentes catalogadas: <!-- AUTO:count -->78<!-- /AUTO:count -->. Alcance actual: 
 | [sanidad-medicamentos](sources/sanidad-medicamentos/README.md) | Sanidad y medicamentos | 5 |
 | [ciencia-investigacion](sources/ciencia-investigacion/README.md) | Ciencia e investigación (biología, química, geología, oceanografía) | 7 |
 | [agricultura-pesca-alimentacion](sources/agricultura-pesca-alimentacion/README.md) | Agricultura, pesca y alimentación | 4 |
-| [transporte-movilidad](sources/transporte-movilidad/README.md) | Transporte y movilidad | 6 |
+| [transporte-movilidad](sources/transporte-movilidad/README.md) | Transporte y movilidad | 7 |
 | [comercio-industria-propiedad](sources/comercio-industria-propiedad/README.md) | Comercio exterior, industria y propiedad industrial | 4 |
 | [educacion-universidades](sources/educacion-universidades/README.md) | Educación y universidades | 1 |
 | [justicia-interior-seguridad](sources/justicia-interior-seguridad/README.md) | Justicia, interior y seguridad | 1 |

@@ -5,7 +5,7 @@
  "repo": "https://github.com/BquantFinance/Administracion-fuentes-publicas",
  "schema": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json",
  "vocab": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml",
- "count": 78,
+ "count": 79,
  "sectors": {
   "legislacion-boletines": "Legislación y boletines oficiales",
   "economia-finanzas": "Economía, finanzas y mercados",
@@ -937,7 +937,7 @@
     "provincias",
     "api"
    ],
-   "summary": "Exportaciones e importaciones mensuales de Aduanas por producto TARIC, país y provincia. Portal de consulta interactiva con cuadros de mando y API REST JSON (DatacomexAPI) con token obtenido por usuario y contraseña gratuitos; la descarga masiva también exige iniciar sesión.",
+   "summary": "Exportaciones e importaciones de Aduanas por producto TARIC (2 a 8 dígitos), país y provincia, mensuales y anuales desde 1995, en JSON por API con token gratuito (usuario y contraseña) y en el portal de consulta con cuadros de mando. Definitivos hasta 2023 y provisionales después.",
    "access": [
     "api-rest",
     "portal",
@@ -951,24 +951,25 @@
     "html"
    ],
    "update": "monthly",
-   "coverage": "Series mensuales y anuales de Aduanas",
+   "coverage": "Anual y mensual desde 1995; definitivos hasta 2023, provisionales en adelante (julio de 2026 el 30/09/2026)",
    "license": "Reutilización libre con cita de la fuente",
    "base_url": "https://datacomex.comercio.es/",
    "docs_url": "https://datacomex.comercio.es/Data/AyudaApi",
    "endpoints": [
     {
      "path": "https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion",
-     "desc": "POST con JSON de usuario y contraseña; devuelve el token de acceso (GET responde 405, credenciales vacías 403)",
-     "example": "curl -s -X POST -H \"Content-Type: application/json\" -d \"{\\\"Usuario\\\":\\\"$DATACOMEX_USER\\\",\\\"Pass\\\":\\\"$DATACOMEX_PASS\\\"}\" \"https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion\""
+     "desc": "POST con JSON {\"Usuario\", \"Pass\"}; devuelve 200 text/plain con una cadena entrecomillada \"token:eyJ...\" (JWT); credenciales vacías o malas dan 403 con texto",
+     "example": "curl -s -X POST -H \"Content-Type: application/json\" -d \"{\\\"Usuario\\\":\\\"$DATACOMEX_USER\\\",\\\"Pass\\\":\\\"$DATACOMEX_PASS\\\"}\" \"https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion\" | sed 's/^\"token://; s/\"$//'"
     },
     {
-     "path": "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f={I|E|I/E}&pe={periodo}&pa={pais}&ta={taric}&pr={provincia}",
-     "desc": "Datos en JSON; pe admite AAAA, AAAAMM, LastY, LastM, ALL y ALLM, pa=ALL todos los países; token por access_token o cabecera Authorization",
+     "path": "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f={E|I|I/E}&pe={periodo}&pa={pais}&ta={taric}&pr={provincia}",
+     "desc": "Datos en JSON (Resultados con flujo, periodo, pais, id_pais, prov, id_prov, taric, euros, kilos, mensaje); los cinco parámetros son obligatorios",
+     "params": "pe en AAAA, AAAAMM, LastM, LastY, ALL (anual desde 1995) o ALLM (mensual desde 1995); pa código numérico de país (001 Francia) o ALL; ta TARIC de 2 a 8 dígitos o ALL; pr INE de 2 dígitos o ALL",
      "example": "curl -s -H \"Authorization: Bearer $DATACOMEX_TOKEN\" \"https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=ALL&ta=1001&pr=28\""
     },
     {
-     "path": "https://datacomex.comercio.es/Metadata/Index",
-     "desc": "Metadatos y clasificaciones del portal"
+     "path": "https://datacomex.comercio.es/Metadata/{Comex|Empresas|UEAnual|UEMensual}",
+     "desc": "Metadatos y clasificaciones de cada base (aplicación JavaScript); no localicé descarga de la tabla de códigos de país"
     },
     {
      "path": "https://datacomex_v6.comercio.es/",
@@ -977,19 +978,24 @@
    ],
    "quirks": [
     "session-required",
-    "js-rendered"
+    "js-rendered",
+    "errors-html-or-xml"
    ],
    "ids": [
     "ine-provincia"
    ],
    "gotchas": [
-    "Sin token, ObtenerDatos responde 401 con JSON (Se ha denegado la autorización). El registro de usuario es gratuito y se hace en el portal (/User).",
-    "La consulta interactiva pequeña funciona sin cuenta, pero DESCARGA MASIVA y la API exigen sesión; los cuadros de mando de la portada son Power BI incrustado, sin descarga programática.",
-    "Los códigos de provincia son los del INE de dos dígitos (pr=28 Madrid) y el TARIC se pasa como prefijo (ta=1001, dos a ocho dígitos).",
-    "Los datos provisionales de los últimos meses se revisan; los definitivos llegan con retraso de meses. La fuente primaria es la AEAT (Aduanas)."
+    "Sin token, ObtenerDatos responde 401 con XML (Se ha denegado la autorización); con un token inválido, 500 con cuerpo vacío. El token va en la cabecera Authorization Bearer o en el parámetro access_token.",
+    "El registro (nombre, correo y contraseña, sin captcha) envía un correo de activación; hasta activar la cuenta no hay token. La descarga masiva del portal también exige sesión.",
+    "Si falta cualquiera de los cinco parámetros la API responde 200 con un único registro cuyo mensaje es \"Error de sintaxis. Faltan parámetros\"; comprobar mensaje antes de parsear.",
+    "pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error.",
+    "Los valores de pe distinguen mayúsculas (lastm da un mensaje Catch de que la cadena no se puede convertir al tipo date); ta=ALL devuelve capítulos de 2 dígitos.",
+    "euros y kilos llegan como texto con coma decimal; periodo es texto (\"Julio de 2026\", \"2025\"); mensaje indica dato definitivo, provisional o provisional acumulado hasta el mes.",
+    "Los códigos de provincia son los del INE de dos dígitos (pr=28 Madrid); la fuente primaria es la AEAT (Aduanas)."
    ],
    "tips": [
-    "Guardar el token y reutilizarlo en las llamadas de la sesión; un bucle por pe=AAAAMM y pa=ALL descarga la serie completa de un TARIC sin pasar por el portal."
+    "Guardar el token y reutilizarlo; una llamada con pe=ALLM, un TARIC y un país devuelve toda la serie mensual desde 1995 (379 filas en 2 segundos), mejor que iterar por meses.",
+    "pd.DataFrame(r.json()['Resultados']) y convertir euros y kilos con str.replace(',', '.').astype(float)."
    ],
    "related": [
     "datainvex",
@@ -5905,7 +5911,8 @@
    "tips": [],
    "related": [
     "dgt-estadisticas",
-    "ine-api-tempus"
+    "ine-api-tempus",
+    "mitma-boletin-estadistico-online"
    ],
    "status": "degraded",
    "verified": "2026-09-30"
@@ -6098,6 +6105,80 @@
    "verified": "2026-09-30"
   },
   {
+   "id": "mitma-boletin-estadistico-online",
+   "name": "Transportes – Boletín estadístico online (aviación, puertos, carretera, ferrocarril)",
+   "org": "Subdirección General de Estudios Económicos y Estadísticas, Ministerio de Transportes y Movilidad Sostenible",
+   "ministry": "Transportes y Movilidad Sostenible",
+   "level": "age",
+   "sector": "transporte-movilidad",
+   "tags": [
+    "boletin-estadistico",
+    "aviacion-civil",
+    "aeropuertos",
+    "puertos",
+    "carretera",
+    "autopistas-peaje",
+    "ferrocarril",
+    "licitacion",
+    "construccion",
+    "xls"
+   ],
+   "summary": "Capítulos del Boletín estadístico del ministerio: licitación y adjudicaciones de obra, aviación civil (tráfico por aeropuerto), Puertos del Estado, mercancías por carretera, autopistas de peaje, ferrocarril, índices de costes de la construcción y visados. Cada tabla en XLS con URL fija por código.",
+   "access": [
+    "download",
+    "portal"
+   ],
+   "auth": "none",
+   "formats": [
+    "xls",
+    "html"
+   ],
+   "update": "monthly",
+   "coverage": "Series mensuales largas por tabla (la de tráfico aeroportuario total tiene 498 filas); segunda aplicación con encuestas EPTMC y MOVILIA por año",
+   "license": "Reutilización libre con cita de la fuente",
+   "base_url": "https://apps.fomento.gob.es/BoletinOnline/",
+   "docs_url": "https://www.transportes.gob.es/informacion-para-el-ciudadano/informacion-estadistica/BoletinEstadistico",
+   "endpoints": [
+    {
+     "path": "https://apps.fomento.gob.es/BoletinOnline/?nivel=2&orden={CC}000000",
+     "desc": "Índice de tablas del capítulo; 01 licitación, 02 adjudicaciones, 03 aviación civil, 04 puertos, 05 carretera, 06 autopistas de peaje, 07 ferrocarril",
+     "example": "curl -s \"https://apps.fomento.gob.es/BoletinOnline/?nivel=2&orden=03000000\" | grep -o 'sedal/[0-9]*\\.XLS'"
+    },
+    {
+     "path": "https://apps.fomento.gob.es/BoletinOnline/sedal/{CCAATT00}.XLS",
+     "desc": "Tabla en Excel 97 (capítulo, apartado y tabla; 03010100 tráfico aeroportuario total); una hoja con título y cabecera PERIODO, TOTAL, NACIONAL, INTERNACIONAL",
+     "example": "curl -sO \"https://apps.fomento.gob.es/BoletinOnline/sedal/03010100.XLS\""
+    },
+    {
+     "path": "https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden={CC}000000",
+     "desc": "Segunda aplicación (capítulos 25 a 46), encuesta de mercancías por carretera por año, MOVILIA, índices antiguos y vivienda (mivau-precios-vivienda-alquiler)"
+    }
+   ],
+   "quirks": [
+    "static-html"
+   ],
+   "ids": [],
+   "gotchas": [
+    "Los códigos de tabla no son secuenciales (08010000 existe y 08201000 no); tomar los href sedal/ del índice del capítulo en vez de construirlos.",
+    "Excel 97 binario (application/vnd.ms-excel, 550 KB la tabla 03010100); xlrd lo abre; la hoja se llama como el código y la cabecera PERIODO está en la fila 8, tras el título.",
+    "La aplicación vive en el dominio antiguo apps.fomento.gob.es y transportes.gob.es solo enlaza a ella; el anuario estadístico por capítulos (capitulos-{AAAA}) se publica solo en PDF.",
+    "Los capítulos 09, 10, 13, 15 y 19 son visados, licencias e índices de construcción con bases antiguas; mirar el título del capítulo antes de usarlos."
+   ],
+   "tips": [
+    "pd.read_excel(url, header=None) y localizar la fila cuyo primer valor es PERIODO para fijar la cabecera.",
+    "Tráfico por aeropuerto mensual aquí (Aena publica las mismas cifras en una web con sesión, aesa-aviacion); tráfico portuario mensual más detallado en puertos-estado-datos."
+   ],
+   "related": [
+    "aesa-aviacion",
+    "puertos-estado-datos",
+    "mivau-precios-vivienda-alquiler",
+    "dgt-estadisticas",
+    "renfe-datos-abiertos"
+   ],
+   "status": "active",
+   "verified": "2026-09-30"
+  },
+  {
    "id": "mitma-opendata-movilidad",
    "name": "Ministerio de Transportes – Estudio de movilidad con big data (Open Data)",
    "org": "Secretaría General de Transportes y Movilidad Sostenible",
@@ -6236,7 +6317,8 @@
    "tips": [],
    "related": [
     "mapa-pesca",
-    "aemet-opendata"
+    "aemet-opendata",
+    "mitma-boletin-estadistico-online"
    ],
    "status": "active",
    "verified": "2026-09-30"
@@ -6406,7 +6488,8 @@
    "related": [
     "catastro-ovc",
     "ine-api-tempus",
-    "ine-codigos-territoriales"
+    "ine-codigos-territoriales",
+    "mitma-boletin-estadistico-online"
    ],
    "status": "active",
    "verified": "2026-09-30"
@@ -7854,6 +7937,42 @@
      }
     ],
     "verified": "2026-09-30"
+   },
+   {
+    "id": "comercio-exterior-por-producto",
+    "intent": "Exportaciones o importaciones de un producto TARIC por país y provincia, mensuales o anuales desde 1995",
+    "inputs": [
+     "ine-provincia"
+    ],
+    "steps": [
+     {
+      "source": "datacomex",
+      "do": "Registrarse una vez en datacomex.comercio.es (correo y contraseña, activación por correo) y obtener el token con POST a IniciarSesion; la respuesta es la cadena \"token:eyJ...\", quitar el prefijo token: y las comillas",
+      "example": "curl -s -X POST -H \"Content-Type: application/json\" -d \"{\\\"Usuario\\\":\\\"$DATACOMEX_USER\\\",\\\"Pass\\\":\\\"$DATACOMEX_PASS\\\"}\" \"https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion\""
+     },
+     {
+      "source": "datacomex",
+      "do": "GET ObtenerDatos con los cinco parámetros (f, pe, pa, ta, pr); pe=ALLM da la serie mensual completa y pe=ALL la anual; pa es el código numérico de país (001 Francia) o ALL; comprobar mensaje en cada fila (provisional, definitivo, error de sintaxis)",
+      "example": "curl -s -H \"Authorization: Bearer $DATACOMEX_TOKEN\" \"https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=ALLM&pa=001&ta=2204&pr=ALL\""
+     },
+     {
+      "source": "aeat-estadisticas",
+      "do": "Para agregados de comercio exterior sin registro, las estadísticas de la AEAT (Aduanas) en el anuario; la fuente primaria de DataComex"
+     }
+    ],
+    "output": "JSON con Resultados (flujo, periodo, país, provincia, taric, euros y kilos como texto con coma decimal)",
+    "checks": [
+     {
+      "url": "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=ALL&ta=1001&pr=28",
+      "status": 401
+     },
+     {
+      "url": "https://datacomex.comercio.es/Data/AyudaApi",
+      "contains": "IniciarSesion",
+      "read_bytes": 200000
+     }
+    ],
+    "verified": "2026-09-30"
    }
   ],
   "necesidades": [
@@ -8239,14 +8358,19 @@
     "source": "puertos-estado-datos"
    },
    {
-    "need": "Tráfico aéreo por aeropuerto y registro de aeronaves",
+    "need": "Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra",
+    "source": "mitma-boletin-estadistico-online",
+    "note": "XLS por tabla con URL fija; la web de Aena (aesa-aviacion) exige sesión"
+   },
+   {
+    "need": "Registro de aeronaves y operadores de drones",
     "source": "aesa-aviacion",
     "note": "degradada; sin ficheros verificados"
    },
    {
-    "need": "Comercio exterior por producto, país y provincia",
+    "need": "Comercio exterior por producto TARIC, país y provincia desde 1995",
     "source": "datacomex",
-    "note": "API con token de usuario gratuito"
+    "note": "API verificada con cuenta gratuita; códigos de país numéricos, no ISO"
    },
    {
     "need": "Inversión extranjera en España y española en el exterior",

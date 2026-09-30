@@ -214,12 +214,15 @@
   note: GTFS-RT no verificado desde el entorno; Adif sin portal localizado
 - need: Tráfico portuario mensual por autoridad portuaria
   source: puertos-estado-datos
-- need: Tráfico aéreo por aeropuerto y registro de aeronaves
+- need: Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra
+  source: mitma-boletin-estadistico-online
+  note: XLS por tabla con URL fija; la web de Aena (aesa-aviacion) exige sesión
+- need: Registro de aeronaves y operadores de drones
   source: aesa-aviacion
   note: degradada; sin ficheros verificados
-- need: Comercio exterior por producto, país y provincia
+- need: Comercio exterior por producto TARIC, país y provincia desde 1995
   source: datacomex
-  note: API con token de usuario gratuito
+  note: API verificada con cuenta gratuita; códigos de país numéricos, no ISO
 - need: Inversión extranjera en España y española en el exterior
   source: datainvex
   note: aplicación ASP.NET con viewstate; sin API
