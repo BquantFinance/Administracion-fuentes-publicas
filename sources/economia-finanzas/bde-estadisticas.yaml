@@ -21,16 +21,19 @@ endpoints:
   - path: /favoritas?idioma={es|en}&series={cod1,cod2}
     desc: Último dato de una o varias series, con frecuencia, tendencia y fecha
     example: curl -s --compressed "https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472"
+    returns: "Lista [{serie, descripcionCorta, codFrecuencia (D, M, Q), decimales, simbolo, tendencia, fechaValor ISO, valor}] con el último dato de cada serie"
   - path: /listaSeries?idioma={es|en}&series={cod1,cod2}&rango={rango}
     desc: Serie completa con metadatos, fechas y valores
     example: curl -s --compressed "https://app.bde.es/bierest/resources/srdatosapp/listaSeries?idioma=es&series=DTNPDE2010_P0000P_PS_APU&rango=MAX"
     params: "rango según frecuencia. Diaria 3M, 12M, 36M; mensual y trimestral 30M, 60M, MAX; anual 60M, MAX; o un año concreto (rango=2024)"
+    returns: "Lista [{serie, descripcion, descripcionCorta, codFrecuencia, decimales, simbolo, informacion[{titulo, descripcion}], fechaInicio, fechaFin, fechas[], valores[]}]; fechas y valores alineados y en orden descendente (el más reciente primero)"
   - path: https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_{be|tc|ti|si|pb}.csv
     desc: Catálogos de series (código, alias, fichero del cuadro, descripción, frecuencia, primera y última observación)
     example: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_tc.csv"
   - path: https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/{cuadro}.csv
     desc: CSV de un cuadro completo con sus series en columnas; también en /datos/xlsx/{cuadro}.xlsx
     example: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/tc_1_1.csv"
+    returns: "CSV latin1 con seis filas de cabecera (código de serie, número secuencial, alias, descripción, unidades, frecuencia) y después una fila por fecha (04 ENE 1999); '_' marca dato ausente; decimal con punto"
   - path: https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_{capitulo}.zip
     desc: ZIP con los CSV de un capítulo del Boletín Estadístico; lista de capítulos en descargas-completas.html
     example: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_DEUAAPP.zip"

@@ -8,7 +8,7 @@ import sys
 
 from jsonschema import Draft202012Validator
 
-from common import SCHEMA, load_indices, load_sources, load_vocab
+from common import INDEX_FILES, SCHEMA, load_indices, load_sources, load_vocab
 
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -151,6 +151,32 @@ def validate_indices(ids: set[str], vocab: dict) -> list[str]:
         elif src is None and not n.get("note"):
             errors.append(f"{w}: source null exige note")
         _str(errors, w, n, "note", 300, required=False)
+
+    # codigos
+    for key, g in (idx["codigos"] or {}).items():
+        w = f"indices/codigos.yaml [{key}]"
+        if not isinstance(key, str) or not ID_RE.match(key):
+            errors.append(f"{w}: clave inválida")
+        if g.get("source") not in ids:
+            errors.append(f"{w}: source '{g.get('source')}' no es una ficha")
+        _str(errors, w, g, "use", 300)
+        _str(errors, w, g, "note", 300, required=False)
+        ver = g.get("verified")
+        if not (isinstance(ver, str) and DATE_RE.match(ver)):
+            errors.append(f"{w}: verified debe ser AAAA-MM-DD (los códigos se obtienen con una llamada real)")
+        entries = g.get("entries") or []
+        if not entries:
+            errors.append(f"{w}: sin entries")
+        codes: set[str] = set()
+        for e in entries:
+            code = str(e.get("code", "")).strip()
+            if not code:
+                errors.append(f"{w}: entrada sin code")
+            if code in codes:
+                errors.append(f"{w}: code duplicado {code}")
+            codes.add(code)
+            _str(errors, w, e, "name", 120)
+            _str(errors, w, e, "note", 160, required=False)
     return errors
 
 
@@ -204,7 +230,7 @@ def main() -> int:
     n_idx = 0
     try:
         errors += validate_indices(set(ids), vocab)
-        n_idx = 4
+        n_idx = len(INDEX_FILES)
     except Exception as exc:  # fichero ausente o YAML roto
         errors.append(f"indices/: no se pudieron cargar los índices ({exc})")
 

@@ -24,6 +24,7 @@ endpoints:
   - path: /Cartografia_Geologica/IGME_Geode_50/MapServer/8/query?geometry={lon},{lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&f=json
     desc: Unidad geológica en un punto (capa 8 Recintos geología, campos CODE_UNIO, DESC_UNIT, NAME_EDA1, NAME_EDA2, ZONA)
     example: curl -s "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geode_50/MapServer/8/query?geometry=-3.70,40.42&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=CODE_UNIO,DESC_UNIT,NAME_EDA1&returnGeometry=false&f=json"
+    returns: "ArcGIS REST {displayFieldName, fieldAliases, geometryType, spatialReference{wkid}, fields[], features:[{attributes:{OBJECTID, CODE_UNIO, DESC_UNIT, NAME_EDA1, NAME_EDA2, ZONA}, geometry:{rings}}]}; geometría en 102100 (Web Mercator) salvo outSR=4326"
   - path: /BasesDatos/IGME_PuntosAgua/MapServer/0/query?where={sql}&outFields=*&f=json
     desc: Puntos de agua subterránea (139.697; HOJA, PUNTO, cuenca, unidad hidrogeológica, acuífero, provincia, municipio, caudal, cota, profundidad, usos)
     example: curl -s "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_PuntosAgua/MapServer/0/query?where=Provincia%3D%27Madrid%27&outFields=*&resultRecordCount=5&f=json"

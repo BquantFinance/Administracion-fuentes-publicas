@@ -43,6 +43,7 @@ gotchas:
   - Es un catálogo de metadatos; distribution[].accessURL apunta al organismo origen y puede estar roto o exigir sesión. No hay proxy de los datos.
   - El identificador del dataset (_about y el slug tras /catalogo/) empieza por el código DIR3 del publicador (l01281317-..., e05251701-...).
   - La documentación y el catálogo web también están detrás del WAF; el HTML de un dataset está en https://datos.gob.es/catalogo/{slug} cuando la petición pasa.
+  - "En mantenimiento la API responde 200 con una página HTML (título Página en mantenimiento) en vez de JSON; comprobar Content-Type antes de parsear (visto el 2026-09-30 por la noche)."
 tips:
   - Sirve para descubrir dónde publica sus ficheros un organismo (DIR3, FACe, INE, SEPE) antes de rascar su web; accessURL suele ser la URL directa del fichero.
 related: [dir3-directorio, transparencia-portal]

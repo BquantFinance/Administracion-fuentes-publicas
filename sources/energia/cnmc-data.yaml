@@ -21,6 +21,7 @@ endpoints:
   - path: /package_search?q={texto}&rows={n}&fq=organization:{org}
     desc: Búsqueda de datasets (name ds_{id}_{v}, title, extras periodo, frecuenciaActualizacion, esInforme); rows=1000 devuelve los 210
     example: curl -s "https://catalogodatos.cnmc.es/api/3/action/package_search?q=comercializadoras&rows=5"
+    returns: "CKAN {help, success, result:{count, results:[{id, name (ds_1947_1), title, notes, license_id, metadata_modified, resources:[{id, url, format, name}]}]}}"
   - path: /organization_list?all_fields=true
     desc: Cinco organizaciones temáticas con recuento (org_energia 181, org_telco_visual 12, org_transporte_postal 12, org_comercio_electronico 4, org_panel_hogares 1)
   - path: /package_show?id={name}
@@ -28,6 +29,7 @@ endpoints:
   - path: /datastore_search?resource_id={id}&limit={n}
     desc: Registros en JSON con fields tipados y etiqueta original en info.label; limit por defecto 100, limit alto devuelve la tabla entera
     example: curl -s "https://catalogodatos.cnmc.es/api/3/action/datastore_search?resource_id=522dcc75-b5c4-4c8d-9ec3-c8d8cf66d6b2&limit=5"
+    returns: "{result:{records:[{_id, una clave por columna}], fields:[{id, type}], total, _links:{start, next}}}"
   - path: https://catalogodatos.cnmc.es/datastore/dump/{resource_id}?format={csv|json|xml}
     desc: Volcado completo de un recurso del datastore
     example: curl -s "https://catalogodatos.cnmc.es/datastore/dump/522dcc75-b5c4-4c8d-9ec3-c8d8cf66d6b2?format=csv"

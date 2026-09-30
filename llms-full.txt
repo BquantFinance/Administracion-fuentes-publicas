@@ -16,18 +16,23 @@ base_url: https://www.boe.es/datosabiertos/api/legislacion-consolidada
 docs_url: https://www.boe.es/datosabiertos/api/api.php
 - ?from={AAAAMMDD}&to={AAAAMMDD}&offset={n}&limit={n} :: Listado de normas por fecha de última actualización del consolidado; JSON o XML [limit por defecto 50, -1 devuelve hasta 10000; query es un JSON URL-encoded con query_string, range y sort]
   ej: curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada?from=20260901&limit=100"
+  devuelve: {status, data:[{identificador, ambito{codigo,texto}, departamento{codigo,texto}, rango{codigo,texto}, fecha_disposicion, numero_oficial, titulo, fecha_publicacion, diario_numero, fecha_vigencia, vigencia_agotada, estado_consolidacion{codigo,texto}, url_eli, url_html_consolidada}]}; fechas AAAAMMDD
 - ?query={json}&limit={n} :: Búsqueda por título y rango de fecha de publicación o de disposición, con orden
   ej: curl -s -G -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada" --data-urlencode 'query={"query":{"query_string":{"query":"titulo:vivienda"},"range":{"fecha_publicacion":{"gte":"20230101","lte":"20241231"}}},"sort":[{"fecha_publicacion":"desc"}]}' --data-urlencode "limit=20"
 - /id/{BOE-A-AAAA-NNNNN} :: Norma completa (metadatos, análisis y texto por bloques); solo XML
   ej: curl -s -H "Accept: application/xml" "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229"
 - /id/{id}/metadatos :: Título, rango, departamento, fechas, vigencia, estado de consolidación y url_eli; JSON o XML
   ej: curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/metadatos"
+  devuelve: data es una lista de un elemento con los campos del listado más estatus_derogacion, estatus_anulacion y fecha_actualizacion (AAAAMMDDThhmmssZ)
 - /id/{id}/analisis :: Materias, notas y referencias anteriores y posteriores; JSON o XML
+  devuelve: data:[{materias:{materia:{codigo,texto}}, referencias:{anteriores:[{anterior:[{id_norma, relacion:{codigo,texto}, texto}]}], posteriores:[{posterior:[...]}]}}]; relacion 210 es DEROGA
 - /id/{id}/texto :: Texto consolidado completo por bloques con todas sus versiones; solo XML
 - /id/{id}/texto/indice :: Índice de bloques con id, título y fecha de actualización; JSON o XML
   ej: curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/indice"
+  devuelve: data:[{bloque:[{id (preambulo, a1, da1...), titulo, fecha_actualizacion, url}]}]; el id se pasa a /texto/bloque/{id_bloque}
 - /id/{id}/texto/bloque/{id_bloque} :: Un bloque (preambulo, tpreliminar, a1, a2-5, da1...) con sus versiones; solo XML
   ej: curl -s -H "Accept: application/xml" "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/bloque/a1"
+  devuelve: XML response/data/bloque[@id,@tipo,@titulo]/version[@id_norma,@fecha_publicacion,@fecha_vigencia]/p[@class] con el texto del precepto
 - /id/{id}/metadata-eli :: Metadatos ELI de la norma en RDF/XML; solo XML
 - https://www.boe.es/datosabiertos/api/datos-auxiliares/{tabla} :: Tablas de códigos (materias, rangos, departamentos, ambitos, estados-consolidacion, relaciones-anteriores, relaciones-posteriores)
   ej: curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/datos-auxiliares/rangos"
@@ -58,8 +63,10 @@ base_url: https://www.boe.es/datosabiertos/api
 docs_url: https://www.boe.es/datosabiertos/api/api.php
 - /boe/sumario/{AAAAMMDD} :: Sumario del día, anidado en diario > seccion > departamento > epigrafe > item
   ej: curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/boe/sumario/20240102"
+  devuelve: {status, data.sumario.diario[]:{numero, sumario_diario, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]:{identificador, control, titulo, url_pdf:{texto, szBytes}, url_html, url_xml}}}}}}; secciones sin epígrafe llevan item bajo departamento; un solo elemento llega como objeto
 - https://www.boe.es/diario_boe/xml.php?id={BOE-A-AAAA-NNNNN} :: Texto completo y metadatos de una disposición en XML; no necesita cabecera Accept
   ej: curl -s "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-87"
+  devuelve: XML documento con metadatos (identificador, departamento y rango con atributo codigo, fecha_disposicion, titulo, fecha_publicacion, seccion, url_pdf, estatus_derogacion), analisis (materias, notas, referencias anteriores y posteriores) y texto
 - https://www.boe.es/diario_boe/txt.php?id={id} :: Versión HTML de la disposición
 - https://www.boe.es/boe/dias/{AAAA}/{MM}/{DD}/pdfs/{id}.pdf :: PDF de la disposición; la fecha del path es la de publicación
   ej: curl -sO "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-A-2024-87.pdf"
@@ -74,6 +81,7 @@ ids: boe-id
 ! Cada item trae url_pdf.texto, url_html y url_xml ya construidas; no montar la URL del PDF a mano (BOE-A-2024-1 no está en 2024/01/02).
 ! Los identificadores siguen el patrón BOE-A-AAAA-NNNNN (disposiciones) y BOE-B-AAAA-NNNNN (anuncios); la numeración es anual.
 ! No hay búsqueda por texto en esta API; descargar sumarios y filtrar en local, o usar la API de legislación consolidada.
+! En el JSON del sumario, departamento, epigrafe e item llegan como objeto cuando hay uno solo y como lista cuando hay varios; normalizar a lista antes de iterar.
 + Un sumario diario pesa entre 100 y 200 KB en JSON; para histórico iterar por fecha y tratar 404 como día sin publicación.
 + El OpenAPI 3.1 completo está embebido en api.php (variable openApiFile); el documento técnico es APIsumarioBOE.pdf en /datosabiertos/documentos/.
 + Para detectar publicaciones nuevas sin descargar el sumario entero, usar los feeds RSS (boe-feeds).
@@ -135,8 +143,10 @@ base_url: https://www.boe.es/datosabiertos/api
 docs_url: https://www.boe.es/datosabiertos/api/api.php
 - /borme/sumario/{AAAAMMDD} :: Sumario del día; secciones A y B con un item por provincia, sección C con apartado > item por anuncio
   ej: curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/borme/sumario/20240102"
+  devuelve: Como el sumario del BOE: data.sumario.diario[].seccion[] con codigo A (actos inscritos, un item por provincia), B (otros actos) y C (anuncios, con apartado); item {identificador BORME-A-AAAA-NNN-PP, titulo, url_pdf, url_html, url_xml}; un solo elemento llega como objeto
 - https://www.boe.es/diario_borme/xml.php?id={BORME-A-AAAA-NNN-PP} :: Actos inscritos de una provincia en XML, un par de párrafos por empresa
   ej: curl -s "https://www.boe.es/diario_borme/xml.php?id=BORME-A-2024-1-01"
+  devuelve: XML documento/metadatos (identificador, titulo = provincia, seccion, fecha_publicacion, url_pdf) y texto con pares p.articulo (número - denominación social) y p.parrafo (actos separados por punto, datos registrales al final)
 - https://www.boe.es/diario_borme/xml.php?id={BORME-C-AAAA-NNNNN} :: XML de un anuncio de la sección C
   ej: curl -s "https://www.boe.es/diario_borme/xml.php?id=BORME-C-2024-1"
 - https://www.boe.es/borme/dias/{AAAA}/{MM}/{DD}/pdfs/{id}.pdf :: PDF de cualquier documento del sumario
@@ -189,12 +199,15 @@ base_url: https://app.bde.es/bierest/resources/srdatosapp
 docs_url: https://www.bde.es/webbe/es/estadisticas/recursos/api-estadisticas-bde.html
 - /favoritas?idioma={es|en}&series={cod1,cod2} :: Último dato de una o varias series, con frecuencia, tendencia y fecha
   ej: curl -s --compressed "https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472"
+  devuelve: Lista [{serie, descripcionCorta, codFrecuencia (D, M, Q), decimales, simbolo, tendencia, fechaValor ISO, valor}] con el último dato de cada serie
 - /listaSeries?idioma={es|en}&series={cod1,cod2}&rango={rango} :: Serie completa con metadatos, fechas y valores [rango según frecuencia. Diaria 3M, 12M, 36M; mensual y trimestral 30M, 60M, MAX; anual 60M, MAX; o un año concreto (rango=2024)]
   ej: curl -s --compressed "https://app.bde.es/bierest/resources/srdatosapp/listaSeries?idioma=es&series=DTNPDE2010_P0000P_PS_APU&rango=MAX"
+  devuelve: Lista [{serie, descripcion, descripcionCorta, codFrecuencia, decimales, simbolo, informacion[{titulo, descripcion}], fechaInicio, fechaFin, fechas[], valores[]}]; fechas y valores alineados y en orden descendente (el más reciente primero)
 - https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_{be|tc|ti|si|pb}.csv :: Catálogos de series (código, alias, fichero del cuadro, descripción, frecuencia, primera y última observación)
   ej: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_tc.csv"
 - https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/{cuadro}.csv :: CSV de un cuadro completo con sus series en columnas; también en /datos/xlsx/{cuadro}.xlsx
   ej: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/tc_1_1.csv"
+  devuelve: CSV latin1 con seis filas de cabecera (código de serie, número secuencial, alias, descripción, unidades, frecuencia) y después una fila por fecha (04 ENE 1999); '_' marca dato ausente; decimal con punto
 - https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_{capitulo}.zip :: ZIP con los CSV de un capítulo del Boletín Estadístico; lista de capítulos en descargas-completas.html
   ej: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_DEUAAPP.zip"
 rate_limit: No documentado
@@ -423,19 +436,26 @@ base_url: https://servicios.ine.es/wstempus/js/ES
 docs_url: https://www.ine.es/dyngs/DAB/index.htm?cid=1099
 - /OPERACIONES_DISPONIBLES :: Las 112 operaciones con Id numérico y Codigo (IPC es 25, EPA 293, ECP 450)
   ej: curl -s "https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES"
+  devuelve: Lista de {Id, Cod_IOE, Nombre, Codigo}; Id (25) y Codigo (IPC) valen ambos como id_o_codigo en el resto de rutas
 - /TABLAS_OPERACION/{id_o_codigo} :: Tablas vigentes de una operación con periodo inicial y última modificación; acepta IPC o 25
   ej: curl -s "https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/IPC"
+  devuelve: Lista de {Id, Nombre, Codigo, FK_Periodicidad, FK_Publicacion, FK_Periodo_ini, Anyo_Periodo_ini, FechaRef_fin, Ultima_Modificacion (epoch ms)}; Id es el id_tabla de DATOS_TABLA
 - /DATOS_TABLA/{id_tabla}?nult={n} :: Todas las series de una tabla con sus últimos n periodos [nult o date=AAAAMMDD:AAAAMMDD (uno obligatorio); tv=id_variable:id_valor filtra, repetible; tip=A nombres legibles y fechas ISO, tip=M metadatos, tip=AM ambos; det=2 desglosa unidad y escala]
   ej: curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/24077?nult=3"
+  devuelve: Lista de series {COD, Nombre, FK_Unidad, FK_Escala, Data:[{Fecha epoch ms, FK_TipoDato, FK_Periodo, Anyo, Valor float, Secreto bool}]}; con tip=AM Fecha es ISO, aparecen T3_Periodo (M08), T3_TipoDato y MetaData:[{T3_Variable, Nombre, Codigo}] por dimensión
 - /DATOS_SERIE/{cod_serie}?nult={n} :: Una serie por su código
   ej: curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/IPC290751?nult=12&tip=A"
+  devuelve: Un objeto {COD, Nombre, FK_Unidad, FK_Escala, Data:[{Fecha, FK_TipoDato, FK_Periodo, Anyo, Valor, Secreto}]}; con tip=A llegan T3_Unidad, T3_TipoDato y T3_Periodo en texto y Fecha en ISO
 - /SERIES_TABLA/{id_tabla} :: Series que componen una tabla con código, decimales, periodicidad y unidad
   ej: curl -sL "https://servicios.ine.es/wstempus/js/ES/SERIES_TABLA/24077"
+  devuelve: Lista de {Id, COD, FK_Operacion, Nombre, Decimales, FK_Periodicidad, FK_Publicacion, FK_Clasificacion, FK_Escala, FK_Unidad}; COD es el cod_serie de DATOS_SERIE
 - /SERIE/{cod_serie} :: Metadatos de una serie
 - /VARIABLES_OPERACION/{id_operacion} :: Variables de una operación; sus valores en /VALORES_VARIABLEOPERACION/{id_variable}/{id_operacion}
   ej: curl -s "https://servicios.ine.es/wstempus/js/ES/VALORES_VARIABLEOPERACION/3/IPC"
+  devuelve: VARIABLES_OPERACION devuelve [{Id, Nombre, Codigo}] (3 Tipo de dato, 19 Municipios, 70 CCAA, 115 Provincias); VALORES_VARIABLEOPERACION/{var}/{op} devuelve [{Id, FK_Variable, Nombre, Codigo}] y ese Id, no Codigo, es el que usa tv
 - https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/{id_tabla}?nult={n} :: Misma API con salida CSV cambiando js por csv
   ej: curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=12"
+  devuelve: Texto tabulado en ISO-8859-15 con BOM; una columna por variable, Periodo (2026M08) y Total; decimal con coma y cadena vacía en los periodos aún sin dato
 rate_limit: No documentado; una tabla grande con nult=1 devuelve 600 KB (4248 series en la 25333)
 quirks: errors-html-or-xml
 ! Los códigos de serie y los ids de tabla cambian con cada cambio de base. El IPC general fue IPC206446 (hasta 2021), IPC251852 (hasta 2025M12) y es IPC290751 (base 2025).
@@ -447,6 +467,7 @@ quirks: errors-html-or-xml
 ! El CSV llega con BOM UTF-8, separador tabulador y coma decimal aunque la cabecera diga ISO-8859-15.
 ! SERIES_TABLA redirige con 301 a /jsCache/; seguir redirecciones. El parámetro page no pagina (devuelve lo mismo).
 ! Cambiar ES por EN en la ruta traduce los nombres; jsCache sirve copias cacheadas, para datos recién publicados usar js.
+! nult=1 puede devolver Data vacío cuando el último periodo aún no está publicado (el CSV lo muestra con cadena vacía); pedir nult=2 y quedarse con el último valor no nulo.
 + Flujo típico. TABLAS_OPERACION para localizar la tabla vigente, DATOS_TABLA con nult=1 y tip=A para ver códigos y nombres, DATOS_SERIE con date para el histórico.
 + Los ids de tabla del portal INEbase (parámetro t=NNNNN en la URL) son los mismos que acepta DATOS_TABLA.
 + En Python, pandas.json_normalize sobre Data de cada serie; con tip=A la fecha ya viene en ISO 8601.
@@ -515,12 +536,16 @@ base_url: https://www.infosubvenciones.es/bdnstrans/api
 docs_url: https://www.infosubvenciones.es/bdnstrans/GE/es/api
 - /convocatorias/busqueda?page={n}&pageSize={n} :: Búsqueda paginada de convocatorias (numeroConvocatoria, descripcion, fechaRecepcion, nivel1 a nivel3, mrr) [descripcion, fechaDesde y fechaHasta en dd/mm/aaaa, tipoAdministracion=C (estatal), numeroConvocatoria, mrr, vpd, order y direccion]
   ej: curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=50&fechaDesde=01/09/2026&fechaHasta=30/09/2026&order=fechaRecepcion&direccion=desc"
+  devuelve: Página Spring {content:[{id, numeroConvocatoria, descripcion, fechaRecepcion, nivel1 (ESTATAL, AUTONOMICA, LOCAL), nivel2, nivel3, mrr, codigoInvente}], totalElements, totalPages, number, size, last}
 - /convocatorias?numConv={numero_bdns} :: Detalle completo de una convocatoria (órgano, instrumentos, presupuesto, bases, documentos)
   ej: curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv=800000"
+  devuelve: Objeto {id, codigoBDNS, organo{nivel1,nivel2,nivel3}, fechaRecepcion, tipoConvocatoria, presupuestoTotal, instrumentos[], tiposBeneficiarios[], sectores[{codigo CNAE, descripcion}], regiones[{descripcion con NUTS}], descripcion, sedeElectronica, mrr}
 - /concesiones/busqueda?page={n}&pageSize={n} :: Concesiones con beneficiario, importe, ayuda equivalente, instrumento y convocatoria [numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa]
   ej: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=50&numeroConvocatoria=931918"
+  devuelve: content:[{id, codConcesion, fechaConcesion, beneficiario (NIF y nombre en la misma cadena), instrumento, importe, ayudaEquivalente, urlBR, numeroConvocatoria, idConvocatoria, convocatoria, nivel1, nivel2, nivel3}]
 - /{coleccion}/busqueda?page={n}&pageSize={n} :: Mismo patrón para ayudasestado, minimis, grandesbeneficiarios, sanciones, planesestrategicos y partidospoliticos
   ej: curl -s "https://www.infosubvenciones.es/bdnstrans/api/grandesbeneficiarios/busqueda?page=0&pageSize=50"
+  devuelve: grandesbeneficiarios devuelve content:[{idPersona, beneficiario (NIF y nombre), ejercicio, ayudaETotal}] con la misma paginación Spring (totalElements, totalPages)
 - /{coleccion}/exportar?vpd=GE&tipoDoc={csv|xlsx} :: Exportación con los mismos filtros que la búsqueda; verificada en convocatorias y concesiones
   ej: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/exportar?vpd=GE&tipoDoc=csv&fechaDesde=29/09/2026&fechaHasta=29/09/2026" | iconv -f WINDOWS-1252 -t UTF-8
 - /convocatorias/ultimas?page={n}&pageSize={n} :: Últimas convocatorias registradas
@@ -563,6 +588,7 @@ base_url: https://contrataciondelestado.es/sindicacion/
 docs_url: https://contrataciondelestado.es/wps/portal/DatosAbiertos
 - sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom :: Licitaciones de perfiles alojados en la Plataforma; unas 235 entradas y 6 MB por página
   ej: curl -s "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom"
+  devuelve: Atom; cada entry lleva ContractFolderStatus (CODICE): ContractFolderID, ContractFolderStatusCode, LocatedContractingParty/Party/PartyIdentification/ID (DIR3), ProcurementProject/Name, BudgetAmount/TaxExclusiveAmount, RequiredCommodityClassification/ItemClassificationCode (CPV) y RealizedLocation/CountrySubentityCode
 - sindicacion_1044/PlataformasAgregadasSinMenores.atom :: Licitaciones agregadas desde plataformas autonómicas y locales, sin contratos menores
 - sindicacion_1143/contratosMenoresPerfilesContratantes.atom :: Contratos menores de perfiles alojados
 - sindicacion_{n}/{nombre_feed}_{AAAA}{MM}.zip :: Histórico mensual de cada feed en el mismo formato ATOM; entre 12 y 19 MB por mes en 2026
@@ -682,6 +708,7 @@ ids: dir3
 ! Es un catálogo de metadatos; distribution[].accessURL apunta al organismo origen y puede estar roto o exigir sesión. No hay proxy de los datos.
 ! El identificador del dataset (_about y el slug tras /catalogo/) empieza por el código DIR3 del publicador (l01281317-..., e05251701-...).
 ! La documentación y el catálogo web también están detrás del WAF; el HTML de un dataset está en https://datos.gob.es/catalogo/{slug} cuando la petición pasa.
+! En mantenimiento la API responde 200 con una página HTML (título Página en mantenimiento) en vez de JSON; comprobar Content-Type antes de parsear (visto el 2026-09-30 por la noche).
 + Sirve para descubrir dónde publica sus ficheros un organismo (DIR3, FACe, INE, SEPE) antes de rascar su web; accessURL suele ser la URL directa del fichero.
 related: dir3-directorio, transparencia-portal
 
@@ -721,8 +748,10 @@ base_url: https://proveedores.face.gob.es/api/v1
 docs_url: https://proveedores.face.gob.es/inicio
 - /relations?fulltext={texto}&page={n}&limit={n} :: Relaciones en JSON; cada item trae oc, og y ut con code (DIR3), name y alias, y og lleva identifier con el NIF [fulltext filtra por nombre; page empieza en 1; limit hasta 1000 (5000 devuelve 500); respuesta con items, count, total, limit y page]
   ej: curl -s "https://proveedores.face.gob.es/api/v1/relations?fulltext=Ayuntamiento%20de%20Madrid&limit=100&page=1"
+  devuelve: {items:[{oc:{code, name, alias}, og:{code, identifier NIF, name}, ut:{code, name}, administration:{code, name}, hash, active}], count, total, limit, page}; los code son DIR3
 - /relations.csv?fulltext={texto} :: Lo mismo en CSV con punto y coma (oficinaContable, organoGestor, unidadTramitadora y activo); sin filtro, las 50186 relaciones en 7 MB
   ej: curl -sO "https://proveedores.face.gob.es/api/v1/relations.csv"
+  devuelve: CSV separado por ; en ISO-8859-1 con BOM: oficinaContableNombre;oficinaContableCodigoDir3;organoGestorNombre;organoGestorCodigoDir3;unidadTramitadoraNombre;unidadTramitadoraCodigoDir3;activo
 - https://webservice.face.gob.es/facturasspp2?wsdl :: WSDL del servicio SOAP de presentación y consulta de facturas en producción
 - https://se-face-webservice.redsara.es/facturasspp2?wsdl :: Mismo servicio en el entorno de pruebas
 ids: dir3, nif
@@ -830,6 +859,7 @@ docs_url: https://www.ign.es/web/ign/portal/ide-area-nodo-ide-ign
 - https://www.ign.es/wms-inspire/ign-base?SERVICE=WMS&REQUEST=GetCapabilities :: WMS del mapa base del IGN
 - https://www.cartociudad.es/geocoder/api/geocoder/find?q={direccion} :: Geocodificador; JSON con provinceCode, muniCode (INE), postalCode y geom en WKT WGS84; candidatesJsonp devuelve varios candidatos
   ej: curl -s "https://www.cartociudad.es/geocoder/api/geocoder/find?q=Calle%20Alcala%2050%20Madrid"
+  devuelve: {id, province, provinceCode, comunidadAutonoma, comunidadAutonomaCode, muni, muniCode (INE 5 dígitos), type, address, tip_via, portalNumber, postalCode, poblacion, geom (WKT POINT lon lat), lat, lng, refCatastral, state, stateMsg}
 quirks: captcha-required, js-rendered, static-html
 ids: ine-municipio, ine-provincia, ccaa
 ! Cada descarga del Centro de Descargas pasa por reCAPTCHA v3 (preAutorizarDescarga con recaptchaToken) antes de descargaDir; sin token responde 403. No automatizable de forma lícita sin navegador.
@@ -895,13 +925,18 @@ base_url: https://opendata.aemet.es/opendata/api
 docs_url: https://opendata.aemet.es/dist/index.html
 - /prediccion/especifica/municipio/diaria/{cod_municipio_ine} :: Predicción diaria a 7 días para un municipio; /todos devuelve todos los municipios
   ej: curl -s -H "api_key: $AEMET_KEY" "https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/28079"
+  devuelve: datos es lista de un objeto {nombre, provincia, elaborado, id, prediccion:{dia:[{fecha, probPrecipitacion[{value, periodo}], estadoCielo[{value, periodo, descripcion}], viento[{direccion, velocidad, periodo}], temperatura{maxima, minima, dato[{value, hora}]}, sensTermica, humedadRelativa, uvMax}]}}
 - /prediccion/especifica/municipio/horaria/{cod_municipio_ine} :: Predicción horaria a 48 horas; /todos para todos los municipios
 - /maestro/municipios :: Maestro de municipios con el código que aceptan las predicciones; /maestro/municipio/{id} para uno
+  devuelve: Lista de municipios [{id (id28079, INE con prefijo id), id_old, nombre, capital, latitud_dec, longitud_dec, altitud, num_hab, zona_comarcal, url}]; todo como texto
 - /observacion/convencional/todas :: Últimas 24 horas de observación de todas las estaciones
+  devuelve: Lista de observaciones horarias de todas las estaciones (3,5 MB) [{idema, ubi, lon, lat, alt, fint (ISO UTC), ta, tamin, tamax, tpr, hr, prec, pres, pres_nmar, vv, dv, vmax, dmax, stdvv, stddv}]; números con punto
 - /observacion/convencional/datos/estacion/{idema} :: Observación de una estación
 - /valores/climatologicos/inventarioestaciones/todasestaciones :: Inventario de estaciones con idema y coordenadas
+  devuelve: Lista de 926 estaciones [{indicativo (idema), nombre, provincia, altitud, latitud, longitud, indsinop}]; coordenadas en grados, minutos y segundos con letra (394924N, 025309E), no decimales
 - /valores/climatologicos/diarios/datos/fechaini/{AAAA-MM-DDTHH:MM:SSUTC}/fechafin/{AAAA-MM-DDTHH:MM:SSUTC}/estacion/{idema} :: Climatología diaria de una o varias estaciones (idema separados por coma) en un rango; /todasestaciones para todas
   ej: curl -s -H "api_key: $AEMET_KEY" "https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2024-01-01T00:00:00UTC/fechafin/2024-01-31T23:59:59UTC/estacion/3195"
+  devuelve: Lista [{fecha, indicativo, nombre, provincia, altitud, tmed, prec, tmin, horatmin, tmax, horatmax, dir, velmedia, racha, horaracha, presMax, presMin, hrMedia, hrMax, hrMin}]; todos los valores son texto con coma decimal
 - /valores/climatologicos/mensualesanuales/datos/anioini/{AAAA}/aniofin/{AAAA}/estacion/{idema} :: Climatología mensual y anual; normales en /valores/climatologicos/normales/estacion/{idema} y extremos en /valoresextremos/parametro/{p}/estacion/{idema}
 - /avisos_cap/ultimoelaborado/area/{area} :: Avisos meteorológicos en formato CAP; archivo por fechas en /avisos_cap/archivo/fechaini/{f}/fechafin/{f}
 - /red/radar/nacional :: Radar nacional; regional en /red/radar/regional/{radar}, rayos en /red/rayos/mapa, radiación y ozono bajo /red/especial/
@@ -1094,10 +1129,12 @@ base_url: https://catalogodatos.cnmc.es/api/3/action
 docs_url: https://data.cnmc.es/reutilizadores
 - /package_search?q={texto}&rows={n}&fq=organization:{org} :: Búsqueda de datasets (name ds_{id}_{v}, title, extras periodo, frecuenciaActualizacion, esInforme); rows=1000 devuelve los 210
   ej: curl -s "https://catalogodatos.cnmc.es/api/3/action/package_search?q=comercializadoras&rows=5"
+  devuelve: CKAN {help, success, result:{count, results:[{id, name (ds_1947_1), title, notes, license_id, metadata_modified, resources:[{id, url, format, name}]}]}}
 - /organization_list?all_fields=true :: Cinco organizaciones temáticas con recuento (org_energia 181, org_telco_visual 12, org_transporte_postal 12, org_comercio_electronico 4, org_panel_hogares 1)
 - /package_show?id={name} :: Ficha de un dataset con sus recursos; el CSV con datastore_active true admite datastore_search
 - /datastore_search?resource_id={id}&limit={n} :: Registros en JSON con fields tipados y etiqueta original en info.label; limit por defecto 100, limit alto devuelve la tabla entera
   ej: curl -s "https://catalogodatos.cnmc.es/api/3/action/datastore_search?resource_id=522dcc75-b5c4-4c8d-9ec3-c8d8cf66d6b2&limit=5"
+  devuelve: {result:{records:[{_id, una clave por columna}], fields:[{id, type}], total, _links:{start, next}}}
 - https://catalogodatos.cnmc.es/datastore/dump/{resource_id}?format={csv|json|xml} :: Volcado completo de un recurso del datastore
   ej: curl -s "https://catalogodatos.cnmc.es/datastore/dump/522dcc75-b5c4-4c8d-9ec3-c8d8cf66d6b2?format=csv"
 - https://catalogodatos.cnmc.es/dataset/{uuid}/resource/{id}/download/ds_{n}_{v}.{csv|json|xml} :: Ficheros estáticos de cada dataset (URL en resources[].url de package_show)
@@ -1123,6 +1160,7 @@ base_url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/Preci
 docs_url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/help
 - /EstacionesTerrestres/ :: Todas las estaciones con todos los precios (12 MB, unos 17 s); claves con espacios y tildes (Precio Gasoleo A, Longitud (WGS84), Rótulo)
   ej: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/"
+  devuelve: {Fecha (dd/mm/aaaa hh:mm:ss), ListaEESSPrecio:[{C.P., Dirección, Horario, Latitud, Longitud (WGS84), Localidad, Municipio, Provincia, Rótulo, Margen, Tipo Venta, Precio Gasolina 95 E5, Precio Gasoleo A y una clave por producto, IDEESS, IDMunicipio, IDProvincia, IDCCAA}], ResultadoConsulta}; números como texto con coma
 - /EstacionesTerrestres/FiltroProvincia/{IDPROVINCIA} :: Estaciones de una provincia (código INE de dos dígitos; Madrid son 894 estaciones y 940 KB)
   ej: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroProvincia/28"
 - /EstacionesTerrestres/FiltroMunicipio/{IDMUNICIPIO} y /EstacionesTerrestres/FiltroCCAA/{IDCCAA} :: Filtros por municipio (id propio de la aplicación) y comunidad autónoma
@@ -1133,6 +1171,7 @@ docs_url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/Preci
 - /PostesMaritimos/ :: Postes marítimos, claves propias (Precio Gasoleo A habitual, Precio Gasóleo para uso marítimo); filtros PostesMaritimosFiltroProvincia y similares
 - /Listados/{Provincias|Municipios|ComunidadesAutonomas|ProductosPetroliferos}/ :: Tablas de códigos (8112 municipios con IDMunicipio propio; productos con IDProducto y abreviatura, Gasolina 95 E5 es 1)
   ej: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/Listados/ProductosPetroliferos/"
+  devuelve: ProductosPetroliferos [{IDProducto, NombreProducto, NombreProductoAbreviatura}]; Provincias [{IDPovincia (sic), IDCCAA, Provincia, CCAA}]; Municipios [{IDMunicipio, IDProvincia, IDCCAA, Municipio, Provincia, CCAA}] (8.112)
 ids: ine-provincia
 ! Precios, latitud y longitud son cadenas con coma decimal (1,879 o 40,528778); precio vacío es que la estación no vende ese producto (211 sin gasóleo A).
 ! IDMunicipio es propio de la aplicación (8112 valores), no el INE; IDProvincia sí es el INE de dos dígitos. En Listados/Provincias la clave está mal escrita, IDPovincia.
@@ -1184,6 +1223,7 @@ base_url: https://www.omie.es/es/file-access-list
 docs_url: https://www.omie.es/es/market-results/daily/daily-market/day-ahead-price
 - https://www.omie.es/es/file-download?parents%5B0%5D={carpeta}&filename={carpeta}_{AAAAMMDD}.{version} :: Fichero diario de una carpeta; marginalpdbc (precio España), marginalpdbcpt (Portugal), pdbc_stota (programas), curva_pbc, cab y det (ofertas), precios_pibcic
   ej: curl -s "https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_20260929.1"
+  devuelve: Texto separado por ; con cabecera MARGINALPDBC; y filas AAAA;MM;DD;periodo;precio;precio; (EUR/MWh, decimal con punto) más una fila final con asterisco; sin cabecera de columnas
 - https://www.omie.es/es/file-download?parents%5B0%5D=marginalpibc&filename=marginalpibc_{AAAAMMDD}{SS}.1 :: Precio marginal del intradiario de subastas; SS es la sesión (01 a 03 en 2026)
   ej: curl -s "https://www.omie.es/es/file-download?parents%5B0%5D=marginalpibc&filename=marginalpibc_2026092901.1"
 - https://www.omie.es/es/file-access-list?parents%5B0%5D={carpeta}&dir={nombre}&realdir={carpeta} :: Listado HTML de los ficheros de una carpeta (1018 en marginalpdbc, desde el 18/12/2023); sin parámetros, las 67 carpetas de todos los mercados
@@ -1211,6 +1251,7 @@ base_url: https://apidatos.ree.es/es/datos
 docs_url: https://www.ree.es/es/datos/apidatos
 - /{categoria}/{widget}?start_date={AAAA-MM-DDTHH:MM}&end_date={AAAA-MM-DDTHH:MM}&time_trunc={hour|day|month|year} :: Patrón general (balance, demanda, generacion, intercambios, transporte, mercados); included[] trae una serie por concepto con value, percentage y datetime [geo_trunc=electric_system con geo_limit (peninsular, canarias, baleares, ceuta, melilla, ccaa) y geo_ids (8741, 8742 y 8743 verificados); /en/ en vez de /es/ traduce títulos y errores]
   ej: curl -s "https://apidatos.ree.es/es/datos/demanda/evolucion?start_date=2026-09-01T00:00&end_date=2026-09-07T23:59&time_trunc=day"
+  devuelve: {data:{type, id, attributes:{title, last-update, description}}, included:[{type, id, groupId, attributes:{title, color, type, magnitude, composite, last-update, values:[{value, percentage, datetime ISO con zona}]}}]}; una entrada de included por concepto
 - /demanda/evolucion :: Demanda en MWh por día, mes o año (serie Demanda 10297); day admite un año por petición; hour no está soportado en este widget (400)
 - /demanda/demanda-tiempo-real?time_trunc=hour :: Demanda real, prevista y programada (dem15) por hora; solo con hour y un día por petición (con day responde 400)
   ej: curl -s "https://apidatos.ree.es/es/datos/demanda/demanda-tiempo-real?start_date=2026-09-29T00:00&end_date=2026-09-29T23:59&time_trunc=hour"
@@ -1250,17 +1291,22 @@ base_url: https://cima.aemps.es/cima/rest
 docs_url: https://sede.aemps.gob.es/docs/CIMA-REST-API_1_19.pdf
 - /medicamentos?nombre={texto}&pagina={n} :: Búsqueda paginada; también practiv1 (principio activo), atc, laboratorio, comerc, receta y otros filtros del manual, combinables
   ej: curl -s "https://cima.aemps.es/cima/rest/medicamentos?nombre=ibuprofeno&pagina=1"
+  devuelve: {totalFilas, pagina, tamanioPagina (200), resultados:[{nregistro, nombre, pactivos, labtitular, labcomercializador, cpresc, estado:{aut, rev} en epoch ms, comerc, receta, generico, conduc, triangulo, huerfano, biosimilar, nosustituible{id,nombre}, psum, ema}]}; paginar mientras pagina*200 < totalFilas
 - /medicamento?nregistro={nreg} :: Detalle completo (pactivos, atcs, presentaciones con cn y estado, docs con url PDF y urlHtml, fotos, vtm, dosis, estado aut/rev); también ?cn={cn}
   ej: curl -s "https://cima.aemps.es/cima/rest/medicamento?nregistro=80298"
+  devuelve: Objeto con los campos de la lista más presentaciones[{cn, nombre, estado, comerc, psum}], docs[{tipo 1 ficha técnica y 2 prospecto, url, urlHtml, secc, fecha}], atcs[{codigo, nombre, nivel}], principiosActivos[], viasAdministracion[], formaFarmaceutica, dosis, fotos[], notas, materialesInf, vtm
 - /presentaciones?cn={cn} :: Presentaciones comerciales por código nacional o por nregistro
 - /psuministro :: Problemas de suministro activos (cn, nombre, tipoProblemaSuministro, fini, ffin, activo, observ), 860 en la fecha de verificación
   ej: curl -s "https://cima.aemps.es/cima/rest/psuministro"
+  devuelve: {totalFilas, pagina, tamanioPagina, resultados:[{cn, nombre, tipoProblemaSuministro (int), fini, ffin (epoch ms), activo, observ}]}
 - /docSegmentado/secciones/{1|2}?nregistro={nreg} y /docSegmentado/contenido/{1|2}?nregistro={nreg}&seccion={s} :: Ficha técnica (1) o prospecto (2) por secciones; contenido devuelve HTML de la sección (4.1 indicaciones, etc.)
   ej: curl -s "https://cima.aemps.es/cima/rest/docSegmentado/contenido/1?nregistro=80298&seccion=4.1"
 - /registroCambios?fecha={dd/mm/aaaa} :: Medicamentos cambiados desde la fecha (nregistro, fecha, tipoCambio, cambio), para sincronizar sin rebajar todo
   ej: curl -s "https://cima.aemps.es/cima/rest/registroCambios?fecha=01/09/2026"
+  devuelve: {totalFilas, resultados:[{nregistro, nombre, labtitular, fecha (epoch ms), tipoCambio (int), cambio:[]}]}; 108.000 filas en total, paginación de 200
 - /maestras?maestra={id}&nombre={texto} :: Tablas maestras filtradas por texto (1 principios activos, 3 formas farmacéuticas, 4 vías, 6 laboratorios, 7 ATC); sin filtro responde 204
   ej: curl -s "https://cima.aemps.es/cima/rest/maestras?maestra=1&nombre=ibu"
+  devuelve: {totalFilas, resultados:[{id, codigo, nombre}]}
 - /vmpp :: Equivalencias SNOMED CT del nomenclátor (vmp, vmpDesc, vmpp), 7016 filas
 - https://listadomedicamentos.aemps.gob.es/prescripcion.zip :: Nomenclátor de prescripción completo (16 MB; Prescripcion.xml de 193 MB con una entrada por presentación más 13 diccionarios XML), regenerado a diario
   ej: curl -sSL -o prescripcion.zip "https://listadomedicamentos.aemps.gob.es/prescripcion.zip"
@@ -1315,9 +1361,11 @@ base_url: https://cne.isciii.es/
 docs_url: https://cne.isciii.es/servicios/enfermedades-transmisibles/vigilancia-mortalidad-momo
 - https://momo.isciii.es/public/momo/data :: CSV completo de MoMo (719 MB, regenerado a diario hasta el día anterior); ignora la cabecera Range y envía el fichero entero, leer en streaming
   ej: curl -sS "https://momo.isciii.es/public/momo/data" | head -c 2000
+  devuelve: CSV UTF-8 con ambito (nacional, ccaa, provincia), cod_ambito, cod_ine_ambito, nombre_ambito, cod_sexo, nombre_sexo, cod_gedad, nombre_gedad, fecha_defuncion, defunciones_observadas, defunciones_estimadas_base, _q01, _q99, defunciones_atrib_exc_temp, defunciones_atrib_def_temp
 - https://momo.isciii.es/panel_momo/ :: Panel MoMo con gráficos por ámbito; enlaza la metodología en gesdoc.isciii.es
 - https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres.csv :: COVID-19 diario por provincia de residencia, sexo y edad (38 MB; num_casos, num_hosp, num_uci, num_def); variantes _60_mas y todas_edades
   ej: curl -sSL -o covid.csv "https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres.csv"
+  devuelve: CSV provincia_iso,sexo,grupo_edad,fecha,num_casos,num_hosp,num_uci,num_def; una fila por provincia, sexo, grupo de edad y día desde 2020-01-01
 - https://cne.isciii.es/servicios/enfermedades-transmisibles/objetivos-boletines :: Boletín epidemiológico semanal en PDF, un documento por semana en /documents/d/cne/is-{AAMMDD}-web-pdf
 - https://cne.isciii.es/servicios/enfermedades-transmisibles/informes :: Informes anuales RENAVE (/documents/d/cne/ano-{AAAA} desde 2019, renave_informe_anual_{AAAA} anteriores)
 - https://cne.isciii.es/servicios/enfermedades-transmisibles/enfermedades-a-z/{enfermedad} :: Página por enfermedad con protocolo e informes anuales (por ejemplo dengue, con informe_renave_dengue-{AAAA})
@@ -1464,10 +1512,12 @@ base_url: https://api.gbif.org/v1
 docs_url: https://techdocs.gbif.org/en/openapi/
 - /occurrence/search?country=ES&scientificName={nombre}&limit={n}&offset={o} :: Ocurrencias en España (sobre con offset, limit, endOfRecords, count, results, facets); limit máximo 300
   ej: curl -s "https://api.gbif.org/v1/occurrence/search?country=ES&scientificName=Lynx%20pardinus&limit=5"
+  devuelve: {offset, limit, endOfRecords, count, results:[{key, datasetKey, scientificName, taxonKey, speciesKey, kingdom...species, decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, stateProvince, eventDate, year, month, day, basisOfRecord, occurrenceStatus, issues[], license}]}
 - /occurrence/count?country=ES :: Recuento rápido con los mismos filtros que search (publishingCountry, taxonKey, year, gadmGid, hasCoordinate)
   ej: curl -s "https://api.gbif.org/v1/occurrence/count?country=ES"
 - /species/match?name={nombre} :: Resolver un nombre científico al taxón (usageKey, rank, status, matchType, confidence)
   ej: curl -s "https://api.gbif.org/v1/species/match?name=Quercus%20ilex"
+  devuelve: {usageKey, scientificName, canonicalName, rank, status, confidence, matchType (EXACT, FUZZY, NONE), kingdom, phylum, order, family, genus, species y sus claves kingdomKey...speciesKey}
 - /dataset/search?publishingCountry=ES&limit={n} :: Datasets publicados desde España (key, title, doi, type, publishingOrganizationTitle)
   ej: curl -s "https://api.gbif.org/v1/dataset/search?publishingCountry=ES&limit=5"
 - /occurrence/download/request :: Descargas masivas asíncronas (POST con predicado JSON); exigen usuario y contraseña de GBIF gratuitos
@@ -1496,6 +1546,7 @@ docs_url: https://ieo.csic.es/datos-oceanograficos/
   ej: curl -s "https://nodc.ieo.es/geonetwork/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecordById&ElementSetName=full&outputSchema=http://www.isotc211.org/2005/gmd&ID=urn:SDN:CSR:LOCAL:29JR200311060"
 - https://nodc.ieo.es/geonetwork/srv/api/search/records/_search :: Búsqueda de texto libre por POST JSON (Elasticsearch de GeoNetwork; query_string, size, _source); hits.hits[]._source con resourceTitleObject y resourceType
   ej: curl -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{"query":{"query_string":{"query":"temperatura"}},"size":5}' "https://nodc.ieo.es/geonetwork/srv/api/search/records/_search"
+  devuelve: Elasticsearch {hits:{total:{value}, hits:[{_id, _source:{metadataIdentifier, resourceTitleObject{default}, resourceAbstractObject, resourceType[], link:[{protocol, url, name}], format[], Org, inspireTheme, dateStamp}}]}}
 - https://nodc.ieo.es/geonetwork/srv/spa/catalog.search :: Interfaz web del catálogo (JavaScript); las fichas se enlazan como
 quirks: errors-html-or-xml, js-rendered
 ! Los filtros CQL_TEXT (AnyText like, dc:title like) responden 200 con un ows:ExceptionReport (UnknownFormatConversionException); filtrar con la API _search o recorrer el listado completo.
@@ -1517,6 +1568,7 @@ docs_url: https://info.igme.es/catalogo/
   ej: curl -s "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica?f=json"
 - /Cartografia_Geologica/IGME_Geode_50/MapServer/8/query?geometry={lon},{lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&f=json :: Unidad geológica en un punto (capa 8 Recintos geología, campos CODE_UNIO, DESC_UNIT, NAME_EDA1, NAME_EDA2, ZONA)
   ej: curl -s "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geode_50/MapServer/8/query?geometry=-3.70,40.42&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=CODE_UNIO,DESC_UNIT,NAME_EDA1&returnGeometry=false&f=json"
+  devuelve: ArcGIS REST {displayFieldName, fieldAliases, geometryType, spatialReference{wkid}, fields[], features:[{attributes:{OBJECTID, CODE_UNIO, DESC_UNIT, NAME_EDA1, NAME_EDA2, ZONA}, geometry:{rings}}]}; geometría en 102100 (Web Mercator) salvo outSR=4326
 - /BasesDatos/IGME_PuntosAgua/MapServer/0/query?where={sql}&outFields=*&f=json :: Puntos de agua subterránea (139.697; HOJA, PUNTO, cuenca, unidad hidrogeológica, acuífero, provincia, municipio, caudal, cota, profundidad, usos)
   ej: curl -s "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_PuntosAgua/MapServer/0/query?where=Provincia%3D%27Madrid%27&outFields=*&resultRecordCount=5&f=json"
 - /BasesDatos/{servicio}/MapServer :: Otras bases de datos (IGME_BDMIN_Explotaciones e Indicios, IGME_BDMoves_ES, IGME_QAFI_v4, IGME_IELIG, IGME_InventarioBalsas, IGME_MuestrasGeoquimica)
@@ -1638,6 +1690,7 @@ base_url: https://sigpac-hubcloud.es/
 docs_url: https://sigpac-hubcloud.es/html/csp/descServicio.html
 - https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfobypoint/{srid}/{x}/{y}.json :: Recinto que contiene un punto (códigos SIGPAC, superficie, pendiente_media, coef_regadio, uso_sigpac, altitud, wkt); con extensión .geojson devuelve GeoJSON
   ej: curl -s "https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfobypoint/4326/-3.9/40.3.json"
+  devuelve: Lista de recintos [{provincia, municipio, agregado, zona, poligono, parcela, recinto, superficie (ha), pendiente_media, coef_regadio, admisibilidad, incidencias, uso_sigpac (ZU, TA, OV...), region}]
 - https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfo/{pr}/{mu}/{ag}/{zo}/{po}/{pa}/{re}.json :: Propiedades de un recinto por códigos; recinfoparc devuelve todos los recintos de la parcela y recincentroid su centroide
   ej: curl -s "https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfo/28/15/0/0/3/9000/6.json"
 - https://sigpac-hubcloud.es/servicioconsultassigpac/query/refcatparcela/{pr}/{mu}/{ag}/{zo}/{po}/{pa}.json :: Referencia catastral de la parcela SIGPAC (referencia_cat de 14 caracteres); refrecinbycoord da los códigos SIGPAC de un punto
@@ -1645,6 +1698,7 @@ docs_url: https://sigpac-hubcloud.es/html/csp/descServicio.html
 - https://sigpac-hubcloud.es/servicioconsultassigpac/intersection/{red_natura|nitratos}/{pr}/{mu}/{ag}/{zo}/{po}/{pa}/{re}.json :: Intersección del recinto con Red Natura 2000 (lic_code, zepa_code, surface_intersection, surface_tpc) o zonas vulnerables a nitratos
 - https://sigpac-hubcloud.es/ogcapi/collections/{recintos|cultivo_declarado|elementos_paisaje_area|elementos_paisaje_linea|elementos_paisaje_punto}/items?bbox={bbox}&limit={n}&f=json :: OGC API Features con filtro por bbox y por atributos (provincia=28); numberMatched y paginación estándar
   ej: curl -s "https://sigpac-hubcloud.es/ogcapi/collections/recintos/items?bbox=-3.71,40.41,-3.70,40.42&limit=5&f=json"
+  devuelve: GeoJSON FeatureCollection {features:[{id, properties:{dn_pk, provincia, municipio, agregado, zona, poligono, parcela, recinto, pendiente_media, altitud}, geometry Polygon en WGS84}], numberMatched, numberReturned, links[]}
 - https://sigpac-hubcloud.es/geopackages/{campaña}/recintos/{PP}_{PROVINCIA}_rec_{campaña}_{AAAAMMDD}_gpkg.zip :: Descarga masiva por provincia (50 ficheros de 200 a 900 MB por campaña; listado en el directorio geopackages/{campaña}/recintos/ y en elementos_del_paisaje/)
   ej: curl -sSL -o 01_ALAVA.zip "https://sigpac-hubcloud.es/geopackages/2026/recintos/01_ALAVA_rec_2026_20251201_gpkg.zip"
 - https://sigpac-hubcloud.es/wms?SERVICE=WMS&REQUEST=GetCapabilities :: WMS con capas AU.Sigpac:recinto, cultivo_declarado y e_paisaje (CRS 84, EPSG 25829-25831); réplica en https://wms.mapa.gob.es/sigpac/wms
@@ -1693,6 +1747,7 @@ base_url: https://infocar.dgt.es/datex2/
 docs_url: https://nap.dgt.es/dataset
 - https://nap.dgt.es/datex2/v3/dgt/SituationPublication/datex2_v37.xml :: Incidencias activas de la red DGT en DATEX II 3.7 (perfil RTTI de la DGT), actualizado cada minuto según la ficha del NAP
   ej: curl -s "https://nap.dgt.es/datex2/v3/dgt/SituationPublication/datex2_v37.xml"
+  devuelve: DATEX II v3 (4,7 MB): payload/situation[@id]/situationRecord[@type,@id,@version] con situationRecordCreationTime, validity/validityStatus, cause/causeType, locationReference (roadInformation/roadName, tpegLinearLocation from y to con pointCoordinates, kilometerPoint, municipality, autonomousCommunity)
 - https://nap.dgt.es/datex2/v3/dgt/DevicePublication/camaras_datex2_v37.xml :: Cámaras de tráfico con localización (95 KB)
 - https://infocar.dgt.es/datex2/dgt/MeasuredDataPublication/detectores/content.xml :: Medidas de 5.569 puntos de detección (TrafficSpeed, intensidad) en DATEX II 1.0, 18,7 MB regenerados cada minuto
   ej: curl -s "https://infocar.dgt.es/datex2/dgt/MeasuredDataPublication/detectores/content.xml" | head -c 3000
@@ -1815,6 +1870,7 @@ base_url: https://data.renfe.com/api/3/action
 docs_url: https://data.renfe.com/
 - /package_search?rows=100 :: Los 44 datasets con resources[].url, format y last_modified; package_list solo nombres; package_show?id={name} un dataset
   ej: curl -s "https://data.renfe.com/api/3/action/package_show?id=horarios-cercanias"
+  devuelve: CKAN {result:{id, name, title, notes, metadata_modified, resources:[{id, name, url, format, size, last_modified, mimetype}], archiver:{is_broken, reason}}}
 - https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip :: GTFS de alta velocidad, larga y media distancia (760 KB; agency, calendar, calendar_dates, routes, stops, stop_times, trips; sin feed_info)
   ej: curl -sO "https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip"
 - https://ssl.renfe.com/ftransit/Fichero_CER_FOMENTO/fomento_transit.zip :: GTFS de Cercanías (14 MB)
@@ -1847,6 +1903,7 @@ docs_url: https://datacomex.comercio.es/Data/AyudaApi
   ej: curl -s -X POST -H "Content-Type: application/json" -d "{\"Usuario\":\"$DATACOMEX_USER\",\"Pass\":\"$DATACOMEX_PASS\"}" "https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion" | sed 's/^"token://; s/"$//'
 - https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f={E|I|I/E}&pe={periodo}&pa={pais}&ta={taric}&pr={provincia} :: Datos en JSON (Resultados con flujo, periodo, pais, id_pais, prov, id_prov, taric, euros, kilos, mensaje); los cinco parámetros son obligatorios [pe en AAAA, AAAAMM, LastM, LastY, ALL (anual desde 1995) o ALLM (mensual desde 1995); pa código numérico de país (001 Francia) o ALL; ta TARIC de 2 a 8 dígitos o ALL; pr INE de 2 dígitos o ALL]
   ej: curl -s -H "Authorization: Bearer $DATACOMEX_TOKEN" "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=ALL&ta=1001&pr=28"
+  devuelve: {Resultados:[{flujo, periodo (Julio de 2026 o 2025), pais, id_pais (3 dígitos), prov, id_prov (INE), taric, euros, kilos (texto con coma decimal), mensaje (dato provisional)}]}; Resultados vacío, sin error, cuando la combinación no tiene comercio
 - https://datacomex.comercio.es/Metadata/{Comex|Empresas|UEAnual|UEMensual} :: Metadatos y clasificaciones de cada base (aplicación JavaScript); no localicé descarga de la tabla de códigos de país
 - https://datacomex_v6.comercio.es/ :: Versión anterior del portal, todavía en línea
 quirks: session-required, js-rendered, errors-html-or-xml

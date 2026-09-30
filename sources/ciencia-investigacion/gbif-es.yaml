@@ -21,12 +21,14 @@ endpoints:
   - path: /occurrence/search?country=ES&scientificName={nombre}&limit={n}&offset={o}
     desc: Ocurrencias en España (sobre con offset, limit, endOfRecords, count, results, facets); limit máximo 300
     example: curl -s "https://api.gbif.org/v1/occurrence/search?country=ES&scientificName=Lynx%20pardinus&limit=5"
+    returns: "{offset, limit, endOfRecords, count, results:[{key, datasetKey, scientificName, taxonKey, speciesKey, kingdom...species, decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, stateProvince, eventDate, year, month, day, basisOfRecord, occurrenceStatus, issues[], license}]}"
   - path: /occurrence/count?country=ES
     desc: Recuento rápido con los mismos filtros que search (publishingCountry, taxonKey, year, gadmGid, hasCoordinate)
     example: curl -s "https://api.gbif.org/v1/occurrence/count?country=ES"
   - path: /species/match?name={nombre}
     desc: Resolver un nombre científico al taxón (usageKey, rank, status, matchType, confidence)
     example: curl -s "https://api.gbif.org/v1/species/match?name=Quercus%20ilex"
+    returns: "{usageKey, scientificName, canonicalName, rank, status, confidence, matchType (EXACT, FUZZY, NONE), kingdom, phylum, order, family, genus, species y sus claves kingdomKey...speciesKey}"
   - path: /dataset/search?publishingCountry=ES&limit={n}
     desc: Datasets publicados desde España (key, title, doi, type, publishingOrganizationTitle)
     example: curl -s "https://api.gbif.org/v1/dataset/search?publishingCountry=ES&limit=5"

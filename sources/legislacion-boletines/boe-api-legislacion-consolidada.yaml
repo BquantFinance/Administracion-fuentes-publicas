@@ -22,6 +22,7 @@ endpoints:
     desc: Listado de normas por fecha de última actualización del consolidado; JSON o XML
     example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada?from=20260901&limit=100"'
     params: "limit por defecto 50, -1 devuelve hasta 10000; query es un JSON URL-encoded con query_string, range y sort"
+    returns: "{status, data:[{identificador, ambito{codigo,texto}, departamento{codigo,texto}, rango{codigo,texto}, fecha_disposicion, numero_oficial, titulo, fecha_publicacion, diario_numero, fecha_vigencia, vigencia_agotada, estado_consolidacion{codigo,texto}, url_eli, url_html_consolidada}]}; fechas AAAAMMDD"
   - path: ?query={json}&limit={n}
     desc: Búsqueda por título y rango de fecha de publicación o de disposición, con orden
     example: 'curl -s -G -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada" --data-urlencode ''query={"query":{"query_string":{"query":"titulo:vivienda"},"range":{"fecha_publicacion":{"gte":"20230101","lte":"20241231"}}},"sort":[{"fecha_publicacion":"desc"}]}'' --data-urlencode "limit=20"'
@@ -31,16 +32,20 @@ endpoints:
   - path: /id/{id}/metadatos
     desc: Título, rango, departamento, fechas, vigencia, estado de consolidación y url_eli; JSON o XML
     example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/metadatos"'
+    returns: "data es una lista de un elemento con los campos del listado más estatus_derogacion, estatus_anulacion y fecha_actualizacion (AAAAMMDDThhmmssZ)"
   - path: /id/{id}/analisis
     desc: Materias, notas y referencias anteriores y posteriores; JSON o XML
+    returns: "data:[{materias:{materia:{codigo,texto}}, referencias:{anteriores:[{anterior:[{id_norma, relacion:{codigo,texto}, texto}]}], posteriores:[{posterior:[...]}]}}]; relacion 210 es DEROGA"
   - path: /id/{id}/texto
     desc: Texto consolidado completo por bloques con todas sus versiones; solo XML
   - path: /id/{id}/texto/indice
     desc: Índice de bloques con id, título y fecha de actualización; JSON o XML
     example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/indice"'
+    returns: "data:[{bloque:[{id (preambulo, a1, da1...), titulo, fecha_actualizacion, url}]}]; el id se pasa a /texto/bloque/{id_bloque}"
   - path: /id/{id}/texto/bloque/{id_bloque}
     desc: Un bloque (preambulo, tpreliminar, a1, a2-5, da1...) con sus versiones; solo XML
     example: 'curl -s -H "Accept: application/xml" "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/bloque/a1"'
+    returns: "XML response/data/bloque[@id,@tipo,@titulo]/version[@id_norma,@fecha_publicacion,@fecha_vigencia]/p[@class] con el texto del precepto"
   - path: /id/{id}/metadata-eli
     desc: Metadatos ELI de la norma en RDF/XML; solo XML
   - path: https://www.boe.es/datosabiertos/api/datos-auxiliares/{tabla}

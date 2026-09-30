@@ -21,6 +21,7 @@ endpoints:
     desc: Patrón general (balance, demanda, generacion, intercambios, transporte, mercados); included[] trae una serie por concepto con value, percentage y datetime
     params: "geo_trunc=electric_system con geo_limit (peninsular, canarias, baleares, ceuta, melilla, ccaa) y geo_ids (8741, 8742 y 8743 verificados); /en/ en vez de /es/ traduce títulos y errores"
     example: curl -s "https://apidatos.ree.es/es/datos/demanda/evolucion?start_date=2026-09-01T00:00&end_date=2026-09-07T23:59&time_trunc=day"
+    returns: "{data:{type, id, attributes:{title, last-update, description}}, included:[{type, id, groupId, attributes:{title, color, type, magnitude, composite, last-update, values:[{value, percentage, datetime ISO con zona}]}}]}; una entrada de included por concepto"
   - path: /demanda/evolucion
     desc: Demanda en MWh por día, mes o año (serie Demanda 10297); day admite un año por petición; hour no está soportado en este widget (400)
   - path: /demanda/demanda-tiempo-real?time_trunc=hour

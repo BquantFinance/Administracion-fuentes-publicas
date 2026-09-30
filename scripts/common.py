@@ -38,14 +38,14 @@ def die(msg: str) -> None:
     sys.exit(1)
 
 INDICES = ROOT / "indices"
-INDEX_FILES = ("recetas", "rutas-muertas", "identificadores", "necesidades")
+INDEX_FILES = ("recetas", "rutas-muertas", "identificadores", "necesidades", "codigos")
 
 
 def load_indices() -> dict:
-    """Carga los cuatro índices agregados de indices/*.yaml (listas, salvo identificadores que es un dict)."""
+    """Carga los índices agregados de indices/*.yaml (listas, salvo identificadores y codigos, que son dicts)."""
     out = {}
     for name in INDEX_FILES:
         path = INDICES / f"{name}.yaml"
         with path.open(encoding="utf-8") as fh:
-            out[name] = yaml.safe_load(fh) or ([] if name != "identificadores" else {})
+            out[name] = yaml.safe_load(fh) or ([] if name not in ("identificadores", "codigos") else {})
     return out

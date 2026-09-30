@@ -21,6 +21,7 @@ endpoints:
   - path: https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfobypoint/{srid}/{x}/{y}.json
     desc: Recinto que contiene un punto (códigos SIGPAC, superficie, pendiente_media, coef_regadio, uso_sigpac, altitud, wkt); con extensión .geojson devuelve GeoJSON
     example: curl -s "https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfobypoint/4326/-3.9/40.3.json"
+    returns: "Lista de recintos [{provincia, municipio, agregado, zona, poligono, parcela, recinto, superficie (ha), pendiente_media, coef_regadio, admisibilidad, incidencias, uso_sigpac (ZU, TA, OV...), region}]"
   - path: https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfo/{pr}/{mu}/{ag}/{zo}/{po}/{pa}/{re}.json
     desc: Propiedades de un recinto por códigos; recinfoparc devuelve todos los recintos de la parcela y recincentroid su centroide
     example: curl -s "https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfo/28/15/0/0/3/9000/6.json"
@@ -32,6 +33,7 @@ endpoints:
   - path: https://sigpac-hubcloud.es/ogcapi/collections/{recintos|cultivo_declarado|elementos_paisaje_area|elementos_paisaje_linea|elementos_paisaje_punto}/items?bbox={bbox}&limit={n}&f=json
     desc: OGC API Features con filtro por bbox y por atributos (provincia=28); numberMatched y paginación estándar
     example: curl -s "https://sigpac-hubcloud.es/ogcapi/collections/recintos/items?bbox=-3.71,40.41,-3.70,40.42&limit=5&f=json"
+    returns: "GeoJSON FeatureCollection {features:[{id, properties:{dn_pk, provincia, municipio, agregado, zona, poligono, parcela, recinto, pendiente_media, altitud}, geometry Polygon en WGS84}], numberMatched, numberReturned, links[]}"
   - path: https://sigpac-hubcloud.es/geopackages/{campaña}/recintos/{PP}_{PROVINCIA}_rec_{campaña}_{AAAAMMDD}_gpkg.zip
     desc: Descarga masiva por provincia (50 ficheros de 200 a 900 MB por campaña; listado en el directorio geopackages/{campaña}/recintos/ y en elementos_del_paisaje/)
     example: curl -sSL -o 01_ALAVA.zip "https://sigpac-hubcloud.es/geopackages/2026/recintos/01_ALAVA_rec_2026_20251201_gpkg.zip"

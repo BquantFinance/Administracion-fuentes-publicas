@@ -26,6 +26,7 @@ endpoints:
     desc: Datos en JSON (Resultados con flujo, periodo, pais, id_pais, prov, id_prov, taric, euros, kilos, mensaje); los cinco parámetros son obligatorios
     params: "pe en AAAA, AAAAMM, LastM, LastY, ALL (anual desde 1995) o ALLM (mensual desde 1995); pa código numérico de país (001 Francia) o ALL; ta TARIC de 2 a 8 dígitos o ALL; pr INE de 2 dígitos o ALL"
     example: 'curl -s -H "Authorization: Bearer $DATACOMEX_TOKEN" "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=ALL&ta=1001&pr=28"'
+    returns: "{Resultados:[{flujo, periodo (Julio de 2026 o 2025), pais, id_pais (3 dígitos), prov, id_prov (INE), taric, euros, kilos (texto con coma decimal), mensaje (dato provisional)}]}; Resultados vacío, sin error, cuando la combinación no tiene comercio"
   - path: https://datacomex.comercio.es/Metadata/{Comex|Empresas|UEAnual|UEMensual}
     desc: Metadatos y clasificaciones de cada base (aplicación JavaScript); no localicé descarga de la tabla de códigos de país
   - path: https://datacomex_v6.comercio.es/

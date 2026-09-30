@@ -22,16 +22,20 @@ endpoints:
     desc: Búsqueda paginada de convocatorias (numeroConvocatoria, descripcion, fechaRecepcion, nivel1 a nivel3, mrr)
     example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=50&fechaDesde=01/09/2026&fechaHasta=30/09/2026&order=fechaRecepcion&direccion=desc"
     params: "descripcion, fechaDesde y fechaHasta en dd/mm/aaaa, tipoAdministracion=C (estatal), numeroConvocatoria, mrr, vpd, order y direccion"
+    returns: "Página Spring {content:[{id, numeroConvocatoria, descripcion, fechaRecepcion, nivel1 (ESTATAL, AUTONOMICA, LOCAL), nivel2, nivel3, mrr, codigoInvente}], totalElements, totalPages, number, size, last}"
   - path: /convocatorias?numConv={numero_bdns}
     desc: Detalle completo de una convocatoria (órgano, instrumentos, presupuesto, bases, documentos)
     example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv=800000"
+    returns: "Objeto {id, codigoBDNS, organo{nivel1,nivel2,nivel3}, fechaRecepcion, tipoConvocatoria, presupuestoTotal, instrumentos[], tiposBeneficiarios[], sectores[{codigo CNAE, descripcion}], regiones[{descripcion con NUTS}], descripcion, sedeElectronica, mrr}"
   - path: /concesiones/busqueda?page={n}&pageSize={n}
     desc: Concesiones con beneficiario, importe, ayuda equivalente, instrumento y convocatoria
     example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=50&numeroConvocatoria=931918"
     params: "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa"
+    returns: "content:[{id, codConcesion, fechaConcesion, beneficiario (NIF y nombre en la misma cadena), instrumento, importe, ayudaEquivalente, urlBR, numeroConvocatoria, idConvocatoria, convocatoria, nivel1, nivel2, nivel3}]"
   - path: /{coleccion}/busqueda?page={n}&pageSize={n}
     desc: Mismo patrón para ayudasestado, minimis, grandesbeneficiarios, sanciones, planesestrategicos y partidospoliticos
     example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/grandesbeneficiarios/busqueda?page=0&pageSize=50"
+    returns: "grandesbeneficiarios devuelve content:[{idPersona, beneficiario (NIF y nombre), ejercicio, ayudaETotal}] con la misma paginación Spring (totalElements, totalPages)"
   - path: /{coleccion}/exportar?vpd=GE&tipoDoc={csv|xlsx}
     desc: Exportación con los mismos filtros que la búsqueda; verificada en convocatorias y concesiones
     example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/exportar?vpd=GE&tipoDoc=csv&fechaDesde=29/09/2026&fechaHasta=29/09/2026" | iconv -f WINDOWS-1252 -t UTF-8

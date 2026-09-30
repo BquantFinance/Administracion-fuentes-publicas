@@ -34,6 +34,7 @@ endpoints:
   - path: https://www.cartociudad.es/geocoder/api/geocoder/find?q={direccion}
     desc: Geocodificador; JSON con provinceCode, muniCode (INE), postalCode y geom en WKT WGS84; candidatesJsonp devuelve varios candidatos
     example: curl -s "https://www.cartociudad.es/geocoder/api/geocoder/find?q=Calle%20Alcala%2050%20Madrid"
+    returns: "{id, province, provinceCode, comunidadAutonoma, comunidadAutonomaCode, muni, muniCode (INE 5 dígitos), type, address, tip_via, portalNumber, postalCode, poblacion, geom (WKT POINT lon lat), lat, lng, refCatastral, state, stateMsg}"
 quirks: [captcha-required, js-rendered, static-html]
 ids: [ine-municipio, ine-provincia, ccaa]
 gotchas:

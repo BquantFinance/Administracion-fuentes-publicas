@@ -21,23 +21,28 @@ endpoints:
   - path: /medicamentos?nombre={texto}&pagina={n}
     desc: Búsqueda paginada; también practiv1 (principio activo), atc, laboratorio, comerc, receta y otros filtros del manual, combinables
     example: curl -s "https://cima.aemps.es/cima/rest/medicamentos?nombre=ibuprofeno&pagina=1"
+    returns: "{totalFilas, pagina, tamanioPagina (200), resultados:[{nregistro, nombre, pactivos, labtitular, labcomercializador, cpresc, estado:{aut, rev} en epoch ms, comerc, receta, generico, conduc, triangulo, huerfano, biosimilar, nosustituible{id,nombre}, psum, ema}]}; paginar mientras pagina*200 < totalFilas"
   - path: /medicamento?nregistro={nreg}
     desc: Detalle completo (pactivos, atcs, presentaciones con cn y estado, docs con url PDF y urlHtml, fotos, vtm, dosis, estado aut/rev); también ?cn={cn}
     example: curl -s "https://cima.aemps.es/cima/rest/medicamento?nregistro=80298"
+    returns: "Objeto con los campos de la lista más presentaciones[{cn, nombre, estado, comerc, psum}], docs[{tipo 1 ficha técnica y 2 prospecto, url, urlHtml, secc, fecha}], atcs[{codigo, nombre, nivel}], principiosActivos[], viasAdministracion[], formaFarmaceutica, dosis, fotos[], notas, materialesInf, vtm"
   - path: /presentaciones?cn={cn}
     desc: Presentaciones comerciales por código nacional o por nregistro
   - path: /psuministro
     desc: Problemas de suministro activos (cn, nombre, tipoProblemaSuministro, fini, ffin, activo, observ), 860 en la fecha de verificación
     example: curl -s "https://cima.aemps.es/cima/rest/psuministro"
+    returns: "{totalFilas, pagina, tamanioPagina, resultados:[{cn, nombre, tipoProblemaSuministro (int), fini, ffin (epoch ms), activo, observ}]}"
   - path: /docSegmentado/secciones/{1|2}?nregistro={nreg} y /docSegmentado/contenido/{1|2}?nregistro={nreg}&seccion={s}
     desc: Ficha técnica (1) o prospecto (2) por secciones; contenido devuelve HTML de la sección (4.1 indicaciones, etc.)
     example: curl -s "https://cima.aemps.es/cima/rest/docSegmentado/contenido/1?nregistro=80298&seccion=4.1"
   - path: /registroCambios?fecha={dd/mm/aaaa}
     desc: Medicamentos cambiados desde la fecha (nregistro, fecha, tipoCambio, cambio), para sincronizar sin rebajar todo
     example: curl -s "https://cima.aemps.es/cima/rest/registroCambios?fecha=01/09/2026"
+    returns: "{totalFilas, resultados:[{nregistro, nombre, labtitular, fecha (epoch ms), tipoCambio (int), cambio:[]}]}; 108.000 filas en total, paginación de 200"
   - path: /maestras?maestra={id}&nombre={texto}
     desc: Tablas maestras filtradas por texto (1 principios activos, 3 formas farmacéuticas, 4 vías, 6 laboratorios, 7 ATC); sin filtro responde 204
     example: curl -s "https://cima.aemps.es/cima/rest/maestras?maestra=1&nombre=ibu"
+    returns: "{totalFilas, resultados:[{id, codigo, nombre}]}"
   - path: /vmpp
     desc: Equivalencias SNOMED CT del nomenclátor (vmp, vmpDesc, vmpp), 7016 filas
   - path: https://listadomedicamentos.aemps.gob.es/prescripcion.zip

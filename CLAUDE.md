@@ -25,8 +25,10 @@ Cada línea que no ahorre una búsqueda, una prueba fallida o una hora de depura
    obligatorias, codificaciones, decimales con coma, límites no documentados, ids que no coinciden entre
    organismos, URLs que cambian, datos que parecen cero y son secreto estadístico. Una frase por trampa.
 4. **`tips` solo si acelera.** Patrón de uso, librería concreta, cruce típico con otra fuente. Máximo seis.
-5. **Ejemplos copiables.** Cada endpoint principal lleva un `example` que funciona al pegarlo. Con claves,
-   usar variable de entorno (`$AEMET_KEY`), nunca una clave real.
+5. **Ejemplos copiables y respuesta descrita.** Cada endpoint principal lleva un `example` que funciona al
+   pegarlo y un `returns` con la forma de la respuesta vista en esa llamada (campos clave, tipos, formato de fecha y
+   decimal, paginación), nunca copiada de la documentación. Con claves, usar variable de entorno (`$AEMET_KEY`),
+   nunca una clave real.
 6. **Vocabulario cerrado.** Sector, acceso, auth, periodicidad, formatos, estado, quirks e ids salen de `schema/vocab.yaml`.
    Si falta un valor, se añade al vocabulario en el mismo commit, no se improvisa.
 7. **Castellano en valores, inglés en claves.** Sin markdown dentro de los valores. Sin dos puntos seguidos de
@@ -47,6 +49,7 @@ python scripts/build.py           # regenera todo lo derivado
 python scripts/check_links.py     # informe de URLs (necesita red)
 python scripts/check_recetas.py   # batería de regresión de las recetas (necesita red; --report, --fail)
 python scripts/fnmt_bundle.py     # genera ca-age.pem (certifi + CA de FNMT) para los hosts con cadena incompleta
+python scripts/mcp_catalogo.py    # servidor MCP por stdio sobre catalog.json (guides/servidor-mcp.md); prueba real con test_mcp_catalogo.py, fuera de CI
 ```
 
 Antes de cada commit: validate y build limpios. Commits pequeños por sector o por lote verificado.
@@ -54,7 +57,7 @@ Sin subagentes salvo petición expresa: el trabajo es secuencial y de precisión
 
 ## Índices agregados (`indices/`)
 
-Cuatro ficheros que responden a lo que una ficha sola no responde; `validate.py` comprueba que solo citan ids
+Cinco ficheros que responden a lo que una ficha sola no responde; `validate.py` comprueba que solo citan ids
 de fichas y del vocabulario, y `build.py` los vuelca en `indices/README.md`, `llms.txt` y `catalog.json`.
 
 - `recetas.yaml`: procedimiento por intención que encadena fichas. Entra una receta si cruza dos o más fuentes
@@ -67,6 +70,10 @@ de fichas y del vocabulario, y `build.py` los vuelca en `indices/README.md`, `ll
   los cruces verificados hacia otras fuentes.
 - `rutas-muertas.yaml`: URL antigua que un agente puede recordar, estado observado, sustituta y fecha. Se
   añade una ruta cuando se comprueba que ha muerto, nunca por suposición.
+- `codigos.yaml`: valores que una API exige como parámetro y no se adivinan (Id de municipio o provincia del INE
+  para `tv`, países de DataComex, estación de AEMET por capital, productos de carburantes, rangos del BOE). Solo
+  los de uso frecuente, obtenidos con una llamada real (`verified` obligatorio) y con la llamada que da la lista
+  completa en `use`.
 
 ## Orden de prioridad
 

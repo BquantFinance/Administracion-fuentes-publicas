@@ -21,19 +21,24 @@ endpoints:
   - path: /prediccion/especifica/municipio/diaria/{cod_municipio_ine}
     desc: Predicción diaria a 7 días para un municipio; /todos devuelve todos los municipios
     example: 'curl -s -H "api_key: $AEMET_KEY" "https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/28079"'
+    returns: "datos es lista de un objeto {nombre, provincia, elaborado, id, prediccion:{dia:[{fecha, probPrecipitacion[{value, periodo}], estadoCielo[{value, periodo, descripcion}], viento[{direccion, velocidad, periodo}], temperatura{maxima, minima, dato[{value, hora}]}, sensTermica, humedadRelativa, uvMax}]}}"
   - path: /prediccion/especifica/municipio/horaria/{cod_municipio_ine}
     desc: Predicción horaria a 48 horas; /todos para todos los municipios
   - path: /maestro/municipios
     desc: Maestro de municipios con el código que aceptan las predicciones; /maestro/municipio/{id} para uno
+    returns: "Lista de municipios [{id (id28079, INE con prefijo id), id_old, nombre, capital, latitud_dec, longitud_dec, altitud, num_hab, zona_comarcal, url}]; todo como texto"
   - path: /observacion/convencional/todas
     desc: Últimas 24 horas de observación de todas las estaciones
+    returns: "Lista de observaciones horarias de todas las estaciones (3,5 MB) [{idema, ubi, lon, lat, alt, fint (ISO UTC), ta, tamin, tamax, tpr, hr, prec, pres, pres_nmar, vv, dv, vmax, dmax, stdvv, stddv}]; números con punto"
   - path: /observacion/convencional/datos/estacion/{idema}
     desc: Observación de una estación
   - path: /valores/climatologicos/inventarioestaciones/todasestaciones
     desc: Inventario de estaciones con idema y coordenadas
+    returns: "Lista de 926 estaciones [{indicativo (idema), nombre, provincia, altitud, latitud, longitud, indsinop}]; coordenadas en grados, minutos y segundos con letra (394924N, 025309E), no decimales"
   - path: /valores/climatologicos/diarios/datos/fechaini/{AAAA-MM-DDTHH:MM:SSUTC}/fechafin/{AAAA-MM-DDTHH:MM:SSUTC}/estacion/{idema}
     desc: Climatología diaria de una o varias estaciones (idema separados por coma) en un rango; /todasestaciones para todas
     example: 'curl -s -H "api_key: $AEMET_KEY" "https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2024-01-01T00:00:00UTC/fechafin/2024-01-31T23:59:59UTC/estacion/3195"'
+    returns: "Lista [{fecha, indicativo, nombre, provincia, altitud, tmed, prec, tmin, horatmin, tmax, horatmax, dir, velmedia, racha, horaracha, presMax, presMin, hrMedia, hrMax, hrMin}]; todos los valores son texto con coma decimal"
   - path: /valores/climatologicos/mensualesanuales/datos/anioini/{AAAA}/aniofin/{AAAA}/estacion/{idema}
     desc: Climatología mensual y anual; normales en /valores/climatologicos/normales/estacion/{idema} y extremos en /valoresextremos/parametro/{p}/estacion/{idema}
   - path: /avisos_cap/ultimoelaborado/area/{area}

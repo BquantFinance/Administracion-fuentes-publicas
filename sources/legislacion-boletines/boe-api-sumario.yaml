@@ -20,9 +20,11 @@ endpoints:
   - path: /boe/sumario/{AAAAMMDD}
     desc: Sumario del día, anidado en diario > seccion > departamento > epigrafe > item
     example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/boe/sumario/20240102"'
+    returns: "{status, data.sumario.diario[]:{numero, sumario_diario, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]:{identificador, control, titulo, url_pdf:{texto, szBytes}, url_html, url_xml}}}}}}; secciones sin epígrafe llevan item bajo departamento; un solo elemento llega como objeto"
   - path: https://www.boe.es/diario_boe/xml.php?id={BOE-A-AAAA-NNNNN}
     desc: Texto completo y metadatos de una disposición en XML; no necesita cabecera Accept
     example: curl -s "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-87"
+    returns: "XML documento con metadatos (identificador, departamento y rango con atributo codigo, fecha_disposicion, titulo, fecha_publicacion, seccion, url_pdf, estatus_derogacion), analisis (materias, notas, referencias anteriores y posteriores) y texto"
   - path: https://www.boe.es/diario_boe/txt.php?id={id}
     desc: Versión HTML de la disposición
   - path: https://www.boe.es/boe/dias/{AAAA}/{MM}/{DD}/pdfs/{id}.pdf
@@ -40,6 +42,7 @@ gotchas:
   - Cada item trae url_pdf.texto, url_html y url_xml ya construidas; no montar la URL del PDF a mano (BOE-A-2024-1 no está en 2024/01/02).
   - Los identificadores siguen el patrón BOE-A-AAAA-NNNNN (disposiciones) y BOE-B-AAAA-NNNNN (anuncios); la numeración es anual.
   - No hay búsqueda por texto en esta API; descargar sumarios y filtrar en local, o usar la API de legislación consolidada.
+  - "En el JSON del sumario, departamento, epigrafe e item llegan como objeto cuando hay uno solo y como lista cuando hay varios; normalizar a lista antes de iterar."
 tips:
   - Un sumario diario pesa entre 100 y 200 KB en JSON; para histórico iterar por fecha y tratar 404 como día sin publicación.
   - El OpenAPI 3.1 completo está embebido en api.php (variable openApiFile); el documento técnico es APIsumarioBOE.pdf en /datosabiertos/documentos/.

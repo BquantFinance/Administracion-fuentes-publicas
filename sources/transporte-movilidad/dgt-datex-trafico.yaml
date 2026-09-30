@@ -21,6 +21,7 @@ endpoints:
   - path: https://nap.dgt.es/datex2/v3/dgt/SituationPublication/datex2_v37.xml
     desc: Incidencias activas de la red DGT en DATEX II 3.7 (perfil RTTI de la DGT), actualizado cada minuto según la ficha del NAP
     example: curl -s "https://nap.dgt.es/datex2/v3/dgt/SituationPublication/datex2_v37.xml"
+    returns: "DATEX II v3 (4,7 MB): payload/situation[@id]/situationRecord[@type,@id,@version] con situationRecordCreationTime, validity/validityStatus, cause/causeType, locationReference (roadInformation/roadName, tpegLinearLocation from y to con pointCoordinates, kilometerPoint, municipality, autonomousCommunity)"
   - path: https://nap.dgt.es/datex2/v3/dgt/DevicePublication/camaras_datex2_v37.xml
     desc: Cámaras de tráfico con localización (95 KB)
   - path: https://infocar.dgt.es/datex2/dgt/MeasuredDataPublication/detectores/content.xml

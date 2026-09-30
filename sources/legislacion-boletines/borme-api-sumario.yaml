@@ -20,9 +20,11 @@ endpoints:
   - path: /borme/sumario/{AAAAMMDD}
     desc: Sumario del día; secciones A y B con un item por provincia, sección C con apartado > item por anuncio
     example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/borme/sumario/20240102"'
+    returns: "Como el sumario del BOE: data.sumario.diario[].seccion[] con codigo A (actos inscritos, un item por provincia), B (otros actos) y C (anuncios, con apartado); item {identificador BORME-A-AAAA-NNN-PP, titulo, url_pdf, url_html, url_xml}; un solo elemento llega como objeto"
   - path: https://www.boe.es/diario_borme/xml.php?id={BORME-A-AAAA-NNN-PP}
     desc: Actos inscritos de una provincia en XML, un par de párrafos por empresa
     example: curl -s "https://www.boe.es/diario_borme/xml.php?id=BORME-A-2024-1-01"
+    returns: "XML documento/metadatos (identificador, titulo = provincia, seccion, fecha_publicacion, url_pdf) y texto con pares p.articulo (número - denominación social) y p.parrafo (actos separados por punto, datos registrales al final)"
   - path: https://www.boe.es/diario_borme/xml.php?id={BORME-C-AAAA-NNNNN}
     desc: XML de un anuncio de la sección C
     example: curl -s "https://www.boe.es/diario_borme/xml.php?id=BORME-C-2024-1"

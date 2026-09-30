@@ -21,11 +21,13 @@ endpoints:
   - path: https://momo.isciii.es/public/momo/data
     desc: CSV completo de MoMo (719 MB, regenerado a diario hasta el día anterior); ignora la cabecera Range y envía el fichero entero, leer en streaming
     example: curl -sS "https://momo.isciii.es/public/momo/data" | head -c 2000
+    returns: "CSV UTF-8 con ambito (nacional, ccaa, provincia), cod_ambito, cod_ine_ambito, nombre_ambito, cod_sexo, nombre_sexo, cod_gedad, nombre_gedad, fecha_defuncion, defunciones_observadas, defunciones_estimadas_base, _q01, _q99, defunciones_atrib_exc_temp, defunciones_atrib_def_temp"
   - path: https://momo.isciii.es/panel_momo/
     desc: Panel MoMo con gráficos por ámbito; enlaza la metodología en gesdoc.isciii.es
   - path: https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres.csv
     desc: COVID-19 diario por provincia de residencia, sexo y edad (38 MB; num_casos, num_hosp, num_uci, num_def); variantes _60_mas y todas_edades
     example: curl -sSL -o covid.csv "https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres.csv"
+    returns: "CSV provincia_iso,sexo,grupo_edad,fecha,num_casos,num_hosp,num_uci,num_def; una fila por provincia, sexo, grupo de edad y día desde 2020-01-01"
   - path: https://cne.isciii.es/servicios/enfermedades-transmisibles/objetivos-boletines
     desc: Boletín epidemiológico semanal en PDF, un documento por semana en /documents/d/cne/is-{AAMMDD}-web-pdf
   - path: https://cne.isciii.es/servicios/enfermedades-transmisibles/informes

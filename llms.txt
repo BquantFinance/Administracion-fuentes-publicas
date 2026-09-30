@@ -10,6 +10,9 @@ Fuentes: 79 · Recetas: 43 · Alcance actual: Administración General del Estado
 - Todas las fichas en texto compacto: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/llms-full.txt
 - Una ficha: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/<sector>/<id>.yaml
 - Índices para agentes (recetas paso a paso, identificadores con regex y cruces, rutas muertas con sustituta): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/README.md
+- Códigos que son parámetros (Id de municipio, provincia y CCAA del INE para tv, países de DataComex, estaciones de AEMET por capital, productos de carburantes, rangos y secciones del BOE): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/codigos.yaml
+- Servidor MCP local para cargar solo la ficha, receta o necesidad que haga falta: python scripts/mcp_catalogo.py (configuración y herramientas en https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/servidor-mcp.md)
+- Cada endpoint principal lleva `returns` (forma de la respuesta vista en una llamada real: campos, tipos, fechas, decimales, paginación) y `example` (llamada copiable).
 - Esquema de ficha: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json
 - Vocabulario (sectores, acceso, auth, formatos, quirks, ids): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml
 - `verified: null` significa que la ficha se redactó a partir de documentación oficial pero aún no se ha probado el endpoint.
@@ -206,6 +209,7 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 
 - [Cliente HTTP para fuentes de la Administración española](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/cliente-http.md)
 - [Identificadores clave para cruzar datos públicos españoles](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/identificadores-clave.md)
+- [Servidor MCP del catálogo](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/servidor-mcp.md)
 
 ## Optional
 

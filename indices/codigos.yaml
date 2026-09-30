@@ -1,0 +1,348 @@
+# Códigos que una API exige como parámetro y no se adivinan (ids internos, códigos numéricos, indicativos).
+# Cada grupo cita la ficha (source), dónde se usa (use) y la fecha en que se obtuvo con una llamada real (verified).
+# Solo los valores de uso frecuente; la lista completa se obtiene con la llamada que indica use o note.
+# build.py los vuelca en indices/README.md y catalog.json; validate.py comprueba fuente, fecha y duplicados.
+
+ine-operaciones:
+  source: ine-api-tempus
+  use: "Id o Codigo como {id_o_codigo} en TABLAS_OPERACION, VARIABLES_OPERACION y VALORES_VARIABLEOPERACION; las 112 operaciones con OPERACIONES_DISPONIBLES"
+  verified: "2026-09-30"
+  entries:
+    - {code: "25", name: "IPC", note: "Índice de Precios de Consumo (IPC)"}
+    - {code: "18", name: "IPCA", note: "Índice de Precios de Consumo Armonizado (IPCA)"}
+    - {code: "293", name: "EPA", note: "Encuesta de Población Activa (EPA)"}
+    - {code: "450", name: "ECP", note: "Estadística Continua de Población"}
+    - {code: "72", name: "CP", note: "Cifras de Población"}
+    - {code: "22", name: "DPOP", note: "Cifras Oficiales de Población de los Municipios Españoles: Revisión del Padrón Municipal"}
+    - {code: "307", name: "MNPN", note: "MNP Estadística de Nacimientos"}
+    - {code: "309", name: "MNPD", note: "MNP Estadística de Defunciones"}
+    - {code: "424", name: "EMN", note: "Estimación Mensual de Nacimientos"}
+    - {code: "23", name: "ECM", note: "Estadística de Defunciones según la Causa de Muerte"}
+    - {code: "71", name: "EM", note: "Estadística de Migraciones"}
+    - {code: "455", name: "EMCR", note: "Estadística de Migraciones y Cambios de Residencia"}
+    - {code: "230", name: "PERE", note: "Estadística del Padrón de la Población Española Residente en el Extranjero"}
+    - {code: "15", name: "IPV", note: "Índice de Precios de la Vivienda (IPV)"}
+    - {code: "432", name: "IPVA", note: "Índice de Precios de Vivienda en Alquiler"}
+    - {code: "40", name: "HPT", note: "Estadística de Hipotecas"}
+    - {code: "259", name: "EH", note: "Estadística sobre Ejecuciones Hipotecarias"}
+    - {code: "7", name: "ETDP", note: "Estadística de Transmisión de Derechos de la Propiedad"}
+    - {code: "125", name: "SM", note: "Estadística de Sociedades Mercantiles"}
+    - {code: "13", name: "EPC", note: "Estadística del Procedimiento Concursal"}
+    - {code: "26", name: "IPI", note: "Índices de Producción Industrial"}
+    - {code: "27", name: "IPRI", note: "Índices de Precios Industriales"}
+    - {code: "32", name: "ICM", note: "Índices de Comercio al por Menor"}
+    - {code: "303", name: "ETCL", note: "Encuesta Trimestral de Coste Laboral (ETCL)"}
+    - {code: "139", name: "EACL", note: "Encuesta Anual de Coste Laboral"}
+    - {code: "140", name: "EAES", note: "Encuesta Anual de Estructura Salarial"}
+    - {code: "6", name: "ICLA", note: "Índice de Coste Laboral Armonizado"}
+    - {code: "155", name: "ECV", note: "Encuesta de Condiciones de Vida (ECV)"}
+    - {code: "314", name: "EPF", note: "Encuesta de Presupuestos Familiares (EPF)"}
+    - {code: "330", name: "FR", note: "Movimientos Turísticos en Fronteras"}
+    - {code: "334", name: "ETR", note: "Encuesta de turismo de residentes"}
+    - {code: "238", name: "EOH", note: "Encuesta de Ocupación Hotelera"}
+    - {code: "241", name: "EOTR", note: "Encuesta de Ocupación en Alojamientos de Turismo Rural"}
+    - {code: "63", name: "IPTR", note: "Índice de Precios de Alojamientos de Turismo Rural"}
+    - {code: "237", name: "CNTR2010", note: "Contabilidad Nacional Trimestral de España: Principales Agregados"}
+
+ine-variables:
+  source: ine-api-tempus
+  use: "Filtro tv={variable}:{Id de valor} en DATOS_TABLA; los Id de valor salen de VALORES_VARIABLEOPERACION/{variable}/{operacion} (campo Id, no Codigo)"
+  verified: "2026-09-30"
+  entries:
+    - {code: "3", name: "Tipo de dato", note: "72 Dato base"}
+    - {code: "18", name: "Sexo"}
+    - {code: "19", name: "Municipios", note: "8.142 valores en la operación 22"}
+    - {code: "20", name: "Islas"}
+    - {code: "34", name: "Tamaño del municipio"}
+    - {code: "70", name: "Comunidades y Ciudades Autónomas"}
+    - {code: "115", name: "Provincias"}
+    - {code: "349", name: "Total Nacional"}
+    - {code: "762", name: "Grupos ECOICOP", note: "IPC"}
+    - {code: "763", name: "Subgrupos ECOICOP", note: "IPC"}
+    - {code: "764", name: "Clases ECOICOP", note: "IPC"}
+    - {code: "765", name: "Subclases ECOICOP", note: "IPC"}
+    - {code: "544", name: "Corrección de efectos", note: "IPC"}
+
+ine-ccaa:
+  source: ine-api-tempus
+  use: "code es el código INE de la comunidad; note da el Id del INE para tv=70:{Id} (padrón, IPC y demás operaciones con variable 70)"
+  verified: "2026-09-30"
+  entries:
+    - {code: "00", name: "Total Nacional", note: "tv=70:16473"}
+    - {code: "01", name: "Andalucía", note: "tv=70:8997"}
+    - {code: "02", name: "Aragón", note: "tv=70:8998"}
+    - {code: "03", name: "Asturias, Principado de", note: "tv=70:8999"}
+    - {code: "04", name: "Balears, Illes", note: "tv=70:9000"}
+    - {code: "05", name: "Canarias", note: "tv=70:9001"}
+    - {code: "06", name: "Cantabria", note: "tv=70:9002"}
+    - {code: "07", name: "Castilla y León", note: "tv=70:9003"}
+    - {code: "08", name: "Castilla - La Mancha", note: "tv=70:9004"}
+    - {code: "09", name: "Cataluña", note: "tv=70:9005"}
+    - {code: "10", name: "Comunitat Valenciana", note: "tv=70:9006"}
+    - {code: "11", name: "Extremadura", note: "tv=70:9007"}
+    - {code: "12", name: "Galicia", note: "tv=70:9008"}
+    - {code: "13", name: "Madrid, Comunidad de", note: "tv=70:9009"}
+    - {code: "14", name: "Murcia, Región de", note: "tv=70:9010"}
+    - {code: "15", name: "Navarra, Comunidad Foral de", note: "tv=70:9011"}
+    - {code: "16", name: "País Vasco", note: "tv=70:9012"}
+    - {code: "17", name: "Rioja, La", note: "tv=70:9013"}
+    - {code: "18", name: "Ceuta", note: "tv=70:9015"}
+    - {code: "19", name: "Melilla", note: "tv=70:8995"}
+
+ine-provincias:
+  source: ine-api-tempus
+  use: "code es el código INE de la provincia (dos dígitos, también IDProvincia en carburantes e id_prov en DataComex); note da el Id para tv=115:{Id}"
+  verified: "2026-09-30"
+  entries:
+    - {code: "01", name: "Araba/Álava", note: "tv=115:2"}
+    - {code: "02", name: "Albacete", note: "tv=115:3"}
+    - {code: "03", name: "Alicante/Alacant", note: "tv=115:4"}
+    - {code: "04", name: "Almería", note: "tv=115:5"}
+    - {code: "05", name: "Ávila", note: "tv=115:6"}
+    - {code: "06", name: "Badajoz", note: "tv=115:7"}
+    - {code: "07", name: "Balears, Illes", note: "tv=115:8"}
+    - {code: "08", name: "Barcelona", note: "tv=115:9"}
+    - {code: "09", name: "Burgos", note: "tv=115:10"}
+    - {code: "10", name: "Cáceres", note: "tv=115:11"}
+    - {code: "11", name: "Cádiz", note: "tv=115:12"}
+    - {code: "12", name: "Castellón/Castelló", note: "tv=115:13"}
+    - {code: "13", name: "Ciudad Real", note: "tv=115:14"}
+    - {code: "14", name: "Córdoba", note: "tv=115:15"}
+    - {code: "15", name: "Coruña, A", note: "tv=115:16"}
+    - {code: "16", name: "Cuenca", note: "tv=115:17"}
+    - {code: "17", name: "Girona", note: "tv=115:18"}
+    - {code: "18", name: "Granada", note: "tv=115:19"}
+    - {code: "19", name: "Guadalajara", note: "tv=115:20"}
+    - {code: "20", name: "Gipuzkoa", note: "tv=115:21"}
+    - {code: "21", name: "Huelva", note: "tv=115:22"}
+    - {code: "22", name: "Huesca", note: "tv=115:23"}
+    - {code: "23", name: "Jaén", note: "tv=115:24"}
+    - {code: "24", name: "León", note: "tv=115:25"}
+    - {code: "25", name: "Lleida", note: "tv=115:26"}
+    - {code: "26", name: "Rioja, La", note: "tv=115:27"}
+    - {code: "27", name: "Lugo", note: "tv=115:28"}
+    - {code: "28", name: "Madrid", note: "tv=115:29"}
+    - {code: "29", name: "Málaga", note: "tv=115:30"}
+    - {code: "30", name: "Murcia", note: "tv=115:31"}
+    - {code: "31", name: "Navarra", note: "tv=115:32"}
+    - {code: "32", name: "Ourense", note: "tv=115:53"}
+    - {code: "33", name: "Asturias", note: "tv=115:33"}
+    - {code: "34", name: "Palencia", note: "tv=115:34"}
+    - {code: "35", name: "Palmas, Las", note: "tv=115:35"}
+    - {code: "36", name: "Pontevedra", note: "tv=115:36"}
+    - {code: "37", name: "Salamanca", note: "tv=115:37"}
+    - {code: "38", name: "Santa Cruz de Tenerife", note: "tv=115:38"}
+    - {code: "39", name: "Cantabria", note: "tv=115:39"}
+    - {code: "40", name: "Segovia", note: "tv=115:40"}
+    - {code: "41", name: "Sevilla", note: "tv=115:41"}
+    - {code: "42", name: "Soria", note: "tv=115:42"}
+    - {code: "43", name: "Tarragona", note: "tv=115:43"}
+    - {code: "44", name: "Teruel", note: "tv=115:44"}
+    - {code: "45", name: "Toledo", note: "tv=115:45"}
+    - {code: "46", name: "Valencia/València", note: "tv=115:46"}
+    - {code: "47", name: "Valladolid", note: "tv=115:47"}
+    - {code: "48", name: "Bizkaia", note: "tv=115:48"}
+    - {code: "49", name: "Zamora", note: "tv=115:49"}
+    - {code: "50", name: "Zaragoza", note: "tv=115:50"}
+    - {code: "51", name: "Ceuta", note: "tv=115:51"}
+    - {code: "52", name: "Melilla", note: "tv=115:52"}
+
+datacomex-paises:
+  source: datacomex
+  use: "Parámetro pa de ObtenerDatos (3 dígitos, no ISO); los 40 principales destinos de exportación de 2025; los 237 códigos salen de id_pais en una llamada con pa=ALL"
+  note: "951 y 952 son avituallamiento (combustible y provisiones a buques y aeronaves), no países; Corea del Sur aparece como Corea del"
+  verified: "2026-09-30"
+  entries:
+    - {code: "001", name: "Francia"}
+    - {code: "004", name: "Alemania"}
+    - {code: "010", name: "Portugal"}
+    - {code: "005", name: "Italia"}
+    - {code: "006", name: "Reino Unido"}
+    - {code: "400", name: "Estados Unidos"}
+    - {code: "003", name: "Países Bajos"}
+    - {code: "017", name: "Bélgica"}
+    - {code: "204", name: "Marruecos"}
+    - {code: "060", name: "Polonia"}
+    - {code: "052", name: "Turquía"}
+    - {code: "720", name: "China"}
+    - {code: "412", name: "México"}
+    - {code: "039", name: "Suiza"}
+    - {code: "061", name: "República Checa"}
+    - {code: "066", name: "Rumanía"}
+    - {code: "030", name: "Suecia"}
+    - {code: "009", name: "Grecia"}
+    - {code: "508", name: "Brasil"}
+    - {code: "647", name: "Emiratos Árabes"}
+    - {code: "007", name: "Irlanda"}
+    - {code: "732", name: "Japón"}
+    - {code: "038", name: "Austria"}
+    - {code: "008", name: "Dinamarca"}
+    - {code: "064", name: "Hungría"}
+    - {code: "632", name: "Arabia Saudí"}
+    - {code: "063", name: "Eslovaquia"}
+    - {code: "404", name: "Canadá"}
+    - {code: "208", name: "Argelia"}
+    - {code: "664", name: "India"}
+    - {code: "800", name: "Australia"}
+    - {code: "728", name: "Corea del"}
+    - {code: "512", name: "Chile"}
+    - {code: "220", name: "Egipto"}
+    - {code: "624", name: "Israel"}
+    - {code: "388", name: "Sudáfrica"}
+    - {code: "043", name: "Andorra"}
+    - {code: "028", name: "Noruega"}
+    - {code: "951", name: "Avituall.y combust.intercambios"}
+    - {code: "952", name: "Avituallamiento terceros"}
+
+aemet-estaciones-capitales:
+  source: aemet-opendata
+  use: "Parámetro {idema} en observación por estación y valores climatológicos; una estación por capital de provincia (nombre oficial en name, ciudad en note); las 926 con inventarioestaciones/todasestaciones"
+  note: "Cuando la capital tiene observatorio y aeropuerto se ha elegido el observatorio urbano salvo Córdoba, Logroño, Bilbao, Burgos, Granada, Málaga, Sevilla, Vitoria y Zaragoza, donde el aeropuerto es la estación de referencia"
+  verified: "2026-09-30"
+  entries:
+    - {code: "8178D", name: "ALBACETE", note: "Albacete"}
+    - {code: "8019", name: "ALICANTE-ELCHE AEROPUERTO", note: "Alicante"}
+    - {code: "6297", name: "ALMERÍA", note: "Almería"}
+    - {code: "2444", name: "ÁVILA", note: "Ávila"}
+    - {code: "4478X", name: "BADAJOZ", note: "Badajoz"}
+    - {code: "0201D", name: "BARCELONA, PORT OLÍMPIC", note: "Barcelona"}
+    - {code: "1082", name: "BILBAO AEROPUERTO", note: "Bilbao"}
+    - {code: "2331", name: "BURGOS AEROPUERTO", note: "Burgos"}
+    - {code: "3469A", name: "CÁCERES", note: "Cáceres"}
+    - {code: "5973", name: "CÁDIZ", note: "Cádiz"}
+    - {code: "8500A", name: "CASTELLÓ - ALMASSORA", note: "Castellón de la Plana"}
+    - {code: "4121", name: "CIUDAD REAL", note: "Ciudad Real"}
+    - {code: "5402", name: "CÓRDOBA AEROPUERTO", note: "Córdoba"}
+    - {code: "1387", name: "A CORUÑA", note: "A Coruña"}
+    - {code: "8096", name: "CUENCA", note: "Cuenca"}
+    - {code: "0370E", name: "GIRONA", note: "Girona"}
+    - {code: "5530E", name: "GRANADA AEROPUERTO", note: "Granada"}
+    - {code: "3168D", name: "GUADALAJARA", note: "Guadalajara"}
+    - {code: "1024E", name: "DONOSTIA / SAN SEBASTIÁN, IGELDO", note: "Donostia / San Sebastián"}
+    - {code: "4605", name: "HUELVA", note: "Huelva"}
+    - {code: "9901X", name: "HUESCA", note: "Huesca"}
+    - {code: "5270B", name: "JAÉN", note: "Jaén"}
+    - {code: "2661", name: "LEÓN, VIRGEN DEL CAMINO", note: "León"}
+    - {code: "9771C", name: "LLEIDA", note: "Lleida"}
+    - {code: "9170", name: "LOGROÑO, AEROPUERTO", note: "Logroño"}
+    - {code: "1518A", name: "LUGO", note: "Lugo"}
+    - {code: "3195", name: "MADRID, RETIRO", note: "Madrid"}
+    - {code: "6155A", name: "MÁLAGA AEROPUERTO", note: "Málaga"}
+    - {code: "7178I", name: "MURCIA", note: "Murcia"}
+    - {code: "9262", name: "PAMPLONA", note: "Pamplona"}
+    - {code: "1690A", name: "OURENSE", note: "Ourense"}
+    - {code: "1249I", name: "OVIEDO", note: "Oviedo"}
+    - {code: "2401X", name: "PALENCIA", note: "Palencia"}
+    - {code: "B228", name: "PALMA, PUERTO", note: "Palma"}
+    - {code: "C659M", name: "LAS PALMAS DE GRAN CANARIA, PL. DE LA FERIA", note: "Las Palmas de Gran Canaria"}
+    - {code: "1484C", name: "PONTEVEDRA", note: "Pontevedra"}
+    - {code: "2870", name: "SALAMANCA", note: "Salamanca"}
+    - {code: "C449C", name: "STA.CRUZ DE TENERIFE", note: "Santa Cruz de Tenerife"}
+    - {code: "1111", name: "SANTANDER", note: "Santander"}
+    - {code: "2465", name: "SEGOVIA", note: "Segovia"}
+    - {code: "5783", name: "SEVILLA AEROPUERTO", note: "Sevilla"}
+    - {code: "2030", name: "SORIA", note: "Soria"}
+    - {code: "0042Y", name: "TARRAGONA", note: "Tarragona"}
+    - {code: "8368U", name: "TERUEL", note: "Teruel"}
+    - {code: "3260B", name: "TOLEDO", note: "Toledo"}
+    - {code: "8416X", name: "VALENCIA, UPV", note: "Valencia"}
+    - {code: "2422", name: "VALLADOLID", note: "Valladolid"}
+    - {code: "9091R", name: "VITORIA-GASTEIZ AEROPUERTO", note: "Vitoria-Gasteiz"}
+    - {code: "2614", name: "ZAMORA", note: "Zamora"}
+    - {code: "9434", name: "ZARAGOZA, AEROPUERTO", note: "Zaragoza"}
+    - {code: "5000C", name: "CEUTA", note: "Ceuta"}
+    - {code: "6000A", name: "MELILLA", note: "Melilla"}
+
+boe-secciones:
+  source: boe-api-sumario
+  use: "Código de seccion en el sumario JSON y parámetro s de los RSS del BOE (boe.php?s=1); vistos en sumarios de 2024 a 2026"
+  verified: "2026-09-30"
+  entries:
+    - {code: "1", name: "I. Disposiciones generales"}
+    - {code: "2A", name: "II. Autoridades y personal. - A. Nombramientos, situaciones e incidencias"}
+    - {code: "2B", name: "II. Autoridades y personal. - B. Oposiciones y concursos"}
+    - {code: "3", name: "III. Otras disposiciones"}
+    - {code: "4", name: "IV. Administración de Justicia"}
+    - {code: "5A", name: "V. Anuncios. - A. Contratación del Sector Público"}
+    - {code: "5B", name: "V. Anuncios. - B. Otros anuncios oficiales"}
+    - {code: "5C", name: "V. Anuncios. - C. Anuncios particulares"}
+
+boe-rangos:
+  source: boe-api-legislacion-consolidada
+  use: "rango.codigo en el listado y metadatos de legislación consolidada y atributo codigo de rango en el XML de cada disposición; lista de datos-auxiliares/rangos"
+  verified: "2026-09-30"
+  entries:
+    - {code: "1020", name: "Acuerdo"}
+    - {code: "1180", name: "Acuerdo Internacional"}
+    - {code: "1390", name: "Circular"}
+    - {code: "1070", name: "Constitución"}
+    - {code: "1510", name: "Decreto"}
+    - {code: "1480", name: "Decreto Foral Legislativo"}
+    - {code: "1470", name: "Decreto Legislativo"}
+    - {code: "1500", name: "Decreto-ley"}
+    - {code: "1325", name: "Decreto-ley Foral"}
+    - {code: "1410", name: "Instrucción"}
+    - {code: "1300", name: "Ley"}
+    - {code: "1450", name: "Ley Foral"}
+    - {code: "1290", name: "Ley Orgánica"}
+    - {code: "1350", name: "Orden"}
+    - {code: "1340", name: "Real Decreto"}
+    - {code: "1310", name: "Real Decreto Legislativo"}
+    - {code: "1320", name: "Real Decreto-ley"}
+    - {code: "1220", name: "Reglamento"}
+    - {code: "1370", name: "Resolución"}
+
+boe-ambitos:
+  source: boe-api-legislacion-consolidada
+  use: "ambito.codigo en legislación consolidada; datos-auxiliares/ambitos"
+  note: "datos-auxiliares/departamentos devuelve 211 códigos (115 de ministerios históricos) y materias varios miles; secciones y origenes-legislativos responden 404"
+  verified: "2026-09-30"
+  entries:
+    - {code: "1", name: "Estatal"}
+    - {code: "2", name: "Autonómico"}
+
+carburantes-productos:
+  source: minetur-precios-carburantes
+  use: "IDPRODUCTO en FiltroProducto y FiltroProvinciaProducto; en la respuesta cada producto es una clave 'Precio {nombre}' de ListaEESSPrecio; lista con Listados/ProductosPetroliferos"
+  verified: "2026-09-30"
+  entries:
+    - {code: "1", name: "Gasolina 95 E5"}
+    - {code: "23", name: "Gasolina 95 E10"}
+    - {code: "24", name: "Gasolina 95 E25"}
+    - {code: "25", name: "Gasolina 95 E85"}
+    - {code: "20", name: "Gasolina 95 E5 Premium"}
+    - {code: "3", name: "Gasolina 98 E5"}
+    - {code: "21", name: "Gasolina 98 E10"}
+    - {code: "4", name: "Gasóleo A habitual"}
+    - {code: "5", name: "Gasóleo Premium"}
+    - {code: "6", name: "Gasóleo B"}
+    - {code: "7", name: "Gasóleo C"}
+    - {code: "16", name: "Bioetanol"}
+    - {code: "8", name: "Biodiésel"}
+    - {code: "17", name: "Gases licuados del petróleo"}
+    - {code: "18", name: "Gas natural comprimido"}
+    - {code: "19", name: "Gas natural licuado"}
+    - {code: "22", name: "Hidrógeno"}
+    - {code: "9", name: "Fuelóleo bajo índice azufre"}
+    - {code: "10", name: "Fuelóleo especial"}
+    - {code: "11", name: "Gasóleo para uso marítimo"}
+    - {code: "12", name: "Gasolina de aviación"}
+    - {code: "13", name: "Queroseno de aviación JET_A1"}
+    - {code: "14", name: "Queroseno de aviación JET_A2"}
+    - {code: "26", name: "Adblue"}
+    - {code: "27", name: "Diésel renovable"}
+    - {code: "28", name: "Gasolina renovable"}
+    - {code: "29", name: "Metanol"}
+    - {code: "30", name: "Amoniaco"}
+    - {code: "31", name: "Biogas natural comprimido"}
+    - {code: "32", name: "Biogas natural licuado"}
+
+ree-geo-ids:
+  source: ree-redata
+  use: "geo_ids con geo_trunc=electric_system y geo_limit; solo los tres verificados"
+  note: "Los geo_ids de comunidades autónomas probados el 2026-09-30 no devolvieron datos; no localizada la lista oficial"
+  verified: "2026-09-30"
+  entries:
+    - {code: "8741", name: "Península"}
+    - {code: "8742", name: "Canarias"}
+    - {code: "8743", name: "Baleares"}

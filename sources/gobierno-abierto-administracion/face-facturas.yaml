@@ -22,9 +22,11 @@ endpoints:
     desc: Relaciones en JSON; cada item trae oc, og y ut con code (DIR3), name y alias, y og lleva identifier con el NIF
     example: curl -s "https://proveedores.face.gob.es/api/v1/relations?fulltext=Ayuntamiento%20de%20Madrid&limit=100&page=1"
     params: "fulltext filtra por nombre; page empieza en 1; limit hasta 1000 (5000 devuelve 500); respuesta con items, count, total, limit y page"
+    returns: "{items:[{oc:{code, name, alias}, og:{code, identifier NIF, name}, ut:{code, name}, administration:{code, name}, hash, active}], count, total, limit, page}; los code son DIR3"
   - path: /relations.csv?fulltext={texto}
     desc: Lo mismo en CSV con punto y coma (oficinaContable, organoGestor, unidadTramitadora y activo); sin filtro, las 50186 relaciones en 7 MB
     example: curl -sO "https://proveedores.face.gob.es/api/v1/relations.csv"
+    returns: "CSV separado por ; en ISO-8859-1 con BOM: oficinaContableNombre;oficinaContableCodigoDir3;organoGestorNombre;organoGestorCodigoDir3;unidadTramitadoraNombre;unidadTramitadoraCodigoDir3;activo"
   - path: https://webservice.face.gob.es/facturasspp2?wsdl
     desc: WSDL del servicio SOAP de presentación y consulta de facturas en producción
   - path: https://se-face-webservice.redsara.es/facturasspp2?wsdl

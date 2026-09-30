@@ -21,6 +21,7 @@ endpoints:
   - path: /EstacionesTerrestres/
     desc: Todas las estaciones con todos los precios (12 MB, unos 17 s); claves con espacios y tildes (Precio Gasoleo A, Longitud (WGS84), Rótulo)
     example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/"
+    returns: "{Fecha (dd/mm/aaaa hh:mm:ss), ListaEESSPrecio:[{C.P., Dirección, Horario, Latitud, Longitud (WGS84), Localidad, Municipio, Provincia, Rótulo, Margen, Tipo Venta, Precio Gasolina 95 E5, Precio Gasoleo A y una clave por producto, IDEESS, IDMunicipio, IDProvincia, IDCCAA}], ResultadoConsulta}; números como texto con coma"
   - path: /EstacionesTerrestres/FiltroProvincia/{IDPROVINCIA}
     desc: Estaciones de una provincia (código INE de dos dígitos; Madrid son 894 estaciones y 940 KB)
     example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroProvincia/28"
@@ -37,6 +38,7 @@ endpoints:
   - path: /Listados/{Provincias|Municipios|ComunidadesAutonomas|ProductosPetroliferos}/
     desc: Tablas de códigos (8112 municipios con IDMunicipio propio; productos con IDProducto y abreviatura, Gasolina 95 E5 es 1)
     example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/Listados/ProductosPetroliferos/"
+    returns: "ProductosPetroliferos [{IDProducto, NombreProducto, NombreProductoAbreviatura}]; Provincias [{IDPovincia (sic), IDCCAA, Provincia, CCAA}]; Municipios [{IDMunicipio, IDProvincia, IDCCAA, Municipio, Provincia, CCAA}] (8.112)"
 quirks: []
 ids: [ine-provincia]
 gotchas:

@@ -55,6 +55,8 @@ def render_source_compact(s: dict) -> str:
         lines.append(line)
         if e.get("example"):
             lines.append(f"  ej: {e['example']}")
+        if e.get("returns"):
+            lines.append(f"  devuelve: {e['returns']}")
     if s.get("rate_limit"):
         lines.append(f"rate_limit: {s['rate_limit']}")
     if s.get("quirks"):
@@ -101,11 +103,12 @@ def render_sector_index(sector: str, title: str, items: list[dict], needs: list[
 
 def render_indices_readme(idx: dict, sector_of: dict[str, str], vocab: dict, used_by: dict[str, list[str]]) -> str:
     recetas, dead, idents, needs = idx["recetas"], idx["rutas-muertas"], idx["identificadores"], idx["necesidades"]
+    codigos = idx["codigos"]
     lines = [
         "# Índices para agentes",
         "",
         f"Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. {len(recetas)} recetas, "
-        f"{len(needs)} necesidades, {len(idents)} identificadores, {len(dead)} rutas muertas.",
+        f"{len(needs)} necesidades, {len(idents)} identificadores, {len(codigos)} grupos de códigos, {len(dead)} rutas muertas.",
         "",
         "## Recetas por intención",
         "",
@@ -171,6 +174,21 @@ def render_indices_readme(idx: dict, sector_of: dict[str, str], vocab: dict, use
                 lines.append(f"- vía `{j['via']}`: {j['how']}")
             lines.append("")
     lines += [
+        "## Códigos que son parámetros",
+        "",
+        "Valores que una API exige y no se adivinan (ids internos, códigos numéricos, indicativos). Obtenidos con una "
+        "llamada real en la fecha indicada; la lista completa se saca con la llamada que cita cada grupo.",
+        "",
+    ]
+    for key, g in codigos.items():
+        lines.append(f"**{key}** · `{g['source']}` · {g['use']} (verificado {g['verified']})")
+        if g.get("note"):
+            lines.append(f"- nota: {g['note']}")
+        lines.append("- " + " · ".join(
+            f"{e['code']}={e['name']}" + (f" ({e['note']})" if e.get("note") else "") for e in g["entries"]
+        ))
+        lines.append("")
+    lines += [
         "## Rutas muertas",
         "",
         "URLs de documentación antigua que ya no sirven y su sustituta verificada.",
@@ -222,6 +240,7 @@ def main() -> None:
             "necesidades": idx["necesidades"],
             "identificadores": identificadores,
             "rutas_muertas": idx["rutas-muertas"],
+            "codigos": idx["codigos"],
         },
     }
     (ROOT / "catalog.json").write_text(
@@ -278,6 +297,9 @@ def main() -> None:
         f"- Todas las fichas en texto compacto: {REPO_RAW}/llms-full.txt",
         f"- Una ficha: {REPO_RAW}/sources/<sector>/<id>.yaml",
         f"- Índices para agentes (recetas paso a paso, identificadores con regex y cruces, rutas muertas con sustituta): {REPO_RAW}/indices/README.md",
+        f"- Códigos que son parámetros (Id de municipio, provincia y CCAA del INE para tv, países de DataComex, estaciones de AEMET por capital, productos de carburantes, rangos y secciones del BOE): {REPO_RAW}/indices/codigos.yaml",
+        f"- Servidor MCP local para cargar solo la ficha, receta o necesidad que haga falta: python scripts/mcp_catalogo.py (configuración y herramientas en {REPO_RAW}/guides/servidor-mcp.md)",
+        "- Cada endpoint principal lleva `returns` (forma de la respuesta vista en una llamada real: campos, tipos, fechas, decimales, paginación) y `example` (llamada copiable).",
         f"- Esquema de ficha: {REPO_RAW}/schema/source.schema.json",
         f"- Vocabulario (sectores, acceso, auth, formatos, quirks, ids): {REPO_RAW}/schema/vocab.yaml",
         "- `verified: null` significa que la ficha se redactó a partir de documentación oficial pero aún no se ha probado el endpoint.",
@@ -335,7 +357,7 @@ def main() -> None:
 
     print(
         f"build OK: {len(sources)} fuentes, {len(by_sector)} sectores, {len(idx['recetas'])} recetas, "
-        f"{len(idx['necesidades'])} necesidades, {len(idx['rutas-muertas'])} rutas muertas"
+        f"{len(idx['necesidades'])} necesidades, {len(idx['codigos'])} grupos de códigos, {len(idx['rutas-muertas'])} rutas muertas"
     )
 
 

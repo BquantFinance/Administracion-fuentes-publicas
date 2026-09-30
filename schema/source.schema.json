@@ -119,6 +119,11 @@
           "params": {
             "type": "string",
             "maxLength": 200
+          },
+          "returns": {
+            "type": "string",
+            "maxLength": 320,
+            "description": "Forma de la respuesta vista en una llamada real: campos clave y tipos, formato de fecha y decimal, paginación. Máx. 320 caracteres."
           }
         }
       }

@@ -21,6 +21,7 @@ endpoints:
   - path: /package_search?rows=100
     desc: Los 44 datasets con resources[].url, format y last_modified; package_list solo nombres; package_show?id={name} un dataset
     example: curl -s "https://data.renfe.com/api/3/action/package_show?id=horarios-cercanias"
+    returns: "CKAN {result:{id, name, title, notes, metadata_modified, resources:[{id, name, url, format, size, last_modified, mimetype}], archiver:{is_broken, reason}}}"
   - path: https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip
     desc: GTFS de alta velocidad, larga y media distancia (760 KB; agency, calendar, calendar_dates, routes, stops, stop_times, trips; sin feed_info)
     example: curl -sO "https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip"

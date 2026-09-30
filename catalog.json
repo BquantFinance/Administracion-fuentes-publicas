@@ -310,7 +310,8 @@
     {
      "path": "https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfobypoint/{srid}/{x}/{y}.json",
      "desc": "Recinto que contiene un punto (códigos SIGPAC, superficie, pendiente_media, coef_regadio, uso_sigpac, altitud, wkt); con extensión .geojson devuelve GeoJSON",
-     "example": "curl -s \"https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfobypoint/4326/-3.9/40.3.json\""
+     "example": "curl -s \"https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfobypoint/4326/-3.9/40.3.json\"",
+     "returns": "Lista de recintos [{provincia, municipio, agregado, zona, poligono, parcela, recinto, superficie (ha), pendiente_media, coef_regadio, admisibilidad, incidencias, uso_sigpac (ZU, TA, OV...), region}]"
     },
     {
      "path": "https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfo/{pr}/{mu}/{ag}/{zo}/{po}/{pa}/{re}.json",
@@ -329,7 +330,8 @@
     {
      "path": "https://sigpac-hubcloud.es/ogcapi/collections/{recintos|cultivo_declarado|elementos_paisaje_area|elementos_paisaje_linea|elementos_paisaje_punto}/items?bbox={bbox}&limit={n}&f=json",
      "desc": "OGC API Features con filtro por bbox y por atributos (provincia=28); numberMatched y paginación estándar",
-     "example": "curl -s \"https://sigpac-hubcloud.es/ogcapi/collections/recintos/items?bbox=-3.71,40.41,-3.70,40.42&limit=5&f=json\""
+     "example": "curl -s \"https://sigpac-hubcloud.es/ogcapi/collections/recintos/items?bbox=-3.71,40.41,-3.70,40.42&limit=5&f=json\"",
+     "returns": "GeoJSON FeatureCollection {features:[{id, properties:{dn_pk, provincia, municipio, agregado, zona, poligono, parcela, recinto, pendiente_media, altitud}, geometry Polygon en WGS84}], numberMatched, numberReturned, links[]}"
     },
     {
      "path": "https://sigpac-hubcloud.es/geopackages/{campaña}/recintos/{PP}_{PROVINCIA}_rec_{campaña}_{AAAAMMDD}_gpkg.zip",
@@ -621,7 +623,8 @@
     {
      "path": "/occurrence/search?country=ES&scientificName={nombre}&limit={n}&offset={o}",
      "desc": "Ocurrencias en España (sobre con offset, limit, endOfRecords, count, results, facets); limit máximo 300",
-     "example": "curl -s \"https://api.gbif.org/v1/occurrence/search?country=ES&scientificName=Lynx%20pardinus&limit=5\""
+     "example": "curl -s \"https://api.gbif.org/v1/occurrence/search?country=ES&scientificName=Lynx%20pardinus&limit=5\"",
+     "returns": "{offset, limit, endOfRecords, count, results:[{key, datasetKey, scientificName, taxonKey, speciesKey, kingdom...species, decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, stateProvince, eventDate, year, month, day, basisOfRecord, occurrenceStatus, issues[], license}]}"
     },
     {
      "path": "/occurrence/count?country=ES",
@@ -631,7 +634,8 @@
     {
      "path": "/species/match?name={nombre}",
      "desc": "Resolver un nombre científico al taxón (usageKey, rank, status, matchType, confidence)",
-     "example": "curl -s \"https://api.gbif.org/v1/species/match?name=Quercus%20ilex\""
+     "example": "curl -s \"https://api.gbif.org/v1/species/match?name=Quercus%20ilex\"",
+     "returns": "{usageKey, scientificName, canonicalName, rank, status, confidence, matchType (EXACT, FUZZY, NONE), kingdom, phylum, order, family, genus, species y sus claves kingdomKey...speciesKey}"
     },
     {
      "path": "/dataset/search?publishingCountry=ES&limit={n}",
@@ -717,7 +721,8 @@
     {
      "path": "https://nodc.ieo.es/geonetwork/srv/api/search/records/_search",
      "desc": "Búsqueda de texto libre por POST JSON (Elasticsearch de GeoNetwork; query_string, size, _source); hits.hits[]._source con resourceTitleObject y resourceType",
-     "example": "curl -s -X POST -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"query\":{\"query_string\":{\"query\":\"temperatura\"}},\"size\":5}' \"https://nodc.ieo.es/geonetwork/srv/api/search/records/_search\""
+     "example": "curl -s -X POST -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"query\":{\"query_string\":{\"query\":\"temperatura\"}},\"size\":5}' \"https://nodc.ieo.es/geonetwork/srv/api/search/records/_search\"",
+     "returns": "Elasticsearch {hits:{total:{value}, hits:[{_id, _source:{metadataIdentifier, resourceTitleObject{default}, resourceAbstractObject, resourceType[], link:[{protocol, url, name}], format[], Org, inspireTheme, dateStamp}}]}}"
     },
     {
      "path": "https://nodc.ieo.es/geonetwork/srv/spa/catalog.search",
@@ -796,7 +801,8 @@
     {
      "path": "/Cartografia_Geologica/IGME_Geode_50/MapServer/8/query?geometry={lon},{lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&f=json",
      "desc": "Unidad geológica en un punto (capa 8 Recintos geología, campos CODE_UNIO, DESC_UNIT, NAME_EDA1, NAME_EDA2, ZONA)",
-     "example": "curl -s \"https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geode_50/MapServer/8/query?geometry=-3.70,40.42&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=CODE_UNIO,DESC_UNIT,NAME_EDA1&returnGeometry=false&f=json\""
+     "example": "curl -s \"https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geode_50/MapServer/8/query?geometry=-3.70,40.42&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=CODE_UNIO,DESC_UNIT,NAME_EDA1&returnGeometry=false&f=json\"",
+     "returns": "ArcGIS REST {displayFieldName, fieldAliases, geometryType, spatialReference{wkid}, fields[], features:[{attributes:{OBJECTID, CODE_UNIO, DESC_UNIT, NAME_EDA1, NAME_EDA2, ZONA}, geometry:{rings}}]}; geometría en 102100 (Web Mercator) salvo outSR=4326"
     },
     {
      "path": "/BasesDatos/IGME_PuntosAgua/MapServer/0/query?where={sql}&outFields=*&f=json",
@@ -965,7 +971,8 @@
      "path": "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f={E|I|I/E}&pe={periodo}&pa={pais}&ta={taric}&pr={provincia}",
      "desc": "Datos en JSON (Resultados con flujo, periodo, pais, id_pais, prov, id_prov, taric, euros, kilos, mensaje); los cinco parámetros son obligatorios",
      "params": "pe en AAAA, AAAAMM, LastM, LastY, ALL (anual desde 1995) o ALLM (mensual desde 1995); pa código numérico de país (001 Francia) o ALL; ta TARIC de 2 a 8 dígitos o ALL; pr INE de 2 dígitos o ALL",
-     "example": "curl -s -H \"Authorization: Bearer $DATACOMEX_TOKEN\" \"https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=ALL&ta=1001&pr=28\""
+     "example": "curl -s -H \"Authorization: Bearer $DATACOMEX_TOKEN\" \"https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=ALL&ta=1001&pr=28\"",
+     "returns": "{Resultados:[{flujo, periodo (Julio de 2026 o 2025), pais, id_pais (3 dígitos), prov, id_prov (INE), taric, euros, kilos (texto con coma decimal), mensaje (dato provisional)}]}; Resultados vacío, sin error, cuando la combinación no tiene comercio"
     },
     {
      "path": "https://datacomex.comercio.es/Metadata/{Comex|Empresas|UEAnual|UEMensual}",
@@ -1328,23 +1335,27 @@
      "path": "/convocatorias/busqueda?page={n}&pageSize={n}",
      "desc": "Búsqueda paginada de convocatorias (numeroConvocatoria, descripcion, fechaRecepcion, nivel1 a nivel3, mrr)",
      "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=50&fechaDesde=01/09/2026&fechaHasta=30/09/2026&order=fechaRecepcion&direccion=desc\"",
-     "params": "descripcion, fechaDesde y fechaHasta en dd/mm/aaaa, tipoAdministracion=C (estatal), numeroConvocatoria, mrr, vpd, order y direccion"
+     "params": "descripcion, fechaDesde y fechaHasta en dd/mm/aaaa, tipoAdministracion=C (estatal), numeroConvocatoria, mrr, vpd, order y direccion",
+     "returns": "Página Spring {content:[{id, numeroConvocatoria, descripcion, fechaRecepcion, nivel1 (ESTATAL, AUTONOMICA, LOCAL), nivel2, nivel3, mrr, codigoInvente}], totalElements, totalPages, number, size, last}"
     },
     {
      "path": "/convocatorias?numConv={numero_bdns}",
      "desc": "Detalle completo de una convocatoria (órgano, instrumentos, presupuesto, bases, documentos)",
-     "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv=800000\""
+     "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv=800000\"",
+     "returns": "Objeto {id, codigoBDNS, organo{nivel1,nivel2,nivel3}, fechaRecepcion, tipoConvocatoria, presupuestoTotal, instrumentos[], tiposBeneficiarios[], sectores[{codigo CNAE, descripcion}], regiones[{descripcion con NUTS}], descripcion, sedeElectronica, mrr}"
     },
     {
      "path": "/concesiones/busqueda?page={n}&pageSize={n}",
      "desc": "Concesiones con beneficiario, importe, ayuda equivalente, instrumento y convocatoria",
      "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=50&numeroConvocatoria=931918\"",
-     "params": "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa"
+     "params": "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa",
+     "returns": "content:[{id, codConcesion, fechaConcesion, beneficiario (NIF y nombre en la misma cadena), instrumento, importe, ayudaEquivalente, urlBR, numeroConvocatoria, idConvocatoria, convocatoria, nivel1, nivel2, nivel3}]"
     },
     {
      "path": "/{coleccion}/busqueda?page={n}&pageSize={n}",
      "desc": "Mismo patrón para ayudasestado, minimis, grandesbeneficiarios, sanciones, planesestrategicos y partidospoliticos",
-     "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/grandesbeneficiarios/busqueda?page=0&pageSize=50\""
+     "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/grandesbeneficiarios/busqueda?page=0&pageSize=50\"",
+     "returns": "grandesbeneficiarios devuelve content:[{idPersona, beneficiario (NIF y nombre), ejercicio, ayudaETotal}] con la misma paginación Spring (totalElements, totalPages)"
     },
     {
      "path": "/{coleccion}/exportar?vpd=GE&tipoDoc={csv|xlsx}",
@@ -1478,7 +1489,8 @@
     {
      "path": "sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom",
      "desc": "Licitaciones de perfiles alojados en la Plataforma; unas 235 entradas y 6 MB por página",
-     "example": "curl -s \"https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom\""
+     "example": "curl -s \"https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom\"",
+     "returns": "Atom; cada entry lleva ContractFolderStatus (CODICE): ContractFolderID, ContractFolderStatusCode, LocatedContractingParty/Party/PartyIdentification/ID (DIR3), ProcurementProject/Name, BudgetAmount/TaxExclusiveAmount, RequiredCommodityClassification/ItemClassificationCode (CPV) y RealizedLocation/CountrySubentityCode"
     },
     {
      "path": "sindicacion_1044/PlataformasAgregadasSinMenores.atom",
@@ -1791,13 +1803,15 @@
     {
      "path": "/favoritas?idioma={es|en}&series={cod1,cod2}",
      "desc": "Último dato de una o varias series, con frecuencia, tendencia y fecha",
-     "example": "curl -s --compressed \"https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472\""
+     "example": "curl -s --compressed \"https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472\"",
+     "returns": "Lista [{serie, descripcionCorta, codFrecuencia (D, M, Q), decimales, simbolo, tendencia, fechaValor ISO, valor}] con el último dato de cada serie"
     },
     {
      "path": "/listaSeries?idioma={es|en}&series={cod1,cod2}&rango={rango}",
      "desc": "Serie completa con metadatos, fechas y valores",
      "example": "curl -s --compressed \"https://app.bde.es/bierest/resources/srdatosapp/listaSeries?idioma=es&series=DTNPDE2010_P0000P_PS_APU&rango=MAX\"",
-     "params": "rango según frecuencia. Diaria 3M, 12M, 36M; mensual y trimestral 30M, 60M, MAX; anual 60M, MAX; o un año concreto (rango=2024)"
+     "params": "rango según frecuencia. Diaria 3M, 12M, 36M; mensual y trimestral 30M, 60M, MAX; anual 60M, MAX; o un año concreto (rango=2024)",
+     "returns": "Lista [{serie, descripcion, descripcionCorta, codFrecuencia, decimales, simbolo, informacion[{titulo, descripcion}], fechaInicio, fechaFin, fechas[], valores[]}]; fechas y valores alineados y en orden descendente (el más reciente primero)"
     },
     {
      "path": "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_{be|tc|ti|si|pb}.csv",
@@ -1807,7 +1821,8 @@
     {
      "path": "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/{cuadro}.csv",
      "desc": "CSV de un cuadro completo con sus series en columnas; también en /datos/xlsx/{cuadro}.xlsx",
-     "example": "curl -sO \"https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/tc_1_1.csv\""
+     "example": "curl -sO \"https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/tc_1_1.csv\"",
+     "returns": "CSV latin1 con seis filas de cabecera (código de serie, número secuencial, alias, descripción, unidades, frecuencia) y después una fila por fecha (04 ENE 1999); '_' marca dato ausente; decimal con punto"
     },
     {
      "path": "https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_{capitulo}.zip",
@@ -2420,7 +2435,8 @@
     {
      "path": "/package_search?q={texto}&rows={n}&fq=organization:{org}",
      "desc": "Búsqueda de datasets (name ds_{id}_{v}, title, extras periodo, frecuenciaActualizacion, esInforme); rows=1000 devuelve los 210",
-     "example": "curl -s \"https://catalogodatos.cnmc.es/api/3/action/package_search?q=comercializadoras&rows=5\""
+     "example": "curl -s \"https://catalogodatos.cnmc.es/api/3/action/package_search?q=comercializadoras&rows=5\"",
+     "returns": "CKAN {help, success, result:{count, results:[{id, name (ds_1947_1), title, notes, license_id, metadata_modified, resources:[{id, url, format, name}]}]}}"
     },
     {
      "path": "/organization_list?all_fields=true",
@@ -2433,7 +2449,8 @@
     {
      "path": "/datastore_search?resource_id={id}&limit={n}",
      "desc": "Registros en JSON con fields tipados y etiqueta original en info.label; limit por defecto 100, limit alto devuelve la tabla entera",
-     "example": "curl -s \"https://catalogodatos.cnmc.es/api/3/action/datastore_search?resource_id=522dcc75-b5c4-4c8d-9ec3-c8d8cf66d6b2&limit=5\""
+     "example": "curl -s \"https://catalogodatos.cnmc.es/api/3/action/datastore_search?resource_id=522dcc75-b5c4-4c8d-9ec3-c8d8cf66d6b2&limit=5\"",
+     "returns": "{result:{records:[{_id, una clave por columna}], fields:[{id, type}], total, _links:{start, next}}}"
     },
     {
      "path": "https://catalogodatos.cnmc.es/datastore/dump/{resource_id}?format={csv|json|xml}",
@@ -2511,7 +2528,8 @@
     {
      "path": "/EstacionesTerrestres/",
      "desc": "Todas las estaciones con todos los precios (12 MB, unos 17 s); claves con espacios y tildes (Precio Gasoleo A, Longitud (WGS84), Rótulo)",
-     "example": "curl -s \"https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/\""
+     "example": "curl -s \"https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/\"",
+     "returns": "{Fecha (dd/mm/aaaa hh:mm:ss), ListaEESSPrecio:[{C.P., Dirección, Horario, Latitud, Longitud (WGS84), Localidad, Municipio, Provincia, Rótulo, Margen, Tipo Venta, Precio Gasolina 95 E5, Precio Gasoleo A y una clave por producto, IDEESS, IDMunicipio, IDProvincia, IDCCAA}], ResultadoConsulta}; números como texto con coma"
     },
     {
      "path": "/EstacionesTerrestres/FiltroProvincia/{IDPROVINCIA}",
@@ -2539,7 +2557,8 @@
     {
      "path": "/Listados/{Provincias|Municipios|ComunidadesAutonomas|ProductosPetroliferos}/",
      "desc": "Tablas de códigos (8112 municipios con IDMunicipio propio; productos con IDProducto y abreviatura, Gasolina 95 E5 es 1)",
-     "example": "curl -s \"https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/Listados/ProductosPetroliferos/\""
+     "example": "curl -s \"https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/Listados/ProductosPetroliferos/\"",
+     "returns": "ProductosPetroliferos [{IDProducto, NombreProducto, NombreProductoAbreviatura}]; Provincias [{IDPovincia (sic), IDCCAA, Provincia, CCAA}]; Municipios [{IDMunicipio, IDProvincia, IDCCAA, Municipio, Provincia, CCAA}] (8.112)"
     }
    ],
    "quirks": [],
@@ -2695,7 +2714,8 @@
     {
      "path": "https://www.omie.es/es/file-download?parents%5B0%5D={carpeta}&filename={carpeta}_{AAAAMMDD}.{version}",
      "desc": "Fichero diario de una carpeta; marginalpdbc (precio España), marginalpdbcpt (Portugal), pdbc_stota (programas), curva_pbc, cab y det (ofertas), precios_pibcic",
-     "example": "curl -s \"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_20260929.1\""
+     "example": "curl -s \"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_20260929.1\"",
+     "returns": "Texto separado por ; con cabecera MARGINALPDBC; y filas AAAA;MM;DD;periodo;precio;precio; (EUR/MWh, decimal con punto) más una fila final con asterisco; sin cabecera de columnas"
     },
     {
      "path": "https://www.omie.es/es/file-download?parents%5B0%5D=marginalpibc&filename=marginalpibc_{AAAAMMDD}{SS}.1",
@@ -2777,7 +2797,8 @@
      "path": "/{categoria}/{widget}?start_date={AAAA-MM-DDTHH:MM}&end_date={AAAA-MM-DDTHH:MM}&time_trunc={hour|day|month|year}",
      "desc": "Patrón general (balance, demanda, generacion, intercambios, transporte, mercados); included[] trae una serie por concepto con value, percentage y datetime",
      "params": "geo_trunc=electric_system con geo_limit (peninsular, canarias, baleares, ceuta, melilla, ccaa) y geo_ids (8741, 8742 y 8743 verificados); /en/ en vez de /es/ traduce títulos y errores",
-     "example": "curl -s \"https://apidatos.ree.es/es/datos/demanda/evolucion?start_date=2026-09-01T00:00&end_date=2026-09-07T23:59&time_trunc=day\""
+     "example": "curl -s \"https://apidatos.ree.es/es/datos/demanda/evolucion?start_date=2026-09-01T00:00&end_date=2026-09-07T23:59&time_trunc=day\"",
+     "returns": "{data:{type, id, attributes:{title, last-update, description}}, included:[{type, id, groupId, attributes:{title, color, type, magnitude, composite, last-update, values:[{value, percentage, datetime ISO con zona}]}}]}; una entrada de included por concepto"
     },
     {
      "path": "/demanda/evolucion",
@@ -2884,28 +2905,33 @@
     {
      "path": "/OPERACIONES_DISPONIBLES",
      "desc": "Las 112 operaciones con Id numérico y Codigo (IPC es 25, EPA 293, ECP 450)",
-     "example": "curl -s \"https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES\""
+     "example": "curl -s \"https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES\"",
+     "returns": "Lista de {Id, Cod_IOE, Nombre, Codigo}; Id (25) y Codigo (IPC) valen ambos como id_o_codigo en el resto de rutas"
     },
     {
      "path": "/TABLAS_OPERACION/{id_o_codigo}",
      "desc": "Tablas vigentes de una operación con periodo inicial y última modificación; acepta IPC o 25",
-     "example": "curl -s \"https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/IPC\""
+     "example": "curl -s \"https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/IPC\"",
+     "returns": "Lista de {Id, Nombre, Codigo, FK_Periodicidad, FK_Publicacion, FK_Periodo_ini, Anyo_Periodo_ini, FechaRef_fin, Ultima_Modificacion (epoch ms)}; Id es el id_tabla de DATOS_TABLA"
     },
     {
      "path": "/DATOS_TABLA/{id_tabla}?nult={n}",
      "desc": "Todas las series de una tabla con sus últimos n periodos",
      "example": "curl -s \"https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/24077?nult=3\"",
-     "params": "nult o date=AAAAMMDD:AAAAMMDD (uno obligatorio); tv=id_variable:id_valor filtra, repetible; tip=A nombres legibles y fechas ISO, tip=M metadatos, tip=AM ambos; det=2 desglosa unidad y escala"
+     "params": "nult o date=AAAAMMDD:AAAAMMDD (uno obligatorio); tv=id_variable:id_valor filtra, repetible; tip=A nombres legibles y fechas ISO, tip=M metadatos, tip=AM ambos; det=2 desglosa unidad y escala",
+     "returns": "Lista de series {COD, Nombre, FK_Unidad, FK_Escala, Data:[{Fecha epoch ms, FK_TipoDato, FK_Periodo, Anyo, Valor float, Secreto bool}]}; con tip=AM Fecha es ISO, aparecen T3_Periodo (M08), T3_TipoDato y MetaData:[{T3_Variable, Nombre, Codigo}] por dimensión"
     },
     {
      "path": "/DATOS_SERIE/{cod_serie}?nult={n}",
      "desc": "Una serie por su código",
-     "example": "curl -s \"https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/IPC290751?nult=12&tip=A\""
+     "example": "curl -s \"https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/IPC290751?nult=12&tip=A\"",
+     "returns": "Un objeto {COD, Nombre, FK_Unidad, FK_Escala, Data:[{Fecha, FK_TipoDato, FK_Periodo, Anyo, Valor, Secreto}]}; con tip=A llegan T3_Unidad, T3_TipoDato y T3_Periodo en texto y Fecha en ISO"
     },
     {
      "path": "/SERIES_TABLA/{id_tabla}",
      "desc": "Series que componen una tabla con código, decimales, periodicidad y unidad",
-     "example": "curl -sL \"https://servicios.ine.es/wstempus/js/ES/SERIES_TABLA/24077\""
+     "example": "curl -sL \"https://servicios.ine.es/wstempus/js/ES/SERIES_TABLA/24077\"",
+     "returns": "Lista de {Id, COD, FK_Operacion, Nombre, Decimales, FK_Periodicidad, FK_Publicacion, FK_Clasificacion, FK_Escala, FK_Unidad}; COD es el cod_serie de DATOS_SERIE"
     },
     {
      "path": "/SERIE/{cod_serie}",
@@ -2914,12 +2940,14 @@
     {
      "path": "/VARIABLES_OPERACION/{id_operacion}",
      "desc": "Variables de una operación; sus valores en /VALORES_VARIABLEOPERACION/{id_variable}/{id_operacion}",
-     "example": "curl -s \"https://servicios.ine.es/wstempus/js/ES/VALORES_VARIABLEOPERACION/3/IPC\""
+     "example": "curl -s \"https://servicios.ine.es/wstempus/js/ES/VALORES_VARIABLEOPERACION/3/IPC\"",
+     "returns": "VARIABLES_OPERACION devuelve [{Id, Nombre, Codigo}] (3 Tipo de dato, 19 Municipios, 70 CCAA, 115 Provincias); VALORES_VARIABLEOPERACION/{var}/{op} devuelve [{Id, FK_Variable, Nombre, Codigo}] y ese Id, no Codigo, es el que usa tv"
     },
     {
      "path": "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/{id_tabla}?nult={n}",
      "desc": "Misma API con salida CSV cambiando js por csv",
-     "example": "curl -s \"https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=12\""
+     "example": "curl -s \"https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=12\"",
+     "returns": "Texto tabulado en ISO-8859-15 con BOM; una columna por variable, Periodo (2026M08) y Total; decimal con coma y cadena vacía en los periodos aún sin dato"
     }
    ],
    "rate_limit": "No documentado; una tabla grande con nult=1 devuelve 600 KB (4248 series en la 25333)",
@@ -2935,7 +2963,8 @@
     "Fecha es epoch en milisegundos con zona Europe/Madrid; usar Anyo y FK_Periodo para el periodo. FK_TipoDato 3 marca dato provisional o avance; Secreto true marca secreto estadístico con Valor ausente.",
     "El CSV llega con BOM UTF-8, separador tabulador y coma decimal aunque la cabecera diga ISO-8859-15.",
     "SERIES_TABLA redirige con 301 a /jsCache/; seguir redirecciones. El parámetro page no pagina (devuelve lo mismo).",
-    "Cambiar ES por EN en la ruta traduce los nombres; jsCache sirve copias cacheadas, para datos recién publicados usar js."
+    "Cambiar ES por EN en la ruta traduce los nombres; jsCache sirve copias cacheadas, para datos recién publicados usar js.",
+    "nult=1 puede devolver Data vacío cuando el último periodo aún no está publicado (el CSV lo muestra con cadena vacía); pedir nult=2 y quedarse con el último valor no nulo."
    ],
    "tips": [
     "Flujo típico. TABLAS_OPERACION para localizar la tabla vigente, DATOS_TABLA con nult=1 y tip=A para ver códigos y nombres, DATOS_SERIE con date para el histórico.",
@@ -3188,7 +3217,8 @@
     "Los campos multilingües (title, description) son listas de objetos con _value y _lang; los de un solo idioma pueden venir como cadena. Tratar ambos casos.",
     "Es un catálogo de metadatos; distribution[].accessURL apunta al organismo origen y puede estar roto o exigir sesión. No hay proxy de los datos.",
     "El identificador del dataset (_about y el slug tras /catalogo/) empieza por el código DIR3 del publicador (l01281317-..., e05251701-...).",
-    "La documentación y el catálogo web también están detrás del WAF; el HTML de un dataset está en https://datos.gob.es/catalogo/{slug} cuando la petición pasa."
+    "La documentación y el catálogo web también están detrás del WAF; el HTML de un dataset está en https://datos.gob.es/catalogo/{slug} cuando la petición pasa.",
+    "En mantenimiento la API responde 200 con una página HTML (título Página en mantenimiento) en vez de JSON; comprobar Content-Type antes de parsear (visto el 2026-09-30 por la noche)."
    ],
    "tips": [
     "Sirve para descubrir dónde publica sus ficheros un organismo (DIR3, FACe, INE, SEPE) antes de rascar su web; accessURL suele ser la URL directa del fichero."
@@ -3321,12 +3351,14 @@
      "path": "/relations?fulltext={texto}&page={n}&limit={n}",
      "desc": "Relaciones en JSON; cada item trae oc, og y ut con code (DIR3), name y alias, y og lleva identifier con el NIF",
      "example": "curl -s \"https://proveedores.face.gob.es/api/v1/relations?fulltext=Ayuntamiento%20de%20Madrid&limit=100&page=1\"",
-     "params": "fulltext filtra por nombre; page empieza en 1; limit hasta 1000 (5000 devuelve 500); respuesta con items, count, total, limit y page"
+     "params": "fulltext filtra por nombre; page empieza en 1; limit hasta 1000 (5000 devuelve 500); respuesta con items, count, total, limit y page",
+     "returns": "{items:[{oc:{code, name, alias}, og:{code, identifier NIF, name}, ut:{code, name}, administration:{code, name}, hash, active}], count, total, limit, page}; los code son DIR3"
     },
     {
      "path": "/relations.csv?fulltext={texto}",
      "desc": "Lo mismo en CSV con punto y coma (oficinaContable, organoGestor, unidadTramitadora y activo); sin filtro, las 50186 relaciones en 7 MB",
-     "example": "curl -sO \"https://proveedores.face.gob.es/api/v1/relations.csv\""
+     "example": "curl -sO \"https://proveedores.face.gob.es/api/v1/relations.csv\"",
+     "returns": "CSV separado por ; en ISO-8859-1 con BOM: oficinaContableNombre;oficinaContableCodigoDir3;organoGestorNombre;organoGestorCodigoDir3;unidadTramitadoraNombre;unidadTramitadoraCodigoDir3;activo"
     },
     {
      "path": "https://webservice.face.gob.es/facturasspp2?wsdl",
@@ -4069,7 +4101,8 @@
      "path": "?from={AAAAMMDD}&to={AAAAMMDD}&offset={n}&limit={n}",
      "desc": "Listado de normas por fecha de última actualización del consolidado; JSON o XML",
      "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada?from=20260901&limit=100\"",
-     "params": "limit por defecto 50, -1 devuelve hasta 10000; query es un JSON URL-encoded con query_string, range y sort"
+     "params": "limit por defecto 50, -1 devuelve hasta 10000; query es un JSON URL-encoded con query_string, range y sort",
+     "returns": "{status, data:[{identificador, ambito{codigo,texto}, departamento{codigo,texto}, rango{codigo,texto}, fecha_disposicion, numero_oficial, titulo, fecha_publicacion, diario_numero, fecha_vigencia, vigencia_agotada, estado_consolidacion{codigo,texto}, url_eli, url_html_consolidada}]}; fechas AAAAMMDD"
     },
     {
      "path": "?query={json}&limit={n}",
@@ -4084,11 +4117,13 @@
     {
      "path": "/id/{id}/metadatos",
      "desc": "Título, rango, departamento, fechas, vigencia, estado de consolidación y url_eli; JSON o XML",
-     "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/metadatos\""
+     "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/metadatos\"",
+     "returns": "data es una lista de un elemento con los campos del listado más estatus_derogacion, estatus_anulacion y fecha_actualizacion (AAAAMMDDThhmmssZ)"
     },
     {
      "path": "/id/{id}/analisis",
-     "desc": "Materias, notas y referencias anteriores y posteriores; JSON o XML"
+     "desc": "Materias, notas y referencias anteriores y posteriores; JSON o XML",
+     "returns": "data:[{materias:{materia:{codigo,texto}}, referencias:{anteriores:[{anterior:[{id_norma, relacion:{codigo,texto}, texto}]}], posteriores:[{posterior:[...]}]}}]; relacion 210 es DEROGA"
     },
     {
      "path": "/id/{id}/texto",
@@ -4097,12 +4132,14 @@
     {
      "path": "/id/{id}/texto/indice",
      "desc": "Índice de bloques con id, título y fecha de actualización; JSON o XML",
-     "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/indice\""
+     "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/indice\"",
+     "returns": "data:[{bloque:[{id (preambulo, a1, da1...), titulo, fecha_actualizacion, url}]}]; el id se pasa a /texto/bloque/{id_bloque}"
     },
     {
      "path": "/id/{id}/texto/bloque/{id_bloque}",
      "desc": "Un bloque (preambulo, tpreliminar, a1, a2-5, da1...) con sus versiones; solo XML",
-     "example": "curl -s -H \"Accept: application/xml\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/bloque/a1\""
+     "example": "curl -s -H \"Accept: application/xml\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/bloque/a1\"",
+     "returns": "XML response/data/bloque[@id,@tipo,@titulo]/version[@id_norma,@fecha_publicacion,@fecha_vigencia]/p[@class] con el texto del precepto"
     },
     {
      "path": "/id/{id}/metadata-eli",
@@ -4181,12 +4218,14 @@
     {
      "path": "/boe/sumario/{AAAAMMDD}",
      "desc": "Sumario del día, anidado en diario > seccion > departamento > epigrafe > item",
-     "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/boe/sumario/20240102\""
+     "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/boe/sumario/20240102\"",
+     "returns": "{status, data.sumario.diario[]:{numero, sumario_diario, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]:{identificador, control, titulo, url_pdf:{texto, szBytes}, url_html, url_xml}}}}}}; secciones sin epígrafe llevan item bajo departamento; un solo elemento llega como objeto"
     },
     {
      "path": "https://www.boe.es/diario_boe/xml.php?id={BOE-A-AAAA-NNNNN}",
      "desc": "Texto completo y metadatos de una disposición en XML; no necesita cabecera Accept",
-     "example": "curl -s \"https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-87\""
+     "example": "curl -s \"https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-87\"",
+     "returns": "XML documento con metadatos (identificador, departamento y rango con atributo codigo, fecha_disposicion, titulo, fecha_publicacion, seccion, url_pdf, estatus_derogacion), analisis (materias, notas, referencias anteriores y posteriores) y texto"
     },
     {
      "path": "https://www.boe.es/diario_boe/txt.php?id={id}",
@@ -4216,7 +4255,8 @@
     "Algunos días antiguos (p. ej. 19700102) devuelven 500 aunque exista boletín; reintentar o saltar.",
     "Cada item trae url_pdf.texto, url_html y url_xml ya construidas; no montar la URL del PDF a mano (BOE-A-2024-1 no está en 2024/01/02).",
     "Los identificadores siguen el patrón BOE-A-AAAA-NNNNN (disposiciones) y BOE-B-AAAA-NNNNN (anuncios); la numeración es anual.",
-    "No hay búsqueda por texto en esta API; descargar sumarios y filtrar en local, o usar la API de legislación consolidada."
+    "No hay búsqueda por texto en esta API; descargar sumarios y filtrar en local, o usar la API de legislación consolidada.",
+    "En el JSON del sumario, departamento, epigrafe e item llegan como objeto cuando hay uno solo y como lista cuando hay varios; normalizar a lista antes de iterar."
    ],
    "tips": [
     "Un sumario diario pesa entre 100 y 200 KB en JSON; para histórico iterar por fecha y tratar 404 como día sin publicación.",
@@ -4401,12 +4441,14 @@
     {
      "path": "/borme/sumario/{AAAAMMDD}",
      "desc": "Sumario del día; secciones A y B con un item por provincia, sección C con apartado > item por anuncio",
-     "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/borme/sumario/20240102\""
+     "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/borme/sumario/20240102\"",
+     "returns": "Como el sumario del BOE: data.sumario.diario[].seccion[] con codigo A (actos inscritos, un item por provincia), B (otros actos) y C (anuncios, con apartado); item {identificador BORME-A-AAAA-NNN-PP, titulo, url_pdf, url_html, url_xml}; un solo elemento llega como objeto"
     },
     {
      "path": "https://www.boe.es/diario_borme/xml.php?id={BORME-A-AAAA-NNN-PP}",
      "desc": "Actos inscritos de una provincia en XML, un par de párrafos por empresa",
-     "example": "curl -s \"https://www.boe.es/diario_borme/xml.php?id=BORME-A-2024-1-01\""
+     "example": "curl -s \"https://www.boe.es/diario_borme/xml.php?id=BORME-A-2024-1-01\"",
+     "returns": "XML documento/metadatos (identificador, titulo = provincia, seccion, fecha_publicacion, url_pdf) y texto con pares p.articulo (número - denominación social) y p.parrafo (actos separados por punto, datos registrales al final)"
     },
     {
      "path": "https://www.boe.es/diario_borme/xml.php?id={BORME-C-AAAA-NNNNN}",
@@ -4924,7 +4966,8 @@
     {
      "path": "/prediccion/especifica/municipio/diaria/{cod_municipio_ine}",
      "desc": "Predicción diaria a 7 días para un municipio; /todos devuelve todos los municipios",
-     "example": "curl -s -H \"api_key: $AEMET_KEY\" \"https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/28079\""
+     "example": "curl -s -H \"api_key: $AEMET_KEY\" \"https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/28079\"",
+     "returns": "datos es lista de un objeto {nombre, provincia, elaborado, id, prediccion:{dia:[{fecha, probPrecipitacion[{value, periodo}], estadoCielo[{value, periodo, descripcion}], viento[{direccion, velocidad, periodo}], temperatura{maxima, minima, dato[{value, hora}]}, sensTermica, humedadRelativa, uvMax}]}}"
     },
     {
      "path": "/prediccion/especifica/municipio/horaria/{cod_municipio_ine}",
@@ -4932,11 +4975,13 @@
     },
     {
      "path": "/maestro/municipios",
-     "desc": "Maestro de municipios con el código que aceptan las predicciones; /maestro/municipio/{id} para uno"
+     "desc": "Maestro de municipios con el código que aceptan las predicciones; /maestro/municipio/{id} para uno",
+     "returns": "Lista de municipios [{id (id28079, INE con prefijo id), id_old, nombre, capital, latitud_dec, longitud_dec, altitud, num_hab, zona_comarcal, url}]; todo como texto"
     },
     {
      "path": "/observacion/convencional/todas",
-     "desc": "Últimas 24 horas de observación de todas las estaciones"
+     "desc": "Últimas 24 horas de observación de todas las estaciones",
+     "returns": "Lista de observaciones horarias de todas las estaciones (3,5 MB) [{idema, ubi, lon, lat, alt, fint (ISO UTC), ta, tamin, tamax, tpr, hr, prec, pres, pres_nmar, vv, dv, vmax, dmax, stdvv, stddv}]; números con punto"
     },
     {
      "path": "/observacion/convencional/datos/estacion/{idema}",
@@ -4944,12 +4989,14 @@
     },
     {
      "path": "/valores/climatologicos/inventarioestaciones/todasestaciones",
-     "desc": "Inventario de estaciones con idema y coordenadas"
+     "desc": "Inventario de estaciones con idema y coordenadas",
+     "returns": "Lista de 926 estaciones [{indicativo (idema), nombre, provincia, altitud, latitud, longitud, indsinop}]; coordenadas en grados, minutos y segundos con letra (394924N, 025309E), no decimales"
     },
     {
      "path": "/valores/climatologicos/diarios/datos/fechaini/{AAAA-MM-DDTHH:MM:SSUTC}/fechafin/{AAAA-MM-DDTHH:MM:SSUTC}/estacion/{idema}",
      "desc": "Climatología diaria de una o varias estaciones (idema separados por coma) en un rango; /todasestaciones para todas",
-     "example": "curl -s -H \"api_key: $AEMET_KEY\" \"https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2024-01-01T00:00:00UTC/fechafin/2024-01-31T23:59:59UTC/estacion/3195\""
+     "example": "curl -s -H \"api_key: $AEMET_KEY\" \"https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2024-01-01T00:00:00UTC/fechafin/2024-01-31T23:59:59UTC/estacion/3195\"",
+     "returns": "Lista [{fecha, indicativo, nombre, provincia, altitud, tmed, prec, tmin, horatmin, tmax, horatmax, dir, velmedia, racha, horaracha, presMax, presMin, hrMedia, hrMax, hrMin}]; todos los valores son texto con coma decimal"
     },
     {
      "path": "/valores/climatologicos/mensualesanuales/datos/anioini/{AAAA}/aniofin/{AAAA}/estacion/{idema}",
@@ -5099,12 +5146,14 @@
     {
      "path": "/medicamentos?nombre={texto}&pagina={n}",
      "desc": "Búsqueda paginada; también practiv1 (principio activo), atc, laboratorio, comerc, receta y otros filtros del manual, combinables",
-     "example": "curl -s \"https://cima.aemps.es/cima/rest/medicamentos?nombre=ibuprofeno&pagina=1\""
+     "example": "curl -s \"https://cima.aemps.es/cima/rest/medicamentos?nombre=ibuprofeno&pagina=1\"",
+     "returns": "{totalFilas, pagina, tamanioPagina (200), resultados:[{nregistro, nombre, pactivos, labtitular, labcomercializador, cpresc, estado:{aut, rev} en epoch ms, comerc, receta, generico, conduc, triangulo, huerfano, biosimilar, nosustituible{id,nombre}, psum, ema}]}; paginar mientras pagina*200 < totalFilas"
     },
     {
      "path": "/medicamento?nregistro={nreg}",
      "desc": "Detalle completo (pactivos, atcs, presentaciones con cn y estado, docs con url PDF y urlHtml, fotos, vtm, dosis, estado aut/rev); también ?cn={cn}",
-     "example": "curl -s \"https://cima.aemps.es/cima/rest/medicamento?nregistro=80298\""
+     "example": "curl -s \"https://cima.aemps.es/cima/rest/medicamento?nregistro=80298\"",
+     "returns": "Objeto con los campos de la lista más presentaciones[{cn, nombre, estado, comerc, psum}], docs[{tipo 1 ficha técnica y 2 prospecto, url, urlHtml, secc, fecha}], atcs[{codigo, nombre, nivel}], principiosActivos[], viasAdministracion[], formaFarmaceutica, dosis, fotos[], notas, materialesInf, vtm"
     },
     {
      "path": "/presentaciones?cn={cn}",
@@ -5113,7 +5162,8 @@
     {
      "path": "/psuministro",
      "desc": "Problemas de suministro activos (cn, nombre, tipoProblemaSuministro, fini, ffin, activo, observ), 860 en la fecha de verificación",
-     "example": "curl -s \"https://cima.aemps.es/cima/rest/psuministro\""
+     "example": "curl -s \"https://cima.aemps.es/cima/rest/psuministro\"",
+     "returns": "{totalFilas, pagina, tamanioPagina, resultados:[{cn, nombre, tipoProblemaSuministro (int), fini, ffin (epoch ms), activo, observ}]}"
     },
     {
      "path": "/docSegmentado/secciones/{1|2}?nregistro={nreg} y /docSegmentado/contenido/{1|2}?nregistro={nreg}&seccion={s}",
@@ -5123,12 +5173,14 @@
     {
      "path": "/registroCambios?fecha={dd/mm/aaaa}",
      "desc": "Medicamentos cambiados desde la fecha (nregistro, fecha, tipoCambio, cambio), para sincronizar sin rebajar todo",
-     "example": "curl -s \"https://cima.aemps.es/cima/rest/registroCambios?fecha=01/09/2026\""
+     "example": "curl -s \"https://cima.aemps.es/cima/rest/registroCambios?fecha=01/09/2026\"",
+     "returns": "{totalFilas, resultados:[{nregistro, nombre, labtitular, fecha (epoch ms), tipoCambio (int), cambio:[]}]}; 108.000 filas en total, paginación de 200"
     },
     {
      "path": "/maestras?maestra={id}&nombre={texto}",
      "desc": "Tablas maestras filtradas por texto (1 principios activos, 3 formas farmacéuticas, 4 vías, 6 laboratorios, 7 ATC); sin filtro responde 204",
-     "example": "curl -s \"https://cima.aemps.es/cima/rest/maestras?maestra=1&nombre=ibu\""
+     "example": "curl -s \"https://cima.aemps.es/cima/rest/maestras?maestra=1&nombre=ibu\"",
+     "returns": "{totalFilas, resultados:[{id, codigo, nombre}]}"
     },
     {
      "path": "/vmpp",
@@ -5290,7 +5342,8 @@
     {
      "path": "https://momo.isciii.es/public/momo/data",
      "desc": "CSV completo de MoMo (719 MB, regenerado a diario hasta el día anterior); ignora la cabecera Range y envía el fichero entero, leer en streaming",
-     "example": "curl -sS \"https://momo.isciii.es/public/momo/data\" | head -c 2000"
+     "example": "curl -sS \"https://momo.isciii.es/public/momo/data\" | head -c 2000",
+     "returns": "CSV UTF-8 con ambito (nacional, ccaa, provincia), cod_ambito, cod_ine_ambito, nombre_ambito, cod_sexo, nombre_sexo, cod_gedad, nombre_gedad, fecha_defuncion, defunciones_observadas, defunciones_estimadas_base, _q01, _q99, defunciones_atrib_exc_temp, defunciones_atrib_def_temp"
     },
     {
      "path": "https://momo.isciii.es/panel_momo/",
@@ -5299,7 +5352,8 @@
     {
      "path": "https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres.csv",
      "desc": "COVID-19 diario por provincia de residencia, sexo y edad (38 MB; num_casos, num_hosp, num_uci, num_def); variantes _60_mas y todas_edades",
-     "example": "curl -sSL -o covid.csv \"https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres.csv\""
+     "example": "curl -sSL -o covid.csv \"https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres.csv\"",
+     "returns": "CSV provincia_iso,sexo,grupo_edad,fecha,num_casos,num_hosp,num_uci,num_def; una fila por provincia, sexo, grupo de edad y día desde 2020-01-01"
     },
     {
      "path": "https://cne.isciii.es/servicios/enfermedades-transmisibles/objetivos-boletines",
@@ -5687,7 +5741,8 @@
     {
      "path": "https://www.cartociudad.es/geocoder/api/geocoder/find?q={direccion}",
      "desc": "Geocodificador; JSON con provinceCode, muniCode (INE), postalCode y geom en WKT WGS84; candidatesJsonp devuelve varios candidatos",
-     "example": "curl -s \"https://www.cartociudad.es/geocoder/api/geocoder/find?q=Calle%20Alcala%2050%20Madrid\""
+     "example": "curl -s \"https://www.cartociudad.es/geocoder/api/geocoder/find?q=Calle%20Alcala%2050%20Madrid\"",
+     "returns": "{id, province, provinceCode, comunidadAutonoma, comunidadAutonomaCode, muni, muniCode (INE 5 dígitos), type, address, tip_via, portalNumber, postalCode, poblacion, geom (WKT POINT lon lat), lat, lng, refCatastral, state, stateMsg}"
     }
    ],
    "quirks": [
@@ -5962,7 +6017,8 @@
     {
      "path": "https://nap.dgt.es/datex2/v3/dgt/SituationPublication/datex2_v37.xml",
      "desc": "Incidencias activas de la red DGT en DATEX II 3.7 (perfil RTTI de la DGT), actualizado cada minuto según la ficha del NAP",
-     "example": "curl -s \"https://nap.dgt.es/datex2/v3/dgt/SituationPublication/datex2_v37.xml\""
+     "example": "curl -s \"https://nap.dgt.es/datex2/v3/dgt/SituationPublication/datex2_v37.xml\"",
+     "returns": "DATEX II v3 (4,7 MB): payload/situation[@id]/situationRecord[@type,@id,@version] con situationRecordCreationTime, validity/validityStatus, cause/causeType, locationReference (roadInformation/roadName, tpegLinearLocation from y to con pointCoordinates, kilometerPoint, municipality, autonomousCommunity)"
     },
     {
      "path": "https://nap.dgt.es/datex2/v3/dgt/DevicePublication/camaras_datex2_v37.xml",
@@ -6371,7 +6427,8 @@
     {
      "path": "/package_search?rows=100",
      "desc": "Los 44 datasets con resources[].url, format y last_modified; package_list solo nombres; package_show?id={name} un dataset",
-     "example": "curl -s \"https://data.renfe.com/api/3/action/package_show?id=horarios-cercanias\""
+     "example": "curl -s \"https://data.renfe.com/api/3/action/package_show?id=horarios-cercanias\"",
+     "returns": "CKAN {result:{id, name, title, notes, metadata_modified, resources:[{id, name, url, format, size, last_modified, mimetype}], archiver:{is_broken, reason}}}"
     },
     {
      "path": "https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip",
@@ -9361,6 +9418,1351 @@
     "note": "ya no hay consulta pública sin certificado; solo el visor de certificados y el DEUC",
     "checked": "2026-09-30"
    }
-  ]
+  ],
+  "codigos": {
+   "ine-operaciones": {
+    "source": "ine-api-tempus",
+    "use": "Id o Codigo como {id_o_codigo} en TABLAS_OPERACION, VARIABLES_OPERACION y VALORES_VARIABLEOPERACION; las 112 operaciones con OPERACIONES_DISPONIBLES",
+    "verified": "2026-09-30",
+    "entries": [
+     {
+      "code": "25",
+      "name": "IPC",
+      "note": "Índice de Precios de Consumo (IPC)"
+     },
+     {
+      "code": "18",
+      "name": "IPCA",
+      "note": "Índice de Precios de Consumo Armonizado (IPCA)"
+     },
+     {
+      "code": "293",
+      "name": "EPA",
+      "note": "Encuesta de Población Activa (EPA)"
+     },
+     {
+      "code": "450",
+      "name": "ECP",
+      "note": "Estadística Continua de Población"
+     },
+     {
+      "code": "72",
+      "name": "CP",
+      "note": "Cifras de Población"
+     },
+     {
+      "code": "22",
+      "name": "DPOP",
+      "note": "Cifras Oficiales de Población de los Municipios Españoles: Revisión del Padrón Municipal"
+     },
+     {
+      "code": "307",
+      "name": "MNPN",
+      "note": "MNP Estadística de Nacimientos"
+     },
+     {
+      "code": "309",
+      "name": "MNPD",
+      "note": "MNP Estadística de Defunciones"
+     },
+     {
+      "code": "424",
+      "name": "EMN",
+      "note": "Estimación Mensual de Nacimientos"
+     },
+     {
+      "code": "23",
+      "name": "ECM",
+      "note": "Estadística de Defunciones según la Causa de Muerte"
+     },
+     {
+      "code": "71",
+      "name": "EM",
+      "note": "Estadística de Migraciones"
+     },
+     {
+      "code": "455",
+      "name": "EMCR",
+      "note": "Estadística de Migraciones y Cambios de Residencia"
+     },
+     {
+      "code": "230",
+      "name": "PERE",
+      "note": "Estadística del Padrón de la Población Española Residente en el Extranjero"
+     },
+     {
+      "code": "15",
+      "name": "IPV",
+      "note": "Índice de Precios de la Vivienda (IPV)"
+     },
+     {
+      "code": "432",
+      "name": "IPVA",
+      "note": "Índice de Precios de Vivienda en Alquiler"
+     },
+     {
+      "code": "40",
+      "name": "HPT",
+      "note": "Estadística de Hipotecas"
+     },
+     {
+      "code": "259",
+      "name": "EH",
+      "note": "Estadística sobre Ejecuciones Hipotecarias"
+     },
+     {
+      "code": "7",
+      "name": "ETDP",
+      "note": "Estadística de Transmisión de Derechos de la Propiedad"
+     },
+     {
+      "code": "125",
+      "name": "SM",
+      "note": "Estadística de Sociedades Mercantiles"
+     },
+     {
+      "code": "13",
+      "name": "EPC",
+      "note": "Estadística del Procedimiento Concursal"
+     },
+     {
+      "code": "26",
+      "name": "IPI",
+      "note": "Índices de Producción Industrial"
+     },
+     {
+      "code": "27",
+      "name": "IPRI",
+      "note": "Índices de Precios Industriales"
+     },
+     {
+      "code": "32",
+      "name": "ICM",
+      "note": "Índices de Comercio al por Menor"
+     },
+     {
+      "code": "303",
+      "name": "ETCL",
+      "note": "Encuesta Trimestral de Coste Laboral (ETCL)"
+     },
+     {
+      "code": "139",
+      "name": "EACL",
+      "note": "Encuesta Anual de Coste Laboral"
+     },
+     {
+      "code": "140",
+      "name": "EAES",
+      "note": "Encuesta Anual de Estructura Salarial"
+     },
+     {
+      "code": "6",
+      "name": "ICLA",
+      "note": "Índice de Coste Laboral Armonizado"
+     },
+     {
+      "code": "155",
+      "name": "ECV",
+      "note": "Encuesta de Condiciones de Vida (ECV)"
+     },
+     {
+      "code": "314",
+      "name": "EPF",
+      "note": "Encuesta de Presupuestos Familiares (EPF)"
+     },
+     {
+      "code": "330",
+      "name": "FR",
+      "note": "Movimientos Turísticos en Fronteras"
+     },
+     {
+      "code": "334",
+      "name": "ETR",
+      "note": "Encuesta de turismo de residentes"
+     },
+     {
+      "code": "238",
+      "name": "EOH",
+      "note": "Encuesta de Ocupación Hotelera"
+     },
+     {
+      "code": "241",
+      "name": "EOTR",
+      "note": "Encuesta de Ocupación en Alojamientos de Turismo Rural"
+     },
+     {
+      "code": "63",
+      "name": "IPTR",
+      "note": "Índice de Precios de Alojamientos de Turismo Rural"
+     },
+     {
+      "code": "237",
+      "name": "CNTR2010",
+      "note": "Contabilidad Nacional Trimestral de España: Principales Agregados"
+     }
+    ]
+   },
+   "ine-variables": {
+    "source": "ine-api-tempus",
+    "use": "Filtro tv={variable}:{Id de valor} en DATOS_TABLA; los Id de valor salen de VALORES_VARIABLEOPERACION/{variable}/{operacion} (campo Id, no Codigo)",
+    "verified": "2026-09-30",
+    "entries": [
+     {
+      "code": "3",
+      "name": "Tipo de dato",
+      "note": "72 Dato base"
+     },
+     {
+      "code": "18",
+      "name": "Sexo"
+     },
+     {
+      "code": "19",
+      "name": "Municipios",
+      "note": "8.142 valores en la operación 22"
+     },
+     {
+      "code": "20",
+      "name": "Islas"
+     },
+     {
+      "code": "34",
+      "name": "Tamaño del municipio"
+     },
+     {
+      "code": "70",
+      "name": "Comunidades y Ciudades Autónomas"
+     },
+     {
+      "code": "115",
+      "name": "Provincias"
+     },
+     {
+      "code": "349",
+      "name": "Total Nacional"
+     },
+     {
+      "code": "762",
+      "name": "Grupos ECOICOP",
+      "note": "IPC"
+     },
+     {
+      "code": "763",
+      "name": "Subgrupos ECOICOP",
+      "note": "IPC"
+     },
+     {
+      "code": "764",
+      "name": "Clases ECOICOP",
+      "note": "IPC"
+     },
+     {
+      "code": "765",
+      "name": "Subclases ECOICOP",
+      "note": "IPC"
+     },
+     {
+      "code": "544",
+      "name": "Corrección de efectos",
+      "note": "IPC"
+     }
+    ]
+   },
+   "ine-ccaa": {
+    "source": "ine-api-tempus",
+    "use": "code es el código INE de la comunidad; note da el Id del INE para tv=70:{Id} (padrón, IPC y demás operaciones con variable 70)",
+    "verified": "2026-09-30",
+    "entries": [
+     {
+      "code": "00",
+      "name": "Total Nacional",
+      "note": "tv=70:16473"
+     },
+     {
+      "code": "01",
+      "name": "Andalucía",
+      "note": "tv=70:8997"
+     },
+     {
+      "code": "02",
+      "name": "Aragón",
+      "note": "tv=70:8998"
+     },
+     {
+      "code": "03",
+      "name": "Asturias, Principado de",
+      "note": "tv=70:8999"
+     },
+     {
+      "code": "04",
+      "name": "Balears, Illes",
+      "note": "tv=70:9000"
+     },
+     {
+      "code": "05",
+      "name": "Canarias",
+      "note": "tv=70:9001"
+     },
+     {
+      "code": "06",
+      "name": "Cantabria",
+      "note": "tv=70:9002"
+     },
+     {
+      "code": "07",
+      "name": "Castilla y León",
+      "note": "tv=70:9003"
+     },
+     {
+      "code": "08",
+      "name": "Castilla - La Mancha",
+      "note": "tv=70:9004"
+     },
+     {
+      "code": "09",
+      "name": "Cataluña",
+      "note": "tv=70:9005"
+     },
+     {
+      "code": "10",
+      "name": "Comunitat Valenciana",
+      "note": "tv=70:9006"
+     },
+     {
+      "code": "11",
+      "name": "Extremadura",
+      "note": "tv=70:9007"
+     },
+     {
+      "code": "12",
+      "name": "Galicia",
+      "note": "tv=70:9008"
+     },
+     {
+      "code": "13",
+      "name": "Madrid, Comunidad de",
+      "note": "tv=70:9009"
+     },
+     {
+      "code": "14",
+      "name": "Murcia, Región de",
+      "note": "tv=70:9010"
+     },
+     {
+      "code": "15",
+      "name": "Navarra, Comunidad Foral de",
+      "note": "tv=70:9011"
+     },
+     {
+      "code": "16",
+      "name": "País Vasco",
+      "note": "tv=70:9012"
+     },
+     {
+      "code": "17",
+      "name": "Rioja, La",
+      "note": "tv=70:9013"
+     },
+     {
+      "code": "18",
+      "name": "Ceuta",
+      "note": "tv=70:9015"
+     },
+     {
+      "code": "19",
+      "name": "Melilla",
+      "note": "tv=70:8995"
+     }
+    ]
+   },
+   "ine-provincias": {
+    "source": "ine-api-tempus",
+    "use": "code es el código INE de la provincia (dos dígitos, también IDProvincia en carburantes e id_prov en DataComex); note da el Id para tv=115:{Id}",
+    "verified": "2026-09-30",
+    "entries": [
+     {
+      "code": "01",
+      "name": "Araba/Álava",
+      "note": "tv=115:2"
+     },
+     {
+      "code": "02",
+      "name": "Albacete",
+      "note": "tv=115:3"
+     },
+     {
+      "code": "03",
+      "name": "Alicante/Alacant",
+      "note": "tv=115:4"
+     },
+     {
+      "code": "04",
+      "name": "Almería",
+      "note": "tv=115:5"
+     },
+     {
+      "code": "05",
+      "name": "Ávila",
+      "note": "tv=115:6"
+     },
+     {
+      "code": "06",
+      "name": "Badajoz",
+      "note": "tv=115:7"
+     },
+     {
+      "code": "07",
+      "name": "Balears, Illes",
+      "note": "tv=115:8"
+     },
+     {
+      "code": "08",
+      "name": "Barcelona",
+      "note": "tv=115:9"
+     },
+     {
+      "code": "09",
+      "name": "Burgos",
+      "note": "tv=115:10"
+     },
+     {
+      "code": "10",
+      "name": "Cáceres",
+      "note": "tv=115:11"
+     },
+     {
+      "code": "11",
+      "name": "Cádiz",
+      "note": "tv=115:12"
+     },
+     {
+      "code": "12",
+      "name": "Castellón/Castelló",
+      "note": "tv=115:13"
+     },
+     {
+      "code": "13",
+      "name": "Ciudad Real",
+      "note": "tv=115:14"
+     },
+     {
+      "code": "14",
+      "name": "Córdoba",
+      "note": "tv=115:15"
+     },
+     {
+      "code": "15",
+      "name": "Coruña, A",
+      "note": "tv=115:16"
+     },
+     {
+      "code": "16",
+      "name": "Cuenca",
+      "note": "tv=115:17"
+     },
+     {
+      "code": "17",
+      "name": "Girona",
+      "note": "tv=115:18"
+     },
+     {
+      "code": "18",
+      "name": "Granada",
+      "note": "tv=115:19"
+     },
+     {
+      "code": "19",
+      "name": "Guadalajara",
+      "note": "tv=115:20"
+     },
+     {
+      "code": "20",
+      "name": "Gipuzkoa",
+      "note": "tv=115:21"
+     },
+     {
+      "code": "21",
+      "name": "Huelva",
+      "note": "tv=115:22"
+     },
+     {
+      "code": "22",
+      "name": "Huesca",
+      "note": "tv=115:23"
+     },
+     {
+      "code": "23",
+      "name": "Jaén",
+      "note": "tv=115:24"
+     },
+     {
+      "code": "24",
+      "name": "León",
+      "note": "tv=115:25"
+     },
+     {
+      "code": "25",
+      "name": "Lleida",
+      "note": "tv=115:26"
+     },
+     {
+      "code": "26",
+      "name": "Rioja, La",
+      "note": "tv=115:27"
+     },
+     {
+      "code": "27",
+      "name": "Lugo",
+      "note": "tv=115:28"
+     },
+     {
+      "code": "28",
+      "name": "Madrid",
+      "note": "tv=115:29"
+     },
+     {
+      "code": "29",
+      "name": "Málaga",
+      "note": "tv=115:30"
+     },
+     {
+      "code": "30",
+      "name": "Murcia",
+      "note": "tv=115:31"
+     },
+     {
+      "code": "31",
+      "name": "Navarra",
+      "note": "tv=115:32"
+     },
+     {
+      "code": "32",
+      "name": "Ourense",
+      "note": "tv=115:53"
+     },
+     {
+      "code": "33",
+      "name": "Asturias",
+      "note": "tv=115:33"
+     },
+     {
+      "code": "34",
+      "name": "Palencia",
+      "note": "tv=115:34"
+     },
+     {
+      "code": "35",
+      "name": "Palmas, Las",
+      "note": "tv=115:35"
+     },
+     {
+      "code": "36",
+      "name": "Pontevedra",
+      "note": "tv=115:36"
+     },
+     {
+      "code": "37",
+      "name": "Salamanca",
+      "note": "tv=115:37"
+     },
+     {
+      "code": "38",
+      "name": "Santa Cruz de Tenerife",
+      "note": "tv=115:38"
+     },
+     {
+      "code": "39",
+      "name": "Cantabria",
+      "note": "tv=115:39"
+     },
+     {
+      "code": "40",
+      "name": "Segovia",
+      "note": "tv=115:40"
+     },
+     {
+      "code": "41",
+      "name": "Sevilla",
+      "note": "tv=115:41"
+     },
+     {
+      "code": "42",
+      "name": "Soria",
+      "note": "tv=115:42"
+     },
+     {
+      "code": "43",
+      "name": "Tarragona",
+      "note": "tv=115:43"
+     },
+     {
+      "code": "44",
+      "name": "Teruel",
+      "note": "tv=115:44"
+     },
+     {
+      "code": "45",
+      "name": "Toledo",
+      "note": "tv=115:45"
+     },
+     {
+      "code": "46",
+      "name": "Valencia/València",
+      "note": "tv=115:46"
+     },
+     {
+      "code": "47",
+      "name": "Valladolid",
+      "note": "tv=115:47"
+     },
+     {
+      "code": "48",
+      "name": "Bizkaia",
+      "note": "tv=115:48"
+     },
+     {
+      "code": "49",
+      "name": "Zamora",
+      "note": "tv=115:49"
+     },
+     {
+      "code": "50",
+      "name": "Zaragoza",
+      "note": "tv=115:50"
+     },
+     {
+      "code": "51",
+      "name": "Ceuta",
+      "note": "tv=115:51"
+     },
+     {
+      "code": "52",
+      "name": "Melilla",
+      "note": "tv=115:52"
+     }
+    ]
+   },
+   "datacomex-paises": {
+    "source": "datacomex",
+    "use": "Parámetro pa de ObtenerDatos (3 dígitos, no ISO); los 40 principales destinos de exportación de 2025; los 237 códigos salen de id_pais en una llamada con pa=ALL",
+    "note": "951 y 952 son avituallamiento (combustible y provisiones a buques y aeronaves), no países; Corea del Sur aparece como Corea del",
+    "verified": "2026-09-30",
+    "entries": [
+     {
+      "code": "001",
+      "name": "Francia"
+     },
+     {
+      "code": "004",
+      "name": "Alemania"
+     },
+     {
+      "code": "010",
+      "name": "Portugal"
+     },
+     {
+      "code": "005",
+      "name": "Italia"
+     },
+     {
+      "code": "006",
+      "name": "Reino Unido"
+     },
+     {
+      "code": "400",
+      "name": "Estados Unidos"
+     },
+     {
+      "code": "003",
+      "name": "Países Bajos"
+     },
+     {
+      "code": "017",
+      "name": "Bélgica"
+     },
+     {
+      "code": "204",
+      "name": "Marruecos"
+     },
+     {
+      "code": "060",
+      "name": "Polonia"
+     },
+     {
+      "code": "052",
+      "name": "Turquía"
+     },
+     {
+      "code": "720",
+      "name": "China"
+     },
+     {
+      "code": "412",
+      "name": "México"
+     },
+     {
+      "code": "039",
+      "name": "Suiza"
+     },
+     {
+      "code": "061",
+      "name": "República Checa"
+     },
+     {
+      "code": "066",
+      "name": "Rumanía"
+     },
+     {
+      "code": "030",
+      "name": "Suecia"
+     },
+     {
+      "code": "009",
+      "name": "Grecia"
+     },
+     {
+      "code": "508",
+      "name": "Brasil"
+     },
+     {
+      "code": "647",
+      "name": "Emiratos Árabes"
+     },
+     {
+      "code": "007",
+      "name": "Irlanda"
+     },
+     {
+      "code": "732",
+      "name": "Japón"
+     },
+     {
+      "code": "038",
+      "name": "Austria"
+     },
+     {
+      "code": "008",
+      "name": "Dinamarca"
+     },
+     {
+      "code": "064",
+      "name": "Hungría"
+     },
+     {
+      "code": "632",
+      "name": "Arabia Saudí"
+     },
+     {
+      "code": "063",
+      "name": "Eslovaquia"
+     },
+     {
+      "code": "404",
+      "name": "Canadá"
+     },
+     {
+      "code": "208",
+      "name": "Argelia"
+     },
+     {
+      "code": "664",
+      "name": "India"
+     },
+     {
+      "code": "800",
+      "name": "Australia"
+     },
+     {
+      "code": "728",
+      "name": "Corea del"
+     },
+     {
+      "code": "512",
+      "name": "Chile"
+     },
+     {
+      "code": "220",
+      "name": "Egipto"
+     },
+     {
+      "code": "624",
+      "name": "Israel"
+     },
+     {
+      "code": "388",
+      "name": "Sudáfrica"
+     },
+     {
+      "code": "043",
+      "name": "Andorra"
+     },
+     {
+      "code": "028",
+      "name": "Noruega"
+     },
+     {
+      "code": "951",
+      "name": "Avituall.y combust.intercambios"
+     },
+     {
+      "code": "952",
+      "name": "Avituallamiento terceros"
+     }
+    ]
+   },
+   "aemet-estaciones-capitales": {
+    "source": "aemet-opendata",
+    "use": "Parámetro {idema} en observación por estación y valores climatológicos; una estación por capital de provincia (nombre oficial en name, ciudad en note); las 926 con inventarioestaciones/todasestaciones",
+    "note": "Cuando la capital tiene observatorio y aeropuerto se ha elegido el observatorio urbano salvo Córdoba, Logroño, Bilbao, Burgos, Granada, Málaga, Sevilla, Vitoria y Zaragoza, donde el aeropuerto es la estación de referencia",
+    "verified": "2026-09-30",
+    "entries": [
+     {
+      "code": "8178D",
+      "name": "ALBACETE",
+      "note": "Albacete"
+     },
+     {
+      "code": "8019",
+      "name": "ALICANTE-ELCHE AEROPUERTO",
+      "note": "Alicante"
+     },
+     {
+      "code": "6297",
+      "name": "ALMERÍA",
+      "note": "Almería"
+     },
+     {
+      "code": "2444",
+      "name": "ÁVILA",
+      "note": "Ávila"
+     },
+     {
+      "code": "4478X",
+      "name": "BADAJOZ",
+      "note": "Badajoz"
+     },
+     {
+      "code": "0201D",
+      "name": "BARCELONA, PORT OLÍMPIC",
+      "note": "Barcelona"
+     },
+     {
+      "code": "1082",
+      "name": "BILBAO AEROPUERTO",
+      "note": "Bilbao"
+     },
+     {
+      "code": "2331",
+      "name": "BURGOS AEROPUERTO",
+      "note": "Burgos"
+     },
+     {
+      "code": "3469A",
+      "name": "CÁCERES",
+      "note": "Cáceres"
+     },
+     {
+      "code": "5973",
+      "name": "CÁDIZ",
+      "note": "Cádiz"
+     },
+     {
+      "code": "8500A",
+      "name": "CASTELLÓ - ALMASSORA",
+      "note": "Castellón de la Plana"
+     },
+     {
+      "code": "4121",
+      "name": "CIUDAD REAL",
+      "note": "Ciudad Real"
+     },
+     {
+      "code": "5402",
+      "name": "CÓRDOBA AEROPUERTO",
+      "note": "Córdoba"
+     },
+     {
+      "code": "1387",
+      "name": "A CORUÑA",
+      "note": "A Coruña"
+     },
+     {
+      "code": "8096",
+      "name": "CUENCA",
+      "note": "Cuenca"
+     },
+     {
+      "code": "0370E",
+      "name": "GIRONA",
+      "note": "Girona"
+     },
+     {
+      "code": "5530E",
+      "name": "GRANADA AEROPUERTO",
+      "note": "Granada"
+     },
+     {
+      "code": "3168D",
+      "name": "GUADALAJARA",
+      "note": "Guadalajara"
+     },
+     {
+      "code": "1024E",
+      "name": "DONOSTIA / SAN SEBASTIÁN, IGELDO",
+      "note": "Donostia / San Sebastián"
+     },
+     {
+      "code": "4605",
+      "name": "HUELVA",
+      "note": "Huelva"
+     },
+     {
+      "code": "9901X",
+      "name": "HUESCA",
+      "note": "Huesca"
+     },
+     {
+      "code": "5270B",
+      "name": "JAÉN",
+      "note": "Jaén"
+     },
+     {
+      "code": "2661",
+      "name": "LEÓN, VIRGEN DEL CAMINO",
+      "note": "León"
+     },
+     {
+      "code": "9771C",
+      "name": "LLEIDA",
+      "note": "Lleida"
+     },
+     {
+      "code": "9170",
+      "name": "LOGROÑO, AEROPUERTO",
+      "note": "Logroño"
+     },
+     {
+      "code": "1518A",
+      "name": "LUGO",
+      "note": "Lugo"
+     },
+     {
+      "code": "3195",
+      "name": "MADRID, RETIRO",
+      "note": "Madrid"
+     },
+     {
+      "code": "6155A",
+      "name": "MÁLAGA AEROPUERTO",
+      "note": "Málaga"
+     },
+     {
+      "code": "7178I",
+      "name": "MURCIA",
+      "note": "Murcia"
+     },
+     {
+      "code": "9262",
+      "name": "PAMPLONA",
+      "note": "Pamplona"
+     },
+     {
+      "code": "1690A",
+      "name": "OURENSE",
+      "note": "Ourense"
+     },
+     {
+      "code": "1249I",
+      "name": "OVIEDO",
+      "note": "Oviedo"
+     },
+     {
+      "code": "2401X",
+      "name": "PALENCIA",
+      "note": "Palencia"
+     },
+     {
+      "code": "B228",
+      "name": "PALMA, PUERTO",
+      "note": "Palma"
+     },
+     {
+      "code": "C659M",
+      "name": "LAS PALMAS DE GRAN CANARIA, PL. DE LA FERIA",
+      "note": "Las Palmas de Gran Canaria"
+     },
+     {
+      "code": "1484C",
+      "name": "PONTEVEDRA",
+      "note": "Pontevedra"
+     },
+     {
+      "code": "2870",
+      "name": "SALAMANCA",
+      "note": "Salamanca"
+     },
+     {
+      "code": "C449C",
+      "name": "STA.CRUZ DE TENERIFE",
+      "note": "Santa Cruz de Tenerife"
+     },
+     {
+      "code": "1111",
+      "name": "SANTANDER",
+      "note": "Santander"
+     },
+     {
+      "code": "2465",
+      "name": "SEGOVIA",
+      "note": "Segovia"
+     },
+     {
+      "code": "5783",
+      "name": "SEVILLA AEROPUERTO",
+      "note": "Sevilla"
+     },
+     {
+      "code": "2030",
+      "name": "SORIA",
+      "note": "Soria"
+     },
+     {
+      "code": "0042Y",
+      "name": "TARRAGONA",
+      "note": "Tarragona"
+     },
+     {
+      "code": "8368U",
+      "name": "TERUEL",
+      "note": "Teruel"
+     },
+     {
+      "code": "3260B",
+      "name": "TOLEDO",
+      "note": "Toledo"
+     },
+     {
+      "code": "8416X",
+      "name": "VALENCIA, UPV",
+      "note": "Valencia"
+     },
+     {
+      "code": "2422",
+      "name": "VALLADOLID",
+      "note": "Valladolid"
+     },
+     {
+      "code": "9091R",
+      "name": "VITORIA-GASTEIZ AEROPUERTO",
+      "note": "Vitoria-Gasteiz"
+     },
+     {
+      "code": "2614",
+      "name": "ZAMORA",
+      "note": "Zamora"
+     },
+     {
+      "code": "9434",
+      "name": "ZARAGOZA, AEROPUERTO",
+      "note": "Zaragoza"
+     },
+     {
+      "code": "5000C",
+      "name": "CEUTA",
+      "note": "Ceuta"
+     },
+     {
+      "code": "6000A",
+      "name": "MELILLA",
+      "note": "Melilla"
+     }
+    ]
+   },
+   "boe-secciones": {
+    "source": "boe-api-sumario",
+    "use": "Código de seccion en el sumario JSON y parámetro s de los RSS del BOE (boe.php?s=1); vistos en sumarios de 2024 a 2026",
+    "verified": "2026-09-30",
+    "entries": [
+     {
+      "code": "1",
+      "name": "I. Disposiciones generales"
+     },
+     {
+      "code": "2A",
+      "name": "II. Autoridades y personal. - A. Nombramientos, situaciones e incidencias"
+     },
+     {
+      "code": "2B",
+      "name": "II. Autoridades y personal. - B. Oposiciones y concursos"
+     },
+     {
+      "code": "3",
+      "name": "III. Otras disposiciones"
+     },
+     {
+      "code": "4",
+      "name": "IV. Administración de Justicia"
+     },
+     {
+      "code": "5A",
+      "name": "V. Anuncios. - A. Contratación del Sector Público"
+     },
+     {
+      "code": "5B",
+      "name": "V. Anuncios. - B. Otros anuncios oficiales"
+     },
+     {
+      "code": "5C",
+      "name": "V. Anuncios. - C. Anuncios particulares"
+     }
+    ]
+   },
+   "boe-rangos": {
+    "source": "boe-api-legislacion-consolidada",
+    "use": "rango.codigo en el listado y metadatos de legislación consolidada y atributo codigo de rango en el XML de cada disposición; lista de datos-auxiliares/rangos",
+    "verified": "2026-09-30",
+    "entries": [
+     {
+      "code": "1020",
+      "name": "Acuerdo"
+     },
+     {
+      "code": "1180",
+      "name": "Acuerdo Internacional"
+     },
+     {
+      "code": "1390",
+      "name": "Circular"
+     },
+     {
+      "code": "1070",
+      "name": "Constitución"
+     },
+     {
+      "code": "1510",
+      "name": "Decreto"
+     },
+     {
+      "code": "1480",
+      "name": "Decreto Foral Legislativo"
+     },
+     {
+      "code": "1470",
+      "name": "Decreto Legislativo"
+     },
+     {
+      "code": "1500",
+      "name": "Decreto-ley"
+     },
+     {
+      "code": "1325",
+      "name": "Decreto-ley Foral"
+     },
+     {
+      "code": "1410",
+      "name": "Instrucción"
+     },
+     {
+      "code": "1300",
+      "name": "Ley"
+     },
+     {
+      "code": "1450",
+      "name": "Ley Foral"
+     },
+     {
+      "code": "1290",
+      "name": "Ley Orgánica"
+     },
+     {
+      "code": "1350",
+      "name": "Orden"
+     },
+     {
+      "code": "1340",
+      "name": "Real Decreto"
+     },
+     {
+      "code": "1310",
+      "name": "Real Decreto Legislativo"
+     },
+     {
+      "code": "1320",
+      "name": "Real Decreto-ley"
+     },
+     {
+      "code": "1220",
+      "name": "Reglamento"
+     },
+     {
+      "code": "1370",
+      "name": "Resolución"
+     }
+    ]
+   },
+   "boe-ambitos": {
+    "source": "boe-api-legislacion-consolidada",
+    "use": "ambito.codigo en legislación consolidada; datos-auxiliares/ambitos",
+    "note": "datos-auxiliares/departamentos devuelve 211 códigos (115 de ministerios históricos) y materias varios miles; secciones y origenes-legislativos responden 404",
+    "verified": "2026-09-30",
+    "entries": [
+     {
+      "code": "1",
+      "name": "Estatal"
+     },
+     {
+      "code": "2",
+      "name": "Autonómico"
+     }
+    ]
+   },
+   "carburantes-productos": {
+    "source": "minetur-precios-carburantes",
+    "use": "IDPRODUCTO en FiltroProducto y FiltroProvinciaProducto; en la respuesta cada producto es una clave 'Precio {nombre}' de ListaEESSPrecio; lista con Listados/ProductosPetroliferos",
+    "verified": "2026-09-30",
+    "entries": [
+     {
+      "code": "1",
+      "name": "Gasolina 95 E5"
+     },
+     {
+      "code": "23",
+      "name": "Gasolina 95 E10"
+     },
+     {
+      "code": "24",
+      "name": "Gasolina 95 E25"
+     },
+     {
+      "code": "25",
+      "name": "Gasolina 95 E85"
+     },
+     {
+      "code": "20",
+      "name": "Gasolina 95 E5 Premium"
+     },
+     {
+      "code": "3",
+      "name": "Gasolina 98 E5"
+     },
+     {
+      "code": "21",
+      "name": "Gasolina 98 E10"
+     },
+     {
+      "code": "4",
+      "name": "Gasóleo A habitual"
+     },
+     {
+      "code": "5",
+      "name": "Gasóleo Premium"
+     },
+     {
+      "code": "6",
+      "name": "Gasóleo B"
+     },
+     {
+      "code": "7",
+      "name": "Gasóleo C"
+     },
+     {
+      "code": "16",
+      "name": "Bioetanol"
+     },
+     {
+      "code": "8",
+      "name": "Biodiésel"
+     },
+     {
+      "code": "17",
+      "name": "Gases licuados del petróleo"
+     },
+     {
+      "code": "18",
+      "name": "Gas natural comprimido"
+     },
+     {
+      "code": "19",
+      "name": "Gas natural licuado"
+     },
+     {
+      "code": "22",
+      "name": "Hidrógeno"
+     },
+     {
+      "code": "9",
+      "name": "Fuelóleo bajo índice azufre"
+     },
+     {
+      "code": "10",
+      "name": "Fuelóleo especial"
+     },
+     {
+      "code": "11",
+      "name": "Gasóleo para uso marítimo"
+     },
+     {
+      "code": "12",
+      "name": "Gasolina de aviación"
+     },
+     {
+      "code": "13",
+      "name": "Queroseno de aviación JET_A1"
+     },
+     {
+      "code": "14",
+      "name": "Queroseno de aviación JET_A2"
+     },
+     {
+      "code": "26",
+      "name": "Adblue"
+     },
+     {
+      "code": "27",
+      "name": "Diésel renovable"
+     },
+     {
+      "code": "28",
+      "name": "Gasolina renovable"
+     },
+     {
+      "code": "29",
+      "name": "Metanol"
+     },
+     {
+      "code": "30",
+      "name": "Amoniaco"
+     },
+     {
+      "code": "31",
+      "name": "Biogas natural comprimido"
+     },
+     {
+      "code": "32",
+      "name": "Biogas natural licuado"
+     }
+    ]
+   },
+   "ree-geo-ids": {
+    "source": "ree-redata",
+    "use": "geo_ids con geo_trunc=electric_system y geo_limit; solo los tres verificados",
+    "note": "Los geo_ids de comunidades autónomas probados el 2026-09-30 no devolvieron datos; no localizada la lista oficial",
+    "verified": "2026-09-30",
+    "entries": [
+     {
+      "code": "8741",
+      "name": "Península"
+     },
+     {
+      "code": "8742",
+      "name": "Canarias"
+     },
+     {
+      "code": "8743",
+      "name": "Baleares"
+     }
+    ]
+   }
+  }
  }
 }

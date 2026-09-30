@@ -20,6 +20,7 @@ endpoints:
   - path: https://www.omie.es/es/file-download?parents%5B0%5D={carpeta}&filename={carpeta}_{AAAAMMDD}.{version}
     desc: Fichero diario de una carpeta; marginalpdbc (precio España), marginalpdbcpt (Portugal), pdbc_stota (programas), curva_pbc, cab y det (ofertas), precios_pibcic
     example: curl -s "https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_20260929.1"
+    returns: "Texto separado por ; con cabecera MARGINALPDBC; y filas AAAA;MM;DD;periodo;precio;precio; (EUR/MWh, decimal con punto) más una fila final con asterisco; sin cabecera de columnas"
   - path: https://www.omie.es/es/file-download?parents%5B0%5D=marginalpibc&filename=marginalpibc_{AAAAMMDD}{SS}.1
     desc: Precio marginal del intradiario de subastas; SS es la sesión (01 a 03 en 2026)
     example: curl -s "https://www.omie.es/es/file-download?parents%5B0%5D=marginalpibc&filename=marginalpibc_2026092901.1"

@@ -28,6 +28,7 @@ endpoints:
     desc: Búsqueda de texto libre por POST JSON (Elasticsearch de GeoNetwork; query_string, size, _source); hits.hits[]._source con resourceTitleObject y resourceType
     example: |-
       curl -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{"query":{"query_string":{"query":"temperatura"}},"size":5}' "https://nodc.ieo.es/geonetwork/srv/api/search/records/_search"
+    returns: "Elasticsearch {hits:{total:{value}, hits:[{_id, _source:{metadataIdentifier, resourceTitleObject{default}, resourceAbstractObject, resourceType[], link:[{protocol, url, name}], format[], Org, inspireTheme, dateStamp}}]}}"
   - path: https://nodc.ieo.es/geonetwork/srv/spa/catalog.search
     desc: Interfaz web del catálogo (JavaScript); las fichas se enlazan como #/metadata/{uuid}
 quirks: [errors-html-or-xml, js-rendered]
