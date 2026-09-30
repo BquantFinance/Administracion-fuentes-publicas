@@ -776,3 +776,82 @@
       min_bytes: 10000
       read_bytes: 1024
   verified: "2026-09-30"
+
+- id: precio-electricidad-horario
+  intent: Precio de la electricidad por hora o cuarto de hora (mercado diario, PVPC y spot) y demanda del día
+  inputs: []
+  steps:
+    - source: omie-mercado
+      do: "Precio marginal oficial en marginalpdbc_{AAAAMMDD}.1 (96 periodos cuarto-horarios en 2026; cabecera, filas AAAA;MM;DD;periodo;precio;precio y asterisco final); el fichero del día siguiente se publica por la tarde"
+      example: curl -s "https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_20260929.1"
+    - source: ree-redata
+      do: "PVPC y precio spot por hora en mercados/precios-mercados-tiempo-real con time_trunc=hour (hasta tres días por petición); demanda real y prevista en demanda/demanda-tiempo-real; reintentar ante el 403 del WAF"
+      example: curl -s "https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real?start_date=2026-09-29T00:00&end_date=2026-09-29T23:59&time_trunc=hour"
+  output: fichero de texto con 96 precios (OMIE) y JSON con series PVPC (1001) y spot (600) por hora (REData)
+  checks:
+    - url: https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_20260929.1
+      contains: MARGINALPDBC
+    - url: https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real?start_date=2026-09-29T00:00&end_date=2026-09-29T23:59&time_trunc=hour
+      headers: {Accept: application/json}
+      contains: PVPC
+      retries: 10
+      read_bytes: 200000
+  verified: "2026-09-30"
+
+- id: medicamento-precio-financiado
+  intent: Precio de venta, precio de referencia y aportación de un medicamento financiado, con su ficha técnica
+  inputs: [cn-medicamento]
+  steps:
+    - source: sanidad-nomenclator-facturacion
+      do: "Descargar el nomenclátor completo (?metodo=nomenclatorExcel, 7 MB, hoja PRODUCTOS) y filtrar por Código Nacional; PVP con IVA, Precio de referencia, Aportación del beneficiario y agrupación homogénea; leer el código como texto"
+      example: curl -s -o nomenclator.xls "https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorExcel"
+    - source: aemps-cima-api
+      do: "medicamento?cn={cn} para composición, presentaciones, estado de autorización y ficha técnica; CIMA no trae precios y el nomenclátor no trae los no financiados"
+      example: curl -s "https://cima.aemps.es/cima/rest/medicamento?cn=708201"
+  output: fila del nomenclátor con precios y financiación más el JSON de CIMA
+  checks:
+    - url: https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorExcel
+      read_bytes: 65536
+      min_bytes: 60000
+    - url: https://www.sanidad.gob.es/profesionales/nomenclator.do
+      contains: codnacional
+      read_bytes: 200000
+  verified: "2026-09-30"
+
+- id: geometria-seccion-censal
+  intent: Geometría de las secciones censales, distritos o municipios de un año para mapear datos del INE
+  inputs: [seccion-censal, ine-municipio]
+  steps:
+    - source: ine-cartografia-censal
+      do: "seccionado_{AAAA}.zip del mismo año que el dato (65 MB, shapefile ETRS89 UTM 30); CUSEC es la sección de 10 dígitos, CUDIS el distrito y CUMUN el municipio; disolver por CUMUN para municipios"
+      example: curl -sO "https://www.ine.es/prodyser/cartografia/seccionado_2026.zip"
+    - source: ine-api-tempus
+      do: "Los datos por sección (Atlas de distribución de renta) o por municipio se cruzan por esos códigos, cargados como texto con ceros a la izquierda"
+  output: GeoDataFrame con una fila por sección y los códigos territoriales
+  checks:
+    - url: https://www.ine.es/prodyser/cartografia/seccionado_2026.zip
+      read_bytes: 1024
+    - url: https://www.ine.es/prodyser/cartografia/seccionado_2019.zip
+      read_bytes: 1024
+  verified: "2026-09-30"
+
+- id: horarios-tren-gtfs
+  intent: Horarios y paradas de Cercanías y de alta velocidad en GTFS, con las coordenadas de las estaciones
+  inputs: []
+  steps:
+    - source: renfe-datos-abiertos
+      do: "GTFS estáticos con URL fija (google_transit.zip para AV, LD y MD; fomento_transit.zip para Cercanías); sin feed_info, la fecha de versión está en last_modified de package_show"
+      example: curl -sO "https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip"
+    - source: renfe-datos-abiertos
+      do: "estaciones.csv (ISO-8859-1, separador ;) con CODIGO, LATITUD y LONGITUD para geolocalizar; los feeds GTFS-RT de gtfsrt.renfe.com no respondieron desde el entorno de verificación"
+      example: curl -sO "https://ssl.renfe.com/ftransit/Fichero_estaciones/estaciones.csv"
+  output: ZIP GTFS y CSV de estaciones
+  checks:
+    - url: https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip
+      min_bytes: 500000
+      read_bytes: 1024
+    - url: https://ssl.renfe.com/ftransit/Fichero_estaciones/estaciones.csv
+      contains: CODIGO
+      read_bytes: 4096
+      retries: 3
+  verified: "2026-09-30"

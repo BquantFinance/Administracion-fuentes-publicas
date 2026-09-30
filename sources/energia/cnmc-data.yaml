@@ -43,10 +43,10 @@ gotchas:
   - Nombres de campo normalizados sin tildes ni ñ (compannia_comercializadora_de_gas); la etiqueta original está en fields[].info.label del datastore.
   - CSV con coma como separador, UTF-8 y cinco decimales fijos en los numéricos (2496967.00000); la primera columna siempre es _id, índice del datastore.
   - Un dataset es una tabla de una publicación (Tabla 10, Tabla 17), no una serie; buscar por texto del título y comprobar periodo y frecuenciaActualizacion en extras.
-  - Datos de operación del sistema eléctrico (demanda, generación en tiempo real) no están aquí sino en Red Eléctrica (empresa participada, fase posterior).
+  - Datos de operación del sistema eléctrico (demanda, generación, PVPC) no están aquí sino en Red Eléctrica (ree-redata) y el precio marginal del mercado en omie-mercado.
 tips:
   - "pandas.read_csv('https://catalogodatos.cnmc.es/datastore/dump/{id}') carga la tabla directamente; para el catálogo completo, package_search?rows=1000 y fq=organization:org_energia."
   - Ejemplos oficiales de uso de la API en gitlab.cnmc.es/cnmcdata/cnmcdata-api-ejemplos.
-related: [minetur-precios-carburantes, miteco-energia-estadisticas]
+related: [minetur-precios-carburantes, miteco-energia-estadisticas, ree-redata, omie-mercado]
 status: active
 verified: "2026-09-30"

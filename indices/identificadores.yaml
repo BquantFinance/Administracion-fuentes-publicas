@@ -19,6 +19,8 @@ ine-municipio:
       how: sin equivalencia; Listados/Municipios usa IDMunicipio propio y solo comparte IDProvincia (INE)
     - via: sanidad-portal-estadistico
       how: el Catálogo de Hospitales lo guarda con dígito de control (6 dígitos)
+    - via: ine-cartografia-censal
+      how: CUMUN en el shapefile de secciones censales; disolver por CUMUN da el contorno municipal del año
 ine-provincia:
   format: 2 dígitos, 01 a 52
   regex: '^(0[1-9]|[1-4]\d|5[0-2])$'
@@ -50,9 +52,11 @@ seccion-censal:
   format: 10 dígitos, municipio (5) + distrito (2) + sección (3)
   regex: '^\d{10}$'
   example: "2807901001"
-  issuer: null
+  issuer: ine-cartografia-censal
   gotcha: las secciones se redibujan cada año; usar la geometría del mismo año que el dato
   joins:
+    - via: ine-cartografia-censal
+      how: geometría anual con CUSEC (sección), CUDIS (distrito) y CUMUN (municipio)
     - via: ine-api-tempus
       how: renta por sección en el Atlas de distribución de renta (operación del INE)
     - via: mitma-opendata-movilidad
@@ -173,6 +177,8 @@ cn-medicamento:
   joins:
     - via: aemps-cima-api
       how: medicamento?cn= devuelve el nregistro y todas las presentaciones; psuministro lista problemas por cn
+    - via: sanidad-nomenclator-facturacion
+      how: precio de venta, precio de referencia, aportación y agrupación homogénea por Código Nacional (solo financiados)
 boe-id:
   format: BOE-A-AAAA-NNNNN (disposición), BOE-B-AAAA-NNNNN (anuncio), BORME-A-AAAA-NNN-PP (PP código de provincia)
   regex: '^(BOE-[ABC]-\d{4}-\d{1,6}|BORME-[ABC]-\d{4}-\d{1,5}(-\d{2})?)$'

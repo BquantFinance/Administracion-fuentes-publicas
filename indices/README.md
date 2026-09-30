@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 37 recetas, 91 necesidades, 19 identificadores, 58 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 41 recetas, 95 necesidades, 19 identificadores, 58 rutas muertas.
 
 ## Recetas por intención
 
@@ -45,6 +45,10 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 | `dataset-cnmc-a-csv` | Descargar un dataset de la CNMC (energía, telecomunicaciones, postal) como CSV o consultarlo por API | cnmc-data | 2026-09-30 |
 | `convenio-colectivo-regcon` | Consultar un convenio colectivo por código, denominación o CNAE en REGCON | mites-estadisticas | 2026-09-30 |
 | `deficit-y-ejecucion-presupuestaria` | Déficit mensual de las Administraciones Públicas y ejecución del presupuesto del Estado | igae-ejecucion-presupuestaria, hacienda-ovef | 2026-09-30 |
+| `precio-electricidad-horario` | Precio de la electricidad por hora o cuarto de hora (mercado diario, PVPC y spot) y demanda del día | omie-mercado, ree-redata | 2026-09-30 |
+| `medicamento-precio-financiado` | Precio de venta, precio de referencia y aportación de un medicamento financiado, con su ficha técnica | sanidad-nomenclator-facturacion, aemps-cima-api | 2026-09-30 |
+| `geometria-seccion-censal` | Geometría de las secciones censales, distritos o municipios de un año para mapear datos del INE | ine-cartografia-censal, ine-api-tempus | 2026-09-30 |
+| `horarios-tren-gtfs` | Horarios y paradas de Cercanías y de alta velocidad en GTFS, con las coordenadas de las estaciones | renfe-datos-abiertos | 2026-09-30 |
 
 ### Pasos
 
@@ -479,6 +483,49 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 3. `hacienda-ovef`: Ejecución trimestral de las entidades locales en un xls por trimestre desde 2017
 - salida: xlsx con cuadros por subsector
 
+**precio-electricidad-horario** · Precio de la electricidad por hora o cuarto de hora (mercado diario, PVPC y spot) y demanda del día
+1. `omie-mercado`: Precio marginal oficial en marginalpdbc_{AAAAMMDD}.1 (96 periodos cuarto-horarios en 2026; cabecera, filas AAAA;MM;DD;periodo;precio;precio y asterisco final); el fichero del día siguiente se publica por la tarde
+   ```
+   curl -s "https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_20260929.1"
+   ```
+2. `ree-redata`: PVPC y precio spot por hora en mercados/precios-mercados-tiempo-real con time_trunc=hour (hasta tres días por petición); demanda real y prevista en demanda/demanda-tiempo-real; reintentar ante el 403 del WAF
+   ```
+   curl -s "https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real?start_date=2026-09-29T00:00&end_date=2026-09-29T23:59&time_trunc=hour"
+   ```
+- salida: fichero de texto con 96 precios (OMIE) y JSON con series PVPC (1001) y spot (600) por hora (REData)
+
+**medicamento-precio-financiado** · Precio de venta, precio de referencia y aportación de un medicamento financiado, con su ficha técnica
+- entrada: cn-medicamento
+1. `sanidad-nomenclator-facturacion`: Descargar el nomenclátor completo (?metodo=nomenclatorExcel, 7 MB, hoja PRODUCTOS) y filtrar por Código Nacional; PVP con IVA, Precio de referencia, Aportación del beneficiario y agrupación homogénea; leer el código como texto
+   ```
+   curl -s -o nomenclator.xls "https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorExcel"
+   ```
+2. `aemps-cima-api`: medicamento?cn={cn} para composición, presentaciones, estado de autorización y ficha técnica; CIMA no trae precios y el nomenclátor no trae los no financiados
+   ```
+   curl -s "https://cima.aemps.es/cima/rest/medicamento?cn=708201"
+   ```
+- salida: fila del nomenclátor con precios y financiación más el JSON de CIMA
+
+**geometria-seccion-censal** · Geometría de las secciones censales, distritos o municipios de un año para mapear datos del INE
+- entrada: seccion-censal, ine-municipio
+1. `ine-cartografia-censal`: seccionado_{AAAA}.zip del mismo año que el dato (65 MB, shapefile ETRS89 UTM 30); CUSEC es la sección de 10 dígitos, CUDIS el distrito y CUMUN el municipio; disolver por CUMUN para municipios
+   ```
+   curl -sO "https://www.ine.es/prodyser/cartografia/seccionado_2026.zip"
+   ```
+2. `ine-api-tempus`: Los datos por sección (Atlas de distribución de renta) o por municipio se cruzan por esos códigos, cargados como texto con ceros a la izquierda
+- salida: GeoDataFrame con una fila por sección y los códigos territoriales
+
+**horarios-tren-gtfs** · Horarios y paradas de Cercanías y de alta velocidad en GTFS, con las coordenadas de las estaciones
+1. `renfe-datos-abiertos`: GTFS estáticos con URL fija (google_transit.zip para AV, LD y MD; fomento_transit.zip para Cercanías); sin feed_info, la fecha de versión está en last_modified de package_show
+   ```
+   curl -sO "https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip"
+   ```
+2. `renfe-datos-abiertos`: estaciones.csv (ISO-8859-1, separador ;) con CODIGO, LATITUD y LONGITUD para geolocalizar; los feeds GTFS-RT de gtfsrt.renfe.com no respondieron desde el entorno de verificación
+   ```
+   curl -sO "https://ssl.renfe.com/ftransit/Fichero_estaciones/estaciones.csv"
+   ```
+- salida: ZIP GTFS y CSV de estaciones
+
 ## Dónde está cada cosa
 
 **Legislación y boletines oficiales**
@@ -543,6 +590,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Parcelario, edificios y direcciones vectoriales por municipio (INSPIRE) → `catastro-ovc`
 - Ortofotos PNOA, modelos del terreno, LiDAR y límites municipales → `cnig-centro-descargas` (descargas con reCAPTCHA; WMS, WMTS y WFS sin restricción)
 - Geocodificar una dirección y obtener su código INE → `cnig-centro-descargas` (geocoder CartoCiudad)
+- Geometría de secciones censales, distritos y municipios por año → `ine-cartografia-censal` (shapefile anual del INE; los límites municipales oficiales del IGN están tras reCAPTCHA (cnig-centro-descargas))
 - Localizar cualquier servicio WMS, WFS o CSW de una Administración → `idee-servicios`
 
 **Meteorología y clima**
@@ -559,11 +607,14 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Precios de carburantes por gasolinera → `minetur-precios-carburantes`
 - Comercializadoras, cambios de suministrador, bono social, garantías de origen → `cnmc-data`
 - Consumo de productos petrolíferos y gas por provincia, balances energéticos → `miteco-energia-estadisticas` (series de CORES en xlsx; el ministerio publica PDF)
+- Demanda, generación por tecnología, PVPC y precio spot horarios → `ree-redata` (WAF intermitente; reintentar; ESIOS exige token)
+- Precio marginal del mercado diario e intradiario, curvas y programas de casación → `omie-mercado` (ficheros de texto por día; 96 periodos cuarto-horarios en 2026)
 - Registro de instalaciones de producción eléctrica y autoconsumo → `miteco-energia-estadisticas` (no localizada descarga abierta; PRETOR da 404)
 - Telecomunicaciones (líneas, operadores, audiovisual) → `cnmc-data`
 
 **Sanidad y medicamentos**
-- Medicamentos, presentaciones, fichas técnicas y problemas de suministro → `aemps-cima-api`
+- Medicamentos, presentaciones, fichas técnicas y problemas de suministro → `aemps-cima-api` (sin precios; precios y financiación en sanidad-nomenclator-facturacion)
+- Precios, financiación y aportación de medicamentos (nomenclátor de facturación) → `sanidad-nomenclator-facturacion`
 - Ensayos clínicos (REEC) y alertas de seguridad → `aemps-otros-registros` (sin API; el REEC exige sesión)
 - Exceso de mortalidad (MoMo), COVID-19, boletines epidemiológicos, gripe → `isciii-cne`
 - Hospitales, altas hospitalarias e indicadores del Sistema Nacional de Salud → `sanidad-portal-estadistico` (solo el Catálogo de Hospitales tiene descarga directa)
@@ -586,6 +637,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Incidencias de tráfico, detectores, radares, zonas de bajas emisiones, puntos de recarga → `dgt-datex-trafico`
 - Matriculaciones, bajas, parque de vehículos y conductores (microdatos) → `dgt-estadisticas` (no localizados microdatos de accidentes, solo tablas)
 - Matrices origen-destino de movilidad por telefonía móvil → `mitma-opendata-movilidad` (el host de datos respondió 403 desde el entorno de verificación)
+- Horarios de trenes (GTFS), estaciones con coordenadas y posiciones en tiempo real → `renfe-datos-abiertos` (GTFS-RT no verificado desde el entorno; Adif sin portal localizado)
 - Tráfico portuario mensual por autoridad portuaria → `puertos-estado-datos`
 - Tráfico aéreo por aeropuerto y registro de aeronaves → `aesa-aviacion` (degradada; sin ficheros verificados)
 
@@ -610,7 +662,6 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **Sin fuente en el catálogo**
 - Cotizaciones bursátiles y precios de mercado (BME, OMIE) → ninguna (fuera del alcance actual; BME es privado y OMIE no está aún en el catálogo)
-- Generación eléctrica, demanda y precios del mercado (REE, OMIE) → ninguna (no está aún en el catálogo (REData y OMIE, siguientes por impacto))
 - Estadística judicial y sentencias → ninguna (Poder Judicial (CGPJ, CENDOJ) fuera del alcance actual)
 - Ayuda oficial al desarrollo y acción exterior → ninguna (sin fuente en el catálogo todavía)
 
@@ -618,11 +669,11 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 | id | formato | regex | ejemplo | emisor | lo usan |
 |---|---|---|---|---|---|
-| ine-municipio | 5 dígitos, provincia (2) + municipio (3); algunos ficheros añaden un sexto dígito de control | `^\d{5}$` | 28079 | ine-codigos-territoriales | mapa-sigpac, ine-codigos-territoriales, miteco-calidad-aire, aemet-opendata, sanidad-portal-estadistico, catastro-ovc, cnig-centro-descargas, dgt-estadisticas, mitma-opendata-movilidad |
-| ine-provincia | 2 dígitos, 01 a 52 | `^(0[1-9]|[1-4]\d|5[0-2])$` | 28 | ine-codigos-territoriales | mapa-sigpac, datacomex, minetur-precios-carburantes, miteco-energia-estadisticas, ine-codigos-territoriales, ine-microdatos, dir3-directorio, miteco-calidad-aire, sanidad-portal-estadistico, catastro-ovc, cnig-centro-descargas, dgt-estadisticas |
-| ccaa | 2 dígitos, 01 Andalucía a 19 Melilla, en el orden del INE | `^(0[1-9]|1\d)$` | 13 | ine-codigos-territoriales | ine-codigos-territoriales, ine-microdatos, isciii-cne, sanidad-portal-estadistico, cnig-centro-descargas |
-| nuts | ES más 1 a 3 caracteres (ES1, ES11, ES111) | `^ES[1-7]\d{0,2}$` | ES300 | — | — |
-| seccion-censal | 10 dígitos, municipio (5) + distrito (2) + sección (3) | `^\d{10}$` | 2807901001 | — | — |
+| ine-municipio | 5 dígitos, provincia (2) + municipio (3); algunos ficheros añaden un sexto dígito de control | `^\d{5}$` | 28079 | ine-codigos-territoriales | mapa-sigpac, ine-codigos-territoriales, miteco-calidad-aire, aemet-opendata, sanidad-portal-estadistico, catastro-ovc, cnig-centro-descargas, ine-cartografia-censal, dgt-estadisticas, mitma-opendata-movilidad |
+| ine-provincia | 2 dígitos, 01 a 52 | `^(0[1-9]|[1-4]\d|5[0-2])$` | 28 | ine-codigos-territoriales | mapa-sigpac, datacomex, minetur-precios-carburantes, miteco-energia-estadisticas, ine-codigos-territoriales, ine-microdatos, dir3-directorio, miteco-calidad-aire, sanidad-portal-estadistico, catastro-ovc, cnig-centro-descargas, ine-cartografia-censal, dgt-estadisticas |
+| ccaa | 2 dígitos, 01 Andalucía a 19 Melilla, en el orden del INE | `^(0[1-9]|1\d)$` | 13 | ine-codigos-territoriales | ine-codigos-territoriales, ine-microdatos, isciii-cne, sanidad-portal-estadistico, cnig-centro-descargas, ine-cartografia-censal |
+| nuts | ES más 1 a 3 caracteres (ES1, ES11, ES111) | `^ES[1-7]\d{0,2}$` | ES300 | — | ine-cartografia-censal |
+| seccion-censal | 10 dígitos, municipio (5) + distrito (2) + sección (3) | `^\d{10}$` | 2807901001 | ine-cartografia-censal | ine-cartografia-censal |
 | referencia-catastral | 14 caracteres alfanuméricos (parcela) o 20 (inmueble, con 4 dígitos y 2 letras de control) | `^[0-9A-Z]{14}(\d{4}[A-Z]{2})?$` | 9872023VH5797S0001WX | catastro-ovc | mapa-sigpac, catastro-ovc |
 | referencia-sigpac | provincia:municipio:agregado:zona:polígono:parcela:recinto, números separados por dos puntos | `^\d{1,2}:\d{1,3}:\d+:\d+:\d+:\d+:\d+$` | 28:15:0:0:3:9000:6 | mapa-sigpac | mapa-sigpac |
 | idema | 4 o 5 caracteres alfanuméricos | `^[0-9A-Z]{4,5}$` | 3195 | aemet-opendata | aemet-opendata |
@@ -634,7 +685,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 | cpv | 8 dígitos, opcionalmente guion y dígito de control | `^\d{8}(-\d)?$` | 45000000-7 | — | placsp-datos-abiertos |
 | cnae | sección (letra A a U) o 2 a 4 dígitos (división, grupo, clase) | `^([A-U]|\d{2,4})$` | 4711 | — | mites-estadisticas, segsocial-estadisticas, miteco-prtr |
 | codigo-convenio | 14 dígitos | `^\d{14}$` | — | mites-estadisticas | mites-estadisticas |
-| cn-medicamento | 6 dígitos | `^\d{6}$` | 708201 | aemps-cima-api | aemps-cima-api |
+| cn-medicamento | 6 dígitos | `^\d{6}$` | 708201 | aemps-cima-api | aemps-cima-api, sanidad-nomenclator-facturacion |
 | boe-id | BOE-A-AAAA-NNNNN (disposición), BOE-B-AAAA-NNNNN (anuncio), BORME-A-AAAA-NNN-PP (PP código de provincia) | `^(BOE-[ABC]-\d{4}-\d{1,6}|BORME-[ABC]-\d{4}-\d{1,5}(-\d{2})?)$` | BOE-A-1978-31229 | boe-api-sumario | boe-api-legislacion-consolidada, boe-api-sumario, boe-eli, borme-api-sumario |
 | eli | URI https://www.boe.es/eli/es/{tipo}/{AAAA}/{MM}/{DD}/{num} con sufijo /con (consolidado) o /dof (publicado) | `^https://www\.boe\.es/eli/es(-[a-z]{2})?/[a-z]+/\d{4}/\d{2}/\d{2}/[^/]+(/(con|dof))?$` | https://www.boe.es/eli/es/lo/2018/12/05/3/con | boe-eli | boe-api-legislacion-consolidada, boe-eli |
 
@@ -645,6 +696,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - vía `aemet-opendata`: las predicciones por municipio se piden con el INE de 5 dígitos sin dígito de control
 - vía `minetur-precios-carburantes`: sin equivalencia; Listados/Municipios usa IDMunicipio propio y solo comparte IDProvincia (INE)
 - vía `sanidad-portal-estadistico`: el Catálogo de Hospitales lo guarda con dígito de control (6 dígitos)
+- vía `ine-cartografia-censal`: CUMUN en el shapefile de secciones censales; disolver por CUMUN da el contorno municipal del año
 
 **ine-provincia**
 - trampa: Ceuta 51 y Melilla 52; el ISO 3166-2 (provincia_iso en los CSV COVID del ISCIII) es otro sistema
@@ -660,6 +712,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **seccion-censal**
 - trampa: las secciones se redibujan cada año; usar la geometría del mismo año que el dato
+- vía `ine-cartografia-censal`: geometría anual con CUSEC (sección), CUDIS (distrito) y CUMUN (municipio)
 - vía `ine-api-tempus`: renta por sección en el Atlas de distribución de renta (operación del INE)
 - vía `mitma-opendata-movilidad`: zonificación por distritos y municipios de los estudios de movilidad (host no verificable)
 
@@ -714,6 +767,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 **cn-medicamento**
 - trampa: identifica la presentación; el nregistro identifica el medicamento
 - vía `aemps-cima-api`: medicamento?cn= devuelve el nregistro y todas las presentaciones; psuministro lista problemas por cn
+- vía `sanidad-nomenclator-facturacion`: precio de venta, precio de referencia, aportación y agrupación homogénea por Código Nacional (solo financiados)
 
 **boe-id**
 - trampa: el número no lleva ceros a la izquierda (BOE-A-2024-87)

@@ -1,0 +1,45 @@
+id: sanidad-nomenclator-facturacion
+name: Ministerio de Sanidad – Nomenclátor de facturación (medicamentos financiados y precios)
+org: Dirección General de Cartera Común de Servicios del SNS y Farmacia
+ministry: Sanidad
+level: age
+sector: sanidad-medicamentos
+tags: [medicamentos, precios, financiacion, nomenclator, precio-referencia, aportacion, agrupacion-homogenea, farmacia]
+summary: >-
+  Los 20.571 productos financiados por el SNS con código nacional, laboratorio, principio activo, estado,
+  fechas de alta y baja, aportación, PVP con IVA, precio de referencia y agrupación homogénea. Descarga
+  completa en Excel y RDF con URL fija, más buscador web.
+access: [download, portal]
+auth: none
+formats: [xls, rdf, html]
+update: monthly
+coverage: "Nomenclátor vigente en cada descarga, con fechas de alta y baja de cada producto"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.sanidad.gob.es/profesionales/nomenclator.do
+docs_url: https://sede.mscbs.gob.es/datosabiertos/nomenclator_schema.htm
+endpoints:
+  - path: ?metodo=nomenclatorExcel
+    desc: Nomenclátor completo en xls (7,3 MB; hoja PRODUCTOS con 20 columnas, de Código Nacional a Medicamento huérfano); el nombre lleva la fecha de descarga
+    example: curl -s -o nomenclator.xls "https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorExcel"
+  - path: ?metodo=nomenclatorRDF
+    desc: Mismo contenido en RDF/XML (schema.org/Drug y esquema propio con CodigoNacional, PrecioReferencia, FechaAltaNomenclator, MedicamentoHuerfano)
+    example: curl -s "https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorRDF" | head -c 3000
+  - path: ?metodo=buscarProductos&codnacional={cn}
+    desc: Buscador en HTML; campos codnacional, especialidad, nomlab, priact_uno a priact_cuatro, estado, generico, fechaaltadesde y hasta, fechabajadesde y hasta
+quirks: [static-html]
+ids: [cn-medicamento]
+gotchas:
+  - El Excel llega con Content-Type text/html y Content-Disposition {AAAAMMDD}_Nomenclator_de_Facturacion.xls fechado el día de la descarga, no el de publicación; guardar como .xls y leer con xlrd o calamine.
+  - "Columnas: Código Nacional, Nombre, Tipo de fármaco, Nombre genérico, Código y Nombre del laboratorio, Estado, Fechas de alta y baja, Aportación, Principio activo, PVP con IVA, Precio de referencia y Menor precio."
+  - Las cuatro últimas columnas son indicadores SI/NO (Diagnóstico hospitalario, Tratamiento de larga duración, Especial control médico, Medicamento huérfano).
+  - El enlace "Formato CSV" de la página no tiene ruta propia (metodo=nomenclatorCSV devuelve la página HTML); usar Excel o RDF.
+  - El RDF se genera al vuelo y en una prueba tardó más de 45 segundos en empezar a responder; usar un timeout largo o preferir el Excel (8 segundos).
+  - El RDF identifica cada producto con rdf:about nomenclatorRDF.do?id={n} y usa nombres de propiedad con tildes (CódigoNombreAgrupaciónHomogeneaMedicamento).
+  - Solo incluye productos financiados; para un código nacional no financiado (708201) el buscador no devolvió ficha.
+  - Muchas celdas de precio van vacías (efectos y accesorios, productos dados de baja); no interpretar vacío como cero.
+tips:
+  - Cruzar con aemps-cima-api por código nacional (presentaciones[].cn) para composición, ficha técnica y estado de autorización; CIMA no trae precios.
+  - "pd.read_excel('nomenclator.xls', dtype={'Código Nacional': str}) conserva los ceros del código nacional."
+related: [aemps-cima-api, sanidad-portal-estadistico]
+status: active
+verified: "2026-09-30"

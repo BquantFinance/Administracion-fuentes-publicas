@@ -1,0 +1,63 @@
+id: ree-redata
+name: Red Eléctrica – API REData (demanda, generación, precios, intercambios)
+org: Red Eléctrica de España (Redeia), operador del sistema eléctrico
+ministry: Empresa participada por la SEPI; regulada por Transición Ecológica y Reto Demográfico
+level: age
+sector: energia
+tags: [electricidad, demanda, generacion, renovables, precios, pvpc, intercambios, red-electrica, redata, esios]
+summary: >-
+  API pública sin clave de REData: demanda (evolución, tiempo real, pérdidas), generación por tecnología,
+  balance, emisiones, precios horarios PVPC y spot, intercambios por frontera y red de transporte, por sistema
+  eléctrico. JSON con una serie por concepto. ESIOS exige token.
+access: [api-rest]
+auth: none
+formats: [json]
+update: daily
+coverage: "Comprobados 2025 completo y 2026 en curso; el inicio de cada serie no se verificó"
+base_url: https://apidatos.ree.es/es/datos
+docs_url: https://www.ree.es/es/datos/apidatos
+endpoints:
+  - path: /{categoria}/{widget}?start_date={AAAA-MM-DDTHH:MM}&end_date={AAAA-MM-DDTHH:MM}&time_trunc={hour|day|month|year}
+    desc: Patrón general (balance, demanda, generacion, intercambios, transporte, mercados); included[] trae una serie por concepto con value, percentage y datetime
+    params: "geo_trunc=electric_system con geo_limit (peninsular, canarias, baleares, ceuta, melilla, ccaa) y geo_ids (8741, 8742 y 8743 verificados); /en/ en vez de /es/ traduce títulos y errores"
+    example: curl -s "https://apidatos.ree.es/es/datos/demanda/evolucion?start_date=2026-09-01T00:00&end_date=2026-09-07T23:59&time_trunc=day"
+  - path: /demanda/evolucion
+    desc: Demanda en MWh por día, mes o año (serie Demanda 10297); day admite un año por petición; hour no está soportado en este widget (400)
+  - path: /demanda/demanda-tiempo-real?time_trunc=hour
+    desc: Demanda real, prevista y programada (dem15) por hora; solo con hour y un día por petición (con day responde 400)
+    example: curl -s "https://apidatos.ree.es/es/datos/demanda/demanda-tiempo-real?start_date=2026-09-29T00:00&end_date=2026-09-29T23:59&time_trunc=hour"
+  - path: /generacion/{estructura-generacion|estructura-renovables|evolucion-renovable-no-renovable|no-renovables-detalle-emisiones-CO2}
+    desc: Generación por tecnología (hidráulica, nuclear, carbón, ciclo combinado, eólica, solar) con percentage sobre el total; emisiones por tecnología no renovable
+    example: curl -s "https://apidatos.ree.es/es/datos/generacion/estructura-generacion?start_date=2026-08-01T00:00&end_date=2026-08-31T23:59&time_trunc=month"
+  - path: /mercados/precios-mercados-tiempo-real?time_trunc=hour
+    desc: PVPC (serie 1001) y precio del mercado spot (600) por hora en EUR/MWh; verificado hasta tres días por petición; con day responde 400
+    example: curl -s "https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real?start_date=2026-09-29T00:00&end_date=2026-09-29T23:59&time_trunc=hour"
+  - path: /balance/balance-electrico
+    desc: Balance por tecnología, demanda y saldo de intercambios (day y month verificados)
+  - path: /intercambios/{francia-frontera|todas-fronteras-fisicos|todas-fronteras-programados|enlace-baleares}
+    desc: Importación y exportación por frontera (Francia, Portugal, Marruecos, Andorra) y enlace Península-Baleares
+  - path: /transporte/{kilometros-lineas|indice-disponibilidad}
+    desc: Kilómetros de circuito por tensión y disponibilidad anual de la red de transporte; usar time_trunc=year
+  - path: /demanda/perdidas-transporte
+    desc: Pérdidas de transporte frente a la demanda
+  - path: https://api.esios.ree.es/indicators/{id}
+    desc: API ESIOS del operador (indicadores con series históricas); exige token personal según esios.ree.es; sin él respondió 403 del WAF desde este entorno
+rate_limit: No documentado; el WAF rechaza peticiones sueltas, no ráfagas concretas
+quirks: [waf-intermittent-403, errors-html-or-xml]
+ids: []
+gotchas:
+  - Incapsula devuelve 403 con una página HTML a una parte de las peticiones (hasta diez seguidas el 30/09/2026); repetir la misma URL tras 3 segundos hasta obtener JSON.
+  - El 400 "Los datos solicitados no están disponibles en este momento" también significa rango demasiado largo o time_trunc no admitido (evolucion con hour, precios con day); acortar el rango.
+  - Un widget inexistente o una combinación no soportada devuelve 500 con una página HTML "An Error Occurred", nunca un 404 JSON.
+  - Límites comprobados por petición; hour hasta tres días (precios) y un día (demanda-tiempo-real); day hasta un año; month de cinco años y year de diez dieron 400.
+  - geo_limit=ccaa con geo_ids 4, 9 y 13 respondió 400 o 500 en todas las pruebas; peninsular (8741), canarias (8742) y baleares (8743) funcionan con geo_trunc=electric_system.
+  - values[].datetime lleva desplazamiento horario (+02:00 en verano); percentage es una fracción (0.33), no un porcentaje.
+  - Los datos de generación y balance se revisan después de publicarse (last-update en cada serie); meta.cache-control indica HIT o MISS y expireAt.
+  - No hace falta cabecera Accept; sin ella responde JSON igualmente.
+tips:
+  - Para series largas iterar por ventanas (días con hour, años con day) con reintento ante 403; cachear en local, los datos antiguos no cambian.
+  - "pandas.json_normalize(r.json()['included'], record_path=['attributes', 'values'], meta=[['attributes', 'title']]) aplana todas las series de una respuesta."
+  - El precio marginal oficial del mercado diario, con 96 periodos por día, está en omie-mercado; REData sirve PVPC y spot horarios.
+related: [omie-mercado, cnmc-data, miteco-energia-estadisticas]
+status: active
+verified: "2026-09-30"

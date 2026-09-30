@@ -1,0 +1,40 @@
+id: ine-cartografia-censal
+name: INE – Cartografía de secciones censales y callejero del Censo Electoral
+org: Instituto Nacional de Estadística
+ministry: Economía, Comercio y Empresa (organismo autónomo)
+level: age
+sector: territorio-cartografia
+tags: [secciones-censales, cartografia, shapefile, distritos, callejero, censo-electoral, ine]
+summary: >-
+  Shapefile anual a 1 de enero de las 36.669 secciones censales (ETRS89 UTM 30) con códigos de sección,
+  distrito, municipio, provincia, comunidad y NUTS, desde 2011, más las variaciones semestrales del callejero
+  del Censo Electoral. La geometría para cualquier dato por sección.
+access: [download]
+auth: none
+formats: [shp, zip, pdf]
+update: annual
+coverage: "Seccionado 2011-2026, un ZIP por año; variaciones del callejero desde 2011"
+license: Reutilización libre con cita de la fuente (licencia INE compatible CC BY 4.0)
+base_url: https://www.ine.es/ss/Satellite?L=es_ES&c=Page&cid=1259952026632&p=1259952026632&pagename=ProductosYServicios%2FPYSLayout
+docs_url: https://www.ine.es/prodyser/callejero/dis_registro.pdf
+endpoints:
+  - path: https://www.ine.es/prodyser/cartografia/seccionado_{AAAA}.zip
+    desc: Seccionado a 1 de enero (65 MB); 36.669 polígonos en 2026 con CUSEC, CUMUN, CSEC, CDIS, CMUN, CPRO, CCA, CUDIS, CLAU2, NPRO, NCA, CNUT0 a CNUT3 y NMUN
+    example: curl -sO "https://www.ine.es/prodyser/cartografia/seccionado_2026.zip"
+  - path: https://www.ine.es/prodyser/callejero/Var_Callejero_{MMAA}_{MMAA}.zip
+    desc: Variaciones del callejero del Censo Electoral entre dos fechas (enero y julio); diseño de registro en dis_registro.pdf y tipos de vía en TipoVias.pdf
+    example: curl -sO "https://www.ine.es/prodyser/callejero/Var_Callejero_0125_0725.zip"
+quirks: [static-html]
+ids: [seccion-censal, ine-municipio, ine-provincia, ccaa, nuts]
+gotchas:
+  - CUSEC es el código de sección de 10 dígitos (CPRO+CMUN+CDIS+CSEC) y CUMUN el municipio de 5; todos los códigos son texto con ceros a la izquierda.
+  - El .prj declara ETRS_1989_UTM_Zone_30N (EPSG 25830) para todo el fichero, Canarias incluida; reproyectar a 4326 antes de cruzar con coordenadas WGS84.
+  - El nombre interno cambia por año; en 2026 la carpeta España_Seccionado2026_ETRS89H30 contiene SECC_CE_20260101.shp y en 2011 los ficheros SECC_CE_20110101_03_R_INE.* van sin carpeta.
+  - Las secciones se redibujan cada año; cruzar cada dato con el seccionado de su mismo año.
+  - No localicé en la página el callejero completo (vías y tramos); solo las variaciones semestrales, su diseño de registro y los tipos de vía (30/09/2026).
+tips:
+  - geopandas.read_file('seccionado_2026.zip') lee el shapefile sin descomprimir; to_crs(4326) para WGS84.
+  - Cruzar con la renta por sección del Atlas de distribución de renta de los hogares (ine-api-tempus) y con los datos de padrón por el código de sección de 10 dígitos.
+related: [ine-codigos-territoriales, ine-api-tempus, cnig-centro-descargas, catastro-ovc]
+status: active
+verified: "2026-09-30"

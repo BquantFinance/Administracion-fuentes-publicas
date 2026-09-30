@@ -5,7 +5,7 @@
  "repo": "https://github.com/BquantFinance/Administracion-fuentes-publicas",
  "schema": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json",
  "vocab": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml",
- "count": 67,
+ "count": 72,
  "sectors": {
   "legislacion-boletines": "Legislación y boletines oficiales",
   "economia-finanzas": "Economía, finanzas y mercados",
@@ -2213,7 +2213,7 @@
     "Nombres de campo normalizados sin tildes ni ñ (compannia_comercializadora_de_gas); la etiqueta original está en fields[].info.label del datastore.",
     "CSV con coma como separador, UTF-8 y cinco decimales fijos en los numéricos (2496967.00000); la primera columna siempre es _id, índice del datastore.",
     "Un dataset es una tabla de una publicación (Tabla 10, Tabla 17), no una serie; buscar por texto del título y comprobar periodo y frecuenciaActualizacion en extras.",
-    "Datos de operación del sistema eléctrico (demanda, generación en tiempo real) no están aquí sino en Red Eléctrica (empresa participada, fase posterior)."
+    "Datos de operación del sistema eléctrico (demanda, generación, PVPC) no están aquí sino en Red Eléctrica (ree-redata) y el precio marginal del mercado en omie-mercado."
    ],
    "tips": [
     "pandas.read_csv('https://catalogodatos.cnmc.es/datastore/dump/{id}') carga la tabla directamente; para el catálogo completo, package_search?rows=1000 y fq=organization:org_energia.",
@@ -2221,7 +2221,9 @@
    ],
    "related": [
     "minetur-precios-carburantes",
-    "miteco-energia-estadisticas"
+    "miteco-energia-estadisticas",
+    "ree-redata",
+    "omie-mercado"
    ],
    "status": "active",
    "verified": "2026-09-30"
@@ -2412,6 +2414,194 @@
    "verified": "2026-09-30"
   },
   {
+   "id": "omie-mercado",
+   "name": "OMIE – Resultados del mercado diario e intradiario de electricidad",
+   "org": "OMI-Polo Español (OMIE), operador designado del mercado eléctrico ibérico",
+   "ministry": "Operador del mercado designado por la Ley 24/2013 del Sector Eléctrico; supervisado por la CNMC",
+   "level": "age",
+   "sector": "energia",
+   "tags": [
+    "electricidad",
+    "mercado-diario",
+    "mercado-intradiario",
+    "precio-marginal",
+    "omie",
+    "mibel",
+    "curvas-oferta-demanda",
+    "casacion"
+   ],
+   "summary": "Precio marginal del mercado diario en España y Portugal (96 periodos cuarto-horarios por día en 2026), programas de casación, curvas de oferta y demanda, ofertas, intradiario de subastas y continuo, capacidades e indisponibilidades. Ficheros de texto con URL fija, sin clave.",
+   "access": [
+    "download"
+   ],
+   "auth": "none",
+   "formats": [
+    "csv",
+    "txt",
+    "zip"
+   ],
+   "update": "daily",
+   "coverage": "Ficheros diarios en línea desde el 18/12/2023; ZIP mensuales anteriores en las carpetas de ficheros mensuales",
+   "base_url": "https://www.omie.es/es/file-access-list",
+   "docs_url": "https://www.omie.es/es/market-results/daily/daily-market/day-ahead-price",
+   "endpoints": [
+    {
+     "path": "https://www.omie.es/es/file-download?parents%5B0%5D={carpeta}&filename={carpeta}_{AAAAMMDD}.{version}",
+     "desc": "Fichero diario de una carpeta; marginalpdbc (precio España), marginalpdbcpt (Portugal), pdbc_stota (programas), curva_pbc, cab y det (ofertas), precios_pibcic",
+     "example": "curl -s \"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_20260929.1\""
+    },
+    {
+     "path": "https://www.omie.es/es/file-download?parents%5B0%5D=marginalpibc&filename=marginalpibc_{AAAAMMDD}{SS}.1",
+     "desc": "Precio marginal del intradiario de subastas; SS es la sesión (01 a 03 en 2026)",
+     "example": "curl -s \"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpibc&filename=marginalpibc_2026092901.1\""
+    },
+    {
+     "path": "https://www.omie.es/es/file-access-list?parents%5B0%5D={carpeta}&dir={nombre}&realdir={carpeta}",
+     "desc": "Listado HTML de los ficheros de una carpeta (1018 en marginalpdbc, desde el 18/12/2023); sin parámetros, las 67 carpetas de todos los mercados",
+     "example": "curl -s \"https://www.omie.es/es/file-access-list?parents%5B0%5D=marginalpdbc&dir=Precios%20horarios%20del%20mercado%20diario%20en%20Espa%C3%B1a&realdir=marginalpdbc\" | grep -o 'filename=[^\"&]*'"
+    },
+    {
+     "path": "https://www.omie.es/es/file-download?parents%5B0%5D={carpeta_mensual}&filename={familia}_{AAAAMM}.zip",
+     "desc": "ZIP mensuales; comunzip agrupa todas las familias (trades, pibcie, pibcipt) y curva_pbc_uof y curva_pibc_uof tienen carpeta propia (202607 verificado)",
+     "example": "curl -sO \"https://www.omie.es/es/file-download?parents%5B0%5D=curva_pbc_uof&filename=curva_pbc_uof_202607.zip\""
+    },
+    {
+     "path": "https://www.omie.es/es/market-results/daily/daily-market/day-ahead-price",
+     "desc": "Página de resultados con gráficos; los datos salen de los mismos ficheros"
+    }
+   ],
+   "quirks": [
+    "latin1",
+    "static-html"
+   ],
+   "ids": [],
+   "gotchas": [
+    "marginalpdbc: cabecera MARGINALPDBC;, filas AAAA;MM;DD;periodo;precio;precio; y un asterisco final; 96 periodos por día en 2026 frente a 24 el 01/01/2025; las dos columnas de precio coinciden en los días vistos.",
+    "Los ficheros con cabecera \"OMIE - Mercado de electricidad\" (pdbc_stota, curva_pbc) van en ISO-8859-1, con coma decimal y punto de miles, dos filas de título antes de las columnas y periodos H1Q1 a H24Q4.",
+    "El sufijo de versión (.1, .2, .3) marca republicaciones; el listado dice cuál existe y una versión inexistente devuelve 404 con HTML.",
+    "Un fichero diario anterior al 18/12/2023 devuelve 404 aunque el histórico exista; para años anteriores usar los ZIP mensuales.",
+    "El parámetro se envía como parents[0] (parents%5B0%5D); la redirección lo reescribe a parents= y ambas formas funcionan.",
+    "El intradiario continuo publica precios_pibcic (máximo, mínimo y medio por periodo) y precios_pibcic_ronda; el de subastas lleva la sesión pegada a la fecha."
+   ],
+   "tips": [
+    "pd.read_csv(url, sep=';', skiprows=1, header=None).dropna(subset=[3]).iloc[:, :6] lee marginalpdbc y descarta la fila del asterisco; columnas año, mes, día, periodo y dos precios.",
+    "Precios horarios PVPC y spot ya combinados, y demanda y generación, en ree-redata; OMIE es la fuente primaria del precio marginal."
+   ],
+   "related": [
+    "ree-redata",
+    "cnmc-data"
+   ],
+   "status": "active",
+   "verified": "2026-09-30"
+  },
+  {
+   "id": "ree-redata",
+   "name": "Red Eléctrica – API REData (demanda, generación, precios, intercambios)",
+   "org": "Red Eléctrica de España (Redeia), operador del sistema eléctrico",
+   "ministry": "Empresa participada por la SEPI; regulada por Transición Ecológica y Reto Demográfico",
+   "level": "age",
+   "sector": "energia",
+   "tags": [
+    "electricidad",
+    "demanda",
+    "generacion",
+    "renovables",
+    "precios",
+    "pvpc",
+    "intercambios",
+    "red-electrica",
+    "redata",
+    "esios"
+   ],
+   "summary": "API pública sin clave de REData: demanda (evolución, tiempo real, pérdidas), generación por tecnología, balance, emisiones, precios horarios PVPC y spot, intercambios por frontera y red de transporte, por sistema eléctrico. JSON con una serie por concepto. ESIOS exige token.",
+   "access": [
+    "api-rest"
+   ],
+   "auth": "none",
+   "formats": [
+    "json"
+   ],
+   "update": "daily",
+   "coverage": "Comprobados 2025 completo y 2026 en curso; el inicio de cada serie no se verificó",
+   "base_url": "https://apidatos.ree.es/es/datos",
+   "docs_url": "https://www.ree.es/es/datos/apidatos",
+   "endpoints": [
+    {
+     "path": "/{categoria}/{widget}?start_date={AAAA-MM-DDTHH:MM}&end_date={AAAA-MM-DDTHH:MM}&time_trunc={hour|day|month|year}",
+     "desc": "Patrón general (balance, demanda, generacion, intercambios, transporte, mercados); included[] trae una serie por concepto con value, percentage y datetime",
+     "params": "geo_trunc=electric_system con geo_limit (peninsular, canarias, baleares, ceuta, melilla, ccaa) y geo_ids (8741, 8742 y 8743 verificados); /en/ en vez de /es/ traduce títulos y errores",
+     "example": "curl -s \"https://apidatos.ree.es/es/datos/demanda/evolucion?start_date=2026-09-01T00:00&end_date=2026-09-07T23:59&time_trunc=day\""
+    },
+    {
+     "path": "/demanda/evolucion",
+     "desc": "Demanda en MWh por día, mes o año (serie Demanda 10297); day admite un año por petición; hour no está soportado en este widget (400)"
+    },
+    {
+     "path": "/demanda/demanda-tiempo-real?time_trunc=hour",
+     "desc": "Demanda real, prevista y programada (dem15) por hora; solo con hour y un día por petición (con day responde 400)",
+     "example": "curl -s \"https://apidatos.ree.es/es/datos/demanda/demanda-tiempo-real?start_date=2026-09-29T00:00&end_date=2026-09-29T23:59&time_trunc=hour\""
+    },
+    {
+     "path": "/generacion/{estructura-generacion|estructura-renovables|evolucion-renovable-no-renovable|no-renovables-detalle-emisiones-CO2}",
+     "desc": "Generación por tecnología (hidráulica, nuclear, carbón, ciclo combinado, eólica, solar) con percentage sobre el total; emisiones por tecnología no renovable",
+     "example": "curl -s \"https://apidatos.ree.es/es/datos/generacion/estructura-generacion?start_date=2026-08-01T00:00&end_date=2026-08-31T23:59&time_trunc=month\""
+    },
+    {
+     "path": "/mercados/precios-mercados-tiempo-real?time_trunc=hour",
+     "desc": "PVPC (serie 1001) y precio del mercado spot (600) por hora en EUR/MWh; verificado hasta tres días por petición; con day responde 400",
+     "example": "curl -s \"https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real?start_date=2026-09-29T00:00&end_date=2026-09-29T23:59&time_trunc=hour\""
+    },
+    {
+     "path": "/balance/balance-electrico",
+     "desc": "Balance por tecnología, demanda y saldo de intercambios (day y month verificados)"
+    },
+    {
+     "path": "/intercambios/{francia-frontera|todas-fronteras-fisicos|todas-fronteras-programados|enlace-baleares}",
+     "desc": "Importación y exportación por frontera (Francia, Portugal, Marruecos, Andorra) y enlace Península-Baleares"
+    },
+    {
+     "path": "/transporte/{kilometros-lineas|indice-disponibilidad}",
+     "desc": "Kilómetros de circuito por tensión y disponibilidad anual de la red de transporte; usar time_trunc=year"
+    },
+    {
+     "path": "/demanda/perdidas-transporte",
+     "desc": "Pérdidas de transporte frente a la demanda"
+    },
+    {
+     "path": "https://api.esios.ree.es/indicators/{id}",
+     "desc": "API ESIOS del operador (indicadores con series históricas); exige token personal según esios.ree.es; sin él respondió 403 del WAF desde este entorno"
+    }
+   ],
+   "rate_limit": "No documentado; el WAF rechaza peticiones sueltas, no ráfagas concretas",
+   "quirks": [
+    "waf-intermittent-403",
+    "errors-html-or-xml"
+   ],
+   "ids": [],
+   "gotchas": [
+    "Incapsula devuelve 403 con una página HTML a una parte de las peticiones (hasta diez seguidas el 30/09/2026); repetir la misma URL tras 3 segundos hasta obtener JSON.",
+    "El 400 \"Los datos solicitados no están disponibles en este momento\" también significa rango demasiado largo o time_trunc no admitido (evolucion con hour, precios con day); acortar el rango.",
+    "Un widget inexistente o una combinación no soportada devuelve 500 con una página HTML \"An Error Occurred\", nunca un 404 JSON.",
+    "Límites comprobados por petición; hour hasta tres días (precios) y un día (demanda-tiempo-real); day hasta un año; month de cinco años y year de diez dieron 400.",
+    "geo_limit=ccaa con geo_ids 4, 9 y 13 respondió 400 o 500 en todas las pruebas; peninsular (8741), canarias (8742) y baleares (8743) funcionan con geo_trunc=electric_system.",
+    "values[].datetime lleva desplazamiento horario (+02:00 en verano); percentage es una fracción (0.33), no un porcentaje.",
+    "Los datos de generación y balance se revisan después de publicarse (last-update en cada serie); meta.cache-control indica HIT o MISS y expireAt.",
+    "No hace falta cabecera Accept; sin ella responde JSON igualmente."
+   ],
+   "tips": [
+    "Para series largas iterar por ventanas (días con hour, años con day) con reintento ante 403; cachear en local, los datos antiguos no cambian.",
+    "pandas.json_normalize(r.json()['included'], record_path=['attributes', 'values'], meta=[['attributes', 'title']]) aplana todas las series de una respuesta.",
+    "El precio marginal oficial del mercado diario, con 96 periodos por día, está en omie-mercado; REData sirve PVPC y spot horarios."
+   ],
+   "related": [
+    "omie-mercado",
+    "cnmc-data",
+    "miteco-energia-estadisticas"
+   ],
+   "status": "active",
+   "verified": "2026-09-30"
+  },
+  {
    "id": "ine-api-tempus",
    "name": "INE – API JSON (Tempus3)",
    "org": "Instituto Nacional de Estadística (INE)",
@@ -2587,7 +2777,8 @@
     "ine-api-tempus",
     "hacienda-ovef",
     "catastro-ovc",
-    "aeat-estadisticas"
+    "aeat-estadisticas",
+    "ine-cartografia-censal"
    ],
    "status": "active",
    "verified": "2026-09-30"
@@ -4491,7 +4682,8 @@
    ],
    "related": [
     "sanidad-portal-estadistico",
-    "aemps-otros-registros"
+    "aemps-otros-registros",
+    "sanidad-nomenclator-facturacion"
    ],
    "status": "active",
    "verified": "2026-09-30"
@@ -4665,6 +4857,82 @@
    "related": [
     "sanidad-portal-estadistico",
     "ine-api-tempus"
+   ],
+   "status": "active",
+   "verified": "2026-09-30"
+  },
+  {
+   "id": "sanidad-nomenclator-facturacion",
+   "name": "Ministerio de Sanidad – Nomenclátor de facturación (medicamentos financiados y precios)",
+   "org": "Dirección General de Cartera Común de Servicios del SNS y Farmacia",
+   "ministry": "Sanidad",
+   "level": "age",
+   "sector": "sanidad-medicamentos",
+   "tags": [
+    "medicamentos",
+    "precios",
+    "financiacion",
+    "nomenclator",
+    "precio-referencia",
+    "aportacion",
+    "agrupacion-homogenea",
+    "farmacia"
+   ],
+   "summary": "Los 20.571 productos financiados por el SNS con código nacional, laboratorio, principio activo, estado, fechas de alta y baja, aportación, PVP con IVA, precio de referencia y agrupación homogénea. Descarga completa en Excel y RDF con URL fija, más buscador web.",
+   "access": [
+    "download",
+    "portal"
+   ],
+   "auth": "none",
+   "formats": [
+    "xls",
+    "rdf",
+    "html"
+   ],
+   "update": "monthly",
+   "coverage": "Nomenclátor vigente en cada descarga, con fechas de alta y baja de cada producto",
+   "license": "Reutilización libre con cita de la fuente",
+   "base_url": "https://www.sanidad.gob.es/profesionales/nomenclator.do",
+   "docs_url": "https://sede.mscbs.gob.es/datosabiertos/nomenclator_schema.htm",
+   "endpoints": [
+    {
+     "path": "?metodo=nomenclatorExcel",
+     "desc": "Nomenclátor completo en xls (7,3 MB; hoja PRODUCTOS con 20 columnas, de Código Nacional a Medicamento huérfano); el nombre lleva la fecha de descarga",
+     "example": "curl -s -o nomenclator.xls \"https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorExcel\""
+    },
+    {
+     "path": "?metodo=nomenclatorRDF",
+     "desc": "Mismo contenido en RDF/XML (schema.org/Drug y esquema propio con CodigoNacional, PrecioReferencia, FechaAltaNomenclator, MedicamentoHuerfano)",
+     "example": "curl -s \"https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorRDF\" | head -c 3000"
+    },
+    {
+     "path": "?metodo=buscarProductos&codnacional={cn}",
+     "desc": "Buscador en HTML; campos codnacional, especialidad, nomlab, priact_uno a priact_cuatro, estado, generico, fechaaltadesde y hasta, fechabajadesde y hasta"
+    }
+   ],
+   "quirks": [
+    "static-html"
+   ],
+   "ids": [
+    "cn-medicamento"
+   ],
+   "gotchas": [
+    "El Excel llega con Content-Type text/html y Content-Disposition {AAAAMMDD}_Nomenclator_de_Facturacion.xls fechado el día de la descarga, no el de publicación; guardar como .xls y leer con xlrd o calamine.",
+    "Columnas: Código Nacional, Nombre, Tipo de fármaco, Nombre genérico, Código y Nombre del laboratorio, Estado, Fechas de alta y baja, Aportación, Principio activo, PVP con IVA, Precio de referencia y Menor precio.",
+    "Las cuatro últimas columnas son indicadores SI/NO (Diagnóstico hospitalario, Tratamiento de larga duración, Especial control médico, Medicamento huérfano).",
+    "El enlace \"Formato CSV\" de la página no tiene ruta propia (metodo=nomenclatorCSV devuelve la página HTML); usar Excel o RDF.",
+    "El RDF se genera al vuelo y en una prueba tardó más de 45 segundos en empezar a responder; usar un timeout largo o preferir el Excel (8 segundos).",
+    "El RDF identifica cada producto con rdf:about nomenclatorRDF.do?id={n} y usa nombres de propiedad con tildes (CódigoNombreAgrupaciónHomogeneaMedicamento).",
+    "Solo incluye productos financiados; para un código nacional no financiado (708201) el buscador no devolvió ficha.",
+    "Muchas celdas de precio van vacías (efectos y accesorios, productos dados de baja); no interpretar vacío como cero."
+   ],
+   "tips": [
+    "Cruzar con aemps-cima-api por código nacional (presentaciones[].cn) para composición, ficha técnica y estado de autorización; CIMA no trae precios.",
+    "pd.read_excel('nomenclator.xls', dtype={'Código Nacional': str}) conserva los ceros del código nacional."
+   ],
+   "related": [
+    "aemps-cima-api",
+    "sanidad-portal-estadistico"
    ],
    "status": "active",
    "verified": "2026-09-30"
@@ -5028,6 +5296,79 @@
     "Los metadatos usan el perfil INSPIRE sobre ISO 19139; los identificadores de registro siguen el patrón del organismo (ES_SDGC_AD, ES_SDGC_AD_ATOM para el Catastro)."
    ],
    "related": [
+    "cnig-centro-descargas",
+    "catastro-ovc"
+   ],
+   "status": "active",
+   "verified": "2026-09-30"
+  },
+  {
+   "id": "ine-cartografia-censal",
+   "name": "INE – Cartografía de secciones censales y callejero del Censo Electoral",
+   "org": "Instituto Nacional de Estadística",
+   "ministry": "Economía, Comercio y Empresa (organismo autónomo)",
+   "level": "age",
+   "sector": "territorio-cartografia",
+   "tags": [
+    "secciones-censales",
+    "cartografia",
+    "shapefile",
+    "distritos",
+    "callejero",
+    "censo-electoral",
+    "ine"
+   ],
+   "summary": "Shapefile anual a 1 de enero de las 36.669 secciones censales (ETRS89 UTM 30) con códigos de sección, distrito, municipio, provincia, comunidad y NUTS, desde 2011, más las variaciones semestrales del callejero del Censo Electoral. La geometría para cualquier dato por sección.",
+   "access": [
+    "download"
+   ],
+   "auth": "none",
+   "formats": [
+    "shp",
+    "zip",
+    "pdf"
+   ],
+   "update": "annual",
+   "coverage": "Seccionado 2011-2026, un ZIP por año; variaciones del callejero desde 2011",
+   "license": "Reutilización libre con cita de la fuente (licencia INE compatible CC BY 4.0)",
+   "base_url": "https://www.ine.es/ss/Satellite?L=es_ES&c=Page&cid=1259952026632&p=1259952026632&pagename=ProductosYServicios%2FPYSLayout",
+   "docs_url": "https://www.ine.es/prodyser/callejero/dis_registro.pdf",
+   "endpoints": [
+    {
+     "path": "https://www.ine.es/prodyser/cartografia/seccionado_{AAAA}.zip",
+     "desc": "Seccionado a 1 de enero (65 MB); 36.669 polígonos en 2026 con CUSEC, CUMUN, CSEC, CDIS, CMUN, CPRO, CCA, CUDIS, CLAU2, NPRO, NCA, CNUT0 a CNUT3 y NMUN",
+     "example": "curl -sO \"https://www.ine.es/prodyser/cartografia/seccionado_2026.zip\""
+    },
+    {
+     "path": "https://www.ine.es/prodyser/callejero/Var_Callejero_{MMAA}_{MMAA}.zip",
+     "desc": "Variaciones del callejero del Censo Electoral entre dos fechas (enero y julio); diseño de registro en dis_registro.pdf y tipos de vía en TipoVias.pdf",
+     "example": "curl -sO \"https://www.ine.es/prodyser/callejero/Var_Callejero_0125_0725.zip\""
+    }
+   ],
+   "quirks": [
+    "static-html"
+   ],
+   "ids": [
+    "seccion-censal",
+    "ine-municipio",
+    "ine-provincia",
+    "ccaa",
+    "nuts"
+   ],
+   "gotchas": [
+    "CUSEC es el código de sección de 10 dígitos (CPRO+CMUN+CDIS+CSEC) y CUMUN el municipio de 5; todos los códigos son texto con ceros a la izquierda.",
+    "El .prj declara ETRS_1989_UTM_Zone_30N (EPSG 25830) para todo el fichero, Canarias incluida; reproyectar a 4326 antes de cruzar con coordenadas WGS84.",
+    "El nombre interno cambia por año; en 2026 la carpeta España_Seccionado2026_ETRS89H30 contiene SECC_CE_20260101.shp y en 2011 los ficheros SECC_CE_20110101_03_R_INE.* van sin carpeta.",
+    "Las secciones se redibujan cada año; cruzar cada dato con el seccionado de su mismo año.",
+    "No localicé en la página el callejero completo (vías y tramos); solo las variaciones semestrales, su diseño de registro y los tipos de vía (30/09/2026)."
+   ],
+   "tips": [
+    "geopandas.read_file('seccionado_2026.zip') lee el shapefile sin descomprimir; to_crs(4326) para WGS84.",
+    "Cruzar con la renta por sección del Atlas de distribución de renta de los hogares (ine-api-tempus) y con los datos de padrón por el código de sección de 10 dígitos."
+   ],
+   "related": [
+    "ine-codigos-territoriales",
+    "ine-api-tempus",
     "cnig-centro-descargas",
     "catastro-ovc"
    ],
@@ -5425,6 +5766,97 @@
    "related": [
     "mapa-pesca",
     "aemet-opendata"
+   ],
+   "status": "active",
+   "verified": "2026-09-30"
+  },
+  {
+   "id": "renfe-datos-abiertos",
+   "name": "Renfe – Datos abiertos (GTFS, GTFS-RT, estaciones, viajeros)",
+   "org": "Renfe Viajeros (Grupo Renfe)",
+   "ministry": "Empresa pública adscrita a Transportes y Movilidad Sostenible",
+   "level": "age",
+   "sector": "transporte-movilidad",
+   "tags": [
+    "ferrocarril",
+    "gtfs",
+    "gtfs-rt",
+    "horarios",
+    "cercanias",
+    "alta-velocidad",
+    "estaciones",
+    "viajeros",
+    "renfe",
+    "ckan"
+   ],
+   "summary": "CKAN con 44 datasets: horarios GTFS de Cercanías y de alta velocidad, larga y media distancia, feeds GTFS-RT (alertas, viajes y posiciones de trenes) en protobuf y JSON, 1.036 estaciones con coordenadas, viajeros por franja horaria y núcleo, y puntualidad. CC BY 4.0, sin clave.",
+   "access": [
+    "api-rest",
+    "download",
+    "feed"
+   ],
+   "auth": "none",
+   "formats": [
+    "zip",
+    "csv",
+    "xlsx",
+    "json",
+    "protobuf"
+   ],
+   "update": "realtime",
+   "coverage": "GTFS vigentes (sin fecha de versión en el fichero); viajeros por franja y puntualidad según dataset",
+   "license": "CC BY 4.0 (license_title de los datasets)",
+   "base_url": "https://data.renfe.com/api/3/action",
+   "docs_url": "https://data.renfe.com/",
+   "endpoints": [
+    {
+     "path": "/package_search?rows=100",
+     "desc": "Los 44 datasets con resources[].url, format y last_modified; package_list solo nombres; package_show?id={name} un dataset",
+     "example": "curl -s \"https://data.renfe.com/api/3/action/package_show?id=horarios-cercanias\""
+    },
+    {
+     "path": "https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip",
+     "desc": "GTFS de alta velocidad, larga y media distancia (760 KB; agency, calendar, calendar_dates, routes, stops, stop_times, trips; sin feed_info)",
+     "example": "curl -sO \"https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip\""
+    },
+    {
+     "path": "https://ssl.renfe.com/ftransit/Fichero_CER_FOMENTO/fomento_transit.zip",
+     "desc": "GTFS de Cercanías (14 MB)",
+     "example": "curl -sO \"https://ssl.renfe.com/ftransit/Fichero_CER_FOMENTO/fomento_transit.zip\""
+    },
+    {
+     "path": "https://ssl.renfe.com/ftransit/Fichero_estaciones/estaciones.csv",
+     "desc": "1.036 estaciones con CODIGO, DESCRIPCION, LATITUD, LONGITUD, DIRECION, CP, POBLACION, PROVINCIA, PAIS, CERCANIAS, ANCHO MÉTRICO y COMUN; también estaciones.xlsx",
+     "example": "curl -sO \"https://ssl.renfe.com/ftransit/Fichero_estaciones/estaciones.csv\""
+    },
+    {
+     "path": "https://gtfsrt.renfe.com/{alerts|trip_updates|vehicle_positions}.{pb|json}",
+     "desc": "GTFS-RT de Cercanías; con sufijo _LD (trip_updates_LD, vehicle_positions_LD) para alta velocidad y larga distancia; no verificado (ver gotchas)"
+    },
+    {
+     "path": "https://data.renfe.com/dataset/{uuid}/resource/{id}/download/{fichero}.{csv|xlsx}",
+     "desc": "Estaciones por núcleo, viajeros por franja horaria (Madrid, Barcelona, Valencia, Sevilla, Bilbao...), puntualidad, fichas de trenes; URL en resources[].url"
+    }
+   ],
+   "quirks": [
+    "latin1"
+   ],
+   "ids": [],
+   "gotchas": [
+    "gtfsrt.renfe.com cerró la conexión TLS (reset) y respondió 503 en http el 30/09/2026 desde el entorno de verificación; los feeds GTFS-RT quedan sin verificar.",
+    "ssl.renfe.com cerró la conexión en una de cuatro descargas de estaciones.csv el 30/09/2026; reintentar ante ConnectionReset.",
+    "El GTFS de AV y LD no lleva feed_info.txt ni fecha de versión; comprobar last_modified del recurso en package_show para saber si cambió.",
+    "agency.txt viene con relleno de espacios al final de las líneas; recortar antes de parsear.",
+    "El CSV de estaciones va en ISO-8859-1, separador ; y todas las columnas entre comillas; CODIGO es un código de estación de 5 dígitos con ceros iniciales (01003).",
+    "No localicé portal de datos abiertos de Adif (data.adif.es no responde y adif.es/datos-abiertos da 404 el 30/09/2026)."
+   ],
+   "tips": [
+    "gtfs-kit o partridge leen los ZIP GTFS directamente; para geometría de estaciones basta estaciones.csv con LATITUD y LONGITUD en WGS84."
+   ],
+   "related": [
+    "dgt-datex-trafico",
+    "puertos-estado-datos",
+    "mitma-opendata-movilidad"
    ],
    "status": "active",
    "verified": "2026-09-30"
@@ -6809,6 +7241,136 @@
      }
     ],
     "verified": "2026-09-30"
+   },
+   {
+    "id": "precio-electricidad-horario",
+    "intent": "Precio de la electricidad por hora o cuarto de hora (mercado diario, PVPC y spot) y demanda del día",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "omie-mercado",
+      "do": "Precio marginal oficial en marginalpdbc_{AAAAMMDD}.1 (96 periodos cuarto-horarios en 2026; cabecera, filas AAAA;MM;DD;periodo;precio;precio y asterisco final); el fichero del día siguiente se publica por la tarde",
+      "example": "curl -s \"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_20260929.1\""
+     },
+     {
+      "source": "ree-redata",
+      "do": "PVPC y precio spot por hora en mercados/precios-mercados-tiempo-real con time_trunc=hour (hasta tres días por petición); demanda real y prevista en demanda/demanda-tiempo-real; reintentar ante el 403 del WAF",
+      "example": "curl -s \"https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real?start_date=2026-09-29T00:00&end_date=2026-09-29T23:59&time_trunc=hour\""
+     }
+    ],
+    "output": "fichero de texto con 96 precios (OMIE) y JSON con series PVPC (1001) y spot (600) por hora (REData)",
+    "checks": [
+     {
+      "url": "https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_20260929.1",
+      "contains": "MARGINALPDBC"
+     },
+     {
+      "url": "https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real?start_date=2026-09-29T00:00&end_date=2026-09-29T23:59&time_trunc=hour",
+      "headers": {
+       "Accept": "application/json"
+      },
+      "contains": "PVPC",
+      "retries": 10,
+      "read_bytes": 200000
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "medicamento-precio-financiado",
+    "intent": "Precio de venta, precio de referencia y aportación de un medicamento financiado, con su ficha técnica",
+    "inputs": [
+     "cn-medicamento"
+    ],
+    "steps": [
+     {
+      "source": "sanidad-nomenclator-facturacion",
+      "do": "Descargar el nomenclátor completo (?metodo=nomenclatorExcel, 7 MB, hoja PRODUCTOS) y filtrar por Código Nacional; PVP con IVA, Precio de referencia, Aportación del beneficiario y agrupación homogénea; leer el código como texto",
+      "example": "curl -s -o nomenclator.xls \"https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorExcel\""
+     },
+     {
+      "source": "aemps-cima-api",
+      "do": "medicamento?cn={cn} para composición, presentaciones, estado de autorización y ficha técnica; CIMA no trae precios y el nomenclátor no trae los no financiados",
+      "example": "curl -s \"https://cima.aemps.es/cima/rest/medicamento?cn=708201\""
+     }
+    ],
+    "output": "fila del nomenclátor con precios y financiación más el JSON de CIMA",
+    "checks": [
+     {
+      "url": "https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorExcel",
+      "read_bytes": 65536,
+      "min_bytes": 60000
+     },
+     {
+      "url": "https://www.sanidad.gob.es/profesionales/nomenclator.do",
+      "contains": "codnacional",
+      "read_bytes": 200000
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "geometria-seccion-censal",
+    "intent": "Geometría de las secciones censales, distritos o municipios de un año para mapear datos del INE",
+    "inputs": [
+     "seccion-censal",
+     "ine-municipio"
+    ],
+    "steps": [
+     {
+      "source": "ine-cartografia-censal",
+      "do": "seccionado_{AAAA}.zip del mismo año que el dato (65 MB, shapefile ETRS89 UTM 30); CUSEC es la sección de 10 dígitos, CUDIS el distrito y CUMUN el municipio; disolver por CUMUN para municipios",
+      "example": "curl -sO \"https://www.ine.es/prodyser/cartografia/seccionado_2026.zip\""
+     },
+     {
+      "source": "ine-api-tempus",
+      "do": "Los datos por sección (Atlas de distribución de renta) o por municipio se cruzan por esos códigos, cargados como texto con ceros a la izquierda"
+     }
+    ],
+    "output": "GeoDataFrame con una fila por sección y los códigos territoriales",
+    "checks": [
+     {
+      "url": "https://www.ine.es/prodyser/cartografia/seccionado_2026.zip",
+      "read_bytes": 1024
+     },
+     {
+      "url": "https://www.ine.es/prodyser/cartografia/seccionado_2019.zip",
+      "read_bytes": 1024
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "horarios-tren-gtfs",
+    "intent": "Horarios y paradas de Cercanías y de alta velocidad en GTFS, con las coordenadas de las estaciones",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "renfe-datos-abiertos",
+      "do": "GTFS estáticos con URL fija (google_transit.zip para AV, LD y MD; fomento_transit.zip para Cercanías); sin feed_info, la fecha de versión está en last_modified de package_show",
+      "example": "curl -sO \"https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip\""
+     },
+     {
+      "source": "renfe-datos-abiertos",
+      "do": "estaciones.csv (ISO-8859-1, separador ;) con CODIGO, LATITUD y LONGITUD para geolocalizar; los feeds GTFS-RT de gtfsrt.renfe.com no respondieron desde el entorno de verificación",
+      "example": "curl -sO \"https://ssl.renfe.com/ftransit/Fichero_estaciones/estaciones.csv\""
+     }
+    ],
+    "output": "ZIP GTFS y CSV de estaciones",
+    "checks": [
+     {
+      "url": "https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip",
+      "min_bytes": 500000,
+      "read_bytes": 1024
+     },
+     {
+      "url": "https://ssl.renfe.com/ftransit/Fichero_estaciones/estaciones.csv",
+      "contains": "CODIGO",
+      "read_bytes": 4096,
+      "retries": 3
+     }
+    ],
+    "verified": "2026-09-30"
    }
   ],
   "necesidades": [
@@ -7015,6 +7577,11 @@
     "note": "geocoder CartoCiudad"
    },
    {
+    "need": "Geometría de secciones censales, distritos y municipios por año",
+    "source": "ine-cartografia-censal",
+    "note": "shapefile anual del INE; los límites municipales oficiales del IGN están tras reCAPTCHA (cnig-centro-descargas)"
+   },
+   {
     "need": "Localizar cualquier servicio WMS, WFS o CSW de una Administración",
     "source": "idee-servicios"
    },
@@ -7068,9 +7635,14 @@
     "note": "series de CORES en xlsx; el ministerio publica PDF"
    },
    {
-    "need": "Generación eléctrica, demanda y precios del mercado (REE, OMIE)",
-    "source": null,
-    "note": "no está aún en el catálogo (REData y OMIE, siguientes por impacto)"
+    "need": "Demanda, generación por tecnología, PVPC y precio spot horarios",
+    "source": "ree-redata",
+    "note": "WAF intermitente; reintentar; ESIOS exige token"
+   },
+   {
+    "need": "Precio marginal del mercado diario e intradiario, curvas y programas de casación",
+    "source": "omie-mercado",
+    "note": "ficheros de texto por día; 96 periodos cuarto-horarios en 2026"
    },
    {
     "need": "Registro de instalaciones de producción eléctrica y autoconsumo",
@@ -7079,7 +7651,12 @@
    },
    {
     "need": "Medicamentos, presentaciones, fichas técnicas y problemas de suministro",
-    "source": "aemps-cima-api"
+    "source": "aemps-cima-api",
+    "note": "sin precios; precios y financiación en sanidad-nomenclator-facturacion"
+   },
+   {
+    "need": "Precios, financiación y aportación de medicamentos (nomenclátor de facturación)",
+    "source": "sanidad-nomenclator-facturacion"
    },
    {
     "need": "Ensayos clínicos (REEC) y alertas de seguridad",
@@ -7145,6 +7722,11 @@
     "need": "Matrices origen-destino de movilidad por telefonía móvil",
     "source": "mitma-opendata-movilidad",
     "note": "el host de datos respondió 403 desde el entorno de verificación"
+   },
+   {
+    "need": "Horarios de trenes (GTFS), estaciones con coordenadas y posiciones en tiempo real",
+    "source": "renfe-datos-abiertos",
+    "note": "GTFS-RT no verificado desde el entorno; Adif sin portal localizado"
    },
    {
     "need": "Tráfico portuario mensual por autoridad portuaria",
@@ -7251,6 +7833,10 @@
      {
       "via": "sanidad-portal-estadistico",
       "how": "el Catálogo de Hospitales lo guarda con dígito de control (6 dígitos)"
+     },
+     {
+      "via": "ine-cartografia-censal",
+      "how": "CUMUN en el shapefile de secciones censales; disolver por CUMUN da el contorno municipal del año"
      }
     ],
     "used_by": [
@@ -7261,6 +7847,7 @@
      "sanidad-portal-estadistico",
      "catastro-ovc",
      "cnig-centro-descargas",
+     "ine-cartografia-censal",
      "dgt-estadisticas",
      "mitma-opendata-movilidad"
     ]
@@ -7293,6 +7880,7 @@
      "sanidad-portal-estadistico",
      "catastro-ovc",
      "cnig-centro-descargas",
+     "ine-cartografia-censal",
      "dgt-estadisticas"
     ]
    },
@@ -7313,7 +7901,8 @@
      "ine-microdatos",
      "isciii-cne",
      "sanidad-portal-estadistico",
-     "cnig-centro-descargas"
+     "cnig-centro-descargas",
+     "ine-cartografia-censal"
     ]
    },
    "nuts": {
@@ -7323,15 +7912,21 @@
     "issuer": null,
     "gotcha": "NUTS3 coincide con la provincia salvo islas, Ceuta y Melilla; lo emite Eurostat, no hay fuente en el catálogo",
     "joins": [],
-    "used_by": []
+    "used_by": [
+     "ine-cartografia-censal"
+    ]
    },
    "seccion-censal": {
     "format": "10 dígitos, municipio (5) + distrito (2) + sección (3)",
     "regex": "^\\d{10}$",
     "example": "2807901001",
-    "issuer": null,
+    "issuer": "ine-cartografia-censal",
     "gotcha": "las secciones se redibujan cada año; usar la geometría del mismo año que el dato",
     "joins": [
+     {
+      "via": "ine-cartografia-censal",
+      "how": "geometría anual con CUSEC (sección), CUDIS (distrito) y CUMUN (municipio)"
+     },
      {
       "via": "ine-api-tempus",
       "how": "renta por sección en el Atlas de distribución de renta (operación del INE)"
@@ -7341,7 +7936,9 @@
       "how": "zonificación por distritos y municipios de los estudios de movilidad (host no verificable)"
      }
     ],
-    "used_by": []
+    "used_by": [
+     "ine-cartografia-censal"
+    ]
    },
    "referencia-catastral": {
     "format": "14 caracteres alfanuméricos (parcela) o 20 (inmueble, con 4 dígitos y 2 letras de control)",
@@ -7549,10 +8146,15 @@
      {
       "via": "aemps-cima-api",
       "how": "medicamento?cn= devuelve el nregistro y todas las presentaciones; psuministro lista problemas por cn"
+     },
+     {
+      "via": "sanidad-nomenclator-facturacion",
+      "how": "precio de venta, precio de referencia, aportación y agrupación homogénea por Código Nacional (solo financiados)"
      }
     ],
     "used_by": [
-     "aemps-cima-api"
+     "aemps-cima-api",
+     "sanidad-nomenclator-facturacion"
     ]
    },
    "boe-id": {

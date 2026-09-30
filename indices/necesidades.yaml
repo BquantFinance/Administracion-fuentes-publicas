@@ -113,6 +113,9 @@
 - need: Geocodificar una dirección y obtener su código INE
   source: cnig-centro-descargas
   note: geocoder CartoCiudad
+- need: Geometría de secciones censales, distritos y municipios por año
+  source: ine-cartografia-censal
+  note: shapefile anual del INE; los límites municipales oficiales del IGN están tras reCAPTCHA (cnig-centro-descargas)
 - need: Localizar cualquier servicio WMS, WFS o CSW de una Administración
   source: idee-servicios
 - need: Recintos agrícolas, usos del suelo y referencia catastral rústica
@@ -142,14 +145,20 @@
 - need: Consumo de productos petrolíferos y gas por provincia, balances energéticos
   source: miteco-energia-estadisticas
   note: series de CORES en xlsx; el ministerio publica PDF
-- need: Generación eléctrica, demanda y precios del mercado (REE, OMIE)
-  source: null
-  note: no está aún en el catálogo (REData y OMIE, siguientes por impacto)
+- need: Demanda, generación por tecnología, PVPC y precio spot horarios
+  source: ree-redata
+  note: WAF intermitente; reintentar; ESIOS exige token
+- need: Precio marginal del mercado diario e intradiario, curvas y programas de casación
+  source: omie-mercado
+  note: ficheros de texto por día; 96 periodos cuarto-horarios en 2026
 - need: Registro de instalaciones de producción eléctrica y autoconsumo
   source: miteco-energia-estadisticas
   note: no localizada descarga abierta; PRETOR da 404
 - need: Medicamentos, presentaciones, fichas técnicas y problemas de suministro
   source: aemps-cima-api
+  note: sin precios; precios y financiación en sanidad-nomenclator-facturacion
+- need: Precios, financiación y aportación de medicamentos (nomenclátor de facturación)
+  source: sanidad-nomenclator-facturacion
 - need: Ensayos clínicos (REEC) y alertas de seguridad
   source: aemps-otros-registros
   note: sin API; el REEC exige sesión
@@ -187,6 +196,9 @@
 - need: Matrices origen-destino de movilidad por telefonía móvil
   source: mitma-opendata-movilidad
   note: el host de datos respondió 403 desde el entorno de verificación
+- need: Horarios de trenes (GTFS), estaciones con coordenadas y posiciones en tiempo real
+  source: renfe-datos-abiertos
+  note: GTFS-RT no verificado desde el entorno; Adif sin portal localizado
 - need: Tráfico portuario mensual por autoridad portuaria
   source: puertos-estado-datos
 - need: Tráfico aéreo por aeropuerto y registro de aeronaves

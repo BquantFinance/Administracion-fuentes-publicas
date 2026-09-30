@@ -38,6 +38,6 @@ gotchas:
   - Los municipios cambian de código al fusionarse o segregarse; para series largas aplicar las variaciones anuales (codmun{AA}/{AA}codmunmod.htm).
 tips:
   - Cruce típico. La deuda viva y liquidaciones de Hacienda (hacienda-ovef) y las estadísticas municipales de la AEAT (aeat-estadisticas) se casan por CPRO+CMUN.
-related: [ine-api-tempus, hacienda-ovef, catastro-ovc, aeat-estadisticas]
+related: [ine-api-tempus, hacienda-ovef, catastro-ovc, aeat-estadisticas, ine-cartografia-censal]
 status: active
 verified: "2026-09-30"

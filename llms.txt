@@ -2,7 +2,7 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 67 · Recetas: 37 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
+Fuentes: 72 · Recetas: 41 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
 
 ## Cómo usar este repo
 
@@ -71,6 +71,7 @@ Fuentes: 67 · Recetas: 37 · Alcance actual: Administración General del Estado
 - Parcelario, edificios y direcciones vectoriales por municipio (INSPIRE) → catastro-ovc
 - Ortofotos PNOA, modelos del terreno, LiDAR y límites municipales → cnig-centro-descargas (descargas con reCAPTCHA; WMS, WMTS y WFS sin restricción)
 - Geocodificar una dirección y obtener su código INE → cnig-centro-descargas (geocoder CartoCiudad)
+- Geometría de secciones censales, distritos y municipios por año → ine-cartografia-censal (shapefile anual del INE; los límites municipales oficiales del IGN están tras reCAPTCHA (cnig-centro-descargas))
 - Localizar cualquier servicio WMS, WFS o CSW de una Administración → idee-servicios
 - Recintos agrícolas, usos del suelo y referencia catastral rústica → mapa-sigpac
 - Predicción, observación, climatología, avisos y radar → aemet-opendata (clave gratuita obligatoria; el cuerpo vacío con 200 es fallo de autenticación)
@@ -83,9 +84,11 @@ Fuentes: 67 · Recetas: 37 · Alcance actual: Administración General del Estado
 - Precios de carburantes por gasolinera → minetur-precios-carburantes
 - Comercializadoras, cambios de suministrador, bono social, garantías de origen → cnmc-data
 - Consumo de productos petrolíferos y gas por provincia, balances energéticos → miteco-energia-estadisticas (series de CORES en xlsx; el ministerio publica PDF)
-- Generación eléctrica, demanda y precios del mercado (REE, OMIE) → ninguna (no está aún en el catálogo (REData y OMIE, siguientes por impacto))
+- Demanda, generación por tecnología, PVPC y precio spot horarios → ree-redata (WAF intermitente; reintentar; ESIOS exige token)
+- Precio marginal del mercado diario e intradiario, curvas y programas de casación → omie-mercado (ficheros de texto por día; 96 periodos cuarto-horarios en 2026)
 - Registro de instalaciones de producción eléctrica y autoconsumo → miteco-energia-estadisticas (no localizada descarga abierta; PRETOR da 404)
-- Medicamentos, presentaciones, fichas técnicas y problemas de suministro → aemps-cima-api
+- Medicamentos, presentaciones, fichas técnicas y problemas de suministro → aemps-cima-api (sin precios; precios y financiación en sanidad-nomenclator-facturacion)
+- Precios, financiación y aportación de medicamentos (nomenclátor de facturación) → sanidad-nomenclator-facturacion
 - Ensayos clínicos (REEC) y alertas de seguridad → aemps-otros-registros (sin API; el REEC exige sesión)
 - Exceso de mortalidad (MoMo), COVID-19, boletines epidemiológicos, gripe → isciii-cne
 - Hospitales, altas hospitalarias e indicadores del Sistema Nacional de Salud → sanidad-portal-estadistico (solo el Catálogo de Hospitales tiene descarga directa)
@@ -100,6 +103,7 @@ Fuentes: 67 · Recetas: 37 · Alcance actual: Administración General del Estado
 - Incidencias de tráfico, detectores, radares, zonas de bajas emisiones, puntos de recarga → dgt-datex-trafico
 - Matriculaciones, bajas, parque de vehículos y conductores (microdatos) → dgt-estadisticas (no localizados microdatos de accidentes, solo tablas)
 - Matrices origen-destino de movilidad por telefonía móvil → mitma-opendata-movilidad (el host de datos respondió 403 desde el entorno de verificación)
+- Horarios de trenes (GTFS), estaciones con coordenadas y posiciones en tiempo real → renfe-datos-abiertos (GTFS-RT no verificado desde el entorno; Adif sin portal localizado)
 - Tráfico portuario mensual por autoridad portuaria → puertos-estado-datos
 - Tráfico aéreo por aeropuerto y registro de aeronaves → aesa-aviacion (degradada; sin ficheros verificados)
 - Comercio exterior por producto, país y provincia → datacomex (API con token de usuario gratuito)
@@ -159,6 +163,10 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 - dataset-cnmc-a-csv: Descargar un dataset de la CNMC (energía, telecomunicaciones, postal) como CSV o consultarlo por API → cnmc-data
 - convenio-colectivo-regcon: Consultar un convenio colectivo por código, denominación o CNAE en REGCON → mites-estadisticas
 - deficit-y-ejecucion-presupuestaria: Déficit mensual de las Administraciones Públicas y ejecución del presupuesto del Estado → igae-ejecucion-presupuestaria, hacienda-ovef
+- precio-electricidad-horario: Precio de la electricidad por hora o cuarto de hora (mercado diario, PVPC y spot) y demanda del día → omie-mercado, ree-redata
+- medicamento-precio-financiado: Precio de venta, precio de referencia y aportación de un medicamento financiado, con su ficha técnica → sanidad-nomenclator-facturacion, aemps-cima-api
+- geometria-seccion-censal: Geometría de las secciones censales, distritos o municipios de un año para mapear datos del INE → ine-cartografia-censal, ine-api-tempus
+- horarios-tren-gtfs: Horarios y paradas de Cercanías y de alta velocidad en GTFS, con las coordenadas de las estaciones → renfe-datos-abiertos
 
 ## Sectores
 
@@ -169,14 +177,14 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 - [Contratación pública y subvenciones](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/contratacion-subvenciones/README.md): bdns-api, hacienda-registro-licitadores, placsp-datos-abiertos
 - [Empleo y Seguridad Social](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/empleo-seguridad-social/README.md): mites-estadisticas, segsocial-estadisticas, sepe-estadisticas
 - [Gobierno abierto, transparencia y organización administrativa](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/gobierno-abierto-administracion/README.md): datos-gob-es-api, dir3-directorio, face-facturas, pag-administracion-gob-es, transparencia-portal
-- [Territorio, catastro y cartografía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/territorio-cartografia/README.md): catastro-ovc, cnig-centro-descargas, idee-servicios
+- [Territorio, catastro y cartografía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/territorio-cartografia/README.md): catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal
 - [Meteorología y clima](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/meteorologia-clima/README.md): aemet-opendata, aemet-otros-servicios
 - [Medio ambiente, agua y biodiversidad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/medio-ambiente-agua-biodiversidad/README.md): miteco-banco-datos-naturaleza, miteco-calidad-aire, miteco-prtr, miteco-saih-boletin-hidrologico
-- [Energía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/energia/README.md): cnmc-data, minetur-precios-carburantes, miteco-energia-estadisticas
-- [Sanidad y medicamentos](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/sanidad-medicamentos/README.md): aemps-cima-api, aemps-otros-registros, isciii-cne, sanidad-portal-estadistico
+- [Energía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/energia/README.md): cnmc-data, minetur-precios-carburantes, miteco-energia-estadisticas, omie-mercado, ree-redata
+- [Sanidad y medicamentos](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/sanidad-medicamentos/README.md): aemps-cima-api, aemps-otros-registros, isciii-cne, sanidad-nomenclator-facturacion, sanidad-portal-estadistico
 - [Ciencia e investigación (biología, química, geología, oceanografía)](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/ciencia-investigacion/README.md): aei-convocatorias, csic-digital, fecyt-recolecta, gbif-es, igme-geologia, ign-sismologia
 - [Agricultura, pesca y alimentación](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/agricultura-pesca-alimentacion/README.md): fega-beneficiarios-pac, mapa-estadisticas-agrarias, mapa-pesca, mapa-sigpac
-- [Transporte y movilidad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/transporte-movilidad/README.md): aesa-aviacion, dgt-datex-trafico, dgt-estadisticas, mitma-opendata-movilidad, puertos-estado-datos
+- [Transporte y movilidad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/transporte-movilidad/README.md): aesa-aviacion, dgt-datex-trafico, dgt-estadisticas, mitma-opendata-movilidad, puertos-estado-datos, renfe-datos-abiertos
 - [Comercio exterior, industria y propiedad industrial](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/comercio-industria-propiedad/README.md): datacomex, datainvex, mincotur-industria-turismo, oepm-invenes
 - [Educación y universidades](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/educacion-universidades/README.md): educacion-estadisticas-ruct
 - [Justicia, interior y seguridad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/justicia-interior-seguridad/README.md): interior-criminalidad

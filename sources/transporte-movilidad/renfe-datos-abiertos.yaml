@@ -1,0 +1,50 @@
+id: renfe-datos-abiertos
+name: Renfe – Datos abiertos (GTFS, GTFS-RT, estaciones, viajeros)
+org: Renfe Viajeros (Grupo Renfe)
+ministry: Empresa pública adscrita a Transportes y Movilidad Sostenible
+level: age
+sector: transporte-movilidad
+tags: [ferrocarril, gtfs, gtfs-rt, horarios, cercanias, alta-velocidad, estaciones, viajeros, renfe, ckan]
+summary: >-
+  CKAN con 44 datasets: horarios GTFS de Cercanías y de alta velocidad, larga y media distancia, feeds GTFS-RT
+  (alertas, viajes y posiciones de trenes) en protobuf y JSON, 1.036 estaciones con coordenadas, viajeros por
+  franja horaria y núcleo, y puntualidad. CC BY 4.0, sin clave.
+access: [api-rest, download, feed]
+auth: none
+formats: [zip, csv, xlsx, json, protobuf]
+update: realtime
+coverage: "GTFS vigentes (sin fecha de versión en el fichero); viajeros por franja y puntualidad según dataset"
+license: CC BY 4.0 (license_title de los datasets)
+base_url: https://data.renfe.com/api/3/action
+docs_url: https://data.renfe.com/
+endpoints:
+  - path: /package_search?rows=100
+    desc: Los 44 datasets con resources[].url, format y last_modified; package_list solo nombres; package_show?id={name} un dataset
+    example: curl -s "https://data.renfe.com/api/3/action/package_show?id=horarios-cercanias"
+  - path: https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip
+    desc: GTFS de alta velocidad, larga y media distancia (760 KB; agency, calendar, calendar_dates, routes, stops, stop_times, trips; sin feed_info)
+    example: curl -sO "https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip"
+  - path: https://ssl.renfe.com/ftransit/Fichero_CER_FOMENTO/fomento_transit.zip
+    desc: GTFS de Cercanías (14 MB)
+    example: curl -sO "https://ssl.renfe.com/ftransit/Fichero_CER_FOMENTO/fomento_transit.zip"
+  - path: https://ssl.renfe.com/ftransit/Fichero_estaciones/estaciones.csv
+    desc: 1.036 estaciones con CODIGO, DESCRIPCION, LATITUD, LONGITUD, DIRECION, CP, POBLACION, PROVINCIA, PAIS, CERCANIAS, ANCHO MÉTRICO y COMUN; también estaciones.xlsx
+    example: curl -sO "https://ssl.renfe.com/ftransit/Fichero_estaciones/estaciones.csv"
+  - path: https://gtfsrt.renfe.com/{alerts|trip_updates|vehicle_positions}.{pb|json}
+    desc: GTFS-RT de Cercanías; con sufijo _LD (trip_updates_LD, vehicle_positions_LD) para alta velocidad y larga distancia; no verificado (ver gotchas)
+  - path: https://data.renfe.com/dataset/{uuid}/resource/{id}/download/{fichero}.{csv|xlsx}
+    desc: Estaciones por núcleo, viajeros por franja horaria (Madrid, Barcelona, Valencia, Sevilla, Bilbao...), puntualidad, fichas de trenes; URL en resources[].url
+quirks: [latin1]
+ids: []
+gotchas:
+  - gtfsrt.renfe.com cerró la conexión TLS (reset) y respondió 503 en http el 30/09/2026 desde el entorno de verificación; los feeds GTFS-RT quedan sin verificar.
+  - ssl.renfe.com cerró la conexión en una de cuatro descargas de estaciones.csv el 30/09/2026; reintentar ante ConnectionReset.
+  - El GTFS de AV y LD no lleva feed_info.txt ni fecha de versión; comprobar last_modified del recurso en package_show para saber si cambió.
+  - agency.txt viene con relleno de espacios al final de las líneas; recortar antes de parsear.
+  - El CSV de estaciones va en ISO-8859-1, separador ; y todas las columnas entre comillas; CODIGO es un código de estación de 5 dígitos con ceros iniciales (01003).
+  - No localicé portal de datos abiertos de Adif (data.adif.es no responde y adif.es/datos-abiertos da 404 el 30/09/2026).
+tips:
+  - gtfs-kit o partridge leen los ZIP GTFS directamente; para geometría de estaciones basta estaciones.csv con LATITUD y LONGITUD en WGS84.
+related: [dgt-datex-trafico, puertos-estado-datos, mitma-opendata-movilidad]
+status: active
+verified: "2026-09-30"

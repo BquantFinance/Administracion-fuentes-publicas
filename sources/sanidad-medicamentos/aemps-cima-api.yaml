@@ -60,6 +60,6 @@ gotchas:
 tips:
   - Para un maestro completo, descargar prescripcion.zip y parsear Prescripcion.xml con iterparse (193 MB); para mantenerlo al día, registroCambios con la fecha de la última descarga.
   - "Secciones útiles de ficha técnica: 4.1 indicaciones, 4.2 posología, 4.3 contraindicaciones, 4.8 reacciones adversas; el HTML de contenido conserva estilos de Word, limpiar con BeautifulSoup get_text."
-related: [sanidad-portal-estadistico, aemps-otros-registros]
+related: [sanidad-portal-estadistico, aemps-otros-registros, sanidad-nomenclator-facturacion]
 status: active
 verified: "2026-09-30"

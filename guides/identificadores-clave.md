@@ -12,7 +12,7 @@ El campo `ids` de cada ficha lista, con el vocabulario de `schema/vocab.yaml` (i
 | Código INE de provincia | 2 dígitos (01 a 52) | INE | Casi todo | Ceuta 51 y Melilla 52 no son provincias en sentido estricto pero se codifican así |
 | Código de CCAA | 2 dígitos (01 Andalucía ... 19 Melilla) | INE | Estadísticas | Orden distinto al alfabético y al de Eurostat (NUTS2 usa ES11, ES12...) |
 | NUTS 1/2/3 | ES + 1 a 3 caracteres | Eurostat | Datos europeos, fondos UE | NUTS3 = provincia salvo islas y Ceuta/Melilla |
-| Sección censal | 10 dígitos: municipio (5) + distrito (2) + sección (3) | INE | Censo, renta por sección (INE Atlas), SERPAVI, movilidad | Las secciones se redibujan cada año; usar la geometría del mismo año que el dato |
+| Sección censal | 10 dígitos: municipio (5) + distrito (2) + sección (3) | INE (`ine-cartografia-censal`, geometría anual) | Censo, renta por sección (INE Atlas), SERPAVI, movilidad | Las secciones se redibujan cada año; usar la geometría del mismo año que el dato |
 | Referencia catastral | 14 caracteres (parcela) o 20 (inmueble) | Catastro (`catastro-ovc`) | Catastro, notarías, registros, SIGPAC rústica | Los códigos de municipio del Catastro son propios, no INE |
 | Referencia SIGPAC | provincia:municipio:agregado:zona:polígono:parcela:recinto | FEGA (`mapa-sigpac`) | PAC, agricultura | Comparte polígono y parcela con Catastro en rústica, no el resto |
 | Código de estación AEMET (idema) | 4 o 5 caracteres alfanuméricos (3195 Madrid Retiro) | AEMET (`aemet-opendata`) | Climatología | Las predicciones no usan idema, usan código INE de municipio |
