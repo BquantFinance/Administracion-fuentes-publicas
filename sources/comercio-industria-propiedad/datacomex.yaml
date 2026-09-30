@@ -1,28 +1,42 @@
 id: datacomex
-name: DataComex – Estadísticas de comercio exterior de España
+name: DataComex – Estadísticas de comercio exterior de España (portal y API con token)
 org: Secretaría de Estado de Comercio
 ministry: Economía, Comercio y Empresa
 level: age
 sector: comercio-industria-propiedad
-tags: [comercio-exterior, exportaciones, importaciones, aduanas, taric, paises, provincias]
+tags: [comercio-exterior, exportaciones, importaciones, aduanas, taric, paises, provincias, api]
 summary: >-
-  Exportaciones e importaciones mensuales por producto (TARIC hasta 8 dígitos, CNAE, CUCI), país, provincia y
-  CCAA, en valor y volumen, desde 1995. Consulta multidimensional con exportación a CSV y Excel.
-access: [portal, download]
-auth: none
-formats: [csv, xlsx, html]
+  Exportaciones e importaciones mensuales de Aduanas por producto TARIC, país y provincia. Portal de consulta
+  interactiva con cuadros de mando y API REST JSON (DatacomexAPI) con token obtenido por usuario y contraseña
+  gratuitos; la descarga masiva también exige iniciar sesión.
+access: [api-rest, portal, download]
+auth: registration
+formats: [json, csv, xlsx, html]
 update: monthly
-coverage: "1995-"
+coverage: "Series mensuales y anuales de Aduanas"
 license: Reutilización libre con cita de la fuente
 base_url: https://datacomex.comercio.es/
-docs_url: https://datacomex.comercio.es/
+docs_url: https://datacomex.comercio.es/Data/AyudaApi
 endpoints:
-  - path: https://datacomex.comercio.es/
-    desc: Consulta interactiva con selección de dimensiones y descarga
+  - path: https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion
+    desc: POST con JSON de usuario y contraseña; devuelve el token de acceso (GET responde 405, credenciales vacías 403)
+    example: 'curl -s -X POST -H "Content-Type: application/json" -d "{\"Usuario\":\"$DATACOMEX_USER\",\"Pass\":\"$DATACOMEX_PASS\"}" "https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion"'
+  - path: https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f={I|E|I/E}&pe={periodo}&pa={pais}&ta={taric}&pr={provincia}
+    desc: Datos en JSON; pe admite AAAA, AAAAMM, LastY, LastM, ALL y ALLM, pa=ALL todos los países; token por access_token o cabecera Authorization
+    example: 'curl -s -H "Authorization: Bearer $DATACOMEX_TOKEN" "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=ALL&ta=1001&pr=28"'
+  - path: https://datacomex.comercio.es/Metadata/Index
+    desc: Metadatos y clasificaciones del portal
+  - path: https://datacomex_v6.comercio.es/
+    desc: Versión anterior del portal, todavía en línea
+quirks: [session-required]
+ids: [ine-provincia]
 gotchas:
-  - Requiere registro gratuito para consultas grandes; las pequeñas funcionan sin cuenta.
-  - Los datos provisionales de los últimos meses se revisan; los definitivos llegan con un año de retardo.
-  - La fuente primaria es la AEAT (Aduanas); DataComex reorganiza pero no cambia cifras.
+  - Sin token, ObtenerDatos responde 401 con JSON (Se ha denegado la autorización). El registro de usuario es gratuito y se hace en el portal (/User).
+  - La consulta interactiva pequeña funciona sin cuenta, pero DESCARGA MASIVA y la API exigen sesión; los cuadros de mando de la portada son Power BI incrustado, sin descarga programática.
+  - Los códigos de provincia son los del INE de dos dígitos (pr=28 Madrid) y el TARIC se pasa como prefijo (ta=1001, dos a ocho dígitos).
+  - Los datos provisionales de los últimos meses se revisan; los definitivos llegan con retraso de meses. La fuente primaria es la AEAT (Aduanas).
+tips:
+  - Guardar el token y reutilizarlo en las llamadas de la sesión; un bucle por pe=AAAAMM y pa=ALL descarga la serie completa de un TARIC sin pasar por el portal.
 related: [datainvex, aeat-estadisticas]
 status: active
-verified: null
+verified: "2026-09-30"

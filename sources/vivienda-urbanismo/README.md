@@ -4,6 +4,6 @@ Sector `vivienda-urbanismo` · 1 fuentes · índice generado por `scripts/build.
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
-| [mivau-precios-vivienda-alquiler](mivau-precios-vivienda-alquiler.yaml) | Ministerio de Vivienda – Precios de vivienda, alquiler y estadísticas de vivienda | portal, download | none | xlsx, csv, pdf | quarterly | — | — |
+| [mivau-precios-vivienda-alquiler](mivau-precios-vivienda-alquiler.yaml) | Ministerio de Vivienda – Estadísticas de vivienda (Boletín Online en XLS) y SERPAVI | download, portal | none | xls, pdf, html | quarterly | url-drift, js-rendered | 2026-09-30 |
 
-- **mivau-precios-vivienda-alquiler**: Sistema Estatal de Referencia del Precio del Alquiler (SERPAVI) por sección censal y municipio, valor tasado de vivienda por municipio, transacciones inmobiliarias, visados de obra, parque de viviendas, precios del suelo.
+- **mivau-precios-vivienda-alquiler**: Transacciones inmobiliarias, valor tasado, estimación del parque, stock de vivienda nueva, precios del suelo urbano y vivienda protegida en tablas XLS del Boletín Estadístico Online (un capítulo por estadística), más SERPAVI, índices de precios de alquiler consultables por municipio y distrito.

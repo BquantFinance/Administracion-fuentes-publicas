@@ -1,29 +1,44 @@
 id: mincotur-industria-turismo
-name: Ministerio de Industria y Turismo – Estadísticas industriales y de turismo
-org: Secretaría de Estado de Industria / Secretaría de Estado de Turismo (Turespaña)
+name: Ministerio de Industria y Turismo – Estadísticas industriales, BADASE y DATAESTUR (API)
+org: Secretaría de Estado de Industria y Secretaría de Estado de Turismo (Turespaña y SEGITTUR)
 ministry: Industria y Turismo
 level: age
 sector: comercio-industria-propiedad
-tags: [industria, turismo, frontur, egatur, registro-industrial, seguridad-industrial, dataestur]
+tags: [industria, turismo, frontur, egatur, badase, dataestur, api, coyuntura-industrial]
 summary: >-
-  Indicadores industriales, Registro Integrado Industrial, y estadísticas de turismo (llegadas FRONTUR, gasto
-  EGATUR, ocupación hotelera, movimientos aeroportuarios) reunidas en DATAESTUR con descarga.
-access: [portal, download]
-auth: none
-formats: [xlsx, csv, pdf]
+  Estadísticas de industria (coyuntura, vehículos, cemento, pyme) y base de series BADASE en aplicaciones
+  ASP.NET, más DATAESTUR, plataforma de datos turísticos con 124 conjuntos descargables y una API REST
+  (API-SEGITTUR v2, OpenAPI, clave de API) que reúne FRONTUR, EGATUR, afiliación y AENA.
+access: [api-rest, portal, download]
+auth: api-key
+formats: [json, xlsx, csv, html]
 update: monthly
-coverage: "Turismo desde 2001"
+coverage: "Turismo desde 2015 en DATAESTUR; series industriales según encuesta"
 license: Reutilización libre con cita de la fuente
-base_url: https://www.mintur.gob.es/
-docs_url: https://www.dataestur.es/
+base_url: https://www.dataestur.es/
+docs_url: https://www.dataestur.es/apidata/
 endpoints:
-  - path: https://www.dataestur.es/
-    desc: DATAESTUR, plataforma de datos turísticos con descargas por indicador
-  - path: https://www.mintur.gob.es/es-ES/IndicadoresyEstadisticas/Paginas/Index.aspx
-    desc: Indicadores y estadísticas industriales
+  - path: https://www.dataestur.es/app/themes/mini-mandrake/apidata/openapi.json
+    desc: Especificación OpenAPI 3 de API-SEGITTUR v2 (124 rutas _DL con filtros desde y hasta año y mes, CCAA y provincia; seguridad apiKeyHeader o apiKeyQuery)
+    example: curl -s "https://www.dataestur.es/app/themes/mini-mandrake/apidata/openapi.json"
+  - path: https://www.dataestur.es/API-SEGITTUR-v2/{conjunto}_DL
+    desc: Descarga de un conjunto (AENA_DESTINOS_DL, AFILIACION_TURISMO_DL, CST_EMPLEO_TURISTICO_DL...) con clave de API; sin clave el gateway respondió 504
+  - path: https://www.dataestur.es/general/{frontur|egatur}/
+    desc: Páginas de FRONTUR y EGATUR en DATAESTUR con descargas por indicador
+  - path: https://sedeaplicaciones.serviciosmin.gob.es/Badase/
+    desc: BADASE, base de series estadísticas de industria (ASP.NET con __VIEWSTATE, selección de series y salida en varios formatos)
+  - path: https://industria.gob.es/es-es/estadisticas
+    desc: Encuesta de coyuntura industrial, estadística de vehículos, cemento y publicaciones sobre pyme
+quirks: [viewstate-forms, url-drift]
+ids: []
 gotchas:
-  - FRONTUR y EGATUR las produce el INE desde 2015; DATAESTUR redistribuye. Para series largas ir al INE.
-  - El dominio del ministerio ha cambiado varias veces (minetur, mincotur, mintur); enlaces antiguos rotos.
-related: [ine-api-tempus, miteco-energia-estadisticas]
+  - La ruta IndicadoresyEstadisticas de mintur.gob.es da 404; las estadísticas de industria viven en industria.gob.es y las de turismo en turismo.gob.es, que remite a DATAESTUR.
+  - La clave de API de DATAESTUR se solicita en la propia plataforma (registro); las llamadas sin clave no fallan con 401 sino que agotan el tiempo (504).
+  - FRONTUR y EGATUR las produce el INE desde 2015; DATAESTUR redistribuye y añade fuentes (AENA, afiliación, telefonía móvil). Para series largas ir al INE.
+  - BADASE es una aplicación con postbacks y estado; la salida se elige en un desplegable (formato y tipo) y no hay URL estable por serie.
+  - El portal de datos abiertos de la sede de Industria (sede.serviciosmin.gob.es) tiene el catálogo roto (ficha miteco-energia-estadisticas).
+tips:
+  - Leer openapi.json y generar el cliente (por ejemplo con openapi-python-client); todas las rutas devuelven el conjunto completo filtrable por fechas y territorio.
+related: [ine-api-tempus, miteco-energia-estadisticas, aesa-aviacion]
 status: active
-verified: null
+verified: "2026-09-30"

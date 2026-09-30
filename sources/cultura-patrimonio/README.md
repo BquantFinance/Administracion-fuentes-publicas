@@ -4,6 +4,6 @@ Sector `cultura-patrimonio` · 1 fuentes · índice generado por `scripts/build.
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
-| [bne-datos](bne-datos.yaml) | BNE – datos.bne.es (linked data, SPARQL) y Hispana | sparql, oai-pmh, api-rest, download | none | rdf, ttl, jsonld, json, xml, marc | monthly | — | — |
+| [bne-datos](bne-datos.yaml) | BNE – datos.bne.es (linked data, SPARQL) e Hispana (OAI-PMH) | oai-pmh, sparql, api-rest, download | none | xml, rdf, ttl, jsonld, json | monthly | waf-blocks-bots, url-drift | 2026-09-30 |
 
-- **bne-datos**: Catálogo bibliográfico y de autoridades de la BNE como datos enlazados (RDF, SPARQL, JSON), Biblioteca Digital Hispánica y Hemeroteca Digital con OAI-PMH, y Hispana, agregador nacional de repositorios de patrimonio digital (más de 10 millones de objetos) también por OAI-PMH.
+- **bne-datos**: Catálogo bibliográfico y de autoridades de la BNE como datos enlazados (RDF, SPARQL, JSON-LD) e Hispana, agregador nacional de patrimonio digital con OAI-PMH (10,6 millones de registros, 124 sets, formatos oai_dc, edm, ese y didl). datos.bne.es respondió 403 desde este entorno; Hispana sí.

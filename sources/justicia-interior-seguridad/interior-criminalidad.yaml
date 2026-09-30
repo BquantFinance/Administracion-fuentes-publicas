@@ -1,30 +1,44 @@
 id: interior-criminalidad
-name: Ministerio del Interior – Portal Estadístico de Criminalidad
+name: Ministerio del Interior – Portal Estadístico de Criminalidad (balances en PC-Axis)
 org: Secretaría de Estado de Seguridad
 ministry: Interior
 level: age
 sector: justicia-interior-seguridad
-tags: [criminalidad, delitos, infracciones-penales, balances, victimizaciones, detenciones, municipios]
+tags: [criminalidad, delitos, infracciones-penales, balances, municipios, provincias, pc-axis]
 summary: >-
-  Infracciones penales conocidas y esclarecidas, detenciones y víctimas por tipología, trimestre, provincia y
-  municipio de más de 20.000 habitantes (balances trimestrales), más series anuales y cubos consultables.
-access: [portal, download]
+  Balances trimestrales de criminalidad (infracciones penales conocidas por tipología, con comparación
+  interanual) por comunidad autónoma, provincia y municipio de más de 20.000 habitantes desde 2016, servidos
+  con el sistema PC-Axis del INE y descargables en CSV, px y xlsx por tabla.
+access: [download, portal]
 auth: none
-formats: [xlsx, csv, pdf, html]
+formats: [csv, px, xlsx, html]
 update: quarterly
-coverage: "2010- (balances); series anuales anteriores"
+coverage: "2016-4 a 2026-2 (balances trimestrales)"
 license: Reutilización libre con cita de la fuente
 base_url: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/
-docs_url: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/
+docs_url: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/balances.html
 endpoints:
   - path: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/balances.html
-    desc: Balances trimestrales de criminalidad con Excel por provincia y municipio
-  - path: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/datos.html
-    desc: Consulta dinámica de cubos (SEC) con exportación
+    desc: Selector de año y trimestre; cada uno enlaza a datos.html?type=jaxi&path=/DatosBalanceAnt/{AAAA}{T}/
+  - path: https://estadisticasdecriminalidad.ses.mir.es/sec/dynPx/inebase/index.htm?type=pcaxis&path=/DatosBalanceAnt/{AAAA}{T}/&file=pcaxis
+    desc: Índice de tablas del trimestre (CCAA, provincias, municipios de más de 20.000 habitantes) con enlaces a jaxiPx/Tabla.htm y al diálogo de exportación
+    example: curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/dynPx/inebase/index.htm?type=pcaxis&path=/DatosBalanceAnt/20262/&file=pcaxis"
+  - path: https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/{csv_bdsc|px|xlsx}{path}{file}?nocab=1
+    desc: Descarga de una tabla; en el último trimestre path=/DatosBalanceAct/l0/ y file 09004.px (CCAA), 09005.px (provincias), 09006.px (municipios)
+    example: curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09004.px?nocab=1"
+  - path: https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/Tabla.htm?path={path}&file={file}&L=0
+    desc: Tabla interactiva con el enlace dlgExport.htm para elegir formato
+quirks: [latin1, js-rendered, url-drift]
+ids: []
 gotchas:
-  - No incluye datos de Mossos d'Esquadra ni Ertzaintza salvo en los totales nacionales agregados; el detalle municipal de Cataluña y País Vasco es parcial.
-  - La tipología penal cambió con la reforma de 2015; series largas requieren reagrupar.
+  - datos.html solo incrusta un iframe del sistema PC-Axis (sec/dynPx); para automatizar ir directamente a index.htm y a files/_px con el path y el file que muestra el índice de cada trimestre.
+  - Los ficheros del trimestre vigente cuelgan de DatosBalanceAct/l0/ y los anteriores de DatosBalanceAnt con otros números de tabla (99010 a 99012 en el índice de 2019-4); la ruta DatosBalanceAnt/{AAAA}{T}/l0/ no existe.
+  - CSV con BOM, separador ; e ISO-8859-15; miles con punto. Las columnas son tipología penal, periodo (enero-junio 2025, enero-junio 2026, variación) y ámbito.
+  - Municipios y provincias vienen por nombre sin código INE; cruzar por nombre normalizado con ine-codigos-territoriales.
+  - No incluye el detalle de Mossos d'Esquadra ni Ertzaintza salvo en agregados; la tipología cambió con la reforma penal de 2015.
   - Los datos judiciales (sentencias, juzgados) los publica el CGPJ, fuera del alcance AGE actual.
+tips:
+  - "pandas.read_csv(url, sep=';', encoding='latin-1', thousands='.') sobre el csv_bdsc; filtrar la fila de variación porcentual antes de sumar."
 related: [ine-codigos-territoriales]
 status: active
-verified: null
+verified: "2026-09-30"

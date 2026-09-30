@@ -1,35 +1,48 @@
 id: educacion-estadisticas-ruct
-name: Educación y Universidades – Estadísticas (EDUCAbase, SIIU), RUCT y registro de centros
-org: Subdirección General de Estadística y Estudios / Secretaría General de Universidades
+name: Educación y Universidades – EDUCAbase (PC-Axis), SIIU, RUCT y registro de centros
+org: Subdirección General de Estadística y Estudios y Secretaría General de Universidades
 ministry: Educación, Formación Profesional y Deportes; Ciencia, Innovación y Universidades
 level: age
 sector: educacion-universidades
-tags: [educacion, universidades, ruct, titulaciones, centros-educativos, alumnado, profesorado, becas, siiu]
+tags: [educacion, universidades, ruct, titulaciones, centros-educativos, alumnado, profesorado, becas, siiu, pc-axis]
 summary: >-
-  Estadísticas de enseñanza no universitaria (alumnado, profesorado, resultados, gasto) en EDUCAbase con exportación
-  PC-Axis/CSV, estadísticas universitarias (SIIU), Registro de Universidades, Centros y Títulos (RUCT) y Registro
-  Estatal de Centros Docentes no universitarios con datos por centro.
-access: [portal, download]
+  Estadísticas de enseñanza no universitaria en EDUCAbase (PC-Axis idéntico al del INE, con descarga CSV, px
+  y xlsx por tabla), estadísticas universitarias SIIU en xlsx (matriculados y egresados por titulación
+  2015-2024), RUCT y Registro Estatal de Centros Docentes.
+access: [download, portal]
 auth: none
-formats: [px, csv, xlsx, pdf, html]
+formats: [csv, px, xlsx, html]
 update: annual
-coverage: "1990-"
+coverage: "EDUCAbase desde el curso 1999-2000; SIIU 2015-"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.educacionfpydeportes.gob.es/servicios-al-ciudadano/estadisticas.html
-docs_url: https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm
+docs_url: https://www.educacionfpydeportes.gob.es/servicios-al-ciudadano/estadisticas/no-universitaria/alumnado/matriculado.html
 endpoints:
-  - path: https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm
-    desc: EDUCAbase, cubos estadísticos con exportación a CSV, Excel y PC-Axis
-  - path: https://www.educacion.gob.es/ruct/home
-    desc: RUCT, universidades, centros y títulos oficiales con código
-  - path: https://www.educacion.gob.es/centros/home.do
-    desc: Registro Estatal de Centros Docentes no universitarios (buscador y descarga)
-  - path: https://www.universidades.gob.es/estadisticas-e-informes/
-    desc: Estadísticas universitarias SIIU (matrícula, egresados, PDI, inserción laboral)
+  - path: https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm?type=pcaxis&path={ruta}&file=pcaxis&l=s0
+    desc: Índice de tablas de un conjunto (ruta como /no-universitaria/alumnado/matriculado/2024-2025-rd/adultos); enlaza a EducaJaxiPx/Tabla.htm con path y file
+    example: curl -s "https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm?type=pcaxis&path=/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos&file=pcaxis&l=s0"
+  - path: https://estadisticas.educacion.gob.es/EducaJaxiPx/files/_px/es/{csv_bdsc|px|xlsx}{path}{file}?nocab=1
+    desc: Descarga de una tabla en CSV (separador ;), PC-Axis o xlsx; path y file son los de Tabla.htm (por ejemplo .../adultos/l0/ y adul_01.px)
+    example: curl -s "https://estadisticas.educacion.gob.es/EducaJaxiPx/files/_px/es/csv_bdsc/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos/l0/adul_01.px?nocab=1"
+  - path: https://www.educacionfpydeportes.gob.es/servicios-al-ciudadano/estadisticas/no-universitaria/alumnado/matriculado/{curso}-rd.html
+    desc: Página por curso (1999-2000 a 2024-2025) con los enlaces a los índices de EDUCAbase; misma estructura para profesorado, centros y resultados
+  - path: https://www.ciencia.gob.es/Ministerio/Estadisticas/SIIU/{Estudiantes|Afiliacion|Becas|Financiacion|Internacionalizacion|PAU}.html
+    desc: SIIU con xlsx bajo /dam/jcr:{uuid}/ (MatriculadosTitulacion2015_2024.xlsx, EgresadosTitulacion2015_2023.xlsx) e informes PDF
+  - path: https://www.educacion.gob.es/ruct/{consultauniversidades|consultacentros|consultaestudios}?actual={universidades|centros|estudios}
+    desc: RUCT, consulta por formulario (codigoEstudio, codigoUniversidad, codigoTipo, codigoRama) con resultados HTML en ISO-8859-1; sin exportación
+  - path: https://www.educacion.gob.es/centros/
+    desc: Registro Estatal de Centros Docentes no universitarios, buscador por CCAA con JavaScript (irBuscador)
+quirks: [latin1, tls-chain-incomplete, url-drift, js-rendered]
+ids: []
 gotchas:
-  - EDUCAbase es PC-Axis (PX-Web) con API interna de tablas; los ficheros .px se leen con pyaxis o pxweb.
-  - Los códigos de centro (8 dígitos) y de título RUCT son las claves estables; los nombres cambian.
+  - La antigua raíz estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm redirige a la web del ministerio (404); hay que entrar con path completo desde la página del curso.
+  - EDUCAbase es el mismo software que INEbase (dynPx, jaxiPx); los CSV llevan BOM y van en ISO-8859-15 con separador ; y los px en ANSI; leer con encoding latin-1.
+  - Cada curso tiene su carpeta (2024-2025-rd, rd por resultados definitivos) y los nombres de tabla se repiten entre cursos (adul_01.px); guardar el path completo.
+  - universidades.gob.es redirige a ciencia.gob.es y su certificado llega sin la cadena FNMT; los xlsx del SIIU cuelgan de rutas /dam/jcr con uuid que cambian en cada publicación.
+  - El RUCT usa jsessionid en la acción del formulario y devuelve HTML; los códigos de centro (8 dígitos) y de título son las claves estables porque los nombres cambian.
   - Las CCAA publican datos más desagregados y recientes que el ministerio.
-related: [ine-api-tempus]
+tips:
+  - "Los ficheros px se leen con pyaxis (pyaxis.parse(url, encoding='ISO-8859-15')); para tablas grandes es más rápido el csv_bdsc con pandas.read_csv(sep=';', encoding='latin-1', thousands='.')."
+related: [ine-api-tempus, ine-codigos-territoriales]
 status: active
-verified: null
+verified: "2026-09-30"

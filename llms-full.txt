@@ -1571,129 +1571,184 @@ related: mapa-pesca, aemet-opendata
 # SECTOR comercio-industria-propiedad: Comercio exterior, industria y propiedad industrial
 
 ## datacomex
-DataComex – Estadísticas de comercio exterior de España | Secretaría de Estado de Comercio
-summary: Exportaciones e importaciones mensuales por producto (TARIC hasta 8 dígitos, CNAE, CUCI), país, provincia y CCAA, en valor y volumen, desde 1995. Consulta multidimensional con exportación a CSV y Excel.
-access: portal, download | auth: none | formats: csv, xlsx, html | update: monthly | status: active | verified: pending
-coverage: 1995-
+DataComex – Estadísticas de comercio exterior de España (portal y API con token) | Secretaría de Estado de Comercio
+summary: Exportaciones e importaciones mensuales de Aduanas por producto TARIC, país y provincia. Portal de consulta interactiva con cuadros de mando y API REST JSON (DatacomexAPI) con token obtenido por usuario y contraseña gratuitos; la descarga masiva también exige iniciar sesión.
+access: api-rest, portal, download | auth: registration | formats: json, csv, xlsx, html | update: monthly | status: active | verified: 2026-09-30
+coverage: Series mensuales y anuales de Aduanas
 license: Reutilización libre con cita de la fuente
 base_url: https://datacomex.comercio.es/
-docs_url: https://datacomex.comercio.es/
-- https://datacomex.comercio.es/ :: Consulta interactiva con selección de dimensiones y descarga
-! Requiere registro gratuito para consultas grandes; las pequeñas funcionan sin cuenta.
-! Los datos provisionales de los últimos meses se revisan; los definitivos llegan con un año de retardo.
-! La fuente primaria es la AEAT (Aduanas); DataComex reorganiza pero no cambia cifras.
+docs_url: https://datacomex.comercio.es/Data/AyudaApi
+- https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion :: POST con JSON de usuario y contraseña; devuelve el token de acceso (GET responde 405, credenciales vacías 403)
+  ej: curl -s -X POST -H "Content-Type: application/json" -d "{\"Usuario\":\"$DATACOMEX_USER\",\"Pass\":\"$DATACOMEX_PASS\"}" "https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion"
+- https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f={I|E|I/E}&pe={periodo}&pa={pais}&ta={taric}&pr={provincia} :: Datos en JSON; pe admite AAAA, AAAAMM, LastY, LastM, ALL y ALLM, pa=ALL todos los países; token por access_token o cabecera Authorization
+  ej: curl -s -H "Authorization: Bearer $DATACOMEX_TOKEN" "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=ALL&ta=1001&pr=28"
+- https://datacomex.comercio.es/Metadata/Index :: Metadatos y clasificaciones del portal
+- https://datacomex_v6.comercio.es/ :: Versión anterior del portal, todavía en línea
+quirks: session-required
+ids: ine-provincia
+! Sin token, ObtenerDatos responde 401 con JSON (Se ha denegado la autorización). El registro de usuario es gratuito y se hace en el portal (/User).
+! La consulta interactiva pequeña funciona sin cuenta, pero DESCARGA MASIVA y la API exigen sesión; los cuadros de mando de la portada son Power BI incrustado, sin descarga programática.
+! Los códigos de provincia son los del INE de dos dígitos (pr=28 Madrid) y el TARIC se pasa como prefijo (ta=1001, dos a ocho dígitos).
+! Los datos provisionales de los últimos meses se revisan; los definitivos llegan con retraso de meses. La fuente primaria es la AEAT (Aduanas).
++ Guardar el token y reutilizarlo en las llamadas de la sesión; un bucle por pe=AAAAMM y pa=ALL descarga la serie completa de un TARIC sin pasar por el portal.
 related: datainvex, aeat-estadisticas
 
 ## datainvex
 DataInvex – Inversiones exteriores directas | Secretaría de Estado de Comercio
-summary: Flujos y stock de inversión extranjera en España y española en el exterior, por país de origen y destino, sector CNAE y CCAA, a partir del Registro de Inversiones Exteriores. Consulta multidimensional.
-access: portal, download | auth: none | formats: csv, xlsx, html | update: quarterly | status: active | verified: pending
-coverage: 1993-
+summary: Flujos y stock de inversión extranjera en España y española en el exterior por país, sector y CCAA, a partir del Registro de Inversiones Exteriores. Aplicación ASP.NET de consulta multidimensional (cubos Inversión Extranjera e Inversión Española) sin API ni ficheros de descarga directa.
+access: portal | auth: none | formats: html, xlsx | update: quarterly | status: active | verified: 2026-09-30
+coverage: Registro de Inversiones Exteriores
 license: Reutilización libre con cita de la fuente
 base_url: https://datainvex.comercio.es/
 docs_url: https://datainvex.comercio.es/
-- https://datainvex.comercio.es/ :: Consulta interactiva de flujos y posición de inversión
+- https://datainvex.comercio.es/init.aspx?cubo={Inversión Extranjera|Inversion Española}&idioma=es-ES :: Entrada a cada cubo; redirige a principal_invex.aspx, que carga el selector dif/seleccion.aspx?cubo=... en un marco
+- https://datainvex.comercio.es/dif/seleccion.aspx?cubo=Inversi%C3%B3n%20Extranjera :: Selector de informe y medidas (formulario con __VIEWSTATE y __EVENTVALIDATION, controles listaInforme, listaSeleccion, medidas, enviarDatos)
+quirks: viewstate-forms, js-rendered
+! Toda la navegación es un formulario ASP.NET con estado (__VIEWSTATE, __EVENTVALIDATION); automatizar exige reproducir cada postback en orden y con sesión.
+! La exportación a Excel se hace desde la propia aplicación tras seleccionar el informe; no se pudo verificar por script.
 ! Distingue país inmediato y país último (ETVE, holdings); elegir la dimensión correcta cambia mucho las cifras.
-! No coincide con la balanza de pagos del Banco de España por diferencias metodológicas.
+! No coincide con la balanza de pagos del Banco de España por diferencias metodológicas (ficha bde-estadisticas).
 related: datacomex, bde-estadisticas
 
 ## mincotur-industria-turismo
-Ministerio de Industria y Turismo – Estadísticas industriales y de turismo | Secretaría de Estado de Industria / Secretaría de Estado de Turismo (Turespaña)
-summary: Indicadores industriales, Registro Integrado Industrial, y estadísticas de turismo (llegadas FRONTUR, gasto EGATUR, ocupación hotelera, movimientos aeroportuarios) reunidas en DATAESTUR con descarga.
-access: portal, download | auth: none | formats: xlsx, csv, pdf | update: monthly | status: active | verified: pending
-coverage: Turismo desde 2001
+Ministerio de Industria y Turismo – Estadísticas industriales, BADASE y DATAESTUR (API) | Secretaría de Estado de Industria y Secretaría de Estado de Turismo (Turespaña y SEGITTUR)
+summary: Estadísticas de industria (coyuntura, vehículos, cemento, pyme) y base de series BADASE en aplicaciones ASP.NET, más DATAESTUR, plataforma de datos turísticos con 124 conjuntos descargables y una API REST (API-SEGITTUR v2, OpenAPI, clave de API) que reúne FRONTUR, EGATUR, afiliación y AENA.
+access: api-rest, portal, download | auth: api-key | formats: json, xlsx, csv, html | update: monthly | status: active | verified: 2026-09-30
+coverage: Turismo desde 2015 en DATAESTUR; series industriales según encuesta
 license: Reutilización libre con cita de la fuente
-base_url: https://www.mintur.gob.es/
-docs_url: https://www.dataestur.es/
-- https://www.dataestur.es/ :: DATAESTUR, plataforma de datos turísticos con descargas por indicador
-- https://www.mintur.gob.es/es-ES/IndicadoresyEstadisticas/Paginas/Index.aspx :: Indicadores y estadísticas industriales
-! FRONTUR y EGATUR las produce el INE desde 2015; DATAESTUR redistribuye. Para series largas ir al INE.
-! El dominio del ministerio ha cambiado varias veces (minetur, mincotur, mintur); enlaces antiguos rotos.
-related: ine-api-tempus, miteco-energia-estadisticas
+base_url: https://www.dataestur.es/
+docs_url: https://www.dataestur.es/apidata/
+- https://www.dataestur.es/app/themes/mini-mandrake/apidata/openapi.json :: Especificación OpenAPI 3 de API-SEGITTUR v2 (124 rutas _DL con filtros desde y hasta año y mes, CCAA y provincia; seguridad apiKeyHeader o apiKeyQuery)
+  ej: curl -s "https://www.dataestur.es/app/themes/mini-mandrake/apidata/openapi.json"
+- https://www.dataestur.es/API-SEGITTUR-v2/{conjunto}_DL :: Descarga de un conjunto (AENA_DESTINOS_DL, AFILIACION_TURISMO_DL, CST_EMPLEO_TURISTICO_DL...) con clave de API; sin clave el gateway respondió 504
+- https://www.dataestur.es/general/{frontur|egatur}/ :: Páginas de FRONTUR y EGATUR en DATAESTUR con descargas por indicador
+- https://sedeaplicaciones.serviciosmin.gob.es/Badase/ :: BADASE, base de series estadísticas de industria (ASP.NET con __VIEWSTATE, selección de series y salida en varios formatos)
+- https://industria.gob.es/es-es/estadisticas :: Encuesta de coyuntura industrial, estadística de vehículos, cemento y publicaciones sobre pyme
+quirks: viewstate-forms, url-drift
+! La ruta IndicadoresyEstadisticas de mintur.gob.es da 404; las estadísticas de industria viven en industria.gob.es y las de turismo en turismo.gob.es, que remite a DATAESTUR.
+! La clave de API de DATAESTUR se solicita en la propia plataforma (registro); las llamadas sin clave no fallan con 401 sino que agotan el tiempo (504).
+! FRONTUR y EGATUR las produce el INE desde 2015; DATAESTUR redistribuye y añade fuentes (AENA, afiliación, telefonía móvil). Para series largas ir al INE.
+! BADASE es una aplicación con postbacks y estado; la salida se elige en un desplegable (formato y tipo) y no hay URL estable por serie.
+! El portal de datos abiertos de la sede de Industria (sede.serviciosmin.gob.es) tiene el catálogo roto (ficha miteco-energia-estadisticas).
++ Leer openapi.json y generar el cliente (por ejemplo con openapi-python-client); todas las rutas devuelven el conjunto completo filtrable por fechas y territorio.
+related: ine-api-tempus, miteco-energia-estadisticas, aesa-aviacion
 
 ## oepm-invenes
-OEPM – Patentes, marcas y diseños (INVENES, bases de datos) | Oficina Española de Patentes y Marcas (OEPM)
-summary: Bases de datos de patentes y modelos de utilidad (INVENES), marcas y nombres comerciales, diseños industriales, Boletín Oficial de la Propiedad Industrial (BOPI) y estadísticas anuales. Consulta pública y descargas del BOPI.
-access: portal, download | auth: none | formats: html, pdf, xml, xlsx | update: daily | status: active | verified: pending
+OEPM – Patentes, marcas y diseños (INVENES, Localizador, BOPI) | Oficina Española de Patentes y Marcas (OEPM)
+summary: Bases de datos de patentes y modelos de utilidad (INVENES), marcas y nombres comerciales (Localizador), Boletín Oficial de la Propiedad Industrial y estadísticas. El cortafuegos de la OEPM rechazó todas las peticiones desde este entorno (403 con support ID), así que ninguna ruta pudo verificarse.
+access: portal, download | auth: none | formats: html, pdf, xml | update: daily | status: unknown | verified: pending
 coverage: Patentes desde 1826; marcas desde 1880
 license: Reutilización libre con cita de la fuente
 base_url: https://www.oepm.es/
-docs_url: https://www.oepm.es/es/Bases_de_Datos_Invenciones/index.html
-- https://consultas2.oepm.es/InvenesWeb/faces/busquedaInternet.jsp :: INVENES, búsqueda de patentes y modelos de utilidad españoles
-- https://consultas2.oepm.es/LocalizadorWeb/ :: Localizador de marcas, nombres comerciales y diseños
-- https://www.oepm.es/es/sobre_oepm/actividades_estadisticas/estadisticas/ :: Estadísticas anuales de solicitudes y concesiones
-! Las aplicaciones de consulta son JSF con sesión; scraping frágil. Para datos masivos usar Espacenet/OPS (EPO) o TMview (EUIPO), que incluyen los registros españoles.
-! El BOPI se publica en PDF y XML diario; el XML es la vía más limpia para automatizar novedades.
+docs_url: https://www.oepm.es/es/index.html
+- https://consultas2.oepm.es/InvenesWeb/faces/busquedaInternet.jsp :: INVENES, búsqueda de patentes y modelos de utilidad españoles (no verificada, 403)
+- https://consultas2.oepm.es/LocalizadorWeb/ :: Localizador de marcas, nombres comerciales y diseños (no verificada, 403)
+- https://www.oepm.es/es/index.html :: Portada; respondió 200 una vez y 403 en los intentos siguientes con las mismas cabeceras
+quirks: waf-blocks-bots, waf-intermittent-403, url-drift
+! www.oepm.es y consultas2.oepm.es responden 403 "The requested URL was rejected" (F5) a curl y requests con cualquier User-Agent, cabeceras de navegador y cookies (30/09/2026).
+! Las rutas antiguas Bases_de_Datos_Invenciones y Bases_de_Datos_Marcas devuelven 403 o 410; localizar las nuevas desde la portada cuando responda.
+! Las aplicaciones de consulta son JSF con sesión; scraping frágil. Para datos masivos usar Espacenet y OPS (EPO) o TMview (EUIPO), que incluyen los registros españoles.
+! El BOPI se publica en PDF y XML diario; el XML es la vía más limpia para automatizar novedades (no verificado en esta sesión).
 related: borme-api-sumario
 
 # SECTOR educacion-universidades: Educación y universidades
 
 ## educacion-estadisticas-ruct
-Educación y Universidades – Estadísticas (EDUCAbase, SIIU), RUCT y registro de centros | Subdirección General de Estadística y Estudios / Secretaría General de Universidades
-summary: Estadísticas de enseñanza no universitaria (alumnado, profesorado, resultados, gasto) en EDUCAbase con exportación PC-Axis/CSV, estadísticas universitarias (SIIU), Registro de Universidades, Centros y Títulos (RUCT) y Registro Estatal de Centros Docentes no universitarios con datos por centro.
-access: portal, download | auth: none | formats: px, csv, xlsx, pdf, html | update: annual | status: active | verified: pending
-coverage: 1990-
+Educación y Universidades – EDUCAbase (PC-Axis), SIIU, RUCT y registro de centros | Subdirección General de Estadística y Estudios y Secretaría General de Universidades
+summary: Estadísticas de enseñanza no universitaria en EDUCAbase (PC-Axis idéntico al del INE, con descarga CSV, px y xlsx por tabla), estadísticas universitarias SIIU en xlsx (matriculados y egresados por titulación 2015-2024), RUCT y Registro Estatal de Centros Docentes.
+access: download, portal | auth: none | formats: csv, px, xlsx, html | update: annual | status: active | verified: 2026-09-30
+coverage: EDUCAbase desde el curso 1999-2000; SIIU 2015-
 license: Reutilización libre con cita de la fuente
 base_url: https://www.educacionfpydeportes.gob.es/servicios-al-ciudadano/estadisticas.html
-docs_url: https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm
-- https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm :: EDUCAbase, cubos estadísticos con exportación a CSV, Excel y PC-Axis
-- https://www.educacion.gob.es/ruct/home :: RUCT, universidades, centros y títulos oficiales con código
-- https://www.educacion.gob.es/centros/home.do :: Registro Estatal de Centros Docentes no universitarios (buscador y descarga)
-- https://www.universidades.gob.es/estadisticas-e-informes/ :: Estadísticas universitarias SIIU (matrícula, egresados, PDI, inserción laboral)
-! EDUCAbase es PC-Axis (PX-Web) con API interna de tablas; los ficheros .px se leen con pyaxis o pxweb.
-! Los códigos de centro (8 dígitos) y de título RUCT son las claves estables; los nombres cambian.
+docs_url: https://www.educacionfpydeportes.gob.es/servicios-al-ciudadano/estadisticas/no-universitaria/alumnado/matriculado.html
+- https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm?type=pcaxis&path={ruta}&file=pcaxis&l=s0 :: Índice de tablas de un conjunto (ruta como /no-universitaria/alumnado/matriculado/2024-2025-rd/adultos); enlaza a EducaJaxiPx/Tabla.htm con path y file
+  ej: curl -s "https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm?type=pcaxis&path=/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos&file=pcaxis&l=s0"
+- https://estadisticas.educacion.gob.es/EducaJaxiPx/files/_px/es/{csv_bdsc|px|xlsx}{path}{file}?nocab=1 :: Descarga de una tabla en CSV (separador ;), PC-Axis o xlsx; path y file son los de Tabla.htm (por ejemplo .../adultos/l0/ y adul_01.px)
+  ej: curl -s "https://estadisticas.educacion.gob.es/EducaJaxiPx/files/_px/es/csv_bdsc/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos/l0/adul_01.px?nocab=1"
+- https://www.educacionfpydeportes.gob.es/servicios-al-ciudadano/estadisticas/no-universitaria/alumnado/matriculado/{curso}-rd.html :: Página por curso (1999-2000 a 2024-2025) con los enlaces a los índices de EDUCAbase; misma estructura para profesorado, centros y resultados
+- https://www.ciencia.gob.es/Ministerio/Estadisticas/SIIU/{Estudiantes|Afiliacion|Becas|Financiacion|Internacionalizacion|PAU}.html :: SIIU con xlsx bajo /dam/jcr:{uuid}/ (MatriculadosTitulacion2015_2024.xlsx, EgresadosTitulacion2015_2023.xlsx) e informes PDF
+- https://www.educacion.gob.es/ruct/{consultauniversidades|consultacentros|consultaestudios}?actual={universidades|centros|estudios} :: RUCT, consulta por formulario (codigoEstudio, codigoUniversidad, codigoTipo, codigoRama) con resultados HTML en ISO-8859-1; sin exportación
+- https://www.educacion.gob.es/centros/ :: Registro Estatal de Centros Docentes no universitarios, buscador por CCAA con JavaScript (irBuscador)
+quirks: latin1, tls-chain-incomplete, url-drift, js-rendered
+! La antigua raíz estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm redirige a la web del ministerio (404); hay que entrar con path completo desde la página del curso.
+! EDUCAbase es el mismo software que INEbase (dynPx, jaxiPx); los CSV llevan BOM y van en ISO-8859-15 con separador ; y los px en ANSI; leer con encoding latin-1.
+! Cada curso tiene su carpeta (2024-2025-rd, rd por resultados definitivos) y los nombres de tabla se repiten entre cursos (adul_01.px); guardar el path completo.
+! universidades.gob.es redirige a ciencia.gob.es y su certificado llega sin la cadena FNMT; los xlsx del SIIU cuelgan de rutas /dam/jcr con uuid que cambian en cada publicación.
+! El RUCT usa jsessionid en la acción del formulario y devuelve HTML; los códigos de centro (8 dígitos) y de título son las claves estables porque los nombres cambian.
 ! Las CCAA publican datos más desagregados y recientes que el ministerio.
-related: ine-api-tempus
++ Los ficheros px se leen con pyaxis (pyaxis.parse(url, encoding='ISO-8859-15')); para tablas grandes es más rápido el csv_bdsc con pandas.read_csv(sep=';', encoding='latin-1', thousands='.').
+related: ine-api-tempus, ine-codigos-territoriales
 
 # SECTOR justicia-interior-seguridad: Justicia, interior y seguridad
 
 ## interior-criminalidad
-Ministerio del Interior – Portal Estadístico de Criminalidad | Secretaría de Estado de Seguridad
-summary: Infracciones penales conocidas y esclarecidas, detenciones y víctimas por tipología, trimestre, provincia y municipio de más de 20.000 habitantes (balances trimestrales), más series anuales y cubos consultables.
-access: portal, download | auth: none | formats: xlsx, csv, pdf, html | update: quarterly | status: active | verified: pending
-coverage: 2010- (balances); series anuales anteriores
+Ministerio del Interior – Portal Estadístico de Criminalidad (balances en PC-Axis) | Secretaría de Estado de Seguridad
+summary: Balances trimestrales de criminalidad (infracciones penales conocidas por tipología, con comparación interanual) por comunidad autónoma, provincia y municipio de más de 20.000 habitantes desde 2016, servidos con el sistema PC-Axis del INE y descargables en CSV, px y xlsx por tabla.
+access: download, portal | auth: none | formats: csv, px, xlsx, html | update: quarterly | status: active | verified: 2026-09-30
+coverage: 2016-4 a 2026-2 (balances trimestrales)
 license: Reutilización libre con cita de la fuente
 base_url: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/
-docs_url: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/
-- https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/balances.html :: Balances trimestrales de criminalidad con Excel por provincia y municipio
-- https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/datos.html :: Consulta dinámica de cubos (SEC) con exportación
-! No incluye datos de Mossos d'Esquadra ni Ertzaintza salvo en los totales nacionales agregados; el detalle municipal de Cataluña y País Vasco es parcial.
-! La tipología penal cambió con la reforma de 2015; series largas requieren reagrupar.
+docs_url: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/balances.html
+- https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/balances.html :: Selector de año y trimestre; cada uno enlaza a datos.html?type=jaxi&path=/DatosBalanceAnt/{AAAA}{T}/
+- https://estadisticasdecriminalidad.ses.mir.es/sec/dynPx/inebase/index.htm?type=pcaxis&path=/DatosBalanceAnt/{AAAA}{T}/&file=pcaxis :: Índice de tablas del trimestre (CCAA, provincias, municipios de más de 20.000 habitantes) con enlaces a jaxiPx/Tabla.htm y al diálogo de exportación
+  ej: curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/dynPx/inebase/index.htm?type=pcaxis&path=/DatosBalanceAnt/20262/&file=pcaxis"
+- https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/{csv_bdsc|px|xlsx}{path}{file}?nocab=1 :: Descarga de una tabla; en el último trimestre path=/DatosBalanceAct/l0/ y file 09004.px (CCAA), 09005.px (provincias), 09006.px (municipios)
+  ej: curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09004.px?nocab=1"
+- https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/Tabla.htm?path={path}&file={file}&L=0 :: Tabla interactiva con el enlace dlgExport.htm para elegir formato
+quirks: latin1, js-rendered, url-drift
+! datos.html solo incrusta un iframe del sistema PC-Axis (sec/dynPx); para automatizar ir directamente a index.htm y a files/_px con el path y el file que muestra el índice de cada trimestre.
+! Los ficheros del trimestre vigente cuelgan de DatosBalanceAct/l0/ y los anteriores de DatosBalanceAnt con otros números de tabla (99010 a 99012 en el índice de 2019-4); la ruta DatosBalanceAnt/{AAAA}{T}/l0/ no existe.
+! CSV con BOM, separador ; e ISO-8859-15; miles con punto. Las columnas son tipología penal, periodo (enero-junio 2025, enero-junio 2026, variación) y ámbito.
+! Municipios y provincias vienen por nombre sin código INE; cruzar por nombre normalizado con ine-codigos-territoriales.
+! No incluye el detalle de Mossos d'Esquadra ni Ertzaintza salvo en agregados; la tipología cambió con la reforma penal de 2015.
 ! Los datos judiciales (sentencias, juzgados) los publica el CGPJ, fuera del alcance AGE actual.
++ pandas.read_csv(url, sep=';', encoding='latin-1', thousands='.') sobre el csv_bdsc; filtrar la fila de variación porcentual antes de sumar.
 related: ine-codigos-territoriales
 
 # SECTOR cultura-patrimonio: Cultura y patrimonio
 
 ## bne-datos
-BNE – datos.bne.es (linked data, SPARQL) y Hispana | Biblioteca Nacional de España (BNE) / Ministerio de Cultura
-summary: Catálogo bibliográfico y de autoridades de la BNE como datos enlazados (RDF, SPARQL, JSON), Biblioteca Digital Hispánica y Hemeroteca Digital con OAI-PMH, y Hispana, agregador nacional de repositorios de patrimonio digital (más de 10 millones de objetos) también por OAI-PMH.
-access: sparql, oai-pmh, api-rest, download | auth: none | formats: rdf, ttl, jsonld, json, xml, marc | update: monthly | status: active | verified: pending
-coverage: Fondos desde el siglo XV
+BNE – datos.bne.es (linked data, SPARQL) e Hispana (OAI-PMH) | Biblioteca Nacional de España (BNE) y Ministerio de Cultura
+summary: Catálogo bibliográfico y de autoridades de la BNE como datos enlazados (RDF, SPARQL, JSON-LD) e Hispana, agregador nacional de patrimonio digital con OAI-PMH (10,6 millones de registros, 124 sets, formatos oai_dc, edm, ese y didl). datos.bne.es respondió 403 desde este entorno; Hispana sí.
+access: oai-pmh, sparql, api-rest, download | auth: none | formats: xml, rdf, ttl, jsonld, json | update: monthly | status: active | verified: 2026-09-30
+coverage: Fondos desde el siglo XV; Hispana según repositorio
 license: CC0 (datos.bne.es); Hispana según repositorio
-base_url: https://datos.bne.es/
+base_url: https://hispana.mcu.es/oai/oai.cmd
 docs_url: https://www.bne.es/es/catalogos/datos-enlazados
-- https://datos.bne.es/sparql :: Endpoint SPARQL sobre obras, autores, ediciones y temas
-- https://datos.bne.es/resource/{id}.jsonld :: Cualquier recurso en JSON-LD, Turtle o RDF/XML cambiando la extensión
-- https://www.bne.es/es/catalogos/datos-enlazados :: Volcados completos RDF y documentación del modelo (FRBR)
-- https://hispana.mcu.es/es/oai :: OAI-PMH de Hispana (Dublin Core y EDM)
-! El modelo es FRBR (obra, expresión, manifestación); un libro es una manifestación enlazada a una obra y un autor.
-! Los ids de datos.bne.es (XX1234567 autoridades, bimo... obras) no son ISBN; el ISBN está como propiedad.
-! La Hemeroteca Digital permite descarga de texto OCR por página pero sin API de búsqueda documentada.
+- https://hispana.mcu.es/oai/oai.cmd?verb=ListRecords&metadataPrefix={oai_dc|edm|ese|didl}&set={set} :: Cosecha de Hispana (100 registros por página, resumptionToken numérico con completeListSize 10658209)
+  ej: curl -s "https://hispana.mcu.es/oai/oai.cmd?verb=ListRecords&metadataPrefix=oai_dc"
+- https://hispana.mcu.es/oai/oai.cmd?verb=ListSets :: 124 sets (driver, esegen, esebvph y uno por repositorio agregado)
+- https://datos.bne.es/sparql :: Endpoint SPARQL de la BNE (no verificado, 403)
+- https://datos.bne.es/resource/{id}.jsonld :: Recurso en JSON-LD, Turtle o RDF/XML cambiando la extensión (no verificado, 403)
+quirks: waf-blocks-bots, url-drift
+! datos.bne.es (portada, sparql, resource) y www.bne.es/es/catalogos/datos-enlazados devuelven 403 con una página de bloqueo de 1,3 MB para curl y requests con cualquier User-Agent; la portada www.bne.es sí responde.
+! La ruta OAI de la ficha anterior (hispana.mcu.es/es/oai) da 404; el endpoint es /oai/oai.cmd. Algunos sets no tienen registros en edm (esegen devolvió 0) y sí en oai_dc.
+! El resumptionToken de Hispana caduca (expirationDate a un día) y el listado completo son más de 100.000 páginas; cosechar por set o con from y until.
+! El modelo de datos.bne.es es FRBR (obra, expresión, manifestación); un libro es una manifestación enlazada a obra y autor, y los ids (XX1234567) no son ISBN.
++ Con sickle: Sickle('https://hispana.mcu.es/oai/oai.cmd').ListRecords(metadataPrefix='edm', set='<set>') recorre un repositorio; edm trae el enlace al objeto digital (isShownBy).
 related: csic-digital
 
 # SECTOR vivienda-urbanismo: Vivienda y urbanismo
 
 ## mivau-precios-vivienda-alquiler
-Ministerio de Vivienda – Precios de vivienda, alquiler y estadísticas de vivienda | Dirección General de Vivienda y Suelo
-summary: Sistema Estatal de Referencia del Precio del Alquiler (SERPAVI) por sección censal y municipio, valor tasado de vivienda por municipio, transacciones inmobiliarias, visados de obra, parque de viviendas, precios del suelo.
-access: portal, download | auth: none | formats: xlsx, csv, pdf | update: quarterly | status: active | verified: pending
-coverage: Valor tasado desde 1995; SERPAVI desde 2015 (fiscal)
+Ministerio de Vivienda – Estadísticas de vivienda (Boletín Online en XLS) y SERPAVI | Dirección General de Vivienda y Suelo
+summary: Transacciones inmobiliarias, valor tasado, estimación del parque, stock de vivienda nueva, precios del suelo urbano y vivienda protegida en tablas XLS del Boletín Estadístico Online (un capítulo por estadística), más SERPAVI, índices de precios de alquiler consultables por municipio y distrito.
+access: download, portal | auth: none | formats: xls, pdf, html | update: quarterly | status: active | verified: 2026-09-30
+coverage: Valor tasado desde 1995; transacciones desde 2004; SERPAVI según año fiscal
 license: Reutilización libre con cita de la fuente
-base_url: https://www.mivau.gob.es/vivienda/estadisticas
+base_url: https://www.mivau.gob.es/el-ministerio/observatorios-y-estadisticas
 docs_url: https://www.mivau.gob.es/vivienda/alquila-bien-es-tu-derecho/serpavi
-- https://www.mivau.gob.es/vivienda/alquila-bien-es-tu-derecho/serpavi :: SERPAVI, índices de alquiler por municipio, distrito y sección censal con descarga
-- https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden=34000000 :: Boletín estadístico online con series de vivienda y suelo (valor tasado, transacciones)
-! SERPAVI se construye con datos fiscales (IRPF) de arrendadores; excluye País Vasco y Navarra y llega con dos años de retardo.
-! El Boletín Online conserva el dominio antiguo fomento.gob.es y redirige de forma inestable.
-! Las transacciones inmobiliarias vienen del Consejo General del Notariado y los precios del Colegio de Registradores; el ministerio agrega.
+- https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden={NN}000000 :: Capítulo del Boletín Online; orden 31 vivienda protegida, 32 libre, 33 parque, 34 transacciones, 35 valor tasado, 36 suelo, 46 viviendas tasadas
+  ej: curl -s "https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden=34000000"
+- https://apps.fomento.gob.es/BoletinOnline2/sedal/{codigo}.XLS :: Tabla en XLS (por ejemplo 34010110.XLS, 145 KB, transacciones totales); los códigos se leen en la página del capítulo
+  ej: curl -sSL -o transacciones.xls "https://apps.fomento.gob.es/BoletinOnline2/sedal/34010110.XLS"
+- https://apps.fomento.gob.es/BoletinOnline2/?nivel=1&orden=34000000 :: Índice de todos los capítulos (orden 25 a 59), incluidos transporte de mercancías, MOVILIA y costes de la construcción
+- https://www.mivau.gob.es/el-ministerio/observatorios-y-estadisticas/estadisticas/{valor-tasado-vivienda|transacciones-inmobiliarias-compraventa|estimacion-parque-viviendas|precios-suelo-urbano|stock-vivienda-nueva|vivienda-libre} :: Página de cada estadística con metodología en PDF y enlace a su capítulo del Boletín Online
+- https://www.mivau.gob.es/vivienda/alquila-bien-es-tu-derecho/serpavi/{municipio|distrito|comunidad_autonoma} :: Consulta de SERPAVI por ámbito (páginas JavaScript, metodología en PDF, sin fichero descargable)
+quirks: url-drift, js-rendered
+! La ruta mivau.gob.es/vivienda/estadisticas da 404; el índice está en el-ministerio/observatorios-y-estadisticas y los datos siguen en apps.fomento.gob.es (dominio antiguo, sin redirección al nuevo).
+! Las tablas son XLS antiguos (application/vnd.ms-excel) con varias filas de cabecera; abrir con xlrd o calamine, no con openpyxl.
+! SERPAVI no ofrece descarga masiva ni API pública; el índice por sección censal solo se consulta en la web. Se construye con datos fiscales y excluye País Vasco y Navarra.
+! Las transacciones proceden del Consejo General del Notariado y el valor tasado de las sociedades de tasación; el ministerio agrega y publica con retraso trimestral.
++ Para una serie municipal de transacciones, localizar en el capítulo 34 la tabla por municipios (código 3401xxxx) y leerla con pandas.read_excel(engine='xlrd' o 'calamine').
 related: catastro-ovc, ine-api-tempus, ine-codigos-territoriales

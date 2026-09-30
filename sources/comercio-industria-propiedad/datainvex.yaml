@@ -6,22 +6,30 @@ level: age
 sector: comercio-industria-propiedad
 tags: [inversion-extranjera, inversion-exterior, ied, flujos, stock, paises, sectores]
 summary: >-
-  Flujos y stock de inversión extranjera en España y española en el exterior, por país de origen y destino,
-  sector CNAE y CCAA, a partir del Registro de Inversiones Exteriores. Consulta multidimensional.
-access: [portal, download]
+  Flujos y stock de inversión extranjera en España y española en el exterior por país, sector y CCAA, a partir
+  del Registro de Inversiones Exteriores. Aplicación ASP.NET de consulta multidimensional (cubos Inversión
+  Extranjera e Inversión Española) sin API ni ficheros de descarga directa.
+access: [portal]
 auth: none
-formats: [csv, xlsx, html]
+formats: [html, xlsx]
 update: quarterly
-coverage: "1993-"
+coverage: "Registro de Inversiones Exteriores"
 license: Reutilización libre con cita de la fuente
 base_url: https://datainvex.comercio.es/
 docs_url: https://datainvex.comercio.es/
 endpoints:
-  - path: https://datainvex.comercio.es/
-    desc: Consulta interactiva de flujos y posición de inversión
+  - path: https://datainvex.comercio.es/init.aspx?cubo={Inversión Extranjera|Inversion Española}&idioma=es-ES
+    desc: Entrada a cada cubo; redirige a principal_invex.aspx, que carga el selector dif/seleccion.aspx?cubo=... en un marco
+  - path: https://datainvex.comercio.es/dif/seleccion.aspx?cubo=Inversi%C3%B3n%20Extranjera
+    desc: Selector de informe y medidas (formulario con __VIEWSTATE y __EVENTVALIDATION, controles listaInforme, listaSeleccion, medidas, enviarDatos)
+quirks: [viewstate-forms, js-rendered]
+ids: []
 gotchas:
+  - Toda la navegación es un formulario ASP.NET con estado (__VIEWSTATE, __EVENTVALIDATION); automatizar exige reproducir cada postback en orden y con sesión.
+  - La exportación a Excel se hace desde la propia aplicación tras seleccionar el informe; no se pudo verificar por script.
   - Distingue país inmediato y país último (ETVE, holdings); elegir la dimensión correcta cambia mucho las cifras.
-  - No coincide con la balanza de pagos del Banco de España por diferencias metodológicas.
+  - No coincide con la balanza de pagos del Banco de España por diferencias metodológicas (ficha bde-estadisticas).
+tips: []
 related: [datacomex, bde-estadisticas]
 status: active
-verified: null
+verified: "2026-09-30"

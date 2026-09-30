@@ -1,35 +1,41 @@
 id: bne-datos
-name: BNE – datos.bne.es (linked data, SPARQL) y Hispana
-org: Biblioteca Nacional de España (BNE) / Ministerio de Cultura
+name: BNE – datos.bne.es (linked data, SPARQL) e Hispana (OAI-PMH)
+org: Biblioteca Nacional de España (BNE) y Ministerio de Cultura
 ministry: Cultura
 level: age
 sector: cultura-patrimonio
-tags: [bne, bibliografia, autoridades, linked-data, sparql, oai-pmh, hispana, patrimonio-digital, hemeroteca]
+tags: [bne, bibliografia, autoridades, linked-data, sparql, oai-pmh, hispana, patrimonio-digital, europeana]
 summary: >-
-  Catálogo bibliográfico y de autoridades de la BNE como datos enlazados (RDF, SPARQL, JSON), Biblioteca Digital
-  Hispánica y Hemeroteca Digital con OAI-PMH, y Hispana, agregador nacional de repositorios de patrimonio digital
-  (más de 10 millones de objetos) también por OAI-PMH.
-access: [sparql, oai-pmh, api-rest, download]
+  Catálogo bibliográfico y de autoridades de la BNE como datos enlazados (RDF, SPARQL, JSON-LD) e Hispana,
+  agregador nacional de patrimonio digital con OAI-PMH (10,6 millones de registros, 124 sets, formatos
+  oai_dc, edm, ese y didl). datos.bne.es respondió 403 desde este entorno; Hispana sí.
+access: [oai-pmh, sparql, api-rest, download]
 auth: none
-formats: [rdf, ttl, jsonld, json, xml, marc]
+formats: [xml, rdf, ttl, jsonld, json]
 update: monthly
-coverage: "Fondos desde el siglo XV"
+coverage: "Fondos desde el siglo XV; Hispana según repositorio"
 license: CC0 (datos.bne.es); Hispana según repositorio
-base_url: https://datos.bne.es/
+base_url: https://hispana.mcu.es/oai/oai.cmd
 docs_url: https://www.bne.es/es/catalogos/datos-enlazados
 endpoints:
+  - path: https://hispana.mcu.es/oai/oai.cmd?verb=ListRecords&metadataPrefix={oai_dc|edm|ese|didl}&set={set}
+    desc: Cosecha de Hispana (100 registros por página, resumptionToken numérico con completeListSize 10658209)
+    example: curl -s "https://hispana.mcu.es/oai/oai.cmd?verb=ListRecords&metadataPrefix=oai_dc"
+  - path: https://hispana.mcu.es/oai/oai.cmd?verb=ListSets
+    desc: 124 sets (driver, esegen, esebvph y uno por repositorio agregado)
   - path: https://datos.bne.es/sparql
-    desc: Endpoint SPARQL sobre obras, autores, ediciones y temas
+    desc: Endpoint SPARQL de la BNE (no verificado, 403)
   - path: https://datos.bne.es/resource/{id}.jsonld
-    desc: Cualquier recurso en JSON-LD, Turtle o RDF/XML cambiando la extensión
-  - path: https://www.bne.es/es/catalogos/datos-enlazados
-    desc: Volcados completos RDF y documentación del modelo (FRBR)
-  - path: https://hispana.mcu.es/es/oai
-    desc: OAI-PMH de Hispana (Dublin Core y EDM)
+    desc: Recurso en JSON-LD, Turtle o RDF/XML cambiando la extensión (no verificado, 403)
+quirks: [waf-blocks-bots, url-drift]
+ids: []
 gotchas:
-  - El modelo es FRBR (obra, expresión, manifestación); un libro es una manifestación enlazada a una obra y un autor.
-  - Los ids de datos.bne.es (XX1234567 autoridades, bimo... obras) no son ISBN; el ISBN está como propiedad.
-  - La Hemeroteca Digital permite descarga de texto OCR por página pero sin API de búsqueda documentada.
+  - datos.bne.es (portada, sparql, resource) y www.bne.es/es/catalogos/datos-enlazados devuelven 403 con una página de bloqueo de 1,3 MB para curl y requests con cualquier User-Agent; la portada www.bne.es sí responde.
+  - La ruta OAI de la ficha anterior (hispana.mcu.es/es/oai) da 404; el endpoint es /oai/oai.cmd. Algunos sets no tienen registros en edm (esegen devolvió 0) y sí en oai_dc.
+  - El resumptionToken de Hispana caduca (expirationDate a un día) y el listado completo son más de 100.000 páginas; cosechar por set o con from y until.
+  - El modelo de datos.bne.es es FRBR (obra, expresión, manifestación); un libro es una manifestación enlazada a obra y autor, y los ids (XX1234567) no son ISBN.
+tips:
+  - "Con sickle: Sickle('https://hispana.mcu.es/oai/oai.cmd').ListRecords(metadataPrefix='edm', set='<set>') recorre un repositorio; edm trae el enlace al objeto digital (isShownBy)."
 related: [csic-digital]
 status: active
-verified: null
+verified: "2026-09-30"
