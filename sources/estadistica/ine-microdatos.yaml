@@ -21,6 +21,7 @@ endpoints:
   - path: https://www.ine.es/ftp/microdatos/epa/datos_{T}t{AA}.zip
     desc: EPA del trimestre T del año AA (dos dígitos), 21 MB con todos los formatos
     example: curl -sO "https://www.ine.es/ftp/microdatos/epa/datos_2t26.zip"
+    returns: "Zip (20 MB) con carpetas CSV (EPA_2026T2.tab, tabulado), R (EPA_2026T2.RData) y SAS (epa_2026t2.sas7bdat); los campos son códigos que se decodifican con el diseño de registro dr_EPA_{AAAA}.xlsx"
   - path: https://www.ine.es/ftp/microdatos/epa/dr_EPA_{AAAA}.xlsx
     desc: Diseño de registro anual de la EPA en Excel
   - path: https://www.ine.es/ftp/microdatos/ecv/ecv_b{AAAA}/ecvb{AA}_{AAAA}.zip

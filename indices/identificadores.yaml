@@ -32,6 +32,17 @@ ine-provincia:
       how: IDProvincia coincide con el código INE
     - via: dir3-directorio
       how: catálogo de provincias con idElemento 427
+ine-entidad-singular:
+  format: 11 dígitos, municipio INE (5) + entidad colectiva (2) + entidad singular (2) + núcleo o diseminado (2)
+  regex: '^\d{11}$'
+  example: "01001000100"
+  issuer: ine-codigos-territoriales
+  gotcha: los cinco primeros dígitos son el código INE de municipio; el Nomenclátor del INE lo muestra en tres pares (colectiva, singular, núcleo) tras provincia y municipio
+  joins:
+    - via: ine-codigos-territoriales
+      how: búsqueda por nombre en nomen2/tabla.do (POST) con población por sexo, edad o nacionalidad desde 2003
+    - via: mtdfp-cobertura-banda-ancha
+      how: columna Código ESP de la hoja ES del fichero de cobertura 2013-2020 (61.819 entidades)
 ccaa:
   format: 2 dígitos, 01 Andalucía a 19 Melilla, en el orden del INE
   regex: '^(0[1-9]|1\d)$'

@@ -21,6 +21,7 @@ endpoints:
   - path: ?metodo=nomenclatorExcel
     desc: Nomenclátor completo en xls (7,3 MB; hoja PRODUCTOS con 20 columnas, de Código Nacional a Medicamento huérfano); el nombre lleva la fecha de descarga
     example: curl -s -o nomenclator.xls "https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorExcel"
+    returns: "xls (7 MB, Content-Type text/html) con hoja PRODUCTOS de 20 columnas: Código Nacional, Nombre del producto, Tipo de fármaco, Nombre genérico, laboratorio, Estado, Fecha de alta y de baja, Aportación del beneficiario, Principio activo, Precio de venta al público, Precio de referencia, Menor precio de la agrupación"
   - path: ?metodo=nomenclatorRDF
     desc: Mismo contenido en RDF/XML (schema.org/Drug y esquema propio con CodigoNacional, PrecioReferencia, FechaAltaNomenclator, MedicamentoHuerfano)
     example: curl -s "https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorRDF" | head -c 3000

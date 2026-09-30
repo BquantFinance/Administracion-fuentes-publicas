@@ -24,6 +24,7 @@ endpoints:
   - path: https://apps.fomento.gob.es/BoletinOnline/sedal/{CCAATT00}.XLS
     desc: Tabla en Excel 97 (capítulo, apartado y tabla; 03010100 tráfico aeroportuario total); una hoja con título y cabecera PERIODO, TOTAL, NACIONAL, INTERNACIONAL
     example: curl -sO "https://apps.fomento.gob.es/BoletinOnline/sedal/03010100.XLS"
+    returns: "Excel 97 (xls) con una hoja por bloque de cinco años (2004, 2005, 2006, 2007, 2008; 2009 a 2013...) y en cada una título Tabla N., descripción y la fila Años antes de los datos; leer con xlrd o pandas engine xlrd"
   - path: https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden={CC}000000
     desc: Segunda aplicación (capítulos 25 a 46), encuesta de mercancías por carretera por año, MOVILIA, índices antiguos y vivienda (mivau-precios-vivienda-alquiler)
 quirks: [static-html]

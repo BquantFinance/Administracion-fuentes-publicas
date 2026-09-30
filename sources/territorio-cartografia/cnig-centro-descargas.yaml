@@ -41,7 +41,7 @@ gotchas:
   - Cada descarga del Centro de Descargas pasa por reCAPTCHA v3 (preAutorizarDescarga con recaptchaToken) antes de descargaDir; sin token responde 403. No automatizable de forma lícita sin navegador.
   - La lista de ficheros de una serie no está en catalogo.do; se obtiene por POST a archivosSerie, donde cada fichero lleva su id en data-sec y en detalleArchivo?sec=.
   - Las rutas apidescargas y descargaDir?secDescDirLA= no son públicas (404 y 403); no localicé API de descargas abierta.
-  - El WFS de unidades administrativas devuelve 403 si el filtro XML va en la URL (el WAF bloquea las etiquetas); descargar por count y filtrar en local. outputFormat=application/json no existe, es geo+json.
+  - El WFS de unidades administrativas dio 403 con FILTER fes en la URL por la mañana y 200 por la noche (WAF intermitente); si falla, descargar por count y filtrar en local. El JSON es outputFormat=application/geo+json.
   - En el WFS, nationalCode es 34 seguido de los códigos INE de comunidad, provincia y municipio (34090800000 es la provincia de Barcelona); cada feature pesa cientos de KB por la geometría.
   - El geocoder devuelve JSONP (envuelto en callback) en findJsonp y candidatesJsonp y JSON limpio en find.
   - Sistema de referencia oficial ETRS89 (EPSG:4258 geográficas, 25829 a 25831 UTM); Canarias REGCAN95 (32628).

@@ -96,6 +96,7 @@ quirks:
 ids:
   ine-municipio: Código INE de municipio, 5 dígitos (provincia + municipio)
   ine-provincia: Código INE de provincia, 2 dígitos
+  ine-entidad-singular: Código INE de entidad singular de población, 11 dígitos (municipio 5 + entidad colectiva 2 + singular 2 + núcleo 2)
   ccaa: Código INE de comunidad autónoma, 2 dígitos
   nuts: Código NUTS de Eurostat
   seccion-censal: Sección censal, 10 dígitos
@@ -114,4 +115,4 @@ ids:
   boe-id: Identificador BOE o BORME (BOE-A-AAAA-NNNNN, BORME-A-AAAA-NNN-PP)
   eli: URI ELI de norma
 
-formats: [json, xml, csv, tsv, xlsx, xls, pdf, html, rdf, ttl, jsonld, xbrl, protobuf, geojson, shp, gml, gpkg, gdb, kml, ods, dxf, dgn, ecw, tiff, geotiff, laz, sdmx, px, zip, txt, atom, rss, parquet, sql, netcdf, grib, jpg, png, marc]
+formats: [json, xml, csv, tsv, xlsx, xls, docx, pdf, rar, dta, sav, html, rdf, ttl, jsonld, xbrl, protobuf, geojson, shp, gml, gpkg, gdb, kml, ods, dxf, dgn, ecw, tiff, geotiff, laz, sdmx, px, zip, txt, atom, rss, parquet, sql, netcdf, grib, jpg, png, marc]

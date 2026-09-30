@@ -21,6 +21,7 @@ endpoints:
   - path: https://www.mapa.gob.es/dam/mapa/contenido/pesca/temas--nuevo/registro-de-flota--flota-pesquera-espanola/registro-general-de-la-flota-pesquera/informacion-sobre-la-flota-pesquera/rgfp_bi_excel_2006_2025_20260127.xlsx
     desc: Registro de flota 2006-2025 (15 MB, hoja Datos con AÑO, CODIGOBUQUE, PUERTO BASE, PROVINCIA, CCAA, CALADERO, modalidad, ARQUEO GT, POTENCIA KW, ESLORA, EDAD)
     example: curl -sSL -o flota.xlsx "https://www.mapa.gob.es/dam/mapa/contenido/pesca/temas--nuevo/registro-de-flota--flota-pesquera-espanola/registro-general-de-la-flota-pesquera/informacion-sobre-la-flota-pesquera/rgfp_bi_excel_2006_2025_20260127.xlsx"
+    returns: "Hoja Datos (15 MB) con una fila por buque y año 2006-2025: AÑO, CODIGOBUQUE, NOMBRE BUQUE, PUERTO BASE, PROVINCIA, CCAA, CALADERO, SUBCALADERO, CENSO POR MODALIDAD Y CALADERO, MODALIDAD DE PESCA, ARQUEO GT, POTENCIA KW, ESLORA TOTAL, EDAD..."
   - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-pesqueras/pesca-maritima/estadistica-capturas-desembarcos
     desc: Capturas y desembarcos en xlsx (peso y valor por especie, destino y zona del último año, serie bcap 1992-2024)
   - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-pesqueras/pesca-maritima/estadistica-flota-pesquera

@@ -1,0 +1,58 @@
+id: imserso-dependencia
+name: IMSERSO – Estadísticas del SAAD (dependencia), PNC, discapacidad y residencias
+org: Instituto de Mayores y Servicios Sociales (IMSERSO)
+ministry: Derechos Sociales, Consumo y Agenda 2030
+level: age
+sector: demografia-migraciones-sociedad
+tags: [dependencia, saad, imserso, pensiones-no-contributivas, discapacidad, residencias, personas-mayores, servicios-sociales, teleasistencia]
+summary: >-
+  Ficheros xlsx y csv con URL deducible: estadística mensual del SAAD (solicitudes, dictámenes, prestaciones
+  por grado y CCAA, lista de espera, cuidadores), nómina mensual de PNC, Base Estatal de Personas con
+  Discapacidad en CSV largo, censo de residencias y servicios sociales para mayores.
+access: [download, portal]
+auth: none
+formats: [xlsx, csv, docx, pdf, html]
+update: monthly
+coverage: "SAAD mensual verificado de diciembre de 2025 a agosto de 2026 (serie desde 2019 en la hoja EVO); PNC 2019-; BEDPCD 2019-2024 en CSV; residencias 2022 y 2024; mayores 2010-2024"
+base_url: https://imserso.es/el-imserso/documentacion/estadisticas
+docs_url: https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia-saad
+endpoints:
+  - path: https://imserso.es/documents/d/global/estsisaad_{AAAAMMDD}
+    desc: Estadística mensual del SAAD a último día de mes en xlsx (97 hojas; porsaad, indsaad, EVO, 21solsaad, 31dictsaad, 51pbgrado, 9TiempoEspera, 11ListaEspera)
+    example: curl -sL -A "Mozilla/5.0" -o estsisaad_20260831.xlsx "https://imserso.es/documents/d/global/estsisaad_20260831"
+  - path: https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia-saad/estadisticas-mensual
+    desc: Página del último mes con enlaces /documents/20123/{carpeta}/{fichero}/{uuid} a estsisaad, cecuidadores y evo_per_fallecidas en xlsx y pdf
+    example: curl -s -A "Mozilla/5.0" "https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia-saad/estadisticas-mensual" | grep -o '/documents/20123/[^"]*\.xlsx[^"]*'
+  - path: https://imserso.es/documents/20123/121856/{provpncs|evolpncs|disterpncs|disimppncs|evolimppncs}.{csv|xlsx|pdf}
+    desc: Nómina mensual de pensiones no contributivas (número e importe por CCAA y provincia, evolución anual desde 2019, distribución por importe); misma URL cada mes
+    example: curl -s -A "Mozilla/5.0" "https://imserso.es/documents/20123/121856/evolpncs.csv" | iconv -f ISO-8859-1 -t UTF-8
+  - path: https://imserso.es/documents/d/global/bdepcd_2024-1-
+    desc: Base Estatal de Datos de Personas con Discapacidad 2019-2024 en CSV largo (Año;CCAA;Provincia;Grupo_DIAG0;Sexo;Grupo_grado_discapacidad;Grupo_edad;Valor)
+    example: curl -sL -A "Mozilla/5.0" -o bdepcd_2024.csv "https://imserso.es/documents/d/global/bdepcd_2024-1-"
+  - path: https://imserso.es/documents/d/global/cenres_2024_agregado_provincia
+    desc: Censo de centros residenciales 2024 agregado por provincia (CSV, 52 filas y 215 columnas de plazas, gestión y acreditación); censo_centros_r_2025 es el informe
+    example: curl -sL -A "Mozilla/5.0" -o cenres_2024_provincia.csv "https://imserso.es/documents/d/global/cenres_2024_agregado_provincia"
+  - path: https://imserso.es/documents/d/global/datos_ssppmmesp2024
+    desc: Servicios sociales para personas mayores a 31/12/2024 (xlsx de 37 hojas; teleasistencia, ayuda a domicilio, centros de día, residencias); páginas 2010-2024
+  - path: https://imserso.es/el-imserso/documentacion/estadisticas/{tema}
+    desc: Índice por tema con los enlaces a los ficheros y a las páginas por año
+    params: "tema = sistema-autonomia-atencion-dependencia-saad, pensiones-no-contributivas-jubilacion-incapacidad-pnc, base-estatal-datos-personas-con-discapacidad, censo-de-centros-residenciales-en-espana"
+quirks: [static-html, overwritten-in-place, latin1, user-agent-browser]
+ids: []
+gotchas:
+  - imserso.es responde 403 al User-Agent por defecto de curl (curl/8.0) incluso en los ficheros de /documents/; enviar un User-Agent de navegador.
+  - La URL corta /documents/d/global/{nombre sin extensión} sirve el fichero sin uuid y vale para meses anteriores (estsisaad_20260630 y estsisaad_20251231 verificados); un nombre inexistente responde 404 HTML.
+  - Los xlsx del SAAD llevan fórmulas (=D10/2410165*100) y cabeceras en varias filas; leer con openpyxl data_only=True o pandas header=None y localizar la fila ÁMBITO TERRITORIAL.
+  - Los ficheros de PNC (provpncs, evolpncs) se sobreescriben cada mes con el mismo nombre; el CSV va en ISO-8859-1 con separador ;, miles con punto, decimales con coma y filas de título antes de la tabla.
+  - El CSV de la BEDPCD va en UTF-8 con BOM, separador ; y todo entrecomillado; el del censo de residencias en UTF-8 con BOM y separador coma.
+  - Los territorios van por nombre (Andalucía, A Coruña), sin código INE; cruzar por nombre normalizado con ine-codigos-territoriales.
+  - Solo el último mes está enlazado en la página del SAAD; el histórico se obtiene deduciendo el nombre por fecha (último día del mes) o de la hoja EVO (31/12/2019 al mes en curso).
+  - El sufijo -1- de /documents/d/global distingue ficheros con el mismo título y cambia el formato (bdepcd_2024 es PDF y bdepcd_2024-1- el CSV; censo_centros_r_2025 docx y -1- PDF); comprobar Content-Type.
+  - La ruta .../estadisticas/sistema-autonomia-atencion-dependencia sin el sufijo -saad responde 404 con meta refresh a /pagina-no-encontrada.
+  - El SAAD es gestión administrativa (solicitudes, dictámenes, prestaciones); la encuesta de discapacidad y dependencia (EDAD 2020) es del INE.
+tips:
+  - "pd.read_excel(f, sheet_name='51pbgrado', header=None) para prestaciones por grado y CCAA; pd.read_csv('bdepcd_2024.csv', sep=';', encoding='utf-8-sig') para la BEDPCD."
+  - Para una serie mensual del SAAD iterar estsisaad_{AAAAMMDD} con el último día de cada mes y tomar la hoja porsaad o EVO.
+related: [segsocial-estadisticas, ine-api-tempus, ine-codigos-territoriales, sanidad-portal-estadistico]
+status: active
+verified: "2026-09-30"

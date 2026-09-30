@@ -5,7 +5,7 @@
  "repo": "https://github.com/BquantFinance/Administracion-fuentes-publicas",
  "schema": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json",
  "vocab": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml",
- "count": 79,
+ "count": 85,
  "sectors": {
   "legislacion-boletines": "Legislación y boletines oficiales",
   "economia-finanzas": "Economía, finanzas y mercados",
@@ -26,7 +26,9 @@
   "educacion-universidades": "Educación y universidades",
   "justicia-interior-seguridad": "Justicia, interior y seguridad",
   "cultura-patrimonio": "Cultura y patrimonio",
+  "demografia-migraciones-sociedad": "Demografía, migraciones y sociedad",
   "vivienda-urbanismo": "Vivienda y urbanismo",
+  "telecomunicaciones-digital": "Telecomunicaciones y sociedad digital",
   "consumo-seguridad-alimentaria": "Consumo y seguridad alimentaria"
  },
  "sources": [
@@ -96,7 +98,7 @@
   },
   {
    "id": "mapa-estadisticas-agrarias",
-   "name": "MAPA – Anuario de estadística, precios, avances de cultivos, ganadería y consumo",
+   "name": "MAPA – Anuario de estadística, precios, avances de cultivos, ESYRCE, ganadería y consumo",
    "org": "Subdirección General de Análisis, Coordinación y Estadística",
    "ministry": "Agricultura, Pesca y Alimentación",
    "level": "age",
@@ -109,9 +111,10 @@
     "producciones",
     "anuario",
     "consumo-alimentario",
-    "encuestas-ganaderas"
+    "encuestas-ganaderas",
+    "esyrce"
    ],
-   "summary": "Anuario de Estadística con todas las tablas en xlsx por capítulo (1999-2024), índices y precios percibidos y pagados, precios medios nacionales semanales, avances mensuales de superficies y producciones, encuestas ganaderas por especie y series anuales del panel de consumo alimentario en hogares.",
+   "summary": "Anuario de Estadística con todas las tablas en xlsx por capítulo (1999-2024), precios percibidos y pagados, precios medios semanales, avances mensuales de superficies y producciones, ESYRCE (xlsx nacional y por comunidad), encuestas ganaderas y panel de consumo alimentario en hogares.",
    "access": [
     "download",
     "portal"
@@ -124,7 +127,7 @@
     "html"
    ],
    "update": "monthly",
-   "coverage": "Anuario 1999-2024; consumo 1999-; precios percibidos 2005-",
+   "coverage": "Anuario 1999-2024; consumo 1999-; precios percibidos 2005-; ESYRCE tablas xlsx 2022-2025 y boletines PDF 2002-2023",
    "license": "Reutilización libre con cita de la fuente",
    "base_url": "https://www.mapa.gob.es/es/estadistica/temas/",
    "docs_url": "https://www.mapa.gob.es/es/estadistica/temas/publicaciones/anuario-de-estadistica/",
@@ -152,6 +155,21 @@
      "desc": "Avances mensuales de superficies y producciones (cuaderno_{mes}{AAAA}.xls desde 2018; años anteriores en subpáginas 2007-2011 y 2012-2017)"
     },
     {
+     "path": "https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/agricultura/esyrce/",
+     "desc": "ESYRCE; resultados provisionales 2025 en un xlsx nacional (secano, regadío, invernadero y total por cultivo) y uno por comunidad; tablas 3.1 a 3.12 desde 2022",
+     "example": "curl -s \"https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/agricultura/esyrce/\" | grep -o 'href=\"[^\"]*\\.xlsx\\?\"'"
+    },
+    {
+     "path": "https://www.mapa.gob.es/es/dam/jcr:{uuid}/{tabla}.{fecha}.xlsx",
+     "desc": "Tabla ESYRCE 2025 (3.1 Distribución General de la Tierra, 18 hojas de 3.1.1. ESPAÑA a 3.1.18 CANARIAS; código de cultivo de dos letras, ha y coef. de variación)",
+     "example": "curl -sS -o esyrce_3_1_2025.xlsx \"https://www.mapa.gob.es/es/dam/jcr:fd8f03c8-8176-460e-9cef-bf3a80d08285/3.1%20Distribuci%C3%B3n%20General%20de%20la%20Tierra.2026-09-04-08-44-44.xlsx\""
+    },
+    {
+     "path": "https://www.mapa.gob.es/dam/mapa/contenido/estadisticas/temas/estadisticas-agrarias/2.agricultura/1.-encuesta-sobre-superficies-y-rendimientos-de-cultivos--esyrce/{AAAA}/{tabla}.xlsx",
+     "desc": "Tablas ESYRCE 2022 y 2023 (31distribuciongeneraldelatierra.xlsx...); 2024 bajo 2024/avanceresultados2024/ y boletines PDF en {AAAA}/boletin{AAAA}.pdf",
+     "example": "curl -sS -o esyrce_3_1_2023.xlsx \"https://www.mapa.gob.es/dam/mapa/contenido/estadisticas/temas/estadisticas-agrarias/2.agricultura/1.-encuesta-sobre-superficies-y-rendimientos-de-cultivos--esyrce/2023/31distribuciongeneraldelatierra.xlsx\""
+    },
+    {
      "path": "https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/ganaderia/encuestas-ganaderas",
      "desc": "Encuestas ganaderas por año y especie ({AAAA}_bovino.xls, ovino, caprino, porcino), 118 ficheros"
     },
@@ -175,7 +193,9 @@
     "Hasta 2019 el anuario usa dam/.../anuario-de-estadistica/{AAAA}/ae_{AAAA}_{cc}_{ss}.xls; desde 2020, estadistica/pags/anuario/{AAAA}/FORMATO EXCEL/AE{AA}-C{CC}/ con espacios en la ruta (codificar %20).",
     "Las tablas del anuario llevan varias filas de cabecera y notas al pie; localizar la fila de cabecera antes de leer con pandas.",
     "Los últimos datos del panel de consumo (mensuales) solo se muestran en páginas y Power BI; en xlsx están las series anuales.",
-    "CCAA y provincias aparecen por nombre, sin código INE; añadirlo con la ficha ine-codigos-territoriales."
+    "CCAA y provincias aparecen por nombre, sin código INE; añadirlo con la ficha ine-codigos-territoriales.",
+    "Los xlsx de ESYRCE 2025 cuelgan de /es/dam/jcr:{uuid}/ con nombre con espacios y fecha (codificar %20) y los de 2022-2024 de /dam/mapa/contenido/.../esyrce/{AAAA}/; el nombre de cada tabla cambia cada año, leer los href.",
+    "Los microdatos de ESYRCE no se descargan; se piden en la sede electrónica (procedimiento 978) con el documento de compromiso firmado; en la web solo hay tablas agregadas y el cuadro Power BI ESYRCE DIGITAL."
    ],
    "tips": [
     "Para una serie larga de un cultivo, el capítulo de superficies y producciones del anuario (un xlsx por año) es más estable que los avances mensuales, que son provisionales."
@@ -226,7 +246,8 @@
     {
      "path": "https://www.mapa.gob.es/dam/mapa/contenido/pesca/temas--nuevo/registro-de-flota--flota-pesquera-espanola/registro-general-de-la-flota-pesquera/informacion-sobre-la-flota-pesquera/rgfp_bi_excel_2006_2025_20260127.xlsx",
      "desc": "Registro de flota 2006-2025 (15 MB, hoja Datos con AÑO, CODIGOBUQUE, PUERTO BASE, PROVINCIA, CCAA, CALADERO, modalidad, ARQUEO GT, POTENCIA KW, ESLORA, EDAD)",
-     "example": "curl -sSL -o flota.xlsx \"https://www.mapa.gob.es/dam/mapa/contenido/pesca/temas--nuevo/registro-de-flota--flota-pesquera-espanola/registro-general-de-la-flota-pesquera/informacion-sobre-la-flota-pesquera/rgfp_bi_excel_2006_2025_20260127.xlsx\""
+     "example": "curl -sSL -o flota.xlsx \"https://www.mapa.gob.es/dam/mapa/contenido/pesca/temas--nuevo/registro-de-flota--flota-pesquera-espanola/registro-general-de-la-flota-pesquera/informacion-sobre-la-flota-pesquera/rgfp_bi_excel_2006_2025_20260127.xlsx\"",
+     "returns": "Hoja Datos (15 MB) con una fila por buque y año 2006-2025: AÑO, CODIGOBUQUE, NOMBRE BUQUE, PUERTO BASE, PROVINCIA, CCAA, CALADERO, SUBCALADERO, CENSO POR MODALIDAD Y CALADERO, MODALIDAD DE PESCA, ARQUEO GT, POTENCIA KW, ESLORA TOTAL, EDAD..."
     },
     {
      "path": "https://www.mapa.gob.es/es/estadistica/temas/estadisticas-pesqueras/pesca-maritima/estadistica-capturas-desembarcos",
@@ -417,7 +438,8 @@
     {
      "path": "https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All",
      "desc": "CSV completo de ayudas concedidas (36 MB, 130.389 filas, UTF-8 con BOM, separador ;)",
-     "example": "curl -sSL -o ayudas_aei.csv \"https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All\""
+     "example": "curl -sSL -o ayudas_aei.csv \"https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All\"",
+     "returns": "CSV separado por ; (35 MB, desde 2008) con Año;Convocatoria;Referencia;Género;Área;Subárea;Título;C.I.F.;Entidad;CC.AA.;Provincia;€ Conced.; importe con punto de miles y coma decimal (192.480,00) y textos entrecomillados"
     },
     {
      "path": "https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas?keys={texto}&convocatory=All&area=All&ccaa=All&province=All",
@@ -1597,7 +1619,8 @@
     "datos.bne.es (portada, sparql, resource) y www.bne.es/es/catalogos/datos-enlazados devuelven 403 con una página de bloqueo de 1,3 MB para curl y requests con cualquier User-Agent; la portada www.bne.es sí responde.",
     "La ruta OAI de la ficha anterior (hispana.mcu.es/es/oai) da 404; el endpoint es /oai/oai.cmd. Algunos sets no tienen registros en edm (esegen devolvió 0) y sí en oai_dc.",
     "El resumptionToken de Hispana caduca (expirationDate a un día) y el listado completo son más de 100.000 páginas; cosechar por set o con from y until.",
-    "El modelo de datos.bne.es es FRBR (obra, expresión, manifestación); un libro es una manifestación enlazada a obra y autor, y los ids (XX1234567) no son ISBN."
+    "El modelo de datos.bne.es es FRBR (obra, expresión, manifestación); un libro es una manifestación enlazada a obra y autor, y los ids (XX1234567) no son ISBN.",
+    "datos.bne.es (SPARQL y resource) y www.bne.es responden 403 con una página HTML a IP de centros de datos (GitHub Actions y entorno de verificación, noche del 2026-09-30); el OAI-PMH de Hispana sí responde."
    ],
    "tips": [
     "Con sickle: Sickle('https://hispana.mcu.es/oai/oai.cmd').ListRecords(metadataPrefix='edm', set='<set>') recorre un repositorio; edm trae el enlace al objeto digital (isShownBy)."
@@ -1686,6 +1709,418 @@
     "ine-api-tempus",
     "educacion-estadisticas-ruct",
     "interior-criminalidad"
+   ],
+   "status": "active",
+   "verified": "2026-09-30"
+  },
+  {
+   "id": "cis-estudios",
+   "name": "CIS – Catálogo de estudios y microdatos de barómetros y encuestas (MD{n}.zip)",
+   "org": "Centro de Investigaciones Sociológicas",
+   "ministry": "Presidencia, Justicia y Relaciones con las Cortes",
+   "level": "age",
+   "sector": "demografia-migraciones-sociedad",
+   "tags": [
+    "cis",
+    "encuestas",
+    "barometro",
+    "opinion-publica",
+    "microdatos",
+    "estimacion-voto",
+    "spss",
+    "sociologia",
+    "json-ld",
+    "liferay"
+   ],
+   "summary": "Microdatos de los estudios del CIS (barómetros, preelectorales, postelectorales y encuestas temáticas) sin registro como MD{n}.zip con .sav, CSV y texto de ancho fijo, más cuestionario, ficha técnica, tabulaciones xlsx y estimación de voto en PDF; cada página de estudio lleva JSON-LD con las URL.",
+   "access": [
+    "download",
+    "scraping"
+   ],
+   "auth": "none",
+   "formats": [
+    "zip",
+    "sav",
+    "csv",
+    "xlsx",
+    "pdf",
+    "html",
+    "jsonld",
+    "xml"
+   ],
+   "update": "monthly",
+   "coverage": "Catálogo con 2582 estudios; ficheros MD verificados para los estudios 2000, 3000, 3490, 3500 y 3577 (barómetro de septiembre de 2026)",
+   "license": "CC BY 4.0 según el JSON-LD de cada estudio; condiciones en /es/condiciones-reutilizacion-datos-del-cis",
+   "base_url": "https://www.cis.es/es/estudios/catalogo",
+   "docs_url": "https://www.cis.es/es/estudios/informacion-general",
+   "endpoints": [
+    {
+     "path": "https://www.cis.es/es/estudios/{slug}",
+     "desc": "Página de un estudio (barometro-de-septiembre-2026); su JSON-LD trae un nodo Dataset con identifier (número de estudio), datePublished, distribution e isPartOf",
+     "example": "curl -s \"https://www.cis.es/es/estudios/barometro-de-septiembre-2026\" | grep -o '\"contentUrl\":\"[^\"]*\"'"
+    },
+    {
+     "path": "https://www.cis.es/documents/20117/{carpeta}/MD{n}.zip",
+     "desc": "Microdatos del estudio n; zip con {n}.sav, {n}_num.csv y {n}_etiq.csv (UTF-8 con BOM, separador ;), DA{n} de ancho fijo con sintaxis ES{n} y PDF de cuestionario",
+     "params": "carpeta es el id de carpeta Liferay propio de cada estudio (13446540 para el 3490, 14250083 para el 3577); se lee de distribution[].contentUrl del JSON-LD, no se deduce",
+     "example": "curl -sSL -o MD3577.zip \"https://www.cis.es/documents/20117/14250083/MD3577.zip\""
+    },
+    {
+     "path": "https://www.cis.es/documents/d/guest/md{n}",
+     "desc": "URL amigable del mismo zip sin conocer la carpeta (verificada para 2000, 3000, 3490 y 3500; 3577 y 1000 responden 410)",
+     "example": "curl -sSL -o MD3500.zip \"https://www.cis.es/documents/d/guest/md3500\""
+    },
+    {
+     "path": "https://www.cis.es/documents/20117/{carpeta}/{n}-multi.xlsx",
+     "desc": "Tabulaciones (14 hojas con marginales y cruces por sexo, edad, estudios, municipio, recuerdo de voto, ocupación y clase social); también _fila y _abs",
+     "example": "curl -sSL -o 3577-multi.xlsx \"https://www.cis.es/documents/20117/14250083/3577-multi.xlsx\""
+    },
+    {
+     "path": "https://www.cis.es/documents/20117/{carpeta}/{n}_Estimacion.pdf",
+     "desc": "Estimación de voto del barómetro (solo PDF); en la misma carpeta es{n}mar.pdf (marginales), FT{n}.pdf (ficha técnica) y cues{n}.pdf (cuestionario)",
+     "example": "curl -sSL -o 3577_Estimacion.pdf \"https://www.cis.es/documents/20117/14250083/3577_Estimacion.pdf\""
+    },
+    {
+     "path": "https://www.cis.es/sitemap.xml",
+     "desc": "Índice con 2400 sitemaps hijos (sitemap.xml?p_l_id=...); a partir del hijo 46 cada uno es una página de estudio con su URL /es/estudios/{slug} en seis idiomas",
+     "example": "curl -s \"https://www.cis.es/sitemap.xml\" | grep -o '<loc>[^<]*</loc>' | sed 's/&amp;/\\&/g' | sed -n '46,48p'"
+    },
+    {
+     "path": "https://www.cis.es/es/avance-de-resultados",
+     "desc": "Últimos barómetros con enlaces a /es/estudios/{slug} y a las notas /es/w/avance-de-resultados-del-estudio-{n}-...; vía más corta al último estudio"
+    },
+    {
+     "path": "https://www.cis.es/es/series/{slug}",
+     "desc": "Página de una serie (intencion-de-voto-en-unas-supuestas-elecciones-generales-noviembre-2023-recodificada-cati-); JSON-LD sin datos, tabla por JavaScript"
+    },
+    {
+     "path": "https://www.cis.es/o/headless-admin-taxonomy/v1.0/taxonomy-vocabularies/{id}/taxonomy-categories",
+     "desc": "Categorías de los vocabularios del catálogo (4674191 tipo de estudio, 4675153 índice temático, 4674204 colecciones); único endpoint headless abierto",
+     "example": "curl -s -H \"Accept: application/json\" \"https://www.cis.es/o/headless-admin-taxonomy/v1.0/taxonomy-vocabularies/4674191/taxonomy-categories?pageSize=50\""
+    }
+   ],
+   "quirks": [
+    "js-rendered",
+    "waf-blocks-bots",
+    "static-html"
+   ],
+   "ids": [
+    "ine-provincia",
+    "ine-municipio"
+   ],
+   "gotchas": [
+    "El catálogo (/es/estudios/catalogo) y /es/buscar se renderizan por JavaScript; sus URL con q= o start= devuelven 429 o redirigen a /__cis_antibot (challenge de 30 s). No localicé API de búsqueda; enumerar por el sitemap.",
+    "detalle-ficha-estudio?idEstudio={id} redirige (301) al catálogo sin el estudio y las rutas cis/opencms del portal antiguo dan 302 o 404; el idEstudio interno de cinco cifras no es el número de estudio.",
+    "El zip llega con Content-Encoding gzip y sin Accept-Ranges; Range se ignora (200 con el fichero entero, 2,3 MB el 3490 y 2 MB el 3577) y Content-Length solo aparece en HEAD.",
+    "DA{n} es texto de ancho fijo sin cabecera; las posiciones están en ES{n} (DATA LIST de SPSS, que termina en WEIGHT BY PESO). _num.csv y _etiq.csv van con ; y BOM UTF-8; _etiq pesa diez veces más por las etiquetas.",
+    "CCAA no es el código INE (7 es Castilla-La Mancha y 9 Cataluña, numeración alfabética propia); PROV sí es el código INE de provincia y MUN los 3 dígitos del municipio, que vale 0 en los municipios pequeños anonimizados.",
+    "Cada estudio tiene su carpeta documents/20117/{carpeta}; con otra carpeta o con /0/ responde 404. La URL amigable documents/d/guest/md{n} no existe para todos (410 en 3577 y 1000).",
+    "Los ids del JSON-LD llevan sufijo",
+    "El sitemap tiene 2400 hijos frente a 2582 estudios del catálogo; el resto solo se localiza desde avance-de-resultados, las noticias /es/w/ o conociendo el slug.",
+    "analisis.cis.es (banco de datos antiguo) no fue alcanzable desde el entorno de prueba (CONNECT 502); no verificado."
+   ],
+   "tips": [
+    "pandas.read_csv('3577_num.csv', sep=';', encoding='utf-8-sig') para los códigos; el .sav lleva etiquetas de variables y valores y se lee con pyreadstat; ponderar siempre por PESO.",
+    "Para la serie de estimación de voto descargar {n}_Estimacion.pdf de cada barómetro; en 2026 el número de estudio avanza 4 o 6 por mes (3557 abril, 3562 mayo, 3567 junio, 3571 julio, 3577 septiembre).",
+    "La página del estudio, el zip y el sitemap responden al User-Agent por defecto de curl; solo el catálogo y el buscador tienen protección anti-bot."
+   ],
+   "related": [
+    "ine-microdatos",
+    "ine-api-tempus",
+    "ine-codigos-territoriales"
+   ],
+   "status": "active",
+   "verified": "2026-09-30"
+  },
+  {
+   "id": "igualdad-estadisticas-violencia-genero",
+   "name": "Ministerio de Igualdad – Portal estadístico de violencia de género (Saiku) y boletines",
+   "org": "Delegación del Gobierno contra la Violencia de Género (DGVG)",
+   "ministry": "Igualdad",
+   "level": "age",
+   "sector": "demografia-migraciones-sociedad",
+   "tags": [
+    "violencia-de-genero",
+    "feminicidios",
+    "telefono-016",
+    "viogen",
+    "ordenes-de-proteccion",
+    "atenpro",
+    "saiku",
+    "olap",
+    "mdx",
+    "boletines"
+   ],
+   "summary": "Portal OLAP (Saiku 2.5) con 17 cubos consultables sin clave por API REST: feminicidios desde 2003, menores, llamadas al 016, ATENPRO, VioGén, denuncias, órdenes de protección y ayudas, por CCAA, provincia, año y mes, con exportación CSV y xlsx. Boletines mensuales en PDF y DERA en xlsx.",
+   "access": [
+    "api-rest",
+    "download",
+    "portal"
+   ],
+   "auth": "none",
+   "formats": [
+    "json",
+    "csv",
+    "xlsx",
+    "pdf",
+    "html"
+   ],
+   "update": "monthly",
+   "coverage": "Feminicidios desde 2003, 016 desde 2007, boletines mensuales desde 2012; el resto según cubo",
+   "base_url": "https://estadisticasviolenciagenero.igualdad.gob.es",
+   "docs_url": "https://violenciagenero.igualdad.gob.es/violenciaencifras/",
+   "endpoints": [
+    {
+     "path": "/saiku/rest/saiku/anonymous/discover",
+     "desc": "Catálogo VDG_CIUDADANO_PRO con los 17 cubos (010 Feminicidios en la pareja o expareja, 040 Servicio 016, 090 VioGén, 120 Órdenes de protección); fija la cookie",
+     "example": "curl -s -c jar \"https://estadisticasviolenciagenero.igualdad.gob.es/saiku/rest/saiku/anonymous/discover\""
+    },
+    {
+     "path": "/saiku/rest/saiku/anonymous/discover/xmla/VDG_CIUDADANO_PRO/null/{cubo}/metadata",
+     "desc": "Dimensiones, jerarquías, niveles y medidas del cubo con sus nombres únicos MDX; el nombre del cubo, con espacios, va codificado en la URL",
+     "example": "curl -s \"https://estadisticasviolenciagenero.igualdad.gob.es/saiku/rest/saiku/anonymous/discover/xmla/VDG_CIUDADANO_PRO/null/040%20Servicio%20016/metadata\""
+    },
+    {
+     "path": "/saiku/rest/saiku/anonymous/query/{nombre}",
+     "desc": "POST form-urlencoded que crea la consulta en la sesión (cookie obligatoria); responde JSON con el cubo",
+     "params": "connection=xmla, cube={cubo}, catalog=VDG_CIUDADANO_PRO, schema= (vacío), type=MDX; nombre libre (uuid o texto)",
+     "example": "curl -s -b jar -c jar -X POST \"https://estadisticasviolenciagenero.igualdad.gob.es/saiku/rest/saiku/anonymous/query/q1\" --data-urlencode \"connection=xmla\" --data-urlencode \"cube=040 Servicio 016\" --data-urlencode \"catalog=VDG_CIUDADANO_PRO\" --data-urlencode \"schema=\" --data-urlencode \"type=MDX\""
+    },
+    {
+     "path": "/saiku/rest/saiku/anonymous/query/{nombre}/result/flattened",
+     "desc": "POST mdx={MDX} ejecuta y devuelve cellset en JSON (primera fila cabeceras, celdas con value, type y properties), height, width, runtime y error",
+     "example": "curl -s -b jar -X POST \"https://estadisticasviolenciagenero.igualdad.gob.es/saiku/rest/saiku/anonymous/query/q1/result/flattened\" --data-urlencode \"mdx=SELECT NON EMPTY {[Measures].[Llamadas pertinentes]} ON COLUMNS, NON EMPTY {[02 Estructura temporal - Año].[Año].[Año].Members} ON ROWS FROM [040 Servicio 016]\""
+    },
+    {
+     "path": "/saiku/rest/saiku/anonymous/query/{nombre}/export/{csv|xls}",
+     "desc": "Exporta la última ejecución como application/octet-stream (saiku-export.csv en UTF-8 con coma y todo entrecomillado; xls entrega un xlsx)",
+     "example": "curl -s -b jar -o 016_anual.csv \"https://estadisticasviolenciagenero.igualdad.gob.es/saiku/rest/saiku/anonymous/query/q1/export/csv\""
+    },
+    {
+     "path": "https://violenciagenero.igualdad.gob.es/violenciaencifras/boletines/mensuales/boletines-estadisticos-mensuales-ano-{AAAA}/",
+     "desc": "Boletín mensual (BEM_{Mes}_{AAAA}.pdf, 7 MB) y Principales_datos_{Mes}_{AAAA}.pdf en wp-content/uploads; anuales BEA_{AAAA}.pdf en boletines/anuales/",
+     "example": "curl -s \"https://violenciagenero.igualdad.gob.es/violenciaencifras/boletines/mensuales/boletines-estadisticos-mensuales-ano-2026/\" | grep -o 'uploads/BEM_[^\"]*'"
+    },
+    {
+     "path": "https://violenciagenero.igualdad.gob.es/violenciaencifras/victimasmortales/{fichamujeres|fichamenores|feminicidio}/",
+     "desc": "Fichas de víctimas mortales en PDF (VMortales_{AAAA_MM_DD}.pdf resumen vigente, VMujeres_{AAAA}_act_{fecha}.pdf por año, Ficha_Otros_feminicidios_{AAAA}.pdf)"
+    },
+    {
+     "path": "https://violenciagenero.igualdad.gob.es/violenciaencifras/recursos-autonomicos/estadistica-de-recursos-autonomicos-en-materia-de-violencia-contra-la-mujer-2024-dera-2024/",
+     "desc": "DERA 2024 (recursos autonómicos) en cinco xlsx por capítulo (DERA2024-Capitulo-{1..5}.xlsx con acogida de emergencia, casas de acogida, viviendas, residencias)",
+     "example": "curl -sO \"https://violenciagenero.igualdad.gob.es/wp-content/uploads/DERA2024-Capitulo-1.xlsx\""
+    }
+   ],
+   "quirks": [
+    "session-required",
+    "errors-html-or-xml",
+    "static-html",
+    "url-drift"
+   ],
+   "ids": [],
+   "gotchas": [
+    "La primera consulta creada en una sesión sin cookie se pierde (result responde No query found using name y export 500); hacer antes un GET a discover con tarro de cookies (session no fija cookie) o repetir el POST.",
+    "La cookie JSESSIONID lleva Path=/saiku y sufijo de worker; sin ella cada llamada cae en otra sesión y export devuelve 500 HTML. En requests usar Session, en curl -c jar y -b jar.",
+    "El segmento schema de la URL de metadata va como null o un espacio (VDG_CIUDADANO_PRO/null/{cubo}); con el segmento vacío responde 404.",
+    "Cubos, dimensiones y medidas llevan espacios, tildes y guiones ([02 Estructura temporal - Año].[Año].[Año], [01 Estructura territorial asesinato].[Jerarquía].[Provincia (As)]); copiarlos del metadata.",
+    "result devuelve 200 con error dentro del JSON y cellset null; export sin consulta previa o con nombre desconocido responde 500 con página HTML de Tomcat; comprobar antes de parsear.",
+    "En el CSV los números van entrecomillados con decimal .0 (\"13.0\") y los periodos como texto, sin BOM y con CRLF; export/xls entrega xlsx aunque la ruta diga xls.",
+    "Las 7 consultas del repositorio (repository?type=saiku) son pruebas de 2017-2023 con el catálogo VDG, ya inexistente; crear una consulta con xml= de ellas responde 500.",
+    "Territorios por nombre (Comunidad autónoma, Provincia) sin código INE; en feminicidios el nivel territorial es el lugar del asesinato (As).",
+    "wp-json de violenciagenero.igualdad.gob.es está restringido (401 rest_login_required); los PDF de víctimas llevan la fecha de actualización en el nombre y cambian, rascar la página.",
+    "VioGén (cubo 090, casos activos y protección policial) y denuncias (110) proceden del Ministerio del Interior; la criminalidad general está en interior-criminalidad."
+   ],
+   "tips": [
+    "Flujo en cuatro llamadas con el mismo tarro de cookies (discover, POST query, POST result, GET export); un CrossJoin de año por CCAA en feminicidios devolvió 331 filas en 62 ms.",
+    "pd.read_csv(io.BytesIO(r.content)) lee el CSV directo; en el JSON, cellset[0] son cabeceras y cellset[1:] filas con c['value'].",
+    "El cubo 010 tiene 14 dimensiones (edad y nacionalidad de víctima y agresor, suicidio, relación, convivencia, denuncia previa) y las medidas feminicidios y huérfanos menores."
+   ],
+   "related": [
+    "interior-criminalidad",
+    "ine-api-tempus",
+    "mites-estadisticas"
+   ],
+   "status": "active",
+   "verified": "2026-09-30"
+  },
+  {
+   "id": "imserso-dependencia",
+   "name": "IMSERSO – Estadísticas del SAAD (dependencia), PNC, discapacidad y residencias",
+   "org": "Instituto de Mayores y Servicios Sociales (IMSERSO)",
+   "ministry": "Derechos Sociales, Consumo y Agenda 2030",
+   "level": "age",
+   "sector": "demografia-migraciones-sociedad",
+   "tags": [
+    "dependencia",
+    "saad",
+    "imserso",
+    "pensiones-no-contributivas",
+    "discapacidad",
+    "residencias",
+    "personas-mayores",
+    "servicios-sociales",
+    "teleasistencia"
+   ],
+   "summary": "Ficheros xlsx y csv con URL deducible: estadística mensual del SAAD (solicitudes, dictámenes, prestaciones por grado y CCAA, lista de espera, cuidadores), nómina mensual de PNC, Base Estatal de Personas con Discapacidad en CSV largo, censo de residencias y servicios sociales para mayores.",
+   "access": [
+    "download",
+    "portal"
+   ],
+   "auth": "none",
+   "formats": [
+    "xlsx",
+    "csv",
+    "docx",
+    "pdf",
+    "html"
+   ],
+   "update": "monthly",
+   "coverage": "SAAD mensual verificado de diciembre de 2025 a agosto de 2026 (serie desde 2019 en la hoja EVO); PNC 2019-; BEDPCD 2019-2024 en CSV; residencias 2022 y 2024; mayores 2010-2024",
+   "base_url": "https://imserso.es/el-imserso/documentacion/estadisticas",
+   "docs_url": "https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia-saad",
+   "endpoints": [
+    {
+     "path": "https://imserso.es/documents/d/global/estsisaad_{AAAAMMDD}",
+     "desc": "Estadística mensual del SAAD a último día de mes en xlsx (97 hojas; porsaad, indsaad, EVO, 21solsaad, 31dictsaad, 51pbgrado, 9TiempoEspera, 11ListaEspera)",
+     "example": "curl -sL -A \"Mozilla/5.0\" -o estsisaad_20260831.xlsx \"https://imserso.es/documents/d/global/estsisaad_20260831\""
+    },
+    {
+     "path": "https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia-saad/estadisticas-mensual",
+     "desc": "Página del último mes con enlaces /documents/20123/{carpeta}/{fichero}/{uuid} a estsisaad, cecuidadores y evo_per_fallecidas en xlsx y pdf",
+     "example": "curl -s -A \"Mozilla/5.0\" \"https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia-saad/estadisticas-mensual\" | grep -o '/documents/20123/[^\"]*\\.xlsx[^\"]*'"
+    },
+    {
+     "path": "https://imserso.es/documents/20123/121856/{provpncs|evolpncs|disterpncs|disimppncs|evolimppncs}.{csv|xlsx|pdf}",
+     "desc": "Nómina mensual de pensiones no contributivas (número e importe por CCAA y provincia, evolución anual desde 2019, distribución por importe); misma URL cada mes",
+     "example": "curl -s -A \"Mozilla/5.0\" \"https://imserso.es/documents/20123/121856/evolpncs.csv\" | iconv -f ISO-8859-1 -t UTF-8"
+    },
+    {
+     "path": "https://imserso.es/documents/d/global/bdepcd_2024-1-",
+     "desc": "Base Estatal de Datos de Personas con Discapacidad 2019-2024 en CSV largo (Año;CCAA;Provincia;Grupo_DIAG0;Sexo;Grupo_grado_discapacidad;Grupo_edad;Valor)",
+     "example": "curl -sL -A \"Mozilla/5.0\" -o bdepcd_2024.csv \"https://imserso.es/documents/d/global/bdepcd_2024-1-\""
+    },
+    {
+     "path": "https://imserso.es/documents/d/global/cenres_2024_agregado_provincia",
+     "desc": "Censo de centros residenciales 2024 agregado por provincia (CSV, 52 filas y 215 columnas de plazas, gestión y acreditación); censo_centros_r_2025 es el informe",
+     "example": "curl -sL -A \"Mozilla/5.0\" -o cenres_2024_provincia.csv \"https://imserso.es/documents/d/global/cenres_2024_agregado_provincia\""
+    },
+    {
+     "path": "https://imserso.es/documents/d/global/datos_ssppmmesp2024",
+     "desc": "Servicios sociales para personas mayores a 31/12/2024 (xlsx de 37 hojas; teleasistencia, ayuda a domicilio, centros de día, residencias); páginas 2010-2024"
+    },
+    {
+     "path": "https://imserso.es/el-imserso/documentacion/estadisticas/{tema}",
+     "desc": "Índice por tema con los enlaces a los ficheros y a las páginas por año",
+     "params": "tema = sistema-autonomia-atencion-dependencia-saad, pensiones-no-contributivas-jubilacion-incapacidad-pnc, base-estatal-datos-personas-con-discapacidad, censo-de-centros-residenciales-en-espana"
+    }
+   ],
+   "quirks": [
+    "static-html",
+    "overwritten-in-place",
+    "latin1",
+    "user-agent-browser"
+   ],
+   "ids": [],
+   "gotchas": [
+    "imserso.es responde 403 al User-Agent por defecto de curl (curl/8.0) incluso en los ficheros de /documents/; enviar un User-Agent de navegador.",
+    "La URL corta /documents/d/global/{nombre sin extensión} sirve el fichero sin uuid y vale para meses anteriores (estsisaad_20260630 y estsisaad_20251231 verificados); un nombre inexistente responde 404 HTML.",
+    "Los xlsx del SAAD llevan fórmulas (=D10/2410165*100) y cabeceras en varias filas; leer con openpyxl data_only=True o pandas header=None y localizar la fila ÁMBITO TERRITORIAL.",
+    "Los ficheros de PNC (provpncs, evolpncs) se sobreescriben cada mes con el mismo nombre; el CSV va en ISO-8859-1 con separador ;, miles con punto, decimales con coma y filas de título antes de la tabla.",
+    "El CSV de la BEDPCD va en UTF-8 con BOM, separador ; y todo entrecomillado; el del censo de residencias en UTF-8 con BOM y separador coma.",
+    "Los territorios van por nombre (Andalucía, A Coruña), sin código INE; cruzar por nombre normalizado con ine-codigos-territoriales.",
+    "Solo el último mes está enlazado en la página del SAAD; el histórico se obtiene deduciendo el nombre por fecha (último día del mes) o de la hoja EVO (31/12/2019 al mes en curso).",
+    "El sufijo -1- de /documents/d/global distingue ficheros con el mismo título y cambia el formato (bdepcd_2024 es PDF y bdepcd_2024-1- el CSV; censo_centros_r_2025 docx y -1- PDF); comprobar Content-Type.",
+    "La ruta .../estadisticas/sistema-autonomia-atencion-dependencia sin el sufijo -saad responde 404 con meta refresh a /pagina-no-encontrada.",
+    "El SAAD es gestión administrativa (solicitudes, dictámenes, prestaciones); la encuesta de discapacidad y dependencia (EDAD 2020) es del INE."
+   ],
+   "tips": [
+    "pd.read_excel(f, sheet_name='51pbgrado', header=None) para prestaciones por grado y CCAA; pd.read_csv('bdepcd_2024.csv', sep=';', encoding='utf-8-sig') para la BEDPCD.",
+    "Para una serie mensual del SAAD iterar estsisaad_{AAAAMMDD} con el último día de cada mes y tomar la hoja porsaad o EVO."
+   ],
+   "related": [
+    "segsocial-estadisticas",
+    "ine-api-tempus",
+    "ine-codigos-territoriales",
+    "sanidad-portal-estadistico"
+   ],
+   "status": "active",
+   "verified": "2026-09-30"
+  },
+  {
+   "id": "inmujeres-mujeres-cifras",
+   "name": "Instituto de las Mujeres – Mujeres en cifras (indicadores por sexo en xls)",
+   "org": "Instituto de las Mujeres",
+   "ministry": "Igualdad",
+   "level": "age",
+   "sector": "demografia-migraciones-sociedad",
+   "tags": [
+    "igualdad",
+    "genero",
+    "mujeres",
+    "indicadores",
+    "brecha-salarial",
+    "empleo",
+    "conciliacion",
+    "poder-decisiones",
+    "violencia-de-genero",
+    "xls"
+   ],
+   "summary": "Indicadores por sexo elaborados sobre datos de INE, SEPE y Seguridad Social en 13 temas (demografía, educación, empleo y prestaciones, salarios, conciliación, poder y decisiones, violencia, salud, ciencia); un xls por indicador con hoja reciente e histórica 1998-2021, más informes PDF.",
+   "access": [
+    "download",
+    "scraping"
+   ],
+   "auth": "none",
+   "formats": [
+    "xls",
+    "pdf",
+    "html"
+   ],
+   "update": "annual",
+   "coverage": "Hoja histórica 1998-2021 y hoja de evolución con los últimos años (hasta 2026 en población)",
+   "base_url": "https://www.inmujeres.gob.es/MujerCifras/Home.htm",
+   "docs_url": "https://www.inmujeres.gob.es/MujerCifras/Informes/Informes.htm",
+   "endpoints": [
+    {
+     "path": "https://www.inmujeres.gob.es/MujerCifras/{Tema}/{Tema}.htm",
+     "desc": "Índice de un tema con sus subtemas (Demografia/Demografia.htm, EmpleoPrestaciones/EmpleoPrestacionessociales.htm, PoderDecisiones/PoderTomaDecisiones.htm)"
+    },
+    {
+     "path": "https://www.inmujeres.gob.es/MujerCifras/{Tema}/{Subtema}.htm",
+     "desc": "Página de subtema (Demografia/Poblacion.htm, EmpleoPrestaciones/TasasParo.htm, PoderDecisiones/PoderLegislativo.htm) con un enlace xls por indicador y su título",
+     "example": "curl -s \"https://www.inmujeres.gob.es/MujerCifras/Demografia/Poblacion.htm\" | iconv -f ISO-8859-1 -t UTF-8 | grep -o 'estadisticasweb/[^\"]*\\.xls'"
+    },
+    {
+     "path": "https://www.inmujeres.gob.es/estadisticasweb/{n}_{Tema}/{n}_{m}_{Subtema}/w{id}.xls",
+     "desc": "Un xls por indicador (1_Demografia/1_1_Poblacion/w1.xls población por edad, 5_EmpleoyPrestacionesSociales/5_4_TasasdeParo/w56.xls tasas de paro)",
+     "example": "curl -sS -o w1.xls \"https://www.inmujeres.gob.es/estadisticasweb/1_Demografia/1_1_Poblacion/w1.xls\""
+    },
+    {
+     "path": "https://www.inmujeres.gob.es/MujerCifras/Informes/Docs/{fichero}.pdf",
+     "desc": "Informes de principales indicadores (principales_indicadores_2021.pdf a PrincipalesIndicadores_2026.pdf, nombre variable) y Mujeresencifras_1983_2023.pdf",
+     "example": "curl -sS -o principales_indicadores_2026.pdf \"https://www.inmujeres.gob.es/MujerCifras/Informes/Docs/PrincipalesIndicadores_2026.pdf\""
+    }
+   ],
+   "quirks": [
+    "static-html",
+    "latin1"
+   ],
+   "ids": [],
+   "gotchas": [
+    "La raíz /MujerCifras/ responde 403 \"Your client is not allowed to access the requested object\"; entrar por /MujerCifras/Home.htm o por la página del tema o subtema.",
+    "Los enlaces del HTML apuntan al host antiguo www.inmujer.es, que no resolvió ni respondió desde el entorno de prueba; la misma ruta /estadisticasweb/... sirve el xls en www.inmujeres.gob.es (206 con Range).",
+    "HTML en ISO-8859-1 con entidades; los xls son Excel 97 (application/vnd.ms-excel) con dos hojas (Evo w{id} y w{id} 1998 - 2021), tres filas de título antes de la fila de años y años en orden descendente.",
+    "Los directorios /estadisticasweb/ no se listan (403); los ids w{id} solo se conocen rascando la página del subtema, donde el texto del enlace es el título del indicador.",
+    "Cada hoja termina con la fuente (INEbase, Estadística Continua de Población) y la fecha de actualización de la tabla; los valores son porcentajes o totales elaborados por el Instituto, no la serie original."
+   ],
+   "tips": [
+    "pandas.read_excel(url, sheet_name=None, header=None) con xlrd; tomar como cabecera la fila cuyo tercer valor es un año y descartar las filas de fuente y notas del final."
+   ],
+   "related": [
+    "ine-api-tempus",
+    "sepe-estadisticas",
+    "segsocial-estadisticas",
+    "igualdad-estadisticas-violencia-genero"
    ],
    "status": "active",
    "verified": "2026-09-30"
@@ -1816,7 +2251,8 @@
     {
      "path": "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_{be|tc|ti|si|pb}.csv",
      "desc": "Catálogos de series (código, alias, fichero del cuadro, descripción, frecuencia, primera y última observación)",
-     "example": "curl -sO \"https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_tc.csv\""
+     "example": "curl -sO \"https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_tc.csv\"",
+     "returns": "CSV con una fila por serie: Nombre de la serie (código), Número secuencial, Alias (TC_1_1.1), Nombre del archivo con los valores (TC_1_1.csv), Descripción, Tipo de variable, Código de unidades, Exponente, Número de decimales, Descripción de unidades, Frecuencia, primera y última fecha y número de observaciones"
     },
     {
      "path": "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/{cuadro}.csv",
@@ -1827,7 +2263,8 @@
     {
      "path": "https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_{capitulo}.zip",
      "desc": "ZIP con los CSV de un capítulo del Boletín Estadístico; lista de capítulos en descargas-completas.html",
-     "example": "curl -sO \"https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_DEUAAPP.zip\""
+     "example": "curl -sO \"https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_DEUAAPP.zip\"",
+     "returns": "Zip con un CSV por cuadro del capítulo (be0106.csv, be0107.csv, be1101.csv...) con el mismo formato de seis filas de cabecera que los CSV sueltos"
     }
    ],
    "rate_limit": "No documentado",
@@ -2114,6 +2551,11 @@
      "example": "curl -s \"https://estadisticas.educacion.gob.es/EducaJaxiPx/files/_px/es/csv_bdsc/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos/l0/adul_01.px?nocab=1\""
     },
     {
+     "path": "https://estadisticas.educacion.gob.es/EducaJaxiPx/dlgExport.htm?path={path}&file={file}",
+     "desc": "Diálogo de descarga de una tabla con los ocho formatos (csv, csv_bd, csv_bdsc, csv_c, csv_sc, px, xls, xlsx) y sus rutas files/_px/es/{formato}{path}{file}",
+     "example": "curl -s \"https://estadisticas.educacion.gob.es/EducaJaxiPx/dlgExport.htm?path=/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos/l0/&file=adul_01.px\" | grep -o 'files/_px[^\"]*'"
+    },
+    {
      "path": "https://www.educacionfpydeportes.gob.es/servicios-al-ciudadano/estadisticas/no-universitaria/alumnado/matriculado/{curso}-rd.html",
      "desc": "Página por curso (1999-2000 a 2024-2025) con los enlaces a los índices de EDUCAbase; misma estructura para profesorado, centros y resultados"
     },
@@ -2141,6 +2583,7 @@
     "La antigua raíz estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm redirige a la web del ministerio (404); hay que entrar con path completo desde la página del curso.",
     "EDUCAbase es el mismo software que INEbase (dynPx, jaxiPx); los CSV llevan BOM y van en ISO-8859-15 con separador ; y los px en ANSI; leer con encoding latin-1.",
     "Cada curso tiene su carpeta (2024-2025-rd, rd por resultados definitivos) y los nombres de tabla se repiten entre cursos (adul_01.px); guardar el path completo.",
+    "Formatos verificados el 30/09/2026; csv_bdsc (separador ;), csv_bd (tabulador), csv_sc (con título), px y xlsx; json responde 500 vacío y el índice sin subcarpeta (path=/no-universitaria) acaba con 200 en 404.html.",
     "universidades.gob.es redirige a ciencia.gob.es y su certificado llega sin la cadena FNMT; los xlsx del SIIU cuelgan de rutas /dam/jcr con uuid que cambian en cada publicación.",
     "El RUCT usa jsessionid en la acción del formulario y devuelve HTML; los códigos de centro (8 dígitos) y de título son las claves estables porque los nombres cambian.",
     "Las CCAA publican datos más desagregados y recientes que el ministerio."
@@ -2151,6 +2594,91 @@
    "related": [
     "ine-api-tempus",
     "ine-codigos-territoriales"
+   ],
+   "status": "active",
+   "verified": "2026-09-30"
+  },
+  {
+   "id": "inee-bases-datos",
+   "name": "INEE – Bases de datos de PISA, TIMSS, PIAAC, ICILS y evaluaciones nacionales (España)",
+   "org": "Instituto Nacional de Evaluación Educativa",
+   "ministry": "Educación, Formación Profesional y Deportes",
+   "level": "age",
+   "sector": "educacion-universidades",
+   "tags": [
+    "inee",
+    "pisa",
+    "timss",
+    "piaac",
+    "pirls",
+    "icils",
+    "evaluacion-educativa",
+    "microdatos",
+    "spss",
+    "stata",
+    "rendimiento-escolar"
+   ],
+   "summary": "Muestras españolas de las evaluaciones internacionales (PISA 2000-2022 con base conjunta 2000-2015, TIMSS 2023, PIAAC ciclo 1, ICILS, PISA para centros) y bases de las evaluaciones nacionales (EGD 2009 y 2010, Escuela 2.0, PROA, Enseñanzas Medias 1984-1989) en SPSS, Stata, xlsx y CSV sin registro.",
+   "access": [
+    "download"
+   ],
+   "auth": "none",
+   "formats": [
+    "zip",
+    "rar",
+    "sav",
+    "dta",
+    "csv",
+    "xlsx"
+   ],
+   "update": "irregular",
+   "coverage": "PISA 2000-2022; TIMSS 2023; PIAAC ciclo 1 (2012); evaluaciones nacionales 1984-1989 y 2009-2010",
+   "base_url": "https://www.educacionfpydeportes.gob.es/inee/bases-datos.html",
+   "docs_url": "https://www.educacionfpydeportes.gob.es/inee/bases-datos/evaluaciones-internacionales.html",
+   "endpoints": [
+    {
+     "path": "https://www.educacionfpydeportes.gob.es/inee/bases-datos/evaluaciones-internacionales/{pisa|timss|piaac|pirls|icils|iccs|talis|pisa-para-centros-educativos}.html",
+     "desc": "Página por programa con enlaces a la base internacional (OCDE, IEA) y a la muestra española bajo /inee/dam/jcr:{uuid}/; iccs y talis solo enlazan fuera",
+     "example": "curl -s \"https://www.educacionfpydeportes.gob.es/inee/bases-datos/evaluaciones-internacionales/pisa.html\" | grep -o 'href=\"[^\"]*/inee/dam/[^\"]*\"'"
+    },
+    {
+     "path": "https://www.educacionfpydeportes.gob.es/inee/dam/jcr:{uuid}/{fichero}",
+     "desc": "PISA 2022 pisa-2022-esp.rar (26,6 MB SPSS), PISA 2018 esp-06-diciembre-pisa2018.zip, PISA 2000-2015 esp-pisa00-03-06-09-12-15.zip (91,5 MB), TIMSS 2023 rar",
+     "example": "curl -sS -o pisa-2022-esp.rar \"https://www.educacionfpydeportes.gob.es/inee/dam/jcr:8f5e9ff3-41ce-4661-b56e-237766dfff2d/pisa-2022-esp.rar\""
+    },
+    {
+     "path": "https://www.educacionfpydeportes.gob.es/inee/bases-datos/evaluaciones-nacionales.html",
+     "desc": "EGD 2009 (EGD09.xlsx) y 2010 (EGD10.xlsx), Escuela 2.0 (xlsx, sav y dta), PROA (basesddproa{excel|spss|stata}.zip) y prueba piloto de inglés en la PAU (xlsx)"
+    },
+    {
+     "path": "https://www.educacionfpydeportes.gob.es/inee/bases-datos/evaluaciones-nacionales/evaluacion-externa.html",
+     "desc": "Evaluación externa de la reforma de Enseñanzas Medias 1984-1989; basesdedatos.zip (seis .sav REEM2G1A a REEM3G3A, 7,2 MB) y librosdecodigos.zip",
+     "example": "curl -sS -o reem_basesdedatos.zip \"https://www.educacionfpydeportes.gob.es/inee/dam/jcr:9c9031fe-f08f-432c-99a9-f79fbbaebaef/basesdedatos.zip\""
+    },
+    {
+     "path": "https://www.educacionfpydeportes.gob.es/inee/bases-datos/evaluaciones-internacionales/piaac.html",
+     "desc": "PIAAC ciclo 1 ronda 1, base nacional esp-31-oct.zip (21 MB); ciclo 2 solo en la OCDE"
+    }
+   ],
+   "quirks": [
+    "url-drift",
+    "static-html"
+   ],
+   "ids": [],
+   "gotchas": [
+    "HEAD sobre los ficheros /inee/dam/ responde 403; usar GET, que admite Range (206) para comprobar tamaño y tipo antes de bajar 400 MB.",
+    "educacionyfp.gob.es y educacion.gob.es redirigen a educacionfpydeportes.gob.es/inee/portada.html; las URL de fichero llevan jcr:{uuid}, que cambia si se resube el fichero, leer los href de la página.",
+    "PISA 2022, TIMSS 2023, ICILS y PISA 2012 Stata vienen en .rar (application/x-rar-compressed), que zipfile no abre; hace falta unrar o 7z. Los .sav y .dta llegan con charset=UTF-8 en el Content-Type aunque son binarios.",
+    "El CSV conjunto PISA 2000-2012 pesa 404 MB con BOM UTF-8 y separador ;, una columna Participa{año} por ciclo y prefijos P00_, P03_ en las variables; el zip SPSS 2000-2015 equivalente pesa 91 MB.",
+    "Son la muestra española de la base internacional; pesos, réplicas y valores plausibles siguen la metodología de la OCDE o la IEA, cuyas guías de uso enlaza cada página.",
+    "TALIS, ICCS y PIAAC ciclo 2 no tienen fichero nacional (solo enlace a la OCDE o la IEA) y PIRLS solo trae guias-de-uso-pirls-2011.rar; PISA 2025 solo enlaza a la base internacional."
+   ],
+   "tips": [
+    "pyreadstat.read_sav() lee los .sav con etiquetas; para el CSV de 404 MB usar pandas.read_csv(sep=';', encoding='utf-8-sig', usecols=[...]) seleccionando columnas."
+   ],
+   "related": [
+    "educacion-estadisticas-ruct",
+    "ine-microdatos"
    ],
    "status": "active",
    "verified": "2026-09-30"
@@ -2287,7 +2815,8 @@
     {
      "path": "https://www.seg-social.es/wps/wcm/connect/wss/{uuid}/{fichero}.xlsx?MOD=AJPERES",
      "desc": "Patrón de descarga de cualquier fichero; el uuid cambia con cada publicación y se toma del enlace de la página",
-     "example": "curl -sL -A \"Mozilla/5.0\" -o PI202609.xlsx \"https://www.seg-social.es/wps/wcm/connect/wss/1ac3470e-8f62-4407-b772-28f189b71be1/PI202609.xlsx?MOD=AJPERES\""
+     "example": "curl -sL -A \"Mozilla/5.0\" -o PI202609.xlsx \"https://www.seg-social.es/wps/wcm/connect/wss/1ac3470e-8f62-4407-b772-28f189b71be1/PI202609.xlsx?MOD=AJPERES\"",
+     "returns": "Libros con varias hojas y títulos en varias filas; el de pensiones internacionales (PI{AAAAMM}) trae Indice_internacional, PI_país_residencia y PI_país_convenio con PAÍS y, por clase de pensión (incapacidad, jubilación, viudedad, orfandad, favor de familiares), Número e Importe (€)"
     }
    ],
    "quirks": [
@@ -2624,7 +3153,8 @@
     {
      "path": "https://www.cores.es/sites/default/files/archivos/estadisticas/consumos-pp-ccaa-provincias.xlsx",
      "desc": "Consumo mensual de productos petrolíferos por CCAA y provincia desde enero de 1997 (hoja Consumos, cabecera en la fila 3, 25.000 filas)",
-     "example": "curl -sSL -o consumos-pp-ccaa-provincias.xlsx \"https://www.cores.es/sites/default/files/archivos/estadisticas/consumos-pp-ccaa-provincias.xlsx\""
+     "example": "curl -sSL -o consumos-pp-ccaa-provincias.xlsx \"https://www.cores.es/sites/default/files/archivos/estadisticas/consumos-pp-ccaa-provincias.xlsx\"",
+     "returns": "Hojas Inicio (fuentes por periodo) y Consumos con cabecera tras dos filas de título: Año, Mes, CCAA, Provincia, Gasolina 97, 95 y 98 I.O., % bio en gasolinas, Gasóleo A, B y C, % bio en gasóleos, Fuelóleo BIA... en toneladas; celdas con fórmulas hacia Inicio (leer con data_only=True)"
     },
     {
      "path": "https://www.cores.es/sites/default/files/archivos/estadisticas/{fichero}.xlsx",
@@ -2948,6 +3478,12 @@
      "desc": "Misma API con salida CSV cambiando js por csv",
      "example": "curl -s \"https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=12\"",
      "returns": "Texto tabulado en ISO-8859-15 con BOM; una columna por variable, Periodo (2026M08) y Total; decimal con coma y cadena vacía en los periodos aún sin dato"
+    },
+    {
+     "path": "https://www.ine.es/jaxiT3/files/t/es/{csv_bdsc|px|xlsx}/{id_tabla}.{csv|px|xlsx}?nocab=1",
+     "desc": "Descarga directa de cualquier tabla de INEbase con la misma id_tabla que DATOS_TABLA (2854, 24077); csv_bdsc separado por ;, px y xlsx",
+     "example": "curl -s \"https://www.ine.es/jaxiT3/files/t/es/csv_bdsc/24077.csv?nocab=1\"",
+     "returns": "CSV en ISO-8859-15 con BOM y separador ; (una columna por variable, Periodo como 2026M08 o 2025, Total con coma decimal y punto de miles; \"\" en el periodo sin dato); px en application/pc-axis y xlsx con la misma tabla"
     }
    ],
    "rate_limit": "No documentado; una tabla grande con nult=1 devuelve 600 KB (4248 series en la 25333)",
@@ -3014,15 +3550,18 @@
     {
      "path": "https://www.ine.es/daco/daco42/codmun/diccionario{AA}.xlsx",
      "desc": "Diccionario de municipios a 1 de enero del año AA en una sola hoja (CODAUTO, CPRO, CMUN, DC, NOMBRE)",
-     "example": "curl -sO \"https://www.ine.es/daco/daco42/codmun/diccionario26.xlsx\""
+     "example": "curl -sO \"https://www.ine.es/daco/daco42/codmun/diccionario26.xlsx\"",
+     "returns": "Una hoja (dic25) con dos filas de título y cabecera CODAUTO, CPRO, CMUN, DC, NOMBRE; el código INE de municipio es CPRO+CMUN (5 dígitos) y DC el dígito de control; leer con header=2 y dtype str"
     },
     {
      "path": "https://www.ine.es/daco/daco42/codmun/{AA}codmun.xlsx",
-     "desc": "Misma relación con una hoja por provincia (01 a 52)"
+     "desc": "Misma relación con una hoja por provincia (01 a 52)",
+     "returns": "Una hoja por provincia (01 a 52) con fila de título, nombre de la provincia y cabecera CPRO, CMUN, DC, NOMBRE; concatenar las hojas y leer los códigos como texto"
     },
     {
      "path": "https://www.ine.es/daco/daco42/codmun/{AA}codislas.xlsx",
-     "desc": "Municipios de Baleares, Las Palmas y Santa Cruz de Tenerife con código de isla (CISLA)"
+     "desc": "Municipios de Baleares, Las Palmas y Santa Cruz de Tenerife con código de isla (CISLA)",
+     "returns": "Una hoja por provincia insular (07 Illes Balears, 35 Las Palmas...) con cabecera CPRO, CISLA, ISLA, CMUN, DC, NOMBRE"
     },
     {
      "path": "https://www.ine.es/daco/daco42/codmun/cod_ccaa_provincia.htm",
@@ -3031,6 +3570,31 @@
     {
      "path": "https://www.ine.es/daco/daco42/codmun/codmun_anual.htm",
      "desc": "Índice de las relaciones anuales anteriores"
+    },
+    {
+     "path": "https://www.ine.es/nomen2/tabla.do",
+     "desc": "Nomenclátor (población por unidad poblacional, entidades colectivas, singulares, núcleos y diseminados); POST de la búsqueda rápida por nombre de población",
+     "params": "accion=busquedaRapida, nombrePoblacion, desagregacionRapida (S sexo, E edad, N nacionalidad), aniosRapida (repetible, 2003-2025), L=0",
+     "example": "curl -s -X POST -d \"accion=busquedaRapida&nombrePoblacion=Abengibre&desagregacionRapida=S&aniosRapida=2025&L=0\" \"https://www.ine.es/nomen2/tabla.do\"",
+     "returns": "HTML con una tabla de Provincia, Municipio, Código Unidad Poblacional (tres pares de dígitos: entidad colectiva, singular y núcleo), Unidad Poblacional, tipo (M municipio, ES entidad singular, NUC núcleo, DIS diseminado) y Total, Hombres y Mujeres por año"
+    },
+    {
+     "path": "https://www.ine.es/nomen2/DescargaTabla",
+     "desc": "La misma consulta descargada como fichero, sin sesión previa; typeDownload 1 xls, 2 CSV tabulado, 3 CSV con punto y coma",
+     "params": "los mismos campos que tabla.do más typeDownload={1|2|3}",
+     "example": "curl -s -X POST -d \"accion=busquedaRapida&nombrePoblacion=Abengibre&desagregacionRapida=S&aniosRapida=2025&L=0&typeDownload=3\" \"https://www.ine.es/nomen2/DescargaTabla\"",
+     "returns": "text/csv en ISO-8859-15 con tres filas de título y cabecera Provincia;Municipio;Código Unidad Poblacional;Unidad Poblacional;;Total;Hombres;Mujeres; el municipio va como 1 Abengibre (sin ceros a la izquierda) y el código como seis dígitos (colectiva, singular, núcleo); tipo M, ES, NUC o DIS en la columna sin nombre"
+    },
+    {
+     "path": "https://www.ine.es/nomen_files/DistribucionUnidPoblacionales.xls",
+     "desc": "Recuento anual de unidades poblacionales por CCAA (municipios, entidades colectivas, singulares, núcleos, diseminados), una hoja por año desde 2025 hacia atrás",
+     "example": "curl -sO \"https://www.ine.es/nomen_files/DistribucionUnidPoblacionales.xls\"",
+     "returns": "xls con una hoja por año; cabecera Código, CCAA, Total, Municipios, Entidades colectivas, Entidades singulares, Núcleos, Diseminados (2025: 8.132 municipios, 62.151 entidades singulares, 41.239 diseminados)"
+    },
+    {
+     "path": "https://www.ine.es/nomen_files/DisenioRegistro.xls",
+     "desc": "Diseño de registro del fichero completo del Nomenclátor (ancho fijo de 104 caracteres; código de unidad poblacional de 11 dígitos en las posiciones 1 a 11)",
+     "example": "curl -sO \"https://www.ine.es/nomen_files/DisenioRegistro.xls\""
     }
    ],
    "quirks": [
@@ -3039,14 +3603,17 @@
    "ids": [
     "ine-municipio",
     "ine-provincia",
-    "ccaa"
+    "ccaa",
+    "ine-entidad-singular"
    ],
    "gotchas": [
     "El código completo son 5 dígitos, CPRO (2) más CMUN (3); el dígito de control DC es una columna aparte. Muchos datasets omiten el DC y otros lo pegan como sexto dígito.",
     "Los códigos vienen como texto con ceros a la izquierda; al leer con pandas forzar dtype str o se pierden (01 pasa a 1).",
     "El diccionario tiene una fila de título antes de la cabecera (leer con header=1); la hoja se llama con el año anterior (dic25 en diccionario26.xlsx) y el título de codislas también va con retraso.",
     "La página menu=resultados de la ficha anterior devuelve 404; la relación cuelga de menu=ultiDatos.",
-    "Los municipios cambian de código al fusionarse o segregarse; para series largas aplicar las variaciones anuales (codmun{AA}/{AA}codmunmod.htm)."
+    "Los municipios cambian de código al fusionarse o segregarse; para series largas aplicar las variaciones anuales (codmun{AA}/{AA}codmunmod.htm).",
+    "Nomenclátor: nombrePoblacion vacío devuelve el formulario, no todas las unidades; el fichero completo (diseño en DisenioRegistro.xls) no se localizó como descarga directa el 2026-09-30, solo por consulta.",
+    "En el CSV del Nomenclátor el municipio pierde los ceros a la izquierda (1 Abengibre) y el código de unidad son seis dígitos; el identificador de 11 se forma con provincia (2) + municipio (3) + esos seis."
    ],
    "tips": [
     "Cruce típico. La deuda viva y liquidaciones de Hacienda (hacienda-ovef) y las estadísticas municipales de la AEAT (aeat-estadisticas) se casan por CPRO+CMUN."
@@ -3100,7 +3667,8 @@
     {
      "path": "https://www.ine.es/ftp/microdatos/epa/datos_{T}t{AA}.zip",
      "desc": "EPA del trimestre T del año AA (dos dígitos), 21 MB con todos los formatos",
-     "example": "curl -sO \"https://www.ine.es/ftp/microdatos/epa/datos_2t26.zip\""
+     "example": "curl -sO \"https://www.ine.es/ftp/microdatos/epa/datos_2t26.zip\"",
+     "returns": "Zip (20 MB) con carpetas CSV (EPA_2026T2.tab, tabulado), R (EPA_2026T2.RData) y SAS (epa_2026t2.sas7bdat); los campos son códigos que se decodifican con el diseño de registro dr_EPA_{AAAA}.xlsx"
     },
     {
      "path": "https://www.ine.es/ftp/microdatos/epa/dr_EPA_{AAAA}.xlsx",
@@ -4624,15 +5192,18 @@
     {
      "path": "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_HH_2024.zip",
      "desc": "Horarios 2024, 9 CSV (PM10, PM25, SO2, C6H6, CO, NO, NO2, NOx, O3) con columnas H01..H24 por estación y día",
-     "example": "curl -sSL -o Datos_HH_2024.zip \"https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_HH_2024.zip\""
+     "example": "curl -sSL -o Datos_HH_2024.zip \"https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_HH_2024.zip\"",
+     "returns": "Zip (26 MB) con un CSV por contaminante (PM10_HH_2024.csv, PM25, SO2, C6H6, CO, NO, NO2, NOx...) separado por ; con PROVINCIA;MUNICIPIO;ESTACION;MAGNITUD;PUNTO_MUESTREO;ANNO;MES;DIA;H01..H24; punto decimal, celda vacía sin dato, PUNTO_MUESTREO del tipo 01022001_10_47"
     },
     {
      "path": "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_DD_2024.zip",
-     "desc": "Diarios 2024, 8 CSV (PM10, PM2.5, Pb, As, Cd, Ni, B(a)P, C6H6) con columnas D01..D31 por estación y mes"
+     "desc": "Diarios 2024, 8 CSV (PM10, PM2.5, Pb, As, Cd, Ni, B(a)P, C6H6) con columnas D01..D31 por estación y mes",
+     "returns": "Zip con un CSV por contaminante (Pb, PM2.5, PM10, As, B(a)P, C6H6...) con PROVINCIA;MUNICIPIO;ESTACION;MAGNITUD;PUNTO_MUESTREO;ANNO;MES;D01..D31 (una fila por estación y mes, una columna por día, vacío sin dato)"
     },
     {
      "path": "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_2024_Irreg.zip",
-     "desc": "Muestreos irregulares 2024 (B(a)P y benceno) con FECHA_INICIAL, FECHA_FINAL y VALOR"
+     "desc": "Muestreos irregulares 2024 (B(a)P y benceno) con FECHA_INICIAL, FECHA_FINAL y VALOR",
+     "returns": "CSV BaPyBenceno_2024_Irreg.csv con PROVINCIA;MUNICIPIO;ESTACION;MAGNITUD;PUNTO_MUESTREO;FECHA_INICIAL;FECHA_FINAL;VALOR para muestreos no diarios (periodos de un mes)"
     },
     {
      "path": "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Metainformacion_2024.xlsx",
@@ -4795,12 +5366,14 @@
     {
      "path": "/informes/descargas/PRTR_Espana_MITECO_Complejos.zip",
      "desc": "Inventario de complejos (XML ArrayOfComplejo con CodigoPRTR, nombre, empresa matriz, CNAE-2009, CodPRTRDEI, CodIPPC, dirección, municipio, provincia y CCAA)",
-     "example": "curl -sSL -o complejos.zip \"https://prtr-es.miteco.gob.es/informes/descargas/PRTR_Espana_MITECO_Complejos.zip\""
+     "example": "curl -sSL -o complejos.zip \"https://prtr-es.miteco.gob.es/informes/descargas/PRTR_Espana_MITECO_Complejos.zip\"",
+     "returns": "Zip con [Content_Types].xml y un XML propio: ArrayOfComplejo/Complejo con CodigoPRTR, NombreDelComplejo, EmpresaMatriz, ActividadEconomica, CodPRTRDEI, CodIPPC, Direccion, CodPostal, Poblacion, Municipio, Provincia, CCAA y DemarcacionHidrografica (sin código INE)"
     },
     {
      "path": "/informes/descargas/PRTR_Espana_MITECO_emisiones{AAAA}.zip",
      "desc": "Emisiones de un año (XML ArrayOfEmisiones con CodigoPRTR, AnyoReferencia, Contaminante, CantidadTotalkgporaño, MedioReceptor, Metodo y detalle Metodo_MCE)",
-     "example": "curl -sSL -o emisiones2024.zip \"https://prtr-es.miteco.gob.es/informes/descargas/PRTR_Espana_MITECO_emisiones2024.zip\""
+     "example": "curl -sSL -o emisiones2024.zip \"https://prtr-es.miteco.gob.es/informes/descargas/PRTR_Espana_MITECO_emisiones2024.zip\"",
+     "returns": "Zip con XML ArrayOfEmisiones/Emision: CodigoPRTR, NombreDelComplejo, AnyoReferencia, Contaminante (Metano (CH4)), CantidadTotalkgporaño, MedioReceptor (Aire, Agua, Suelo), Metodo (M, C, E) y Metodo_MCE con TipologiaMetodo y fuentes; 2 MB en 2023; cruzar con complejos por CodigoPRTR"
     },
     {
      "path": "/informes/descargas/PRTR_Espana_MITECO_residuos{AAAA}.zip",
@@ -4879,7 +5452,8 @@
     {
      "path": "https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/Historico-de-embalses/BD-Embalses.zip",
      "desc": "Access .mdb (10 MB comprimido, 222 MB) con la tabla T_Datos Embalses (AMBITO_NOMBRE, EMBALSE_NOMBRE, FECHA, AGUA_TOTAL, AGUA_ACTUAL, ELECTRICO_FLAG) desde 1988",
-     "example": "curl -sSL -o BD-Embalses.zip \"https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/Historico-de-embalses/BD-Embalses.zip\""
+     "example": "curl -sSL -o BD-Embalses.zip \"https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/Historico-de-embalses/BD-Embalses.zip\"",
+     "returns": "Zip (10 MB) con un único fichero BD-Embalses.mdb (Access); leer con mdbtools (mdb-tables, mdb-export) o pandas_access, no con pandas directamente"
     },
     {
      "path": "https://sede.miteco.gob.es/BoleHWeb/",
@@ -4888,11 +5462,13 @@
     {
      "path": "https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/Anuario-21-22-csv.zip",
      "desc": "Anuario completo en CSV (136 MB), una carpeta por cuenca con afliq.csv (indroea;fecha;altura;caudal diarios), estaf.csv, embalse.csv y anual_a.csv",
-     "example": "curl -sSL -o Anuario-21-22-csv.zip \"https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/Anuario-21-22-csv.zip\""
+     "example": "curl -sSL -o Anuario-21-22-csv.zip \"https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/Anuario-21-22-csv.zip\"",
+     "returns": "Zip (130 MB, 342 ficheros) con una carpeta por demarcación (CANTABRICO, DUERO, EBRO...) y CSV ; por tipo: afliq.csv (indroea;fecha;altura;caudal diario, fecha dd/mm/aaaa, desde 1912 en algunas estaciones), afliqc (ref_ceh;fecha;altura;caudal), afliqe, afliqi y anual_*.csv"
     },
     {
      "path": "https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/listado-estaciones-aforo.zip",
-     "desc": "Cuatro CSV de estaciones (río, embalse, canal, evaporimétrica) con COD_HIDRO, COD_SAIH, COD_SAICA, UTM huso 30 ETRS89, masa de agua, municipio y provincia"
+     "desc": "Cuatro CSV de estaciones (río, embalse, canal, evaporimétrica) con COD_HIDRO, COD_SAIH, COD_SAICA, UTM huso 30 ETRS89, masa de agua, municipio y provincia",
+     "returns": "Cuatro CSV ; (Situac 1_Canal, 2_Embalse, 3_Evaporimetrica, 4_Rio) con ORGANISMO_CUENCA_VISOR, COD_SITUACION_ESTACION, COD_HIDRO (indroea), NOM_ANUARIO, COD_SAIH, COD_SAICA, ESTADO, ANO_INICIO_MEDIDAS, COORD_UTMX_H30_ETRS89, COORD_UTMY_H30_ETRS89, RIO, TERMINO_MUNICIPAL, PROVINCIA, COD_MASA_AGUA"
     },
     {
      "path": "https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos.html",
@@ -5435,7 +6011,8 @@
     {
      "path": "?metodo=nomenclatorExcel",
      "desc": "Nomenclátor completo en xls (7,3 MB; hoja PRODUCTOS con 20 columnas, de Código Nacional a Medicamento huérfano); el nombre lleva la fecha de descarga",
-     "example": "curl -s -o nomenclator.xls \"https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorExcel\""
+     "example": "curl -s -o nomenclator.xls \"https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorExcel\"",
+     "returns": "xls (7 MB, Content-Type text/html) con hoja PRODUCTOS de 20 columnas: Código Nacional, Nombre del producto, Tipo de fármaco, Nombre genérico, laboratorio, Estado, Fecha de alta y de baja, Aportación del beneficiario, Principio activo, Precio de venta al público, Precio de referencia, Menor precio de la agrupación"
     },
     {
      "path": "?metodo=nomenclatorRDF",
@@ -5512,7 +6089,8 @@
     {
      "path": "https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/docs/CNH_2025.xlsx",
      "desc": "Catálogo Nacional de Hospitales (hojas DIRECTORIO, ESTRUCTURA FUNCIONAL, BAJAS, ALTAS y tablas de códigos de CCAA, provincias, municipios, clase y dependencia)",
-     "example": "curl -sSL -o CNH_2025.xlsx \"https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/docs/CNH_2025.xlsx\""
+     "example": "curl -sSL -o CNH_2025.xlsx \"https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/docs/CNH_2025.xlsx\"",
+     "returns": "Una fila por hospital: CCN, CODCNH, Nombre Centro, dirección, teléfono, código de municipio de 6 dígitos (INE más dígito de control), Municipio, Cód. Provincia, Provincia, Cód. CCAA, CCAA, código postal, camas y Clase (C11...); segunda hoja ESTRUCTURA FUNCIONAL con Cod Concierto, Forma parte Complejo y CODIDCOM"
     },
     {
      "path": "https://pestadistico.inteligenciadegestion.sanidad.gob.es/publicoSNS/S",
@@ -5561,6 +6139,87 @@
     "isciii-cne",
     "aemps-cima-api",
     "ine-api-tempus"
+   ],
+   "status": "active",
+   "verified": "2026-09-30"
+  },
+  {
+   "id": "mtdfp-cobertura-banda-ancha",
+   "name": "SETELECO – Cobertura de banda ancha por municipio, provincia y CCAA",
+   "org": "Secretaría de Estado de Telecomunicaciones e Infraestructuras Digitales",
+   "ministry": "Transformación Digital y de la Función Pública",
+   "level": "age",
+   "sector": "telecomunicaciones-digital",
+   "tags": [
+    "banda-ancha",
+    "cobertura",
+    "fibra",
+    "ftth",
+    "5g",
+    "4g",
+    "telecomunicaciones",
+    "municipios",
+    "entidades-singulares"
+   ],
+   "summary": "Dos xlsx con la fracción de hogares o viviendas con cobertura por tecnología (FTTH, HFC, inalámbrico fijo, 4G, 5G) y por velocidad (30 Mbps, 100 Mbps, 1 Gbps) para todos los municipios (código INE), provincias y CCAA de 2013 a 2025, entidades singulares hasta 2020 e informes anuales en PDF.",
+   "access": [
+    "download"
+   ],
+   "auth": "none",
+   "formats": [
+    "xlsx",
+    "pdf",
+    "html"
+   ],
+   "update": "annual",
+   "coverage": "Datos a diciembre de 2013, 2014 y 2015 y a junio de 2017 a 2025",
+   "base_url": "https://digital.gob.es/telecomunicaciones-infraestructuras-digitales/areas-interes/banda-ancha/informacion-cobertura",
+   "docs_url": "https://digital.gob.es/telecomunicaciones-infraestructuras-digitales/areas-interes/banda-ancha/informacion-cobertura/informes-cobertura/informe-cobertura-2025",
+   "endpoints": [
+    {
+     "path": "https://digital.gob.es/content/dam/portal-mtdfp/avance-digital/telecomunicacion-e-infraestructuras-digitales/areas_interes/banda-ancha/cobertura/documents/Cobertura_BA_Espa%C3%B1a_2021-2025_MUN_PROV_CCAA_Nacional_datosgob_DEF.xlsx",
+     "desc": "Cobertura junio 2021-2025 (6,5 MB); hojas Municipio, Provincia, CCAA y Nacional en versión _%hogar (2023-2025) y _%viviendas (2021-2025); CMUN y Habitantes",
+     "example": "curl -sL -o cobertura_2021_2025.xlsx \"https://digital.gob.es/content/dam/portal-mtdfp/avance-digital/telecomunicacion-e-infraestructuras-digitales/areas_interes/banda-ancha/cobertura/documents/Cobertura_BA_Espa%C3%B1a_2021-2025_MUN_PROV_CCAA_Nacional_datosgob_DEF.xlsx\""
+    },
+    {
+     "path": "https://digital.gob.es/content/dam/portal-mtdfp/avance-digital/telecomunicacion-e-infraestructuras-digitales/areas_interes/banda-ancha/cobertura/documents/cobertura_ba_espana_2013-2020_esp_mun_prov_ccaa_nacional_datosgob.xlsx",
+     "desc": "Cobertura 2013-2020 (42 MB); hoja ES con 61.819 entidades singulares (Código ESP, 11 dígitos), Municipio, Provincia, CCAA y Nacional; ADSL, VDSL, FTTH, HFC, LTE",
+     "example": "curl -sL -o cobertura_2013_2020.xlsx \"https://digital.gob.es/content/dam/portal-mtdfp/avance-digital/telecomunicacion-e-infraestructuras-digitales/areas_interes/banda-ancha/cobertura/documents/cobertura_ba_espana_2013-2020_esp_mun_prov_ccaa_nacional_datosgob.xlsx\""
+    },
+    {
+     "path": "/informes-cobertura/informe-cobertura-{AAAA}",
+     "desc": "Página por año (2012-2025) con el informe, el resumen ejecutivo y la metodología en PDF bajo /content/dam/ (Informe_Cobertura-BA-2025.pdf)",
+     "example": "curl -s \"https://digital.gob.es/telecomunicaciones-infraestructuras-digitales/areas-interes/banda-ancha/informacion-cobertura/informes-cobertura/informe-cobertura-2025\" | grep -o '/content/dam/[^\"]*\\.pdf'"
+    },
+    {
+     "path": "/mapas-cobertura-agregada",
+     "desc": "Mapas interactivos en ArcGIS (conectemos.maps.arcgis.com y experience.arcgis.com); sin descarga verificada"
+    }
+   ],
+   "quirks": [
+    "static-html"
+   ],
+   "ids": [
+    "ine-municipio",
+    "ine-entidad-singular"
+   ],
+   "gotchas": [
+    "Los valores son fracciones entre 0 y 1 (0.9982), no porcentajes; las cabeceras llevan salto de línea y el periodo entre paréntesis (FTTH (junio 2025)) y hay columnas vacías entre grupos de tecnologías.",
+    "Dos bases no comparables en el fichero 2021-2025: hojas _%hogar (hogares del censo INE 2021, desde junio 2023) y _%viviendas (viviendas catastrales a enero de 2024, desde junio 2021).",
+    "CMUN es el código INE de municipio de 5 dígitos como texto; el Código ESP de la hoja ES tiene 11 dígitos (municipio, entidad colectiva y singular).",
+    "La ñ del nombre del fichero 2021-2025 va como %C3%B1 en la URL y hay que conservarla; el fichero 2013-2020 pesa 42 MB y openpyxl tarda en abrirlo (usar read_only=True).",
+    "Los datos de 2013 a 2015 están referidos a diciembre y desde 2017 a junio (no hay 2016); las velocidades pasan a condiciones de máxima demanda en 2022 y la base por parcela catastral empieza en junio de 2021.",
+    "avancedigital.mineco.gob.es/banda-ancha/cobertura/Paginas/informes-cobertura.aspx redirige a la página de informacion-cobertura de digital.gob.es.",
+    "El sufijo datosgob del nombre indica que se publican también en datos.gob.es, que estaba en mantenimiento (mantenimiento.red.es) el 30/09/2026."
+   ],
+   "tips": [
+    "pd.read_excel(url, sheet_name='Municipio_%hogar', dtype={'CMUN': str}) y limpiar cabeceras con str.replace('\\n', ' '); Habitantes y Hogares permiten ponderar agregados propios.",
+    "Cruce por CMUN con ine-codigos-territoriales; líneas y operadores por municipio en cnmc-data."
+   ],
+   "related": [
+    "ine-codigos-territoriales",
+    "cnmc-data",
+    "datos-gob-es-api"
    ],
    "status": "active",
    "verified": "2026-09-30"
@@ -5658,7 +6317,8 @@
     "El JSON anida con claves abreviadas (consulta_dnprcResult, bico, bi, dt, loine, locat); loine trae el código INE (cp, cm) y locat el catastral (cd, cmc), que no coinciden.",
     "Cartografía en EPSG:25829, 25830 y 25831 según huso y 32628 en Canarias; el WFS y el WMS responden en ISO-8859-1.",
     "Titulares, valor catastral y planos detallados solo por Sede Electrónica con certificado o Cl@ve.",
-    "La ruta de documentación de la ficha anterior (esp/ws_serviciosweb.asp) devuelve una página de error con 200; la documentación pública es la de INSPIRE (docs_url)."
+    "La ruta de documentación de la ficha anterior (esp/ws_serviciosweb.asp) devuelve una página de error con 200; la documentación pública es la de INSPIRE (docs_url).",
+    "Bloquea rangos de centros de datos: desde GitHub Actions cerró la conexión en la primera llamada y desde el entorno de verificación devolvió 403 Petición HTTP bloqueada (2026-09-30); verificar desde IP residencial."
    ],
    "tips": [
     "Flujo típico. ObtenerMunicipios para traducir INE a códigos catastrales, Consulta_DNPLOC o Consulta_RCCOOR para llegar a la referencia, Consulta_DNPRC para el detalle.",
@@ -5759,7 +6419,7 @@
     "Cada descarga del Centro de Descargas pasa por reCAPTCHA v3 (preAutorizarDescarga con recaptchaToken) antes de descargaDir; sin token responde 403. No automatizable de forma lícita sin navegador.",
     "La lista de ficheros de una serie no está en catalogo.do; se obtiene por POST a archivosSerie, donde cada fichero lleva su id en data-sec y en detalleArchivo?sec=.",
     "Las rutas apidescargas y descargaDir?secDescDirLA= no son públicas (404 y 403); no localicé API de descargas abierta.",
-    "El WFS de unidades administrativas devuelve 403 si el filtro XML va en la URL (el WAF bloquea las etiquetas); descargar por count y filtrar en local. outputFormat=application/json no existe, es geo+json.",
+    "El WFS de unidades administrativas dio 403 con FILTER fes en la URL por la mañana y 200 por la noche (WAF intermitente); si falla, descargar por count y filtrar en local. El JSON es outputFormat=application/geo+json.",
     "En el WFS, nationalCode es 34 seguido de los códigos INE de comunidad, provincia y municipio (34090800000 es la provincia de Barcelona); cada feature pesa cientos de KB por la geometría.",
     "El geocoder devuelve JSONP (envuelto en callback) en findJsonp y candidatesJsonp y JSON limpio en find.",
     "Sistema de referencia oficial ETRS89 (EPSG:4258 geográficas, 25829 a 25831 UTM); Canarias REGCAN95 (32628)."
@@ -5777,8 +6437,8 @@
   },
   {
    "id": "idee-servicios",
-   "name": "IDEE – Catálogos CSW y directorio de servicios geográficos",
-   "org": "Consejo Superior Geográfico y CNIG",
+   "name": "IDEE – Catálogos CSW y servicios INSPIRE del IGN (WFS, WMS, WMTS, WCS)",
+   "org": "Consejo Superior Geográfico, CNIG e IGN (Sistema Cartográfico Nacional)",
    "ministry": "Transportes y Movilidad Sostenible",
    "level": "age",
    "sector": "territorio-cartografia",
@@ -5787,12 +6447,16 @@
     "inspire",
     "wms",
     "wfs",
-    "catalogo-metadatos",
+    "wmts",
+    "wcs",
     "csw",
     "codsi",
-    "geoportal"
+    "hidrografia",
+    "transportes",
+    "ocupacion-suelo",
+    "ngbe"
    ],
-   "summary": "Punto de entrada a los servicios geográficos oficiales de todas las Administraciones: catálogo CSW INSPIRE con más de 13000 registros, catálogo oficial CODSI, directorio de servicios OGC por tipo y organismo y monitorización de disponibilidad. Metadatos ISO 19139 consultables por CQL.",
+   "summary": "Catálogo CSW INSPIRE y CODSI, directorio de servicios OGC y los servicios INSPIRE del Sistema Cartográfico Nacional en servicios.idee.es (WFS de hidrografía, transportes y ocupación del suelo en GML, WMS temáticos, WMTS y WCS del MDT), más el WFS del Nomenclátor NGBE en www.ign.es con GeoJSON.",
    "access": [
     "ogc",
     "portal"
@@ -5800,10 +6464,16 @@
    "auth": "none",
    "formats": [
     "xml",
-    "json"
+    "json",
+    "gml",
+    "geojson",
+    "png",
+    "jpg",
+    "geotiff"
    ],
-   "update": "daily",
-   "license": "Metadatos libres; cada servicio y dataset con su licencia",
+   "update": "irregular",
+   "coverage": "Servicios vigentes; ocupación del suelo procede de SIOSE AR 2017; NGBE con fechas de versión 2018-2023",
+   "license": "Metadatos libres; datos del IGN CC BY 4.0 con cita; cada servicio ajeno con su licencia",
    "base_url": "https://www.idee.es/",
    "docs_url": "https://www.idee.es/web/idee/servicios",
    "endpoints": [
@@ -5823,19 +6493,86 @@
     {
      "path": "https://www.idee.es/web/idee/directorio-de-servicios",
      "desc": "Directorio navegable de servicios por tipo (WMS, WFS, WMTS, CSW, ATOM) y organismo; redirige a segun-tipo-de-servicio"
+    },
+    {
+     "path": "https://servicios.idee.es/wfs-inspire/{hidrografia|transportes|ocupacion-suelo}?service=WFS&request=GetCapabilities&AcceptVersions=2.0.0",
+     "desc": "WFS 2.0 (deegree) del Sistema Cartográfico Nacional; FeatureType con Name, Title y OutputFormats (solo GML 3.2, 3.1 y 2.1); CountDefault 10000",
+     "example": "curl -s \"https://servicios.idee.es/wfs-inspire/transportes?service=WFS&request=GetCapabilities&AcceptVersions=2.0.0\""
+    },
+    {
+     "path": "https://servicios.idee.es/wfs-inspire/transportes?service=WFS&version=2.0.0&request=GetFeature&typeNames={typeName}&count={n}&startIndex={i}",
+     "desc": "51 tipos en ETRS89 (tn-ro:RoadLink 9,9 millones, tn-ro:RoadNode, tn-ra:RailwayLink, tn-ra:RailwayStationNode, tn-a:AerodromeArea, tn-w:PortArea)",
+     "params": "bbox=lat_min,lon_min,lat_max,lon_max,urn:ogc:def:crs:EPSG::4326 (orden lat lon); resultType=hits para contar; STOREDQUERY_ID=urn:ogc:def:query:OGC-WFS::GetFeatureById&ID={gml_id}; FILTER fes 2.0",
+     "example": "curl -s \"https://servicios.idee.es/wfs-inspire/transportes?service=WFS&version=2.0.0&request=GetFeature&typeNames=tn-ro:RoadLink&count=5&bbox=40.40,-3.72,40.42,-3.70,urn:ogc:def:crs:EPSG::4326\""
+    },
+    {
+     "path": "https://servicios.idee.es/wfs-inspire/hidrografia?service=WFS&version=2.0.0&request=GetFeature&typeNames={typeName}&count={n}",
+     "desc": "15 tipos (hy-p:Watercourse con 950183 tramos, hy-p:StandingWater, hy-p:DamOrWeir, hy-p:RiverBasin, hy-p:Wetland, hy-n:WatercourseLink, hy-n:HydroNode)",
+     "example": "curl -s \"https://servicios.idee.es/wfs-inspire/hidrografia?service=WFS&version=2.0.0&request=GetFeature&typeNames=hy-p:Watercourse&count=5\""
+    },
+    {
+     "path": "https://servicios.idee.es/wfs-inspire/ocupacion-suelo?service=WFS&version=2.0.0&request=GetFeature&typeNames={typeName}&count={n}",
+     "desc": "SIOSE de alta resolución 2017; lcv:LandCoverUnit (110 millones de polígonos, clase CODIIGE como URL de registro.idee.es) y elu:ExistingLandUseObject",
+     "example": "curl -s \"https://servicios.idee.es/wfs-inspire/ocupacion-suelo?service=WFS&version=2.0.0&request=GetFeature&typeNames=lcv:LandCoverUnit&count=5\""
+    },
+    {
+     "path": "https://www.ign.es/wfs-inspire/ngbe?service=WFS&version=2.0.0&request=GetFeature&typeNames=gn:NamedPlace&count={n}&outputFormat=application/geo%2Bjson",
+     "desc": "Nomenclátor Geográfico Básico (1166593 topónimos como punto con name, localType y type INSPIRE); admite GeoJSON, bbox y FILTER",
+     "params": "FILTER=<fes:Filter> con PropertyIsEqualTo o PropertyIsLike sobre gn:name/gn:GeographicalName/gn:spelling/gn:SpellingOfName/gn:text, con xmlns:gn del esquema gn/4.0 declarado dentro del Filter",
+     "example": "curl -s \"https://www.ign.es/wfs-inspire/ngbe?service=WFS&version=2.0.0&request=GetFeature&typeNames=gn:NamedPlace&count=5&outputFormat=application/geo%2Bjson&FILTER=%3Cfes:Filter%20xmlns:fes=%22http://www.opengis.net/fes/2.0%22%20xmlns:gn=%22http://inspire.ec.europa.eu/schemas/gn/4.0%22%3E%3Cfes:PropertyIsEqualTo%3E%3Cfes:ValueReference%3Egn:name/gn:GeographicalName/gn:spelling/gn:SpellingOfName/gn:text%3C/fes:ValueReference%3E%3Cfes:Literal%3EAlbacete%3C/fes:Literal%3E%3C/fes:PropertyIsEqualTo%3E%3C/fes:Filter%3E\""
+    },
+    {
+     "path": "https://www.ign.es/wfs-inspire/unidades-administrativas?service=WFS&version=2.0.0&request=GetFeature&typeNames={au:AdministrativeUnit|au:AdministrativeBoundary}&count={n}&outputFormat=application/geo%2Bjson",
+     "desc": "Límites de comunidades, provincias y municipios (8294 unidades, id AU_ADMINISTRATIVEUNIT_{nationalCode}); FILTER por nationalCode verificado",
+     "example": "curl -s \"https://www.ign.es/wfs-inspire/unidades-administrativas?service=WFS&version=2.0.0&request=GetFeature&typeNames=au:AdministrativeUnit&count=2&outputFormat=application/geo%2Bjson&FILTER=%3Cfes:Filter%20xmlns:fes=%22http://www.opengis.net/fes/2.0%22%20xmlns:au=%22http://inspire.ec.europa.eu/schemas/au/4.0%22%3E%3Cfes:PropertyIsEqualTo%3E%3Cfes:ValueReference%3Eau:nationalCode%3C/fes:ValueReference%3E%3Cfes:Literal%3E34090800000%3C/fes:Literal%3E%3C/fes:PropertyIsEqualTo%3E%3C/fes:Filter%3E\""
+    },
+    {
+     "path": "https://servicios.idee.es/wms-inspire/{hidrografia|transportes|ocupacion-suelo|mdt}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS={capa}&STYLES=&CRS=EPSG:4258&BBOX={lat_min},{lon_min},{lat_max},{lon_max}&WIDTH={w}&HEIGHT={h}&FORMAT=image/png",
+     "desc": "WMS 1.3 (GeoServer) con capas HY.Network, HY.PhysicalWaters.Waterbodies, TN.RoadTransportNetwork.RoadLink, LC.LandCoverSurfaces y EL.ElevationGridCoverage",
+     "example": "curl -s -o carreteras.png \"https://servicios.idee.es/wms-inspire/transportes?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=TN.RoadTransportNetwork.RoadLink&STYLES=&CRS=EPSG:4258&BBOX=40.40,-3.75,40.45,-3.65&WIDTH=400&HEIGHT=300&FORMAT=image/png\""
+    },
+    {
+     "path": "https://www.ign.es/wmts/{mapa-raster|pnoa-ma}?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER={MTN|OI.OrthoimageCoverage}&STYLE=default&TILEMATRIXSET=GoogleMapsCompatible&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/jpeg",
+     "desc": "Teselas 256x256 del MTN ráster y de la ortofoto PNOA (también EPSG:4258, 25830 e InspireCRS84Quad); servicios.idee.es solo tiene /wmts/mdt",
+     "example": "curl -s -o tesela.jpg \"https://www.ign.es/wmts/mapa-raster?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=MTN&STYLE=default&TILEMATRIXSET=GoogleMapsCompatible&TILEMATRIX=10&TILEROW=394&TILECOL=497&FORMAT=image/jpeg\""
+    },
+    {
+     "path": "https://servicios.idee.es/wcs-inspire/mdt?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID={coverage}&SUBSET=Lat({min},{max})&SUBSET=Long({min},{max})&FORMAT=image/tiff",
+     "desc": "MDT como GeoTIFF int16 recortado; 17 coberturas Elevacion{4258|4326|25830|4083}_{5|25|200|500|1000} (resolución en metros); DescribeCoverage da ejes y extensión",
+     "example": "curl -s -o mdt25.tif \"https://servicios.idee.es/wcs-inspire/mdt?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=Elevacion4258_25&SUBSET=Lat(40.40,40.42)&SUBSET=Long(-3.72,-3.70)&FORMAT=image/tiff\""
     }
    ],
    "quirks": [
-    "static-html"
+    "static-html",
+    "errors-html-or-xml"
+   ],
+   "ids": [
+    "ine-municipio",
+    "ine-provincia",
+    "ccaa"
    ],
    "gotchas": [
     "El portal es Liferay y el directorio es HTML pesado (200 KB) sin API localizada; para buscar servicios de forma programática usar el CSW con CQL.",
     "Muchos servicios listados son autonómicos o locales con disponibilidad irregular; comprobar GetCapabilities antes de depender de ellos (monitorización en /web/idee/monitorizacion-de-servicios).",
-    "Los metadatos usan el perfil INSPIRE sobre ISO 19139; los identificadores de registro siguen el patrón del organismo (ES_SDGC_AD, ES_SDGC_AD_ATOM para el Catastro)."
+    "Los metadatos usan el perfil INSPIRE sobre ISO 19139; los identificadores de registro siguen el patrón del organismo (ES_SDGC_AD, ES_SDGC_AD_ATOM para el Catastro).",
+    "GetCapabilities de wfs-inspire/hidrografia responde 500 NoApplicableCode \"Builder is already complete\" en la mitad de los intentos (8 de 16 el 30/09/2026) con cualquier parámetro; repetir; GetFeature no falla.",
+    "Los WFS de servicios.idee.es (deegree) solo sirven GML 3.2, 3.1 y 2.1; outputFormat=application/geo+json o json responde 400 InvalidParameterValue. GeoJSON solo en los WFS de www.ign.es (ngbe y unidades-administrativas).",
+    "Sin count, hidrografia devuelve 10000 features (CountDefault) y ocupacion-suelo y ngbe no respondieron en 45 s; paginar siempre con count y startIndex (la respuesta trae next y previous) y contar con resultType=hits.",
+    "Filtrar con bbox (lat,lon y urn:ogc:def:crs:EPSG::4326) o con FILTER fes en la URL, que pasa en servicios.idee.es y www.ign.es; un filtro con tipo incorrecto da 500 con el error SQL (net:fictitious es texto).",
+    "En el NGBE el filtro exige declarar xmlns:gn dentro de fes:Filter; solo con el parámetro namespaces= responde 500 \"Cannot resolve namespace prefix gn\".",
+    "Un topónimo repite entradas por localType (Albacete es provincia, municipio, capital de provincia, capital de municipio y entidad singular); NamedPlace no lleva código INE, solo inspireId ES.IGN.NGBE.{localId}.",
+    "www.ign.es/wfs-inspire solo tiene ngbe y unidades-administrativas (hidrografia, transportes, mdt e ign-base dan 404); servicios.idee.es no tiene ngbe, ign-base, pnoa-ma ni mapa-raster (404 o conexión cerrada)."
+   ],
+   "tips": [
+    "Los WFS devuelven wfs:FeatureCollection con numberMatched, numberReturned y next; para volcados grandes iterar startIndex de 10000 en 10000 con count=10000 y convertir cada GML con ogr2ogr a GeoPackage.",
+    "Para mapa base y ortofoto usar los WMTS de www.ign.es con TILEMATRIXSET=GoogleMapsCompatible en cualquier cliente XYZ; los WMS de servicios.idee.es sirven las capas temáticas (hidrografía, transporte, suelo, relieve).",
+    "Para altitudes de una zona, el WCS del MDT con SUBSET de unas centésimas de grado devuelve un GeoTIFF de pocos KB (89x89 píxeles para 0,02 grados en Elevacion4258_25)."
    ],
    "related": [
     "cnig-centro-descargas",
-    "catastro-ovc"
+    "catastro-ovc",
+    "ine-codigos-territoriales",
+    "miteco-saih-boletin-hidrologico"
    ],
    "status": "active",
    "verified": "2026-09-30"
@@ -5915,67 +6652,92 @@
   },
   {
    "id": "aesa-aviacion",
-   "name": "AESA y Aena – Registro de aeronaves, operadores UAS y estadísticas de tráfico aéreo",
-   "org": "Agencia Estatal de Seguridad Aérea (AESA) y Aena SME",
+   "name": "Aena y AESA – Estadísticas de tráfico aéreo, registro de aeronaves y operadores UAS",
+   "org": "Aena SME y Agencia Estatal de Seguridad Aérea (AESA)",
    "ministry": "Transportes y Movilidad Sostenible",
    "level": "age",
    "sector": "transporte-movilidad",
    "tags": [
     "aviacion",
-    "aeronaves",
-    "matriculas",
-    "operadores",
-    "drones",
     "aeropuertos",
     "pasajeros",
-    "trafico-aereo"
+    "operaciones",
+    "mercancias",
+    "trafico-aereo",
+    "aena",
+    "aeronaves",
+    "matriculas",
+    "drones"
    ],
-   "summary": "Registro de Matrícula de Aeronaves Civiles y registro de operadores de UAS (trámites en sede con certificado, sin listado abierto localizado) y estadísticas de tráfico de Aena (informes por aeropuerto en una web con sesión y enlaces generados por JavaScript). Sin ficheros descargables verificados.",
+   "summary": "Informes mensuales y anuales de tráfico de Aena desde 2004 en xlsx y PDF con URL directa (pasajeros, operaciones y mercancía por aeropuerto con variación interanual); cuadros por compañía y destino solo con registro. Registro de aeronaves y de operadores UAS de AESA sin listado descargable.",
    "access": [
+    "download",
     "portal"
    ],
-   "auth": "registration",
+   "auth": "none",
    "formats": [
-    "html",
-    "pdf"
+    "xlsx",
+    "pdf",
+    "html"
    ],
    "update": "monthly",
-   "coverage": "Informes de Aena por año desde 2004 según el selector de la web",
-   "license": "Reutilización libre con cita de la fuente (AESA); condiciones propias de Aena",
-   "base_url": "https://www.seguridadaerea.gob.es/es/ambitos/aeronaves/registro-de-matriculas-de-aeronaves-civiles",
-   "docs_url": "https://www.aena.es/es/estadisticas/inicio.html",
+   "coverage": "Informes mensuales 2004-2026 y anuales 2004-2025",
+   "license": "Condiciones propias de Aena (sociedad mercantil estatal); reutilización libre con cita de la fuente en AESA",
+   "base_url": "https://www.aena.es/es/estadisticas/inicio.html",
+   "docs_url": "https://www.aena.es/es/estadisticas/glosario-y-ayuda.html",
    "endpoints": [
     {
+     "path": "https://www.aena.es/es/estadisticas/informes-mensuales.html?anio={AAAA}",
+     "desc": "Doce bloques div.informes (id=Enero a Diciembre) con enlaces PDF y XLS a /sites/Satellite?...blobwhere={id}; años 2004-2026 en el selector",
+     "example": "curl -s \"https://www.aena.es/es/estadisticas/informes-mensuales.html?anio=2025\" | grep -o 'blobwhere=[0-9]*&amp;ssbinary=true'"
+    },
+    {
+     "path": "https://www.aena.es/sites/Satellite?blobcol=urldata&blobkey=id&blobtable=MungoBlobs&blobwhere={id}&ssbinary=true",
+     "desc": "Fichero del informe; el XLS es xlsx (55 KB) con la hoja Ranking mensual y tres bloques (pasajeros, operaciones, mercancías) por aeropuerto con total y variación",
+     "example": "curl -sL -o aena_2025_01.xlsx \"https://www.aena.es/sites/Satellite?blobcol=urldata&blobkey=id&blobtable=MungoBlobs&blobwhere=1576870695595&ssbinary=true\""
+    },
+    {
+     "path": "https://www.aena.es/es/estadisticas/informes-anuales.html",
+     "desc": "Informes anuales 2004-2025 (22 pares PDF y XLS en una sola página); el xlsx anual tiene la hoja AÑO {AAAA} con la misma estructura que el mensual",
+     "example": "curl -sL -o aena_2025.xlsx \"https://www.aena.es/sites/Satellite?blobcol=urldata&blobkey=id&blobtable=MungoBlobs&blobwhere=1576873058143&ssbinary=true\""
+    },
+    {
+     "path": "https://www.aena.es/es/estadisticas/{informes-detallados|consultas-personalizadas}.html",
+     "desc": "Cuadros de mando por compañía, aeropuerto y destino en MicroStrategy (informeswpa.aena.es); exigen registro e inicio de sesión (token en la URL)"
+    },
+    {
      "path": "https://www.seguridadaerea.gob.es/es/ambitos/aeronaves/registro-de-matriculas-de-aeronaves-civiles/registro-de-matriculas",
-     "desc": "Información del registro con cuadros estadísticos anuales en PDF (registro general, AFI, ULM) y formularios; no localicé listado de aeronaves"
+     "desc": "Registro de Matrícula de Aeronaves Civiles con cuadros estadísticos anuales en PDF (registro general, AFI, ULM); no localicé listado descargable de aeronaves"
     },
     {
      "path": "https://www.seguridadaerea.gob.es/es/ambitos/drones/registro-de-operador-de-drones-uas",
      "desc": "Registro de operadores de UAS; el alta y la consulta se hacen en sede.seguridadaerea.gob.es con identificación electrónica"
-    },
-    {
-     "path": "https://www.aena.es/es/estadisticas/informes-mensuales.html?anio={AAAA}",
-     "desc": "Informes mensuales de tráfico por año (informes-anuales.html e informes-detallados.html análogos); consultas-personalizadas.html requiere usuario"
     }
    ],
    "quirks": [
-    "js-rendered",
-    "session-required"
+    "static-html",
+    "url-drift"
    ],
    "ids": [],
    "gotchas": [
-    "La ruta matriculacion-de-aeronaves de la ficha anterior responde 200 con cuerpo vacío; la información está en registro-de-matriculas-de-aeronaves-civiles y no localicé ningún Excel con el censo de aeronaves.",
-    "En Aena los enlaces de descarga se generan con JavaScript y la aplicación gestiona un token de sesión (cookie JWT); con curl no aparece ningún href a PDF o Excel, así que no se pudo verificar ningún fichero.",
-    "Aena es una sociedad mercantil estatal (51 por ciento público) que publica datos por cuenta propia; sus condiciones de reutilización no son las de la AGE.",
-    "Los datos estructurados de tráfico aéreo en abierto están fuera de estas webs (Eurostat y las estadísticas del INE de transporte aéreo); para el registro de aeronaves no localicé descarga pública."
+    "Los enlaces PDF y XLS están en el HTML servido de informes-mensuales.html?anio= e informes-anuales.html (div.descargas); el JavaScript solo conmuta pestañas y no hace falta navegador ni sesión.",
+    "El id de blobwhere es un número opaco sin fecha (1576870695595 es enero de 2025); rascar la página en cada ejecución y emparejar cada div.informes con su texto Informe {mes} {año}.",
+    "Lo etiquetado XLS es xlsx (Content-Type spreadsheetml); cabeceras en las filas 5 a 7, datos desde la 8, variaciones como fracción (0.084 es 8,4 por ciento), mercancía en kilogramos y hoja Mozart Reports de metadato.",
+    "Los informes se publican como Datos provisionales; el Boletín Estadístico del MITMA (mitma-boletin-estadistico-online) da la misma serie mensual por aeropuerto con URL fija.",
+    "Aena es sociedad mercantil estatal (51 por ciento público) y publica por cuenta propia; sus condiciones de reutilización no son las de la AGE.",
+    "informeswpa.aena.es/MicroStrategyLibrary/api/status responde JSON sin autenticación, pero los cuadros detallados exigen usuario registrado.",
+    "La ruta matriculacion-de-aeronaves de AESA responde 200 con cuerpo vacío; la información está en registro-de-matriculas-de-aeronaves-civiles y no localicé ningún Excel con el censo de aeronaves."
    ],
-   "tips": [],
+   "tips": [
+    "pd.read_excel(f, sheet_name='Ranking mensual', header=None, skiprows=7, usecols='B:D') da aeropuerto, pasajeros y variación; repetir con F:H (operaciones) y J:L (mercancías)."
+   ],
    "related": [
+    "mitma-boletin-estadistico-online",
     "dgt-estadisticas",
     "ine-api-tempus",
-    "mitma-boletin-estadistico-online"
+    "mincotur-industria-turismo"
    ],
-   "status": "degraded",
+   "status": "active",
    "verified": "2026-09-30"
   },
   {
@@ -6117,7 +6879,7 @@
     {
      "path": "https://www.dgt.es/menusecundario/dgt-en-cifras/dgt-en-cifras-resultados/dgt-en-cifras-detalle/{slug}/",
      "desc": "Ficha con enlaces xlsx bajo /export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/ (series y tablas de matriculaciones, parque, bajas, conductores)",
-     "example": "curl -sSL -o parque.xlsx \"https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/publicaciones/Parque-vehiculos-Tablas-Estadisticas/Parque-de-vehiculos-Tablas-estadisticas-2025.xlsx\""
+     "example": "curl -sSL -o parque.xlsx \"https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/publicaciones/Parque-de-vehiculos-Tablas-Estadisticas/Parque-de-vehiculos-Tablas-estadisticas-2025.xlsx\""
     },
     {
      "path": "https://www.dgt.es/menusecundario/dgt-en-cifras/matraba-listados/{matriculaciones|bajas}-automoviles-{diario|mensual}.html",
@@ -6209,7 +6971,8 @@
     {
      "path": "https://apps.fomento.gob.es/BoletinOnline/sedal/{CCAATT00}.XLS",
      "desc": "Tabla en Excel 97 (capítulo, apartado y tabla; 03010100 tráfico aeroportuario total); una hoja con título y cabecera PERIODO, TOTAL, NACIONAL, INTERNACIONAL",
-     "example": "curl -sO \"https://apps.fomento.gob.es/BoletinOnline/sedal/03010100.XLS\""
+     "example": "curl -sO \"https://apps.fomento.gob.es/BoletinOnline/sedal/03010100.XLS\"",
+     "returns": "Excel 97 (xls) con una hoja por bloque de cinco años (2004, 2005, 2006, 2007, 2008; 2009 a 2013...) y en cada una título Tabla N., descripción y la fila Años antes de los datos; leer con xlrd o pandas engine xlrd"
     },
     {
      "path": "https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden={CC}000000",
@@ -8491,7 +9254,7 @@
    {
     "need": "Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra",
     "source": "mitma-boletin-estadistico-online",
-    "note": "XLS por tabla con URL fija; la web de Aena (aesa-aviacion) exige sesión"
+    "note": "XLS por tabla con URL fija; Aena publica además xlsx mensual y anual por aeropuerto con URL directa (aesa-aviacion)"
    },
    {
     "need": "Registro de aeronaves y operadores de drones",
@@ -8575,6 +9338,101 @@
     "need": "Ayuda oficial al desarrollo y acción exterior",
     "source": null,
     "note": "sin fuente en el catálogo todavía"
+   },
+   {
+    "need": "Feminicidios por comunidad autónoma, provincia, año y mes",
+    "source": "igualdad-estadisticas-violencia-genero",
+    "note": "API Saiku sin clave; crear consulta MDX y exportar CSV; territorios por nombre, sin código INE"
+   },
+   {
+    "need": "Llamadas al 016 por provincia y mes",
+    "source": "igualdad-estadisticas-violencia-genero",
+    "note": "cubo 040 Servicio 016 con medidas de llamadas, WhatsApp, correo y chat"
+   },
+   {
+    "need": "Casos activos en VioGén y órdenes de protección",
+    "source": "igualdad-estadisticas-violencia-genero",
+    "note": "cubos 090 y 120; el origen es Interior y el CGPJ"
+   },
+   {
+    "need": "Dependencia (SAAD): solicitudes, dictámenes, prestaciones por grado y CCAA, lista de espera",
+    "source": "imserso-dependencia",
+    "note": "xlsx mensual estsisaad_{AAAAMMDD} con URL deducible; la encuesta EDAD es del INE"
+   },
+   {
+    "need": "Personas con discapacidad reconocida por provincia, sexo, edad y grado",
+    "source": "imserso-dependencia",
+    "note": "BEDPCD en CSV largo 2019-2024 (bdepcd_2024-1-)"
+   },
+   {
+    "need": "Pensiones no contributivas por provincia",
+    "source": "imserso-dependencia",
+    "note": "csv y xlsx sobreescritos cada mes; las contributivas están en segsocial-estadisticas"
+   },
+   {
+    "need": "Cobertura de fibra, HFC y 5G por municipio",
+    "source": "mtdfp-cobertura-banda-ancha",
+    "note": "fracciones 0-1 por hogares o por viviendas, no comparables entre bases; la CNMC da líneas, no cobertura"
+   },
+   {
+    "need": "Extranjeros con certificado de registro o tarjeta de residencia, autorizaciones y protección internacional",
+    "source": null,
+    "note": "Observatorio Permanente de la Inmigración en inclusion.gob.es; el host respondió 403 (Akamai) a IP de centro de datos el 2026-09-30; verificar desde otra red"
+   },
+   {
+    "need": "Población de una entidad singular, núcleo o diseminado (Nomenclátor)",
+    "source": "ine-codigos-territoriales",
+    "note": "POST a nomen2/DescargaTabla por nombre de población (xls o csv), sin clave; la API Tempus no baja del municipio"
+   },
+   {
+    "need": "Microdatos de un barómetro o encuesta del CIS",
+    "source": "cis-estudios",
+    "note": "MD{n}.zip sin registro desde contentUrl del JSON-LD de la página del estudio; el catálogo es JavaScript con anti-bot, enumerar por sitemap.xml"
+   },
+   {
+    "need": "Serie de estimación de voto del CIS",
+    "source": "cis-estudios",
+    "note": "solo PDF {n}_Estimacion.pdf por barómetro; las series web cargan por JavaScript sin API localizada"
+   },
+   {
+    "need": "Carreteras y ferrocarril oficiales en vectorial",
+    "source": "idee-servicios",
+    "note": "WFS transportes de servicios.idee.es solo en GML; filtrar por bbox y paginar con count"
+   },
+   {
+    "need": "Ríos, embalses y cuencas en vectorial",
+    "source": "idee-servicios",
+    "note": "WFS hidrografia; GetCapabilities falla con 500 la mitad de las veces, repetir; GetFeature no falla"
+   },
+   {
+    "need": "Ocupación del suelo SIOSE por polígono",
+    "source": "idee-servicios",
+    "note": "110 millones de polígonos en el WFS ocupacion-suelo; sin count no responde"
+   },
+   {
+    "need": "Altitud o modelo digital del terreno de una zona",
+    "source": "idee-servicios",
+    "note": "WCS mdt con GetCoverage y SUBSET devuelve GeoTIFF; WMTS mdt para visualizar"
+   },
+   {
+    "need": "Buscar un topónimo",
+    "source": "idee-servicios",
+    "note": "WFS NGBE de www.ign.es con FILTER por nombre y GeoJSON; el geocoder de direcciones está en cnig-centro-descargas"
+   },
+   {
+    "need": "Superficie por cultivo y comunidad autónoma (ESYRCE)",
+    "source": "mapa-estadisticas-agrarias",
+    "note": "xlsx anual desde 2022; microdatos solo previa solicitud en sede electrónica"
+   },
+   {
+    "need": "Indicadores de igualdad por sexo (empleo, salarios, poder, salud)",
+    "source": "inmujeres-mujeres-cifras",
+    "note": "un xls por indicador en inmujeres.gob.es aunque el HTML enlace al host antiguo inmujer.es"
+   },
+   {
+    "need": "Microdatos de PISA, TIMSS o PIAAC de España",
+    "source": "inee-bases-datos",
+    "note": "muestra española en rar o zip con SPSS y Stata; HEAD responde 403, usar GET con Range"
    }
   ],
   "identificadores": {
@@ -8612,12 +9470,15 @@
     ],
     "used_by": [
      "mapa-sigpac",
+     "cis-estudios",
      "ine-codigos-territoriales",
      "miteco-calidad-aire",
      "aemet-opendata",
      "sanidad-portal-estadistico",
+     "mtdfp-cobertura-banda-ancha",
      "catastro-ovc",
      "cnig-centro-descargas",
+     "idee-servicios",
      "ine-cartografia-censal",
      "dgt-estadisticas",
      "mitma-opendata-movilidad"
@@ -8642,6 +9503,7 @@
     "used_by": [
      "mapa-sigpac",
      "datacomex",
+     "cis-estudios",
      "minetur-precios-carburantes",
      "miteco-energia-estadisticas",
      "ine-codigos-territoriales",
@@ -8651,8 +9513,30 @@
      "sanidad-portal-estadistico",
      "catastro-ovc",
      "cnig-centro-descargas",
+     "idee-servicios",
      "ine-cartografia-censal",
      "dgt-estadisticas"
+    ]
+   },
+   "ine-entidad-singular": {
+    "format": "11 dígitos, municipio INE (5) + entidad colectiva (2) + entidad singular (2) + núcleo o diseminado (2)",
+    "regex": "^\\d{11}$",
+    "example": "01001000100",
+    "issuer": "ine-codigos-territoriales",
+    "gotcha": "los cinco primeros dígitos son el código INE de municipio; el Nomenclátor del INE lo muestra en tres pares (colectiva, singular, núcleo) tras provincia y municipio",
+    "joins": [
+     {
+      "via": "ine-codigos-territoriales",
+      "how": "búsqueda por nombre en nomen2/tabla.do (POST) con población por sexo, edad o nacionalidad desde 2003"
+     },
+     {
+      "via": "mtdfp-cobertura-banda-ancha",
+      "how": "columna Código ESP de la hoja ES del fichero de cobertura 2013-2020 (61.819 entidades)"
+     }
+    ],
+    "used_by": [
+     "ine-codigos-territoriales",
+     "mtdfp-cobertura-banda-ancha"
     ]
    },
    "ccaa": {
@@ -8673,6 +9557,7 @@
      "isciii-cne",
      "sanidad-portal-estadistico",
      "cnig-centro-descargas",
+     "idee-servicios",
      "ine-cartografia-censal"
     ]
    },
@@ -9416,6 +10301,126 @@
     "new": "https://visor.registrodelicitadores.gob.es/",
     "source": "hacienda-registro-licitadores",
     "note": "ya no hay consulta pública sin certificado; solo el visor de certificados y el DEUC",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://extranjeros.inclusion.gob.es/es/ObservatorioPermanenteInmigracion/",
+    "status": "redirect",
+    "new": "https://www.inclusion.gob.es/web/migraciones/homees/ObservatorioPermanenteInmigracion/",
+    "source": "interior-criminalidad",
+    "note": "redirige al portal de migraciones, que respondió 403 (Akamai) desde centro de datos; no hay ficha del OPI hasta verificarlo desde otra red",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia",
+    "status": "404",
+    "new": "https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia-saad",
+    "source": "imserso-dependencia",
+    "note": "404 con meta refresh a /pagina-no-encontrada; la ruta actual lleva el sufijo -saad",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://avancedigital.mineco.gob.es/banda-ancha/cobertura/Paginas/informes-cobertura.aspx",
+    "status": "redirect",
+    "new": "https://digital.gob.es/telecomunicaciones-infraestructuras-digitales/areas-interes/banda-ancha/informacion-cobertura",
+    "source": "mtdfp-cobertura-banda-ancha",
+    "note": "el portal de avance digital se integró en digital.gob.es; los xlsx cuelgan de /content/dam/portal-mtdfp/",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm?type=pcaxis&path=/no-universitaria&file=pcaxis",
+    "status": "empty",
+    "new": "https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm?type=pcaxis&path=/no-universitaria/alumnado/matriculado/series/gen-al-mat&file=pcaxis",
+    "source": "educacion-estadisticas-ruct",
+    "note": "un path incompleto acaba en la 404.html del ministerio con código 200; hay que dar la ruta completa hasta la carpeta de tablas",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/publicaciones/Parque-vehiculos-Tablas-Estadisticas/Parque-de-vehiculos-Tablas-estadisticas-2025.xlsx",
+    "status": "404",
+    "new": "https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/publicaciones/Parque-de-vehiculos-Tablas-Estadisticas/Parque-de-vehiculos-Tablas-estadisticas-2025.xlsx",
+    "source": "dgt-estadisticas",
+    "note": "la carpeta pasó de Parque-vehiculos-Tablas-Estadisticas a Parque-de-vehiculos-Tablas-Estadisticas (con de); el nombre del fichero no cambió; las URL de los xlsx salen de la página dgt-en-cifras-detalle/{slug}/",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.ign.es/wfs-inspire/hidrografia",
+    "status": "404",
+    "new": "https://servicios.idee.es/wfs-inspire/hidrografia",
+    "source": "idee-servicios",
+    "note": "los WFS temáticos INSPIRE (hidrografía, transportes, ocupación del suelo) viven en servicios.idee.es; www.ign.es solo mantiene ngbe y unidades-administrativas",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.ign.es/wfs-inspire/transportes",
+    "status": "404",
+    "new": "https://servicios.idee.es/wfs-inspire/transportes",
+    "source": "idee-servicios",
+    "note": "mismo caso que hidrografia",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.ign.es/wfs-inspire/ocupacion-suelo",
+    "status": "error",
+    "new": "https://servicios.idee.es/wfs-inspire/ocupacion-suelo",
+    "source": "idee-servicios",
+    "note": "responde 502",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.ign.es/wms-inspire/hidrografia",
+    "status": "404",
+    "new": "https://servicios.idee.es/wms-inspire/hidrografia",
+    "source": "idee-servicios",
+    "note": "también transportes, ocupacion-suelo y mdt; en www.ign.es quedan ign-base, pnoa-ma y unidades-administrativas",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://servicios.idee.es/wmts/mapa-raster",
+    "status": "404",
+    "new": "https://www.ign.es/wmts/mapa-raster",
+    "source": "idee-servicios",
+    "note": "el MTN ráster y la ortofoto (pnoa-ma) siguen en www.ign.es; servicios.idee.es solo tiene wmts/mdt",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.cis.es/detalle-ficha-estudio?idEstudio=14893",
+    "status": "redirect",
+    "new": "https://www.cis.es/es/estudios/barometro-de-septiembre-2026",
+    "source": "cis-estudios",
+    "note": "redirige al catálogo sin el estudio; la página de cada estudio es /es/estudios/{slug}, enumerable por sitemap.xml",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.cis.es/catalogo-estudios/resultados-definidos",
+    "status": "404",
+    "new": "https://www.cis.es/es/estudios/catalogo",
+    "source": "cis-estudios",
+    "note": "el catálogo nuevo se renderiza por JavaScript y sus consultas con q= o start= disparan el anti-bot",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.cis.es/cis/opencms/ES/index.html",
+    "status": "redirect",
+    "new": "https://www.cis.es/",
+    "source": "cis-estudios",
+    "note": "portal OpenCms antiguo; las rutas 2_bancodedatos/estudios/ver.jsp responden 404",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.inmujeres.gob.es/MujerCifras/",
+    "status": "403",
+    "new": "https://www.inmujeres.gob.es/MujerCifras/Home.htm",
+    "source": "inmujeres-mujeres-cifras",
+    "note": "la raíz responde Your client is not allowed; las páginas de tema y los xls de /estadisticasweb/ sí",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.educacionyfp.gob.es/inee/",
+    "status": "redirect",
+    "new": "https://www.educacionfpydeportes.gob.es/inee/portada.html",
+    "source": "inee-bases-datos",
+    "note": "también educacion.gob.es/inee; los ficheros llevan /inee/dam/jcr:{uuid}/ y HEAD responde 403",
     "checked": "2026-09-30"
    }
   ],

@@ -311,7 +311,7 @@ def main() -> None:
         "- Envía siempre User-Agent y Accept de navegador; varios sitios (tesoro.es, seg-social.es) devuelven 403 a los valores por defecto de curl y requests.",
         "- Las APIs del BOE exigen Accept explícito (application/json o application/xml) y devuelven los errores siempre en XML.",
         "- Espera ISO-8859-1 en feeds del BOE y CSV del Banco de España; convierte antes de parsear.",
-        "- Ninguna fuente verificada documenta límites ni devolvió 429; para descargas masivas, peticiones secuenciales y reintento con espera ante 5xx. El Catastro bloquea la IP tras ráfagas de unas 15 peticiones.",
+        "- Ninguna fuente verificada documenta límites ni devolvió 429; para descargas masivas, peticiones secuenciales y reintento con espera ante 5xx. El Catastro bloquea la IP tras ráfagas de unas 15 peticiones y rechaza rangos de centros de datos (GitHub Actions incluido); Catastro, REData, datos.gob.es, BNE y FEGA se verifican mejor desde una IP residencial.",
         "- Si una URL que recuerdas falla, busca en la tabla de rutas muertas antes de dar la fuente por perdida.",
         "",
         "## Dónde está cada cosa",

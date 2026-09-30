@@ -21,9 +21,11 @@ endpoints:
   - path: /informes/descargas/PRTR_Espana_MITECO_Complejos.zip
     desc: Inventario de complejos (XML ArrayOfComplejo con CodigoPRTR, nombre, empresa matriz, CNAE-2009, CodPRTRDEI, CodIPPC, dirección, municipio, provincia y CCAA)
     example: curl -sSL -o complejos.zip "https://prtr-es.miteco.gob.es/informes/descargas/PRTR_Espana_MITECO_Complejos.zip"
+    returns: "Zip con [Content_Types].xml y un XML propio: ArrayOfComplejo/Complejo con CodigoPRTR, NombreDelComplejo, EmpresaMatriz, ActividadEconomica, CodPRTRDEI, CodIPPC, Direccion, CodPostal, Poblacion, Municipio, Provincia, CCAA y DemarcacionHidrografica (sin código INE)"
   - path: /informes/descargas/PRTR_Espana_MITECO_emisiones{AAAA}.zip
     desc: Emisiones de un año (XML ArrayOfEmisiones con CodigoPRTR, AnyoReferencia, Contaminante, CantidadTotalkgporaño, MedioReceptor, Metodo y detalle Metodo_MCE)
     example: curl -sSL -o emisiones2024.zip "https://prtr-es.miteco.gob.es/informes/descargas/PRTR_Espana_MITECO_emisiones2024.zip"
+    returns: "Zip con XML ArrayOfEmisiones/Emision: CodigoPRTR, NombreDelComplejo, AnyoReferencia, Contaminante (Metano (CH4)), CantidadTotalkgporaño, MedioReceptor (Aire, Agua, Suelo), Metodo (M, C, E) y Metodo_MCE con TipologiaMetodo y fuentes; 2 MB en 2023; cruzar con complejos por CodigoPRTR"
   - path: /informes/descargas/PRTR_Espana_MITECO_residuos{AAAA}.zip
     desc: Transferencias de residuos de un año (2007-2024)
   - path: /informes/descargasEmisiones.aspx

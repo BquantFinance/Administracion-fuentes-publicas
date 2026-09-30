@@ -34,6 +34,7 @@ gotchas:
   - La ruta OAI de la ficha anterior (hispana.mcu.es/es/oai) da 404; el endpoint es /oai/oai.cmd. Algunos sets no tienen registros en edm (esegen devolvió 0) y sí en oai_dc.
   - El resumptionToken de Hispana caduca (expirationDate a un día) y el listado completo son más de 100.000 páginas; cosechar por set o con from y until.
   - El modelo de datos.bne.es es FRBR (obra, expresión, manifestación); un libro es una manifestación enlazada a obra y autor, y los ids (XX1234567) no son ISBN.
+  - "datos.bne.es (SPARQL y resource) y www.bne.es responden 403 con una página HTML a IP de centros de datos (GitHub Actions y entorno de verificación, noche del 2026-09-30); el OAI-PMH de Hispana sí responde."
 tips:
   - "Con sickle: Sickle('https://hispana.mcu.es/oai/oai.cmd').ListRecords(metadataPrefix='edm', set='<set>') recorre un repositorio; edm trae el enlace al objeto digital (isShownBy)."
 related: [csic-digital]

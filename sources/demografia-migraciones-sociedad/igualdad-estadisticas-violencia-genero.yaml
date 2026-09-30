@@ -1,0 +1,63 @@
+id: igualdad-estadisticas-violencia-genero
+name: Ministerio de Igualdad – Portal estadístico de violencia de género (Saiku) y boletines
+org: Delegación del Gobierno contra la Violencia de Género (DGVG)
+ministry: Igualdad
+level: age
+sector: demografia-migraciones-sociedad
+tags: [violencia-de-genero, feminicidios, telefono-016, viogen, ordenes-de-proteccion, atenpro, saiku, olap, mdx, boletines]
+summary: >-
+  Portal OLAP (Saiku 2.5) con 17 cubos consultables sin clave por API REST: feminicidios desde 2003, menores,
+  llamadas al 016, ATENPRO, VioGén, denuncias, órdenes de protección y ayudas, por CCAA, provincia, año y
+  mes, con exportación CSV y xlsx. Boletines mensuales en PDF y DERA en xlsx.
+access: [api-rest, download, portal]
+auth: none
+formats: [json, csv, xlsx, pdf, html]
+update: monthly
+coverage: "Feminicidios desde 2003, 016 desde 2007, boletines mensuales desde 2012; el resto según cubo"
+base_url: https://estadisticasviolenciagenero.igualdad.gob.es
+docs_url: https://violenciagenero.igualdad.gob.es/violenciaencifras/
+endpoints:
+  - path: /saiku/rest/saiku/anonymous/discover
+    desc: Catálogo VDG_CIUDADANO_PRO con los 17 cubos (010 Feminicidios en la pareja o expareja, 040 Servicio 016, 090 VioGén, 120 Órdenes de protección); fija la cookie
+    example: curl -s -c jar "https://estadisticasviolenciagenero.igualdad.gob.es/saiku/rest/saiku/anonymous/discover"
+  - path: /saiku/rest/saiku/anonymous/discover/xmla/VDG_CIUDADANO_PRO/null/{cubo}/metadata
+    desc: Dimensiones, jerarquías, niveles y medidas del cubo con sus nombres únicos MDX; el nombre del cubo, con espacios, va codificado en la URL
+    example: curl -s "https://estadisticasviolenciagenero.igualdad.gob.es/saiku/rest/saiku/anonymous/discover/xmla/VDG_CIUDADANO_PRO/null/040%20Servicio%20016/metadata"
+  - path: /saiku/rest/saiku/anonymous/query/{nombre}
+    desc: POST form-urlencoded que crea la consulta en la sesión (cookie obligatoria); responde JSON con el cubo
+    params: "connection=xmla, cube={cubo}, catalog=VDG_CIUDADANO_PRO, schema= (vacío), type=MDX; nombre libre (uuid o texto)"
+    example: curl -s -b jar -c jar -X POST "https://estadisticasviolenciagenero.igualdad.gob.es/saiku/rest/saiku/anonymous/query/q1" --data-urlencode "connection=xmla" --data-urlencode "cube=040 Servicio 016" --data-urlencode "catalog=VDG_CIUDADANO_PRO" --data-urlencode "schema=" --data-urlencode "type=MDX"
+  - path: /saiku/rest/saiku/anonymous/query/{nombre}/result/flattened
+    desc: POST mdx={MDX} ejecuta y devuelve cellset en JSON (primera fila cabeceras, celdas con value, type y properties), height, width, runtime y error
+    example: curl -s -b jar -X POST "https://estadisticasviolenciagenero.igualdad.gob.es/saiku/rest/saiku/anonymous/query/q1/result/flattened" --data-urlencode "mdx=SELECT NON EMPTY {[Measures].[Llamadas pertinentes]} ON COLUMNS, NON EMPTY {[02 Estructura temporal - Año].[Año].[Año].Members} ON ROWS FROM [040 Servicio 016]"
+  - path: /saiku/rest/saiku/anonymous/query/{nombre}/export/{csv|xls}
+    desc: Exporta la última ejecución como application/octet-stream (saiku-export.csv en UTF-8 con coma y todo entrecomillado; xls entrega un xlsx)
+    example: curl -s -b jar -o 016_anual.csv "https://estadisticasviolenciagenero.igualdad.gob.es/saiku/rest/saiku/anonymous/query/q1/export/csv"
+  - path: https://violenciagenero.igualdad.gob.es/violenciaencifras/boletines/mensuales/boletines-estadisticos-mensuales-ano-{AAAA}/
+    desc: Boletín mensual (BEM_{Mes}_{AAAA}.pdf, 7 MB) y Principales_datos_{Mes}_{AAAA}.pdf en wp-content/uploads; anuales BEA_{AAAA}.pdf en boletines/anuales/
+    example: curl -s "https://violenciagenero.igualdad.gob.es/violenciaencifras/boletines/mensuales/boletines-estadisticos-mensuales-ano-2026/" | grep -o 'uploads/BEM_[^"]*'
+  - path: https://violenciagenero.igualdad.gob.es/violenciaencifras/victimasmortales/{fichamujeres|fichamenores|feminicidio}/
+    desc: Fichas de víctimas mortales en PDF (VMortales_{AAAA_MM_DD}.pdf resumen vigente, VMujeres_{AAAA}_act_{fecha}.pdf por año, Ficha_Otros_feminicidios_{AAAA}.pdf)
+  - path: https://violenciagenero.igualdad.gob.es/violenciaencifras/recursos-autonomicos/estadistica-de-recursos-autonomicos-en-materia-de-violencia-contra-la-mujer-2024-dera-2024/
+    desc: DERA 2024 (recursos autonómicos) en cinco xlsx por capítulo (DERA2024-Capitulo-{1..5}.xlsx con acogida de emergencia, casas de acogida, viviendas, residencias)
+    example: curl -sO "https://violenciagenero.igualdad.gob.es/wp-content/uploads/DERA2024-Capitulo-1.xlsx"
+quirks: [session-required, errors-html-or-xml, static-html, url-drift]
+ids: []
+gotchas:
+  - La primera consulta creada en una sesión sin cookie se pierde (result responde No query found using name y export 500); hacer antes un GET a discover con tarro de cookies (session no fija cookie) o repetir el POST.
+  - La cookie JSESSIONID lleva Path=/saiku y sufijo de worker; sin ella cada llamada cae en otra sesión y export devuelve 500 HTML. En requests usar Session, en curl -c jar y -b jar.
+  - El segmento schema de la URL de metadata va como null o un espacio (VDG_CIUDADANO_PRO/null/{cubo}); con el segmento vacío responde 404.
+  - Cubos, dimensiones y medidas llevan espacios, tildes y guiones ([02 Estructura temporal - Año].[Año].[Año], [01 Estructura territorial asesinato].[Jerarquía].[Provincia (As)]); copiarlos del metadata.
+  - result devuelve 200 con error dentro del JSON y cellset null; export sin consulta previa o con nombre desconocido responde 500 con página HTML de Tomcat; comprobar antes de parsear.
+  - En el CSV los números van entrecomillados con decimal .0 ("13.0") y los periodos como texto, sin BOM y con CRLF; export/xls entrega xlsx aunque la ruta diga xls.
+  - Las 7 consultas del repositorio (repository?type=saiku) son pruebas de 2017-2023 con el catálogo VDG, ya inexistente; crear una consulta con xml= de ellas responde 500.
+  - Territorios por nombre (Comunidad autónoma, Provincia) sin código INE; en feminicidios el nivel territorial es el lugar del asesinato (As).
+  - wp-json de violenciagenero.igualdad.gob.es está restringido (401 rest_login_required); los PDF de víctimas llevan la fecha de actualización en el nombre y cambian, rascar la página.
+  - VioGén (cubo 090, casos activos y protección policial) y denuncias (110) proceden del Ministerio del Interior; la criminalidad general está en interior-criminalidad.
+tips:
+  - Flujo en cuatro llamadas con el mismo tarro de cookies (discover, POST query, POST result, GET export); un CrossJoin de año por CCAA en feminicidios devolvió 331 filas en 62 ms.
+  - "pd.read_csv(io.BytesIO(r.content)) lee el CSV directo; en el JSON, cellset[0] son cabeceras y cellset[1:] filas con c['value']."
+  - El cubo 010 tiene 14 dimensiones (edad y nacionalidad de víctima y agresor, suicidio, relación, convivencia, denuncia previa) y las medidas feminicidios y huérfanos menores.
+related: [interior-criminalidad, ine-api-tempus, mites-estadisticas]
+status: active
+verified: "2026-09-30"

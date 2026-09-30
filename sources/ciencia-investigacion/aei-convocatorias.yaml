@@ -21,6 +21,7 @@ endpoints:
   - path: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All
     desc: CSV completo de ayudas concedidas (36 MB, 130.389 filas, UTF-8 con BOM, separador ;)
     example: curl -sSL -o ayudas_aei.csv "https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All"
+    returns: "CSV separado por ; (35 MB, desde 2008) con Año;Convocatoria;Referencia;Género;Área;Subárea;Título;C.I.F.;Entidad;CC.AA.;Provincia;€ Conced.; importe con punto de miles y coma decimal (192.480,00) y textos entrecomillados"
   - path: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas?keys={texto}&convocatory=All&area=All&ccaa=All&province=All
     desc: Buscador web (GET) con filtros name, cif, code, convocatory, area, ccaa, province, gender y granted[min|max]; resultados en HTML paginado
   - path: https://www.aei.gob.es/convocatorias/buscador-convocatorias?status=1&page={n}

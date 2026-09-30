@@ -51,6 +51,7 @@ gotchas:
   - Cartografía en EPSG:25829, 25830 y 25831 según huso y 32628 en Canarias; el WFS y el WMS responden en ISO-8859-1.
   - Titulares, valor catastral y planos detallados solo por Sede Electrónica con certificado o Cl@ve.
   - La ruta de documentación de la ficha anterior (esp/ws_serviciosweb.asp) devuelve una página de error con 200; la documentación pública es la de INSPIRE (docs_url).
+  - "Bloquea rangos de centros de datos: desde GitHub Actions cerró la conexión en la primera llamada y desde el entorno de verificación devolvió 403 Petición HTTP bloqueada (2026-09-30); verificar desde IP residencial."
 tips:
   - Flujo típico. ObtenerMunicipios para traducir INE a códigos catastrales, Consulta_DNPLOC o Consulta_RCCOOR para llegar a la referencia, Consulta_DNPRC para el detalle.
   - Para geocodificar direcciones antes de pedir la referencia, el geocoder de CartoCiudad (cnig-centro-descargas) devuelve coordenadas y código INE.

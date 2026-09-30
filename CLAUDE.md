@@ -87,15 +87,16 @@ solo cuando el propietario lo indique: Cortes y Poder Judicial, comunidades aut�
 
 ## Estado de verificación
 
-Las 67 fichas iniciales se verificaron endpoint a endpoint el 2026-09-30: 63 llevan fecha en `verified` y 4
-siguen en `null` (aemet-opendata exige clave de API; fega-beneficiarios-pac, oepm-invenes y el host de datos de
-mitma-opendata-movilidad no respondieron desde el entorno de verificación). Al empezar una sesión con red,
-re-verificar primero esas cuatro y las fichas en `degraded` o `unknown`; después añadir fuentes nuevas por
-impacto. Las verificaciones se hacen con el bundle FNMT y el User-Agent de navegador que describe
-`guides/cliente-http.md`. Después se añadieron 9 fichas verificadas el mismo día (REData, OMIE, cartografía censal,
-Renfe, nomenclátor de facturación, inventario de emisiones, AESAN, CULTURAbase, IEO). Las 41 recetas se comprobaron
-el 2026-09-30 con `check_recetas.py` (77 de 81 comprobaciones ok; el Catastro bloqueó la IP tras la ráfaga de
-pruebas, datos.gob.es agotó los reintentos del WAF y ssl.renfe.com y REGCON cortaron una conexión).
+85 fichas verificadas endpoint a endpoint el 2026-09-30 (82 con fecha en `verified`; `null` en fega-beneficiarios-pac,
+oepm-invenes y mitma-opendata-movilidad, que no respondieron desde el entorno). Las 43 recetas se comprobaron ese día
+desde GitHub Actions (`verificacion.yml`, 87 de 89 comprobaciones ok; Catastro cerró la conexión y datos.gob.es estaba
+en mantenimiento). Hosts que rechazan IP de centros de datos, verificados desde GitHub y desde el entorno: Catastro,
+REData y datos.gob.es (Incapsula), BNE, FEGA, OPI de inclusion.gob.es (Akamai), ENAIRE (F5), infoelectoral, DGSFP e
+Instituciones Penitenciarias; se re-verifican desde una IP residencial. ESIOS sigue pendiente de token. Al empezar una
+sesión con red, re-verificar primero esas fuentes y las fichas en `degraded` o `unknown`; después añadir fuentes nuevas
+por impacto. Las verificaciones se hacen con el bundle FNMT y el User-Agent de navegador que describe
+`guides/cliente-http.md`. `verificacion.yml` (cron semanal y ejecución manual) solo corre desde la rama por defecto del
+repositorio.
 
 ## Lo que no se hace
 

@@ -2,7 +2,7 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 79 · Recetas: 43 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
+Fuentes: 85 · Recetas: 43 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
 
 ## Cómo usar este repo
 
@@ -24,7 +24,7 @@ Fuentes: 79 · Recetas: 43 · Alcance actual: Administración General del Estado
 - Envía siempre User-Agent y Accept de navegador; varios sitios (tesoro.es, seg-social.es) devuelven 403 a los valores por defecto de curl y requests.
 - Las APIs del BOE exigen Accept explícito (application/json o application/xml) y devuelven los errores siempre en XML.
 - Espera ISO-8859-1 en feeds del BOE y CSV del Banco de España; convierte antes de parsear.
-- Ninguna fuente verificada documenta límites ni devolvió 429; para descargas masivas, peticiones secuenciales y reintento con espera ante 5xx. El Catastro bloquea la IP tras ráfagas de unas 15 peticiones.
+- Ninguna fuente verificada documenta límites ni devolvió 429; para descargas masivas, peticiones secuenciales y reintento con espera ante 5xx. El Catastro bloquea la IP tras ráfagas de unas 15 peticiones y rechaza rangos de centros de datos (GitHub Actions incluido); Catastro, REData, datos.gob.es, BNE y FEGA se verifican mejor desde una IP residencial.
 - Si una URL que recuerdas falla, busca en la tabla de rutas muertas antes de dar la fuente por perdida.
 
 ## Dónde está cada cosa
@@ -113,7 +113,7 @@ Fuentes: 79 · Recetas: 43 · Alcance actual: Administración General del Estado
 - Matrices origen-destino de movilidad por telefonía móvil → mitma-opendata-movilidad (el host de datos respondió 403 desde el entorno de verificación)
 - Horarios de trenes (GTFS), estaciones con coordenadas y posiciones en tiempo real → renfe-datos-abiertos (GTFS-RT no verificado desde el entorno; Adif sin portal localizado)
 - Tráfico portuario mensual por autoridad portuaria → puertos-estado-datos
-- Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra → mitma-boletin-estadistico-online (XLS por tabla con URL fija; la web de Aena (aesa-aviacion) exige sesión)
+- Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra → mitma-boletin-estadistico-online (XLS por tabla con URL fija; Aena publica además xlsx mensual y anual por aeropuerto con URL directa (aesa-aviacion))
 - Registro de aeronaves y operadores de drones → aesa-aviacion (degradada; sin ficheros verificados)
 - Comercio exterior por producto TARIC, país y provincia desde 1995 → datacomex (API verificada con cuenta gratuita; códigos de país numéricos, no ISO)
 - Inversión extranjera en España y española en el exterior → datainvex (aplicación ASP.NET con viewstate; sin API)
@@ -132,6 +132,25 @@ Fuentes: 79 · Recetas: 43 · Alcance actual: Administración General del Estado
 - Telecomunicaciones (líneas, operadores, audiovisual) → cnmc-data
 - Alertas alimentarias, registro sanitario de empresas alimentarias y laboratorios → aesan-alertas-registros (alertas solo en HTML; sin RSS ni API localizados)
 - Ayuda oficial al desarrollo y acción exterior → ninguna (sin fuente en el catálogo todavía)
+- Feminicidios por comunidad autónoma, provincia, año y mes → igualdad-estadisticas-violencia-genero (API Saiku sin clave; crear consulta MDX y exportar CSV; territorios por nombre, sin código INE)
+- Llamadas al 016 por provincia y mes → igualdad-estadisticas-violencia-genero (cubo 040 Servicio 016 con medidas de llamadas, WhatsApp, correo y chat)
+- Casos activos en VioGén y órdenes de protección → igualdad-estadisticas-violencia-genero (cubos 090 y 120; el origen es Interior y el CGPJ)
+- Dependencia (SAAD): solicitudes, dictámenes, prestaciones por grado y CCAA, lista de espera → imserso-dependencia (xlsx mensual estsisaad_{AAAAMMDD} con URL deducible; la encuesta EDAD es del INE)
+- Personas con discapacidad reconocida por provincia, sexo, edad y grado → imserso-dependencia (BEDPCD en CSV largo 2019-2024 (bdepcd_2024-1-))
+- Pensiones no contributivas por provincia → imserso-dependencia (csv y xlsx sobreescritos cada mes; las contributivas están en segsocial-estadisticas)
+- Cobertura de fibra, HFC y 5G por municipio → mtdfp-cobertura-banda-ancha (fracciones 0-1 por hogares o por viviendas, no comparables entre bases; la CNMC da líneas, no cobertura)
+- Extranjeros con certificado de registro o tarjeta de residencia, autorizaciones y protección internacional → ninguna (Observatorio Permanente de la Inmigración en inclusion.gob.es; el host respondió 403 (Akamai) a IP de centro de datos el 2026-09-30; verificar desde otra red)
+- Población de una entidad singular, núcleo o diseminado (Nomenclátor) → ine-codigos-territoriales (POST a nomen2/DescargaTabla por nombre de población (xls o csv), sin clave; la API Tempus no baja del municipio)
+- Microdatos de un barómetro o encuesta del CIS → cis-estudios (MD{n}.zip sin registro desde contentUrl del JSON-LD de la página del estudio; el catálogo es JavaScript con anti-bot, enumerar por sitemap.xml)
+- Serie de estimación de voto del CIS → cis-estudios (solo PDF {n}_Estimacion.pdf por barómetro; las series web cargan por JavaScript sin API localizada)
+- Carreteras y ferrocarril oficiales en vectorial → idee-servicios (WFS transportes de servicios.idee.es solo en GML; filtrar por bbox y paginar con count)
+- Ríos, embalses y cuencas en vectorial → idee-servicios (WFS hidrografia; GetCapabilities falla con 500 la mitad de las veces, repetir; GetFeature no falla)
+- Ocupación del suelo SIOSE por polígono → idee-servicios (110 millones de polígonos en el WFS ocupacion-suelo; sin count no responde)
+- Altitud o modelo digital del terreno de una zona → idee-servicios (WCS mdt con GetCoverage y SUBSET devuelve GeoTIFF; WMTS mdt para visualizar)
+- Buscar un topónimo → idee-servicios (WFS NGBE de www.ign.es con FILTER por nombre y GeoJSON; el geocoder de direcciones está en cnig-centro-descargas)
+- Superficie por cultivo y comunidad autónoma (ESYRCE) → mapa-estadisticas-agrarias (xlsx anual desde 2022; microdatos solo previa solicitud en sede electrónica)
+- Indicadores de igualdad por sexo (empleo, salarios, poder, salud) → inmujeres-mujeres-cifras (un xls por indicador en inmujeres.gob.es aunque el HTML enlace al host antiguo inmujer.es)
+- Microdatos de PISA, TIMSS o PIAAC de España → inee-bases-datos (muestra española en rar o zip con SPSS y Stata; HEAD responde 403, usar GET con Range)
 
 ## Recetas por intención
 
@@ -199,10 +218,12 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 - [Agricultura, pesca y alimentación](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/agricultura-pesca-alimentacion/README.md): fega-beneficiarios-pac, mapa-estadisticas-agrarias, mapa-pesca, mapa-sigpac
 - [Transporte y movilidad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/transporte-movilidad/README.md): aesa-aviacion, dgt-datex-trafico, dgt-estadisticas, mitma-boletin-estadistico-online, mitma-opendata-movilidad, puertos-estado-datos, renfe-datos-abiertos
 - [Comercio exterior, industria y propiedad industrial](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/comercio-industria-propiedad/README.md): datacomex, datainvex, mincotur-industria-turismo, oepm-invenes
-- [Educación y universidades](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/educacion-universidades/README.md): educacion-estadisticas-ruct
+- [Educación y universidades](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/educacion-universidades/README.md): educacion-estadisticas-ruct, inee-bases-datos
 - [Justicia, interior y seguridad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/justicia-interior-seguridad/README.md): interior-criminalidad
 - [Cultura y patrimonio](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/cultura-patrimonio/README.md): bne-datos, cultura-culturabase
+- [Demografía, migraciones y sociedad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/demografia-migraciones-sociedad/README.md): cis-estudios, igualdad-estadisticas-violencia-genero, imserso-dependencia, inmujeres-mujeres-cifras
 - [Vivienda y urbanismo](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/vivienda-urbanismo/README.md): mivau-precios-vivienda-alquiler
+- [Telecomunicaciones y sociedad digital](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/telecomunicaciones-digital/README.md): mtdfp-cobertura-banda-ancha
 - [Consumo y seguridad alimentaria](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/consumo-seguridad-alimentaria/README.md): aesan-alertas-registros
 
 ## Guías transversales

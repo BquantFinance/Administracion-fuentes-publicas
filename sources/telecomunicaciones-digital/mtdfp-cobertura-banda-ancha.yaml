@@ -1,0 +1,46 @@
+id: mtdfp-cobertura-banda-ancha
+name: SETELECO – Cobertura de banda ancha por municipio, provincia y CCAA
+org: Secretaría de Estado de Telecomunicaciones e Infraestructuras Digitales
+ministry: Transformación Digital y de la Función Pública
+level: age
+sector: telecomunicaciones-digital
+tags: [banda-ancha, cobertura, fibra, ftth, 5g, 4g, telecomunicaciones, municipios, entidades-singulares]
+summary: >-
+  Dos xlsx con la fracción de hogares o viviendas con cobertura por tecnología (FTTH, HFC, inalámbrico fijo,
+  4G, 5G) y por velocidad (30 Mbps, 100 Mbps, 1 Gbps) para todos los municipios (código INE), provincias y
+  CCAA de 2013 a 2025, entidades singulares hasta 2020 e informes anuales en PDF.
+access: [download]
+auth: none
+formats: [xlsx, pdf, html]
+update: annual
+coverage: "Datos a diciembre de 2013, 2014 y 2015 y a junio de 2017 a 2025"
+base_url: https://digital.gob.es/telecomunicaciones-infraestructuras-digitales/areas-interes/banda-ancha/informacion-cobertura
+docs_url: https://digital.gob.es/telecomunicaciones-infraestructuras-digitales/areas-interes/banda-ancha/informacion-cobertura/informes-cobertura/informe-cobertura-2025
+endpoints:
+  - path: https://digital.gob.es/content/dam/portal-mtdfp/avance-digital/telecomunicacion-e-infraestructuras-digitales/areas_interes/banda-ancha/cobertura/documents/Cobertura_BA_Espa%C3%B1a_2021-2025_MUN_PROV_CCAA_Nacional_datosgob_DEF.xlsx
+    desc: Cobertura junio 2021-2025 (6,5 MB); hojas Municipio, Provincia, CCAA y Nacional en versión _%hogar (2023-2025) y _%viviendas (2021-2025); CMUN y Habitantes
+    example: curl -sL -o cobertura_2021_2025.xlsx "https://digital.gob.es/content/dam/portal-mtdfp/avance-digital/telecomunicacion-e-infraestructuras-digitales/areas_interes/banda-ancha/cobertura/documents/Cobertura_BA_Espa%C3%B1a_2021-2025_MUN_PROV_CCAA_Nacional_datosgob_DEF.xlsx"
+  - path: https://digital.gob.es/content/dam/portal-mtdfp/avance-digital/telecomunicacion-e-infraestructuras-digitales/areas_interes/banda-ancha/cobertura/documents/cobertura_ba_espana_2013-2020_esp_mun_prov_ccaa_nacional_datosgob.xlsx
+    desc: Cobertura 2013-2020 (42 MB); hoja ES con 61.819 entidades singulares (Código ESP, 11 dígitos), Municipio, Provincia, CCAA y Nacional; ADSL, VDSL, FTTH, HFC, LTE
+    example: curl -sL -o cobertura_2013_2020.xlsx "https://digital.gob.es/content/dam/portal-mtdfp/avance-digital/telecomunicacion-e-infraestructuras-digitales/areas_interes/banda-ancha/cobertura/documents/cobertura_ba_espana_2013-2020_esp_mun_prov_ccaa_nacional_datosgob.xlsx"
+  - path: /informes-cobertura/informe-cobertura-{AAAA}
+    desc: Página por año (2012-2025) con el informe, el resumen ejecutivo y la metodología en PDF bajo /content/dam/ (Informe_Cobertura-BA-2025.pdf)
+    example: curl -s "https://digital.gob.es/telecomunicaciones-infraestructuras-digitales/areas-interes/banda-ancha/informacion-cobertura/informes-cobertura/informe-cobertura-2025" | grep -o '/content/dam/[^"]*\.pdf'
+  - path: /mapas-cobertura-agregada
+    desc: Mapas interactivos en ArcGIS (conectemos.maps.arcgis.com y experience.arcgis.com); sin descarga verificada
+quirks: [static-html]
+ids: [ine-municipio, ine-entidad-singular]
+gotchas:
+  - Los valores son fracciones entre 0 y 1 (0.9982), no porcentajes; las cabeceras llevan salto de línea y el periodo entre paréntesis (FTTH (junio 2025)) y hay columnas vacías entre grupos de tecnologías.
+  - "Dos bases no comparables en el fichero 2021-2025: hojas _%hogar (hogares del censo INE 2021, desde junio 2023) y _%viviendas (viviendas catastrales a enero de 2024, desde junio 2021)."
+  - CMUN es el código INE de municipio de 5 dígitos como texto; el Código ESP de la hoja ES tiene 11 dígitos (municipio, entidad colectiva y singular).
+  - La ñ del nombre del fichero 2021-2025 va como %C3%B1 en la URL y hay que conservarla; el fichero 2013-2020 pesa 42 MB y openpyxl tarda en abrirlo (usar read_only=True).
+  - Los datos de 2013 a 2015 están referidos a diciembre y desde 2017 a junio (no hay 2016); las velocidades pasan a condiciones de máxima demanda en 2022 y la base por parcela catastral empieza en junio de 2021.
+  - avancedigital.mineco.gob.es/banda-ancha/cobertura/Paginas/informes-cobertura.aspx redirige a la página de informacion-cobertura de digital.gob.es.
+  - El sufijo datosgob del nombre indica que se publican también en datos.gob.es, que estaba en mantenimiento (mantenimiento.red.es) el 30/09/2026.
+tips:
+  - "pd.read_excel(url, sheet_name='Municipio_%hogar', dtype={'CMUN': str}) y limpiar cabeceras con str.replace('\\n', ' '); Habitantes y Hogares permiten ponderar agregados propios."
+  - Cruce por CMUN con ine-codigos-territoriales; líneas y operadores por municipio en cnmc-data.
+related: [ine-codigos-territoriales, cnmc-data, datos-gob-es-api]
+status: active
+verified: "2026-09-30"

@@ -24,6 +24,9 @@ endpoints:
   - path: https://estadisticas.educacion.gob.es/EducaJaxiPx/files/_px/es/{csv_bdsc|px|xlsx}{path}{file}?nocab=1
     desc: Descarga de una tabla en CSV (separador ;), PC-Axis o xlsx; path y file son los de Tabla.htm (por ejemplo .../adultos/l0/ y adul_01.px)
     example: curl -s "https://estadisticas.educacion.gob.es/EducaJaxiPx/files/_px/es/csv_bdsc/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos/l0/adul_01.px?nocab=1"
+  - path: https://estadisticas.educacion.gob.es/EducaJaxiPx/dlgExport.htm?path={path}&file={file}
+    desc: Diálogo de descarga de una tabla con los ocho formatos (csv, csv_bd, csv_bdsc, csv_c, csv_sc, px, xls, xlsx) y sus rutas files/_px/es/{formato}{path}{file}
+    example: curl -s "https://estadisticas.educacion.gob.es/EducaJaxiPx/dlgExport.htm?path=/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos/l0/&file=adul_01.px" | grep -o 'files/_px[^"]*'
   - path: https://www.educacionfpydeportes.gob.es/servicios-al-ciudadano/estadisticas/no-universitaria/alumnado/matriculado/{curso}-rd.html
     desc: Página por curso (1999-2000 a 2024-2025) con los enlaces a los índices de EDUCAbase; misma estructura para profesorado, centros y resultados
   - path: https://www.ciencia.gob.es/Ministerio/Estadisticas/SIIU/{Estudiantes|Afiliacion|Becas|Financiacion|Internacionalizacion|PAU}.html
@@ -38,6 +41,7 @@ gotchas:
   - La antigua raíz estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm redirige a la web del ministerio (404); hay que entrar con path completo desde la página del curso.
   - EDUCAbase es el mismo software que INEbase (dynPx, jaxiPx); los CSV llevan BOM y van en ISO-8859-15 con separador ; y los px en ANSI; leer con encoding latin-1.
   - Cada curso tiene su carpeta (2024-2025-rd, rd por resultados definitivos) y los nombres de tabla se repiten entre cursos (adul_01.px); guardar el path completo.
+  - Formatos verificados el 30/09/2026; csv_bdsc (separador ;), csv_bd (tabulador), csv_sc (con título), px y xlsx; json responde 500 vacío y el índice sin subcarpeta (path=/no-universitaria) acaba con 200 en 404.html.
   - universidades.gob.es redirige a ciencia.gob.es y su certificado llega sin la cadena FNMT; los xlsx del SIIU cuelgan de rutas /dam/jcr con uuid que cambian en cada publicación.
   - El RUCT usa jsessionid en la acción del formulario y devuelve HTML; los códigos de centro (8 dígitos) y de título son las claves estables porque los nombres cambian.
   - Las CCAA publican datos más desagregados y recientes que el ministerio.

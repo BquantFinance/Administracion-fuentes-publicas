@@ -10,12 +10,12 @@ Sector `transporte-movilidad` · 7 fuentes · índice generado por `scripts/buil
 - Matrices origen-destino de movilidad por telefonía móvil → `mitma-opendata-movilidad` (el host de datos respondió 403 desde el entorno de verificación)
 - Horarios de trenes (GTFS), estaciones con coordenadas y posiciones en tiempo real → `renfe-datos-abiertos` (GTFS-RT no verificado desde el entorno; Adif sin portal localizado)
 - Tráfico portuario mensual por autoridad portuaria → `puertos-estado-datos`
-- Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra → `mitma-boletin-estadistico-online` (XLS por tabla con URL fija; la web de Aena (aesa-aviacion) exige sesión)
+- Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra → `mitma-boletin-estadistico-online` (XLS por tabla con URL fija; Aena publica además xlsx mensual y anual por aeropuerto con URL directa (aesa-aviacion))
 - Registro de aeronaves y operadores de drones → `aesa-aviacion` (degradada; sin ficheros verificados)
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
-| [aesa-aviacion](aesa-aviacion.yaml) | AESA y Aena – Registro de aeronaves, operadores UAS y estadísticas de tráfico aéreo | portal | registration | html, pdf | monthly | js-rendered, session-required | 2026-09-30 |
+| [aesa-aviacion](aesa-aviacion.yaml) | Aena y AESA – Estadísticas de tráfico aéreo, registro de aeronaves y operadores UAS | download, portal | none | xlsx, pdf, html | monthly | static-html, url-drift | 2026-09-30 |
 | [dgt-datex-trafico](dgt-datex-trafico.yaml) | DGT – NAP de tráfico y ficheros DATEX II (incidencias, detectores, cámaras, ZBE) | download | none | xml, rdf | realtime | url-drift, static-html | 2026-09-30 |
 | [dgt-estadisticas](dgt-estadisticas.yaml) | DGT en cifras – Parque, matriculaciones, bajas, conductores, siniestralidad y microdatos | download, portal | none | xlsx, txt, zip, pdf, html | daily | latin1, url-drift, tls-chain-incomplete | 2026-09-30 |
 | [mitma-boletin-estadistico-online](mitma-boletin-estadistico-online.yaml) | Transportes – Boletín estadístico online (aviación, puertos, carretera, ferrocarril) | download, portal | none | xls, html | monthly | static-html | 2026-09-30 |
@@ -23,7 +23,7 @@ Sector `transporte-movilidad` · 7 fuentes · índice generado por `scripts/buil
 | [puertos-estado-datos](puertos-estado-datos.yaml) | Puertos del Estado – Estadística mensual de tráfico portuario y Portus (oceanografía) | download, portal | none | xlsx, pdf, html, json | monthly | js-rendered, url-drift | 2026-09-30 |
 | [renfe-datos-abiertos](renfe-datos-abiertos.yaml) | Renfe – Datos abiertos (GTFS, GTFS-RT, estaciones, viajeros) | api-rest, download, feed | none | zip, csv, xlsx, json, protobuf | realtime | latin1 | 2026-09-30 |
 
-- **aesa-aviacion**: Registro de Matrícula de Aeronaves Civiles y registro de operadores de UAS (trámites en sede con certificado, sin listado abierto localizado) y estadísticas de tráfico de Aena (informes por aeropuerto en una web con sesión y enlaces generados por JavaScript). Sin ficheros descargables verificados.
+- **aesa-aviacion**: Informes mensuales y anuales de tráfico de Aena desde 2004 en xlsx y PDF con URL directa (pasajeros, operaciones y mercancía por aeropuerto con variación interanual); cuadros por compañía y destino solo con registro. Registro de aeronaves y de operadores UAS de AESA sin listado descargable.
 - **dgt-datex-trafico**: Ficheros DATEX II públicos sin clave: incidencias en tiempo real (versión 3.7, cada minuto) y cámaras en el NAP; en infocar.dgt.es, medidas de 5.569 detectores cada minuto, radares, tramos, zonas de bajas emisiones, puntos de recarga eléctrica e incidencias de Cataluña y Gipuzkoa.
 - **dgt-estadisticas**: Portal DGT en cifras con 226 productos por tema (tablas y series en xlsx, anuarios en PDF) y microdatos descargables sin registro: matriculaciones y bajas diarias y mensuales (MATRABA, ancho fijo, desde 2014), parque de vehículos anual y mensual por vehículo, censo de conductores y sanciones.
 - **mitma-boletin-estadistico-online**: Capítulos del Boletín estadístico del ministerio: licitación y adjudicaciones de obra, aviación civil (tráfico por aeropuerto), Puertos del Estado, mercancías por carretera, autopistas de peaje, ferrocarril, índices de costes de la construcción y visados. Cada tabla en XLS con URL fija por código.

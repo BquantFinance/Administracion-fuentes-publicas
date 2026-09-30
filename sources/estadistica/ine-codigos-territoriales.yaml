@@ -20,22 +20,44 @@ endpoints:
   - path: https://www.ine.es/daco/daco42/codmun/diccionario{AA}.xlsx
     desc: Diccionario de municipios a 1 de enero del año AA en una sola hoja (CODAUTO, CPRO, CMUN, DC, NOMBRE)
     example: curl -sO "https://www.ine.es/daco/daco42/codmun/diccionario26.xlsx"
+    returns: "Una hoja (dic25) con dos filas de título y cabecera CODAUTO, CPRO, CMUN, DC, NOMBRE; el código INE de municipio es CPRO+CMUN (5 dígitos) y DC el dígito de control; leer con header=2 y dtype str"
   - path: https://www.ine.es/daco/daco42/codmun/{AA}codmun.xlsx
     desc: Misma relación con una hoja por provincia (01 a 52)
+    returns: "Una hoja por provincia (01 a 52) con fila de título, nombre de la provincia y cabecera CPRO, CMUN, DC, NOMBRE; concatenar las hojas y leer los códigos como texto"
   - path: https://www.ine.es/daco/daco42/codmun/{AA}codislas.xlsx
     desc: Municipios de Baleares, Las Palmas y Santa Cruz de Tenerife con código de isla (CISLA)
+    returns: "Una hoja por provincia insular (07 Illes Balears, 35 Las Palmas...) con cabecera CPRO, CISLA, ISLA, CMUN, DC, NOMBRE"
   - path: https://www.ine.es/daco/daco42/codmun/cod_ccaa_provincia.htm
     desc: Códigos de comunidades autónomas y provincias en HTML; también cod_ccaa.htm, cod_provincia.htm y cod_islas.htm
   - path: https://www.ine.es/daco/daco42/codmun/codmun_anual.htm
     desc: Índice de las relaciones anuales anteriores
+  - path: https://www.ine.es/nomen2/tabla.do
+    desc: Nomenclátor (población por unidad poblacional, entidades colectivas, singulares, núcleos y diseminados); POST de la búsqueda rápida por nombre de población
+    params: "accion=busquedaRapida, nombrePoblacion, desagregacionRapida (S sexo, E edad, N nacionalidad), aniosRapida (repetible, 2003-2025), L=0"
+    example: curl -s -X POST -d "accion=busquedaRapida&nombrePoblacion=Abengibre&desagregacionRapida=S&aniosRapida=2025&L=0" "https://www.ine.es/nomen2/tabla.do"
+    returns: "HTML con una tabla de Provincia, Municipio, Código Unidad Poblacional (tres pares de dígitos: entidad colectiva, singular y núcleo), Unidad Poblacional, tipo (M municipio, ES entidad singular, NUC núcleo, DIS diseminado) y Total, Hombres y Mujeres por año"
+  - path: https://www.ine.es/nomen2/DescargaTabla
+    desc: La misma consulta descargada como fichero, sin sesión previa; typeDownload 1 xls, 2 CSV tabulado, 3 CSV con punto y coma
+    params: "los mismos campos que tabla.do más typeDownload={1|2|3}"
+    example: curl -s -X POST -d "accion=busquedaRapida&nombrePoblacion=Abengibre&desagregacionRapida=S&aniosRapida=2025&L=0&typeDownload=3" "https://www.ine.es/nomen2/DescargaTabla"
+    returns: "text/csv en ISO-8859-15 con tres filas de título y cabecera Provincia;Municipio;Código Unidad Poblacional;Unidad Poblacional;;Total;Hombres;Mujeres; el municipio va como 1 Abengibre (sin ceros a la izquierda) y el código como seis dígitos (colectiva, singular, núcleo); tipo M, ES, NUC o DIS en la columna sin nombre"
+  - path: https://www.ine.es/nomen_files/DistribucionUnidPoblacionales.xls
+    desc: Recuento anual de unidades poblacionales por CCAA (municipios, entidades colectivas, singulares, núcleos, diseminados), una hoja por año desde 2025 hacia atrás
+    example: curl -sO "https://www.ine.es/nomen_files/DistribucionUnidPoblacionales.xls"
+    returns: "xls con una hoja por año; cabecera Código, CCAA, Total, Municipios, Entidades colectivas, Entidades singulares, Núcleos, Diseminados (2025: 8.132 municipios, 62.151 entidades singulares, 41.239 diseminados)"
+  - path: https://www.ine.es/nomen_files/DisenioRegistro.xls
+    desc: Diseño de registro del fichero completo del Nomenclátor (ancho fijo de 104 caracteres; código de unidad poblacional de 11 dígitos en las posiciones 1 a 11)
+    example: curl -sO "https://www.ine.es/nomen_files/DisenioRegistro.xls"
 quirks: [static-html]
-ids: [ine-municipio, ine-provincia, ccaa]
+ids: [ine-municipio, ine-provincia, ccaa, ine-entidad-singular]
 gotchas:
   - El código completo son 5 dígitos, CPRO (2) más CMUN (3); el dígito de control DC es una columna aparte. Muchos datasets omiten el DC y otros lo pegan como sexto dígito.
   - Los códigos vienen como texto con ceros a la izquierda; al leer con pandas forzar dtype str o se pierden (01 pasa a 1).
   - El diccionario tiene una fila de título antes de la cabecera (leer con header=1); la hoja se llama con el año anterior (dic25 en diccionario26.xlsx) y el título de codislas también va con retraso.
   - La página menu=resultados de la ficha anterior devuelve 404; la relación cuelga de menu=ultiDatos.
   - Los municipios cambian de código al fusionarse o segregarse; para series largas aplicar las variaciones anuales (codmun{AA}/{AA}codmunmod.htm).
+  - "Nomenclátor: nombrePoblacion vacío devuelve el formulario, no todas las unidades; el fichero completo (diseño en DisenioRegistro.xls) no se localizó como descarga directa el 2026-09-30, solo por consulta."
+  - "En el CSV del Nomenclátor el municipio pierde los ceros a la izquierda (1 Abengibre) y el código de unidad son seis dígitos; el identificador de 11 se forma con provincia (2) + municipio (3) + esos seis."
 tips:
   - Cruce típico. La deuda viva y liquidaciones de Hacienda (hacienda-ovef) y las estadísticas municipales de la AEAT (aeat-estadisticas) se casan por CPRO+CMUN.
 related: [ine-api-tempus, hacienda-ovef, catastro-ovc, aeat-estadisticas, ine-cartografia-censal]

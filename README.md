@@ -4,7 +4,7 @@ Catálogo de fuentes de datos de la Administración pública española, pensado 
 
 **Para agentes:** empieza por [`llms.txt`](llms.txt). Todo el catálogo cabe en [`catalog.json`](catalog.json) o en [`llms-full.txt`](llms-full.txt).
 
-Fuentes catalogadas: <!-- AUTO:count -->79<!-- /AUTO:count -->. Alcance actual: Administración General del Estado. Después: comunidades autónomas, entidades locales, Cortes y Poder Judicial, Unión Europea.
+Fuentes catalogadas: <!-- AUTO:count -->85<!-- /AUTO:count -->. Alcance actual: Administración General del Estado. Después: comunidades autónomas, entidades locales, Cortes y Poder Judicial, Unión Europea.
 
 ## Principios
 
@@ -35,12 +35,12 @@ Fuentes catalogadas: <!-- AUTO:count -->79<!-- /AUTO:count -->. Alcance actual: 
 | [agricultura-pesca-alimentacion](sources/agricultura-pesca-alimentacion/README.md) | Agricultura, pesca y alimentación | 4 |
 | [transporte-movilidad](sources/transporte-movilidad/README.md) | Transporte y movilidad | 7 |
 | [comercio-industria-propiedad](sources/comercio-industria-propiedad/README.md) | Comercio exterior, industria y propiedad industrial | 4 |
-| [educacion-universidades](sources/educacion-universidades/README.md) | Educación y universidades | 1 |
+| [educacion-universidades](sources/educacion-universidades/README.md) | Educación y universidades | 2 |
 | [justicia-interior-seguridad](sources/justicia-interior-seguridad/README.md) | Justicia, interior y seguridad | 1 |
 | [cultura-patrimonio](sources/cultura-patrimonio/README.md) | Cultura y patrimonio | 2 |
-| `demografia-migraciones-sociedad` | Demografía, migraciones y sociedad | 0 |
+| [demografia-migraciones-sociedad](sources/demografia-migraciones-sociedad/README.md) | Demografía, migraciones y sociedad | 4 |
 | [vivienda-urbanismo](sources/vivienda-urbanismo/README.md) | Vivienda y urbanismo | 1 |
-| `telecomunicaciones-digital` | Telecomunicaciones y sociedad digital | 0 |
+| [telecomunicaciones-digital](sources/telecomunicaciones-digital/README.md) | Telecomunicaciones y sociedad digital | 1 |
 | `exterior-cooperacion` | Acción exterior y cooperación | 0 |
 | [consumo-seguridad-alimentaria](sources/consumo-seguridad-alimentaria/README.md) | Consumo y seguridad alimentaria | 1 |
 | `defensa` | Defensa | 0 |
@@ -55,9 +55,10 @@ schema/source.schema.json    esquema de ficha
 schema/vocab.yaml            vocabulario controlado: sectores, acceso, auth, formatos
 catalog.json                 todo el catálogo (generado)
 llms.txt / llms-full.txt     entrada para agentes (generado)
-indices/*.yaml               recetas por intención, necesidades, identificadores, rutas muertas (fuente de verdad)
-indices/README.md            los cuatro índices en texto (generado)
-scripts/                     validate.py, build.py, check_links.py, check_recetas.py, fnmt_bundle.py
+indices/*.yaml               recetas por intención, necesidades, identificadores, códigos que son parámetros, rutas muertas (fuente de verdad)
+indices/README.md            los cinco índices en texto (generado)
+scripts/                     validate.py, build.py, check_links.py, check_recetas.py, fnmt_bundle.py, mcp_catalogo.py (servidor MCP local)
+evals/                       20 tareas con respuesta esperada para medir lo que aporta el repo a un agente
 templates/source.yaml        plantilla de ficha
 guides/                      guías transversales (identificadores para cruzar datasets, etc.)
 ```
@@ -76,12 +77,13 @@ curl -s .../catalog.json | jq '.sources[] | select(.sector=="economia-finanzas" 
 
 Además de las fichas, `indices/` responde a las preguntas que se hacen antes de elegir una fuente:
 
-- **Recetas por intención**: 37 procedimientos verificados que encadenan fichas (de un NIF a sus subvenciones y contratos, de unas coordenadas a la referencia catastral, del sumario del BOE al texto consolidado). Cada receta lleva comprobaciones que `python scripts/check_recetas.py` ejecuta contra los servidores reales.
-- **Dónde está cada cosa**: 91 necesidades habituales con la ficha que las resuelve y la nota que evita el desvío típico.
-- **Identificadores**: los 19 códigos que cruzan datasets, con regex, ejemplo, emisor y vías verificadas de conversión.
-- **Rutas muertas**: 58 URLs de documentación antigua que ya no sirven y su sustituta.
+- **Recetas por intención**: procedimientos verificados que encadenan fichas (de un NIF a sus subvenciones y contratos, de unas coordenadas a la referencia catastral, del sumario del BOE al texto consolidado). Cada receta lleva comprobaciones que `python scripts/check_recetas.py` ejecuta contra los servidores reales.
+- **Dónde está cada cosa**: necesidades habituales con la ficha que las resuelve y la nota que evita el desvío típico.
+- **Identificadores**: los códigos que cruzan datasets, con regex, ejemplo, emisor y vías verificadas de conversión.
+- **Códigos que son parámetros**: valores que las APIs exigen y no se adivinan (Id del INE para `tv`, países de DataComex, estación de AEMET por capital, productos de carburantes, rangos del BOE), obtenidos con llamadas reales.
+- **Rutas muertas**: URLs de documentación antigua que ya no sirven y su sustituta.
 
-Todo en [indices/README.md](indices/README.md) y, para consumo programático, bajo la clave `indices` de `catalog.json`.
+Todo en [indices/README.md](indices/README.md) y, para consumo programático, bajo la clave `indices` de `catalog.json`. Cada endpoint principal de una ficha lleva `example` (llamada copiable) y `returns` (forma de la respuesta vista en esa llamada). `python scripts/mcp_catalogo.py` expone el catálogo por MCP en local para cargar solo lo necesario ([guía](guides/servidor-mcp.md)).
 
 ## Contribuir
 

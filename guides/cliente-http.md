@@ -193,3 +193,12 @@ Ninguna de las fuentes verificadas documenta límites ni devolvió 429 durante l
 para descargas masivas: peticiones secuenciales por host, reintento con espera exponencial (2, 4, 8 s) ante
 5xx y ante cortes de conexión, y cachear en local lo descargado, porque varias fuentes sobreescriben ficheros
 en la misma URL (cuadros mensuales del Tesoro) o mueven las rutas (uploads de AIReF, documentos del ICO).
+
+## IP de centros de datos
+
+Varios servidores rechazan rangos de nube (GitHub Actions, entornos de ejecución de agentes) aunque la petición sea
+correcta; el mismo cliente funciona desde una IP residencial o corporativa. Verificado el 2026-09-30 desde GitHub Actions
+y desde un entorno de verificación: Catastro (cierra la conexión o 403 «Petición HTTP bloqueada»), REData y datos.gob.es
+(Incapsula, 403 con HTML), www.bne.es y datos.bne.es (403 con HTML), FEGA (reset o tiempo de espera), inclusion.gob.es
+(403 Akamai), ENAIRE (403 del WAF F5), infoelectoral, DGSFP e Instituciones Penitenciarias (reset). Antes de dar una
+fuente por caída, probar desde otra red; `verificacion.yml` marca estos casos como `blocked` o `error`, no como `fail`.

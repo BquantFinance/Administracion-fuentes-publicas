@@ -15,6 +15,7 @@ Sector `estadistica` · 3 fuentes · índice generado por `scripts/build.py`, no
 - Defunciones por causa de muerte → `ine-api-tempus` (estadística del INE; Sanidad solo publica PDF)
 - Padrón, nacimientos, defunciones y migraciones → `ine-api-tempus`
 - Índice de precios de vivienda y de alquiler → `ine-api-tempus`
+- Población de una entidad singular, núcleo o diseminado (Nomenclátor) → `ine-codigos-territoriales` (POST a nomen2/DescargaTabla por nombre de población (xls o csv), sin clave; la API Tempus no baja del municipio)
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|

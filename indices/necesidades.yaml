@@ -216,7 +216,7 @@
   source: puertos-estado-datos
 - need: Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra
   source: mitma-boletin-estadistico-online
-  note: XLS por tabla con URL fija; la web de Aena (aesa-aviacion) exige sesión
+  note: XLS por tabla con URL fija; Aena publica además xlsx mensual y anual por aeropuerto con URL directa (aesa-aviacion)
 - need: Registro de aeronaves y operadores de drones
   source: aesa-aviacion
   note: degradada; sin ficheros verificados
@@ -264,3 +264,60 @@
 - need: Ayuda oficial al desarrollo y acción exterior
   source: null
   note: sin fuente en el catálogo todavía
+- need: "Feminicidios por comunidad autónoma, provincia, año y mes"
+  source: igualdad-estadisticas-violencia-genero
+  note: "API Saiku sin clave; crear consulta MDX y exportar CSV; territorios por nombre, sin código INE"
+- need: "Llamadas al 016 por provincia y mes"
+  source: igualdad-estadisticas-violencia-genero
+  note: "cubo 040 Servicio 016 con medidas de llamadas, WhatsApp, correo y chat"
+- need: "Casos activos en VioGén y órdenes de protección"
+  source: igualdad-estadisticas-violencia-genero
+  note: "cubos 090 y 120; el origen es Interior y el CGPJ"
+- need: "Dependencia (SAAD): solicitudes, dictámenes, prestaciones por grado y CCAA, lista de espera"
+  source: imserso-dependencia
+  note: "xlsx mensual estsisaad_{AAAAMMDD} con URL deducible; la encuesta EDAD es del INE"
+- need: "Personas con discapacidad reconocida por provincia, sexo, edad y grado"
+  source: imserso-dependencia
+  note: "BEDPCD en CSV largo 2019-2024 (bdepcd_2024-1-)"
+- need: "Pensiones no contributivas por provincia"
+  source: imserso-dependencia
+  note: "csv y xlsx sobreescritos cada mes; las contributivas están en segsocial-estadisticas"
+- need: "Cobertura de fibra, HFC y 5G por municipio"
+  source: mtdfp-cobertura-banda-ancha
+  note: "fracciones 0-1 por hogares o por viviendas, no comparables entre bases; la CNMC da líneas, no cobertura"
+- need: "Extranjeros con certificado de registro o tarjeta de residencia, autorizaciones y protección internacional"
+  source: null
+  note: "Observatorio Permanente de la Inmigración en inclusion.gob.es; el host respondió 403 (Akamai) a IP de centro de datos el 2026-09-30; verificar desde otra red"
+- need: "Población de una entidad singular, núcleo o diseminado (Nomenclátor)"
+  source: ine-codigos-territoriales
+  note: "POST a nomen2/DescargaTabla por nombre de población (xls o csv), sin clave; la API Tempus no baja del municipio"
+- need: "Microdatos de un barómetro o encuesta del CIS"
+  source: cis-estudios
+  note: "MD{n}.zip sin registro desde contentUrl del JSON-LD de la página del estudio; el catálogo es JavaScript con anti-bot, enumerar por sitemap.xml"
+- need: "Serie de estimación de voto del CIS"
+  source: cis-estudios
+  note: "solo PDF {n}_Estimacion.pdf por barómetro; las series web cargan por JavaScript sin API localizada"
+- need: "Carreteras y ferrocarril oficiales en vectorial"
+  source: idee-servicios
+  note: "WFS transportes de servicios.idee.es solo en GML; filtrar por bbox y paginar con count"
+- need: "Ríos, embalses y cuencas en vectorial"
+  source: idee-servicios
+  note: "WFS hidrografia; GetCapabilities falla con 500 la mitad de las veces, repetir; GetFeature no falla"
+- need: "Ocupación del suelo SIOSE por polígono"
+  source: idee-servicios
+  note: "110 millones de polígonos en el WFS ocupacion-suelo; sin count no responde"
+- need: "Altitud o modelo digital del terreno de una zona"
+  source: idee-servicios
+  note: "WCS mdt con GetCoverage y SUBSET devuelve GeoTIFF; WMTS mdt para visualizar"
+- need: "Buscar un topónimo"
+  source: idee-servicios
+  note: "WFS NGBE de www.ign.es con FILTER por nombre y GeoJSON; el geocoder de direcciones está en cnig-centro-descargas"
+- need: "Superficie por cultivo y comunidad autónoma (ESYRCE)"
+  source: mapa-estadisticas-agrarias
+  note: "xlsx anual desde 2022; microdatos solo previa solicitud en sede electrónica"
+- need: "Indicadores de igualdad por sexo (empleo, salarios, poder, salud)"
+  source: inmujeres-mujeres-cifras
+  note: "un xls por indicador en inmujeres.gob.es aunque el HTML enlace al host antiguo inmujer.es"
+- need: "Microdatos de PISA, TIMSS o PIAAC de España"
+  source: inee-bases-datos
+  note: "muestra española en rar o zip con SPSS y Stata; HEAD responde 403, usar GET con Range"

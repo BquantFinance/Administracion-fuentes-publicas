@@ -23,10 +23,13 @@ endpoints:
   - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_HH_2024.zip
     desc: Horarios 2024, 9 CSV (PM10, PM25, SO2, C6H6, CO, NO, NO2, NOx, O3) con columnas H01..H24 por estación y día
     example: curl -sSL -o Datos_HH_2024.zip "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_HH_2024.zip"
+    returns: "Zip (26 MB) con un CSV por contaminante (PM10_HH_2024.csv, PM25, SO2, C6H6, CO, NO, NO2, NOx...) separado por ; con PROVINCIA;MUNICIPIO;ESTACION;MAGNITUD;PUNTO_MUESTREO;ANNO;MES;DIA;H01..H24; punto decimal, celda vacía sin dato, PUNTO_MUESTREO del tipo 01022001_10_47"
   - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_DD_2024.zip
     desc: Diarios 2024, 8 CSV (PM10, PM2.5, Pb, As, Cd, Ni, B(a)P, C6H6) con columnas D01..D31 por estación y mes
+    returns: "Zip con un CSV por contaminante (Pb, PM2.5, PM10, As, B(a)P, C6H6...) con PROVINCIA;MUNICIPIO;ESTACION;MAGNITUD;PUNTO_MUESTREO;ANNO;MES;D01..D31 (una fila por estación y mes, una columna por día, vacío sin dato)"
   - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_2024_Irreg.zip
     desc: Muestreos irregulares 2024 (B(a)P y benceno) con FECHA_INICIAL, FECHA_FINAL y VALOR
+    returns: "CSV BaPyBenceno_2024_Irreg.csv con PROVINCIA;MUNICIPIO;ESTACION;MAGNITUD;PUNTO_MUESTREO;FECHA_INICIAL;FECHA_FINAL;VALOR para muestreos no diarios (periodos de un mes)"
   - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Metainformacion_2024.xlsx
     desc: Hojas Magnitudes (código, unidad), Técnicas y Estaciones_2024 (COD_LOCAL, código europeo, red, lat/lon, altitud, tipo de estación y de área)
   - path: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/evaluacion-y-datos-de-calidad-del-aire/datos/datos-historicos.html

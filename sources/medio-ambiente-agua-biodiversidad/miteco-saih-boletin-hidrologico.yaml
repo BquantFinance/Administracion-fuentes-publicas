@@ -21,13 +21,16 @@ endpoints:
   - path: https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/Historico-de-embalses/BD-Embalses.zip
     desc: Access .mdb (10 MB comprimido, 222 MB) con la tabla T_Datos Embalses (AMBITO_NOMBRE, EMBALSE_NOMBRE, FECHA, AGUA_TOTAL, AGUA_ACTUAL, ELECTRICO_FLAG) desde 1988
     example: curl -sSL -o BD-Embalses.zip "https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/Historico-de-embalses/BD-Embalses.zip"
+    returns: "Zip (10 MB) con un único fichero BD-Embalses.mdb (Access); leer con mdbtools (mdb-tables, mdb-export) o pandas_access, no con pandas directamente"
   - path: https://sede.miteco.gob.es/BoleHWeb/
     desc: Boletín hidrológico semanal en PDF (aplicación con calendario JS, sin URL estable por fecha)
   - path: https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/Anuario-21-22-csv.zip
     desc: Anuario completo en CSV (136 MB), una carpeta por cuenca con afliq.csv (indroea;fecha;altura;caudal diarios), estaf.csv, embalse.csv y anual_a.csv
     example: curl -sSL -o Anuario-21-22-csv.zip "https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/Anuario-21-22-csv.zip"
+    returns: "Zip (130 MB, 342 ficheros) con una carpeta por demarcación (CANTABRICO, DUERO, EBRO...) y CSV ; por tipo: afliq.csv (indroea;fecha;altura;caudal diario, fecha dd/mm/aaaa, desde 1912 en algunas estaciones), afliqc (ref_ceh;fecha;altura;caudal), afliqe, afliqi y anual_*.csv"
   - path: https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/listado-estaciones-aforo.zip
     desc: Cuatro CSV de estaciones (río, embalse, canal, evaporimétrica) con COD_HIDRO, COD_SAIH, COD_SAICA, UTM huso 30 ETRS89, masa de agua, municipio y provincia
+    returns: "Cuatro CSV ; (Situac 1_Canal, 2_Embalse, 3_Evaporimetrica, 4_Rio) con ORGANISMO_CUENCA_VISOR, COD_SITUACION_ESTACION, COD_HIDRO (indroea), NOM_ANUARIO, COD_SAIH, COD_SAICA, ESTADO, ANO_INICIO_MEDIDAS, COORD_UTMX_H30_ETRS89, COORD_UTMY_H30_ETRS89, RIO, TERMINO_MUNICIPAL, PROVINCIA, COD_MASA_AGUA"
   - path: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos.html
     desc: Página del anuario con la variante mdb, la memoria y la descripción de tablas en PDF
   - path: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/saih.html

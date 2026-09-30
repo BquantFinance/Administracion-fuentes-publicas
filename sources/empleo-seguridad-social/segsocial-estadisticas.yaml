@@ -31,6 +31,7 @@ endpoints:
   - path: https://www.seg-social.es/wps/wcm/connect/wss/{uuid}/{fichero}.xlsx?MOD=AJPERES
     desc: Patrón de descarga de cualquier fichero; el uuid cambia con cada publicación y se toma del enlace de la página
     example: curl -sL -A "Mozilla/5.0" -o PI202609.xlsx "https://www.seg-social.es/wps/wcm/connect/wss/1ac3470e-8f62-4407-b772-28f189b71be1/PI202609.xlsx?MOD=AJPERES"
+    returns: "Libros con varias hojas y títulos en varias filas; el de pensiones internacionales (PI{AAAAMM}) trae Indice_internacional, PI_país_residencia y PI_país_convenio con PAÍS y, por clase de pensión (incapacidad, jubilación, viudedad, orfandad, favor de familiares), Número e Importe (€)"
 quirks: [waf-intermittent-403, url-drift, static-html]
 ids: [cnae]
 gotchas:

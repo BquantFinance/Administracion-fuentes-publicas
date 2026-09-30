@@ -30,6 +30,7 @@ endpoints:
   - path: https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_{be|tc|ti|si|pb}.csv
     desc: Catálogos de series (código, alias, fichero del cuadro, descripción, frecuencia, primera y última observación)
     example: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_tc.csv"
+    returns: "CSV con una fila por serie: Nombre de la serie (código), Número secuencial, Alias (TC_1_1.1), Nombre del archivo con los valores (TC_1_1.csv), Descripción, Tipo de variable, Código de unidades, Exponente, Número de decimales, Descripción de unidades, Frecuencia, primera y última fecha y número de observaciones"
   - path: https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/{cuadro}.csv
     desc: CSV de un cuadro completo con sus series en columnas; también en /datos/xlsx/{cuadro}.xlsx
     example: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/tc_1_1.csv"
@@ -37,6 +38,7 @@ endpoints:
   - path: https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_{capitulo}.zip
     desc: ZIP con los CSV de un capítulo del Boletín Estadístico; lista de capítulos en descargas-completas.html
     example: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_DEUAAPP.zip"
+    returns: "Zip con un CSV por cuadro del capítulo (be0106.csv, be0107.csv, be1101.csv...) con el mismo formato de seis filas de cabecera que los CSV sueltos"
 rate_limit: No documentado
 quirks: [gzip-unannounced, latin1, waf-blocks-bots]
 gotchas:

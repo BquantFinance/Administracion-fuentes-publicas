@@ -22,7 +22,7 @@ endpoints:
     desc: Listado paginado de productos por tema; cada uno tiene ficha en /dgt-en-cifras-detalle/{slug}/ con los ficheros
   - path: https://www.dgt.es/menusecundario/dgt-en-cifras/dgt-en-cifras-resultados/dgt-en-cifras-detalle/{slug}/
     desc: Ficha con enlaces xlsx bajo /export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/ (series y tablas de matriculaciones, parque, bajas, conductores)
-    example: curl -sSL -o parque.xlsx "https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/publicaciones/Parque-vehiculos-Tablas-Estadisticas/Parque-de-vehiculos-Tablas-estadisticas-2025.xlsx"
+    example: curl -sSL -o parque.xlsx "https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/publicaciones/Parque-de-vehiculos-Tablas-Estadisticas/Parque-de-vehiculos-Tablas-estadisticas-2025.xlsx"
   - path: https://www.dgt.es/menusecundario/dgt-en-cifras/matraba-listados/{matriculaciones|bajas}-automoviles-{diario|mensual}.html
     desc: Listados de ficheros de microdatos con los enlaces ZIP (24 diarios del mes en curso; 141 mensuales desde 2014-12)
   - path: https://www.dgt.es/microdatos/salida/{AAAA}/{M}/vehiculos/{matriculaciones|bajas}/export_{mat|bajas}_{AAAAMMDD}.zip

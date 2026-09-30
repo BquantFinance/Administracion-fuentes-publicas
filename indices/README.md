@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 103 necesidades, 19 identificadores, 11 grupos de códigos, 58 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 122 necesidades, 20 identificadores, 11 grupos de códigos, 73 rutas muertas.
 
 ## Recetas por intención
 
@@ -606,6 +606,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Defunciones por causa de muerte → `ine-api-tempus` (estadística del INE; Sanidad solo publica PDF)
 - Padrón, nacimientos, defunciones y migraciones → `ine-api-tempus`
 - Índice de precios de vivienda y de alquiler → `ine-api-tempus`
+- Población de una entidad singular, núcleo o diseminado (Nomenclátor) → `ine-codigos-territoriales` (POST a nomen2/DescargaTabla por nombre de población (xls o csv), sin clave; la API Tempus no baja del municipio)
 
 **Contratación pública y subvenciones**
 - Licitaciones, adjudicaciones y contratos menores de todas las Administraciones → `placsp-datos-abiertos`
@@ -634,6 +635,11 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Geocodificar una dirección y obtener su código INE → `cnig-centro-descargas` (geocoder CartoCiudad)
 - Geometría de secciones censales, distritos y municipios por año → `ine-cartografia-censal` (shapefile anual del INE; los límites municipales oficiales del IGN están tras reCAPTCHA (cnig-centro-descargas))
 - Localizar cualquier servicio WMS, WFS o CSW de una Administración → `idee-servicios`
+- Carreteras y ferrocarril oficiales en vectorial → `idee-servicios` (WFS transportes de servicios.idee.es solo en GML; filtrar por bbox y paginar con count)
+- Ríos, embalses y cuencas en vectorial → `idee-servicios` (WFS hidrografia; GetCapabilities falla con 500 la mitad de las veces, repetir; GetFeature no falla)
+- Ocupación del suelo SIOSE por polígono → `idee-servicios` (110 millones de polígonos en el WFS ocupacion-suelo; sin count no responde)
+- Altitud o modelo digital del terreno de una zona → `idee-servicios` (WCS mdt con GetCoverage y SUBSET devuelve GeoTIFF; WMTS mdt para visualizar)
+- Buscar un topónimo → `idee-servicios` (WFS NGBE de www.ign.es con FILTER por nombre y GeoJSON; el geocoder de direcciones está en cnig-centro-descargas)
 
 **Meteorología y clima**
 - Predicción, observación, climatología, avisos y radar → `aemet-opendata` (clave gratuita obligatoria; el cuerpo vacío con 200 es fallo de autenticación)
@@ -675,6 +681,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Recintos agrícolas, usos del suelo y referencia catastral rústica → `mapa-sigpac`
 - Anuario de estadística agraria, precios percibidos y pagados, consumo alimentario → `mapa-estadisticas-agrarias`
 - Flota pesquera, capturas y acuicultura → `mapa-pesca` (el identificador de buque es CODIGOBUQUE, no el CFR)
+- Superficie por cultivo y comunidad autónoma (ESYRCE) → `mapa-estadisticas-agrarias` (xlsx anual desde 2022; microdatos solo previa solicitud en sede electrónica)
 
 **Transporte y movilidad**
 - Datos oceanográficos en tiempo real (oleaje, mareas, boyas) → `puertos-estado-datos` (Portus es una aplicación con API interna no reproducida)
@@ -683,7 +690,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Matrices origen-destino de movilidad por telefonía móvil → `mitma-opendata-movilidad` (el host de datos respondió 403 desde el entorno de verificación)
 - Horarios de trenes (GTFS), estaciones con coordenadas y posiciones en tiempo real → `renfe-datos-abiertos` (GTFS-RT no verificado desde el entorno; Adif sin portal localizado)
 - Tráfico portuario mensual por autoridad portuaria → `puertos-estado-datos`
-- Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra → `mitma-boletin-estadistico-online` (XLS por tabla con URL fija; la web de Aena (aesa-aviacion) exige sesión)
+- Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra → `mitma-boletin-estadistico-online` (XLS por tabla con URL fija; Aena publica además xlsx mensual y anual por aeropuerto con URL directa (aesa-aviacion))
 - Registro de aeronaves y operadores de drones → `aesa-aviacion` (degradada; sin ficheros verificados)
 
 **Comercio exterior, industria y propiedad industrial**
@@ -695,6 +702,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 **Educación y universidades**
 - Alumnado, profesorado y centros no universitarios → `educacion-estadisticas-ruct` (EDUCAbase con el patrón PC-Axis del INE)
 - Universidades, matriculados y egresados por titulación, títulos oficiales (RUCT) → `educacion-estadisticas-ruct`
+- Microdatos de PISA, TIMSS o PIAAC de España → `inee-bases-datos` (muestra española en rar o zip con SPSS y Stata; HEAD responde 403, usar GET con Range)
 
 **Justicia, interior y seguridad**
 - Criminalidad por tipología, comunidad, provincia y municipio → `interior-criminalidad`
@@ -703,8 +711,22 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Estadísticas culturales (empleo cultural, bibliotecas, museos, cine, bono cultural) → `cultura-culturabase` (PC-Axis con el patrón de descarga del INE; certificado con intermedia fuera de la lista FNMT)
 - Catálogo bibliográfico de la BNE y patrimonio digital (Hispana) → `bne-datos` (datos.bne.es bloqueado desde el entorno; Hispana por OAI-PMH)
 
+**Demografía, migraciones y sociedad**
+- Feminicidios por comunidad autónoma, provincia, año y mes → `igualdad-estadisticas-violencia-genero` (API Saiku sin clave; crear consulta MDX y exportar CSV; territorios por nombre, sin código INE)
+- Llamadas al 016 por provincia y mes → `igualdad-estadisticas-violencia-genero` (cubo 040 Servicio 016 con medidas de llamadas, WhatsApp, correo y chat)
+- Casos activos en VioGén y órdenes de protección → `igualdad-estadisticas-violencia-genero` (cubos 090 y 120; el origen es Interior y el CGPJ)
+- Dependencia (SAAD): solicitudes, dictámenes, prestaciones por grado y CCAA, lista de espera → `imserso-dependencia` (xlsx mensual estsisaad_{AAAAMMDD} con URL deducible; la encuesta EDAD es del INE)
+- Personas con discapacidad reconocida por provincia, sexo, edad y grado → `imserso-dependencia` (BEDPCD en CSV largo 2019-2024 (bdepcd_2024-1-))
+- Pensiones no contributivas por provincia → `imserso-dependencia` (csv y xlsx sobreescritos cada mes; las contributivas están en segsocial-estadisticas)
+- Microdatos de un barómetro o encuesta del CIS → `cis-estudios` (MD{n}.zip sin registro desde contentUrl del JSON-LD de la página del estudio; el catálogo es JavaScript con anti-bot, enumerar por sitemap.xml)
+- Serie de estimación de voto del CIS → `cis-estudios` (solo PDF {n}_Estimacion.pdf por barómetro; las series web cargan por JavaScript sin API localizada)
+- Indicadores de igualdad por sexo (empleo, salarios, poder, salud) → `inmujeres-mujeres-cifras` (un xls por indicador en inmujeres.gob.es aunque el HTML enlace al host antiguo inmujer.es)
+
 **Vivienda y urbanismo**
 - Precios de vivienda, transacciones, alquiler (SERPAVI) y suelo → `mivau-precios-vivienda-alquiler`
+
+**Telecomunicaciones y sociedad digital**
+- Cobertura de fibra, HFC y 5G por municipio → `mtdfp-cobertura-banda-ancha` (fracciones 0-1 por hogares o por viviendas, no comparables entre bases; la CNMC da líneas, no cobertura)
 
 **Consumo y seguridad alimentaria**
 - Alertas alimentarias, registro sanitario de empresas alimentarias y laboratorios → `aesan-alertas-registros` (alertas solo en HTML; sin RSS ni API localizados)
@@ -713,14 +735,16 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Cotizaciones bursátiles y precios de mercado (BME, OMIE) → ninguna (fuera del alcance actual; BME es privado y OMIE no está aún en el catálogo)
 - Estadística judicial y sentencias → ninguna (Poder Judicial (CGPJ, CENDOJ) fuera del alcance actual)
 - Ayuda oficial al desarrollo y acción exterior → ninguna (sin fuente en el catálogo todavía)
+- Extranjeros con certificado de registro o tarjeta de residencia, autorizaciones y protección internacional → ninguna (Observatorio Permanente de la Inmigración en inclusion.gob.es; el host respondió 403 (Akamai) a IP de centro de datos el 2026-09-30; verificar desde otra red)
 
 ## Identificadores para cruzar datos
 
 | id | formato | regex | ejemplo | emisor | lo usan |
 |---|---|---|---|---|---|
-| ine-municipio | 5 dígitos, provincia (2) + municipio (3); algunos ficheros añaden un sexto dígito de control | `^\d{5}$` | 28079 | ine-codigos-territoriales | mapa-sigpac, ine-codigos-territoriales, miteco-calidad-aire, aemet-opendata, sanidad-portal-estadistico, catastro-ovc, cnig-centro-descargas, ine-cartografia-censal, dgt-estadisticas, mitma-opendata-movilidad |
-| ine-provincia | 2 dígitos, 01 a 52 | `^(0[1-9]|[1-4]\d|5[0-2])$` | 28 | ine-codigos-territoriales | mapa-sigpac, datacomex, minetur-precios-carburantes, miteco-energia-estadisticas, ine-codigos-territoriales, ine-microdatos, dir3-directorio, miteco-calidad-aire, sanidad-portal-estadistico, catastro-ovc, cnig-centro-descargas, ine-cartografia-censal, dgt-estadisticas |
-| ccaa | 2 dígitos, 01 Andalucía a 19 Melilla, en el orden del INE | `^(0[1-9]|1\d)$` | 13 | ine-codigos-territoriales | ine-codigos-territoriales, ine-microdatos, isciii-cne, sanidad-portal-estadistico, cnig-centro-descargas, ine-cartografia-censal |
+| ine-municipio | 5 dígitos, provincia (2) + municipio (3); algunos ficheros añaden un sexto dígito de control | `^\d{5}$` | 28079 | ine-codigos-territoriales | mapa-sigpac, cis-estudios, ine-codigos-territoriales, miteco-calidad-aire, aemet-opendata, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas, mitma-opendata-movilidad |
+| ine-provincia | 2 dígitos, 01 a 52 | `^(0[1-9]|[1-4]\d|5[0-2])$` | 28 | ine-codigos-territoriales | mapa-sigpac, datacomex, cis-estudios, minetur-precios-carburantes, miteco-energia-estadisticas, ine-codigos-territoriales, ine-microdatos, dir3-directorio, miteco-calidad-aire, sanidad-portal-estadistico, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas |
+| ine-entidad-singular | 11 dígitos, municipio INE (5) + entidad colectiva (2) + entidad singular (2) + núcleo o diseminado (2) | `^\d{11}$` | 01001000100 | ine-codigos-territoriales | ine-codigos-territoriales, mtdfp-cobertura-banda-ancha |
+| ccaa | 2 dígitos, 01 Andalucía a 19 Melilla, en el orden del INE | `^(0[1-9]|1\d)$` | 13 | ine-codigos-territoriales | ine-codigos-territoriales, ine-microdatos, isciii-cne, sanidad-portal-estadistico, cnig-centro-descargas, idee-servicios, ine-cartografia-censal |
 | nuts | ES más 1 a 3 caracteres (ES1, ES11, ES111) | `^ES[1-7]\d{0,2}$` | ES300 | — | ine-cartografia-censal |
 | seccion-censal | 10 dígitos, municipio (5) + distrito (2) + sección (3) | `^\d{10}$` | 2807901001 | ine-cartografia-censal | ine-cartografia-censal |
 | referencia-catastral | 14 caracteres alfanuméricos (parcela) o 20 (inmueble, con 4 dígitos y 2 letras de control) | `^[0-9A-Z]{14}(\d{4}[A-Z]{2})?$` | 9872023VH5797S0001WX | catastro-ovc | mapa-sigpac, catastro-ovc |
@@ -751,6 +775,11 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - trampa: Ceuta 51 y Melilla 52; el ISO 3166-2 (provincia_iso en los CSV COVID del ISCIII) es otro sistema
 - vía `minetur-precios-carburantes`: IDProvincia coincide con el código INE
 - vía `dir3-directorio`: catálogo de provincias con idElemento 427
+
+**ine-entidad-singular**
+- trampa: los cinco primeros dígitos son el código INE de municipio; el Nomenclátor del INE lo muestra en tres pares (colectiva, singular, núcleo) tras provincia y municipio
+- vía `ine-codigos-territoriales`: búsqueda por nombre en nomen2/tabla.do (POST) con población por sexo, edad o nacionalidad desde 2003
+- vía `mtdfp-cobertura-banda-ancha`: columna Código ESP de la hoja ES del fichero de cobertura 2013-2020 (61.819 entidades)
 
 **ccaa**
 - trampa: el orden no es alfabético ni el de Eurostat (NUTS2 ES11...)
@@ -932,3 +961,18 @@ URLs de documentación antigua que ya no sirven y su sustituta verificada.
 | https://app.bde.es/bie_www/ | blocked | https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472 | `bde-estadisticas` | el buscador BIEST responde Request Rejected a las consultas automatizadas; la API bierest y los CSV no tienen ese bloqueo | 2026-09-30 |
 | https://datos.gob.es/virtuoso/sparql | blocked | https://datos.gob.es/apidata/catalog/dataset.json?_pageSize=100&_page=0 | `datos-gob-es-api` | 403 del WAF en todos los intentos; la API REST pasa con reintentos | 2026-09-30 |
 | https://registrodelicitadores.gob.es/rolece/public/consulta_publica | 404 | https://visor.registrodelicitadores.gob.es/ | `hacienda-registro-licitadores` | ya no hay consulta pública sin certificado; solo el visor de certificados y el DEUC | 2026-09-30 |
+| https://extranjeros.inclusion.gob.es/es/ObservatorioPermanenteInmigracion/ | redirect | https://www.inclusion.gob.es/web/migraciones/homees/ObservatorioPermanenteInmigracion/ | `interior-criminalidad` | redirige al portal de migraciones, que respondió 403 (Akamai) desde centro de datos; no hay ficha del OPI hasta verificarlo desde otra red | 2026-09-30 |
+| https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia | 404 | https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia-saad | `imserso-dependencia` | 404 con meta refresh a /pagina-no-encontrada; la ruta actual lleva el sufijo -saad | 2026-09-30 |
+| https://avancedigital.mineco.gob.es/banda-ancha/cobertura/Paginas/informes-cobertura.aspx | redirect | https://digital.gob.es/telecomunicaciones-infraestructuras-digitales/areas-interes/banda-ancha/informacion-cobertura | `mtdfp-cobertura-banda-ancha` | el portal de avance digital se integró en digital.gob.es; los xlsx cuelgan de /content/dam/portal-mtdfp/ | 2026-09-30 |
+| https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm?type=pcaxis&path=/no-universitaria&file=pcaxis | empty | https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm?type=pcaxis&path=/no-universitaria/alumnado/matriculado/series/gen-al-mat&file=pcaxis | `educacion-estadisticas-ruct` | un path incompleto acaba en la 404.html del ministerio con código 200; hay que dar la ruta completa hasta la carpeta de tablas | 2026-09-30 |
+| https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/publicaciones/Parque-vehiculos-Tablas-Estadisticas/Parque-de-vehiculos-Tablas-estadisticas-2025.xlsx | 404 | https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/publicaciones/Parque-de-vehiculos-Tablas-Estadisticas/Parque-de-vehiculos-Tablas-estadisticas-2025.xlsx | `dgt-estadisticas` | la carpeta pasó de Parque-vehiculos-Tablas-Estadisticas a Parque-de-vehiculos-Tablas-Estadisticas (con de); el nombre del fichero no cambió; las URL de los xlsx salen de la página dgt-en-cifras-detalle/{slug}/ | 2026-09-30 |
+| https://www.ign.es/wfs-inspire/hidrografia | 404 | https://servicios.idee.es/wfs-inspire/hidrografia | `idee-servicios` | los WFS temáticos INSPIRE (hidrografía, transportes, ocupación del suelo) viven en servicios.idee.es; www.ign.es solo mantiene ngbe y unidades-administrativas | 2026-09-30 |
+| https://www.ign.es/wfs-inspire/transportes | 404 | https://servicios.idee.es/wfs-inspire/transportes | `idee-servicios` | mismo caso que hidrografia | 2026-09-30 |
+| https://www.ign.es/wfs-inspire/ocupacion-suelo | error | https://servicios.idee.es/wfs-inspire/ocupacion-suelo | `idee-servicios` | responde 502 | 2026-09-30 |
+| https://www.ign.es/wms-inspire/hidrografia | 404 | https://servicios.idee.es/wms-inspire/hidrografia | `idee-servicios` | también transportes, ocupacion-suelo y mdt; en www.ign.es quedan ign-base, pnoa-ma y unidades-administrativas | 2026-09-30 |
+| https://servicios.idee.es/wmts/mapa-raster | 404 | https://www.ign.es/wmts/mapa-raster | `idee-servicios` | el MTN ráster y la ortofoto (pnoa-ma) siguen en www.ign.es; servicios.idee.es solo tiene wmts/mdt | 2026-09-30 |
+| https://www.cis.es/detalle-ficha-estudio?idEstudio=14893 | redirect | https://www.cis.es/es/estudios/barometro-de-septiembre-2026 | `cis-estudios` | redirige al catálogo sin el estudio; la página de cada estudio es /es/estudios/{slug}, enumerable por sitemap.xml | 2026-09-30 |
+| https://www.cis.es/catalogo-estudios/resultados-definidos | 404 | https://www.cis.es/es/estudios/catalogo | `cis-estudios` | el catálogo nuevo se renderiza por JavaScript y sus consultas con q= o start= disparan el anti-bot | 2026-09-30 |
+| https://www.cis.es/cis/opencms/ES/index.html | redirect | https://www.cis.es/ | `cis-estudios` | portal OpenCms antiguo; las rutas 2_bancodedatos/estudios/ver.jsp responden 404 | 2026-09-30 |
+| https://www.inmujeres.gob.es/MujerCifras/ | 403 | https://www.inmujeres.gob.es/MujerCifras/Home.htm | `inmujeres-mujeres-cifras` | la raíz responde Your client is not allowed; las páginas de tema y los xls de /estadisticasweb/ sí | 2026-09-30 |
+| https://www.educacionyfp.gob.es/inee/ | redirect | https://www.educacionfpydeportes.gob.es/inee/portada.html | `inee-bases-datos` | también educacion.gob.es/inee; los ficheros llevan /inee/dam/jcr:{uuid}/ y HEAD responde 403 | 2026-09-30 |

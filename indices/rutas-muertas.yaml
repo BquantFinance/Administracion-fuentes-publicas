@@ -335,3 +335,93 @@
   source: hacienda-registro-licitadores
   note: ya no hay consulta pública sin certificado; solo el visor de certificados y el DEUC
   checked: "2026-09-30"
+- old: https://extranjeros.inclusion.gob.es/es/ObservatorioPermanenteInmigracion/
+  status: redirect
+  new: https://www.inclusion.gob.es/web/migraciones/homees/ObservatorioPermanenteInmigracion/
+  source: interior-criminalidad
+  note: "redirige al portal de migraciones, que respondió 403 (Akamai) desde centro de datos; no hay ficha del OPI hasta verificarlo desde otra red"
+  checked: "2026-09-30"
+- old: https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia
+  status: "404"
+  new: https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia-saad
+  source: imserso-dependencia
+  note: "404 con meta refresh a /pagina-no-encontrada; la ruta actual lleva el sufijo -saad"
+  checked: "2026-09-30"
+- old: https://avancedigital.mineco.gob.es/banda-ancha/cobertura/Paginas/informes-cobertura.aspx
+  status: redirect
+  new: https://digital.gob.es/telecomunicaciones-infraestructuras-digitales/areas-interes/banda-ancha/informacion-cobertura
+  source: mtdfp-cobertura-banda-ancha
+  note: "el portal de avance digital se integró en digital.gob.es; los xlsx cuelgan de /content/dam/portal-mtdfp/"
+  checked: "2026-09-30"
+- old: https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm?type=pcaxis&path=/no-universitaria&file=pcaxis
+  status: empty
+  new: https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm?type=pcaxis&path=/no-universitaria/alumnado/matriculado/series/gen-al-mat&file=pcaxis
+  source: educacion-estadisticas-ruct
+  note: "un path incompleto acaba en la 404.html del ministerio con código 200; hay que dar la ruta completa hasta la carpeta de tablas"
+  checked: "2026-09-30"
+- old: https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/publicaciones/Parque-vehiculos-Tablas-Estadisticas/Parque-de-vehiculos-Tablas-estadisticas-2025.xlsx
+  status: "404"
+  new: https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/publicaciones/Parque-de-vehiculos-Tablas-Estadisticas/Parque-de-vehiculos-Tablas-estadisticas-2025.xlsx
+  source: dgt-estadisticas
+  note: "la carpeta pasó de Parque-vehiculos-Tablas-Estadisticas a Parque-de-vehiculos-Tablas-Estadisticas (con de); el nombre del fichero no cambió; las URL de los xlsx salen de la página dgt-en-cifras-detalle/{slug}/"
+  checked: "2026-09-30"
+- old: https://www.ign.es/wfs-inspire/hidrografia
+  status: "404"
+  new: https://servicios.idee.es/wfs-inspire/hidrografia
+  source: idee-servicios
+  note: "los WFS temáticos INSPIRE (hidrografía, transportes, ocupación del suelo) viven en servicios.idee.es; www.ign.es solo mantiene ngbe y unidades-administrativas"
+  checked: "2026-09-30"
+- old: https://www.ign.es/wfs-inspire/transportes
+  status: "404"
+  new: https://servicios.idee.es/wfs-inspire/transportes
+  source: idee-servicios
+  note: "mismo caso que hidrografia"
+  checked: "2026-09-30"
+- old: https://www.ign.es/wfs-inspire/ocupacion-suelo
+  status: error
+  new: https://servicios.idee.es/wfs-inspire/ocupacion-suelo
+  source: idee-servicios
+  note: "responde 502"
+  checked: "2026-09-30"
+- old: https://www.ign.es/wms-inspire/hidrografia
+  status: "404"
+  new: https://servicios.idee.es/wms-inspire/hidrografia
+  source: idee-servicios
+  note: "también transportes, ocupacion-suelo y mdt; en www.ign.es quedan ign-base, pnoa-ma y unidades-administrativas"
+  checked: "2026-09-30"
+- old: https://servicios.idee.es/wmts/mapa-raster
+  status: "404"
+  new: https://www.ign.es/wmts/mapa-raster
+  source: idee-servicios
+  note: "el MTN ráster y la ortofoto (pnoa-ma) siguen en www.ign.es; servicios.idee.es solo tiene wmts/mdt"
+  checked: "2026-09-30"
+- old: https://www.cis.es/detalle-ficha-estudio?idEstudio=14893
+  status: redirect
+  new: https://www.cis.es/es/estudios/barometro-de-septiembre-2026
+  source: cis-estudios
+  note: "redirige al catálogo sin el estudio; la página de cada estudio es /es/estudios/{slug}, enumerable por sitemap.xml"
+  checked: "2026-09-30"
+- old: https://www.cis.es/catalogo-estudios/resultados-definidos
+  status: "404"
+  new: https://www.cis.es/es/estudios/catalogo
+  source: cis-estudios
+  note: "el catálogo nuevo se renderiza por JavaScript y sus consultas con q= o start= disparan el anti-bot"
+  checked: "2026-09-30"
+- old: https://www.cis.es/cis/opencms/ES/index.html
+  status: redirect
+  new: https://www.cis.es/
+  source: cis-estudios
+  note: "portal OpenCms antiguo; las rutas 2_bancodedatos/estudios/ver.jsp responden 404"
+  checked: "2026-09-30"
+- old: https://www.inmujeres.gob.es/MujerCifras/
+  status: "403"
+  new: https://www.inmujeres.gob.es/MujerCifras/Home.htm
+  source: inmujeres-mujeres-cifras
+  note: "la raíz responde Your client is not allowed; las páginas de tema y los xls de /estadisticasweb/ sí"
+  checked: "2026-09-30"
+- old: https://www.educacionyfp.gob.es/inee/
+  status: redirect
+  new: https://www.educacionfpydeportes.gob.es/inee/portada.html
+  source: inee-bases-datos
+  note: "también educacion.gob.es/inee; los ficheros llevan /inee/dam/jcr:{uuid}/ y HEAD responde 403"
+  checked: "2026-09-30"

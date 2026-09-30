@@ -1,0 +1,65 @@
+id: cis-estudios
+name: CIS – Catálogo de estudios y microdatos de barómetros y encuestas (MD{n}.zip)
+org: Centro de Investigaciones Sociológicas
+ministry: Presidencia, Justicia y Relaciones con las Cortes
+level: age
+sector: demografia-migraciones-sociedad
+tags: [cis, encuestas, barometro, opinion-publica, microdatos, estimacion-voto, spss, sociologia, json-ld, liferay]
+summary: >-
+  Microdatos de los estudios del CIS (barómetros, preelectorales, postelectorales y encuestas temáticas) sin
+  registro como MD{n}.zip con .sav, CSV y texto de ancho fijo, más cuestionario, ficha técnica, tabulaciones xlsx
+  y estimación de voto en PDF; cada página de estudio lleva JSON-LD con las URL.
+access: [download, scraping]
+auth: none
+formats: [zip, sav, csv, xlsx, pdf, html, jsonld, xml]
+update: monthly
+coverage: "Catálogo con 2582 estudios; ficheros MD verificados para los estudios 2000, 3000, 3490, 3500 y 3577 (barómetro de septiembre de 2026)"
+license: CC BY 4.0 según el JSON-LD de cada estudio; condiciones en /es/condiciones-reutilizacion-datos-del-cis
+base_url: https://www.cis.es/es/estudios/catalogo
+docs_url: https://www.cis.es/es/estudios/informacion-general
+endpoints:
+  - path: https://www.cis.es/es/estudios/{slug}
+    desc: Página de un estudio (barometro-de-septiembre-2026); su JSON-LD trae un nodo Dataset con identifier (número de estudio), datePublished, distribution e isPartOf
+    example: curl -s "https://www.cis.es/es/estudios/barometro-de-septiembre-2026" | grep -o '"contentUrl":"[^"]*"'
+  - path: https://www.cis.es/documents/20117/{carpeta}/MD{n}.zip
+    desc: Microdatos del estudio n; zip con {n}.sav, {n}_num.csv y {n}_etiq.csv (UTF-8 con BOM, separador ;), DA{n} de ancho fijo con sintaxis ES{n} y PDF de cuestionario
+    params: "carpeta es el id de carpeta Liferay propio de cada estudio (13446540 para el 3490, 14250083 para el 3577); se lee de distribution[].contentUrl del JSON-LD, no se deduce"
+    example: curl -sSL -o MD3577.zip "https://www.cis.es/documents/20117/14250083/MD3577.zip"
+  - path: https://www.cis.es/documents/d/guest/md{n}
+    desc: URL amigable del mismo zip sin conocer la carpeta (verificada para 2000, 3000, 3490 y 3500; 3577 y 1000 responden 410)
+    example: curl -sSL -o MD3500.zip "https://www.cis.es/documents/d/guest/md3500"
+  - path: https://www.cis.es/documents/20117/{carpeta}/{n}-multi.xlsx
+    desc: Tabulaciones (14 hojas con marginales y cruces por sexo, edad, estudios, municipio, recuerdo de voto, ocupación y clase social); también _fila y _abs
+    example: curl -sSL -o 3577-multi.xlsx "https://www.cis.es/documents/20117/14250083/3577-multi.xlsx"
+  - path: https://www.cis.es/documents/20117/{carpeta}/{n}_Estimacion.pdf
+    desc: Estimación de voto del barómetro (solo PDF); en la misma carpeta es{n}mar.pdf (marginales), FT{n}.pdf (ficha técnica) y cues{n}.pdf (cuestionario)
+    example: curl -sSL -o 3577_Estimacion.pdf "https://www.cis.es/documents/20117/14250083/3577_Estimacion.pdf"
+  - path: https://www.cis.es/sitemap.xml
+    desc: Índice con 2400 sitemaps hijos (sitemap.xml?p_l_id=...); a partir del hijo 46 cada uno es una página de estudio con su URL /es/estudios/{slug} en seis idiomas
+    example: curl -s "https://www.cis.es/sitemap.xml" | grep -o '<loc>[^<]*</loc>' | sed 's/&amp;/\&/g' | sed -n '46,48p'
+  - path: https://www.cis.es/es/avance-de-resultados
+    desc: Últimos barómetros con enlaces a /es/estudios/{slug} y a las notas /es/w/avance-de-resultados-del-estudio-{n}-...; vía más corta al último estudio
+  - path: https://www.cis.es/es/series/{slug}
+    desc: Página de una serie (intencion-de-voto-en-unas-supuestas-elecciones-generales-noviembre-2023-recodificada-cati-); JSON-LD sin datos, tabla por JavaScript
+  - path: https://www.cis.es/o/headless-admin-taxonomy/v1.0/taxonomy-vocabularies/{id}/taxonomy-categories
+    desc: Categorías de los vocabularios del catálogo (4674191 tipo de estudio, 4675153 índice temático, 4674204 colecciones); único endpoint headless abierto
+    example: 'curl -s -H "Accept: application/json" "https://www.cis.es/o/headless-admin-taxonomy/v1.0/taxonomy-vocabularies/4674191/taxonomy-categories?pageSize=50"'
+quirks: [js-rendered, waf-blocks-bots, static-html]
+ids: [ine-provincia, ine-municipio]
+gotchas:
+  - El catálogo (/es/estudios/catalogo) y /es/buscar se renderizan por JavaScript; sus URL con q= o start= devuelven 429 o redirigen a /__cis_antibot (challenge de 30 s). No localicé API de búsqueda; enumerar por el sitemap.
+  - detalle-ficha-estudio?idEstudio={id} redirige (301) al catálogo sin el estudio y las rutas cis/opencms del portal antiguo dan 302 o 404; el idEstudio interno de cinco cifras no es el número de estudio.
+  - El zip llega con Content-Encoding gzip y sin Accept-Ranges; Range se ignora (200 con el fichero entero, 2,3 MB el 3490 y 2 MB el 3577) y Content-Length solo aparece en HEAD.
+  - DA{n} es texto de ancho fijo sin cabecera; las posiciones están en ES{n} (DATA LIST de SPSS, que termina en WEIGHT BY PESO). _num.csv y _etiq.csv van con ; y BOM UTF-8; _etiq pesa diez veces más por las etiquetas.
+  - CCAA no es el código INE (7 es Castilla-La Mancha y 9 Cataluña, numeración alfabética propia); PROV sí es el código INE de provincia y MUN los 3 dígitos del municipio, que vale 0 en los municipios pequeños anonimizados.
+  - Cada estudio tiene su carpeta documents/20117/{carpeta}; con otra carpeta o con /0/ responde 404. La URL amigable documents/d/guest/md{n} no existe para todos (410 en 3577 y 1000).
+  - Los ids del JSON-LD llevan sufijo #dataset, #report y #catalog; isPartOf enumera las series del estudio (31 en un barómetro) con URL /es/series/{slug}, cuyos datos solo cargan por JavaScript.
+  - El sitemap tiene 2400 hijos frente a 2582 estudios del catálogo; el resto solo se localiza desde avance-de-resultados, las noticias /es/w/ o conociendo el slug.
+  - analisis.cis.es (banco de datos antiguo) no fue alcanzable desde el entorno de prueba (CONNECT 502); no verificado.
+tips:
+  - "pandas.read_csv('3577_num.csv', sep=';', encoding='utf-8-sig') para los códigos; el .sav lleva etiquetas de variables y valores y se lee con pyreadstat; ponderar siempre por PESO."
+  - Para la serie de estimación de voto descargar {n}_Estimacion.pdf de cada barómetro; en 2026 el número de estudio avanza 4 o 6 por mes (3557 abril, 3562 mayo, 3567 junio, 3571 julio, 3577 septiembre).
+  - La página del estudio, el zip y el sitemap responden al User-Agent por defecto de curl; solo el catálogo y el buscador tienen protección anti-bot.
+related: [ine-microdatos, ine-api-tempus, ine-codigos-territoriales]
+status: active
+verified: "2026-09-30"

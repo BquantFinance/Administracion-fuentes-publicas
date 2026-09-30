@@ -1,0 +1,43 @@
+id: inmujeres-mujeres-cifras
+name: Instituto de las Mujeres – Mujeres en cifras (indicadores por sexo en xls)
+org: Instituto de las Mujeres
+ministry: Igualdad
+level: age
+sector: demografia-migraciones-sociedad
+tags: [igualdad, genero, mujeres, indicadores, brecha-salarial, empleo, conciliacion, poder-decisiones, violencia-de-genero, xls]
+summary: >-
+  Indicadores por sexo elaborados sobre datos de INE, SEPE y Seguridad Social en 13 temas (demografía, educación,
+  empleo y prestaciones, salarios, conciliación, poder y decisiones, violencia, salud, ciencia); un xls por
+  indicador con hoja reciente e histórica 1998-2021, más informes PDF.
+access: [download, scraping]
+auth: none
+formats: [xls, pdf, html]
+update: annual
+coverage: "Hoja histórica 1998-2021 y hoja de evolución con los últimos años (hasta 2026 en población)"
+base_url: https://www.inmujeres.gob.es/MujerCifras/Home.htm
+docs_url: https://www.inmujeres.gob.es/MujerCifras/Informes/Informes.htm
+endpoints:
+  - path: https://www.inmujeres.gob.es/MujerCifras/{Tema}/{Tema}.htm
+    desc: Índice de un tema con sus subtemas (Demografia/Demografia.htm, EmpleoPrestaciones/EmpleoPrestacionessociales.htm, PoderDecisiones/PoderTomaDecisiones.htm)
+  - path: https://www.inmujeres.gob.es/MujerCifras/{Tema}/{Subtema}.htm
+    desc: Página de subtema (Demografia/Poblacion.htm, EmpleoPrestaciones/TasasParo.htm, PoderDecisiones/PoderLegislativo.htm) con un enlace xls por indicador y su título
+    example: curl -s "https://www.inmujeres.gob.es/MujerCifras/Demografia/Poblacion.htm" | iconv -f ISO-8859-1 -t UTF-8 | grep -o 'estadisticasweb/[^"]*\.xls'
+  - path: https://www.inmujeres.gob.es/estadisticasweb/{n}_{Tema}/{n}_{m}_{Subtema}/w{id}.xls
+    desc: Un xls por indicador (1_Demografia/1_1_Poblacion/w1.xls población por edad, 5_EmpleoyPrestacionesSociales/5_4_TasasdeParo/w56.xls tasas de paro)
+    example: curl -sS -o w1.xls "https://www.inmujeres.gob.es/estadisticasweb/1_Demografia/1_1_Poblacion/w1.xls"
+  - path: https://www.inmujeres.gob.es/MujerCifras/Informes/Docs/{fichero}.pdf
+    desc: Informes de principales indicadores (principales_indicadores_2021.pdf a PrincipalesIndicadores_2026.pdf, nombre variable) y Mujeresencifras_1983_2023.pdf
+    example: curl -sS -o principales_indicadores_2026.pdf "https://www.inmujeres.gob.es/MujerCifras/Informes/Docs/PrincipalesIndicadores_2026.pdf"
+quirks: [static-html, latin1]
+ids: []
+gotchas:
+  - La raíz /MujerCifras/ responde 403 "Your client is not allowed to access the requested object"; entrar por /MujerCifras/Home.htm o por la página del tema o subtema.
+  - Los enlaces del HTML apuntan al host antiguo www.inmujer.es, que no resolvió ni respondió desde el entorno de prueba; la misma ruta /estadisticasweb/... sirve el xls en www.inmujeres.gob.es (206 con Range).
+  - HTML en ISO-8859-1 con entidades; los xls son Excel 97 (application/vnd.ms-excel) con dos hojas (Evo w{id} y w{id} 1998 - 2021), tres filas de título antes de la fila de años y años en orden descendente.
+  - Los directorios /estadisticasweb/ no se listan (403); los ids w{id} solo se conocen rascando la página del subtema, donde el texto del enlace es el título del indicador.
+  - Cada hoja termina con la fuente (INEbase, Estadística Continua de Población) y la fecha de actualización de la tabla; los valores son porcentajes o totales elaborados por el Instituto, no la serie original.
+tips:
+  - "pandas.read_excel(url, sheet_name=None, header=None) con xlrd; tomar como cabecera la fila cuyo tercer valor es un año y descartar las filas de fuente y notas del final."
+related: [ine-api-tempus, sepe-estadisticas, segsocial-estadisticas, igualdad-estadisticas-violencia-genero]
+status: active
+verified: "2026-09-30"

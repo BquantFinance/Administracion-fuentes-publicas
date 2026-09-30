@@ -48,6 +48,10 @@ endpoints:
     desc: Misma API con salida CSV cambiando js por csv
     example: curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=12"
     returns: "Texto tabulado en ISO-8859-15 con BOM; una columna por variable, Periodo (2026M08) y Total; decimal con coma y cadena vacía en los periodos aún sin dato"
+  - path: https://www.ine.es/jaxiT3/files/t/es/{csv_bdsc|px|xlsx}/{id_tabla}.{csv|px|xlsx}?nocab=1
+    desc: Descarga directa de cualquier tabla de INEbase con la misma id_tabla que DATOS_TABLA (2854, 24077); csv_bdsc separado por ;, px y xlsx
+    example: curl -s "https://www.ine.es/jaxiT3/files/t/es/csv_bdsc/24077.csv?nocab=1"
+    returns: "CSV en ISO-8859-15 con BOM y separador ; (una columna por variable, Periodo como 2026M08 o 2025, Total con coma decimal y punto de miles; \"\" en el periodo sin dato); px en application/pc-axis y xlsx con la misma tabla"
 rate_limit: No documentado; una tabla grande con nult=1 devuelve 600 KB (4248 series en la 25333)
 quirks: [errors-html-or-xml]
 gotchas:

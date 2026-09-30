@@ -21,6 +21,7 @@ endpoints:
   - path: https://www.cores.es/sites/default/files/archivos/estadisticas/consumos-pp-ccaa-provincias.xlsx
     desc: Consumo mensual de productos petrolíferos por CCAA y provincia desde enero de 1997 (hoja Consumos, cabecera en la fila 3, 25.000 filas)
     example: curl -sSL -o consumos-pp-ccaa-provincias.xlsx "https://www.cores.es/sites/default/files/archivos/estadisticas/consumos-pp-ccaa-provincias.xlsx"
+    returns: "Hojas Inicio (fuentes por periodo) y Consumos con cabecera tras dos filas de título: Año, Mes, CCAA, Provincia, Gasolina 97, 95 y 98 I.O., % bio en gasolinas, Gasóleo A, B y C, % bio en gasóleos, Fuelóleo BIA... en toneladas; celdas con fórmulas hacia Inicio (leer con data_only=True)"
   - path: https://www.cores.es/sites/default/files/archivos/estadisticas/{fichero}.xlsx
     desc: Series completas con nombre fijo, sobrescritas cada mes
     params: fichero = consumos-pp, consumos-pp-por-grupo, consumos-gas, existencias-gas, balance-pp-anual, balance-gas-anual, capacidad-refineria

@@ -21,6 +21,7 @@ endpoints:
   - path: https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/docs/CNH_2025.xlsx
     desc: Catálogo Nacional de Hospitales (hojas DIRECTORIO, ESTRUCTURA FUNCIONAL, BAJAS, ALTAS y tablas de códigos de CCAA, provincias, municipios, clase y dependencia)
     example: curl -sSL -o CNH_2025.xlsx "https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/docs/CNH_2025.xlsx"
+    returns: "Una fila por hospital: CCN, CODCNH, Nombre Centro, dirección, teléfono, código de municipio de 6 dígitos (INE más dígito de control), Municipio, Cód. Provincia, Provincia, Cód. CCAA, CCAA, código postal, camas y Clase (C11...); segunda hoja ESTRUCTURA FUNCIONAL con Cod Concierto, Forma parte Complejo y CODIDCOM"
   - path: https://pestadistico.inteligenciadegestion.sanidad.gob.es/publicoSNS/S
     desc: Consulta Interactiva del SNS (cubos de altas, actividad, recursos y gasto); aplicación ASP.NET con __VIEWSTATE, exportación manual
   - path: https://inclasns.sanidad.gob.es/
