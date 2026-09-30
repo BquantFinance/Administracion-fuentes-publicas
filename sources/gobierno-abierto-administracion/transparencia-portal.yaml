@@ -6,27 +6,33 @@ level: age
 sector: gobierno-abierto-administracion
 tags: [transparencia, publicidad-activa, altos-cargos, retribuciones, agendas, contratos, convenios, derecho-de-acceso]
 summary: >-
-  Publicidad activa de la AGE: altos cargos y sus retribuciones, agendas, contratos, convenios, subvenciones,
-  presupuestos, informes, y estadísticas de solicitudes de derecho de acceso. Muchos datasets en CSV/XLSX.
+  Publicidad activa de la AGE por materias (organización y empleo público, altos cargos, planificación,
+  normativa, contratos, convenios, subvenciones) y estadísticas del derecho de acceso en xlsx. Portal Adobe
+  Experience Manager con contenido por página; sin API y con pocas descargas estructuradas.
 access: [portal, download]
 auth: none
-formats: [csv, xlsx, pdf, html]
+formats: [html, xlsx, pdf]
 update: monthly
 coverage: "2014-"
 license: Reutilización libre con cita de la fuente
 base_url: https://transparencia.gob.es/
-docs_url: https://transparencia.gob.es/transparencia/transparencia_Home/index/Datos-abiertos.html
+docs_url: https://transparencia.gob.es/publicidad-activa/por-materias/tramites
 endpoints:
-  - path: https://transparencia.gob.es/transparencia/transparencia_Home/index/PublicidadActiva/Contratos.html
-    desc: Contratos, convenios y encomiendas por ministerio
-  - path: https://transparencia.gob.es/transparencia/transparencia_Home/index/PublicidadActiva/AltosCargos.html
-    desc: Altos cargos, retribuciones, agendas y declaraciones de bienes
-  - path: https://transparencia.gob.es/transparencia/transparencia_Home/index/Derecho-de-acceso.html
-    desc: Solicitudes de acceso a información pública y sus resoluciones
+  - path: /publicidad-activa/por-materias/tramites/{contratos|contratos-estadisticas|convenios-encomiendas|subvenciones|subvenciones-partidos-politicos}
+    desc: Contratos, convenios, encomiendas y subvenciones de la AGE
+  - path: /publicidad-activa/por-materias/altos-cargos/{retribuciones|agendaAACC|actividad-privada-cese}
+    desc: Retribuciones, agendas y actividad tras el cese de altos cargos
+  - path: /derecho-acceso/datos-derecho-de-acceso
+    desc: Estadísticas de solicitudes de acceso; xlsx bajo /content/dam/transparencia_home/masinformacion/elportalencifras/{AAAA}-cifras/
+    example: curl -sO "https://transparencia.gob.es/content/dam/transparencia_home/masinformacion/elportalencifras/2026-cifras/datos_2026-06.VersionDefinitiva.xlsx"
+  - path: /derecho-acceso/resoluciones-denegatorias/resolucionesdenegatorias{AAAA}
+    desc: Resoluciones denegatorias por año
+quirks: [static-html, url-drift]
 gotchas:
-  - Los datasets se publican por ministerio y trimestre en ficheros separados; agregarlos requiere normalizar nombres de organismos (usar DIR3).
-  - Las agendas de altos cargos son HTML por persona; no hay descarga masiva.
-  - El derecho de acceso se ejerce vía Cl@ve; las resoluciones se publican sin datos del solicitante.
-related: [datos-gob-es-api, dir3-directorio, bdns-api]
+  - El portal se rediseñó (Adobe Experience Manager); las rutas transparencia_Home/index/... de la ficha anterior devuelven 404 o redirigen. Las nuevas cuelgan de /publicidad-activa/por-materias/ y /derecho-acceso/.
+  - Cada página pesa 400 KB porque incluye el menú completo; el contenido propio va al final del HTML.
+  - En la verificación, las páginas de contratos, convenios y subvenciones no enlazan ficheros descargables; el detalle por expediente está en PLACSP y BDNS (fichas propias).
+  - Los xlsx llevan la fecha en el nombre (datos_2026-06.VersionDefinitiva.xlsx); rascar la página para obtener el vigente.
+related: [datos-gob-es-api, dir3-directorio, bdns-api, placsp-datos-abiertos]
 status: active
-verified: null
+verified: "2026-09-30"

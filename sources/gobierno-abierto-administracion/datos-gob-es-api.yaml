@@ -1,41 +1,50 @@
 id: datos-gob-es-api
-name: datos.gob.es – Catálogo nacional de datos abiertos (API y SPARQL)
-org: Dirección General del Dato / Entidad Pública Empresarial Red.es
+name: datos.gob.es – Catálogo nacional de datos abiertos (API)
+org: Dirección General del Dato y Red.es
 ministry: Transformación Digital y de la Función Pública
 level: age
 sector: gobierno-abierto-administracion
-tags: [datos-abiertos, catalogo, dcat, sparql, metadatos, federacion]
+tags: [datos-abiertos, catalogo, dcat, metadatos, federacion, sparql]
 summary: >-
-  Catálogo federado de datasets abiertos de todas las Administraciones españolas (más de 90.000 conjuntos) con
-  metadatos DCAT-AP. API REST para buscar datasets, distribuciones y publicadores, y endpoint SPARQL.
-access: [api-rest, sparql, download]
+  Catálogo federado de los datasets abiertos de todas las Administraciones (Estado, CCAA, EELL, universidades) con
+  metadatos DCAT-AP, distribuciones con URL de descarga y publicador identificado por código DIR3. API REST JSON
+  paginada; el endpoint SPARQL no respondió desde este entorno.
+access: [api-rest, sparql, portal]
 auth: none
-formats: [json, xml, csv, rdf, ttl]
+formats: [json, xml, csv, rdf]
 update: daily
 coverage: "2011-"
-license: Metadatos CC BY 4.0; cada dataset tiene su licencia
+license: Metadatos CC BY 4.0; cada dataset lleva su licencia en el campo license
 base_url: https://datos.gob.es/apidata
 docs_url: https://datos.gob.es/es/accessible-apidata
 endpoints:
-  - path: /catalog/dataset?_pageSize={n}&_page={n}
-    desc: Listado paginado de datasets
-    example: curl -s "https://datos.gob.es/apidata/catalog/dataset?_pageSize=10&_page=0"
-  - path: /catalog/dataset/title/{texto}
-    desc: Búsqueda de datasets por título
-    example: curl -s "https://datos.gob.es/apidata/catalog/dataset/title/paro"
-  - path: /catalog/dataset/publisher/{id_publicador}
-    desc: Datasets de un publicador (id DIR3 del organismo)
-  - path: /catalog/dataset/theme/{tema}
-    desc: Datasets por tema NTI (economia, sector-publico, medio-ambiente...)
-  - path: /catalog/publisher
-    desc: Lista de organismos publicadores
+  - path: /catalog/dataset.json?_pageSize={n}&_page={n}
+    desc: Listado paginado de datasets con title, description, publisher, theme, keyword, spatial, temporal y distribution
+    example: 'curl -s -H "Accept: application/json" -A "Mozilla/5.0" "https://datos.gob.es/apidata/catalog/dataset.json?_pageSize=100&_page=0"'
+    params: "_pageSize hasta 100 (verificado), _page desde 0, _sort=-modified para los más recientes"
+  - path: /catalog/dataset/title/{texto}.json
+    desc: Datasets cuyo título contiene el texto
+    example: curl -s -A "Mozilla/5.0" "https://datos.gob.es/apidata/catalog/dataset/title/paro.json?_pageSize=50"
+  - path: /catalog/dataset/publisher/{codigo_dir3}.json
+    desc: Datasets de un organismo por su código DIR3 (E05251701 es la SGAD)
+  - path: /catalog/dataset/theme/{tema}.json
+    desc: Datasets por tema NTI (economia, sector-publico, medio-ambiente, empleo...)
+    example: curl -s -A "Mozilla/5.0" "https://datos.gob.es/apidata/catalog/dataset/theme/economia.json?_pageSize=50"
+  - path: /catalog/publisher.json
+    desc: Organismos publicadores, como URI con el código DIR3 al final
   - path: https://datos.gob.es/virtuoso/sparql
-    desc: Endpoint SPARQL sobre el catálogo DCAT
+    desc: Endpoint SPARQL sobre el grafo DCAT; bloqueado por el WAF en todos los intentos de esta verificación
+quirks: [waf-intermittent-403, errors-html-or-xml, static-html]
+ids: [dir3]
 gotchas:
-  - Añadir .json, .xml, .csv o .rdf al final de la ruta fuerza el formato; sin extensión negocia por Accept.
-  - _pageSize máximo 50; usar _page para paginar y _sort para ordenar.
-  - Es un catálogo de metadatos, no de datos; las URLs de descarga (accessURL) apuntan al organismo origen y pueden estar rotas.
-  - Muchos datasets autonómicos y locales solo existen aquí como metadatos federados del portal de origen.
+  - El WAF (Incapsula) responde 403 con un reto JavaScript a la mayoría de las peticiones (pasa 1 de cada 3 a 6), con cualquier User-Agent; reintentar con espera creciente hasta obtener 200.
+  - _pageSize admite 100 (la ficha anterior decía 50); la respuesta es un envoltorio Linked Data API (result.items, itemsPerPage, next, startIndex).
+  - Los campos multilingües (title, description) son listas de objetos con _value y _lang; los de un solo idioma pueden venir como cadena. Tratar ambos casos.
+  - Es un catálogo de metadatos; distribution[].accessURL apunta al organismo origen y puede estar roto o exigir sesión. No hay proxy de los datos.
+  - El identificador del dataset (_about y el slug tras /catalogo/) empieza por el código DIR3 del publicador (l01281317-..., e05251701-...).
+  - La documentación y el catálogo web también están detrás del WAF; el HTML de un dataset está en https://datos.gob.es/catalogo/{slug} cuando la petición pasa.
+tips:
+  - Sirve para descubrir dónde publica sus ficheros un organismo (DIR3, FACe, INE, SEPE) antes de rascar su web; accessURL suele ser la URL directa del fichero.
 related: [dir3-directorio, transparencia-portal]
 status: active
-verified: null
+verified: "2026-09-30"

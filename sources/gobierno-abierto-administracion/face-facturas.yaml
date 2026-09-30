@@ -1,32 +1,43 @@
 id: face-facturas
-name: FACe – Punto general de entrada de facturas electrónicas
+name: FACe – Facturas electrónicas al sector público y directorio DIR3
 org: Secretaría General de Administración Digital
 ministry: Transformación Digital y de la Función Pública
 level: age
 sector: gobierno-abierto-administracion
-tags: [face, factura-electronica, facturae, proveedores, oficinas-contables, dir3]
+tags: [face, factura-electronica, facturae, proveedores, oficinas-contables, dir3, soap]
 summary: >-
-  Servicios web para presentar y consultar facturas electrónicas (Facturae 3.2.x) a las Administraciones adheridas,
-  directorio de unidades receptoras (DIR3) y estadísticas de facturación.
-access: [api-soap, download]
-auth: certificate
-formats: [xml, xlsx]
+  Punto general de entrada de facturas electrónicas: API pública JSON y CSV con las 50000 relaciones oficina
+  contable, órgano gestor y unidad tramitadora (DIR3 y NIF) de las Administraciones adheridas, y servicios SOAP
+  con certificado para presentar y consultar facturas.
+access: [api-rest, api-soap, download]
+auth: none
+formats: [json, csv, xml]
 update: realtime
-coverage: "2015-"
-license: Servicio administrativo; directorio y estadísticas reutilizables
-base_url: https://face.gob.es/
-docs_url: https://face.gob.es/es/proveedores
+coverage: "Relaciones vigentes; facturas desde 2015 (las anteriores al 27/02/2026 se consultan en face.gob.es)"
+license: Directorio reutilizable; el envío y consulta de facturas exige certificado del proveedor
+base_url: https://proveedores.face.gob.es/api/v1
+docs_url: https://proveedores.face.gob.es/inicio
 endpoints:
-  - path: https://face.gob.es/es/directorio/administraciones
-    desc: Directorio de administraciones y unidades DIR3 que reciben por FACe (descargable)
-  - path: https://face.gob.es/es/facturas/estadisticas
-    desc: Estadísticas de facturas recibidas
-  - path: https://webservice.face.gob.es/facturasspp2
-    desc: Servicio web SOAP de presentación y consulta (requiere certificado y firma WS-Security)
+  - path: /relations?fulltext={texto}&page={n}&limit={n}
+    desc: Relaciones en JSON; cada item trae oc, og y ut con code (DIR3), name y alias, y og lleva identifier con el NIF
+    example: curl -s "https://proveedores.face.gob.es/api/v1/relations?fulltext=Ayuntamiento%20de%20Madrid&limit=100&page=1"
+    params: "fulltext filtra por nombre; page empieza en 1; limit hasta 1000 (5000 devuelve 500); respuesta con items, count, total, limit y page"
+  - path: /relations.csv?fulltext={texto}
+    desc: Lo mismo en CSV con punto y coma (oficinaContable, organoGestor, unidadTramitadora y activo); sin filtro, las 50186 relaciones en 7 MB
+    example: curl -sO "https://proveedores.face.gob.es/api/v1/relations.csv"
+  - path: https://webservice.face.gob.es/facturasspp2?wsdl
+    desc: WSDL del servicio SOAP de presentación y consulta de facturas en producción
+  - path: https://se-face-webservice.redsara.es/facturasspp2?wsdl
+    desc: Mismo servicio en el entorno de pruebas
+ids: [dir3, nif]
 gotchas:
-  - Las facturas deben ir en Facturae 3.2, 3.2.1 o 3.2.2 firmadas con XAdES; otros formatos se rechazan.
-  - Cada factura necesita tres códigos DIR3 (oficina contable, órgano gestor, unidad tramitadora) obtenidos del directorio.
-  - Existe entorno de pruebas (se-face-webservice) con certificados de prueba.
-related: [dir3-directorio]
+  - face.gob.es es desde el 27/02/2026 solo consulta histórica; el portal y la API viven en proveedores.face.gob.es. Las rutas /es/directorio/administraciones y /es/facturas/estadisticas de la ficha anterior ya no dan datos.
+  - Solo relations es público; statistics responde 401 y no existen administraciones ni nifs como recursos de la API.
+  - page=0 devuelve 500 (la paginación empieza en 1); relations.json no existe, el JSON se obtiene sin extensión.
+  - El CSV llega en UTF-8 con BOM aunque Content-Type diga ISO-8859-1.
+  - Cada factura necesita los tres códigos DIR3 (OC, OG, UT) de una relación con activo=1; el SOAP exige certificado del proveedor.
+tips:
+  - El CSV completo es la forma más rápida de tener los DIR3 de todo el sector público que factura electrónicamente, sin pasar por el WAF del CTT (dir3-directorio).
+related: [dir3-directorio, placsp-datos-abiertos]
 status: active
-verified: null
+verified: "2026-09-30"

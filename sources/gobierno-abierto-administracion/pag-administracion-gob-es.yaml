@@ -1,30 +1,40 @@
 id: pag-administracion-gob-es
-name: Punto de Acceso General – Trámites, sedes y empleo público
+name: Punto de Acceso General – Trámites, SIA, empleo público y ayudas
 org: Secretaría General de Administración Digital
 ministry: Transformación Digital y de la Función Pública
 level: age
 sector: gobierno-abierto-administracion
-tags: [tramites, sedes-electronicas, empleo-publico, oposiciones, sia, catalogo-procedimientos]
+tags: [tramites, sedes-electronicas, empleo-publico, oposiciones, sia, becas, ayudas]
 summary: >-
-  Catálogo de procedimientos y servicios de la AGE (SIA), convocatorias de empleo público, directorio de sedes
-  electrónicas y organigramas. Base para localizar el trámite y la sede competentes.
-access: [portal, feed]
+  Portal ciudadano de la AGE: boletín semanal de empleo público y boletín quincenal de ayudas y becas en PDF,
+  buscador de trámites con código SIA, buscador de oficinas y directorio de sedes electrónicas. Sin API ni
+  descarga estructurada; útil como índice, no como fuente de datos.
+access: [portal]
 auth: none
-formats: [html, rss, xlsx]
-update: daily
+formats: [html, pdf]
+update: weekly
 license: Reutilización libre con cita de la fuente
 base_url: https://administracion.gob.es/
-docs_url: https://administracion.gob.es/pag_Home/empleoBecas/empleo/boletinEmpleoPublico.html
+docs_url: https://administracion.gob.es/espanaadmon/sia
 endpoints:
-  - path: https://administracion.gob.es/pag_Home/empleoBecas/empleo/boletinEmpleoPublico.html
-    desc: Boletín semanal de empleo público con convocatorias de todas las Administraciones
-  - path: https://administracion.gob.es/pag_Home/atencionCiudadana/OficinasAtencion.html
-    desc: Oficinas de asistencia en materia de registro
-  - path: https://administracionelectronica.gob.es/ctt/sia
-    desc: SIA, Sistema de Información Administrativa, inventario de procedimientos con código SIA
+  - path: /empleopublico/boletin
+    desc: Boletín semanal de convocatorias de empleo público en PDF con fecha en el nombre (Boletin_Convocatorias_Empleo_{DD}{Mes}{AAAA}.pdf)
+  - path: /empleopublico/ofertas-empleo-publico
+    desc: Ofertas de empleo público de la AGE
+  - path: /ayudas/boletin
+    desc: Boletín quincenal de ayudas, subvenciones, becas y premios en PDF
+  - path: /espanaadmon/sia
+    desc: Qué es el SIA y enlace al buscador de trámites filtrable por código SIA
+  - path: /informacion/buscador-de-oficinas
+    desc: Buscador de oficinas de asistencia en materia de registro
+  - path: /informacion/sedes-electronicas-y-portales-de-internet-publicos
+    desc: Directorio de sedes electrónicas y portales públicos
+quirks: [static-html, url-drift]
 gotchas:
-  - El código SIA identifica cada procedimiento y aparece en sedes, BDNS y notificaciones; el inventario completo se descarga desde el CTT previa solicitud.
-  - Las convocatorias de empleo público remiten al BOE; usar la API del BOE para el texto.
-related: [boe-api-sumario, dir3-directorio]
+  - El portal se rediseñó (Adobe Experience Manager) y las rutas pag_Home/... de la ficha anterior devuelven 404; las nuevas son cortas (/empleopublico/boletin).
+  - Los boletines son PDF con la fecha en el nombre bajo /content/dam/punto-acceso-general/; rascar la página para obtener el enlace vigente.
+  - El inventario SIA no se descarga en abierto; el área pública del CTT (administracionelectronica.gob.es, idIniciativa=sia) no ofrece ficheros y el completo se pide como usuario de la red SARA.
+  - Las convocatorias de empleo público remiten al BOE; usar la API del BOE para el texto y sus canales RSS para el seguimiento.
+related: [boe-api-sumario, dir3-directorio, bdns-api]
 status: active
-verified: null
+verified: "2026-09-30"
