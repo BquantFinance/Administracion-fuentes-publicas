@@ -28,6 +28,8 @@ endpoints:
     desc: Códigos de comunidades autónomas y provincias en HTML; también cod_ccaa.htm, cod_provincia.htm y cod_islas.htm
   - path: https://www.ine.es/daco/daco42/codmun/codmun_anual.htm
     desc: Índice de las relaciones anuales anteriores
+quirks: [static-html]
+ids: [ine-municipio, ine-provincia, ccaa]
 gotchas:
   - El código completo son 5 dígitos, CPRO (2) más CMUN (3); el dígito de control DC es una columna aparte. Muchos datasets omiten el DC y otros lo pegan como sexto dígito.
   - Los códigos vienen como texto con ceros a la izquierda; al leer con pandas forzar dtype str o se pierden (01 pasa a 1).

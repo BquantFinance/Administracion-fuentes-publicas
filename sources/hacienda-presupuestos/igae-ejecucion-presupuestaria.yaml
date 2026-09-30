@@ -28,6 +28,7 @@ endpoints:
     desc: Ejecución mensual del presupuesto del Estado en caja; PDF por mes y xlsx con anexos
   - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/BasesDatos/Invente/Paginas/inicio.aspx
     desc: INVENTE, inventario de entes del sector público estatal, autonómico y local
+quirks: [static-html]
 gotchas:
   - Las rutas imMensualEstado.aspx y pap.hacienda.gob.es/invente2/ de la ficha anterior no existen (404 y rechazo del WAF); INVENTE cuelga de BasesDatos/Invente.
   - Sitio SharePoint. Los xlsx de contabilidad nacional siguen patrón por año (M_AACC_{AAAA}.xlsx); los de ejecución en caja llevan el mes en mayúsculas y espacios (MENSUAL ABRIL 2026.xlsx), codificar %20.

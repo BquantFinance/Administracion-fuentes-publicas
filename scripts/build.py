@@ -54,6 +54,8 @@ def render_source_compact(s: dict) -> str:
         lines.append(f"rate_limit: {s['rate_limit']}")
     if s.get("quirks"):
         lines.append(f"quirks: {fmt_list(s['quirks'])}")
+    if s.get("ids"):
+        lines.append(f"ids: {fmt_list(s['ids'])}")
     for g in s.get("gotchas", []) or []:
         lines.append(f"! {g}")
     for tip in s.get("tips", []) or []:
@@ -158,7 +160,7 @@ def main() -> None:
         "",
         "## Reglas rápidas antes de programar contra una fuente",
         "",
-        "- Lee `quirks` y `gotchas` de la ficha: son hechos verificados con llamadas reales, no documentación oficial.",
+        "- Lee `quirks`, `ids` y `gotchas` de la ficha: son hechos verificados con llamadas reales, no documentación oficial. `quirks` dice cómo configurar el cliente; `ids` con qué otras fuentes se cruza.",
         "- Muchos servidores .gob.es sirven certificados FNMT sin la cadena intermedia; curl y requests fallan hasta añadirla al bundle. Arreglo copiable en la guía Cliente HTTP.",
         "- Envía siempre un User-Agent de navegador; varios sitios (tesoro.es) devuelven 403 al User-Agent de curl.",
         "- Las APIs del BOE exigen Accept explícito (application/json o application/xml) y devuelven los errores siempre en XML.",

@@ -47,7 +47,8 @@ endpoints:
     desc: Tablas de códigos (materias, rangos, departamentos, ambitos, estados-consolidacion, relaciones-anteriores, relaciones-posteriores)
     example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/datos-auxiliares/rangos"'
 rate_limit: No documentado
-quirks: [accept-header-required]
+quirks: [accept-header-required, errors-html-or-xml]
+ids: [boe-id, eli]
 gotchas:
   - Cabecera Accept obligatoria; sin ella o con */* responde 400. Los errores llegan siempre en XML aunque se pida JSON.
   - Norma completa, texto, bloque y metadata-eli solo se sirven en XML; con Accept application/json devuelven 400. Metadatos, análisis, índice, listado y tablas auxiliares sí van en JSON.

@@ -42,7 +42,7 @@ endpoints:
     desc: Misma API con salida CSV cambiando js por csv
     example: curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=12"
 rate_limit: No documentado; una tabla grande con nult=1 devuelve 600 KB (4248 series en la 25333)
-quirks: [latin1]
+quirks: [errors-html-or-xml]
 gotchas:
   - Los códigos de serie y los ids de tabla cambian con cada cambio de base. El IPC general fue IPC206446 (hasta 2021), IPC251852 (hasta 2025M12) y es IPC290751 (base 2025).
   - Una tabla retirada (50902) sigue respondiendo con datos viejos aunque ya no aparezca en TABLAS_OPERACION; validar siempre la tabla contra ese listado.

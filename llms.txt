@@ -15,7 +15,7 @@ Fuentes: 67 · Alcance actual: Administración General del Estado · Generado: 2
 
 ## Reglas rápidas antes de programar contra una fuente
 
-- Lee `quirks` y `gotchas` de la ficha: son hechos verificados con llamadas reales, no documentación oficial.
+- Lee `quirks`, `ids` y `gotchas` de la ficha: son hechos verificados con llamadas reales, no documentación oficial. `quirks` dice cómo configurar el cliente; `ids` con qué otras fuentes se cruza.
 - Muchos servidores .gob.es sirven certificados FNMT sin la cadena intermedia; curl y requests fallan hasta añadirla al bundle. Arreglo copiable en la guía Cliente HTTP.
 - Envía siempre un User-Agent de navegador; varios sitios (tesoro.es) devuelven 403 al User-Agent de curl.
 - Las APIs del BOE exigen Accept explícito (application/json o application/xml) y devuelven los errores siempre en XML.

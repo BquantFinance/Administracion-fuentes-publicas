@@ -32,6 +32,7 @@ endpoints:
     desc: Tipos de IBI, IAE, IVTM y otros tributos por municipio
   - path: https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PMP_NET/aspx/consulta/consulta.aspx?tipoPublicacion=2
     desc: Periodo medio de pago a proveedores por entidad local
+quirks: [static-html, session-required, url-drift]
 gotchas:
   - SelDescargaDC.aspx y SeldescargaDF.aspx (descarga de presupuestos) devuelven sesion_expirada por URL directa, incluso con cookies y Referer; la sesión nace en la navegación del menú. Automatizar con navegador.
   - Los xlsx de hacienda.gob.es tienen rutas con espacios (sist financiacion y deuda); codificar como %20.

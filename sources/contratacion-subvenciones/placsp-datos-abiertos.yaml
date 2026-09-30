@@ -28,6 +28,7 @@ endpoints:
   - path: sindicacion_{n}/{nombre_feed}_{AAAA}{MM}.zip
     desc: Histórico mensual de cada feed en el mismo formato ATOM; entre 12 y 19 MB por mes en 2026
     example: curl -sO "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_202508.zip"
+ids: [dir3, cpv]
 gotchas:
   - El feed se recorre hacia atrás con el link rel=next, que apunta a instantáneas con fecha y hora en el nombre (Completo3_20260929_201515.atom); no hay paginación por número.
   - Un expediente aparece varias veces (una por cambio de estado); quedarse con la entry de updated mayor por id (sindicacion/licitacionesPerfilContratante/{n}).

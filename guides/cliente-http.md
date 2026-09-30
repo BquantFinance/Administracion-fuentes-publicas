@@ -68,6 +68,44 @@ con los campos del formulario (nombres `ctl00$...`). Mantener la sesión de cook
 El buscador BIEST del Banco de España (app.bde.es/bie_www) rechaza clientes automatizados con "Request
 Rejected" aunque lleven User-Agent de navegador. No hay arreglo; usar la API y los catálogos CSV de la ficha.
 
+## waf-intermittent-403
+
+El portal de la Seguridad Social (Akamai) responde 403 "Acceso denegado" a una de cada dos o tres peticiones
+legítimas, también en las descargas de ficheros, y 200 a la siguiente. Reintentar la misma URL tras 2 a 5
+segundos, con las mismas cabeceras (User-Agent y Accept-Language de navegador). No es un límite de ritmo: una
+petición aislada también puede recibir el 403.
+
+## session-required
+
+Hacienda (aplicación de presupuestos de entidades locales, SGCIEF) devuelve "sesión expirada" a cualquier URL de
+descarga pedida directamente, incluso con cookies y Referer, porque la sesión se crea en la navegación por el
+menú; automatizar con navegador (Playwright). REGCON (convenios colectivos) es más simple: GET del formulario,
+conservar cookies y reenviar el token consulta_token_value_id en el POST.
+
+## js-rendered
+
+Contenido generado en el navegador. Antes de lanzar un navegador sin cabeza, mirar en las herramientas de red
+qué llamadas XHR hace la página: casi siempre devuelven JSON y se pueden replicar con requests. Ninguna fuente
+verificada hasta ahora lo exige.
+
+## static-html
+
+Lo contrario: el HTML servido ya contiene los enlaces a los ficheros. Un GET más una expresión regular sobre
+href, o lxml, bastan. Es el caso de AIReF, Tesoro, AEAT, IGAE, Hacienda local, INE, MITES, SEPE y Seguridad
+Social. Rascar la página en cada ejecución cuando además tenga url-drift.
+
+## errors-html-or-xml
+
+BOE (errores siempre en XML), INE (404 y 500 en HTML) y BDNS (404 de Tomcat en HTML) no devuelven el error en el
+formato pedido. Comprobar el código HTTP antes de parsear y no confiar en Content-Type.
+
+## url-drift y overwritten-in-place
+
+Dos estrategias de caché opuestas. Con url-drift (AIReF, ICO, CNMV, Hacienda local, Seguridad Social) la URL del
+fichero cambia en cada publicación: no fijar enlaces, localizarlos en la página cada vez. Con overwritten-in-place
+(Tesoro, AEAT, SEPE) la URL es fija pero el contenido se sustituye: guardar copia fechada si se necesita el
+histórico de publicaciones o de revisiones.
+
 ## json-object-or-list
 
 En las APIs del BOE y BORME, `item`, `departamento`, `epigrafe` y `apartado` son un objeto cuando hay un

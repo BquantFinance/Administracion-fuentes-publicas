@@ -885,7 +885,13 @@
    ],
    "rate_limit": "No documentado; pageSize se limita en silencio a 10000 (4 MB y 6 s por página). El aviso legal se reserva bloquear usos abusivos.",
    "quirks": [
-    "latin1"
+    "latin1",
+    "errors-html-or-xml"
+   ],
+   "ids": [
+    "bdns",
+    "nif",
+    "invente"
    ],
    "gotchas": [
     "Las fechas de filtro van en dd/mm/aaaa; en ISO (2026-09-01) responde 400 con JSON de campos codigo y errores.",
@@ -1012,6 +1018,10 @@
      "desc": "Histórico mensual de cada feed en el mismo formato ATOM; entre 12 y 19 MB por mes en 2026",
      "example": "curl -sO \"https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_202508.zip\""
     }
+   ],
+   "ids": [
+    "dir3",
+    "cpv"
    ],
    "gotchas": [
     "El feed se recorre hacia atrás con el link rel=next, que apunta a instantáneas con fecha y hora en el nombre (Completo3_20260929_201515.atom); no hay paginación por número.",
@@ -1158,7 +1168,9 @@
     }
    ],
    "quirks": [
-    "tls-chain-incomplete"
+    "tls-chain-incomplete",
+    "static-html",
+    "url-drift"
    ],
    "gotchas": [
     "El servidor envía el certificado sin la cadena intermedia FNMT; curl y requests fallan la verificación TLS salvo que se añada AC Componentes Informáticos al bundle (ver guía).",
@@ -1335,7 +1347,9 @@
     }
    ],
    "quirks": [
-    "viewstate-forms"
+    "viewstate-forms",
+    "static-html",
+    "url-drift"
    ],
    "gotchas": [
     "La raíz /portal/ y /portal/RSS/ devuelven 403; la portada es /portal/home. Las rutas funcionan con y sin extensión .aspx.",
@@ -1384,6 +1398,10 @@
      "path": "https://www.ico.es/web/guest/ico/informe-anual",
      "desc": "Memoria, cuentas anuales e informe de relevancia prudencial en PDF"
     }
+   ],
+   "quirks": [
+    "static-html",
+    "url-drift"
    ],
    "gotchas": [
     "Las rutas /web/ico/estadisticas y /web/ico/transparencia ya no existen; redirigen a la portada.",
@@ -1449,7 +1467,9 @@
    ],
    "quirks": [
     "user-agent-browser",
-    "tls-chain-incomplete"
+    "tls-chain-incomplete",
+    "static-html",
+    "overwritten-in-place"
    ],
    "gotchas": [
     "Con el User-Agent por defecto de curl responde 403 en todo el sitio; enviar un User-Agent de navegador.",
@@ -1532,23 +1552,24 @@
   },
   {
    "id": "mites-estadisticas",
-   "name": "Ministerio de Trabajo – Estadísticas laborales y convenios",
+   "name": "Ministerio de Trabajo – Estadísticas laborales y REGCON",
    "org": "Subdirección General de Estadística y Análisis Sociolaboral",
    "ministry": "Trabajo y Economía Social",
    "level": "age",
    "sector": "empleo-seguridad-social",
    "tags": [
     "convenios-colectivos",
+    "regcon",
     "huelgas",
     "accidentes-laborales",
     "regulacion-empleo",
-    "ere",
-    "empresas-trabajo-temporal"
+    "ett",
+    "planes-igualdad"
    ],
-   "summary": "Estadísticas de convenios colectivos (REGCON), huelgas y cierres, accidentes de trabajo, regulación de empleo, ETT, cooperativas y sociedades laborales, mediación, arbitraje y conciliación. Tablas descargables y anuario.",
+   "summary": "Estadísticas de convenios colectivos, accidentes de trabajo, huelgas, regulación de empleo, ETT, cooperativas y mediación, con avances mensuales y monográficas anuales en xlsx, más REGCON, el registro de convenios, acuerdos y planes de igualdad con búsqueda pública por código, CNAE y denominación.",
    "access": [
-    "portal",
-    "download"
+    "download",
+    "portal"
    ],
    "auth": "none",
    "formats": [
@@ -1557,38 +1578,57 @@
     "html"
    ],
    "update": "monthly",
-   "coverage": "1990-",
+   "coverage": "Monográficas anuales desde 2014 (accidentes) y 2016 (convenios); avances mensuales del año en curso",
    "license": "Reutilización libre con cita de la fuente",
    "base_url": "https://www.mites.gob.es/es/estadisticas/index.htm",
    "docs_url": "https://www.mites.gob.es/es/estadisticas/index.htm",
    "endpoints": [
     {
-     "path": "https://www.mites.gob.es/estadisticas/cct/welcome.htm",
-     "desc": "Estadística de convenios colectivos de trabajo"
+     "path": "https://www.mites.gob.es/es/estadisticas/condiciones_trabajo_relac_laborales/CCT/welcome.htm",
+     "desc": "Convenios colectivos; enlaza los avances mensuales (estadisticas/cct/CCT{AA}...) y las monográficas anuales"
     },
     {
-     "path": "https://www.mites.gob.es/estadisticas/eat/welcome.htm",
-     "desc": "Estadística de accidentes de trabajo"
+     "path": "https://www.mites.gob.es/es/estadisticas/condiciones_trabajo_relac_laborales/EAT/welcome.htm",
+     "desc": "Accidentes de trabajo; avances mensuales y monográficas anuales"
     },
     {
-     "path": "https://expinterweb.mites.gob.es/regcon/",
-     "desc": "REGCON, registro y depósito de convenios colectivos con texto íntegro"
+     "path": "https://www.mites.gob.es/es/estadisticas/monograficas_anuales/{EAT|CCT}/{AAAA}/index.htm",
+     "desc": "Monográfica anual con todas las tablas en xlsx y pdf",
+     "example": "curl -sO \"https://www.mites.gob.es/estadisticas/eat/eat25/TABLAS%20ESTADISTICAS/ATR_2025_A.xlsx\""
+    },
+    {
+     "path": "https://expinterweb.mites.gob.es/regcon/pub/consultaPublicaEstatal",
+     "desc": "REGCON, búsqueda pública de convenios y acuerdos de ámbito estatal (formulario POST)",
+     "params": "codigoConvenio, denominacion, cnae2009Pub, cnae2025Pub, fhIncripcionPublicacionDesde y Hasta, _idAmbFuncionalConsPublica, _idEstadoVigencia, más consulta_token_value_id del GET previo"
     }
    ],
+   "quirks": [
+    "tls-chain-incomplete",
+    "static-html",
+    "session-required"
+   ],
+   "ids": [
+    "codigo-convenio",
+    "cnae"
+   ],
    "gotchas": [
-    "El buscador REGCON exige seleccionar ámbito y no devuelve más de unas decenas de resultados por página.",
-    "Las tablas de accidentes distinguen con baja y sin baja; usar la serie correcta."
+    "Las rutas /estadisticas/cct/welcome.htm y /estadisticas/eat/welcome.htm de la ficha anterior son páginas de aviso que remiten a la nueva ubicación bajo /es/estadisticas/condiciones_trabajo_relac_laborales/.",
+    "Los xlsx de las monográficas cuelgan de rutas con espacios (TABLAS ESTADISTICAS); codificar como %20.",
+    "El certificado del servidor no incluye el intermedio FNMT; añadirlo al bundle o falla la verificación TLS (ver guía).",
+    "REGCON es un formulario POST con token de sesión (consulta_token_value_id); hacer GET del formulario, conservar cookies y reenviar el token en cada búsqueda.",
+    "REGCON separa consultas en /regcon/pub/ (consultaPublicaEstatal para el registro actual, consultaAntiguos y consultaPublicaRegconAntiguo para el histórico).",
+    "Los nombres de las carpetas de avances mensuales no son uniformes (CCT09SepAv, CCT08AGOAV, CCT10DEF); tomar los enlaces de la página, no construirlos."
    ],
    "related": [
     "sepe-estadisticas",
     "segsocial-estadisticas"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "segsocial-estadisticas",
-   "name": "Seguridad Social – Afiliación, pensiones y estadísticas",
+   "name": "Seguridad Social – Afiliación, pensiones, IMV y MCVL",
    "org": "Secretaría de Estado de la Seguridad Social y Pensiones (TGSS, INSS)",
    "ministry": "Inclusión, Seguridad Social y Migraciones",
    "level": "age",
@@ -1600,9 +1640,10 @@
     "cotizaciones",
     "autonomos",
     "regimenes",
-    "ingreso-minimo-vital"
+    "ingreso-minimo-vital",
+    "mcvl"
    ],
-   "summary": "Afiliados por régimen, provincia, sector y nacionalidad (media mensual y último día), pensiones contributivas por clase e importe, Ingreso Mínimo Vital, recaudación y presupuestos. Excel mensuales y series históricas.",
+   "summary": "Afiliación (media mensual y último día) por régimen, provincia, CNAE, sexo y municipio; pensiones contributivas por clase e importe; Ingreso Mínimo Vital; bases de cotización; Muestra Continua de Vidas Laborales bajo solicitud. Excel mensuales y anuales servidos por un gestor de contenidos.",
    "access": [
     "download",
     "portal"
@@ -1610,40 +1651,67 @@
    "auth": "none",
    "formats": [
     "xlsx",
-    "pdf",
-    "csv"
+    "pdf"
    ],
    "update": "monthly",
-   "coverage": "2001- según serie",
+   "coverage": "Afiliación media con ficheros anuales y serie por regímenes; pensiones y afiliación mensuales del año en curso",
    "license": "Reutilización libre con cita de la fuente",
    "base_url": "https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas",
    "docs_url": "https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas",
    "endpoints": [
     {
-     "path": "https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST8",
-     "desc": "Afiliación de trabajadores al sistema"
+     "path": "/EST8/EST10/EST290",
+     "desc": "Afiliación media mensual; xlsx anuales (Afiliación {AAAA}.xlsx) y serie por regímenes; EST291 totales, EST292 extranjeros"
     },
     {
-     "path": "https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST23",
-     "desc": "Pensiones contributivas del sistema"
+     "path": "/EST8/EST10/EST305",
+     "desc": "Afiliación a último día del mes por régimen, CNAE a dos dígitos, sexo y municipio"
     },
     {
-     "path": "https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST45",
-     "desc": "Ingreso Mínimo Vital"
+     "path": "/EST23/EST24",
+     "desc": "Pensiones contributivas del mes; xlsx y pdf con nombre {SERIE}{AAAAMM} (PI, IP, JUCOVI, TC, EDPR, TRCA)"
+    },
+    {
+     "path": "/EST45",
+     "desc": "Otras prestaciones, incluido el Ingreso Mínimo Vital (subpáginas EST46, EST169, EST247, EST274, EST280, EST282)"
+    },
+    {
+     "path": "/EST211",
+     "desc": "Muestra Continua de Vidas Laborales; documentación y procedimiento de solicitud de los microdatos"
+    },
+    {
+     "path": "https://www.seg-social.es/wps/wcm/connect/wss/{uuid}/{fichero}.xlsx?MOD=AJPERES",
+     "desc": "Patrón de descarga de cualquier fichero; el uuid cambia con cada publicación y se toma del enlace de la página",
+     "example": "curl -sL -A \"Mozilla/5.0\" -o PI202609.xlsx \"https://www.seg-social.es/wps/wcm/connect/wss/1ac3470e-8f62-4407-b772-28f189b71be1/PI202609.xlsx?MOD=AJPERES\""
     }
    ],
+   "quirks": [
+    "waf-intermittent-403",
+    "url-drift",
+    "static-html"
+   ],
+   "ids": [
+    "cnae"
+   ],
    "gotchas": [
-    "Las URLs del portal WebSphere (wps/portal) son largas pero estables por código ESTnn.",
-    "Afiliación media mensual y afiliación a último día son series distintas con cifras distintas.",
-    "Los Excel tienen varias hojas con cabeceras combinadas; no leer con parsers CSV.",
-    "Los datos por municipio de afiliados solo se publican para municipios de más de 40.000 habitantes."
+    "El WAF (Akamai) responde 403 \"Acceso denegado\" a una de cada dos o tres peticiones, también en las descargas; reintentar la misma URL tras 2 a 5 segundos funciona.",
+    "Los códigos ESTnn son estables y se anidan (EST8/EST10/EST290); las hojas finales llevan un uuid en la ruta y cada fichero otro uuid distinto en wps/wcm/connect.",
+    "Afiliación media mensual (EST290) y afiliación a último día (EST305) son series distintas con cifras distintas.",
+    "Los xlsx tienen varias hojas con fila de título y cabeceras combinadas; no leer como CSV ni con header=0.",
+    "La afiliación por actividad pasa a CNAE 2025 en 2026 (Afiliación 2026_CNAE25.xlsx) frente a CNAE 2009 en los anteriores; no encadenar series sin recodificar.",
+    "La MCVL no se descarga; se solicita y se entrega bajo convenio.",
+    "eSTADISS (pensiones interactivas) vive en la sede electrónica con una URL WebSphere opaca; tomar el enlace del índice, no fijarlo."
+   ],
+   "tips": [
+    "Flujo típico. GET del índice de la estadística para obtener el enlace wcm/connect vigente, descargar con las mismas cabeceras y reintentar ante 403."
    ],
    "related": [
     "sepe-estadisticas",
-    "igae-ejecucion-presupuestaria"
+    "igae-ejecucion-presupuestaria",
+    "mites-estadisticas"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "sepe-estadisticas",
@@ -1659,50 +1727,66 @@
     "prestaciones",
     "demandantes",
     "municipios",
-    "ocupaciones"
+    "ocupaciones",
+    "cnae"
    ],
-   "summary": "Datos mensuales de paro registrado, demandantes, contratos y prestaciones por desempleo desglosados por municipio, sexo, edad, sector y ocupación. Ficheros CSV/Excel mensuales y datos abiertos en datos.gob.es.",
+   "summary": "Datos mensuales de paro registrado, demandantes, contratos y prestaciones por desempleo: avance mensual en xls con URL fija, series históricas, y desglose por municipio, actividad económica, sexo y edad en un xls por comunidad autónoma y mes.",
    "access": [
     "download",
     "portal"
    ],
    "auth": "none",
    "formats": [
-    "csv",
-    "xlsx",
-    "pdf"
+    "xls",
+    "pdf",
+    "html",
+    "rss"
    ],
    "update": "monthly",
-   "coverage": "2005- (municipios); series nacionales desde 1996",
+   "coverage": "Municipios desde mayo de 2005; series nacionales largas en evolparoseries.xls",
    "license": "Reutilización libre con cita de la fuente",
    "base_url": "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas.html",
    "docs_url": "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos.html",
    "endpoints": [
     {
-     "path": "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-avance/paro.html",
-     "desc": "Avance mensual de paro registrado (nota de prensa y tablas)"
+     "path": "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/{tabla}.xls",
+     "desc": "Avance mensual de paro con URL fija por tabla (evolparo, evolparoseries, evolparoseries2001, evolprovsectores, paroprovsector, parosexoedadprov)",
+     "example": "curl -sO -A \"Mozilla/5.0\" \"https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/evolparoseries.xls\""
     },
     {
-     "path": "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios.html",
-     "desc": "Paro y contratos por municipio, un fichero por mes"
+     "path": "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios-20-45/{AAAA}/{mes}.html",
+     "desc": "Página del mes (2020 en adelante) con un xls por comunidad autónoma; de 2005 a 2019 en municipios/{AAAA}/{mes}-{AAAA}.html"
     },
     {
-     "path": "https://datos.gob.es/es/catalogo?publisher_display_name=Servicio+P%C3%BAblico+de+Empleo+Estatal",
-     "desc": "Conjuntos del SEPE en datos.gob.es (paro y contratos por municipio en CSV)"
+     "path": "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_20_45/{AAAA}/{mes}_{AAAA}/Muniacteco_20-45_{CCAA}.xls",
+     "desc": "Demandantes parados por actividad económica, sexo, edad y municipio de una comunidad (3 MB)",
+     "example": "curl -sO -A \"Mozilla/5.0\" \"https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_20_45/2026/agosto_2026/Muniacteco_20-45_ANDALUCIA.xls\""
+    },
+    {
+     "path": "https://www.sepe.es/HomeSepe/rssgen/RSSServlet?namePage={pagina}.html&param1=HomeSepe",
+     "desc": "RSS de novedades de cada página de estadísticas"
     }
    ],
+   "quirks": [
+    "static-html",
+    "overwritten-in-place"
+   ],
    "gotchas": [
-    "Los CSV por municipio usan codificación Latin-1 y separador punto y coma; los códigos de municipio son INE sin dígito de control.",
-    "Paro registrado no es lo mismo que desempleo EPA (INE); no comparar niveles.",
-    "Los ficheros mensuales cambian ligeramente de columnas entre años; validar cabeceras."
+    "HEAD devuelve 403 en los ficheros; usar GET, que admite Range.",
+    "Los xls municipales tienen formato de informe, bloques por provincia y municipio identificados solo por nombre, sin código INE; hay que parsear las filas de título.",
+    "xlrd no abre estos xls (cabecera OLE atípica) y LibreOffice tampoco los convierte; pandas con engine calamine sí los lee.",
+    "Los xls de avance se sobreescriben cada mes en la misma URL; guardar copia fechada para el histórico de publicaciones.",
+    "La página municipios.html solo cubre 2005 a 2019; desde 2020 es municipios-20-45.html, y las capitales van aparte (municipios-capitales.html).",
+    "Paro registrado no es lo mismo que desempleo EPA (INE); no comparar niveles."
    ],
    "related": [
     "ine-api-tempus",
     "segsocial-estadisticas",
-    "ine-codigos-territoriales"
+    "ine-codigos-territoriales",
+    "mites-estadisticas"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "cnmc-data",
@@ -1964,7 +2048,7 @@
    ],
    "rate_limit": "No documentado; una tabla grande con nult=1 devuelve 600 KB (4248 series en la 25333)",
    "quirks": [
-    "latin1"
+    "errors-html-or-xml"
    ],
    "gotchas": [
     "Los códigos de serie y los ids de tabla cambian con cada cambio de base. El IPC general fue IPC206446 (hasta 2021), IPC251852 (hasta 2025M12) y es IPC290751 (base 2025).",
@@ -2042,6 +2126,14 @@
      "desc": "Índice de las relaciones anuales anteriores"
     }
    ],
+   "quirks": [
+    "static-html"
+   ],
+   "ids": [
+    "ine-municipio",
+    "ine-provincia",
+    "ccaa"
+   ],
    "gotchas": [
     "El código completo son 5 dígitos, CPRO (2) más CMUN (3); el dígito de control DC es una columna aparte. Muchos datasets omiten el DC y otros lo pegan como sexto dígito.",
     "Los códigos vienen como texto con ceros a la izquierda; al leer con pandas forzar dtype str o se pierden (01 pasa a 1).",
@@ -2114,6 +2206,13 @@
      "path": "https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176918&menu=resultados&idp=1254735976595",
      "desc": "Página de la EPA con los enlaces a todos los ZIP de microdatos"
     }
+   ],
+   "quirks": [
+    "static-html"
+   ],
+   "ids": [
+    "ine-provincia",
+    "ccaa"
    ],
    "gotchas": [
     "La ruta /prodyser/microdatos.htm de la ficha anterior es una redirección; el índice es /dyngs/SER/index.htm?cid=1388.",
@@ -2493,6 +2592,10 @@
      "desc": "Índice de estadísticas por impuesto con enlace a la ficha de cada una"
     }
    ],
+   "quirks": [
+    "static-html",
+    "overwritten-in-place"
+   ],
    "gotchas": [
     "Los CSV usan punto y coma como separador, coma decimal y CRLF; las columnas son códigos (MUNI_1, M714_3) descritos en AyudaCSV_AnuarioTotal.pdf y AyudaCSV_AnuarioMunicipal.pdf de la misma carpeta.",
     "IRPFmunicipios.csv pesa 30 MB y trae todos los ejercicios en una sola tabla (columnas EJER y TRAMO).",
@@ -2644,6 +2747,11 @@
      "desc": "Periodo medio de pago a proveedores por entidad local"
     }
    ],
+   "quirks": [
+    "static-html",
+    "session-required",
+    "url-drift"
+   ],
    "gotchas": [
     "SelDescargaDC.aspx y SeldescargaDF.aspx (descarga de presupuestos) devuelven sesion_expirada por URL directa, incluso con cookies y Referer; la sesión nace en la navegación del menú. Automatizar con navegador.",
     "Los xlsx de hacienda.gob.es tienen rutas con espacios (sist financiacion y deuda); codificar como %20.",
@@ -2712,6 +2820,9 @@
      "path": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/BasesDatos/Invente/Paginas/inicio.aspx",
      "desc": "INVENTE, inventario de entes del sector público estatal, autonómico y local"
     }
+   ],
+   "quirks": [
+    "static-html"
    ],
    "gotchas": [
     "Las rutas imMensualEstado.aspx y pap.hacienda.gob.es/invente2/ de la ficha anterior no existen (404 y rechazo del WAF); INVENTE cuelga de BasesDatos/Invente.",
@@ -2865,7 +2976,12 @@
    ],
    "rate_limit": "No documentado",
    "quirks": [
-    "accept-header-required"
+    "accept-header-required",
+    "errors-html-or-xml"
+   ],
+   "ids": [
+    "boe-id",
+    "eli"
    ],
    "gotchas": [
     "Cabecera Accept obligatoria; sin ella o con */* responde 400. Los errores llegan siempre en XML aunque se pida JSON.",
@@ -2946,7 +3062,11 @@
    "quirks": [
     "accept-header-required",
     "json-object-or-list",
+    "errors-html-or-xml",
     "no-weekend-data"
+   ],
+   "ids": [
+    "boe-id"
    ],
    "gotchas": [
     "Cabecera Accept obligatoria con application/json o application/xml; sin ella, o con */*, responde 400.",
@@ -3009,6 +3129,10 @@
      "desc": "Versión tal como se publicó en el diario oficial; sin sufijo equivale a dof",
      "example": "curl -s \"https://www.boe.es/eli/es/lo/2018/12/05/3/dof\""
     }
+   ],
+   "ids": [
+    "eli",
+    "boe-id"
    ],
    "gotchas": [
     "Tipos de norma en la URI (verificados) lo ley orgánica, l ley, rd real decreto, rdl real decreto-ley, rdlg real decreto legislativo, o orden.",
@@ -3159,7 +3283,11 @@
    "quirks": [
     "accept-header-required",
     "json-object-or-list",
+    "errors-html-or-xml",
     "no-weekend-data"
+   ],
+   "ids": [
+    "boe-id"
    ],
    "gotchas": [
     "Cabecera Accept obligatoria (application/json o application/xml); sin ella 400. Los errores llegan siempre en XML.",

@@ -27,6 +27,8 @@ endpoints:
     desc: Encuesta de Condiciones de Vida por base y año
   - path: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176918&menu=resultados&idp=1254735976595
     desc: Página de la EPA con los enlaces a todos los ZIP de microdatos
+quirks: [static-html]
+ids: [ine-provincia, ccaa]
 gotchas:
   - La ruta /prodyser/microdatos.htm de la ficha anterior es una redirección; el índice es /dyngs/SER/index.htm?cid=1388.
   - Dentro del ZIP, CSV/{op}_{periodo}.tab va con tabulador y cabecera entrecomillada; md_{op}_{periodo}.txt es ancho fijo sin cabecera y md_{op}_{periodo}.parquet es lo mismo en parquet.

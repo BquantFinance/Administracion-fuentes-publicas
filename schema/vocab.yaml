@@ -71,16 +71,46 @@ status:
   deprecated: Anunciada su retirada o sustituida
   unknown: Sin confirmar
 
-# Peculiaridades técnicas verificadas que cambian cómo se configura el cliente HTTP. Detalle y arreglos en guides/cliente-http.md
+# Peculiaridades técnicas verificadas que cambian cómo se configura el cliente. Arreglos en guides/cliente-http.md.
+# Grupos: transporte y cabeceras, anti-bot y sesión, forma de la respuesta, estabilidad de URL y datos.
 quirks:
   tls-chain-incomplete: El servidor no envía el certificado intermedio (FNMT); completar el bundle de CA o falla la verificación TLS
   user-agent-browser: Responde 403 o bloquea sin un User-Agent de navegador
   accept-header-required: Exige cabecera Accept explícita (application/json o application/xml); sin ella o con */* devuelve 400
-  gzip-unannounced: Devuelve el cuerpo comprimido en gzip sin cabecera Content-Encoding si el cliente no envía Accept-Encoding
-  latin1: Respuestas o ficheros en ISO-8859-1, no UTF-8
+  waf-blocks-bots: Un WAF rechaza clientes automatizados aunque lleven User-Agent de navegador; no hay arreglo, buscar otra vía
+  waf-intermittent-403: Un WAF devuelve 403 de forma intermitente a peticiones legítimas; reintentar la misma petición tras 2 a 5 segundos
+  session-required: Exige sesión, token o navegación previa por menú; las URL directas devuelven error o sesión expirada
   viewstate-forms: Formularios ASP.NET con __VIEWSTATE; hay que reenviar los campos ocultos en cada POST
-  waf-blocks-bots: Un WAF rechaza clientes automatizados aunque lleven User-Agent de navegador
+  js-rendered: Contenido o enlaces generados por JavaScript; hace falta navegador sin cabeza o replicar las llamadas XHR
+  static-html: Los enlaces a ficheros están en el HTML servido; basta un GET y una expresión regular o lxml
+  gzip-unannounced: Devuelve el cuerpo comprimido en gzip sin cabecera Content-Encoding si el cliente no envía Accept-Encoding
+  latin1: Respuestas o ficheros en ISO-8859-1 o windows-1252, no UTF-8
   json-object-or-list: Campos JSON que son objeto con un elemento y lista con varios; normalizar antes de iterar
+  errors-html-or-xml: Los errores llegan en HTML o XML aunque se pida JSON; comprobar el código HTTP antes de parsear
   no-weekend-data: Sin datos (404) en fines de semana y festivos; no es un error
+  url-drift: Las URL de los ficheros cambian en cada publicación (uuid, fecha o ruta); rascar la página en cada ejecución
+  overwritten-in-place: El fichero se sobreescribe en la misma URL en cada actualización; guardar copia si se necesita el histórico
+
+# Identificadores presentes en los datos que sirven para cruzar con otras fuentes. Formato y trampas en guides/identificadores-clave.md.
+ids:
+  ine-municipio: Código INE de municipio, 5 dígitos (provincia + municipio)
+  ine-provincia: Código INE de provincia, 2 dígitos
+  ccaa: Código INE de comunidad autónoma, 2 dígitos
+  nuts: Código NUTS de Eurostat
+  seccion-censal: Sección censal, 10 dígitos
+  referencia-catastral: Referencia catastral, 14 o 20 caracteres
+  referencia-sigpac: Referencia SIGPAC de recinto
+  idema: Código de estación meteorológica de AEMET
+  nif: NIF de persona física o jurídica
+  dir3: Código DIR3 de unidad u órgano administrativo
+  sia: Código SIA de procedimiento administrativo
+  invente: Código INVENTE de entidad del sector público
+  bdns: Número de convocatoria BDNS
+  cpv: Código CPV de contratación pública
+  cnae: Código CNAE de actividad económica
+  codigo-convenio: Código de convenio colectivo de REGCON
+  cn-medicamento: Código nacional de medicamento de la AEMPS
+  boe-id: Identificador BOE o BORME (BOE-A-AAAA-NNNNN, BORME-A-AAAA-NNN-PP)
+  eli: URI ELI de norma
 
 formats: [json, xml, csv, tsv, xlsx, xls, pdf, html, rdf, ttl, jsonld, xbrl, geojson, shp, gml, gpkg, kml, dxf, dgn, ecw, tiff, geotiff, laz, sdmx, px, zip, txt, atom, rss, parquet, sql, netcdf, grib, jpg, png, marc]

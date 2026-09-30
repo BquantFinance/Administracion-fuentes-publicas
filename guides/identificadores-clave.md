@@ -2,6 +2,8 @@
 
 Los datasets de la Administración no comparten nombres, comparten códigos. Estos son los que hay que conocer.
 
+El campo `ids` de cada ficha lista, con el vocabulario de `schema/vocab.yaml` (ine-municipio, nif, dir3, cpv, cnae, boe-id...), los identificadores que de verdad aparecen en los datos de esa fuente, verificados abriendo el dato. Filtrar `catalog.json` por `ids` responde a la pregunta "¿con qué puedo cruzar esto?" sin descargar nada.
+
 ## Territorio
 
 | clave | formato | quién la emite | dónde se usa | trampa |

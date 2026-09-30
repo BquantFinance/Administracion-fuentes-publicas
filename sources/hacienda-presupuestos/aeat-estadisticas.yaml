@@ -31,6 +31,7 @@ endpoints:
     desc: Ficha de cada estadística con enlaces a las tablas HTML por ejercicio y a su documentación
   - path: https://sede.agenciatributaria.gob.es/Sede/estadisticas/estadisticas-impuesto.html
     desc: Índice de estadísticas por impuesto con enlace a la ficha de cada una
+quirks: [static-html, overwritten-in-place]
 gotchas:
   - Los CSV usan punto y coma como separador, coma decimal y CRLF; las columnas son códigos (MUNI_1, M714_3) descritos en AyudaCSV_AnuarioTotal.pdf y AyudaCSV_AnuarioMunicipal.pdf de la misma carpeta.
   - IRPFmunicipios.csv pesa 30 MB y trae todos los ejercicios en una sola tabla (columnas EJER y TRAMO).

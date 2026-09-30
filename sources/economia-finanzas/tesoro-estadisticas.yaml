@@ -27,7 +27,7 @@ endpoints:
     desc: Última subasta por instrumento en tabla HTML
   - path: https://www.tesoro.es/deuda-publica/subastas/calendario
     desc: Calendario anual de subastas en HTML y PDF
-quirks: [user-agent-browser, tls-chain-incomplete]
+quirks: [user-agent-browser, tls-chain-incomplete, static-html, overwritten-in-place]
 gotchas:
   - Con el User-Agent por defecto de curl responde 403 en todo el sitio; enviar un User-Agent de navegador.
   - Certificado FNMT sin cadena intermedia; añadir AC Componentes Informáticos al bundle o falla la verificación TLS (ver guía).

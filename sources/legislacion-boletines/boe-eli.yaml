@@ -22,6 +22,7 @@ endpoints:
   - path: https://www.boe.es/eli/es/{tipo}/{AAAA}/{MM}/{DD}/{num}/dof
     desc: Versión tal como se publicó en el diario oficial; sin sufijo equivale a dof
     example: curl -s "https://www.boe.es/eli/es/lo/2018/12/05/3/dof"
+ids: [eli, boe-id]
 gotchas:
   - Tipos de norma en la URI (verificados) lo ley orgánica, l ley, rd real decreto, rdl real decreto-ley, rdlg real decreto legislativo, o orden.
   - La fecha de la URI es la de la disposición (firma), no la de publicación en el BOE.

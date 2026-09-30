@@ -24,7 +24,7 @@ Cada línea que no ahorre una búsqueda, una prueba fallida o una hora de depura
 4. **`tips` solo si acelera.** Patrón de uso, librería concreta, cruce típico con otra fuente. Máximo seis.
 5. **Ejemplos copiables.** Cada endpoint principal lleva un `example` que funciona al pegarlo. Con claves,
    usar variable de entorno (`$AEMET_KEY`), nunca una clave real.
-6. **Vocabulario cerrado.** Sector, acceso, auth, periodicidad, formatos, estado y quirks salen de `schema/vocab.yaml`.
+6. **Vocabulario cerrado.** Sector, acceso, auth, periodicidad, formatos, estado, quirks e ids salen de `schema/vocab.yaml`.
    Si falta un valor, se añade al vocabulario en el mismo commit, no se improvisa.
 7. **Castellano en valores, inglés en claves.** Sin markdown dentro de los valores. Sin dos puntos seguidos de
    espacio en valores sin comillas, porque rompe el YAML.

@@ -135,6 +135,15 @@
       "uniqueItems": true,
       "description": "Peculiaridades técnicas verificadas, del vocabulario quirks. Cambian cómo se configura el cliente HTTP."
     },
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10,
+      "uniqueItems": true,
+      "description": "Identificadores presentes en los datos, del vocabulario ids. Sirven para saber con qué otras fuentes se cruza."
+    },
     "gotchas": {
       "type": "array",
       "items": {

@@ -45,6 +45,9 @@ def main() -> int:
         for q in s.get("quirks", []) or []:
             if q not in vocab["quirks"]:
                 errors.append(f"{path}: quirk '{q}' no está en el vocabulario")
+        for i in s.get("ids", []) or []:
+            if i not in vocab["ids"]:
+                errors.append(f"{path}: id '{i}' no está en el vocabulario ids")
         summary = s.get("summary", "")
         if summary and summary.strip().endswith(":"):
             errors.append(f"{path}: summary termina en ':'")

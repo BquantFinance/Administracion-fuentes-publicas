@@ -4,29 +4,38 @@ org: Servicio Público de Empleo Estatal (SEPE)
 ministry: Trabajo y Economía Social
 level: age
 sector: empleo-seguridad-social
-tags: [sepe, paro-registrado, contratos, prestaciones, demandantes, municipios, ocupaciones]
+tags: [sepe, paro-registrado, contratos, prestaciones, demandantes, municipios, ocupaciones, cnae]
 summary: >-
-  Datos mensuales de paro registrado, demandantes, contratos y prestaciones por desempleo desglosados por
-  municipio, sexo, edad, sector y ocupación. Ficheros CSV/Excel mensuales y datos abiertos en datos.gob.es.
+  Datos mensuales de paro registrado, demandantes, contratos y prestaciones por desempleo: avance mensual en
+  xls con URL fija, series históricas, y desglose por municipio, actividad económica, sexo y edad en un xls
+  por comunidad autónoma y mes.
 access: [download, portal]
 auth: none
-formats: [csv, xlsx, pdf]
+formats: [xls, pdf, html, rss]
 update: monthly
-coverage: "2005- (municipios); series nacionales desde 1996"
+coverage: "Municipios desde mayo de 2005; series nacionales largas en evolparoseries.xls"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas.html
 docs_url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos.html
 endpoints:
-  - path: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-avance/paro.html
-    desc: Avance mensual de paro registrado (nota de prensa y tablas)
-  - path: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios.html
-    desc: Paro y contratos por municipio, un fichero por mes
-  - path: https://datos.gob.es/es/catalogo?publisher_display_name=Servicio+P%C3%BAblico+de+Empleo+Estatal
-    desc: Conjuntos del SEPE en datos.gob.es (paro y contratos por municipio en CSV)
+  - path: https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/{tabla}.xls
+    desc: Avance mensual de paro con URL fija por tabla (evolparo, evolparoseries, evolparoseries2001, evolprovsectores, paroprovsector, parosexoedadprov)
+    example: curl -sO -A "Mozilla/5.0" "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/evolparoseries.xls"
+  - path: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios-20-45/{AAAA}/{mes}.html
+    desc: Página del mes (2020 en adelante) con un xls por comunidad autónoma; de 2005 a 2019 en municipios/{AAAA}/{mes}-{AAAA}.html
+  - path: https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_20_45/{AAAA}/{mes}_{AAAA}/Muniacteco_20-45_{CCAA}.xls
+    desc: Demandantes parados por actividad económica, sexo, edad y municipio de una comunidad (3 MB)
+    example: curl -sO -A "Mozilla/5.0" "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_20_45/2026/agosto_2026/Muniacteco_20-45_ANDALUCIA.xls"
+  - path: https://www.sepe.es/HomeSepe/rssgen/RSSServlet?namePage={pagina}.html&param1=HomeSepe
+    desc: RSS de novedades de cada página de estadísticas
+quirks: [static-html, overwritten-in-place]
 gotchas:
-  - Los CSV por municipio usan codificación Latin-1 y separador punto y coma; los códigos de municipio son INE sin dígito de control.
+  - HEAD devuelve 403 en los ficheros; usar GET, que admite Range.
+  - Los xls municipales tienen formato de informe, bloques por provincia y municipio identificados solo por nombre, sin código INE; hay que parsear las filas de título.
+  - xlrd no abre estos xls (cabecera OLE atípica) y LibreOffice tampoco los convierte; pandas con engine calamine sí los lee.
+  - Los xls de avance se sobreescriben cada mes en la misma URL; guardar copia fechada para el histórico de publicaciones.
+  - La página municipios.html solo cubre 2005 a 2019; desde 2020 es municipios-20-45.html, y las capitales van aparte (municipios-capitales.html).
   - Paro registrado no es lo mismo que desempleo EPA (INE); no comparar niveles.
-  - Los ficheros mensuales cambian ligeramente de columnas entre años; validar cabeceras.
-related: [ine-api-tempus, segsocial-estadisticas, ine-codigos-territoriales]
+related: [ine-api-tempus, segsocial-estadisticas, ine-codigos-territoriales, mites-estadisticas]
 status: active
-verified: null
+verified: "2026-09-30"

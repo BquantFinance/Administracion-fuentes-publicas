@@ -1,33 +1,48 @@
 id: segsocial-estadisticas
-name: Seguridad Social – Afiliación, pensiones y estadísticas
+name: Seguridad Social – Afiliación, pensiones, IMV y MCVL
 org: Secretaría de Estado de la Seguridad Social y Pensiones (TGSS, INSS)
 ministry: Inclusión, Seguridad Social y Migraciones
 level: age
 sector: empleo-seguridad-social
-tags: [seguridad-social, afiliacion, pensiones, cotizaciones, autonomos, regimenes, ingreso-minimo-vital]
+tags: [seguridad-social, afiliacion, pensiones, cotizaciones, autonomos, regimenes, ingreso-minimo-vital, mcvl]
 summary: >-
-  Afiliados por régimen, provincia, sector y nacionalidad (media mensual y último día), pensiones contributivas
-  por clase e importe, Ingreso Mínimo Vital, recaudación y presupuestos. Excel mensuales y series históricas.
+  Afiliación (media mensual y último día) por régimen, provincia, CNAE, sexo y municipio; pensiones contributivas
+  por clase e importe; Ingreso Mínimo Vital; bases de cotización; Muestra Continua de Vidas Laborales bajo
+  solicitud. Excel mensuales y anuales servidos por un gestor de contenidos.
 access: [download, portal]
 auth: none
-formats: [xlsx, pdf, csv]
+formats: [xlsx, pdf]
 update: monthly
-coverage: "2001- según serie"
+coverage: "Afiliación media con ficheros anuales y serie por regímenes; pensiones y afiliación mensuales del año en curso"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas
 docs_url: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas
 endpoints:
-  - path: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST8
-    desc: Afiliación de trabajadores al sistema
-  - path: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST23
-    desc: Pensiones contributivas del sistema
-  - path: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST45
-    desc: Ingreso Mínimo Vital
+  - path: /EST8/EST10/EST290
+    desc: Afiliación media mensual; xlsx anuales (Afiliación {AAAA}.xlsx) y serie por regímenes; EST291 totales, EST292 extranjeros
+  - path: /EST8/EST10/EST305
+    desc: Afiliación a último día del mes por régimen, CNAE a dos dígitos, sexo y municipio
+  - path: /EST23/EST24
+    desc: Pensiones contributivas del mes; xlsx y pdf con nombre {SERIE}{AAAAMM} (PI, IP, JUCOVI, TC, EDPR, TRCA)
+  - path: /EST45
+    desc: Otras prestaciones, incluido el Ingreso Mínimo Vital (subpáginas EST46, EST169, EST247, EST274, EST280, EST282)
+  - path: /EST211
+    desc: Muestra Continua de Vidas Laborales; documentación y procedimiento de solicitud de los microdatos
+  - path: https://www.seg-social.es/wps/wcm/connect/wss/{uuid}/{fichero}.xlsx?MOD=AJPERES
+    desc: Patrón de descarga de cualquier fichero; el uuid cambia con cada publicación y se toma del enlace de la página
+    example: curl -sL -A "Mozilla/5.0" -o PI202609.xlsx "https://www.seg-social.es/wps/wcm/connect/wss/1ac3470e-8f62-4407-b772-28f189b71be1/PI202609.xlsx?MOD=AJPERES"
+quirks: [waf-intermittent-403, url-drift, static-html]
+ids: [cnae]
 gotchas:
-  - Las URLs del portal WebSphere (wps/portal) son largas pero estables por código ESTnn.
-  - Afiliación media mensual y afiliación a último día son series distintas con cifras distintas.
-  - Los Excel tienen varias hojas con cabeceras combinadas; no leer con parsers CSV.
-  - Los datos por municipio de afiliados solo se publican para municipios de más de 40.000 habitantes.
-related: [sepe-estadisticas, igae-ejecucion-presupuestaria]
+  - El WAF (Akamai) responde 403 "Acceso denegado" a una de cada dos o tres peticiones, también en las descargas; reintentar la misma URL tras 2 a 5 segundos funciona.
+  - Los códigos ESTnn son estables y se anidan (EST8/EST10/EST290); las hojas finales llevan un uuid en la ruta y cada fichero otro uuid distinto en wps/wcm/connect.
+  - Afiliación media mensual (EST290) y afiliación a último día (EST305) son series distintas con cifras distintas.
+  - Los xlsx tienen varias hojas con fila de título y cabeceras combinadas; no leer como CSV ni con header=0.
+  - La afiliación por actividad pasa a CNAE 2025 en 2026 (Afiliación 2026_CNAE25.xlsx) frente a CNAE 2009 en los anteriores; no encadenar series sin recodificar.
+  - La MCVL no se descarga; se solicita y se entrega bajo convenio.
+  - eSTADISS (pensiones interactivas) vive en la sede electrónica con una URL WebSphere opaca; tomar el enlace del índice, no fijarlo.
+tips:
+  - Flujo típico. GET del índice de la estadística para obtener el enlace wcm/connect vigente, descargar con las mismas cabeceras y reintentar ante 403.
+related: [sepe-estadisticas, igae-ejecucion-presupuestaria, mites-estadisticas]
 status: active
-verified: null
+verified: "2026-09-30"

@@ -1,31 +1,42 @@
 id: mites-estadisticas
-name: Ministerio de Trabajo – Estadísticas laborales y convenios
+name: Ministerio de Trabajo – Estadísticas laborales y REGCON
 org: Subdirección General de Estadística y Análisis Sociolaboral
 ministry: Trabajo y Economía Social
 level: age
 sector: empleo-seguridad-social
-tags: [convenios-colectivos, huelgas, accidentes-laborales, regulacion-empleo, ere, empresas-trabajo-temporal]
+tags: [convenios-colectivos, regcon, huelgas, accidentes-laborales, regulacion-empleo, ett, planes-igualdad]
 summary: >-
-  Estadísticas de convenios colectivos (REGCON), huelgas y cierres, accidentes de trabajo, regulación de empleo,
-  ETT, cooperativas y sociedades laborales, mediación, arbitraje y conciliación. Tablas descargables y anuario.
-access: [portal, download]
+  Estadísticas de convenios colectivos, accidentes de trabajo, huelgas, regulación de empleo, ETT, cooperativas
+  y mediación, con avances mensuales y monográficas anuales en xlsx, más REGCON, el registro de convenios,
+  acuerdos y planes de igualdad con búsqueda pública por código, CNAE y denominación.
+access: [download, portal]
 auth: none
 formats: [xlsx, pdf, html]
 update: monthly
-coverage: "1990-"
+coverage: "Monográficas anuales desde 2014 (accidentes) y 2016 (convenios); avances mensuales del año en curso"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.mites.gob.es/es/estadisticas/index.htm
 docs_url: https://www.mites.gob.es/es/estadisticas/index.htm
 endpoints:
-  - path: https://www.mites.gob.es/estadisticas/cct/welcome.htm
-    desc: Estadística de convenios colectivos de trabajo
-  - path: https://www.mites.gob.es/estadisticas/eat/welcome.htm
-    desc: Estadística de accidentes de trabajo
-  - path: https://expinterweb.mites.gob.es/regcon/
-    desc: REGCON, registro y depósito de convenios colectivos con texto íntegro
+  - path: https://www.mites.gob.es/es/estadisticas/condiciones_trabajo_relac_laborales/CCT/welcome.htm
+    desc: Convenios colectivos; enlaza los avances mensuales (estadisticas/cct/CCT{AA}...) y las monográficas anuales
+  - path: https://www.mites.gob.es/es/estadisticas/condiciones_trabajo_relac_laborales/EAT/welcome.htm
+    desc: Accidentes de trabajo; avances mensuales y monográficas anuales
+  - path: https://www.mites.gob.es/es/estadisticas/monograficas_anuales/{EAT|CCT}/{AAAA}/index.htm
+    desc: Monográfica anual con todas las tablas en xlsx y pdf
+    example: curl -sO "https://www.mites.gob.es/estadisticas/eat/eat25/TABLAS%20ESTADISTICAS/ATR_2025_A.xlsx"
+  - path: https://expinterweb.mites.gob.es/regcon/pub/consultaPublicaEstatal
+    desc: REGCON, búsqueda pública de convenios y acuerdos de ámbito estatal (formulario POST)
+    params: "codigoConvenio, denominacion, cnae2009Pub, cnae2025Pub, fhIncripcionPublicacionDesde y Hasta, _idAmbFuncionalConsPublica, _idEstadoVigencia, más consulta_token_value_id del GET previo"
+quirks: [tls-chain-incomplete, static-html, session-required]
+ids: [codigo-convenio, cnae]
 gotchas:
-  - El buscador REGCON exige seleccionar ámbito y no devuelve más de unas decenas de resultados por página.
-  - Las tablas de accidentes distinguen con baja y sin baja; usar la serie correcta.
+  - Las rutas /estadisticas/cct/welcome.htm y /estadisticas/eat/welcome.htm de la ficha anterior son páginas de aviso que remiten a la nueva ubicación bajo /es/estadisticas/condiciones_trabajo_relac_laborales/.
+  - Los xlsx de las monográficas cuelgan de rutas con espacios (TABLAS ESTADISTICAS); codificar como %20.
+  - El certificado del servidor no incluye el intermedio FNMT; añadirlo al bundle o falla la verificación TLS (ver guía).
+  - REGCON es un formulario POST con token de sesión (consulta_token_value_id); hacer GET del formulario, conservar cookies y reenviar el token en cada búsqueda.
+  - REGCON separa consultas en /regcon/pub/ (consultaPublicaEstatal para el registro actual, consultaAntiguos y consultaPublicaRegconAntiguo para el histórico).
+  - Los nombres de las carpetas de avances mensuales no son uniformes (CCT09SepAv, CCT08AGOAV, CCT10DEF); tomar los enlaces de la página, no construirlos.
 related: [sepe-estadisticas, segsocial-estadisticas]
 status: active
-verified: null
+verified: "2026-09-30"

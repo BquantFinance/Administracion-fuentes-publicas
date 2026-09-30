@@ -32,7 +32,8 @@ docs_url: https://www.boe.es/datosabiertos/api/api.php
 - https://www.boe.es/datosabiertos/api/datos-auxiliares/{tabla} :: Tablas de códigos (materias, rangos, departamentos, ambitos, estados-consolidacion, relaciones-anteriores, relaciones-posteriores)
   ej: curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/datos-auxiliares/rangos"
 rate_limit: No documentado
-quirks: accept-header-required
+quirks: accept-header-required, errors-html-or-xml
+ids: boe-id, eli
 ! Cabecera Accept obligatoria; sin ella o con */* responde 400. Los errores llegan siempre en XML aunque se pida JSON.
 ! Norma completa, texto, bloque y metadata-eli solo se sirven en XML; con Accept application/json devuelven 400. Metadatos, análisis, índice, listado y tablas auxiliares sí van en JSON.
 ! El listado es la propia base_url sin sufijo; limit por defecto 50, limit=-1 se corta en 10000, paginar con offset (offset=10000 funciona).
@@ -63,7 +64,8 @@ docs_url: https://www.boe.es/datosabiertos/api/api.php
 - https://www.boe.es/boe/dias/{AAAA}/{MM}/{DD}/pdfs/{id}.pdf :: PDF de la disposición; la fecha del path es la de publicación
   ej: curl -sO "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-A-2024-87.pdf"
 rate_limit: No documentado
-quirks: accept-header-required, json-object-or-list, no-weekend-data
+quirks: accept-header-required, json-object-or-list, errors-html-or-xml, no-weekend-data
+ids: boe-id
 ! Cabecera Accept obligatoria con application/json o application/xml; sin ella, o con */*, responde 400.
 ! Los errores (400, 404, 500) llegan siempre con cuerpo XML aunque se pida JSON; comprobar el código HTTP antes de parsear.
 ! En JSON, item, departamento y epigrafe son objeto si hay un elemento y lista si hay varios; normalizar a lista antes de iterar.
@@ -88,6 +90,7 @@ docs_url: https://www.boe.es/legislacion/eli.php
   ej: curl -s "https://www.boe.es/eli/es/lo/2018/12/05/3/con"
 - https://www.boe.es/eli/es/{tipo}/{AAAA}/{MM}/{DD}/{num}/dof :: Versión tal como se publicó en el diario oficial; sin sufijo equivale a dof
   ej: curl -s "https://www.boe.es/eli/es/lo/2018/12/05/3/dof"
+ids: eli, boe-id
 ! Tipos de norma en la URI (verificados) lo ley orgánica, l ley, rd real decreto, rdl real decreto-ley, rdlg real decreto legislativo, o orden.
 ! La fecha de la URI es la de la disposición (firma), no la de publicación en el BOE.
 ! En las órdenes el número lleva delante el código del departamento en minúsculas (o/2025/01/16/trm59 para la Orden TRM/59/2025).
@@ -139,7 +142,8 @@ docs_url: https://www.boe.es/datosabiertos/api/api.php
 - https://www.boe.es/borme/dias/{AAAA}/{MM}/{DD}/pdfs/{id}.pdf :: PDF de cualquier documento del sumario
   ej: curl -sO "https://www.boe.es/borme/dias/2024/01/02/pdfs/BORME-A-2024-1-01.pdf"
 rate_limit: No documentado
-quirks: accept-header-required, json-object-or-list, no-weekend-data
+quirks: accept-header-required, json-object-or-list, errors-html-or-xml, no-weekend-data
+ids: boe-id
 ! Cabecera Accept obligatoria (application/json o application/xml); sin ella 400. Los errores llegan siempre en XML.
 ! En JSON, item y apartado son objeto si hay un elemento y lista si hay varios; normalizar antes de iterar.
 ! El XML de la sección A no tiene campos por acto. Cada empresa es un p class articulo (número - denominación) seguido de un p class parrafo con los actos separados por punto y los Datos registrales al final.
@@ -166,7 +170,7 @@ docs_url: https://www.airef.es/es/acceso-a-datos/
 - https://www.airef.es/es/datalab-previsiones-macroeconomicas-historicas/ :: Cuadro macro de previsiones de la AIReF en xlsx (Cuadro_macro_web)
 - https://www.airef.es/es/datalab/datos-economicos/seguimiento-del-objetivo-de-estabilidad/ :: Seguimiento del objetivo de estabilidad por subsector
 - https://www.airef.es/es/datalab/datos-economicos/estimacion-pib-trimestral-por-ccaa/ :: Estimación del PIB trimestral por comunidad autónoma
-quirks: tls-chain-incomplete
+quirks: tls-chain-incomplete, static-html, url-drift
 ! El servidor envía el certificado sin la cadena intermedia FNMT; curl y requests fallan la verificación TLS salvo que se añada AC Componentes Informáticos al bundle (ver guía).
 ! Los xlsx cuelgan de wp-content/uploads con rutas que cambian en cada actualización; rascar la página para localizar el enlace vigente.
 ! Algunas URLs /es/ redirigen con 301 a la versión /ca/ con el mismo contenido; no descartar por el idioma de la URL final.
@@ -225,7 +229,7 @@ docs_url: https://www.cnmv.es/portal/gpage.aspx?id=RSS
 - https://www.cnmv.es/portal/RSS/RSS.asmx/GetDatos?iID={1|3|4} :: RSS de notas de prensa (1), discursos (3) e información al sector (4)
   ej: curl -s "https://www.cnmv.es/portal/RSS/RSS.asmx/GetDatos?iID=1"
 - https://www.cnmv.es/portal/informacion-privilegiada/RSS.asmx/GetNoticiasCNMV :: RSS de información privilegiada del día, desde el cierre de la sesión anterior
-quirks: viewstate-forms
+quirks: viewstate-forms, static-html, url-drift
 ! La raíz /portal/ y /portal/RSS/ devuelven 403; la portada es /portal/home. Las rutas funcionan con y sin extensión .aspx.
 ! Consultas/Busqueda.aspx y HR/ResultadoBusquedaHR.aspx ya no existen (400); las búsquedas de IPP y OIR están en hr/busquedahr.aspx con division 2 y 3.
 ! Formularios ASP.NET con __VIEWSTATE; para automatizar hay que hacer GET del formulario y reenviar los campos ocultos en el POST.
@@ -242,6 +246,7 @@ license: Reutilización libre con cita de la fuente
 base_url: https://www.ico.es/web/guest/ico/informe-anual
 docs_url: https://www.ico.es/web/guest/datos-abiertos
 - https://www.ico.es/web/guest/ico/informe-anual :: Memoria, cuentas anuales e informe de relevancia prudencial en PDF
+quirks: static-html, url-drift
 ! Las rutas /web/ico/estadisticas y /web/ico/transparencia ya no existen; redirigen a la portada.
 ! La página de datos abiertos solo recoge la normativa RISP, sin conjuntos de datos.
 ! Los PDF cuelgan de /documents/ con identificadores opacos y parámetro t de caché; los enlaces cambian con cada publicación.
@@ -260,7 +265,7 @@ docs_url: https://www.tesoro.es/deuda-publica/estadisticas
   ej: curl -sO -A "Mozilla/5.0" "https://www.tesoro.es/sites/default/files/estadisticas/historico/historico_subastas.xlsx"
 - https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/{letras-del-tesoro|bonos-del-estado|obligaciones-del-estado} :: Última subasta por instrumento en tabla HTML
 - https://www.tesoro.es/deuda-publica/subastas/calendario :: Calendario anual de subastas en HTML y PDF
-quirks: user-agent-browser, tls-chain-incomplete
+quirks: user-agent-browser, tls-chain-incomplete, static-html, overwritten-in-place
 ! Con el User-Agent por defecto de curl responde 403 en todo el sitio; enviar un User-Agent de navegador.
 ! Certificado FNMT sin cadena intermedia; añadir AC Componentes Informáticos al bundle o falla la verificación TLS (ver guía).
 ! Los cuadros mensuales se sobreescriben cada mes en la misma URL (01.xlsx); no hay histórico por fecha, guardar copia si hace falta.
@@ -285,6 +290,7 @@ docs_url: https://sede.agenciatributaria.gob.es/Sede/estadisticas/anuario-estadi
 - https://sede.agenciatributaria.gob.es/static_files/AEAT/Estudios/Estadisticas/Informes_Estadisticos/Informes_mensuales_recaudacion_tributaria/{AAAA}/IMR_{AA}_{MM}_es_es.pdf :: Informe mensual de recaudación en PDF
 - https://sede.agenciatributaria.gob.es/Sede/datosabiertos/catalogo/hacienda/{Estadistica}.shtml :: Ficha de cada estadística con enlaces a las tablas HTML por ejercicio y a su documentación
 - https://sede.agenciatributaria.gob.es/Sede/estadisticas/estadisticas-impuesto.html :: Índice de estadísticas por impuesto con enlace a la ficha de cada una
+quirks: static-html, overwritten-in-place
 ! Los CSV usan punto y coma como separador, coma decimal y CRLF; las columnas son códigos (MUNI_1, M714_3) descritos en AyudaCSV_AnuarioTotal.pdf y AyudaCSV_AnuarioMunicipal.pdf de la misma carpeta.
 ! IRPFmunicipios.csv pesa 30 MB y trae todos los ejercicios en una sola tabla (columnas EJER y TRAMO).
 ! Las rutas estadisticas-irpf.html, informes-mensuales-recaudacion-tributaria.html y datos-abiertos.html no existen; el índice es estadisticas-impuesto.html y las fichas cuelgan de datosabiertos/catalogo/hacienda/.
@@ -330,6 +336,7 @@ docs_url: https://www.hacienda.gob.es/es-ES/Areas%20Tematicas/Administracion%20E
 - https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PublicacionPresupuestos/aspx/inicio.aspx :: Consulta y descarga de presupuestos y liquidaciones detalladas por entidad
 - https://serviciostelematicosext.hacienda.gob.es/SGFAL/ConsultaTipos/html/portadaconsultasm.aspx :: Tipos de IBI, IAE, IVTM y otros tributos por municipio
 - https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PMP_NET/aspx/consulta/consulta.aspx?tipoPublicacion=2 :: Periodo medio de pago a proveedores por entidad local
+quirks: static-html, session-required, url-drift
 ! SelDescargaDC.aspx y SeldescargaDF.aspx (descarga de presupuestos) devuelven sesion_expirada por URL directa, incluso con cookies y Referer; la sesión nace en la navegación del menú. Automatizar con navegador.
 ! Los xlsx de hacienda.gob.es tienen rutas con espacios (sist financiacion y deuda); codificar como %20.
 ! Los nombres de fichero llevan la fecha de publicación (liquidacion2024eell-...-13022026.xlsx); hay que rascar la página para obtener el enlace. Solo la deuda viva sigue un patrón fijo.
@@ -350,6 +357,7 @@ docs_url: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/Co
 - https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/CAAP/CAP_Serie.xlsx :: Cuentas anuales de las AAPP, serie completa; liquidaciones y subvenciones por año en la misma carpeta
 - https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadPublica/CPE/EjecucionPresupuestaria/Paginas/imejecucionpresupuesto.aspx :: Ejecución mensual del presupuesto del Estado en caja; PDF por mes y xlsx con anexos
 - https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/BasesDatos/Invente/Paginas/inicio.aspx :: INVENTE, inventario de entes del sector público estatal, autonómico y local
+quirks: static-html
 ! Las rutas imMensualEstado.aspx y pap.hacienda.gob.es/invente2/ de la ficha anterior no existen (404 y rechazo del WAF); INVENTE cuelga de BasesDatos/Invente.
 ! Sitio SharePoint. Los xlsx de contabilidad nacional siguen patrón por año (M_AACC_{AAAA}.xlsx); los de ejecución en caja llevan el mes en mayúsculas y espacios (MENSUAL ABRIL 2026.xlsx), codificar %20.
 ! Los trimestrales del total de AAPP (itnofinancierasAAPP) solo se publican en PDF.
@@ -383,7 +391,7 @@ docs_url: https://www.ine.es/dyngs/DAB/index.htm?cid=1099
 - https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/{id_tabla}?nult={n} :: Misma API con salida CSV cambiando js por csv
   ej: curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=12"
 rate_limit: No documentado; una tabla grande con nult=1 devuelve 600 KB (4248 series en la 25333)
-quirks: latin1
+quirks: errors-html-or-xml
 ! Los códigos de serie y los ids de tabla cambian con cada cambio de base. El IPC general fue IPC206446 (hasta 2021), IPC251852 (hasta 2025M12) y es IPC290751 (base 2025).
 ! Una tabla retirada (50902) sigue respondiendo con datos viejos aunque ya no aparezca en TABLAS_OPERACION; validar siempre la tabla contra ese listado.
 ! DATOS_SERIE y DATOS_TABLA sin nult ni date devuelven 404 con HTML, no la serie completa. Para toda la serie usar date con un rango amplio.
@@ -412,6 +420,8 @@ docs_url: https://www.ine.es/daco/daco42/codmun/cod_num_muni_provincia_ccaa.htm
 - https://www.ine.es/daco/daco42/codmun/{AA}codislas.xlsx :: Municipios de Baleares, Las Palmas y Santa Cruz de Tenerife con código de isla (CISLA)
 - https://www.ine.es/daco/daco42/codmun/cod_ccaa_provincia.htm :: Códigos de comunidades autónomas y provincias en HTML; también cod_ccaa.htm, cod_provincia.htm y cod_islas.htm
 - https://www.ine.es/daco/daco42/codmun/codmun_anual.htm :: Índice de las relaciones anuales anteriores
+quirks: static-html
+ids: ine-municipio, ine-provincia, ccaa
 ! El código completo son 5 dígitos, CPRO (2) más CMUN (3); el dígito de control DC es una columna aparte. Muchos datasets omiten el DC y otros lo pegan como sexto dígito.
 ! Los códigos vienen como texto con ceros a la izquierda; al leer con pandas forzar dtype str o se pierden (01 pasa a 1).
 ! El diccionario tiene una fila de título antes de la cabecera (leer con header=1); la hoja se llama con el año anterior (dic25 en diccionario26.xlsx) y el título de codislas también va con retraso.
@@ -433,6 +443,8 @@ docs_url: https://www.ine.es/dyngs/SER/index.htm?cid=1388
 - https://www.ine.es/ftp/microdatos/epa/dr_EPA_{AAAA}.xlsx :: Diseño de registro anual de la EPA en Excel
 - https://www.ine.es/ftp/microdatos/ecv/ecv_b{AAAA}/ecvb{AA}_{AAAA}.zip :: Encuesta de Condiciones de Vida por base y año
 - https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176918&menu=resultados&idp=1254735976595 :: Página de la EPA con los enlaces a todos los ZIP de microdatos
+quirks: static-html
+ids: ine-provincia, ccaa
 ! La ruta /prodyser/microdatos.htm de la ficha anterior es una redirección; el índice es /dyngs/SER/index.htm?cid=1388.
 ! Dentro del ZIP, CSV/{op}_{periodo}.tab va con tabulador y cabecera entrecomillada; md_{op}_{periodo}.txt es ancho fijo sin cabecera y md_{op}_{periodo}.parquet es lo mismo en parquet.
 ! Los códigos (CCAA, PROV, CICLO) llevan ceros a la izquierda; leer como texto o se corrompen.
@@ -465,7 +477,8 @@ docs_url: https://www.infosubvenciones.es/bdnstrans/GE/es/api
   ej: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/exportar?vpd=GE&tipoDoc=csv&fechaDesde=29/09/2026&fechaHasta=29/09/2026" | iconv -f WINDOWS-1252 -t UTF-8
 - /convocatorias/ultimas?page={n}&pageSize={n} :: Últimas convocatorias registradas
 rate_limit: No documentado; pageSize se limita en silencio a 10000 (4 MB y 6 s por página). El aviso legal se reserva bloquear usos abusivos.
-quirks: latin1
+quirks: latin1, errors-html-or-xml
+ids: bdns, nif, invente
 ! Las fechas de filtro van en dd/mm/aaaa; en ISO (2026-09-01) responde 400 con JSON de campos codigo y errores.
 ! pageSize mayor de 10000 no da error, devuelve 10000. La respuesta es un Page de Spring (content, totalElements, totalPages, last) más el campo advertencia con el aviso legal.
 ! Los beneficiarios personas físicas van con el DNI parcialmente oculto (***1490**) y nombre; las jurídicas con el NIF completo delante del nombre, todo en el mismo campo beneficiario.
@@ -505,6 +518,7 @@ docs_url: https://contrataciondelestado.es/wps/portal/DatosAbiertos
 - sindicacion_1143/contratosMenoresPerfilesContratantes.atom :: Contratos menores de perfiles alojados
 - sindicacion_{n}/{nombre_feed}_{AAAA}{MM}.zip :: Histórico mensual de cada feed en el mismo formato ATOM; entre 12 y 19 MB por mes en 2026
   ej: curl -sO "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_202508.zip"
+ids: dir3, cpv
 ! El feed se recorre hacia atrás con el link rel=next, que apunta a instantáneas con fecha y hora en el nombre (Completo3_20260929_201515.atom); no hay paginación por número.
 ! Un expediente aparece varias veces (una por cambio de estado); quedarse con la entry de updated mayor por id (sindicacion/licitacionesPerfilContratante/{n}).
 ! cbc:TotalAmount lleva el IVA incluido y cbc:TaxExclusiveAmount va sin IVA; cbc:EstimatedOverallContractAmount es el valor estimado. La ficha anterior lo tenía al revés.
@@ -519,52 +533,77 @@ related: bdns-api, hacienda-registro-licitadores, dir3-directorio
 # SECTOR empleo-seguridad-social: Empleo y Seguridad Social
 
 ## mites-estadisticas
-Ministerio de Trabajo – Estadísticas laborales y convenios | Subdirección General de Estadística y Análisis Sociolaboral
-summary: Estadísticas de convenios colectivos (REGCON), huelgas y cierres, accidentes de trabajo, regulación de empleo, ETT, cooperativas y sociedades laborales, mediación, arbitraje y conciliación. Tablas descargables y anuario.
-access: portal, download | auth: none | formats: xlsx, pdf, html | update: monthly | status: active | verified: pending
-coverage: 1990-
+Ministerio de Trabajo – Estadísticas laborales y REGCON | Subdirección General de Estadística y Análisis Sociolaboral
+summary: Estadísticas de convenios colectivos, accidentes de trabajo, huelgas, regulación de empleo, ETT, cooperativas y mediación, con avances mensuales y monográficas anuales en xlsx, más REGCON, el registro de convenios, acuerdos y planes de igualdad con búsqueda pública por código, CNAE y denominación.
+access: download, portal | auth: none | formats: xlsx, pdf, html | update: monthly | status: active | verified: 2026-09-30
+coverage: Monográficas anuales desde 2014 (accidentes) y 2016 (convenios); avances mensuales del año en curso
 license: Reutilización libre con cita de la fuente
 base_url: https://www.mites.gob.es/es/estadisticas/index.htm
 docs_url: https://www.mites.gob.es/es/estadisticas/index.htm
-- https://www.mites.gob.es/estadisticas/cct/welcome.htm :: Estadística de convenios colectivos de trabajo
-- https://www.mites.gob.es/estadisticas/eat/welcome.htm :: Estadística de accidentes de trabajo
-- https://expinterweb.mites.gob.es/regcon/ :: REGCON, registro y depósito de convenios colectivos con texto íntegro
-! El buscador REGCON exige seleccionar ámbito y no devuelve más de unas decenas de resultados por página.
-! Las tablas de accidentes distinguen con baja y sin baja; usar la serie correcta.
+- https://www.mites.gob.es/es/estadisticas/condiciones_trabajo_relac_laborales/CCT/welcome.htm :: Convenios colectivos; enlaza los avances mensuales (estadisticas/cct/CCT{AA}...) y las monográficas anuales
+- https://www.mites.gob.es/es/estadisticas/condiciones_trabajo_relac_laborales/EAT/welcome.htm :: Accidentes de trabajo; avances mensuales y monográficas anuales
+- https://www.mites.gob.es/es/estadisticas/monograficas_anuales/{EAT|CCT}/{AAAA}/index.htm :: Monográfica anual con todas las tablas en xlsx y pdf
+  ej: curl -sO "https://www.mites.gob.es/estadisticas/eat/eat25/TABLAS%20ESTADISTICAS/ATR_2025_A.xlsx"
+- https://expinterweb.mites.gob.es/regcon/pub/consultaPublicaEstatal :: REGCON, búsqueda pública de convenios y acuerdos de ámbito estatal (formulario POST) [codigoConvenio, denominacion, cnae2009Pub, cnae2025Pub, fhIncripcionPublicacionDesde y Hasta, _idAmbFuncionalConsPublica, _idEstadoVigencia, más consulta_token_value_id del GET previo]
+quirks: tls-chain-incomplete, static-html, session-required
+ids: codigo-convenio, cnae
+! Las rutas /estadisticas/cct/welcome.htm y /estadisticas/eat/welcome.htm de la ficha anterior son páginas de aviso que remiten a la nueva ubicación bajo /es/estadisticas/condiciones_trabajo_relac_laborales/.
+! Los xlsx de las monográficas cuelgan de rutas con espacios (TABLAS ESTADISTICAS); codificar como %20.
+! El certificado del servidor no incluye el intermedio FNMT; añadirlo al bundle o falla la verificación TLS (ver guía).
+! REGCON es un formulario POST con token de sesión (consulta_token_value_id); hacer GET del formulario, conservar cookies y reenviar el token en cada búsqueda.
+! REGCON separa consultas en /regcon/pub/ (consultaPublicaEstatal para el registro actual, consultaAntiguos y consultaPublicaRegconAntiguo para el histórico).
+! Los nombres de las carpetas de avances mensuales no son uniformes (CCT09SepAv, CCT08AGOAV, CCT10DEF); tomar los enlaces de la página, no construirlos.
 related: sepe-estadisticas, segsocial-estadisticas
 
 ## segsocial-estadisticas
-Seguridad Social – Afiliación, pensiones y estadísticas | Secretaría de Estado de la Seguridad Social y Pensiones (TGSS, INSS)
-summary: Afiliados por régimen, provincia, sector y nacionalidad (media mensual y último día), pensiones contributivas por clase e importe, Ingreso Mínimo Vital, recaudación y presupuestos. Excel mensuales y series históricas.
-access: download, portal | auth: none | formats: xlsx, pdf, csv | update: monthly | status: active | verified: pending
-coverage: 2001- según serie
+Seguridad Social – Afiliación, pensiones, IMV y MCVL | Secretaría de Estado de la Seguridad Social y Pensiones (TGSS, INSS)
+summary: Afiliación (media mensual y último día) por régimen, provincia, CNAE, sexo y municipio; pensiones contributivas por clase e importe; Ingreso Mínimo Vital; bases de cotización; Muestra Continua de Vidas Laborales bajo solicitud. Excel mensuales y anuales servidos por un gestor de contenidos.
+access: download, portal | auth: none | formats: xlsx, pdf | update: monthly | status: active | verified: 2026-09-30
+coverage: Afiliación media con ficheros anuales y serie por regímenes; pensiones y afiliación mensuales del año en curso
 license: Reutilización libre con cita de la fuente
 base_url: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas
 docs_url: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas
-- https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST8 :: Afiliación de trabajadores al sistema
-- https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST23 :: Pensiones contributivas del sistema
-- https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST45 :: Ingreso Mínimo Vital
-! Las URLs del portal WebSphere (wps/portal) son largas pero estables por código ESTnn.
-! Afiliación media mensual y afiliación a último día son series distintas con cifras distintas.
-! Los Excel tienen varias hojas con cabeceras combinadas; no leer con parsers CSV.
-! Los datos por municipio de afiliados solo se publican para municipios de más de 40.000 habitantes.
-related: sepe-estadisticas, igae-ejecucion-presupuestaria
+- /EST8/EST10/EST290 :: Afiliación media mensual; xlsx anuales (Afiliación {AAAA}.xlsx) y serie por regímenes; EST291 totales, EST292 extranjeros
+- /EST8/EST10/EST305 :: Afiliación a último día del mes por régimen, CNAE a dos dígitos, sexo y municipio
+- /EST23/EST24 :: Pensiones contributivas del mes; xlsx y pdf con nombre {SERIE}{AAAAMM} (PI, IP, JUCOVI, TC, EDPR, TRCA)
+- /EST45 :: Otras prestaciones, incluido el Ingreso Mínimo Vital (subpáginas EST46, EST169, EST247, EST274, EST280, EST282)
+- /EST211 :: Muestra Continua de Vidas Laborales; documentación y procedimiento de solicitud de los microdatos
+- https://www.seg-social.es/wps/wcm/connect/wss/{uuid}/{fichero}.xlsx?MOD=AJPERES :: Patrón de descarga de cualquier fichero; el uuid cambia con cada publicación y se toma del enlace de la página
+  ej: curl -sL -A "Mozilla/5.0" -o PI202609.xlsx "https://www.seg-social.es/wps/wcm/connect/wss/1ac3470e-8f62-4407-b772-28f189b71be1/PI202609.xlsx?MOD=AJPERES"
+quirks: waf-intermittent-403, url-drift, static-html
+ids: cnae
+! El WAF (Akamai) responde 403 "Acceso denegado" a una de cada dos o tres peticiones, también en las descargas; reintentar la misma URL tras 2 a 5 segundos funciona.
+! Los códigos ESTnn son estables y se anidan (EST8/EST10/EST290); las hojas finales llevan un uuid en la ruta y cada fichero otro uuid distinto en wps/wcm/connect.
+! Afiliación media mensual (EST290) y afiliación a último día (EST305) son series distintas con cifras distintas.
+! Los xlsx tienen varias hojas con fila de título y cabeceras combinadas; no leer como CSV ni con header=0.
+! La afiliación por actividad pasa a CNAE 2025 en 2026 (Afiliación 2026_CNAE25.xlsx) frente a CNAE 2009 en los anteriores; no encadenar series sin recodificar.
+! La MCVL no se descarga; se solicita y se entrega bajo convenio.
+! eSTADISS (pensiones interactivas) vive en la sede electrónica con una URL WebSphere opaca; tomar el enlace del índice, no fijarlo.
++ Flujo típico. GET del índice de la estadística para obtener el enlace wcm/connect vigente, descargar con las mismas cabeceras y reintentar ante 403.
+related: sepe-estadisticas, igae-ejecucion-presupuestaria, mites-estadisticas
 
 ## sepe-estadisticas
 SEPE – Paro registrado, contratos y prestaciones | Servicio Público de Empleo Estatal (SEPE)
-summary: Datos mensuales de paro registrado, demandantes, contratos y prestaciones por desempleo desglosados por municipio, sexo, edad, sector y ocupación. Ficheros CSV/Excel mensuales y datos abiertos en datos.gob.es.
-access: download, portal | auth: none | formats: csv, xlsx, pdf | update: monthly | status: active | verified: pending
-coverage: 2005- (municipios); series nacionales desde 1996
+summary: Datos mensuales de paro registrado, demandantes, contratos y prestaciones por desempleo: avance mensual en xls con URL fija, series históricas, y desglose por municipio, actividad económica, sexo y edad en un xls por comunidad autónoma y mes.
+access: download, portal | auth: none | formats: xls, pdf, html, rss | update: monthly | status: active | verified: 2026-09-30
+coverage: Municipios desde mayo de 2005; series nacionales largas en evolparoseries.xls
 license: Reutilización libre con cita de la fuente
 base_url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas.html
 docs_url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos.html
-- https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-avance/paro.html :: Avance mensual de paro registrado (nota de prensa y tablas)
-- https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios.html :: Paro y contratos por municipio, un fichero por mes
-- https://datos.gob.es/es/catalogo?publisher_display_name=Servicio+P%C3%BAblico+de+Empleo+Estatal :: Conjuntos del SEPE en datos.gob.es (paro y contratos por municipio en CSV)
-! Los CSV por municipio usan codificación Latin-1 y separador punto y coma; los códigos de municipio son INE sin dígito de control.
+- https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/{tabla}.xls :: Avance mensual de paro con URL fija por tabla (evolparo, evolparoseries, evolparoseries2001, evolprovsectores, paroprovsector, parosexoedadprov)
+  ej: curl -sO -A "Mozilla/5.0" "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/evolparoseries.xls"
+- https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios-20-45/{AAAA}/{mes}.html :: Página del mes (2020 en adelante) con un xls por comunidad autónoma; de 2005 a 2019 en municipios/{AAAA}/{mes}-{AAAA}.html
+- https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_20_45/{AAAA}/{mes}_{AAAA}/Muniacteco_20-45_{CCAA}.xls :: Demandantes parados por actividad económica, sexo, edad y municipio de una comunidad (3 MB)
+  ej: curl -sO -A "Mozilla/5.0" "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_20_45/2026/agosto_2026/Muniacteco_20-45_ANDALUCIA.xls"
+- https://www.sepe.es/HomeSepe/rssgen/RSSServlet?namePage={pagina}.html&param1=HomeSepe :: RSS de novedades de cada página de estadísticas
+quirks: static-html, overwritten-in-place
+! HEAD devuelve 403 en los ficheros; usar GET, que admite Range.
+! Los xls municipales tienen formato de informe, bloques por provincia y municipio identificados solo por nombre, sin código INE; hay que parsear las filas de título.
+! xlrd no abre estos xls (cabecera OLE atípica) y LibreOffice tampoco los convierte; pandas con engine calamine sí los lee.
+! Los xls de avance se sobreescriben cada mes en la misma URL; guardar copia fechada para el histórico de publicaciones.
+! La página municipios.html solo cubre 2005 a 2019; desde 2020 es municipios-20-45.html, y las capitales van aparte (municipios-capitales.html).
 ! Paro registrado no es lo mismo que desempleo EPA (INE); no comparar niveles.
-! Los ficheros mensuales cambian ligeramente de columnas entre años; validar cabeceras.
-related: ine-api-tempus, segsocial-estadisticas, ine-codigos-territoriales
+related: ine-api-tempus, segsocial-estadisticas, ine-codigos-territoriales, mites-estadisticas
 
 # SECTOR gobierno-abierto-administracion: Gobierno abierto, transparencia y organización administrativa
 

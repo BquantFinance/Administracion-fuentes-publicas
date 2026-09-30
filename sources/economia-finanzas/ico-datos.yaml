@@ -18,6 +18,7 @@ docs_url: https://www.ico.es/web/guest/datos-abiertos
 endpoints:
   - path: https://www.ico.es/web/guest/ico/informe-anual
     desc: Memoria, cuentas anuales e informe de relevancia prudencial en PDF
+quirks: [static-html, url-drift]
 gotchas:
   - Las rutas /web/ico/estadisticas y /web/ico/transparencia ya no existen; redirigen a la portada.
   - La página de datos abiertos solo recoge la normativa RISP, sin conjuntos de datos.
