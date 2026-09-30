@@ -6,7 +6,8 @@ Uso: check_recetas.py [--only ID ...] [--report FICHERO.md] [--fail] [--ca BUNDL
 Cada check hace la petición con User-Agent y Accept de navegador, lee como mucho read_bytes (65536 por defecto)
 y comprueba status (200 por defecto), contains y min_bytes (Content-Length si existe, bytes leídos si no).
 Resultado: ok | fail (código o contenido distinto del esperado) | blocked (WAF, filtro antibots o bloqueo por
-IP reconocido en la respuesta) | error (sin respuesta). Con --fail devuelve 1 si hay fail o error; blocked
+IP reconocido en la respuesta) | error (sin respuesta) | skipped (la url o una cabecera usa ${VARIABLE} y la
+variable de entorno no está definida; así se pasan claves como AEMET_KEY sin escribirlas en el repo). Con --fail devuelve 1 si hay fail o error; blocked
 se informa pero no rompe, porque depende de la red desde la que se ejecuta.
 El bundle de CA sale de --ca, de la variable CA_BUNDLE o de ca-age.pem (scripts/fnmt_bundle.py) si existe.
 """
@@ -14,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 import time
 from datetime import date
@@ -46,10 +48,35 @@ def ca_bundle(arg: str | None) -> str | bool:
     return True
 
 
+ENV_RE = re.compile(r"\$\{([A-Z0-9_]+)\}")
+
+
+def expand_env(value: str) -> tuple[str, list[str]]:
+    """Sustituye ${VAR} por la variable de entorno; devuelve el texto y las variables que faltan."""
+    missing: list[str] = []
+
+    def repl(m: re.Match) -> str:
+        val = os.environ.get(m.group(1))
+        if val is None:
+            missing.append(m.group(1))
+            return ""
+        return val
+
+    return ENV_RE.sub(repl, value), missing
+
+
 def run_check(session: requests.Session, c: dict, timeout: float, sleep: float, verify) -> dict:
     method = c.get("method", "GET")
     headers = {"User-Agent": UA, "Accept": ACCEPT, "Accept-Language": "es-ES,es;q=0.9"}
-    headers.update(c.get("headers") or {})
+    missing: list[str] = []
+    for k, v in (c.get("headers") or {}).items():
+        headers[k], miss = expand_env(str(v))
+        missing += miss
+    url, miss = expand_env(c["url"])
+    missing += miss
+    if missing:
+        return {"result": "skipped", "status": None, "bytes": 0, "ms": 0, "detail": f"falta la variable {', '.join(sorted(set(missing)))}", "attempt": 0}
+    c = dict(c, url=url)
     want_status = c.get("status", 200)
     read_bytes = c.get("read_bytes", 65536)
     attempts = c.get("retries", 0) + 1
@@ -113,13 +140,13 @@ def main() -> int:
             print(f"{res['result']:7} {r['id']:36} {res['status'] or '-':>4} {res['bytes']:>9}B {res['ms']:>6}ms  {c['url'][:90]}  {res['detail']}")
             time.sleep(0.5)
 
-    counts = {k: sum(1 for _, _, res in rows if res["result"] == k) for k in ("ok", "fail", "blocked", "error")}
+    counts = {k: sum(1 for _, _, res in rows if res["result"] == k) for k in ("ok", "fail", "blocked", "error", "skipped")}
     print(f"\n{len(rows)} comprobaciones en {len(recetas)} recetas: {counts}")
     if args.report:
         lines = [
             f"# Comprobación de recetas · {date.today().isoformat()}",
             "",
-            f"{len(rows)} comprobaciones en {len(recetas)} recetas: ok {counts['ok']}, fail {counts['fail']}, blocked {counts['blocked']}, error {counts['error']}.",
+            f"{len(rows)} comprobaciones en {len(recetas)} recetas: ok {counts['ok']}, fail {counts['fail']}, blocked {counts['blocked']}, error {counts['error']}, skipped {counts['skipped']}.",
             "",
             "| receta | resultado | código | bytes | ms | url | detalle |",
             "|---|---|---|---|---|---|---|",

@@ -886,7 +886,7 @@ related: ine-codigos-territoriales, ine-api-tempus, cnig-centro-descargas, catas
 ## aemet-opendata
 AEMET OpenData – API meteorológica y climatológica | Agencia Estatal de Meteorología (AEMET)
 summary: API REST con clave gratuita (JWT): predicciones por municipio, provincia y comunidad, observación de estaciones, climatología diaria, mensual, normales y extremos, avisos CAP, radar, rayos, radiación, ozono, satélite y maestro de municipios. 64 rutas en la especificación OpenAPI 3.0.1.
-access: api-rest | auth: api-key | formats: json, xml, csv, png | update: hourly | status: active | verified: pending
+access: api-rest | auth: api-key | formats: json, xml, csv, png | update: hourly | status: active | verified: 2026-09-30
 coverage: Climatología diaria desde 1920 según estación
 license: Reutilización libre con cita de la fuente (aviso legal AEMET)
 base_url: https://opendata.aemet.es/opendata/api
@@ -908,15 +908,19 @@ docs_url: https://opendata.aemet.es/dist/index.html
 rate_limit: No documentado en la especificación; la clave es un JWT gratuito
 quirks: latin1
 ids: ine-municipio, idema
-! Sin clave la API responde 200 con cuerpo vacío, no 401; con clave inválida, 401 y JSON con descripcion y estado. Tratar el cuerpo vacío como fallo de autenticación.
-! La clave va en la cabecera api_key (así la define la especificación) o como parámetro api_key; se solicita en opendata.aemet.es/centrodedescargas/altaUsuario y llega por correo.
-! Toda llamada responde con un JSON intermedio (estado, datos, metadatos); los datos reales se descargan con una segunda petición a la URL del campo datos.
-! El código de municipio de las predicciones es el INE de 5 dígitos sin dígito de control (Madrid 28079); el maestro de municipios lo confirma.
-! Las fechas de climatología van como AAAA-MM-DDTHH:MM:SSUTC, con el sufijo UTC literal.
-! Los ficheros de datos usan coma decimal (tmed 12,3) y algunos endpoints codifican en ISO-8859-15.
-! Verificación del 30/09/2026 sin clave. Probados la autenticación, los errores, la especificación y la existencia de todas las rutas; no se han probado las respuestas de datos, por eso verified sigue en null.
-+ Envolver las dos peticiones (metadatos y datos) en una función y comprobar que el cuerpo no está vacío.
+! Sin clave la API responde 200 con cuerpo vacío, no 401; con clave inválida, 401 y JSON con descripcion (JWT strings must contain exactly 2 period characters). Tratar el cuerpo vacío como fallo de autenticación.
+! La clave va en la cabecera api_key o en el parámetro api_key (ambos verificados); se solicita en opendata.aemet.es/centrodedescargas/altaUsuario (correo y captcha), llega por correo y caduca a los tres meses.
+! Toda llamada responde con un JSON intermedio (estado, datos, metadatos); los datos reales se descargan con una segunda petición a la URL del campo datos (opendata/sh/{hash}), que no conviene fijar.
+! Los errores de datos llegan con HTTP 200 y estado en el cuerpo (404 Error al obtener los datos para un municipio inexistente, 404 No hay datos que satisfagan esos criterios con dígito de control o estación inexistente).
+! Límite de uso; tras unas diez peticiones en un minuto responde 429 (Se ha alcanzado uno de los límites de uso. Vuelva a intentarlo el próximo minuto) durante el resto del minuto. Espaciar y cachear.
+! Rangos máximos por petición; 6 meses en climatologías diarias y 36 meses en mensuales y anuales (estado 400 en el JSON intermedio). Iterar por ventanas.
+! Los ficheros de datos llegan como text/plain;charset=ISO-8859-15 con JSON dentro; decodificar como ISO-8859-15 o las tildes salen mal. Climatología con valores en texto y coma decimal (tmed 6,6).
+! El código de municipio de las predicciones es el INE de 5 dígitos sin dígito de control (Madrid 28079); el maestro de municipios (3 MB, id con prefijo id, latitud en grados y minutos) lo confirma.
+! Las fechas de climatología van como AAAA-MM-DDTHH:MM:SSUTC, con el sufijo UTC literal; el inventario de estaciones da latitud y longitud compactas (394924N, 025309E), no decimales.
+! Tamaños; predicción diaria de todos los municipios 2,3 MB, observación de todas las estaciones 3,2 MB; los avisos CAP se sirven como tar (application/x-gtar) con un XML por aviso.
++ Envolver las dos peticiones en una función que decodifique ISO-8859-15, compruebe estado en el JSON intermedio y espere un minuto ante 429.
 + Cachear el inventario de estaciones y el maestro de municipios; cambian raramente.
++ Para series largas de climatología diaria, ventanas de 6 meses por estación; el inventario da la lista de idema.
 related: ine-codigos-territoriales, miteco-saih-boletin-hidrologico
 
 ## aemet-otros-servicios
@@ -1883,13 +1887,13 @@ base_url: https://www.dataestur.es/
 docs_url: https://www.dataestur.es/apidata/
 - https://www.dataestur.es/app/themes/mini-mandrake/apidata/openapi.json :: Especificación OpenAPI 3 de API-SEGITTUR v2 (124 rutas _DL con filtros desde y hasta año y mes, CCAA y provincia; seguridad apiKeyHeader o apiKeyQuery)
   ej: curl -s "https://www.dataestur.es/app/themes/mini-mandrake/apidata/openapi.json"
-- https://www.dataestur.es/API-SEGITTUR-v2/{conjunto}_DL :: Descarga de un conjunto (AENA_DESTINOS_DL, AFILIACION_TURISMO_DL, CST_EMPLEO_TURISTICO_DL...) con clave de API; sin clave el gateway respondió 504
+- https://www.dataestur.es/API-SEGITTUR-v2/{conjunto}_DL :: Descarga de un conjunto (AENA_DESTINOS_DL, FRONTUR_DL...); la página API no pide clave; desde el entorno de verificación respondió 504 a los 30 s
 - https://www.dataestur.es/general/{frontur|egatur}/ :: Páginas de FRONTUR y EGATUR en DATAESTUR con descargas por indicador
 - https://sedeaplicaciones.serviciosmin.gob.es/Badase/ :: BADASE, base de series estadísticas de industria (ASP.NET con __VIEWSTATE, selección de series y salida en varios formatos)
 - https://industria.gob.es/es-es/estadisticas :: Encuesta de coyuntura industrial, estadística de vehículos, cemento y publicaciones sobre pyme
 quirks: viewstate-forms, url-drift
 ! La ruta IndicadoresyEstadisticas de mintur.gob.es da 404; las estadísticas de industria viven en industria.gob.es y las de turismo en turismo.gob.es, que remite a DATAESTUR.
-! La clave de API de DATAESTUR se solicita en la propia plataforma (registro); las llamadas sin clave no fallan con 401 sino que agotan el tiempo (504).
+! La página API de DATAESTUR no menciona clave ni registro aunque la especificación OpenAPI declare apiKey; desde este entorno las rutas _DL dieron 504 a los 30 s con y sin cabecera (30/09/2026).
 ! FRONTUR y EGATUR las produce el INE desde 2015; DATAESTUR redistribuye y añade fuentes (AENA, afiliación, telefonía móvil). Para series largas ir al INE.
 ! BADASE es una aplicación con postbacks y estado; la salida se elige en un desplegable (formato y tipo) y no localicé URL estable por serie.
 ! El portal de datos abiertos de la sede de Industria (sede.serviciosmin.gob.es) tiene el catálogo roto (ficha miteco-energia-estadisticas).

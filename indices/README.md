@@ -29,7 +29,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 | `calidad-aire-estacion` | Serie horaria o diaria de un contaminante en una estación de calidad del aire | miteco-calidad-aire | 2026-09-30 |
 | `embalses-y-caudales` | Reserva de agua de un embalse y caudal diario de un río en una estación de aforo | miteco-saih-boletin-hidrologico | 2026-09-30 |
 | `capa-red-natura-2000` | Descargar la capa oficial de Red Natura 2000 u otra capa de biodiversidad | miteco-banco-datos-naturaleza, mapa-sigpac | 2026-09-30 |
-| `prediccion-meteo-municipio` | Predicción diaria u horaria de un municipio y observación de la estación más cercana | aemet-opendata | pendiente |
+| `prediccion-meteo-municipio` | Predicción diaria u horaria de un municipio y observación de la estación más cercana | aemet-opendata | 2026-09-30 |
 | `medicamento-por-cn-o-nombre` | Datos de un medicamento por código nacional, nombre o principio activo, con ficha técnica y problemas de suministro | aemps-cima-api | 2026-09-30 |
 | `exceso-mortalidad-momo` | Defunciones observadas y esperadas por día, ámbito, sexo y edad (MoMo) | isciii-cne | 2026-09-30 |
 | `cosecha-oai-publicaciones` | Cosechar publicaciones científicas o patrimonio digital de forma incremental | csic-digital, bne-datos, fecyt-recolecta | 2026-09-30 |
@@ -308,7 +308,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **prediccion-meteo-municipio** · Predicción diaria u horaria de un municipio y observación de la estación más cercana
 - entrada: ine-municipio, idema
-1. `aemet-opendata`: Con clave gratuita en la cabecera api_key, GET prediccion/especifica/municipio/diaria/{INE de 5 dígitos sin dígito de control}; la respuesta es un JSON intermedio (estado, datos) y los datos se descargan con una segunda petición a la URL del campo datos; sin clave llega 200 con cuerpo vacío
+1. `aemet-opendata`: Con clave gratuita en la cabecera api_key (caduca a los tres meses), GET prediccion/especifica/municipio/diaria/{INE de 5 dígitos sin dígito de control}; la respuesta es un JSON intermedio (estado, datos) y los datos se descargan con una segunda petición a la URL del campo datos, en ISO-8859-15; sin clave llega 200 con cuerpo vacío
    ```
    curl -s -H "api_key: $AEMET_KEY" "https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/28079"
    ```
@@ -317,8 +317,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
    ```
    curl -s "https://opendata.aemet.es/AEMET_OpenData_specification.json"
    ```
-- salida: JSON de predicción por día; coma decimal en algunos ficheros de datos
-- nota: Sin clave solo se verificaron la especificación y el comportamiento sin autenticación (30/09/2026); las respuestas de datos están pendientes
+- salida: JSON de predicción por día (ficheros en ISO-8859-15); errores con HTTP 200 y estado en el cuerpo; 429 tras unas diez peticiones por minuto
 
 **medicamento-por-cn-o-nombre** · Datos de un medicamento por código nacional, nombre o principio activo, con ficha técnica y problemas de suministro
 - entrada: cn-medicamento

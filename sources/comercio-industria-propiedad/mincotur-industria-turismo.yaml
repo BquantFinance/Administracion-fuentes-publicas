@@ -22,7 +22,7 @@ endpoints:
     desc: Especificación OpenAPI 3 de API-SEGITTUR v2 (124 rutas _DL con filtros desde y hasta año y mes, CCAA y provincia; seguridad apiKeyHeader o apiKeyQuery)
     example: curl -s "https://www.dataestur.es/app/themes/mini-mandrake/apidata/openapi.json"
   - path: https://www.dataestur.es/API-SEGITTUR-v2/{conjunto}_DL
-    desc: Descarga de un conjunto (AENA_DESTINOS_DL, AFILIACION_TURISMO_DL, CST_EMPLEO_TURISTICO_DL...) con clave de API; sin clave el gateway respondió 504
+    desc: Descarga de un conjunto (AENA_DESTINOS_DL, FRONTUR_DL...); la página API no pide clave; desde el entorno de verificación respondió 504 a los 30 s
   - path: https://www.dataestur.es/general/{frontur|egatur}/
     desc: Páginas de FRONTUR y EGATUR en DATAESTUR con descargas por indicador
   - path: https://sedeaplicaciones.serviciosmin.gob.es/Badase/
@@ -33,7 +33,7 @@ quirks: [viewstate-forms, url-drift]
 ids: []
 gotchas:
   - La ruta IndicadoresyEstadisticas de mintur.gob.es da 404; las estadísticas de industria viven en industria.gob.es y las de turismo en turismo.gob.es, que remite a DATAESTUR.
-  - La clave de API de DATAESTUR se solicita en la propia plataforma (registro); las llamadas sin clave no fallan con 401 sino que agotan el tiempo (504).
+  - La página API de DATAESTUR no menciona clave ni registro aunque la especificación OpenAPI declare apiKey; desde este entorno las rutas _DL dieron 504 a los 30 s con y sin cabecera (30/09/2026).
   - FRONTUR y EGATUR las produce el INE desde 2015; DATAESTUR redistribuye y añade fuentes (AENA, afiliación, telefonía móvil). Para series largas ir al INE.
   - BADASE es una aplicación con postbacks y estado; la salida se elige en un desplegable (formato y tipo) y no localicé URL estable por serie.
   - El portal de datos abiertos de la sede de Industria (sede.serviciosmin.gob.es) tiene el catálogo roto (ficha miteco-energia-estadisticas).

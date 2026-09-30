@@ -47,16 +47,20 @@ rate_limit: No documentado en la especificación; la clave es un JWT gratuito
 quirks: [latin1]
 ids: [ine-municipio, idema]
 gotchas:
-  - Sin clave la API responde 200 con cuerpo vacío, no 401; con clave inválida, 401 y JSON con descripcion y estado. Tratar el cuerpo vacío como fallo de autenticación.
-  - La clave va en la cabecera api_key (así la define la especificación) o como parámetro api_key; se solicita en opendata.aemet.es/centrodedescargas/altaUsuario y llega por correo.
-  - Toda llamada responde con un JSON intermedio (estado, datos, metadatos); los datos reales se descargan con una segunda petición a la URL del campo datos.
-  - El código de municipio de las predicciones es el INE de 5 dígitos sin dígito de control (Madrid 28079); el maestro de municipios lo confirma.
-  - Las fechas de climatología van como AAAA-MM-DDTHH:MM:SSUTC, con el sufijo UTC literal.
-  - Los ficheros de datos usan coma decimal (tmed 12,3) y algunos endpoints codifican en ISO-8859-15.
-  - Verificación del 30/09/2026 sin clave. Probados la autenticación, los errores, la especificación y la existencia de todas las rutas; no se han probado las respuestas de datos, por eso verified sigue en null.
+  - Sin clave la API responde 200 con cuerpo vacío, no 401; con clave inválida, 401 y JSON con descripcion (JWT strings must contain exactly 2 period characters). Tratar el cuerpo vacío como fallo de autenticación.
+  - La clave va en la cabecera api_key o en el parámetro api_key (ambos verificados); se solicita en opendata.aemet.es/centrodedescargas/altaUsuario (correo y captcha), llega por correo y caduca a los tres meses.
+  - Toda llamada responde con un JSON intermedio (estado, datos, metadatos); los datos reales se descargan con una segunda petición a la URL del campo datos (opendata/sh/{hash}), que no conviene fijar.
+  - Los errores de datos llegan con HTTP 200 y estado en el cuerpo (404 Error al obtener los datos para un municipio inexistente, 404 No hay datos que satisfagan esos criterios con dígito de control o estación inexistente).
+  - Límite de uso; tras unas diez peticiones en un minuto responde 429 (Se ha alcanzado uno de los límites de uso. Vuelva a intentarlo el próximo minuto) durante el resto del minuto. Espaciar y cachear.
+  - Rangos máximos por petición; 6 meses en climatologías diarias y 36 meses en mensuales y anuales (estado 400 en el JSON intermedio). Iterar por ventanas.
+  - Los ficheros de datos llegan como text/plain;charset=ISO-8859-15 con JSON dentro; decodificar como ISO-8859-15 o las tildes salen mal. Climatología con valores en texto y coma decimal (tmed 6,6).
+  - El código de municipio de las predicciones es el INE de 5 dígitos sin dígito de control (Madrid 28079); el maestro de municipios (3 MB, id con prefijo id, latitud en grados y minutos) lo confirma.
+  - Las fechas de climatología van como AAAA-MM-DDTHH:MM:SSUTC, con el sufijo UTC literal; el inventario de estaciones da latitud y longitud compactas (394924N, 025309E), no decimales.
+  - Tamaños; predicción diaria de todos los municipios 2,3 MB, observación de todas las estaciones 3,2 MB; los avisos CAP se sirven como tar (application/x-gtar) con un XML por aviso.
 tips:
-  - Envolver las dos peticiones (metadatos y datos) en una función y comprobar que el cuerpo no está vacío.
+  - Envolver las dos peticiones en una función que decodifique ISO-8859-15, compruebe estado en el JSON intermedio y espere un minuto ante 429.
   - Cachear el inventario de estaciones y el maestro de municipios; cambian raramente.
+  - Para series largas de climatología diaria, ventanas de 6 meses por estación; el inventario da la lista de idema.
 related: [ine-codigos-territoriales, miteco-saih-boletin-hidrologico]
 status: active
-verified: null
+verified: "2026-09-30"

@@ -479,7 +479,7 @@
   inputs: [ine-municipio, idema]
   steps:
     - source: aemet-opendata
-      do: "Con clave gratuita en la cabecera api_key, GET prediccion/especifica/municipio/diaria/{INE de 5 dígitos sin dígito de control}; la respuesta es un JSON intermedio (estado, datos) y los datos se descargan con una segunda petición a la URL del campo datos; sin clave llega 200 con cuerpo vacío"
+      do: "Con clave gratuita en la cabecera api_key (caduca a los tres meses), GET prediccion/especifica/municipio/diaria/{INE de 5 dígitos sin dígito de control}; la respuesta es un JSON intermedio (estado, datos) y los datos se descargan con una segunda petición a la URL del campo datos, en ISO-8859-15; sin clave llega 200 con cuerpo vacío"
       example: |-
         curl -s -H "api_key: $AEMET_KEY" "https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/28079"
     - source: aemet-opendata
@@ -487,13 +487,18 @@
     - source: aemet-opendata
       do: "Las 64 rutas y sus parámetros están en AEMET_OpenData_specification.json (OpenAPI 3.0.1), sin clave"
       example: curl -s "https://opendata.aemet.es/AEMET_OpenData_specification.json"
-  output: JSON de predicción por día; coma decimal en algunos ficheros de datos
+  output: JSON de predicción por día (ficheros en ISO-8859-15); errores con HTTP 200 y estado en el cuerpo; 429 tras unas diez peticiones por minuto
   checks:
+    - url: https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/28079
+      headers: {api_key: "${AEMET_KEY}"}
+      contains: exito
+    - url: https://opendata.aemet.es/opendata/api/valores/climatologicos/inventarioestaciones/todasestaciones
+      headers: {api_key: "${AEMET_KEY}"}
+      contains: exito
     - url: https://opendata.aemet.es/AEMET_OpenData_specification.json
       contains: /prediccion/especifica/municipio/diaria/{municipio}
       read_bytes: 200000
-  verified: null
-  note: "Sin clave solo se verificaron la especificación y el comportamiento sin autenticación (30/09/2026); las respuestas de datos están pendientes"
+  verified: "2026-09-30"
 
 - id: medicamento-por-cn-o-nombre
   intent: Datos de un medicamento por código nacional, nombre o principio activo, con ficha técnica y problemas de suministro
