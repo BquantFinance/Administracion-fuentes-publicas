@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 42 recetas, 103 necesidades, 19 identificadores, 58 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 103 necesidades, 19 identificadores, 58 rutas muertas.
 
 ## Recetas por intención
 
@@ -50,6 +50,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 | `geometria-seccion-censal` | Geometría de las secciones censales, distritos o municipios de un año para mapear datos del INE | ine-cartografia-censal, ine-api-tempus | 2026-09-30 |
 | `horarios-tren-gtfs` | Horarios y paradas de Cercanías y de alta velocidad en GTFS, con las coordenadas de las estaciones | renfe-datos-abiertos | 2026-09-30 |
 | `comercio-exterior-por-producto` | Exportaciones o importaciones de un producto TARIC por país y provincia, mensuales o anuales desde 1995 | datacomex, aeat-estadisticas | 2026-09-30 |
+| `poblacion-renta-alquiler-por-municipio` | Población, renta media y precio del alquiler de un municipio con las tablas concretas del INE | ine-api-tempus, ine-cartografia-censal | 2026-09-30 |
 
 ### Pasos
 
@@ -542,6 +543,27 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
    ```
 3. `aeat-estadisticas`: Para agregados de comercio exterior sin registro, las estadísticas de la AEAT (Aduanas) en el anuario; la fuente primaria de DataComex
 - salida: JSON con Resultados (flujo, periodo, país, provincia, taric, euros y kilos como texto con coma decimal)
+
+**poblacion-renta-alquiler-por-municipio** · Población, renta media y precio del alquiler de un municipio con las tablas concretas del INE
+- entrada: ine-municipio
+1. `ine-api-tempus`: VALORES_VARIABLEOPERACION/19/22 lista los 8.142 municipios con Codigo INE e Id (Abengibre 02001 es 6124); ese Id es el que admite el filtro tv=19:{id} en cualquier tabla con la variable Municipios
+   ```
+   curl -s "https://servicios.ine.es/wstempus/js/ES/VALORES_VARIABLEOPERACION/19/22"
+   ```
+2. `ine-api-tempus`: Padrón por municipio y sexo en DATOS_TABLA/29005?nult=1&tv=19:{id} (sin filtro son 24.414 series y 14 MB); la operación DPOP (Id 22) tiene 65 tablas
+   ```
+   curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/29005?nult=1&tv=19:6124&tip=AM"
+   ```
+3. `ine-api-tempus`: Atlas de distribución de renta (operación ADRH, Id 353): 540 tablas con nombres repetidos, nueve por provincia (30656 Albacete, 30833 Alicante, 30842 Almería); Indicadores de renta media y mediana por municipio, distrito y sección con tv=19:{id}
+   ```
+   curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/30656?nult=1&tv=19:6124&tip=AM"
+   ```
+4. `ine-api-tempus`: Índice de precios de la vivienda en alquiler por municipio de más de 10.000 habitantes en DATOS_TABLA/59060 (operación IPVA, Id 432; el MetaData de cada serie lleva el código INE)
+   ```
+   curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/59060?nult=1&tip=AM"
+   ```
+5. `ine-cartografia-censal`: Geometría de secciones y municipios del mismo año para mapear (CUSEC y CUMUN)
+- salida: series JSON con MetaData (variable, nombre y Codigo INE) y Data por año
 
 ## Dónde está cada cosa
 

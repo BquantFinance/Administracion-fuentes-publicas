@@ -2,7 +2,7 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 79 · Recetas: 42 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
+Fuentes: 79 · Recetas: 43 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
 
 ## Cómo usar este repo
 
@@ -176,6 +176,7 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 - geometria-seccion-censal: Geometría de las secciones censales, distritos o municipios de un año para mapear datos del INE → ine-cartografia-censal, ine-api-tempus
 - horarios-tren-gtfs: Horarios y paradas de Cercanías y de alta velocidad en GTFS, con las coordenadas de las estaciones → renfe-datos-abiertos
 - comercio-exterior-por-producto: Exportaciones o importaciones de un producto TARIC por país y provincia, mensuales o anuales desde 1995 → datacomex, aeat-estadisticas
+- poblacion-renta-alquiler-por-municipio: Población, renta media y precio del alquiler de un municipio con las tablas concretas del INE → ine-api-tempus, ine-cartografia-censal
 
 ## Sectores
 
