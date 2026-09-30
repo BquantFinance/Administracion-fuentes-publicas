@@ -6,31 +6,39 @@ level: age
 sector: legislacion-boletines
 tags: [borme, registro-mercantil, empresas, sociedades, constituciones, nombramientos]
 summary: >-
-  Sumario diario del Boletín Oficial del Registro Mercantil: actos inscritos por provincia (constituciones,
-  nombramientos, ceses, ampliaciones, disoluciones), anuncios y convocatorias, con enlaces a PDF y XML.
+  Sumario diario del Boletín Oficial del Registro Mercantil con los actos inscritos por provincia (constituciones,
+  nombramientos, ceses, ampliaciones, disoluciones), otros actos y anuncios, con XML y PDF de cada documento.
 access: [api-rest, download]
 auth: none
-formats: [json, xml, pdf]
+formats: [json, xml, pdf, html]
 update: daily
-coverage: "2009- (PDF); sumarios estructurados desde 2009"
+coverage: "2009-"
 license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
 base_url: https://www.boe.es/datosabiertos/api
-docs_url: https://www.boe.es/datosabiertos/documentos/APIsumarioBORME.pdf
+docs_url: https://www.boe.es/datosabiertos/api/api.php
 endpoints:
   - path: /borme/sumario/{AAAAMMDD}
-    desc: Sumario del BORME del día, con un ítem por provincia y sección
+    desc: Sumario del día; secciones A y B con un item por provincia, sección C con apartado > item por anuncio
     example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/borme/sumario/20240102"'
-  - path: https://www.boe.es/borme/dias/{AAAA}/{MM}/{DD}/pdfs/{BORME-A-AAAA-NNN-XX}.pdf
-    desc: PDF de actos inscritos de una provincia (sección A)
-    example: curl -sO "https://www.boe.es/borme/dias/2024/01/02/pdfs/BORME-A-2024-1-01.pdf"
+  - path: https://www.boe.es/diario_borme/xml.php?id={BORME-A-AAAA-NNN-PP}
+    desc: Actos inscritos de una provincia en XML, un par de párrafos por empresa
+    example: curl -s "https://www.boe.es/diario_borme/xml.php?id=BORME-A-2024-1-01"
   - path: https://www.boe.es/diario_borme/xml.php?id={BORME-C-AAAA-NNNNN}
     desc: XML de un anuncio de la sección C
+    example: curl -s "https://www.boe.es/diario_borme/xml.php?id=BORME-C-2024-1"
+  - path: https://www.boe.es/borme/dias/{AAAA}/{MM}/{DD}/pdfs/{id}.pdf
+    desc: PDF de cualquier documento del sumario
+    example: curl -sO "https://www.boe.es/borme/dias/2024/01/02/pdfs/BORME-A-2024-1-01.pdf"
 rate_limit: No documentado
 gotchas:
-  - Los actos de la sección A (inscripciones) solo existen en PDF; el detalle por empresa exige parsear el PDF.
-  - El sufijo del PDF de sección A es el código de provincia (01 Álava ... 52 Melilla), no un correlativo.
-  - No se publica sábados, domingos ni festivos; 404 esos días.
-  - El BORME no incluye cuentas anuales ni datos de socios; eso está en el Registro Mercantil (no AGE, de pago).
-related: [boe-api-sumario]
+  - Cabecera Accept obligatoria (application/json o application/xml); sin ella 400. Los errores llegan siempre en XML.
+  - En JSON, item y apartado son objeto si hay un elemento y lista si hay varios; normalizar antes de iterar.
+  - El XML de la sección A no tiene campos por acto. Cada empresa es un p class articulo (número - denominación) seguido de un p class parrafo con los actos separados por punto y los Datos registrales al final.
+  - El sufijo del id de las secciones A y B es el código de provincia (01 Álava ... 52 Melilla), no un correlativo.
+  - No se publica sábados, domingos ni festivos; esos días 404. El sumario estructurado empieza en enero de 2009.
+  - El BORME no incluye cuentas anuales ni socios; eso está en el Registro Mercantil (Colegio de Registradores, de pago).
+tips:
+  - Los tipos de acto en el parrafo son un vocabulario fijo (Constitución, Nombramientos, Ceses, Revocaciones, Ampliación de capital, Disolución, Modificaciones estatutarias...) y sirven de separador al parsear.
+related: [boe-api-sumario, boe-feeds]
 status: active
-verified: null
+verified: "2026-09-30"

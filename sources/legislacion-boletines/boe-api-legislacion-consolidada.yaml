@@ -4,10 +4,11 @@ org: Agencia Estatal Boletín Oficial del Estado (AEBOE)
 ministry: Presidencia, Justicia y Relaciones con las Cortes
 level: age
 sector: legislacion-boletines
-tags: [boe, legislacion, consolidada, normas, texto-vigente]
+tags: [boe, legislacion, consolidada, normas, texto-vigente, eli, materias]
 summary: >-
-  Textos consolidados de normas estatales y autonómicas con estructura por artículos, versiones históricas,
-  metadatos, análisis jurídico (materias, referencias anteriores y posteriores) y estado de vigencia.
+  Textos consolidados de normas estatales y autonómicas por bloques (artículos, disposiciones) con todas las
+  versiones de cada bloque, metadatos, análisis (materias, referencias) y vigencia. Listado filtrable por fecha
+  de actualización, búsqueda por título y tablas auxiliares de códigos.
 access: [api-rest]
 auth: none
 formats: [json, xml]
@@ -15,29 +16,51 @@ update: daily
 coverage: "Normas vigentes y derogadas desde 1978, algunas anteriores"
 license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
 base_url: https://www.boe.es/datosabiertos/api/legislacion-consolidada
-docs_url: https://www.boe.es/datosabiertos/documentos/APIlegislacionConsolidada.pdf
+docs_url: https://www.boe.es/datosabiertos/api/api.php
 endpoints:
+  - path: ?from={AAAAMMDD}&to={AAAAMMDD}&offset={n}&limit={n}
+    desc: Listado de normas por fecha de última actualización del consolidado; JSON o XML
+    example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada?from=20260901&limit=100"'
+    params: "limit por defecto 50, -1 devuelve hasta 10000; query es un JSON URL-encoded con query_string, range y sort"
+  - path: ?query={json}&limit={n}
+    desc: Búsqueda por título y rango de fecha de publicación o de disposición, con orden
+    example: 'curl -s -G -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada" --data-urlencode ''query={"query":{"query_string":{"query":"titulo:vivienda"},"range":{"fecha_publicacion":{"gte":"20230101","lte":"20241231"}}},"sort":[{"fecha_publicacion":"desc"}]}'' --data-urlencode "limit=20"'
   - path: /id/{BOE-A-AAAA-NNNNN}
-    desc: Norma completa consolidada (metadatos, análisis, texto por bloques)
-    example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229"'
+    desc: Norma completa (metadatos, análisis y texto por bloques); solo XML
+    example: 'curl -s -H "Accept: application/xml" "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229"'
   - path: /id/{id}/metadatos
-    desc: Solo metadatos (título, rango, fechas, vigencia)
+    desc: Título, rango, departamento, fechas, vigencia, estado de consolidación y url_eli; JSON o XML
+    example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/metadatos"'
   - path: /id/{id}/analisis
-    desc: Materias, notas, referencias anteriores y posteriores
+    desc: Materias, notas y referencias anteriores y posteriores; JSON o XML
   - path: /id/{id}/texto
-    desc: Texto consolidado dividido en bloques (artículos, disposiciones)
-  - path: /id/{id}/texto/bloque/{id_bloque}
-    desc: Un artículo o bloque concreto
+    desc: Texto consolidado completo por bloques con todas sus versiones; solo XML
   - path: /id/{id}/texto/indice
-    desc: Índice de bloques de la norma
-  - path: /legislacion-consolidada?from={AAAAMMDD}&offset={n}&limit={n}
-    desc: Listado de normas, filtrable por fecha de actualización
+    desc: Índice de bloques con id, título y fecha de actualización; JSON o XML
+    example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/indice"'
+  - path: /id/{id}/texto/bloque/{id_bloque}
+    desc: Un bloque (preambulo, tpreliminar, a1, a2-5, da1...) con sus versiones; solo XML
+    example: 'curl -s -H "Accept: application/xml" "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/bloque/a1"'
+  - path: /id/{id}/metadata-eli
+    desc: Metadatos ELI de la norma en RDF/XML; solo XML
+  - path: https://www.boe.es/datosabiertos/api/datos-auxiliares/{tabla}
+    desc: Tablas de códigos (materias, rangos, departamentos, ambitos, estados-consolidacion, relaciones-anteriores, relaciones-posteriores)
+    example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/datos-auxiliares/rangos"'
 rate_limit: No documentado
 gotchas:
-  - Cabecera Accept obligatoria (application/json o application/xml).
-  - El identificador es el del BOE original de la norma, p. ej. la Constitución es BOE-A-1978-31229.
-  - Los bloques de texto llevan fecha de vigencia; una norma tiene varias versiones del mismo artículo.
-  - Solo cubre normas con texto consolidado, no todas las disposiciones publicadas.
-related: [boe-api-sumario]
+  - Cabecera Accept obligatoria; sin ella o con */* responde 400. Los errores llegan siempre en XML aunque se pida JSON.
+  - Norma completa, texto, bloque y metadata-eli solo se sirven en XML; con Accept application/json devuelven 400. Metadatos, análisis, índice, listado y tablas auxiliares sí van en JSON.
+  - El listado es la propia base_url sin sufijo; limit por defecto 50, limit=-1 se corta en 10000, paginar con offset (offset=10000 funciona).
+  - Sin resultados, data es la cadena vacía y no una lista vacía.
+  - En query_string el término va con campo (titulo:vivienda); un término suelto devuelve vacío. En range, gte y lte son obligatorios en formato AAAAMMDD.
+  - from y to filtran por fecha_actualizacion (última modificación del consolidado), no por fecha de publicación; para eso usar range en query.
+  - Solo hay normas con texto consolidado; una disposición del BOE sin consolidar devuelve 404 aunque su id exista.
+  - Cada bloque trae una o varias version con fecha_vigencia; para el texto vigente quedarse con la de fecha_vigencia más reciente.
+tips:
+  - Flujo de actualización diaria. Listado con from=ayer, y después metadatos o texto de cada identificador devuelto.
+  - Para un artículo concreto, indice para localizar el id de bloque y luego texto/bloque/{id}.
+  - Los códigos numéricos de rango, materia y departamento se traducen con datos-auxiliares.
+  - El OpenAPI 3.1 está embebido en api.php (variable openApiFile); el documento técnico es APIconsolidada.pdf en /datosabiertos/documentos/.
+related: [boe-api-sumario, boe-eli]
 status: active
-verified: null
+verified: "2026-09-30"

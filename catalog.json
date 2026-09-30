@@ -2576,9 +2576,11 @@
     "legislacion",
     "consolidada",
     "normas",
-    "texto-vigente"
+    "texto-vigente",
+    "eli",
+    "materias"
    ],
-   "summary": "Textos consolidados de normas estatales y autonómicas con estructura por artículos, versiones históricas, metadatos, análisis jurídico (materias, referencias anteriores y posteriores) y estado de vigencia.",
+   "summary": "Textos consolidados de normas estatales y autonómicas por bloques (artículos, disposiciones) con todas las versiones de cada bloque, metadatos, análisis (materias, referencias) y vigencia. Listado filtrable por fecha de actualización, búsqueda por título y tablas auxiliares de códigos.",
    "access": [
     "api-rest"
    ],
@@ -2591,50 +2593,80 @@
    "coverage": "Normas vigentes y derogadas desde 1978, algunas anteriores",
    "license": "Reutilización libre con cita de la fuente (aviso legal AEBOE)",
    "base_url": "https://www.boe.es/datosabiertos/api/legislacion-consolidada",
-   "docs_url": "https://www.boe.es/datosabiertos/documentos/APIlegislacionConsolidada.pdf",
+   "docs_url": "https://www.boe.es/datosabiertos/api/api.php",
    "endpoints": [
     {
+     "path": "?from={AAAAMMDD}&to={AAAAMMDD}&offset={n}&limit={n}",
+     "desc": "Listado de normas por fecha de última actualización del consolidado; JSON o XML",
+     "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada?from=20260901&limit=100\"",
+     "params": "limit por defecto 50, -1 devuelve hasta 10000; query es un JSON URL-encoded con query_string, range y sort"
+    },
+    {
+     "path": "?query={json}&limit={n}",
+     "desc": "Búsqueda por título y rango de fecha de publicación o de disposición, con orden",
+     "example": "curl -s -G -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada\" --data-urlencode 'query={\"query\":{\"query_string\":{\"query\":\"titulo:vivienda\"},\"range\":{\"fecha_publicacion\":{\"gte\":\"20230101\",\"lte\":\"20241231\"}}},\"sort\":[{\"fecha_publicacion\":\"desc\"}]}' --data-urlencode \"limit=20\""
+    },
+    {
      "path": "/id/{BOE-A-AAAA-NNNNN}",
-     "desc": "Norma completa consolidada (metadatos, análisis, texto por bloques)",
-     "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229\""
+     "desc": "Norma completa (metadatos, análisis y texto por bloques); solo XML",
+     "example": "curl -s -H \"Accept: application/xml\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229\""
     },
     {
      "path": "/id/{id}/metadatos",
-     "desc": "Solo metadatos (título, rango, fechas, vigencia)"
+     "desc": "Título, rango, departamento, fechas, vigencia, estado de consolidación y url_eli; JSON o XML",
+     "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/metadatos\""
     },
     {
      "path": "/id/{id}/analisis",
-     "desc": "Materias, notas, referencias anteriores y posteriores"
+     "desc": "Materias, notas y referencias anteriores y posteriores; JSON o XML"
     },
     {
      "path": "/id/{id}/texto",
-     "desc": "Texto consolidado dividido en bloques (artículos, disposiciones)"
-    },
-    {
-     "path": "/id/{id}/texto/bloque/{id_bloque}",
-     "desc": "Un artículo o bloque concreto"
+     "desc": "Texto consolidado completo por bloques con todas sus versiones; solo XML"
     },
     {
      "path": "/id/{id}/texto/indice",
-     "desc": "Índice de bloques de la norma"
+     "desc": "Índice de bloques con id, título y fecha de actualización; JSON o XML",
+     "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/indice\""
     },
     {
-     "path": "/legislacion-consolidada?from={AAAAMMDD}&offset={n}&limit={n}",
-     "desc": "Listado de normas, filtrable por fecha de actualización"
+     "path": "/id/{id}/texto/bloque/{id_bloque}",
+     "desc": "Un bloque (preambulo, tpreliminar, a1, a2-5, da1...) con sus versiones; solo XML",
+     "example": "curl -s -H \"Accept: application/xml\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/bloque/a1\""
+    },
+    {
+     "path": "/id/{id}/metadata-eli",
+     "desc": "Metadatos ELI de la norma en RDF/XML; solo XML"
+    },
+    {
+     "path": "https://www.boe.es/datosabiertos/api/datos-auxiliares/{tabla}",
+     "desc": "Tablas de códigos (materias, rangos, departamentos, ambitos, estados-consolidacion, relaciones-anteriores, relaciones-posteriores)",
+     "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/datos-auxiliares/rangos\""
     }
    ],
    "rate_limit": "No documentado",
    "gotchas": [
-    "Cabecera Accept obligatoria (application/json o application/xml).",
-    "El identificador es el del BOE original de la norma, p. ej. la Constitución es BOE-A-1978-31229.",
-    "Los bloques de texto llevan fecha de vigencia; una norma tiene varias versiones del mismo artículo.",
-    "Solo cubre normas con texto consolidado, no todas las disposiciones publicadas."
+    "Cabecera Accept obligatoria; sin ella o con */* responde 400. Los errores llegan siempre en XML aunque se pida JSON.",
+    "Norma completa, texto, bloque y metadata-eli solo se sirven en XML; con Accept application/json devuelven 400. Metadatos, análisis, índice, listado y tablas auxiliares sí van en JSON.",
+    "El listado es la propia base_url sin sufijo; limit por defecto 50, limit=-1 se corta en 10000, paginar con offset (offset=10000 funciona).",
+    "Sin resultados, data es la cadena vacía y no una lista vacía.",
+    "En query_string el término va con campo (titulo:vivienda); un término suelto devuelve vacío. En range, gte y lte son obligatorios en formato AAAAMMDD.",
+    "from y to filtran por fecha_actualizacion (última modificación del consolidado), no por fecha de publicación; para eso usar range en query.",
+    "Solo hay normas con texto consolidado; una disposición del BOE sin consolidar devuelve 404 aunque su id exista.",
+    "Cada bloque trae una o varias version con fecha_vigencia; para el texto vigente quedarse con la de fecha_vigencia más reciente."
+   ],
+   "tips": [
+    "Flujo de actualización diaria. Listado con from=ayer, y después metadatos o texto de cada identificador devuelto.",
+    "Para un artículo concreto, indice para localizar el id de bloque y luego texto/bloque/{id}.",
+    "Los códigos numéricos de rango, materia y departamento se traducen con datos-auxiliares.",
+    "El OpenAPI 3.1 está embebido en api.php (variable openApiFile); el documento técnico es APIconsolidada.pdf en /datosabiertos/documentos/."
    ],
    "related": [
-    "boe-api-sumario"
+    "boe-api-sumario",
+    "boe-eli"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "boe-api-sumario",
@@ -2648,44 +2680,61 @@
     "diario-oficial",
     "legislacion",
     "sumario",
-    "disposiciones"
+    "disposiciones",
+    "anuncios"
    ],
-   "summary": "Sumario diario del BOE en JSON/XML: todas las disposiciones publicadas cada día con identificador, título, sección, departamento y enlaces a PDF, HTML y XML del texto completo.",
+   "summary": "Sumario diario del BOE en JSON o XML: todas las disposiciones y anuncios publicados cada día con identificador, título, sección, departamento, epígrafe y URLs de PDF, HTML y XML del texto completo de cada uno.",
    "access": [
     "api-rest"
    ],
    "auth": "none",
    "formats": [
     "json",
-    "xml"
+    "xml",
+    "pdf",
+    "html"
    ],
    "update": "daily",
-   "coverage": "1960-",
+   "coverage": "1960-09-",
    "license": "Reutilización libre con cita de la fuente (aviso legal AEBOE)",
    "base_url": "https://www.boe.es/datosabiertos/api",
-   "docs_url": "https://www.boe.es/datosabiertos/documentos/APIsumarioBOE.pdf",
+   "docs_url": "https://www.boe.es/datosabiertos/api/api.php",
    "endpoints": [
     {
      "path": "/boe/sumario/{AAAAMMDD}",
-     "desc": "Sumario completo del BOE del día indicado",
+     "desc": "Sumario del día, anidado en diario > seccion > departamento > epigrafe > item",
      "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/boe/sumario/20240102\""
     },
     {
      "path": "https://www.boe.es/diario_boe/xml.php?id={BOE-A-AAAA-NNNNN}",
-     "desc": "Texto completo y metadatos de una disposición en XML",
-     "example": "curl -s \"https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-1\""
+     "desc": "Texto completo y metadatos de una disposición en XML; no necesita cabecera Accept",
+     "example": "curl -s \"https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-87\""
+    },
+    {
+     "path": "https://www.boe.es/diario_boe/txt.php?id={id}",
+     "desc": "Versión HTML de la disposición"
     },
     {
      "path": "https://www.boe.es/boe/dias/{AAAA}/{MM}/{DD}/pdfs/{id}.pdf",
-     "desc": "PDF de una disposición"
+     "desc": "PDF de la disposición; la fecha del path es la de publicación",
+     "example": "curl -sO \"https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-A-2024-87.pdf\""
     }
    ],
-   "rate_limit": "No documentado; peticiones masivas pueden bloquearse temporalmente",
+   "rate_limit": "No documentado",
    "gotchas": [
-    "La cabecera Accept es obligatoria; sin ella devuelve XML por defecto o error 400.",
-    "No hay BOE los domingos ni festivos nacionales; la API devuelve 404 para esos días.",
-    "Los identificadores siguen el patrón BOE-A-AAAA-NNNNN (disposiciones) y BOE-B-AAAA-NNNNN (anuncios).",
-    "Para búsquedas por texto no hay API; usar el buscador web o descargar sumarios y filtrar en local."
+    "Cabecera Accept obligatoria con application/json o application/xml; sin ella, o con */*, responde 400.",
+    "Los errores (400, 404, 500) llegan siempre con cuerpo XML aunque se pida JSON; comprobar el código HTTP antes de parsear.",
+    "En JSON, item, departamento y epigrafe son objeto si hay un elemento y lista si hay varios; normalizar a lista antes de iterar.",
+    "No hay BOE los domingos ni festivos nacionales; esos días la API devuelve 404.",
+    "Algunos días antiguos (p. ej. 19700102) devuelven 500 aunque exista boletín; reintentar o saltar.",
+    "Cada item trae url_pdf.texto, url_html y url_xml ya construidas; no montar la URL del PDF a mano (BOE-A-2024-1 no está en 2024/01/02).",
+    "Los identificadores siguen el patrón BOE-A-AAAA-NNNNN (disposiciones) y BOE-B-AAAA-NNNNN (anuncios); la numeración es anual.",
+    "No hay búsqueda por texto en esta API; descargar sumarios y filtrar en local, o usar la API de legislación consolidada."
+   ],
+   "tips": [
+    "Un sumario diario pesa entre 100 y 200 KB en JSON; para histórico iterar por fecha y tratar 404 como día sin publicación.",
+    "El OpenAPI 3.1 completo está embebido en api.php (variable openApiFile); el documento técnico es APIsumarioBOE.pdf en /datosabiertos/documentos/.",
+    "Para detectar publicaciones nuevas sin descargar el sumario entero, usar los feeds RSS (boe-feeds)."
    ],
    "related": [
     "boe-api-legislacion-consolidada",
@@ -2693,7 +2742,7 @@
     "boe-feeds"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "boe-eli",
@@ -2707,9 +2756,9 @@
     "legislacion",
     "uris",
     "linked-data",
-    "rdf"
+    "rdfa"
    ],
-   "summary": "URIs estables tipo ELI para normas estatales, con metadatos RDFa embebidos en las páginas de legislación consolidada, interoperables con EUR-Lex y otros boletines europeos.",
+   "summary": "URIs estables ELI para normas publicadas en el BOE, que resuelven a la página HTML de la norma con metadatos RDFa de la ontología eli embebidos, interoperables con EUR-Lex y otros boletines europeos.",
    "access": [
     "download"
    ],
@@ -2725,27 +2774,35 @@
    "endpoints": [
     {
      "path": "https://www.boe.es/eli/es/{tipo}/{AAAA}/{MM}/{DD}/{num}/con",
-     "desc": "Texto consolidado de una norma por su URI ELI",
-     "example": "curl -sL \"https://www.boe.es/eli/es/lo/2018/12/05/3/con\""
+     "desc": "Texto consolidado vigente de la norma, HTML con RDFa",
+     "example": "curl -s \"https://www.boe.es/eli/es/lo/2018/12/05/3/con\""
     },
     {
      "path": "https://www.boe.es/eli/es/{tipo}/{AAAA}/{MM}/{DD}/{num}/dof",
-     "desc": "Versión publicada en el diario oficial"
+     "desc": "Versión tal como se publicó en el diario oficial; sin sufijo equivale a dof",
+     "example": "curl -s \"https://www.boe.es/eli/es/lo/2018/12/05/3/dof\""
     }
    ],
    "gotchas": [
-    "Los tipos de norma en la URI son abreviaturas (lo ley orgánica, l ley, rd real decreto, rdl real decreto-ley, o orden).",
-    "La URI ELI redirige a la página HTML; para JSON usar la API de legislación consolidada con el id BOE."
+    "Tipos de norma en la URI (verificados) lo ley orgánica, l ley, rd real decreto, rdl real decreto-ley, rdlg real decreto legislativo, o orden.",
+    "La fecha de la URI es la de la disposición (firma), no la de publicación en el BOE.",
+    "En las órdenes el número lleva delante el código del departamento en minúsculas (o/2025/01/16/trm59 para la Orden TRM/59/2025).",
+    "Responde 200 con HTML directamente, sin redirección y sin negociación de contenido; Accept application/rdf+xml devuelve el mismo HTML.",
+    "Sufijos distintos de con y dof redirigen a una página de error con 400."
+   ],
+   "tips": [
+    "Para obtener la URI ELI a partir de un id BOE, el campo url_eli de /id/{id}/metadatos de la API de legislación consolidada.",
+    "Para los metadatos ELI en RDF/XML sin parsear RDFa, /id/{id}/metadata-eli de la misma API."
    ],
    "related": [
     "boe-api-legislacion-consolidada"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "boe-feeds",
-   "name": "BOE y BORME – Feeds RSS y alertas",
+   "name": "BOE y BORME – Feeds RSS",
    "org": "Agencia Estatal Boletín Oficial del Estado (AEBOE)",
    "ministry": "Presidencia, Justicia y Relaciones con las Cortes",
    "level": "age",
@@ -2755,9 +2812,11 @@
     "borme",
     "rss",
     "sindicacion",
-    "alertas"
+    "alertas",
+    "licitaciones",
+    "cpv"
    ],
-   "summary": "Canales RSS del sumario diario del BOE por secciones y del BORME, útiles para detectar publicaciones nuevas sin consultar la API.",
+   "summary": "Canales RSS 2.0 del sumario diario del BOE (completo o por sección), del BORME, de canales temáticos (ayudas, becas, convenios colectivos, sentencias del TC) y de anuncios de licitación por división CPV.",
    "access": [
     "feed"
    ],
@@ -2772,32 +2831,45 @@
    "docs_url": "https://www.boe.es/rss/",
    "endpoints": [
     {
-     "path": "https://www.boe.es/rss/boe.php",
-     "desc": "Sumario del BOE del día"
+     "path": "boe.php",
+     "desc": "Sumario completo del BOE del día",
+     "example": "curl -s \"https://www.boe.es/rss/boe.php\" | iconv -f ISO-8859-1 -t UTF-8"
     },
     {
-     "path": "https://www.boe.es/rss/boe.php?s={seccion}",
-     "desc": "Sumario filtrado por sección (1 disposiciones generales, 2A, 2B, 3, 4, 5A, 5B, 5C)"
+     "path": "boe.php?s={seccion}",
+     "desc": "Sumario del día por sección (1, 2, 2A, 2B, 3, 4, 5, 5A, 5B, 5C, T)",
+     "example": "curl -s \"https://www.boe.es/rss/boe.php?s=1\""
     },
     {
-     "path": "https://www.boe.es/rss/borme.php",
-     "desc": "Sumario del BORME del día"
+     "path": "borme.php?s={seccion}",
+     "desc": "Sumario del BORME del día, completo (sin s) o por sección (1, A, B, C)",
+     "example": "curl -s \"https://www.boe.es/rss/borme.php?s=A\""
     },
     {
-     "path": "https://www.boe.es/rss/canal.php?c={tema}",
-     "desc": "Canales temáticos (legislación consolidada actualizada, ayudas, empleo público)"
+     "path": "canal.php?c={canal}",
+     "desc": "Canales temáticos, con las últimas semanas de publicaciones",
+     "params": "c en ayudas, becas, ccolectivos, ccolaboracion, imp_amb, prestamos, planes, premios, tabaco, tc, fundaciones, notariado, cartas, cambios",
+     "example": "curl -s \"https://www.boe.es/rss/canal.php?c=ayudas\""
+    },
+    {
+     "path": "canal_cpv.php?l=a&c={division_cpv}",
+     "desc": "Anuncios de licitación y formalización por división CPV de tres dígitos (720 servicios TI, 450 obras, 850 salud)",
+     "example": "curl -s \"https://www.boe.es/rss/canal_cpv.php?l=a&c=720\""
     }
    ],
    "gotchas": [
-    "Los feeds solo contienen el día en curso; para histórico usar la API de sumarios.",
-    "El servicio de alertas personalizadas por correo requiere cuenta en Mi BOE y no tiene API."
+    "Los feeds van en ISO-8859-1, no en UTF-8; convertir antes de parsear o los acentos se corrompen.",
+    "Los feeds de sumario solo contienen el día en curso; los canales temáticos guardan unas ocho semanas. Para histórico usar la API de sumarios.",
+    "canal.php sin c válido responde 200 con cuerpo vacío, no un error.",
+    "La lista completa de canales y divisiones CPV está en el HTML de https://www.boe.es/rss/ (no hay índice legible por máquina).",
+    "Las alertas personalizadas por correo (Mi BOE) no tienen API."
    ],
    "related": [
     "boe-api-sumario",
     "borme-api-sumario"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "borme-api-sumario",
@@ -2814,7 +2886,7 @@
     "constituciones",
     "nombramientos"
    ],
-   "summary": "Sumario diario del Boletín Oficial del Registro Mercantil: actos inscritos por provincia (constituciones, nombramientos, ceses, ampliaciones, disoluciones), anuncios y convocatorias, con enlaces a PDF y XML.",
+   "summary": "Sumario diario del Boletín Oficial del Registro Mercantil con los actos inscritos por provincia (constituciones, nombramientos, ceses, ampliaciones, disoluciones), otros actos y anuncios, con XML y PDF de cada documento.",
    "access": [
     "api-rest",
     "download"
@@ -2823,41 +2895,54 @@
    "formats": [
     "json",
     "xml",
-    "pdf"
+    "pdf",
+    "html"
    ],
    "update": "daily",
-   "coverage": "2009- (PDF); sumarios estructurados desde 2009",
+   "coverage": "2009-",
    "license": "Reutilización libre con cita de la fuente (aviso legal AEBOE)",
    "base_url": "https://www.boe.es/datosabiertos/api",
-   "docs_url": "https://www.boe.es/datosabiertos/documentos/APIsumarioBORME.pdf",
+   "docs_url": "https://www.boe.es/datosabiertos/api/api.php",
    "endpoints": [
     {
      "path": "/borme/sumario/{AAAAMMDD}",
-     "desc": "Sumario del BORME del día, con un ítem por provincia y sección",
+     "desc": "Sumario del día; secciones A y B con un item por provincia, sección C con apartado > item por anuncio",
      "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/borme/sumario/20240102\""
     },
     {
-     "path": "https://www.boe.es/borme/dias/{AAAA}/{MM}/{DD}/pdfs/{BORME-A-AAAA-NNN-XX}.pdf",
-     "desc": "PDF de actos inscritos de una provincia (sección A)",
-     "example": "curl -sO \"https://www.boe.es/borme/dias/2024/01/02/pdfs/BORME-A-2024-1-01.pdf\""
+     "path": "https://www.boe.es/diario_borme/xml.php?id={BORME-A-AAAA-NNN-PP}",
+     "desc": "Actos inscritos de una provincia en XML, un par de párrafos por empresa",
+     "example": "curl -s \"https://www.boe.es/diario_borme/xml.php?id=BORME-A-2024-1-01\""
     },
     {
      "path": "https://www.boe.es/diario_borme/xml.php?id={BORME-C-AAAA-NNNNN}",
-     "desc": "XML de un anuncio de la sección C"
+     "desc": "XML de un anuncio de la sección C",
+     "example": "curl -s \"https://www.boe.es/diario_borme/xml.php?id=BORME-C-2024-1\""
+    },
+    {
+     "path": "https://www.boe.es/borme/dias/{AAAA}/{MM}/{DD}/pdfs/{id}.pdf",
+     "desc": "PDF de cualquier documento del sumario",
+     "example": "curl -sO \"https://www.boe.es/borme/dias/2024/01/02/pdfs/BORME-A-2024-1-01.pdf\""
     }
    ],
    "rate_limit": "No documentado",
    "gotchas": [
-    "Los actos de la sección A (inscripciones) solo existen en PDF; el detalle por empresa exige parsear el PDF.",
-    "El sufijo del PDF de sección A es el código de provincia (01 Álava ... 52 Melilla), no un correlativo.",
-    "No se publica sábados, domingos ni festivos; 404 esos días.",
-    "El BORME no incluye cuentas anuales ni datos de socios; eso está en el Registro Mercantil (no AGE, de pago)."
+    "Cabecera Accept obligatoria (application/json o application/xml); sin ella 400. Los errores llegan siempre en XML.",
+    "En JSON, item y apartado son objeto si hay un elemento y lista si hay varios; normalizar antes de iterar.",
+    "El XML de la sección A no tiene campos por acto. Cada empresa es un p class articulo (número - denominación) seguido de un p class parrafo con los actos separados por punto y los Datos registrales al final.",
+    "El sufijo del id de las secciones A y B es el código de provincia (01 Álava ... 52 Melilla), no un correlativo.",
+    "No se publica sábados, domingos ni festivos; esos días 404. El sumario estructurado empieza en enero de 2009.",
+    "El BORME no incluye cuentas anuales ni socios; eso está en el Registro Mercantil (Colegio de Registradores, de pago)."
+   ],
+   "tips": [
+    "Los tipos de acto en el parrafo son un vocabulario fijo (Constitución, Nombramientos, Ceses, Revocaciones, Ampliación de capital, Disolución, Modificaciones estatutarias...) y sirven de separador al parsear."
    ],
    "related": [
-    "boe-api-sumario"
+    "boe-api-sumario",
+    "boe-feeds"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "miteco-banco-datos-naturaleza",

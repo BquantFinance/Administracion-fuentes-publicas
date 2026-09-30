@@ -1,13 +1,13 @@
 id: boe-feeds
-name: BOE y BORME – Feeds RSS y alertas
+name: BOE y BORME – Feeds RSS
 org: Agencia Estatal Boletín Oficial del Estado (AEBOE)
 ministry: Presidencia, Justicia y Relaciones con las Cortes
 level: age
 sector: legislacion-boletines
-tags: [boe, borme, rss, sindicacion, alertas]
+tags: [boe, borme, rss, sindicacion, alertas, licitaciones, cpv]
 summary: >-
-  Canales RSS del sumario diario del BOE por secciones y del BORME, útiles para detectar publicaciones
-  nuevas sin consultar la API.
+  Canales RSS 2.0 del sumario diario del BOE (completo o por sección), del BORME, de canales temáticos
+  (ayudas, becas, convenios colectivos, sentencias del TC) y de anuncios de licitación por división CPV.
 access: [feed]
 auth: none
 formats: [rss, xml]
@@ -16,17 +16,28 @@ license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
 base_url: https://www.boe.es/rss/
 docs_url: https://www.boe.es/rss/
 endpoints:
-  - path: https://www.boe.es/rss/boe.php
-    desc: Sumario del BOE del día
-  - path: https://www.boe.es/rss/boe.php?s={seccion}
-    desc: Sumario filtrado por sección (1 disposiciones generales, 2A, 2B, 3, 4, 5A, 5B, 5C)
-  - path: https://www.boe.es/rss/borme.php
-    desc: Sumario del BORME del día
-  - path: https://www.boe.es/rss/canal.php?c={tema}
-    desc: Canales temáticos (legislación consolidada actualizada, ayudas, empleo público)
+  - path: boe.php
+    desc: Sumario completo del BOE del día
+    example: curl -s "https://www.boe.es/rss/boe.php" | iconv -f ISO-8859-1 -t UTF-8
+  - path: boe.php?s={seccion}
+    desc: Sumario del día por sección (1, 2, 2A, 2B, 3, 4, 5, 5A, 5B, 5C, T)
+    example: curl -s "https://www.boe.es/rss/boe.php?s=1"
+  - path: borme.php?s={seccion}
+    desc: Sumario del BORME del día, completo (sin s) o por sección (1, A, B, C)
+    example: curl -s "https://www.boe.es/rss/borme.php?s=A"
+  - path: canal.php?c={canal}
+    desc: Canales temáticos, con las últimas semanas de publicaciones
+    params: "c en ayudas, becas, ccolectivos, ccolaboracion, imp_amb, prestamos, planes, premios, tabaco, tc, fundaciones, notariado, cartas, cambios"
+    example: curl -s "https://www.boe.es/rss/canal.php?c=ayudas"
+  - path: canal_cpv.php?l=a&c={division_cpv}
+    desc: Anuncios de licitación y formalización por división CPV de tres dígitos (720 servicios TI, 450 obras, 850 salud)
+    example: curl -s "https://www.boe.es/rss/canal_cpv.php?l=a&c=720"
 gotchas:
-  - Los feeds solo contienen el día en curso; para histórico usar la API de sumarios.
-  - El servicio de alertas personalizadas por correo requiere cuenta en Mi BOE y no tiene API.
+  - Los feeds van en ISO-8859-1, no en UTF-8; convertir antes de parsear o los acentos se corrompen.
+  - Los feeds de sumario solo contienen el día en curso; los canales temáticos guardan unas ocho semanas. Para histórico usar la API de sumarios.
+  - canal.php sin c válido responde 200 con cuerpo vacío, no un error.
+  - La lista completa de canales y divisiones CPV está en el HTML de https://www.boe.es/rss/ (no hay índice legible por máquina).
+  - Las alertas personalizadas por correo (Mi BOE) no tienen API.
 related: [boe-api-sumario, borme-api-sumario]
 status: active
-verified: null
+verified: "2026-09-30"

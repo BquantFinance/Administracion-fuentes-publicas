@@ -4,14 +4,14 @@ Sector `legislacion-boletines` · 5 fuentes · índice generado por `scripts/bui
 
 | id | fuente | acceso | auth | formatos | actualización | verificada |
 |---|---|---|---|---|---|---|
-| [boe-api-legislacion-consolidada](boe-api-legislacion-consolidada.yaml) | BOE – API de legislación consolidada | api-rest | none | json, xml | daily | — |
-| [boe-api-sumario](boe-api-sumario.yaml) | BOE – API de sumarios | api-rest | none | json, xml | daily | — |
-| [boe-eli](boe-eli.yaml) | ELI – Identificador Europeo de Legislación en el BOE | download | none | html, rdf | daily | — |
-| [boe-feeds](boe-feeds.yaml) | BOE y BORME – Feeds RSS y alertas | feed | none | rss, xml | daily | — |
-| [borme-api-sumario](borme-api-sumario.yaml) | BORME – API de sumarios y actos mercantiles | api-rest, download | none | json, xml, pdf | daily | — |
+| [boe-api-legislacion-consolidada](boe-api-legislacion-consolidada.yaml) | BOE – API de legislación consolidada | api-rest | none | json, xml | daily | 2026-09-30 |
+| [boe-api-sumario](boe-api-sumario.yaml) | BOE – API de sumarios | api-rest | none | json, xml, pdf, html | daily | 2026-09-30 |
+| [boe-eli](boe-eli.yaml) | ELI – Identificador Europeo de Legislación en el BOE | download | none | html, rdf | daily | 2026-09-30 |
+| [boe-feeds](boe-feeds.yaml) | BOE y BORME – Feeds RSS | feed | none | rss, xml | daily | 2026-09-30 |
+| [borme-api-sumario](borme-api-sumario.yaml) | BORME – API de sumarios y actos mercantiles | api-rest, download | none | json, xml, pdf, html | daily | 2026-09-30 |
 
-- **boe-api-legislacion-consolidada**: Textos consolidados de normas estatales y autonómicas con estructura por artículos, versiones históricas, metadatos, análisis jurídico (materias, referencias anteriores y posteriores) y estado de vigencia.
-- **boe-api-sumario**: Sumario diario del BOE en JSON/XML: todas las disposiciones publicadas cada día con identificador, título, sección, departamento y enlaces a PDF, HTML y XML del texto completo.
-- **boe-eli**: URIs estables tipo ELI para normas estatales, con metadatos RDFa embebidos en las páginas de legislación consolidada, interoperables con EUR-Lex y otros boletines europeos.
-- **boe-feeds**: Canales RSS del sumario diario del BOE por secciones y del BORME, útiles para detectar publicaciones nuevas sin consultar la API.
-- **borme-api-sumario**: Sumario diario del Boletín Oficial del Registro Mercantil: actos inscritos por provincia (constituciones, nombramientos, ceses, ampliaciones, disoluciones), anuncios y convocatorias, con enlaces a PDF y XML.
+- **boe-api-legislacion-consolidada**: Textos consolidados de normas estatales y autonómicas por bloques (artículos, disposiciones) con todas las versiones de cada bloque, metadatos, análisis (materias, referencias) y vigencia. Listado filtrable por fecha de actualización, búsqueda por título y tablas auxiliares de códigos.
+- **boe-api-sumario**: Sumario diario del BOE en JSON o XML: todas las disposiciones y anuncios publicados cada día con identificador, título, sección, departamento, epígrafe y URLs de PDF, HTML y XML del texto completo de cada uno.
+- **boe-eli**: URIs estables ELI para normas publicadas en el BOE, que resuelven a la página HTML de la norma con metadatos RDFa de la ontología eli embebidos, interoperables con EUR-Lex y otros boletines europeos.
+- **boe-feeds**: Canales RSS 2.0 del sumario diario del BOE (completo o por sección), del BORME, de canales temáticos (ayudas, becas, convenios colectivos, sentencias del TC) y de anuncios de licitación por división CPV.
+- **borme-api-sumario**: Sumario diario del Boletín Oficial del Registro Mercantil con los actos inscritos por provincia (constituciones, nombramientos, ceses, ampliaciones, disoluciones), otros actos y anuncios, con XML y PDF de cada documento.

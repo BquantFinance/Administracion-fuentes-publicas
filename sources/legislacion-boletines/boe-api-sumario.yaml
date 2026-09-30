@@ -4,33 +4,44 @@ org: Agencia Estatal Boletín Oficial del Estado (AEBOE)
 ministry: Presidencia, Justicia y Relaciones con las Cortes
 level: age
 sector: legislacion-boletines
-tags: [boe, diario-oficial, legislacion, sumario, disposiciones]
+tags: [boe, diario-oficial, legislacion, sumario, disposiciones, anuncios]
 summary: >-
-  Sumario diario del BOE en JSON/XML: todas las disposiciones publicadas cada día con identificador,
-  título, sección, departamento y enlaces a PDF, HTML y XML del texto completo.
+  Sumario diario del BOE en JSON o XML: todas las disposiciones y anuncios publicados cada día con identificador,
+  título, sección, departamento, epígrafe y URLs de PDF, HTML y XML del texto completo de cada uno.
 access: [api-rest]
 auth: none
-formats: [json, xml]
+formats: [json, xml, pdf, html]
 update: daily
-coverage: "1960-"
+coverage: "1960-09-"
 license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
 base_url: https://www.boe.es/datosabiertos/api
-docs_url: https://www.boe.es/datosabiertos/documentos/APIsumarioBOE.pdf
+docs_url: https://www.boe.es/datosabiertos/api/api.php
 endpoints:
   - path: /boe/sumario/{AAAAMMDD}
-    desc: Sumario completo del BOE del día indicado
+    desc: Sumario del día, anidado en diario > seccion > departamento > epigrafe > item
     example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/boe/sumario/20240102"'
   - path: https://www.boe.es/diario_boe/xml.php?id={BOE-A-AAAA-NNNNN}
-    desc: Texto completo y metadatos de una disposición en XML
-    example: curl -s "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-1"
+    desc: Texto completo y metadatos de una disposición en XML; no necesita cabecera Accept
+    example: curl -s "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-87"
+  - path: https://www.boe.es/diario_boe/txt.php?id={id}
+    desc: Versión HTML de la disposición
   - path: https://www.boe.es/boe/dias/{AAAA}/{MM}/{DD}/pdfs/{id}.pdf
-    desc: PDF de una disposición
-rate_limit: No documentado; peticiones masivas pueden bloquearse temporalmente
+    desc: PDF de la disposición; la fecha del path es la de publicación
+    example: curl -sO "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-A-2024-87.pdf"
+rate_limit: No documentado
 gotchas:
-  - La cabecera Accept es obligatoria; sin ella devuelve XML por defecto o error 400.
-  - No hay BOE los domingos ni festivos nacionales; la API devuelve 404 para esos días.
-  - Los identificadores siguen el patrón BOE-A-AAAA-NNNNN (disposiciones) y BOE-B-AAAA-NNNNN (anuncios).
-  - Para búsquedas por texto no hay API; usar el buscador web o descargar sumarios y filtrar en local.
+  - Cabecera Accept obligatoria con application/json o application/xml; sin ella, o con */*, responde 400.
+  - Los errores (400, 404, 500) llegan siempre con cuerpo XML aunque se pida JSON; comprobar el código HTTP antes de parsear.
+  - En JSON, item, departamento y epigrafe son objeto si hay un elemento y lista si hay varios; normalizar a lista antes de iterar.
+  - No hay BOE los domingos ni festivos nacionales; esos días la API devuelve 404.
+  - Algunos días antiguos (p. ej. 19700102) devuelven 500 aunque exista boletín; reintentar o saltar.
+  - Cada item trae url_pdf.texto, url_html y url_xml ya construidas; no montar la URL del PDF a mano (BOE-A-2024-1 no está en 2024/01/02).
+  - Los identificadores siguen el patrón BOE-A-AAAA-NNNNN (disposiciones) y BOE-B-AAAA-NNNNN (anuncios); la numeración es anual.
+  - No hay búsqueda por texto en esta API; descargar sumarios y filtrar en local, o usar la API de legislación consolidada.
+tips:
+  - Un sumario diario pesa entre 100 y 200 KB en JSON; para histórico iterar por fecha y tratar 404 como día sin publicación.
+  - El OpenAPI 3.1 completo está embebido en api.php (variable openApiFile); el documento técnico es APIsumarioBOE.pdf en /datosabiertos/documentos/.
+  - Para detectar publicaciones nuevas sin descargar el sumario entero, usar los feeds RSS (boe-feeds).
 related: [boe-api-legislacion-consolidada, borme-api-sumario, boe-feeds]
 status: active
-verified: null
+verified: "2026-09-30"
