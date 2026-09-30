@@ -8,7 +8,7 @@ tags: [inversion-extranjera, inversion-exterior, ied, flujos, stock, paises, sec
 summary: >-
   Flujos y stock de inversión extranjera en España y española en el exterior por país, sector y CCAA, a partir
   del Registro de Inversiones Exteriores. Aplicación ASP.NET de consulta multidimensional (cubos Inversión
-  Extranjera e Inversión Española) sin API ni ficheros de descarga directa.
+  Extranjera e Inversión Española); no localicé API ni ficheros de descarga directa.
 access: [portal]
 auth: none
 formats: [html, xlsx]

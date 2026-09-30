@@ -17,7 +17,10 @@ Cada línea que no ahorre una búsqueda, una prueba fallida o una hora de depura
    programa contra la fuente. Historia del organismo, adjetivos, contexto institucional: fuera.
 2. **Verificar antes de escribir.** Toda URL, endpoint, parámetro y formato se prueba con una llamada real
    antes de afirmarse. Si responde, `verified` lleva la fecha de hoy. Si no se puede probar, `verified: null`
-   y se dice por qué en `gotchas`. Nunca inventar endpoints ni parámetros plausibles.
+   y se dice por qué en `gotchas`. Nunca inventar endpoints ni parámetros plausibles. Un intento fallido de
+   automatizar no demuestra que no se pueda: se escribe «no localizado» o «no conseguido», con lo probado y la
+   fecha, nunca «no existe» o «no es posible», salvo que lo diga la documentación oficial o el propio servidor
+   (404, 410, 401).
 3. **Las trampas son el valor.** `gotchas` recoge lo que la documentación oficial no dice: cabeceras
    obligatorias, codificaciones, decimales con coma, límites no documentados, ids que no coinciden entre
    organismos, URLs que cambian, datos que parecen cero y son secreto estadístico. Una frase por trampa.

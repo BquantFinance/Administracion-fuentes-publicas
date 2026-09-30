@@ -36,7 +36,7 @@ gotchas:
   - Espacios de nombres cac y cbc (urn:dgpe:names:draft:codice) más las extensiones cac-place-ext y cbc-place-ext; registrarlos en lxml. El feed declara at (tombstones) para entradas borradas.
   - Los ZIP no admiten HEAD (respuesta vacía) ni Range; descargar completos.
   - El PDF de especificación enlazado en datos abiertos (DGPE_PLACSP_OpenPLACSP_v.2.2.pdf) responde HTML; la documentación de CODICE está en la propia página del portal.
-  - No hay API de búsqueda; el link de cada entry es un deeplink al detalle web, no un recurso estructurado.
+  - No localicé API de búsqueda; el link de cada entry es un deeplink al detalle web, no un recurso estructurado.
 tips:
   - Identificadores útiles en cada entry. cbc:ContractFolderID (expediente), cbc:ItemClassificationCode (CPV), cbc:ID del órgano (código DIR3, p. ej. L01280647) y cbc:TypeCode (tipo de contrato).
   - Para el histórico completo, cargar los ZIP mensuales de los tres feeds y deduplicar por id con updated máximo. La página de datos abiertos publica OpenPLACSP, la herramienta oficial de descarga.

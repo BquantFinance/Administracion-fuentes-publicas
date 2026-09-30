@@ -29,7 +29,7 @@ endpoints:
   - path: https://www.ciencia.gob.es/Ministerio/Estadisticas/SIIU/{Estudiantes|Afiliacion|Becas|Financiacion|Internacionalizacion|PAU}.html
     desc: SIIU con xlsx bajo /dam/jcr:{uuid}/ (MatriculadosTitulacion2015_2024.xlsx, EgresadosTitulacion2015_2023.xlsx) e informes PDF
   - path: https://www.educacion.gob.es/ruct/{consultauniversidades|consultacentros|consultaestudios}?actual={universidades|centros|estudios}
-    desc: RUCT, consulta por formulario (codigoEstudio, codigoUniversidad, codigoTipo, codigoRama) con resultados HTML en ISO-8859-1; sin exportación
+    desc: RUCT, consulta por formulario (codigoEstudio, codigoUniversidad, codigoTipo, codigoRama) con resultados HTML en ISO-8859-1; sin exportación localizada
   - path: https://www.educacion.gob.es/centros/
     desc: Registro Estatal de Centros Docentes no universitarios, buscador por CCAA con JavaScript (irBuscador)
 quirks: [latin1, tls-chain-incomplete, url-drift, js-rendered]

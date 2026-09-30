@@ -32,7 +32,7 @@ quirks: [waf-blocks-bots, js-rendered]
 ids: []
 gotchas:
   - digital.csic.es/rest/, /server/api y las páginas handle responden 200 con una página Anubis (prueba de trabajo en JavaScript, "Making sure you're not a bot") en vez de datos; el endpoint OAI-PMH no está filtrado.
-  - Sin acceso a la API REST no se puede buscar por texto; localizar ítems cosechando el set del instituto y filtrando en local.
+  - OAI-PMH no tiene búsqueda por texto y la API REST está bloqueada; localizar ítems cosechando el set del instituto y filtrando en local.
   - El resumptionToken codifica formato, fecha y cursor (oai_dc/2026-09-01T00:00:00Z///100); se pasa tal cual en verb=ListRecords&resumptionToken=.
   - Los registros oai_dc repiten dc:identifier (handle, DOI, URL) y dc:relation (proyecto financiador); oai_cerif_openaire trae la financiación estructurada.
   - Digital.CSIC estaba agregado en RECOLECTA, cuyo OAI ya no responde (ficha fecyt-recolecta); cosechar aquí directamente.

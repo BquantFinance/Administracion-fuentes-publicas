@@ -32,7 +32,7 @@ gotchas:
   - Con el User-Agent por defecto de curl responde 403 en todo el sitio; enviar un User-Agent de navegador.
   - Certificado FNMT sin cadena intermedia; añadir AC Componentes Informáticos al bundle o falla la verificación TLS (ver guía).
   - Los cuadros mensuales se sobreescriben cada mes en la misma URL (01.xlsx); no hay histórico por fecha, guardar copia si hace falta.
-  - No hay API ni CSV; las subastas recientes solo en HTML y el histórico en xlsx.
+  - No localicé API ni CSV; las subastas recientes solo en HTML y el histórico en xlsx.
   - La URL de estadísticas mensuales lleva la tilde codificada (estad%C3%ADsticas-mensuales); /deuda-publica/estadisticas es solo el índice.
 related: [bde-estadisticas, igae-ejecucion-presupuestaria]
 status: active

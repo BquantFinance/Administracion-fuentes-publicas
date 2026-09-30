@@ -127,7 +127,7 @@ rn2000.zip (133 MB, 0,05 s de cálculo).
 Contenido generado en el navegador. Antes de lanzar un navegador sin cabeza, mirar en las herramientas de red
 qué llamadas XHR hace la página: casi siempre devuelven JSON y se pueden replicar con requests. Casos
 verificados: los buscadores del REEC (AEMPS), Portus (Puertos del Estado), las estadísticas de Aena, el
-catálogo sísmico del IGN y SERPAVI no exponen URL de datos reutilizable, así que la ficha lo dice y remite a
+catálogo sísmico del IGN y SERPAVI no me dejaron localizar una URL de datos reutilizable, así que la ficha lo dice y remite a
 la alternativa.
 
 Caso aparte y muy rentable: los portales PC-Axis clonados del INE (INEbase, EDUCAbase de Educación y el

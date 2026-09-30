@@ -7,7 +7,7 @@ sector: gobierno-abierto-administracion
 tags: [tramites, sedes-electronicas, empleo-publico, oposiciones, sia, becas, ayudas]
 summary: >-
   Portal ciudadano de la AGE: boletín semanal de empleo público y boletín quincenal de ayudas y becas en PDF,
-  buscador de trámites con código SIA, buscador de oficinas y directorio de sedes electrónicas. Sin API ni
+  buscador de trámites con código SIA, buscador de oficinas y directorio de sedes electrónicas. Sin API localizada ni
   descarga estructurada; útil como índice, no como fuente de datos.
 access: [portal]
 auth: none
@@ -33,7 +33,7 @@ quirks: [static-html, url-drift]
 gotchas:
   - El portal se rediseñó (Adobe Experience Manager) y las rutas pag_Home/... de la ficha anterior devuelven 404; las nuevas son cortas (/empleopublico/boletin).
   - Los boletines son PDF con la fecha en el nombre bajo /content/dam/punto-acceso-general/; rascar la página para obtener el enlace vigente.
-  - El inventario SIA no se descarga en abierto; el área pública del CTT (administracionelectronica.gob.es, idIniciativa=sia) no ofrece ficheros y el completo se pide como usuario de la red SARA.
+  - El inventario SIA no se descarga en abierto; el área pública del CTT (administracionelectronica.gob.es, idIniciativa=sia) no muestra ficheros y el completo se pide como usuario de la red SARA.
   - Las convocatorias de empleo público remiten al BOE; usar la API del BOE para el texto y sus canales RSS para el seguimiento.
 related: [boe-api-sumario, dir3-directorio, bdns-api]
 status: active

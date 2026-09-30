@@ -35,7 +35,7 @@ gotchas:
   - La ruta IndicadoresyEstadisticas de mintur.gob.es da 404; las estadísticas de industria viven en industria.gob.es y las de turismo en turismo.gob.es, que remite a DATAESTUR.
   - La clave de API de DATAESTUR se solicita en la propia plataforma (registro); las llamadas sin clave no fallan con 401 sino que agotan el tiempo (504).
   - FRONTUR y EGATUR las produce el INE desde 2015; DATAESTUR redistribuye y añade fuentes (AENA, afiliación, telefonía móvil). Para series largas ir al INE.
-  - BADASE es una aplicación con postbacks y estado; la salida se elige en un desplegable (formato y tipo) y no hay URL estable por serie.
+  - BADASE es una aplicación con postbacks y estado; la salida se elige en un desplegable (formato y tipo) y no localicé URL estable por serie.
   - El portal de datos abiertos de la sede de Industria (sede.serviciosmin.gob.es) tiene el catálogo roto (ficha miteco-energia-estadisticas).
 tips:
   - Leer openapi.json y generar el cliente (por ejemplo con openapi-python-client); todas las rutas devuelven el conjunto completo filtrable por fechas y territorio.

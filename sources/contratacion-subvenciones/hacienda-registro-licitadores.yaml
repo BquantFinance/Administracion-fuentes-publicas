@@ -25,7 +25,7 @@ quirks: [tls-chain-incomplete, url-drift]
 gotchas:
   - La ruta /consulta_publica de la ficha anterior devuelve 404; la raíz redirige por meta refresh a /rolece y de ahí a public/inicio.action.
   - El servidor no envía el intermedio FNMT AC Servidores Seguros Tipo2; añadirlo al bundle o falla la verificación TLS (ver guía).
-  - No hay API, descarga ni búsqueda por NIF sin certificado; la inscripción de un licitador se acredita con el certificado XML que él mismo aporta.
+  - No localicé API ni descarga; la búsqueda por NIF exige certificado; la inscripción de un licitador se acredita con el certificado XML que él mismo aporta.
 related: [placsp-datos-abiertos]
 status: degraded
 verified: "2026-09-30"

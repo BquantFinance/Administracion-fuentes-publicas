@@ -8,7 +8,7 @@ tags: [cnmv, mercados, cotizadas, informacion-privilegiada, oir, fondos, iic, pa
 summary: >-
   Registros oficiales de entidades supervisadas, información privilegiada (IPP) y otra información relevante (OIR),
   informes financieros de cotizadas, información pública de IIC en XML mensual, series estadísticas y feeds RSS.
-  Portal ASP.NET sin API pública.
+  Portal ASP.NET sin API pública documentada.
 access: [portal, feed, download]
 auth: none
 formats: [html, xml, pdf, xlsx, rss]

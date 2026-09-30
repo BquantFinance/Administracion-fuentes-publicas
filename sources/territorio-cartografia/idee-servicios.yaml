@@ -28,7 +28,7 @@ endpoints:
     desc: Directorio navegable de servicios por tipo (WMS, WFS, WMTS, CSW, ATOM) y organismo; redirige a segun-tipo-de-servicio
 quirks: [static-html]
 gotchas:
-  - El portal es Liferay y el directorio es HTML pesado (200 KB) sin API; para buscar servicios de forma programática usar el CSW con CQL.
+  - El portal es Liferay y el directorio es HTML pesado (200 KB) sin API localizada; para buscar servicios de forma programática usar el CSW con CQL.
   - Muchos servicios listados son autonómicos o locales con disponibilidad irregular; comprobar GetCapabilities antes de depender de ellos (monitorización en /web/idee/monitorizacion-de-servicios).
   - Los metadatos usan el perfil INSPIRE sobre ISO 19139; los identificadores de registro siguen el patrón del organismo (ES_SDGC_AD, ES_SDGC_AD_ATOM para el Catastro).
 related: [cnig-centro-descargas, catastro-ovc]

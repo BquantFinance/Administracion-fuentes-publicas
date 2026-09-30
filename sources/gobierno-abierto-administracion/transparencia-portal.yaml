@@ -8,7 +8,7 @@ tags: [transparencia, publicidad-activa, altos-cargos, retribuciones, agendas, c
 summary: >-
   Publicidad activa de la AGE por materias (organización y empleo público, altos cargos, planificación,
   normativa, contratos, convenios, subvenciones) y estadísticas del derecho de acceso en xlsx. Portal Adobe
-  Experience Manager con contenido por página; sin API y con pocas descargas estructuradas.
+  Experience Manager con contenido por página; sin API localizada y pocas descargas.
 access: [portal, download]
 auth: none
 formats: [html, xlsx, pdf]

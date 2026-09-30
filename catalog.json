@@ -510,7 +510,7 @@
    "ids": [],
    "gotchas": [
     "digital.csic.es/rest/, /server/api y las páginas handle responden 200 con una página Anubis (prueba de trabajo en JavaScript, \"Making sure you're not a bot\") en vez de datos; el endpoint OAI-PMH no está filtrado.",
-    "Sin acceso a la API REST no se puede buscar por texto; localizar ítems cosechando el set del instituto y filtrando en local.",
+    "OAI-PMH no tiene búsqueda por texto y la API REST está bloqueada; localizar ítems cosechando el set del instituto y filtrando en local.",
     "El resumptionToken codifica formato, fecha y cursor (oai_dc/2026-09-01T00:00:00Z///100); se pasa tal cual en verb=ListRecords&resumptionToken=.",
     "Los registros oai_dc repiten dc:identifier (handle, DOI, URL) y dc:relation (proyecto financiador); oai_cerif_openaire trae la financiación estructurada.",
     "Digital.CSIC estaba agregado en RECOLECTA, cuyo OAI ya no responde (ficha fecyt-recolecta); cosechar aquí directamente."
@@ -781,7 +781,7 @@
     "geofisica",
     "tiempo-real"
    ],
-   "summary": "Terremotos localizados por la Red Sísmica Nacional: tablas HTML de los últimos 5, 10 y 30 días y del año (magnitud 1,5 o superior o sentidos) y catálogo histórico con formulario por fechas, zona, magnitud, intensidad y profundidad, descargable en csv, txt, kmz, zip o geojson solo desde el navegador.",
+   "summary": "Terremotos localizados por la Red Sísmica Nacional: tablas HTML de los últimos 5, 10 y 30 días y del año (magnitud 1,5 o superior o sentidos) y catálogo histórico con formulario por fechas, zona, magnitud e intensidad, descargable en csv, kmz o geojson desde la web (no reproducido por script).",
    "access": [
     "portal",
     "scraping"
@@ -825,10 +825,10 @@
    ],
    "ids": [],
    "gotchas": [
-    "No hay API, feed ni fichero estable. El RSS y el KML de la ficha anterior (resources/sismologia/tproximos/) responden 404 y no existe servicio FDSN en www.ign.es/fdsnws.",
+    "No localicé API, feed ni fichero estable. El RSS y el KML de la ficha anterior (resources/sismologia/tproximos/) responden 404 y www.ign.es/fdsnws devuelve 404.",
     "Las páginas getNdias son la única fuente automatizable; parsear la tabla HTML (200 KB para 10 días). Las horas se dan en UTC y en hora local en columnas separadas.",
-    "El catálogo es un portlet Liferay. La búsqueda y la descarga (selector csv, txt, kmz, zip, geojson) se resuelven con JavaScript y estado de sesión; enviando el formulario desde un script solo se obtuvo la cabecera.",
-    "La descarga del catálogo devuelve un fichero de anchos fijos (Evento, Fecha, Hora, Latitud, Longitud, Prof., Inten., Mag., Tipo Mag., Localización) aunque se elija csv.",
+    "El catálogo es un portlet Liferay con búsqueda y descarga (csv, txt, kmz, zip, geojson) por JavaScript y sesión; mis envíos por script devolvieron solo la cabecera (30/09/2026); replicar las peticiones del navegador.",
+    "En mis pruebas la descarga devolvió un fichero de anchos fijos (Evento, Fecha, Hora, Latitud, Longitud, Prof., Inten., Mag., Tipo Mag., Localización) aunque se eligiera csv.",
     "El tipo de magnitud varía por evento (mb, mbLg, Mw); las magnitudes históricas anteriores a la red instrumental son intensidades macrosísmicas."
    ],
    "tips": [
@@ -935,7 +935,7 @@
     "paises",
     "sectores"
    ],
-   "summary": "Flujos y stock de inversión extranjera en España y española en el exterior por país, sector y CCAA, a partir del Registro de Inversiones Exteriores. Aplicación ASP.NET de consulta multidimensional (cubos Inversión Extranjera e Inversión Española) sin API ni ficheros de descarga directa.",
+   "summary": "Flujos y stock de inversión extranjera en España y española en el exterior por país, sector y CCAA, a partir del Registro de Inversiones Exteriores. Aplicación ASP.NET de consulta multidimensional (cubos Inversión Extranjera e Inversión Española); no localicé API ni ficheros de descarga directa.",
    "access": [
     "portal"
    ],
@@ -1045,7 +1045,7 @@
     "La ruta IndicadoresyEstadisticas de mintur.gob.es da 404; las estadísticas de industria viven en industria.gob.es y las de turismo en turismo.gob.es, que remite a DATAESTUR.",
     "La clave de API de DATAESTUR se solicita en la propia plataforma (registro); las llamadas sin clave no fallan con 401 sino que agotan el tiempo (504).",
     "FRONTUR y EGATUR las produce el INE desde 2015; DATAESTUR redistribuye y añade fuentes (AENA, afiliación, telefonía móvil). Para series largas ir al INE.",
-    "BADASE es una aplicación con postbacks y estado; la salida se elige en un desplegable (formato y tipo) y no hay URL estable por serie.",
+    "BADASE es una aplicación con postbacks y estado; la salida se elige en un desplegable (formato y tipo) y no localicé URL estable por serie.",
     "El portal de datos abiertos de la sede de Industria (sede.serviciosmin.gob.es) tiene el catálogo roto (ficha miteco-energia-estadisticas)."
    ],
    "tips": [
@@ -1267,7 +1267,7 @@
    "gotchas": [
     "La ruta /consulta_publica de la ficha anterior devuelve 404; la raíz redirige por meta refresh a /rolece y de ahí a public/inicio.action.",
     "El servidor no envía el intermedio FNMT AC Servidores Seguros Tipo2; añadirlo al bundle o falla la verificación TLS (ver guía).",
-    "No hay API, descarga ni búsqueda por NIF sin certificado; la inscripción de un licitador se acredita con el certificado XML que él mismo aporta."
+    "No localicé API ni descarga; la búsqueda por NIF exige certificado; la inscripción de un licitador se acredita con el certificado XML que él mismo aporta."
    ],
    "related": [
     "placsp-datos-abiertos"
@@ -1339,7 +1339,7 @@
     "Espacios de nombres cac y cbc (urn:dgpe:names:draft:codice) más las extensiones cac-place-ext y cbc-place-ext; registrarlos en lxml. El feed declara at (tombstones) para entradas borradas.",
     "Los ZIP no admiten HEAD (respuesta vacía) ni Range; descargar completos.",
     "El PDF de especificación enlazado en datos abiertos (DGPE_PLACSP_OpenPLACSP_v.2.2.pdf) responde HTML; la documentación de CODICE está en la propia página del portal.",
-    "No hay API de búsqueda; el link de cada entry es un deeplink al detalle web, no un recurso estructurado."
+    "No localicé API de búsqueda; el link de cada entry es un deeplink al detalle web, no un recurso estructurado."
    ],
    "tips": [
     "Identificadores útiles en cada entry. cbc:ContractFolderID (expediente), cbc:ItemClassificationCode (CPV), cbc:ID del órgano (código DIR3, p. ej. L01280647) y cbc:TypeCode (tipo de contrato).",
@@ -1446,7 +1446,7 @@
     "pib-tiempo-real",
     "ccaa"
    ],
-   "summary": "Ficheros xlsx de la AIReF: histórico de deuda por Administración, cuadro macro de previsiones, estimación en tiempo real del PIB trimestral (MIPred) y por CCAA, y seguimiento del objetivo de estabilidad. Sin API; los Excel se enlazan desde páginas WordPress.",
+   "summary": "Ficheros xlsx de la AIReF: histórico de deuda por Administración, cuadro macro de previsiones, estimación en tiempo real del PIB trimestral (MIPred) y por CCAA, y seguimiento del objetivo de estabilidad. Sin API localizada; los Excel se enlazan desde páginas WordPress.",
    "access": [
     "download",
     "portal"
@@ -1614,7 +1614,7 @@
     "iic",
     "participaciones-significativas"
    ],
-   "summary": "Registros oficiales de entidades supervisadas, información privilegiada (IPP) y otra información relevante (OIR), informes financieros de cotizadas, información pública de IIC en XML mensual, series estadísticas y feeds RSS. Portal ASP.NET sin API pública.",
+   "summary": "Registros oficiales de entidades supervisadas, información privilegiada (IPP) y otra información relevante (OIR), informes financieros de cotizadas, información pública de IIC en XML mensual, series estadísticas y feeds RSS. Portal ASP.NET sin API pública documentada.",
    "access": [
     "portal",
     "feed",
@@ -1793,7 +1793,7 @@
     "Con el User-Agent por defecto de curl responde 403 en todo el sitio; enviar un User-Agent de navegador.",
     "Certificado FNMT sin cadena intermedia; añadir AC Componentes Informáticos al bundle o falla la verificación TLS (ver guía).",
     "Los cuadros mensuales se sobreescriben cada mes en la misma URL (01.xlsx); no hay histórico por fecha, guardar copia si hace falta.",
-    "No hay API ni CSV; las subastas recientes solo en HTML y el histórico en xlsx.",
+    "No localicé API ni CSV; las subastas recientes solo en HTML y el histórico en xlsx.",
     "La URL de estadísticas mensuales lleva la tilde codificada (estad%C3%ADsticas-mensuales); /deuda-publica/estadisticas es solo el índice."
    ],
    "related": [
@@ -1860,7 +1860,7 @@
     },
     {
      "path": "https://www.educacion.gob.es/ruct/{consultauniversidades|consultacentros|consultaestudios}?actual={universidades|centros|estudios}",
-     "desc": "RUCT, consulta por formulario (codigoEstudio, codigoUniversidad, codigoTipo, codigoRama) con resultados HTML en ISO-8859-1; sin exportación"
+     "desc": "RUCT, consulta por formulario (codigoEstudio, codigoUniversidad, codigoTipo, codigoRama) con resultados HTML en ISO-8859-1; sin exportación localizada"
     },
     {
      "path": "https://www.educacion.gob.es/centros/",
@@ -2932,7 +2932,7 @@
     "becas",
     "ayudas"
    ],
-   "summary": "Portal ciudadano de la AGE: boletín semanal de empleo público y boletín quincenal de ayudas y becas en PDF, buscador de trámites con código SIA, buscador de oficinas y directorio de sedes electrónicas. Sin API ni descarga estructurada; útil como índice, no como fuente de datos.",
+   "summary": "Portal ciudadano de la AGE: boletín semanal de empleo público y boletín quincenal de ayudas y becas en PDF, buscador de trámites con código SIA, buscador de oficinas y directorio de sedes electrónicas. Sin API localizada ni descarga estructurada; útil como índice, no como fuente de datos.",
    "access": [
     "portal"
    ],
@@ -2978,7 +2978,7 @@
    "gotchas": [
     "El portal se rediseñó (Adobe Experience Manager) y las rutas pag_Home/... de la ficha anterior devuelven 404; las nuevas son cortas (/empleopublico/boletin).",
     "Los boletines son PDF con la fecha en el nombre bajo /content/dam/punto-acceso-general/; rascar la página para obtener el enlace vigente.",
-    "El inventario SIA no se descarga en abierto; el área pública del CTT (administracionelectronica.gob.es, idIniciativa=sia) no ofrece ficheros y el completo se pide como usuario de la red SARA.",
+    "El inventario SIA no se descarga en abierto; el área pública del CTT (administracionelectronica.gob.es, idIniciativa=sia) no muestra ficheros y el completo se pide como usuario de la red SARA.",
     "Las convocatorias de empleo público remiten al BOE; usar la API del BOE para el texto y sus canales RSS para el seguimiento."
    ],
    "related": [
@@ -3006,7 +3006,7 @@
     "convenios",
     "derecho-de-acceso"
    ],
-   "summary": "Publicidad activa de la AGE por materias (organización y empleo público, altos cargos, planificación, normativa, contratos, convenios, subvenciones) y estadísticas del derecho de acceso en xlsx. Portal Adobe Experience Manager con contenido por página; sin API y con pocas descargas estructuradas.",
+   "summary": "Publicidad activa de la AGE por materias (organización y empleo público, altos cargos, planificación, normativa, contratos, convenios, subvenciones) y estadísticas del derecho de acceso en xlsx. Portal Adobe Experience Manager con contenido por página; sin API localizada y pocas descargas.",
    "access": [
     "portal",
     "download"
@@ -4559,7 +4559,7 @@
    ],
    "ids": [],
    "gotchas": [
-    "El REEC no tiene API pública. Sus endpoints internos (buscador/count, getEstudiosIdByLikes, getEstudiosIdByFiltro, getEstudiosByIdSession) son POST con sesión y devuelven vacío fuera de la secuencia del buscador.",
+    "El REEC no tiene API documentada. Sus endpoints internos (buscador/count, getEstudiosIdByLikes, getEstudiosIdByFiltro, getEstudiosByIdSession) son POST con sesión y devuelven vacío fuera de la secuencia del buscador.",
     "Las fichas /reec/estudio/{id} son HTML sin datos estructurados; para datos completos y descarga masiva de ensayos europeos usar CTIS o EU CTR, que incluyen los españoles.",
     "La ruta /informa/ (índice y búsqueda) responde 403 Forbidden con cualquier User-Agent, pero cada nota bajo /informa/{slug}/ y el listado en /comunicacion/ responden 200.",
     "Los feeds por categoría (por ejemplo /comunicacion/notas-informativas-productos-sanitarios/feed/) existen pero vienen casi vacíos; usar el feed global y filtrar por categoría.",
@@ -4740,7 +4740,7 @@
    ],
    "gotchas": [
     "pestadistico.inteligenciadegestion.sanidad.gob.es envía solo el certificado hoja (FNMT AC Componentes Informáticos); añadir los intermedios FNMT o falla la verificación TLS.",
-    "El Portal Estadístico es una aplicación WebForms sin API ni URL por consulta; cada cubo se explora y exporta a mano. No hay ficheros masivos de altas.",
+    "El Portal Estadístico es una aplicación WebForms; no localicé API ni URL por consulta, cada cubo se explora y exporta a mano. No localicé ficheros masivos de altas.",
     "En el CNH el código de municipio lleva 6 dígitos (INE de 5 más dígito de control, 310977 es Estella-Lizarra 31097); CCN es el código del centro y CODCNH el del catálogo.",
     "Las rutas sisInfSanSNS/home.htm y ciudadanos/.../hospitales/home.htm ya no existen o redirigen (meta refresh) a ofertaRecursos/hospitales/home.htm.",
     "Los microdatos RAE-CMBD se solicitan formalmente y se entregan anonimizados; no hay descarga directa.",
@@ -4948,9 +4948,9 @@
     "ccaa"
    ],
    "gotchas": [
-    "Cada descarga del Centro de Descargas pasa por reCAPTCHA v3 (preAutorizarDescarga con recaptchaToken) antes de descargaDir; sin token responde 403. No es automatizable sin navegador.",
+    "Cada descarga del Centro de Descargas pasa por reCAPTCHA v3 (preAutorizarDescarga con recaptchaToken) antes de descargaDir; sin token responde 403. No automatizable de forma lícita sin navegador.",
     "La lista de ficheros de una serie no está en catalogo.do; se obtiene por POST a archivosSerie, donde cada fichero lleva su id en data-sec y en detalleArchivo?sec=.",
-    "Las rutas apidescargas y descargaDir?secDescDirLA= no son públicas (404 y 403); no hay API de descargas abierta.",
+    "Las rutas apidescargas y descargaDir?secDescDirLA= no son públicas (404 y 403); no localicé API de descargas abierta.",
     "El WFS de unidades administrativas devuelve 403 si el filtro XML va en la URL (el WAF bloquea las etiquetas); descargar por count y filtrar en local. outputFormat=application/json no existe, es geo+json.",
     "En el WFS, nationalCode es 34 seguido de los códigos INE de comunidad, provincia y municipio (34090800000 es la provincia de Barcelona); cada feature pesa cientos de KB por la geometría.",
     "El geocoder devuelve JSONP (envuelto en callback) en findJsonp y candidatesJsonp y JSON limpio en find.",
@@ -5021,7 +5021,7 @@
     "static-html"
    ],
    "gotchas": [
-    "El portal es Liferay y el directorio es HTML pesado (200 KB) sin API; para buscar servicios de forma programática usar el CSW con CQL.",
+    "El portal es Liferay y el directorio es HTML pesado (200 KB) sin API localizada; para buscar servicios de forma programática usar el CSW con CQL.",
     "Muchos servicios listados son autonómicos o locales con disponibilidad irregular; comprobar GetCapabilities antes de depender de ellos (monitorización en /web/idee/monitorizacion-de-servicios).",
     "Los metadatos usan el perfil INSPIRE sobre ISO 19139; los identificadores de registro siguen el patrón del organismo (ES_SDGC_AD, ES_SDGC_AD_ATOM para el Catastro)."
    ],
@@ -5049,7 +5049,7 @@
     "pasajeros",
     "trafico-aereo"
    ],
-   "summary": "Registro de Matrícula de Aeronaves Civiles y registro de operadores de UAS (trámites en sede con certificado, sin listado abierto) y estadísticas de tráfico de Aena (informes por aeropuerto en una web con sesión y enlaces generados por JavaScript). Sin ficheros descargables verificados.",
+   "summary": "Registro de Matrícula de Aeronaves Civiles y registro de operadores de UAS (trámites en sede con certificado, sin listado abierto localizado) y estadísticas de tráfico de Aena (informes por aeropuerto en una web con sesión y enlaces generados por JavaScript). Sin ficheros descargables verificados.",
    "access": [
     "portal"
    ],
@@ -5066,7 +5066,7 @@
    "endpoints": [
     {
      "path": "https://www.seguridadaerea.gob.es/es/ambitos/aeronaves/registro-de-matriculas-de-aeronaves-civiles/registro-de-matriculas",
-     "desc": "Información del registro con cuadros estadísticos anuales en PDF (registro general, AFI, ULM) y formularios; sin listado de aeronaves"
+     "desc": "Información del registro con cuadros estadísticos anuales en PDF (registro general, AFI, ULM) y formularios; no localicé listado de aeronaves"
     },
     {
      "path": "https://www.seguridadaerea.gob.es/es/ambitos/drones/registro-de-operador-de-drones-uas",
@@ -5083,10 +5083,10 @@
    ],
    "ids": [],
    "gotchas": [
-    "La ruta matriculacion-de-aeronaves de la ficha anterior responde 200 con cuerpo vacío; la información está en registro-de-matriculas-de-aeronaves-civiles y no incluye ningún Excel con el censo de aeronaves.",
+    "La ruta matriculacion-de-aeronaves de la ficha anterior responde 200 con cuerpo vacío; la información está en registro-de-matriculas-de-aeronaves-civiles y no localicé ningún Excel con el censo de aeronaves.",
     "En Aena los enlaces de descarga se generan con JavaScript y la aplicación gestiona un token de sesión (cookie JWT); con curl no aparece ningún href a PDF o Excel, así que no se pudo verificar ningún fichero.",
     "Aena es una sociedad mercantil estatal (51 por ciento público) que publica datos por cuenta propia; sus condiciones de reutilización no son las de la AGE.",
-    "Los datos estructurados de tráfico aéreo en abierto están fuera de estas webs (Eurostat y las estadísticas del INE de transporte aéreo); para el registro de aeronaves no hay descarga pública."
+    "Los datos estructurados de tráfico aéreo en abierto están fuera de estas webs (Eurostat y las estadísticas del INE de transporte aéreo); para el registro de aeronaves no localicé descarga pública."
    ],
    "tips": [],
    "related": [
@@ -5267,7 +5267,7 @@
     "Los microdatos son txt de ancho fijo en Latin-1 con una línea de cabecera de texto libre (letras de la última matrícula asignada); el diseño de registro está en el PDF MATRICULACIONES_MATRABA y no dentro del ZIP.",
     "El bastidor viene enmascarado (UA8D72FZ5T***********) salvo acreditación de interés legítimo; el registro incluye marca, modelo, fecha, código INE de municipio (39020 Castro Urdiales), potencia, emisiones y distintivo.",
     "El portal IEST (sedeapl.dgt.gob.es/WEB_IEST_CONSULTA) redirige a dgt-en-cifras; el listado de transferencias mensuales (transferencias-automoviles-mensual.html) da 404 aunque exista la ficha.",
-    "No hay microdatos de accidentes en el portal (solo anuarios y estudios de siniestralidad en PDF y tablas xlsx); los microdatos disponibles son de vehículos, conductores, exámenes y sanciones.",
+    "No localicé microdatos de accidentes entre los 226 productos del portal (solo anuarios y estudios de siniestralidad en PDF y tablas xlsx); los microdatos disponibles son de vehículos, conductores, exámenes y sanciones.",
     "Las fichas de resultados no filtran por texto (buscar= se ignora); para localizar un producto recorrer las categorías con page=n hasta que no aparezcan slugs nuevos.",
     "Los cuadros de mando (paneldatos.dgt.es, MicroStrategy) sirven el certificado sin la cadena FNMT; añadir los intermedios FNMT para verificar TLS.",
     "Los ficheros anuales del parque son muy grandes (1,6 GB comprimidos en 2025); descargar con reanudación y procesar por trozos."
@@ -5416,7 +5416,7 @@
     "Las rutas SharePoint antiguas (es-es/estadisticas/Paginas/*.aspx) redirigen a /datos/estadisticas/...; /es-es/estadisticas responde 403 (estadisticas-bk).",
     "Los xlsx no tienen URL por fecha; el id numérico de file-download hay que leerlo del HTML de la página del año (atributo title con el nombre del fichero).",
     "El cuadro mensual tiene hojas Portada, Cálculo y Resumen general antes de las tablas, con cabeceras en varias filas; localizar la fila de cabecera por hoja.",
-    "No hay serie histórica en xlsx en la web nueva; hay que descargar los cuadros mes a mes y apilarlos.",
+    "No localicé serie histórica en xlsx en la web nueva; hay que descargar los cuadros mes a mes y apilarlos.",
     "La API de Portus (portussvr/api) no está documentada y sus rutas se construyen en el código; las probadas a mano responden 404. Los históricos oceanográficos se piden por formulario según el manual de descarga."
    ],
    "tips": [],
@@ -5492,7 +5492,7 @@
    "gotchas": [
     "La ruta mivau.gob.es/vivienda/estadisticas da 404; el índice está en el-ministerio/observatorios-y-estadisticas y los datos siguen en apps.fomento.gob.es (dominio antiguo, sin redirección al nuevo).",
     "Las tablas son XLS antiguos (application/vnd.ms-excel) con varias filas de cabecera; abrir con xlrd o calamine, no con openpyxl.",
-    "SERPAVI no ofrece descarga masiva ni API pública; el índice por sección censal solo se consulta en la web. Se construye con datos fiscales y excluye País Vasco y Navarra.",
+    "No localicé descarga masiva ni API pública de SERPAVI; el índice por sección censal solo se consulta en la web. Se construye con datos fiscales y excluye País Vasco y Navarra.",
     "Las transacciones proceden del Consejo General del Notariado y el valor tasado de las sociedades de tasación; el ministerio agrega y publica con retraso trimestral."
    ],
    "tips": [

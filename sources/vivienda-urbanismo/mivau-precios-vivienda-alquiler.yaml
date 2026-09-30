@@ -35,7 +35,7 @@ ids: []
 gotchas:
   - La ruta mivau.gob.es/vivienda/estadisticas da 404; el índice está en el-ministerio/observatorios-y-estadisticas y los datos siguen en apps.fomento.gob.es (dominio antiguo, sin redirección al nuevo).
   - Las tablas son XLS antiguos (application/vnd.ms-excel) con varias filas de cabecera; abrir con xlrd o calamine, no con openpyxl.
-  - SERPAVI no ofrece descarga masiva ni API pública; el índice por sección censal solo se consulta en la web. Se construye con datos fiscales y excluye País Vasco y Navarra.
+  - No localicé descarga masiva ni API pública de SERPAVI; el índice por sección censal solo se consulta en la web. Se construye con datos fiscales y excluye País Vasco y Navarra.
   - Las transacciones proceden del Consejo General del Notariado y el valor tasado de las sociedades de tasación; el ministerio agrega y publica con retraso trimestral.
 tips:
   - "Para una serie municipal de transacciones, localizar en el capítulo 34 la tabla por municipios (código 3401xxxx) y leerla con pandas.read_excel(engine='xlrd' o 'calamine')."

@@ -34,7 +34,7 @@ endpoints:
 quirks: [session-required, js-rendered, waf-blocks-bots]
 ids: []
 gotchas:
-  - El REEC no tiene API pública. Sus endpoints internos (buscador/count, getEstudiosIdByLikes, getEstudiosIdByFiltro, getEstudiosByIdSession) son POST con sesión y devuelven vacío fuera de la secuencia del buscador.
+  - El REEC no tiene API documentada. Sus endpoints internos (buscador/count, getEstudiosIdByLikes, getEstudiosIdByFiltro, getEstudiosByIdSession) son POST con sesión y devuelven vacío fuera de la secuencia del buscador.
   - Las fichas /reec/estudio/{id} son HTML sin datos estructurados; para datos completos y descarga masiva de ensayos europeos usar CTIS o EU CTR, que incluyen los españoles.
   - La ruta /informa/ (índice y búsqueda) responde 403 Forbidden con cualquier User-Agent, pero cada nota bajo /informa/{slug}/ y el listado en /comunicacion/ responden 200.
   - Los feeds por categoría (por ejemplo /comunicacion/notas-informativas-productos-sanitarios/feed/) existen pero vienen casi vacíos; usar el feed global y filtrar por categoría.

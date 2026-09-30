@@ -7,7 +7,7 @@ sector: economia-finanzas
 tags: [airef, previsiones, deuda, deficit, reglas-fiscales, pib-tiempo-real, ccaa]
 summary: >-
   Ficheros xlsx de la AIReF: histórico de deuda por Administración, cuadro macro de previsiones, estimación en
-  tiempo real del PIB trimestral (MIPred) y por CCAA, y seguimiento del objetivo de estabilidad. Sin API; los
+  tiempo real del PIB trimestral (MIPred) y por CCAA, y seguimiento del objetivo de estabilidad. Sin API localizada; los
   Excel se enlazan desde páginas WordPress.
 access: [download, portal]
 auth: none

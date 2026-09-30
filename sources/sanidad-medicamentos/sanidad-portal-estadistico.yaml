@@ -35,7 +35,7 @@ quirks: [tls-chain-incomplete, viewstate-forms, url-drift]
 ids: [ine-municipio, ine-provincia, ccaa]
 gotchas:
   - pestadistico.inteligenciadegestion.sanidad.gob.es envía solo el certificado hoja (FNMT AC Componentes Informáticos); añadir los intermedios FNMT o falla la verificación TLS.
-  - El Portal Estadístico es una aplicación WebForms sin API ni URL por consulta; cada cubo se explora y exporta a mano. No hay ficheros masivos de altas.
+  - El Portal Estadístico es una aplicación WebForms; no localicé API ni URL por consulta, cada cubo se explora y exporta a mano. No localicé ficheros masivos de altas.
   - En el CNH el código de municipio lleva 6 dígitos (INE de 5 más dígito de control, 310977 es Estella-Lizarra 31097); CCN es el código del centro y CODCNH el del catálogo.
   - Las rutas sisInfSanSNS/home.htm y ciudadanos/.../hospitales/home.htm ya no existen o redirigen (meta refresh) a ofertaRecursos/hospitales/home.htm.
   - Los microdatos RAE-CMBD se solicitan formalmente y se entregan anonimizados; no hay descarga directa.

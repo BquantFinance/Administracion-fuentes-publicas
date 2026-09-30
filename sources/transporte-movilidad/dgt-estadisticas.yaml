@@ -38,7 +38,7 @@ gotchas:
   - Los microdatos son txt de ancho fijo en Latin-1 con una línea de cabecera de texto libre (letras de la última matrícula asignada); el diseño de registro está en el PDF MATRICULACIONES_MATRABA y no dentro del ZIP.
   - El bastidor viene enmascarado (UA8D72FZ5T***********) salvo acreditación de interés legítimo; el registro incluye marca, modelo, fecha, código INE de municipio (39020 Castro Urdiales), potencia, emisiones y distintivo.
   - El portal IEST (sedeapl.dgt.gob.es/WEB_IEST_CONSULTA) redirige a dgt-en-cifras; el listado de transferencias mensuales (transferencias-automoviles-mensual.html) da 404 aunque exista la ficha.
-  - No hay microdatos de accidentes en el portal (solo anuarios y estudios de siniestralidad en PDF y tablas xlsx); los microdatos disponibles son de vehículos, conductores, exámenes y sanciones.
+  - No localicé microdatos de accidentes entre los 226 productos del portal (solo anuarios y estudios de siniestralidad en PDF y tablas xlsx); los microdatos disponibles son de vehículos, conductores, exámenes y sanciones.
   - Las fichas de resultados no filtran por texto (buscar= se ignora); para localizar un producto recorrer las categorías con page=n hasta que no aparezcan slugs nuevos.
   - Los cuadros de mando (paneldatos.dgt.es, MicroStrategy) sirven el certificado sin la cadena FNMT; añadir los intermedios FNMT para verificar TLS.
   - Los ficheros anuales del parque son muy grandes (1,6 GB comprimidos en 2025); descargar con reanudación y procesar por trozos.

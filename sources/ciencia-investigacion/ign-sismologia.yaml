@@ -7,8 +7,8 @@ sector: ciencia-investigacion
 tags: [terremotos, sismicidad, catalogo-sismico, volcanes, geofisica, tiempo-real]
 summary: >-
   Terremotos localizados por la Red Sísmica Nacional: tablas HTML de los últimos 5, 10 y 30 días y del año
-  (magnitud 1,5 o superior o sentidos) y catálogo histórico con formulario por fechas, zona, magnitud,
-  intensidad y profundidad, descargable en csv, txt, kmz, zip o geojson solo desde el navegador.
+  (magnitud 1,5 o superior o sentidos) y catálogo histórico con formulario por fechas, zona, magnitud e
+  intensidad, descargable en csv, kmz o geojson desde la web (no reproducido por script).
 access: [portal, scraping]
 auth: none
 formats: [html, csv, txt, kml, geojson]
@@ -30,10 +30,10 @@ endpoints:
 quirks: [js-rendered, session-required, url-drift]
 ids: []
 gotchas:
-  - No hay API, feed ni fichero estable. El RSS y el KML de la ficha anterior (resources/sismologia/tproximos/) responden 404 y no existe servicio FDSN en www.ign.es/fdsnws.
+  - No localicé API, feed ni fichero estable. El RSS y el KML de la ficha anterior (resources/sismologia/tproximos/) responden 404 y www.ign.es/fdsnws devuelve 404.
   - Las páginas getNdias son la única fuente automatizable; parsear la tabla HTML (200 KB para 10 días). Las horas se dan en UTC y en hora local en columnas separadas.
-  - El catálogo es un portlet Liferay. La búsqueda y la descarga (selector csv, txt, kmz, zip, geojson) se resuelven con JavaScript y estado de sesión; enviando el formulario desde un script solo se obtuvo la cabecera.
-  - La descarga del catálogo devuelve un fichero de anchos fijos (Evento, Fecha, Hora, Latitud, Longitud, Prof., Inten., Mag., Tipo Mag., Localización) aunque se elija csv.
+  - El catálogo es un portlet Liferay con búsqueda y descarga (csv, txt, kmz, zip, geojson) por JavaScript y sesión; mis envíos por script devolvieron solo la cabecera (30/09/2026); replicar las peticiones del navegador.
+  - En mis pruebas la descarga devolvió un fichero de anchos fijos (Evento, Fecha, Hora, Latitud, Longitud, Prof., Inten., Mag., Tipo Mag., Localización) aunque se eligiera csv.
   - El tipo de magnitud varía por evento (mb, mbLg, Mw); las magnitudes históricas anteriores a la red instrumental son intensidades macrosísmicas.
 tips:
   - "pandas.read_html(get10dias)[0] recupera la tabla de últimos terremotos en una línea; convertir Fecha y Hora UTC a datetime con dayfirst=True."

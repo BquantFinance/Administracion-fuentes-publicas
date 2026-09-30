@@ -33,7 +33,7 @@ gotchas:
   - Las rutas SharePoint antiguas (es-es/estadisticas/Paginas/*.aspx) redirigen a /datos/estadisticas/...; /es-es/estadisticas responde 403 (estadisticas-bk).
   - Los xlsx no tienen URL por fecha; el id numérico de file-download hay que leerlo del HTML de la página del año (atributo title con el nombre del fichero).
   - El cuadro mensual tiene hojas Portada, Cálculo y Resumen general antes de las tablas, con cabeceras en varias filas; localizar la fila de cabecera por hoja.
-  - No hay serie histórica en xlsx en la web nueva; hay que descargar los cuadros mes a mes y apilarlos.
+  - No localicé serie histórica en xlsx en la web nueva; hay que descargar los cuadros mes a mes y apilarlos.
   - La API de Portus (portussvr/api) no está documentada y sus rutas se construyen en el código; las probadas a mano responden 404. Los históricos oceanográficos se piden por formulario según el manual de descarga.
 tips: []
 related: [mapa-pesca, aemet-opendata]
