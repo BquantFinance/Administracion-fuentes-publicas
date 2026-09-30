@@ -2,7 +2,7 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 72 · Generado: 2026-09-30 · Formato: un bloque por fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
+Fuentes: 76 · Generado: 2026-09-30 · Formato: un bloque por fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
 
 # SECTOR legislacion-boletines: Legislación y boletines oficiales
 
@@ -950,6 +950,30 @@ ids: ine-provincia, ine-municipio
 + El catálogo CKAN de MITECO lista 369 datasets de calidad del aire (package_search?q=calidad del aire), pero sus recursos ZIP apuntan a descargafichero.aspx, que devuelve 404; usar las páginas de datos.
 related: miteco-prtr, aemet-opendata
 
+## miteco-inventario-emisiones
+MITECO – Inventario nacional de emisiones (gases de efecto invernadero y contaminantes) | Sistema Español de Inventario (SEI), Dirección General de Calidad y Evaluación Ambiental
+summary: Serie 1990-2024 de emisiones de gases de efecto invernadero por gas y sector en una tabla resumen xlsx, tablas CRT de la UNFCCC (un xlsx por año en ZIP) con el diccionario de categorías IPCC, e inventario de contaminantes atmosféricos (CLRTAP) por territorio y dominio EMEP. Edición anual.
+access: download | auth: none | formats: xlsx, zip, pdf | update: annual | status: active | verified: 2026-09-30
+coverage: 1990-2024 en la edición 2026; avance del año anterior en nota separada
+license: Reutilización libre con cita de la fuente
+base_url: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero.html
+docs_url: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-.html
+- https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/webtabla-inv-Ed{AAAA}.xlsx :: Tabla resumen de la edición (2,8 MB; hojas Intro, IPCC_SUBACTIVITIES, Total GEI por gas y sector, Contaminantes-TotalNacional, Contaminantes-SinCanarias)
+  ej: curl -sO "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/webtabla-inv-Ed2026.xlsx"
+- https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/es-tablas-crt-edicion-{AAAA}.zip :: Tablas CRT de la UNFCCC, un xlsx por año 1990-2024 (35 ficheros, 121 MB; ESP-CRT-2026-V0.3-{año}-...xlsx)
+  ej: curl -sO "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/es-tablas-crt-edicion-2026.zip"
+- https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/Categorias-CRT-{AAAA}.xlsx :: Diccionario de categorías IPCC (ACTIVIDAD, sector, división, clase, subclase, actividad, subactividad y descripción)
+- https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-contaminantes-atmosfericos/es-clrtap-{territorio-nacional|dominio-emep}-edicion-{AAAA}.zip :: Inventario de contaminantes atmosféricos (CLRTAP) por territorio nacional y por dominio EMEP; informe IIR en PDF en la misma carpeta
+- https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/es-nid-edicion-{AAAA}.pdf :: Informe del inventario (NID); Nota-Avance-GEI-{AAAA}.pdf en la carpeta superior con el avance del último año
+quirks: static-html, url-drift
+! Los nombres llevan la edición (Ed2026, edicion-2026, CRT-2026-V0.3) y cambian cada año; tomar los enlaces de la página en cada ejecución.
+! La tabla resumen abre con una hoja de introducción y filas de título antes de la cabecera; localizar la fila de cabecera antes de leer con pandas.
+! Las tablas CRT son las hojas oficiales de reporte de la UNFCCC (una tabla por categoría y año), no una serie plana; para series usar la tabla resumen.
+! El avance del último año (Nota-Avance-GEI) sale meses antes que la edición completa; no mezclar avance e inventario.
++ pd.read_excel('webtabla-inv-Ed2026.xlsx', sheet_name='Total GEI por gas y sector', header=None) y buscar la fila de cabecera por su primer texto.
++ Emisiones por instalación en miteco-prtr; el inventario agrega por categoría IPCC y no identifica complejos.
+related: miteco-prtr, miteco-calidad-aire, ree-redata
+
 ## miteco-prtr
 PRTR-España – Registro Estatal de Emisiones y Fuentes Contaminantes | Dirección General de Calidad y Evaluación Ambiental
 summary: Emisiones anuales a aire, agua y suelo y transferencias de residuos de cada complejo industrial afectado, por sustancia y método, más el inventario de complejos con CNAE, actividad PRTR e IPPC y municipio. Descarga masiva en XML por año (emisiones 2001-2024, residuos 2007-2024) y consultas web.
@@ -1405,6 +1429,29 @@ quirks: waf-blocks-bots
 ! El portal nacional registros.gbif.es responde 418 con una comprobación antibots y api.gbif.es sirve un certificado que no cubre ese nombre; usar api.gbif.org.
 + La librería pygbif (occurrences.search, species.name_backbone) envuelve estos endpoints; para volúmenes grandes, occurrences.download con usuario GBIF y predicado country=ES.
 related: miteco-banco-datos-naturaleza, csic-digital
+
+## ieo-datos-oceanograficos
+IEO (CSIC) – Centro Nacional de Datos Oceanográficos (catálogo CSW) | Instituto Español de Oceanografía, Centro Nacional de Datos Oceanográficos
+summary: Catálogo GeoNetwork del centro de datos oceanográficos del IEO con 7.582 registros (campañas, datasets y series) consultable por CSW 2.0.2 (listado paginado y metadato ISO 19139) y por la API de búsqueda Elasticsearch de GeoNetwork. El ERDDAP de datos no respondió desde el entorno.
+access: ogc, api-rest, portal | auth: none | formats: xml, json | update: irregular | status: active | verified: 2026-09-30
+coverage: 7.582 registros el 30/09/2026; campañas desde los años 2000 según los identificadores
+license: Reutilización libre con cita de la fuente
+base_url: https://nodc.ieo.es/geonetwork/srv/spa/csw
+docs_url: https://ieo.csic.es/datos-oceanograficos/
+- ?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecords&resultType=results&typeNames=csw:Record&ElementSetName=brief&maxRecords={n}&startPosition={p} :: Listado paginado (numberOfRecordsMatched 7582; cada registro con dc:identifier, dc:title, dc:type y BoundingBox WGS84); resultType=hits solo cuenta
+  ej: curl -s "https://nodc.ieo.es/geonetwork/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecords&resultType=results&typeNames=csw:Record&ElementSetName=brief&maxRecords=10&startPosition=1"
+- ?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecordById&ElementSetName=full&outputSchema=http://www.isotc211.org/2005/gmd&ID={id} :: Metadato ISO 19139 completo (gmd:MD_Metadata) de un registro por su identificador (urn:SDN:CSR:LOCAL:... en campañas)
+  ej: curl -s "https://nodc.ieo.es/geonetwork/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecordById&ElementSetName=full&outputSchema=http://www.isotc211.org/2005/gmd&ID=urn:SDN:CSR:LOCAL:29JR200311060"
+- https://nodc.ieo.es/geonetwork/srv/api/search/records/_search :: Búsqueda de texto libre por POST JSON (Elasticsearch de GeoNetwork; query_string, size, _source); hits.hits[]._source con resourceTitleObject y resourceType
+  ej: curl -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{"query":{"query_string":{"query":"temperatura"}},"size":5}' "https://nodc.ieo.es/geonetwork/srv/api/search/records/_search"
+- https://nodc.ieo.es/geonetwork/srv/spa/catalog.search :: Interfaz web del catálogo (JavaScript); las fichas se enlazan como
+quirks: errors-html-or-xml, js-rendered
+! Los filtros CQL_TEXT (AnyText like, dc:title like) responden 200 con un ows:ExceptionReport (UnknownFormatConversionException); filtrar con la API _search o recorrer el listado completo.
+! La API antigua srv/spa/q responde 500 con el texto "Use ES search instead".
+! Los primeros miles de registros son campañas (dc:type campañas, identificador SeaDataNet urn:SDN:CSR:LOCAL); los datasets con descarga se localizan mejor con _search por resourceType.
+! erddap.ieo.es no resolvió desde el entorno de verificación (30/09/2026); solo se verificó el catálogo, no la descarga de perfiles o series.
++ Paginar con startPosition y nextRecord de la respuesta; maxRecords=100 funciona.
+related: gbif-es, csic-digital, puertos-estado-datos, igme-geologia
 
 ## igme-geologia
 IGME-CSIC – Cartografía geológica, bases de datos geocientíficas y servicios ArcGIS | Instituto Geológico y Minero de España (IGME-CSIC)
@@ -1872,6 +1919,29 @@ quirks: waf-blocks-bots, url-drift
 + Con sickle: Sickle('https://hispana.mcu.es/oai/oai.cmd').ListRecords(metadataPrefix='edm', set='<set>') recorre un repositorio; edm trae el enlace al objeto digital (isShownBy).
 related: csic-digital
 
+## cultura-culturabase
+Ministerio de Cultura – CULTURAbase y estadísticas culturales | División de Estadística y Estudios, Secretaría General Técnica
+summary: Sistema PC-Axis (el mismo software que INEbase) con las estadísticas culturales: empleo cultural, bibliotecas, museos, cine, comercio exterior, bono cultural, fundaciones y asuntos taurinos; cada tabla se descarga en CSV, px o xlsx con URL deducible. Más el Anuario en PDF.
+access: download, portal | auth: none | formats: csv, px, xlsx, pdf, html | update: annual | status: active | verified: 2026-09-30
+coverage: Según estadística; empleo cultural anual desde 2008, bibliotecas y museos por ediciones (2005, 2020...)
+license: Reutilización libre con cita de la fuente
+base_url: https://www.cultura.gob.es/servicios-a-la-ciudadania/estadisticas/cultura/mc/culturabase/portada.html
+docs_url: https://www.cultura.gob.es/servicios-a-la-ciudadania/estadisticas.html
+- https://www.cultura.gob.es/servicios-a-la-ciudadania/estadisticas/cultura/mc/culturabase/{tema}.html :: Página por tema (bibliotecas, empleo-cultural, cine-contenidos-audiovisuales, museos, comercio-exterior, bono-cultural) con los enlaces a CulturaDynPx
+  ej: curl -s --cacert ca-age.pem "https://www.cultura.gob.es/servicios-a-la-ciudadania/estadisticas/cultura/mc/culturabase/bibliotecas.html" | grep -o 'CulturaDynPx[^"]*'
+- https://estadisticas.cultura.gob.es/CulturaDynPx/culturabase/index.htm?type=pcaxis&path={ruta}&file=pcaxis :: Índice de tablas de un conjunto (ruta como /t1/p1/M_Anuales/ o /t14/p14b/a2020/) con enlaces CulturaJaxiPx/Tabla.htm que llevan path y file
+  ej: curl -s --cacert ca-age.pem "https://estadisticas.cultura.gob.es/CulturaDynPx/culturabase/index.htm?type=pcaxis&path=/t1/p1/M_Anuales/&file=pcaxis" | grep -o 'Tabla.htm[^"]*'
+- https://estadisticas.cultura.gob.es/CulturaJaxiPx/files/_px/es/{csv_bdsc|px|xlsx}{path}{file}?nocab=1 :: Tabla en CSV (separador ;, ISO-8859-15 con BOM, coma decimal), PC-Axis o xlsx; path y file son los del enlace Tabla.htm (/t1/p1/M_Anuales/l0/ y T1M01001.px)
+  ej: curl -s --cacert ca-age.pem "https://estadisticas.cultura.gob.es/CulturaJaxiPx/files/_px/es/csv_bdsc/t1/p1/M_Anuales/l0/T1M01001.px?nocab=1"
+- https://www.cultura.gob.es/servicios-a-la-ciudadania/estadisticas/cultura/mc/aec.html :: Anuario de Estadísticas Culturales (PDF por edición, 2007-2025) y notas resumen; ficheros bajo /dam/jcr:{uuid}/
+quirks: tls-chain-incomplete, static-html, latin1, url-drift
+! El certificado de *.cultura.gob.es lo firma AC Componentes Informáticos, intermedia que no está en la lista de la sede FNMT; se obtiene de http://www.cert.fnmt.es/certs/ACCOMP.crt (AIA) o con scripts/fnmt_bundle.py.
+! Las rutas /servicios-al-ciudadano/... redirigen a /servicios-a-la-ciudadania/...; un índice CulturaDynPx sin la subcarpeta (/t1/p1/) responde 404 con "Error page", usar la ruta completa que enlaza la página del tema.
+! Los códigos de tabla (T1M01001, T14B1001) y la carpeta l0 se toman del enlace Tabla.htm; verificados csv_bdsc, px y xlsx con el mismo patrón que INE, EDUCAbase y criminalidad.
+! El CSV lleva una fila por combinación de variables y periodo y cabeceras con el nombre de cada variable; sin nocab=1 añade filas de título.
++ Receta tabla-pcaxis-a-csv; con pandas, read_csv(url, sep=';', encoding='iso-8859-15', decimal=',', thousands='.').
+related: bne-datos, ine-api-tempus, educacion-estadisticas-ruct, interior-criminalidad
+
 # SECTOR vivienda-urbanismo: Vivienda y urbanismo
 
 ## mivau-precios-vivienda-alquiler
@@ -1896,3 +1966,29 @@ quirks: url-drift, js-rendered
 ! Las transacciones proceden del Consejo General del Notariado y el valor tasado de las sociedades de tasación; el ministerio agrega y publica con retraso trimestral.
 + Para una serie municipal de transacciones, localizar en el capítulo 34 la tabla por municipios (código 3401xxxx) y leerla con pandas.read_excel(engine='xlrd' o 'calamine').
 related: catastro-ovc, ine-api-tempus, ine-codigos-territoriales
+
+# SECTOR consumo-seguridad-alimentaria: Consumo y seguridad alimentaria
+
+## aesan-alertas-registros
+AESAN – Alertas alimentarias, registro sanitario de empresas y datos abiertos | Agencia Española de Seguridad Alimentaria y Nutrición
+summary: Alertas alimentarias como páginas HTML con referencia, fecha y producto, buscador con filtros de fecha y paginación, Excel con composición y cuota de mercado de alimentos comercializados en 2022 por código EAN, lista de laboratorios RELSA y consulta del registro sanitario de empresas (JSP).
+access: portal, download, scraping | auth: none | formats: html, xlsx | update: irregular | status: active | verified: 2026-09-30
+coverage: Alertas de 2026 en el buscador paginado; Excel de alimentos con datos de 2022
+license: Reutilización libre con cita de la fuente
+base_url: https://www.aesan.gob.es/alertas/alertas-alimentarias
+docs_url: https://www.aesan.gob.es/datos-abiertos
+- /alertas/alertas-alimentarias :: Últimas alertas enlazadas como /alertas/{AAAA}_{NN}; cada página lleva en el h1 el producto, el origen y la referencia (Ref. ES2026/575) y la fecha en el cuerpo
+  ej: curl -s "https://www.aesan.gob.es/alertas/alertas-alimentarias" | grep -o 'href="/alertas/20[0-9_a-zA-Z]*"'
+- /alertas/buscador-alertas?quantity={n}&filter-select=&filter-initDate={dd/mm/aaaa}&filter-endDate={dd/mm/aaaa} :: Buscador en HTML con 20 alertas por página; páginas siguientes en /alertas/buscador-alertas/2, /3
+  ej: curl -s "https://www.aesan.gob.es/alertas/buscador-alertas?quantity=50&filter-select=&filter-initDate=01/01/2026&filter-endDate=30/09/2026"
+- /datos-abiertos/alimentos-y-bebidas :: Enlace a BasedatosWeb.xlsx (12 MB, hoja DATOS con IdCategoria, Categoria, Subcategoria, AÑO, FUENTE, CuotaMercadoTotalEan, EAN, Nombrecomercial, Fabricante...)
+- /datos-abiertos/control-oficial-y-red-alertas :: RELSA_PNIR xlsx (laboratorios de la Red de Laboratorios de Seguridad Alimentaria) y documentos de la red
+- https://rgsa-web-aesan.mscbs.es/rgsa/formulario_principal_js.jsp :: Consulta del Registro General Sanitario de Empresas Alimentarias y Alimentos (formulario JSP en ISO-8859-1); sin descarga masiva localizada
+quirks: static-html, url-drift, latin1
+! No localicé RSS ni API de alertas (varias rutas rss y feed probadas dan 404 el 30/09/2026); la lista y el buscador son HTML con los enlaces en href.
+! Los identificadores de alerta no son uniformes (2026_68, 2026_65_rev, 2026_55_ampliacion_1, 2026_Ampliacion_45); tomar el enlace, no construirlo.
+! Los ficheros de datos abiertos cuelgan de /dam/jcr:{uuid}/ y la URL cambia con cada publicación; localizarlos en la página.
+! BasedatosWeb.xlsx recoge datos de 2022 aportados por terceros (FUENTE Kantar Worldpanel), no un registro oficial actualizado.
+! La ruta aesan.gob.es/datos-abiertos/registro-general-sanitario-empresas-alimentarias-alimentos da 404; el registro se consulta en rgsa-web-aesan.mscbs.es.
++ Para vigilar alertas, descargar la lista cada día y comparar los href con los ya vistos; el h1 contiene producto, origen y referencia.
+related: aemps-otros-registros, mapa-estadisticas-agrarias

@@ -1,0 +1,45 @@
+id: aesan-alertas-registros
+name: AESAN – Alertas alimentarias, registro sanitario de empresas y datos abiertos
+org: Agencia Española de Seguridad Alimentaria y Nutrición
+ministry: Derechos Sociales, Consumo y Agenda 2030
+level: age
+sector: consumo-seguridad-alimentaria
+tags: [alertas-alimentarias, seguridad-alimentaria, rgseaa, registro-sanitario, alimentos, ean, laboratorios, aesan]
+summary: >-
+  Alertas alimentarias como páginas HTML con referencia, fecha y producto, buscador con filtros de fecha y
+  paginación, Excel con composición y cuota de mercado de alimentos comercializados en 2022 por código EAN,
+  lista de laboratorios RELSA y consulta del registro sanitario de empresas (JSP).
+access: [portal, download, scraping]
+auth: none
+formats: [html, xlsx]
+update: irregular
+coverage: "Alertas de 2026 en el buscador paginado; Excel de alimentos con datos de 2022"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.aesan.gob.es/alertas/alertas-alimentarias
+docs_url: https://www.aesan.gob.es/datos-abiertos
+endpoints:
+  - path: /alertas/alertas-alimentarias
+    desc: Últimas alertas enlazadas como /alertas/{AAAA}_{NN}; cada página lleva en el h1 el producto, el origen y la referencia (Ref. ES2026/575) y la fecha en el cuerpo
+    example: curl -s "https://www.aesan.gob.es/alertas/alertas-alimentarias" | grep -o 'href="/alertas/20[0-9_a-zA-Z]*"'
+  - path: /alertas/buscador-alertas?quantity={n}&filter-select=&filter-initDate={dd/mm/aaaa}&filter-endDate={dd/mm/aaaa}
+    desc: Buscador en HTML con 20 alertas por página; páginas siguientes en /alertas/buscador-alertas/2, /3
+    example: curl -s "https://www.aesan.gob.es/alertas/buscador-alertas?quantity=50&filter-select=&filter-initDate=01/01/2026&filter-endDate=30/09/2026"
+  - path: /datos-abiertos/alimentos-y-bebidas
+    desc: Enlace a BasedatosWeb.xlsx (12 MB, hoja DATOS con IdCategoria, Categoria, Subcategoria, AÑO, FUENTE, CuotaMercadoTotalEan, EAN, Nombrecomercial, Fabricante...)
+  - path: /datos-abiertos/control-oficial-y-red-alertas
+    desc: RELSA_PNIR xlsx (laboratorios de la Red de Laboratorios de Seguridad Alimentaria) y documentos de la red
+  - path: https://rgsa-web-aesan.mscbs.es/rgsa/formulario_principal_js.jsp
+    desc: Consulta del Registro General Sanitario de Empresas Alimentarias y Alimentos (formulario JSP en ISO-8859-1); sin descarga masiva localizada
+quirks: [static-html, url-drift, latin1]
+ids: []
+gotchas:
+  - No localicé RSS ni API de alertas (varias rutas rss y feed probadas dan 404 el 30/09/2026); la lista y el buscador son HTML con los enlaces en href.
+  - Los identificadores de alerta no son uniformes (2026_68, 2026_65_rev, 2026_55_ampliacion_1, 2026_Ampliacion_45); tomar el enlace, no construirlo.
+  - Los ficheros de datos abiertos cuelgan de /dam/jcr:{uuid}/ y la URL cambia con cada publicación; localizarlos en la página.
+  - BasedatosWeb.xlsx recoge datos de 2022 aportados por terceros (FUENTE Kantar Worldpanel), no un registro oficial actualizado.
+  - La ruta aesan.gob.es/datos-abiertos/registro-general-sanitario-empresas-alimentarias-alimentos da 404; el registro se consulta en rgsa-web-aesan.mscbs.es.
+tips:
+  - Para vigilar alertas, descargar la lista cada día y comparar los href con los ya vistos; el h1 contiene producto, origen y referencia.
+related: [aemps-otros-registros, mapa-estadisticas-agrarias]
+status: active
+verified: "2026-09-30"

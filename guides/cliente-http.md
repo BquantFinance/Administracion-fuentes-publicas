@@ -23,6 +23,7 @@ for c in AC_Componentes_Informaticos_SHA256 AC_Servidores_Seguros_Tipo1 AC_Servi
   curl -sS -o c.cer "$B/$c.cer"
   (openssl x509 -inform DER -in c.cer 2>/dev/null || openssl x509 -in c.cer) >> fnmt-intermedios.pem
 done
+curl -sS -o c.cer http://www.cert.fnmt.es/certs/ACCOMP.crt && openssl x509 -inform DER -in c.cer >> fnmt-intermedios.pem
 cat "$(python3 -c 'import certifi;print(certifi.where())')" fnmt-intermedios.pem > ca-age.pem
 curl --cacert ca-age.pem -A "Mozilla/5.0" "https://www.tesoro.es/deuda-publica/estadisticas"
 ```
@@ -34,6 +35,18 @@ r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, verify="ca-age.pem"
 
 O bien `export REQUESTS_CA_BUNDLE=ca-age.pem` y `export SSL_CERT_FILE=ca-age.pem` para todo el proceso. La lista
 completa de certificados de FNMT está en https://www.sede.fnmt.gob.es/descargas/certificados-raiz-de-la-fnmt.
+`python scripts/fnmt_bundle.py` hace todo esto (certifi, los 12 certificados de la sede, ACCOMP.crt y el contenido de
+`EXTRA_CA_BUNDLE` si existe) y deja `ca-age.pem` en la raíz del repo.
+
+Dos trampas verificadas el 2026-09-30:
+
+- Algunos .cer de la sede (Tipo1_G2, Tipo2_G2, Tipo2_G2R) son PEM con una cabecera de texto (Subject, Issuer) delante
+  del bloque BEGIN CERTIFICATE; convertirlos como DER produce un bundle que curl rechaza con el error 77. Extraer el
+  bloque PEM o dejar que `fnmt_bundle.py` lo haga.
+- www.cultura.gob.es firma con una intermedia (AC Componentes Informáticos) que no está en la lista de la sede; se
+  obtiene de la extensión AIA del certificado (http://www.cert.fnmt.es/certs/ACCOMP.crt). Y si `REQUESTS_CA_BUNDLE` o
+  `CURL_CA_BUNDLE` están definidos en el entorno (proxies corporativos, sandboxes), `requests.Session` ignora
+  `session.verify` y usa esa variable: pasar `verify="ca-age.pem"` en cada petición o apuntar la variable al bundle.
 
 ## user-agent-browser
 

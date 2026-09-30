@@ -19,6 +19,8 @@ import requests
 from common import ROOT
 
 BASE = "https://www.sede.fnmt.gob.es/documents/10445900/10526749"
+# Intermedias que no están en la lista de la sede pero sí en el AIA de certificados vigentes (www.cultura.gob.es)
+EXTRA_URLS = ["http://www.cert.fnmt.es/certs/ACCOMP.crt"]
 CERTS = [
     "AC_Componentes_Informaticos_SHA256",
     "AC_Servidores_Seguros_Tipo1",
@@ -55,8 +57,8 @@ def main() -> int:
     if extra and os.path.exists(extra):
         parts.append(open(extra, encoding="ascii").read().rstrip() + "\n")
     ok = 0
-    for name in CERTS:
-        url = f"{BASE}/{name}.cer"
+    urls = [(name, f"{BASE}/{name}.cer") for name in CERTS] + [(u.rsplit("/", 1)[-1], u) for u in EXTRA_URLS]
+    for name, url in urls:
         try:
             r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=40)
             r.raise_for_status()
@@ -66,8 +68,8 @@ def main() -> int:
             print(f"no descargado {name}: {exc}", file=sys.stderr)
     with open(args.out, "w", encoding="ascii") as fh:
         fh.write("".join(parts))
-    print(f"{args.out}: certifi + {ok}/{len(CERTS)} certificados FNMT" + (" + EXTRA_CA_BUNDLE" if extra else ""))
-    return 0 if ok == len(CERTS) else 1
+    print(f"{args.out}: certifi + {ok}/{len(urls)} certificados FNMT" + (" + EXTRA_CA_BUNDLE" if extra else ""))
+    return 0 if ok == len(urls) else 1
 
 
 if __name__ == "__main__":

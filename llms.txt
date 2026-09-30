@@ -2,7 +2,7 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 72 · Recetas: 41 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
+Fuentes: 76 · Recetas: 41 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
 
 ## Cómo usar este repo
 
@@ -81,6 +81,7 @@ Fuentes: 72 · Recetas: 41 · Alcance actual: Administración General del Estado
 - Reserva de embalses, caudales y estaciones de aforo → miteco-saih-boletin-hidrologico
 - Red Natura 2000, espacios protegidos, hábitats, humedales, inventario forestal → miteco-banco-datos-naturaleza (descargas con desafío ALTCHA (resuelto en la guía); los WMS de mapama están rotos)
 - Presencia de especies (ocurrencias, datasets de biodiversidad) → gbif-es
+- Emisiones de gases de efecto invernadero y contaminantes atmosféricos por sector (inventario nacional) → miteco-inventario-emisiones (por categoría IPCC; por instalación en miteco-prtr)
 - Precios de carburantes por gasolinera → minetur-precios-carburantes
 - Comercializadoras, cambios de suministrador, bono social, garantías de origen → cnmc-data
 - Consumo de productos petrolíferos y gas por provincia, balances energéticos → miteco-energia-estadisticas (series de CORES en xlsx; el ministerio publica PDF)
@@ -98,6 +99,7 @@ Fuentes: 72 · Recetas: 41 · Alcance actual: Administración General del Estado
 - Geología, hidrogeología, puntos de agua y minería → igme-geologia
 - Terremotos recientes y catálogo sísmico → ign-sismologia (tablas HTML; el catálogo solo se descargó desde navegador)
 - Datos oceanográficos en tiempo real (oleaje, mareas, boyas) → puertos-estado-datos (Portus es una aplicación con API interna no reproducida)
+- Campañas oceanográficas y datasets del IEO (catálogo de metadatos) → ieo-datos-oceanograficos (catálogo CSW verificado; el ERDDAP de datos no respondió desde el entorno)
 - Anuario de estadística agraria, precios percibidos y pagados, consumo alimentario → mapa-estadisticas-agrarias
 - Flota pesquera, capturas y acuicultura → mapa-pesca (el identificador de buque es CODIGOBUQUE, no el CFR)
 - Incidencias de tráfico, detectores, radares, zonas de bajas emisiones, puntos de recarga → dgt-datex-trafico
@@ -114,12 +116,14 @@ Fuentes: 72 · Recetas: 41 · Alcance actual: Administración General del Estado
 - Universidades, matriculados y egresados por titulación, títulos oficiales (RUCT) → educacion-estadisticas-ruct
 - Criminalidad por tipología, comunidad, provincia y municipio → interior-criminalidad
 - Estadística judicial y sentencias → ninguna (Poder Judicial (CGPJ, CENDOJ) fuera del alcance actual)
+- Estadísticas culturales (empleo cultural, bibliotecas, museos, cine, bono cultural) → cultura-culturabase (PC-Axis con el patrón de descarga del INE; certificado con intermedia fuera de la lista FNMT)
 - Catálogo bibliográfico de la BNE y patrimonio digital (Hispana) → bne-datos (datos.bne.es bloqueado desde el entorno; Hispana por OAI-PMH)
 - Padrón, nacimientos, defunciones y migraciones → ine-api-tempus
 - Extranjeros con autorización de residencia y afiliados extranjeros → segsocial-estadisticas (afiliados extranjeros en EST292; las estadísticas de extranjería del Ministerio de Inclusión no están aún en el catálogo)
 - Precios de vivienda, transacciones, alquiler (SERPAVI) y suelo → mivau-precios-vivienda-alquiler
 - Índice de precios de vivienda y de alquiler → ine-api-tempus
 - Telecomunicaciones (líneas, operadores, audiovisual) → cnmc-data
+- Alertas alimentarias, registro sanitario de empresas alimentarias y laboratorios → aesan-alertas-registros (alertas solo en HTML; sin RSS ni API localizados)
 - Ayuda oficial al desarrollo y acción exterior → ninguna (sin fuente en el catálogo todavía)
 
 ## Recetas por intención
@@ -151,7 +155,7 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 - medicamento-por-cn-o-nombre: Datos de un medicamento por código nacional, nombre o principio activo, con ficha técnica y problemas de suministro → aemps-cima-api
 - exceso-mortalidad-momo: Defunciones observadas y esperadas por día, ámbito, sexo y edad (MoMo) → isciii-cne
 - cosecha-oai-publicaciones: Cosechar publicaciones científicas o patrimonio digital de forma incremental → csic-digital, bne-datos, fecyt-recolecta
-- tabla-pcaxis-a-csv: Descargar como CSV una tabla de cualquier portal PC-Axis (INE, EDUCAbase, criminalidad) sin navegador → ine-api-tempus, educacion-estadisticas-ruct, interior-criminalidad
+- tabla-pcaxis-a-csv: Descargar como CSV una tabla de cualquier portal PC-Axis (INE, EDUCAbase, criminalidad, CULTURAbase) sin navegador → ine-api-tempus, educacion-estadisticas-ruct, interior-criminalidad, cultura-culturabase
 - ocurrencias-especie-espana: Registros de presencia de una especie en España, con recuento y descarga → gbif-es
 - geologia-y-aguas-subterraneas-punto: Unidad geológica en un punto y puntos de agua subterránea de una provincia → igme-geologia
 - buscar-dataset-datos-gob-es: Localizar un dataset abierto de cualquier Administración y su URL de descarga real → datos-gob-es-api
@@ -179,17 +183,18 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 - [Gobierno abierto, transparencia y organización administrativa](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/gobierno-abierto-administracion/README.md): datos-gob-es-api, dir3-directorio, face-facturas, pag-administracion-gob-es, transparencia-portal
 - [Territorio, catastro y cartografía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/territorio-cartografia/README.md): catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal
 - [Meteorología y clima](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/meteorologia-clima/README.md): aemet-opendata, aemet-otros-servicios
-- [Medio ambiente, agua y biodiversidad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/medio-ambiente-agua-biodiversidad/README.md): miteco-banco-datos-naturaleza, miteco-calidad-aire, miteco-prtr, miteco-saih-boletin-hidrologico
+- [Medio ambiente, agua y biodiversidad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/medio-ambiente-agua-biodiversidad/README.md): miteco-banco-datos-naturaleza, miteco-calidad-aire, miteco-inventario-emisiones, miteco-prtr, miteco-saih-boletin-hidrologico
 - [Energía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/energia/README.md): cnmc-data, minetur-precios-carburantes, miteco-energia-estadisticas, omie-mercado, ree-redata
 - [Sanidad y medicamentos](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/sanidad-medicamentos/README.md): aemps-cima-api, aemps-otros-registros, isciii-cne, sanidad-nomenclator-facturacion, sanidad-portal-estadistico
-- [Ciencia e investigación (biología, química, geología, oceanografía)](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/ciencia-investigacion/README.md): aei-convocatorias, csic-digital, fecyt-recolecta, gbif-es, igme-geologia, ign-sismologia
+- [Ciencia e investigación (biología, química, geología, oceanografía)](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/ciencia-investigacion/README.md): aei-convocatorias, csic-digital, fecyt-recolecta, gbif-es, ieo-datos-oceanograficos, igme-geologia, ign-sismologia
 - [Agricultura, pesca y alimentación](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/agricultura-pesca-alimentacion/README.md): fega-beneficiarios-pac, mapa-estadisticas-agrarias, mapa-pesca, mapa-sigpac
 - [Transporte y movilidad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/transporte-movilidad/README.md): aesa-aviacion, dgt-datex-trafico, dgt-estadisticas, mitma-opendata-movilidad, puertos-estado-datos, renfe-datos-abiertos
 - [Comercio exterior, industria y propiedad industrial](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/comercio-industria-propiedad/README.md): datacomex, datainvex, mincotur-industria-turismo, oepm-invenes
 - [Educación y universidades](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/educacion-universidades/README.md): educacion-estadisticas-ruct
 - [Justicia, interior y seguridad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/justicia-interior-seguridad/README.md): interior-criminalidad
-- [Cultura y patrimonio](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/cultura-patrimonio/README.md): bne-datos
+- [Cultura y patrimonio](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/cultura-patrimonio/README.md): bne-datos, cultura-culturabase
 - [Vivienda y urbanismo](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/vivienda-urbanismo/README.md): mivau-precios-vivienda-alquiler
+- [Consumo y seguridad alimentaria](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/consumo-seguridad-alimentaria/README.md): aesan-alertas-registros
 
 ## Guías transversales
 

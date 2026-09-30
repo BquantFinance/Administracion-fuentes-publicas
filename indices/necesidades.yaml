@@ -138,6 +138,9 @@
   note: descargas con desafío ALTCHA (resuelto en la guía); los WMS de mapama están rotos
 - need: Presencia de especies (ocurrencias, datasets de biodiversidad)
   source: gbif-es
+- need: Emisiones de gases de efecto invernadero y contaminantes atmosféricos por sector (inventario nacional)
+  source: miteco-inventario-emisiones
+  note: por categoría IPCC; por instalación en miteco-prtr
 - need: Precios de carburantes por gasolinera
   source: minetur-precios-carburantes
 - need: Comercializadoras, cambios de suministrador, bono social, garantías de origen
@@ -183,6 +186,9 @@
 - need: Datos oceanográficos en tiempo real (oleaje, mareas, boyas)
   source: puertos-estado-datos
   note: Portus es una aplicación con API interna no reproducida
+- need: Campañas oceanográficas y datasets del IEO (catálogo de metadatos)
+  source: ieo-datos-oceanograficos
+  note: catálogo CSW verificado; el ERDDAP de datos no respondió desde el entorno
 - need: Anuario de estadística agraria, precios percibidos y pagados, consumo alimentario
   source: mapa-estadisticas-agrarias
 - need: Flota pesquera, capturas y acuicultura
@@ -225,6 +231,9 @@
 - need: Estadística judicial y sentencias
   source: null
   note: Poder Judicial (CGPJ, CENDOJ) fuera del alcance actual
+- need: Estadísticas culturales (empleo cultural, bibliotecas, museos, cine, bono cultural)
+  source: cultura-culturabase
+  note: PC-Axis con el patrón de descarga del INE; certificado con intermedia fuera de la lista FNMT
 - need: Catálogo bibliográfico de la BNE y patrimonio digital (Hispana)
   source: bne-datos
   note: datos.bne.es bloqueado desde el entorno; Hispana por OAI-PMH
@@ -239,6 +248,9 @@
   source: ine-api-tempus
 - need: Telecomunicaciones (líneas, operadores, audiovisual)
   source: cnmc-data
+- need: Alertas alimentarias, registro sanitario de empresas alimentarias y laboratorios
+  source: aesan-alertas-registros
+  note: alertas solo en HTML; sin RSS ni API localizados
 - need: Ayuda oficial al desarrollo y acción exterior
   source: null
   note: sin fuente en el catálogo todavía

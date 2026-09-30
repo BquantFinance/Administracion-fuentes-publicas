@@ -1,0 +1,45 @@
+id: miteco-inventario-emisiones
+name: MITECO – Inventario nacional de emisiones (gases de efecto invernadero y contaminantes)
+org: Sistema Español de Inventario (SEI), Dirección General de Calidad y Evaluación Ambiental
+ministry: Transición Ecológica y Reto Demográfico
+level: age
+sector: medio-ambiente-agua-biodiversidad
+tags: [emisiones, gei, co2, inventario, unfccc, crt, ipcc, contaminantes-atmosfericos, clrtap, cambio-climatico]
+summary: >-
+  Serie 1990-2024 de emisiones de gases de efecto invernadero por gas y sector en una tabla resumen xlsx,
+  tablas CRT de la UNFCCC (un xlsx por año en ZIP) con el diccionario de categorías IPCC, e inventario de
+  contaminantes atmosféricos (CLRTAP) por territorio y dominio EMEP. Edición anual.
+access: [download]
+auth: none
+formats: [xlsx, zip, pdf]
+update: annual
+coverage: "1990-2024 en la edición 2026; avance del año anterior en nota separada"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero.html
+docs_url: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-.html
+endpoints:
+  - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/webtabla-inv-Ed{AAAA}.xlsx
+    desc: Tabla resumen de la edición (2,8 MB; hojas Intro, IPCC_SUBACTIVITIES, Total GEI por gas y sector, Contaminantes-TotalNacional, Contaminantes-SinCanarias)
+    example: curl -sO "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/webtabla-inv-Ed2026.xlsx"
+  - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/es-tablas-crt-edicion-{AAAA}.zip
+    desc: Tablas CRT de la UNFCCC, un xlsx por año 1990-2024 (35 ficheros, 121 MB; ESP-CRT-2026-V0.3-{año}-...xlsx)
+    example: curl -sO "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/es-tablas-crt-edicion-2026.zip"
+  - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/Categorias-CRT-{AAAA}.xlsx
+    desc: Diccionario de categorías IPCC (ACTIVIDAD, sector, división, clase, subclase, actividad, subactividad y descripción)
+  - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-contaminantes-atmosfericos/es-clrtap-{territorio-nacional|dominio-emep}-edicion-{AAAA}.zip
+    desc: Inventario de contaminantes atmosféricos (CLRTAP) por territorio nacional y por dominio EMEP; informe IIR en PDF en la misma carpeta
+  - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/es-nid-edicion-{AAAA}.pdf
+    desc: Informe del inventario (NID); Nota-Avance-GEI-{AAAA}.pdf en la carpeta superior con el avance del último año
+quirks: [static-html, url-drift]
+ids: []
+gotchas:
+  - Los nombres llevan la edición (Ed2026, edicion-2026, CRT-2026-V0.3) y cambian cada año; tomar los enlaces de la página en cada ejecución.
+  - La tabla resumen abre con una hoja de introducción y filas de título antes de la cabecera; localizar la fila de cabecera antes de leer con pandas.
+  - Las tablas CRT son las hojas oficiales de reporte de la UNFCCC (una tabla por categoría y año), no una serie plana; para series usar la tabla resumen.
+  - El avance del último año (Nota-Avance-GEI) sale meses antes que la edición completa; no mezclar avance e inventario.
+tips:
+  - "pd.read_excel('webtabla-inv-Ed2026.xlsx', sheet_name='Total GEI por gas y sector', header=None) y buscar la fila de cabecera por su primer texto."
+  - Emisiones por instalación en miteco-prtr; el inventario agrega por categoría IPCC y no identifica complejos.
+related: [miteco-prtr, miteco-calidad-aire, ree-redata]
+status: active
+verified: "2026-09-30"

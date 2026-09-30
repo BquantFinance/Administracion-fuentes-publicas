@@ -4,7 +4,7 @@ Catálogo de fuentes de datos de la Administración pública española, pensado 
 
 **Para agentes:** empieza por [`llms.txt`](llms.txt). Todo el catálogo cabe en [`catalog.json`](catalog.json) o en [`llms-full.txt`](llms-full.txt).
 
-Fuentes catalogadas: <!-- AUTO:count -->72<!-- /AUTO:count -->. Alcance actual: Administración General del Estado. Después: comunidades autónomas, entidades locales, Cortes y Poder Judicial, Unión Europea.
+Fuentes catalogadas: <!-- AUTO:count -->76<!-- /AUTO:count -->. Alcance actual: Administración General del Estado. Después: comunidades autónomas, entidades locales, Cortes y Poder Judicial, Unión Europea.
 
 ## Principios
 
@@ -28,21 +28,21 @@ Fuentes catalogadas: <!-- AUTO:count -->72<!-- /AUTO:count -->. Alcance actual: 
 | [gobierno-abierto-administracion](sources/gobierno-abierto-administracion/README.md) | Gobierno abierto, transparencia y organización administrativa | 5 |
 | [territorio-cartografia](sources/territorio-cartografia/README.md) | Territorio, catastro y cartografía | 4 |
 | [meteorologia-clima](sources/meteorologia-clima/README.md) | Meteorología y clima | 2 |
-| [medio-ambiente-agua-biodiversidad](sources/medio-ambiente-agua-biodiversidad/README.md) | Medio ambiente, agua y biodiversidad | 4 |
+| [medio-ambiente-agua-biodiversidad](sources/medio-ambiente-agua-biodiversidad/README.md) | Medio ambiente, agua y biodiversidad | 5 |
 | [energia](sources/energia/README.md) | Energía | 5 |
 | [sanidad-medicamentos](sources/sanidad-medicamentos/README.md) | Sanidad y medicamentos | 5 |
-| [ciencia-investigacion](sources/ciencia-investigacion/README.md) | Ciencia e investigación (biología, química, geología, oceanografía) | 6 |
+| [ciencia-investigacion](sources/ciencia-investigacion/README.md) | Ciencia e investigación (biología, química, geología, oceanografía) | 7 |
 | [agricultura-pesca-alimentacion](sources/agricultura-pesca-alimentacion/README.md) | Agricultura, pesca y alimentación | 4 |
 | [transporte-movilidad](sources/transporte-movilidad/README.md) | Transporte y movilidad | 6 |
 | [comercio-industria-propiedad](sources/comercio-industria-propiedad/README.md) | Comercio exterior, industria y propiedad industrial | 4 |
 | [educacion-universidades](sources/educacion-universidades/README.md) | Educación y universidades | 1 |
 | [justicia-interior-seguridad](sources/justicia-interior-seguridad/README.md) | Justicia, interior y seguridad | 1 |
-| [cultura-patrimonio](sources/cultura-patrimonio/README.md) | Cultura y patrimonio | 1 |
+| [cultura-patrimonio](sources/cultura-patrimonio/README.md) | Cultura y patrimonio | 2 |
 | `demografia-migraciones-sociedad` | Demografía, migraciones y sociedad | 0 |
 | [vivienda-urbanismo](sources/vivienda-urbanismo/README.md) | Vivienda y urbanismo | 1 |
 | `telecomunicaciones-digital` | Telecomunicaciones y sociedad digital | 0 |
 | `exterior-cooperacion` | Acción exterior y cooperación | 0 |
-| `consumo-seguridad-alimentaria` | Consumo y seguridad alimentaria | 0 |
+| [consumo-seguridad-alimentaria](sources/consumo-seguridad-alimentaria/README.md) | Consumo y seguridad alimentaria | 1 |
 | `defensa` | Defensa | 0 |
 <!-- /AUTO:sectors -->
 

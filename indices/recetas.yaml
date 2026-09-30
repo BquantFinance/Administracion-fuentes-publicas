@@ -552,7 +552,7 @@
   verified: "2026-09-30"
 
 - id: tabla-pcaxis-a-csv
-  intent: Descargar como CSV una tabla de cualquier portal PC-Axis (INE, EDUCAbase, criminalidad) sin navegador
+  intent: Descargar como CSV una tabla de cualquier portal PC-Axis (INE, EDUCAbase, criminalidad, CULTURAbase) sin navegador
   inputs: []
   steps:
     - source: ine-api-tempus
@@ -564,10 +564,16 @@
     - source: interior-criminalidad
       do: "Criminalidad, mismo patrón en sec/jaxiPx/files/_px/es/csv_bdsc{path}{file}?nocab=1 (último trimestre en /DatosBalanceAct/l0/)"
       example: curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09004.px?nocab=1"
+    - source: cultura-culturabase
+      do: "CULTURAbase, mismo patrón en CulturaJaxiPx/files/_px/es/csv_bdsc{path}{file}?nocab=1; el servidor exige el bundle FNMT con ACCOMP.crt (scripts/fnmt_bundle.py)"
+      example: curl -s --cacert ca-age.pem "https://estadisticas.cultura.gob.es/CulturaJaxiPx/files/_px/es/csv_bdsc/t1/p1/M_Anuales/l0/T1M01001.px?nocab=1"
   output: CSV con la tabla completa; px y xlsx cambiando csv_bdsc por px o xlsx
   checks:
     - url: https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=1
       contains: Periodo
+    - url: https://estadisticas.cultura.gob.es/CulturaJaxiPx/files/_px/es/csv_bdsc/t1/p1/M_Anuales/l0/T1M01001.px?nocab=1
+      contains: periodo
+      fnmt: true
     - url: https://estadisticas.educacion.gob.es/EducaJaxiPx/files/_px/es/csv_bdsc/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos/l0/adul_01.px?nocab=1
       contains: Total
     - url: https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09004.px?nocab=1

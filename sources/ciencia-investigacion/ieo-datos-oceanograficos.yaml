@@ -1,0 +1,44 @@
+id: ieo-datos-oceanograficos
+name: IEO (CSIC) – Centro Nacional de Datos Oceanográficos (catálogo CSW)
+org: Instituto Español de Oceanografía, Centro Nacional de Datos Oceanográficos
+ministry: Ciencia, Innovación y Universidades (CSIC)
+level: age
+sector: ciencia-investigacion
+tags: [oceanografia, campanas, csw, geonetwork, seadatanet, temperatura, salinidad, ieo, csic]
+summary: >-
+  Catálogo GeoNetwork del centro de datos oceanográficos del IEO con 7.582 registros (campañas, datasets y
+  series) consultable por CSW 2.0.2 (listado paginado y metadato ISO 19139) y por la API de búsqueda
+  Elasticsearch de GeoNetwork. El ERDDAP de datos no respondió desde el entorno.
+access: [ogc, api-rest, portal]
+auth: none
+formats: [xml, json]
+update: irregular
+coverage: "7.582 registros el 30/09/2026; campañas desde los años 2000 según los identificadores"
+license: Reutilización libre con cita de la fuente
+base_url: https://nodc.ieo.es/geonetwork/srv/spa/csw
+docs_url: https://ieo.csic.es/datos-oceanograficos/
+endpoints:
+  - path: ?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecords&resultType=results&typeNames=csw:Record&ElementSetName=brief&maxRecords={n}&startPosition={p}
+    desc: Listado paginado (numberOfRecordsMatched 7582; cada registro con dc:identifier, dc:title, dc:type y BoundingBox WGS84); resultType=hits solo cuenta
+    example: curl -s "https://nodc.ieo.es/geonetwork/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecords&resultType=results&typeNames=csw:Record&ElementSetName=brief&maxRecords=10&startPosition=1"
+  - path: ?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecordById&ElementSetName=full&outputSchema=http://www.isotc211.org/2005/gmd&ID={id}
+    desc: Metadato ISO 19139 completo (gmd:MD_Metadata) de un registro por su identificador (urn:SDN:CSR:LOCAL:... en campañas)
+    example: curl -s "https://nodc.ieo.es/geonetwork/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecordById&ElementSetName=full&outputSchema=http://www.isotc211.org/2005/gmd&ID=urn:SDN:CSR:LOCAL:29JR200311060"
+  - path: https://nodc.ieo.es/geonetwork/srv/api/search/records/_search
+    desc: Búsqueda de texto libre por POST JSON (Elasticsearch de GeoNetwork; query_string, size, _source); hits.hits[]._source con resourceTitleObject y resourceType
+    example: |-
+      curl -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{"query":{"query_string":{"query":"temperatura"}},"size":5}' "https://nodc.ieo.es/geonetwork/srv/api/search/records/_search"
+  - path: https://nodc.ieo.es/geonetwork/srv/spa/catalog.search
+    desc: Interfaz web del catálogo (JavaScript); las fichas se enlazan como #/metadata/{uuid}
+quirks: [errors-html-or-xml, js-rendered]
+ids: []
+gotchas:
+  - Los filtros CQL_TEXT (AnyText like, dc:title like) responden 200 con un ows:ExceptionReport (UnknownFormatConversionException); filtrar con la API _search o recorrer el listado completo.
+  - La API antigua srv/spa/q responde 500 con el texto "Use ES search instead".
+  - Los primeros miles de registros son campañas (dc:type campañas, identificador SeaDataNet urn:SDN:CSR:LOCAL); los datasets con descarga se localizan mejor con _search por resourceType.
+  - erddap.ieo.es no resolvió desde el entorno de verificación (30/09/2026); solo se verificó el catálogo, no la descarga de perfiles o series.
+tips:
+  - Paginar con startPosition y nextRecord de la respuesta; maxRecords=100 funciona.
+related: [gbif-es, csic-digital, puertos-estado-datos, igme-geologia]
+status: active
+verified: "2026-09-30"

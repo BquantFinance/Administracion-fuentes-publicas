@@ -1,0 +1,43 @@
+id: cultura-culturabase
+name: Ministerio de Cultura – CULTURAbase y estadísticas culturales
+org: División de Estadística y Estudios, Secretaría General Técnica
+ministry: Cultura
+level: age
+sector: cultura-patrimonio
+tags: [estadisticas-culturales, culturabase, pc-axis, empleo-cultural, bibliotecas, museos, cine, bono-cultural, anuario]
+summary: >-
+  Sistema PC-Axis (el mismo software que INEbase) con las estadísticas culturales: empleo cultural,
+  bibliotecas, museos, cine, comercio exterior, bono cultural, fundaciones y asuntos taurinos; cada tabla se
+  descarga en CSV, px o xlsx con URL deducible. Más el Anuario en PDF.
+access: [download, portal]
+auth: none
+formats: [csv, px, xlsx, pdf, html]
+update: annual
+coverage: "Según estadística; empleo cultural anual desde 2008, bibliotecas y museos por ediciones (2005, 2020...)"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.cultura.gob.es/servicios-a-la-ciudadania/estadisticas/cultura/mc/culturabase/portada.html
+docs_url: https://www.cultura.gob.es/servicios-a-la-ciudadania/estadisticas.html
+endpoints:
+  - path: https://www.cultura.gob.es/servicios-a-la-ciudadania/estadisticas/cultura/mc/culturabase/{tema}.html
+    desc: Página por tema (bibliotecas, empleo-cultural, cine-contenidos-audiovisuales, museos, comercio-exterior, bono-cultural) con los enlaces a CulturaDynPx
+    example: curl -s --cacert ca-age.pem "https://www.cultura.gob.es/servicios-a-la-ciudadania/estadisticas/cultura/mc/culturabase/bibliotecas.html" | grep -o 'CulturaDynPx[^"]*'
+  - path: https://estadisticas.cultura.gob.es/CulturaDynPx/culturabase/index.htm?type=pcaxis&path={ruta}&file=pcaxis
+    desc: Índice de tablas de un conjunto (ruta como /t1/p1/M_Anuales/ o /t14/p14b/a2020/) con enlaces CulturaJaxiPx/Tabla.htm que llevan path y file
+    example: curl -s --cacert ca-age.pem "https://estadisticas.cultura.gob.es/CulturaDynPx/culturabase/index.htm?type=pcaxis&path=/t1/p1/M_Anuales/&file=pcaxis" | grep -o 'Tabla.htm[^"]*'
+  - path: https://estadisticas.cultura.gob.es/CulturaJaxiPx/files/_px/es/{csv_bdsc|px|xlsx}{path}{file}?nocab=1
+    desc: Tabla en CSV (separador ;, ISO-8859-15 con BOM, coma decimal), PC-Axis o xlsx; path y file son los del enlace Tabla.htm (/t1/p1/M_Anuales/l0/ y T1M01001.px)
+    example: curl -s --cacert ca-age.pem "https://estadisticas.cultura.gob.es/CulturaJaxiPx/files/_px/es/csv_bdsc/t1/p1/M_Anuales/l0/T1M01001.px?nocab=1"
+  - path: https://www.cultura.gob.es/servicios-a-la-ciudadania/estadisticas/cultura/mc/aec.html
+    desc: Anuario de Estadísticas Culturales (PDF por edición, 2007-2025) y notas resumen; ficheros bajo /dam/jcr:{uuid}/
+quirks: [tls-chain-incomplete, static-html, latin1, url-drift]
+ids: []
+gotchas:
+  - El certificado de *.cultura.gob.es lo firma AC Componentes Informáticos, intermedia que no está en la lista de la sede FNMT; se obtiene de http://www.cert.fnmt.es/certs/ACCOMP.crt (AIA) o con scripts/fnmt_bundle.py.
+  - Las rutas /servicios-al-ciudadano/... redirigen a /servicios-a-la-ciudadania/...; un índice CulturaDynPx sin la subcarpeta (/t1/p1/) responde 404 con "Error page", usar la ruta completa que enlaza la página del tema.
+  - Los códigos de tabla (T1M01001, T14B1001) y la carpeta l0 se toman del enlace Tabla.htm; verificados csv_bdsc, px y xlsx con el mismo patrón que INE, EDUCAbase y criminalidad.
+  - El CSV lleva una fila por combinación de variables y periodo y cabeceras con el nombre de cada variable; sin nocab=1 añade filas de título.
+tips:
+  - Receta tabla-pcaxis-a-csv; con pandas, read_csv(url, sep=';', encoding='iso-8859-15', decimal=',', thousands='.').
+related: [bne-datos, ine-api-tempus, educacion-estadisticas-ruct, interior-criminalidad]
+status: active
+verified: "2026-09-30"

@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 41 recetas, 95 necesidades, 19 identificadores, 58 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 41 recetas, 99 necesidades, 19 identificadores, 58 rutas muertas.
 
 ## Recetas por intención
 
@@ -33,7 +33,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 | `medicamento-por-cn-o-nombre` | Datos de un medicamento por código nacional, nombre o principio activo, con ficha técnica y problemas de suministro | aemps-cima-api | 2026-09-30 |
 | `exceso-mortalidad-momo` | Defunciones observadas y esperadas por día, ámbito, sexo y edad (MoMo) | isciii-cne | 2026-09-30 |
 | `cosecha-oai-publicaciones` | Cosechar publicaciones científicas o patrimonio digital de forma incremental | csic-digital, bne-datos, fecyt-recolecta | 2026-09-30 |
-| `tabla-pcaxis-a-csv` | Descargar como CSV una tabla de cualquier portal PC-Axis (INE, EDUCAbase, criminalidad) sin navegador | ine-api-tempus, educacion-estadisticas-ruct, interior-criminalidad | 2026-09-30 |
+| `tabla-pcaxis-a-csv` | Descargar como CSV una tabla de cualquier portal PC-Axis (INE, EDUCAbase, criminalidad, CULTURAbase) sin navegador | ine-api-tempus, educacion-estadisticas-ruct, interior-criminalidad, cultura-culturabase | 2026-09-30 |
 | `ocurrencias-especie-espana` | Registros de presencia de una especie en España, con recuento y descarga | gbif-es | 2026-09-30 |
 | `geologia-y-aguas-subterraneas-punto` | Unidad geológica en un punto y puntos de agua subterránea de una provincia | igme-geologia | 2026-09-30 |
 | `buscar-dataset-datos-gob-es` | Localizar un dataset abierto de cualquier Administración y su URL de descarga real | datos-gob-es-api | 2026-09-30 |
@@ -353,7 +353,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 3. `fecyt-recolecta`: RECOLECTA ya no expone OAI-PMH (404 en cuatro rutas el 30/09/2026); cosechar cada repositorio universitario por separado
 - salida: XML OAI-PMH paginado con resumptionToken
 
-**tabla-pcaxis-a-csv** · Descargar como CSV una tabla de cualquier portal PC-Axis (INE, EDUCAbase, criminalidad) sin navegador
+**tabla-pcaxis-a-csv** · Descargar como CSV una tabla de cualquier portal PC-Axis (INE, EDUCAbase, criminalidad, CULTURAbase) sin navegador
 1. `ine-api-tempus`: INE, cambiar js por csv en la API (csv/ES/DATOS_TABLA/{id}?nult=n): tabulador, ISO-8859-15 con BOM
    ```
    curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=12"
@@ -365,6 +365,10 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 3. `interior-criminalidad`: Criminalidad, mismo patrón en sec/jaxiPx/files/_px/es/csv_bdsc{path}{file}?nocab=1 (último trimestre en /DatosBalanceAct/l0/)
    ```
    curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09004.px?nocab=1"
+   ```
+4. `cultura-culturabase`: CULTURAbase, mismo patrón en CulturaJaxiPx/files/_px/es/csv_bdsc{path}{file}?nocab=1; el servidor exige el bundle FNMT con ACCOMP.crt (scripts/fnmt_bundle.py)
+   ```
+   curl -s --cacert ca-age.pem "https://estadisticas.cultura.gob.es/CulturaJaxiPx/files/_px/es/csv_bdsc/t1/p1/M_Anuales/l0/T1M01001.px?nocab=1"
    ```
 - salida: CSV con la tabla completa; px y xlsx cambiando csv_bdsc por px o xlsx
 
@@ -602,6 +606,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Emisiones industriales por complejo (PRTR) → `miteco-prtr`
 - Reserva de embalses, caudales y estaciones de aforo → `miteco-saih-boletin-hidrologico`
 - Red Natura 2000, espacios protegidos, hábitats, humedales, inventario forestal → `miteco-banco-datos-naturaleza` (descargas con desafío ALTCHA (resuelto en la guía); los WMS de mapama están rotos)
+- Emisiones de gases de efecto invernadero y contaminantes atmosféricos por sector (inventario nacional) → `miteco-inventario-emisiones` (por categoría IPCC; por instalación en miteco-prtr)
 
 **Energía**
 - Precios de carburantes por gasolinera → `minetur-precios-carburantes`
@@ -625,6 +630,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Publicaciones científicas en acceso abierto → `csic-digital` (OAI-PMH; RECOLECTA (fecyt-recolecta) ya no expone OAI)
 - Geología, hidrogeología, puntos de agua y minería → `igme-geologia`
 - Terremotos recientes y catálogo sísmico → `ign-sismologia` (tablas HTML; el catálogo solo se descargó desde navegador)
+- Campañas oceanográficas y datasets del IEO (catálogo de metadatos) → `ieo-datos-oceanograficos` (catálogo CSW verificado; el ERDDAP de datos no respondió desde el entorno)
 
 **Agricultura, pesca y alimentación**
 - Beneficiarios de la PAC → `fega-beneficiarios-pac` (no verificable el 30/09/2026 (el servidor cierra la conexión); probar bdns-api concesiones con el órgano FEGA)
@@ -655,10 +661,14 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Criminalidad por tipología, comunidad, provincia y municipio → `interior-criminalidad`
 
 **Cultura y patrimonio**
+- Estadísticas culturales (empleo cultural, bibliotecas, museos, cine, bono cultural) → `cultura-culturabase` (PC-Axis con el patrón de descarga del INE; certificado con intermedia fuera de la lista FNMT)
 - Catálogo bibliográfico de la BNE y patrimonio digital (Hispana) → `bne-datos` (datos.bne.es bloqueado desde el entorno; Hispana por OAI-PMH)
 
 **Vivienda y urbanismo**
 - Precios de vivienda, transacciones, alquiler (SERPAVI) y suelo → `mivau-precios-vivienda-alquiler`
+
+**Consumo y seguridad alimentaria**
+- Alertas alimentarias, registro sanitario de empresas alimentarias y laboratorios → `aesan-alertas-registros` (alertas solo en HTML; sin RSS ni API localizados)
 
 **Sin fuente en el catálogo**
 - Cotizaciones bursátiles y precios de mercado (BME, OMIE) → ninguna (fuera del alcance actual; BME es privado y OMIE no está aún en el catálogo)
