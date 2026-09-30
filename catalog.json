@@ -3072,7 +3072,8 @@
     {
      "path": "/EstacionesTerrestres/FiltroProducto/{IDPRODUCTO} y /EstacionesTerrestres/FiltroProvinciaProducto/{IDPROVINCIA}/{IDPRODUCTO}",
      "desc": "Un solo producto; la respuesta lleva PrecioProducto en vez de una clave por carburante",
-     "example": "curl -s \"https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroProvinciaProducto/28/1\""
+     "example": "curl -s \"https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroProvinciaProducto/28/1\"",
+     "returns": "Como EstacionesTerrestres pero con una única clave PrecioProducto (texto con coma) en vez de una clave por producto; Fecha, ListaEESSPrecio, ResultadoConsulta"
     },
     {
      "path": "/EstacionesTerrestresHist/{DD-MM-AAAA} y /EstacionesTerrestresHist/FiltroProvincia/{DD-MM-AAAA}/{IDPROVINCIA}",

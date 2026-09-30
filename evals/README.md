@@ -16,6 +16,11 @@ referencia y la trampa que hace fallar a quien no conoce la fuente. Sirven para 
 Las tareas con `check.status: 401` (DataComex) se puntúan por el procedimiento (login, token, códigos), no por el
 valor. La de AEMET exige `AEMET_KEY` en las dos condiciones.
 
+## Resultados
+
+`resultados-2026-09-30.md`: cinco tareas, una ejecución por condición. Mismo acierto (5 de 5), la mitad de llamadas HTTP
+(11 frente a 23), cero fallidas o inútiles (frente a 8) y un 34 % más de tokens por leer `llms.txt` entero.
+
 ## Qué mide y qué no
 
 Mide llamadas evitadas, errores evitados y tokens gastados en tareas típicas; no mide cobertura (para eso está

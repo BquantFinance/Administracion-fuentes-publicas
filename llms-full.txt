@@ -1228,6 +1228,7 @@ docs_url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/Preci
 - /EstacionesTerrestres/FiltroMunicipio/{IDMUNICIPIO} y /EstacionesTerrestres/FiltroCCAA/{IDCCAA} :: Filtros por municipio (id propio de la aplicación) y comunidad autónoma
 - /EstacionesTerrestres/FiltroProducto/{IDPRODUCTO} y /EstacionesTerrestres/FiltroProvinciaProducto/{IDPROVINCIA}/{IDPRODUCTO} :: Un solo producto; la respuesta lleva PrecioProducto en vez de una clave por carburante
   ej: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroProvinciaProducto/28/1"
+  devuelve: Como EstacionesTerrestres pero con una única clave PrecioProducto (texto con coma) en vez de una clave por producto; Fecha, ListaEESSPrecio, ResultadoConsulta
 - /EstacionesTerrestresHist/{DD-MM-AAAA} y /EstacionesTerrestresHist/FiltroProvincia/{DD-MM-AAAA}/{IDPROVINCIA} :: Precios de un día; mismos filtros que el vigente (CCAA, municipio, producto) tras la fecha
   ej: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestresHist/FiltroProvincia/01-06-2024/28"
 - /PostesMaritimos/ :: Postes marítimos, claves propias (Precio Gasoleo A habitual, Precio Gasóleo para uso marítimo); filtros PostesMaritimosFiltroProvincia y similares
