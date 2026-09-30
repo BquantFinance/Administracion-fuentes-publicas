@@ -5,7 +5,7 @@
  "repo": "https://github.com/BquantFinance/Administracion-fuentes-publicas",
  "schema": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json",
  "vocab": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml",
- "count": 76,
+ "count": 78,
  "sectors": {
   "legislacion-boletines": "Legislación y boletines oficiales",
   "economia-finanzas": "Economía, finanzas y mercados",
@@ -3646,6 +3646,87 @@
    "verified": "2026-09-30"
   },
   {
+   "id": "hacienda-central-informacion",
+   "name": "Hacienda – Central de Información (calendario, periodo medio de pago, financiación CCAA)",
+   "org": "Secretaría General de Financiación Autonómica y Local y Central de Información económico-financiera",
+   "ministry": "Hacienda",
+   "level": "age",
+   "sector": "hacienda-presupuestos",
+   "tags": [
+    "central-de-informacion",
+    "calendario",
+    "periodo-medio-pago",
+    "pmp",
+    "financiacion-autonomica",
+    "fla",
+    "ccaa",
+    "liquidez"
+   ],
+   "summary": "Portal que reúne las publicaciones económico-financieras de Hacienda e IGAE, con catálogo de informes y tres ficheros de URL estable: calendario de publicaciones (xlsx), periodo medio de pago a proveedores de todas las AAPP (xlsx mensual) y financiación extraordinaria de las CCAA (xlsx desde 2019).",
+   "access": [
+    "download",
+    "portal"
+   ],
+   "auth": "none",
+   "formats": [
+    "xlsx",
+    "html",
+    "pdf"
+   ],
+   "update": "monthly",
+   "coverage": "PMP mensual (publicación 2026-07 verificada); mecanismos de financiación 2019-2026; calendario con la próxima fecha de cada publicación",
+   "license": "Reutilización libre con cita de la fuente",
+   "base_url": "https://www.hacienda.gob.es/es-ES/CDI/Paginas/centraldeinformacion.aspx",
+   "docs_url": "https://www.hacienda.gob.es/es-ES/CDI/Paginas/centraldeinformacion.aspx",
+   "endpoints": [
+    {
+     "path": "https://www.hacienda.gob.es/cdi/calendario%20cdi/calendario.xlsx",
+     "desc": "Calendario de todas las publicaciones (AUTOR, NOMBRE, ÚLTIMOS DATOS, PERIODICIDAD, PRÓXIMA FECHA, PERIODO DE REFERENCIA); una hoja, cabecera en la fila 3",
+     "example": "curl -sO \"https://www.hacienda.gob.es/cdi/calendario%20cdi/calendario.xlsx\""
+    },
+    {
+     "path": "https://www.hacienda.gob.es/cdi/pmp/publicacion-pmp-{AAAA}-{MM}.xlsx",
+     "desc": "Periodo medio de pago a proveedores de todas las AAPP (hojas Indice, Tabla 1 a 5.2 y Notas); el enlace del mes vigente está en la página del PMP",
+     "example": "curl -sO \"https://www.hacienda.gob.es/cdi/pmp/publicacion-pmp-2026-07.xlsx\""
+    },
+    {
+     "path": "https://www.hacienda.gob.es/cdi/mecanismos%20financiaci%C3%B3n/mecanismos-financiacion-ccaa.xlsx",
+     "desc": "Mecanismos extraordinarios de financiación de las CCAA (FLA, liquidez); hojas Resumen, Detalle y FFCCAA{AAAA} desde 2019; URL fija, contenido sobrescrito",
+     "example": "curl -sO \"https://www.hacienda.gob.es/cdi/mecanismos%20financiaci%C3%B3n/mecanismos-financiacion-ccaa.xlsx\""
+    },
+    {
+     "path": "https://www.hacienda.gob.es/es-es/cdi/paginas/estabilidadpresupuestaria/estabilidadpresupuestaria.aspx?report{n}",
+     "desc": "Catálogo de informes (autor, periodicidad, últimos datos, soporte) con enlaces al banco de datos y a la visualización; los datos están en las aplicaciones"
+    },
+    {
+     "path": "https://www.hacienda.gob.es/es-es/cdi/paginas/periodomediopago/informacionaapps/pmpdelasaapp.aspx",
+     "desc": "Página del PMP con el enlace al xlsx del mes y a las comunicaciones de las CCAA"
+    }
+   ],
+   "quirks": [
+    "static-html",
+    "overwritten-in-place"
+   ],
+   "ids": [],
+   "gotchas": [
+    "Las rutas con espacios y tildes (calendario cdi, mecanismos financiación) van codificadas en la URL (%20, %C3%B3); sin codificar dan 404.",
+    "Los xlsx abren con filas de título y una hoja Indice; leer con header=None y localizar la cabecera (en el calendario está en la fila 3).",
+    "La ruta antigua es-ES/CDI/Paginas/OVEELL/OVEntidadesLocales.aspx y las de InformacionCCAAs dan 404; la Central de Información enlaza a las aplicaciones (SGCIEF, PMP_NET) que exigen sesión.",
+    "La ejecución mensual de las CCAA y las cuentas anuales están en igae-ejecucion-presupuestaria; el catálogo solo enlaza."
+   ],
+   "tips": [
+    "El calendario sirve para saber cuándo se actualiza cada estadística de Hacienda, IGAE y AEAT antes de programar descargas."
+   ],
+   "related": [
+    "igae-ejecucion-presupuestaria",
+    "hacienda-ovef",
+    "sepg-presupuestos-generales-estado",
+    "bde-estadisticas"
+   ],
+   "status": "active",
+   "verified": "2026-09-30"
+  },
+  {
    "id": "hacienda-ovef",
    "name": "Hacienda – Entidades locales, presupuestos, deuda viva, financiación y tributos",
    "org": "Secretaría General de Financiación Autonómica y Local",
@@ -3770,6 +3851,11 @@
      "desc": "Páginas de operaciones no financieras mensuales (im), trimestrales (it) y anuales (ia) por subsector"
     },
     {
+     "path": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/CCAA-M/M_CCAA_Sub_Det_{AAAA}.xlsx",
+     "desc": "Ejecución presupuestaria mensual de las comunidades autónomas por subsector con detalle (xlsx anual acumulado, URL predecible)",
+     "example": "curl -sO \"https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/CCAA-M/M_CCAA_Sub_Det_2026.xlsx\""
+    },
+    {
      "path": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/CAAP/CAP_Serie.xlsx",
      "desc": "Cuentas anuales de las AAPP, serie completa; liquidaciones y subvenciones por año en la misma carpeta"
     },
@@ -3797,6 +3883,69 @@
     "airef-datos",
     "tesoro-estadisticas",
     "bde-estadisticas"
+   ],
+   "status": "active",
+   "verified": "2026-09-30"
+  },
+  {
+   "id": "sepg-presupuestos-generales-estado",
+   "name": "Secretaría de Estado de Presupuestos y Gastos – Presupuestos Generales del Estado en xlsx",
+   "org": "Secretaría de Estado de Presupuestos y Gastos (SEPG), Dirección General de Presupuestos",
+   "ministry": "Hacienda",
+   "level": "age",
+   "sector": "hacienda-presupuestos",
+   "tags": [
+    "presupuestos",
+    "pge",
+    "gasto-publico",
+    "ingresos",
+    "seguridad-social",
+    "organismos-autonomos",
+    "series-presupuestarias"
+   ],
+   "summary": "Estadísticas de los Presupuestos Generales del Estado por ejercicio (2014 a 2025, proyectos con sufijo P): cinco libros xlsx por año (consolidados, Estado, Seguridad Social, organismos autónomos, resto de entes) con los cuadros de ingresos y gastos por capítulos, políticas y programas, más su PDF.",
+   "access": [
+    "download"
+   ],
+   "auth": "none",
+   "formats": [
+    "xlsx",
+    "pdf"
+   ],
+   "update": "annual",
+   "coverage": "Ejercicios 2014-2025 (64 xlsx); los años sin presupuesto aprobado aparecen como proyecto (2019-P, 2023-P, 2024-P, 2025-P)",
+   "license": "Reutilización libre con cita de la fuente",
+   "base_url": "https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/DocumentacionEstadisticas/Estadisticas/Paginas/Estadisticas.aspx",
+   "docs_url": "https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/DocumentacionEstadisticas/Documentacion/Paginas/Documentacion.aspx",
+   "endpoints": [
+    {
+     "path": "https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/accesodocumentacion/DocumentacionEstadisticas/Estadisticas/Documents/{AAAA|AAAA-P}/{NN nombre}.xlsx",
+     "desc": "Un libro por bloque y ejercicio; 01 PGE Consolidados, 02 Presupuestos del Estado, 03 Seguridad Social, 04 Organismos Autónomos, 05 resto de entes",
+     "example": "curl -sO \"https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/accesodocumentacion/DocumentacionEstadisticas/Estadisticas/Documents/2025-P/02%20Presupuestos%20del%20Estado.xlsx\""
+    },
+    {
+     "path": "https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/DocumentacionEstadisticas/Estadisticas/Paginas/Estadisticas.aspx",
+     "desc": "Página índice con los 64 enlaces xlsx y sus PDF (SharePoint; los enlaces están en el HTML)",
+     "example": "curl -s \"https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/DocumentacionEstadisticas/Estadisticas/Paginas/Estadisticas.aspx\" | grep -o 'href=\"[^\"]*\\.xlsx\"'"
+    }
+   ],
+   "quirks": [
+    "static-html"
+   ],
+   "ids": [],
+   "gotchas": [
+    "Los nombres llevan espacios y tildes (02 Presupuestos del Estado.xlsx) y cambian entre años (05 resto Entes presupuesto limitativo en 2023, resto de Entidades del SP en 2025-P); tomar los enlaces de la página.",
+    "Cada libro abre con una hoja índice (Estadística) y una hoja por cuadro (11, 12.1, 12.2, 13...); las hojas de cuadro llevan filas de título vacías antes de la cabecera.",
+    "Los ejercicios con presupuesto prorrogado solo tienen la versión proyecto (sufijo -P); no existe carpeta 2020 ni 2024 sin sufijo.",
+    "Es el presupuesto aprobado o proyectado, no la ejecución; la ejecución mensual está en igae-ejecucion-presupuestaria."
+   ],
+   "tips": [
+    "pd.read_excel(url, sheet_name=None, header=None) carga todas las hojas; localizar la cabecera por la primera fila con texto en la primera columna."
+   ],
+   "related": [
+    "igae-ejecucion-presupuestaria",
+    "hacienda-ovef",
+    "tesoro-estadisticas"
    ],
    "status": "active",
    "verified": "2026-09-30"
@@ -7792,6 +7941,19 @@
    {
     "need": "Inventario de entes del sector público (INVENTE)",
     "source": "igae-ejecucion-presupuestaria"
+   },
+   {
+    "need": "Presupuestos Generales del Estado por capítulos, políticas y programas (aprobados o proyecto)",
+    "source": "sepg-presupuestos-generales-estado",
+    "note": "presupuesto, no ejecución; la ejecución está en igae-ejecucion-presupuestaria"
+   },
+   {
+    "need": "Periodo medio de pago a proveedores de todas las AAPP y financiación extraordinaria de las CCAA (FLA)",
+    "source": "hacienda-central-informacion"
+   },
+   {
+    "need": "Calendario de publicación de las estadísticas de Hacienda, IGAE y AEAT",
+    "source": "hacienda-central-informacion"
    },
    {
     "need": "Cualquier estadística oficial del INE (IPC, EPA, PIB, padrón, natalidad, empresas)",

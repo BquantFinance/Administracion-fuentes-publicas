@@ -48,6 +48,13 @@
   source: igae-ejecucion-presupuestaria
 - need: Inventario de entes del sector público (INVENTE)
   source: igae-ejecucion-presupuestaria
+- need: Presupuestos Generales del Estado por capítulos, políticas y programas (aprobados o proyecto)
+  source: sepg-presupuestos-generales-estado
+  note: presupuesto, no ejecución; la ejecución está en igae-ejecucion-presupuestaria
+- need: Periodo medio de pago a proveedores de todas las AAPP y financiación extraordinaria de las CCAA (FLA)
+  source: hacienda-central-informacion
+- need: Calendario de publicación de las estadísticas de Hacienda, IGAE y AEAT
+  source: hacienda-central-informacion
 - need: Cualquier estadística oficial del INE (IPC, EPA, PIB, padrón, natalidad, empresas)
   source: ine-api-tempus
 - need: Códigos INE de municipios, provincias y comunidades

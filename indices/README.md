@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 41 recetas, 99 necesidades, 19 identificadores, 58 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 41 recetas, 102 necesidades, 19 identificadores, 58 rutas muertas.
 
 ## Recetas por intención
 
@@ -555,6 +555,9 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Tipos de IBI, IAE e IVTM por municipio → `hacienda-ovef` (consulta web con sesión (SGFAL))
 - Déficit de las Administraciones Públicas y ejecución del presupuesto del Estado → `igae-ejecucion-presupuestaria`
 - Inventario de entes del sector público (INVENTE) → `igae-ejecucion-presupuestaria`
+- Presupuestos Generales del Estado por capítulos, políticas y programas (aprobados o proyecto) → `sepg-presupuestos-generales-estado` (presupuesto, no ejecución; la ejecución está en igae-ejecucion-presupuestaria)
+- Periodo medio de pago a proveedores de todas las AAPP y financiación extraordinaria de las CCAA (FLA) → `hacienda-central-informacion`
+- Calendario de publicación de las estadísticas de Hacienda, IGAE y AEAT → `hacienda-central-informacion`
 
 **Estadística oficial**
 - Cualquier estadística oficial del INE (IPC, EPA, PIB, padrón, natalidad, empresas) → `ine-api-tempus`

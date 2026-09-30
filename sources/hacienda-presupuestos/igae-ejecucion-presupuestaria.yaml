@@ -22,6 +22,9 @@ endpoints:
     example: curl -sO "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AACC-M/M_AACC_2026.xlsx"
   - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/{im|it|ia}nofinancieras{AC|CA|CL|SS|Total|AAPP}.aspx
     desc: Páginas de operaciones no financieras mensuales (im), trimestrales (it) y anuales (ia) por subsector
+  - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/CCAA-M/M_CCAA_Sub_Det_{AAAA}.xlsx
+    desc: Ejecución presupuestaria mensual de las comunidades autónomas por subsector con detalle (xlsx anual acumulado, URL predecible)
+    example: curl -sO "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/CCAA-M/M_CCAA_Sub_Det_2026.xlsx"
   - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/CAAP/CAP_Serie.xlsx
     desc: Cuentas anuales de las AAPP, serie completa; liquidaciones y subvenciones por año en la misma carpeta
   - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadPublica/CPE/EjecucionPresupuestaria/Paginas/imejecucionpresupuesto.aspx

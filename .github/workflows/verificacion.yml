@@ -1,0 +1,51 @@
+name: verificacion-semanal
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"   # lunes 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  recetas:
+    runs-on: ubuntu-latest
+    env:
+      AEMET_KEY: ${{ secrets.AEMET_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r scripts/requirements.txt
+      - name: Bundle de CA con las intermedias de FNMT
+        run: python scripts/fnmt_bundle.py --out ca-age.pem
+      - name: Batería de recetas contra los servidores reales
+        id: recetas
+        run: |
+          set +e
+          python scripts/check_recetas.py --ca ca-age.pem --report recetas-report.md --fail
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+      - name: Informe de enlaces de las fichas
+        run: python scripts/check_links.py > link-report.md || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: informes-verificacion
+          path: |
+            recetas-report.md
+            link-report.md
+      - name: Abrir o actualizar el issue si hay fallos
+        if: steps.recetas.outputs.exit != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          titulo="Verificación semanal: comprobaciones de recetas con fail o error"
+          cuerpo="$(head -c 60000 recetas-report.md)"
+          num=$(gh issue list --state open --search "\"$titulo\" in:title" --json number --jq '.[0].number')
+          if [ -n "$num" ]; then
+            gh issue comment "$num" --body "$cuerpo"
+          else
+            gh issue create --title "$titulo" --body "$cuerpo" --label verificacion || gh issue create --title "$titulo" --body "$cuerpo"
+          fi

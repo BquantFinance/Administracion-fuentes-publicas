@@ -2,7 +2,7 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 76 · Recetas: 41 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
+Fuentes: 78 · Recetas: 41 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
 
 ## Cómo usar este repo
 
@@ -45,6 +45,9 @@ Fuentes: 76 · Recetas: 41 · Alcance actual: Administración General del Estado
 - Tipos de IBI, IAE e IVTM por municipio → hacienda-ovef (consulta web con sesión (SGFAL))
 - Déficit de las Administraciones Públicas y ejecución del presupuesto del Estado → igae-ejecucion-presupuestaria
 - Inventario de entes del sector público (INVENTE) → igae-ejecucion-presupuestaria
+- Presupuestos Generales del Estado por capítulos, políticas y programas (aprobados o proyecto) → sepg-presupuestos-generales-estado (presupuesto, no ejecución; la ejecución está en igae-ejecucion-presupuestaria)
+- Periodo medio de pago a proveedores de todas las AAPP y financiación extraordinaria de las CCAA (FLA) → hacienda-central-informacion
+- Calendario de publicación de las estadísticas de Hacienda, IGAE y AEAT → hacienda-central-informacion
 - Cualquier estadística oficial del INE (IPC, EPA, PIB, padrón, natalidad, empresas) → ine-api-tempus
 - Códigos INE de municipios, provincias y comunidades → ine-codigos-territoriales
 - Microdatos de encuestas (EPA, condiciones de vida, presupuestos familiares, censo) → ine-microdatos
@@ -176,7 +179,7 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 
 - [Legislación y boletines oficiales](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/legislacion-boletines/README.md): boe-api-legislacion-consolidada, boe-api-sumario, boe-eli, boe-feeds, borme-api-sumario
 - [Economía, finanzas y mercados](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/economia-finanzas/README.md): airef-datos, bde-estadisticas, cnmv-registros, ico-datos, tesoro-estadisticas
-- [Hacienda, tributos y presupuestos](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/hacienda-presupuestos/README.md): aeat-estadisticas, aeat-servicios-web, hacienda-ovef, igae-ejecucion-presupuestaria
+- [Hacienda, tributos y presupuestos](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/hacienda-presupuestos/README.md): aeat-estadisticas, aeat-servicios-web, hacienda-central-informacion, hacienda-ovef, igae-ejecucion-presupuestaria, sepg-presupuestos-generales-estado
 - [Estadística oficial](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/estadistica/README.md): ine-api-tempus, ine-codigos-territoriales, ine-microdatos
 - [Contratación pública y subvenciones](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/contratacion-subvenciones/README.md): bdns-api, hacienda-registro-licitadores, placsp-datos-abiertos
 - [Empleo y Seguridad Social](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/empleo-seguridad-social/README.md): mites-estadisticas, segsocial-estadisticas, sepe-estadisticas

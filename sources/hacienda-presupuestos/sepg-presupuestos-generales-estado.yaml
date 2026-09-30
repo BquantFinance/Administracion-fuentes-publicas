@@ -1,0 +1,38 @@
+id: sepg-presupuestos-generales-estado
+name: Secretaría de Estado de Presupuestos y Gastos – Presupuestos Generales del Estado en xlsx
+org: Secretaría de Estado de Presupuestos y Gastos (SEPG), Dirección General de Presupuestos
+ministry: Hacienda
+level: age
+sector: hacienda-presupuestos
+tags: [presupuestos, pge, gasto-publico, ingresos, seguridad-social, organismos-autonomos, series-presupuestarias]
+summary: >-
+  Estadísticas de los Presupuestos Generales del Estado por ejercicio (2014 a 2025, proyectos con sufijo P):
+  cinco libros xlsx por año (consolidados, Estado, Seguridad Social, organismos autónomos, resto de entes) con
+  los cuadros de ingresos y gastos por capítulos, políticas y programas, más su PDF.
+access: [download]
+auth: none
+formats: [xlsx, pdf]
+update: annual
+coverage: "Ejercicios 2014-2025 (64 xlsx); los años sin presupuesto aprobado aparecen como proyecto (2019-P, 2023-P, 2024-P, 2025-P)"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/DocumentacionEstadisticas/Estadisticas/Paginas/Estadisticas.aspx
+docs_url: https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/DocumentacionEstadisticas/Documentacion/Paginas/Documentacion.aspx
+endpoints:
+  - path: https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/accesodocumentacion/DocumentacionEstadisticas/Estadisticas/Documents/{AAAA|AAAA-P}/{NN nombre}.xlsx
+    desc: Un libro por bloque y ejercicio; 01 PGE Consolidados, 02 Presupuestos del Estado, 03 Seguridad Social, 04 Organismos Autónomos, 05 resto de entes
+    example: curl -sO "https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/accesodocumentacion/DocumentacionEstadisticas/Estadisticas/Documents/2025-P/02%20Presupuestos%20del%20Estado.xlsx"
+  - path: https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/DocumentacionEstadisticas/Estadisticas/Paginas/Estadisticas.aspx
+    desc: Página índice con los 64 enlaces xlsx y sus PDF (SharePoint; los enlaces están en el HTML)
+    example: curl -s "https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/DocumentacionEstadisticas/Estadisticas/Paginas/Estadisticas.aspx" | grep -o 'href="[^"]*\.xlsx"'
+quirks: [static-html]
+ids: []
+gotchas:
+  - Los nombres llevan espacios y tildes (02 Presupuestos del Estado.xlsx) y cambian entre años (05 resto Entes presupuesto limitativo en 2023, resto de Entidades del SP en 2025-P); tomar los enlaces de la página.
+  - Cada libro abre con una hoja índice (Estadística) y una hoja por cuadro (11, 12.1, 12.2, 13...); las hojas de cuadro llevan filas de título vacías antes de la cabecera.
+  - Los ejercicios con presupuesto prorrogado solo tienen la versión proyecto (sufijo -P); no existe carpeta 2020 ni 2024 sin sufijo.
+  - Es el presupuesto aprobado o proyectado, no la ejecución; la ejecución mensual está en igae-ejecucion-presupuestaria.
+tips:
+  - "pd.read_excel(url, sheet_name=None, header=None) carga todas las hojas; localizar la cabecera por la primera fila con texto en la primera columna."
+related: [igae-ejecucion-presupuestaria, hacienda-ovef, tesoro-estadisticas]
+status: active
+verified: "2026-09-30"

@@ -4,7 +4,7 @@ Catálogo de fuentes de datos de la Administración pública española, pensado 
 
 **Para agentes:** empieza por [`llms.txt`](llms.txt). Todo el catálogo cabe en [`catalog.json`](catalog.json) o en [`llms-full.txt`](llms-full.txt).
 
-Fuentes catalogadas: <!-- AUTO:count -->76<!-- /AUTO:count -->. Alcance actual: Administración General del Estado. Después: comunidades autónomas, entidades locales, Cortes y Poder Judicial, Unión Europea.
+Fuentes catalogadas: <!-- AUTO:count -->78<!-- /AUTO:count -->. Alcance actual: Administración General del Estado. Después: comunidades autónomas, entidades locales, Cortes y Poder Judicial, Unión Europea.
 
 ## Principios
 
@@ -21,7 +21,7 @@ Fuentes catalogadas: <!-- AUTO:count -->76<!-- /AUTO:count -->. Alcance actual: 
 |---|---|---|
 | [legislacion-boletines](sources/legislacion-boletines/README.md) | Legislación y boletines oficiales | 5 |
 | [economia-finanzas](sources/economia-finanzas/README.md) | Economía, finanzas y mercados | 5 |
-| [hacienda-presupuestos](sources/hacienda-presupuestos/README.md) | Hacienda, tributos y presupuestos | 4 |
+| [hacienda-presupuestos](sources/hacienda-presupuestos/README.md) | Hacienda, tributos y presupuestos | 6 |
 | [estadistica](sources/estadistica/README.md) | Estadística oficial | 3 |
 | [contratacion-subvenciones](sources/contratacion-subvenciones/README.md) | Contratación pública y subvenciones | 3 |
 | [empleo-seguridad-social](sources/empleo-seguridad-social/README.md) | Empleo y Seguridad Social | 3 |

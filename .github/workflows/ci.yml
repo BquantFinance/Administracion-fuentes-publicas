@@ -1,0 +1,29 @@
+name: validar-y-construir
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r scripts/requirements.txt
+      - name: Validar fichas e índices
+        run: python scripts/validate.py
+      - name: Regenerar artefactos y comprobar que están al día
+        run: |
+          python scripts/build.py
+          # build.py escribe la fecha de generación; se ignora esa línea al comparar
+          if git diff --ignore-matching-lines='"generated": ' --ignore-matching-lines='Generado: ' --quiet -- catalog.json llms.txt llms-full.txt indices/README.md sources README.md; then
+            echo "Artefactos generados al día"
+          else
+            echo "::error::Los artefactos generados no coinciden con las fuentes; ejecuta python scripts/build.py y sube el resultado"
+            git --no-pager diff --stat
+            exit 1
+          fi

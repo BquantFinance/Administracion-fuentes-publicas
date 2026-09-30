@@ -1,0 +1,45 @@
+id: hacienda-central-informacion
+name: Hacienda – Central de Información (calendario, periodo medio de pago, financiación CCAA)
+org: Secretaría General de Financiación Autonómica y Local y Central de Información económico-financiera
+ministry: Hacienda
+level: age
+sector: hacienda-presupuestos
+tags: [central-de-informacion, calendario, periodo-medio-pago, pmp, financiacion-autonomica, fla, ccaa, liquidez]
+summary: >-
+  Portal que reúne las publicaciones económico-financieras de Hacienda e IGAE, con catálogo de informes y tres
+  ficheros de URL estable: calendario de publicaciones (xlsx), periodo medio de pago a proveedores de todas
+  las AAPP (xlsx mensual) y financiación extraordinaria de las CCAA (xlsx desde 2019).
+access: [download, portal]
+auth: none
+formats: [xlsx, html, pdf]
+update: monthly
+coverage: "PMP mensual (publicación 2026-07 verificada); mecanismos de financiación 2019-2026; calendario con la próxima fecha de cada publicación"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.hacienda.gob.es/es-ES/CDI/Paginas/centraldeinformacion.aspx
+docs_url: https://www.hacienda.gob.es/es-ES/CDI/Paginas/centraldeinformacion.aspx
+endpoints:
+  - path: https://www.hacienda.gob.es/cdi/calendario%20cdi/calendario.xlsx
+    desc: Calendario de todas las publicaciones (AUTOR, NOMBRE, ÚLTIMOS DATOS, PERIODICIDAD, PRÓXIMA FECHA, PERIODO DE REFERENCIA); una hoja, cabecera en la fila 3
+    example: curl -sO "https://www.hacienda.gob.es/cdi/calendario%20cdi/calendario.xlsx"
+  - path: https://www.hacienda.gob.es/cdi/pmp/publicacion-pmp-{AAAA}-{MM}.xlsx
+    desc: Periodo medio de pago a proveedores de todas las AAPP (hojas Indice, Tabla 1 a 5.2 y Notas); el enlace del mes vigente está en la página del PMP
+    example: curl -sO "https://www.hacienda.gob.es/cdi/pmp/publicacion-pmp-2026-07.xlsx"
+  - path: https://www.hacienda.gob.es/cdi/mecanismos%20financiaci%C3%B3n/mecanismos-financiacion-ccaa.xlsx
+    desc: Mecanismos extraordinarios de financiación de las CCAA (FLA, liquidez); hojas Resumen, Detalle y FFCCAA{AAAA} desde 2019; URL fija, contenido sobrescrito
+    example: curl -sO "https://www.hacienda.gob.es/cdi/mecanismos%20financiaci%C3%B3n/mecanismos-financiacion-ccaa.xlsx"
+  - path: https://www.hacienda.gob.es/es-es/cdi/paginas/estabilidadpresupuestaria/estabilidadpresupuestaria.aspx?report{n}
+    desc: Catálogo de informes (autor, periodicidad, últimos datos, soporte) con enlaces al banco de datos y a la visualización; los datos están en las aplicaciones
+  - path: https://www.hacienda.gob.es/es-es/cdi/paginas/periodomediopago/informacionaapps/pmpdelasaapp.aspx
+    desc: Página del PMP con el enlace al xlsx del mes y a las comunicaciones de las CCAA
+quirks: [static-html, overwritten-in-place]
+ids: []
+gotchas:
+  - Las rutas con espacios y tildes (calendario cdi, mecanismos financiación) van codificadas en la URL (%20, %C3%B3); sin codificar dan 404.
+  - Los xlsx abren con filas de título y una hoja Indice; leer con header=None y localizar la cabecera (en el calendario está en la fila 3).
+  - La ruta antigua es-ES/CDI/Paginas/OVEELL/OVEntidadesLocales.aspx y las de InformacionCCAAs dan 404; la Central de Información enlaza a las aplicaciones (SGCIEF, PMP_NET) que exigen sesión.
+  - La ejecución mensual de las CCAA y las cuentas anuales están en igae-ejecucion-presupuestaria; el catálogo solo enlaza.
+tips:
+  - El calendario sirve para saber cuándo se actualiza cada estadística de Hacienda, IGAE y AEAT antes de programar descargas.
+related: [igae-ejecucion-presupuestaria, hacienda-ovef, sepg-presupuestos-generales-estado, bde-estadisticas]
+status: active
+verified: "2026-09-30"
