@@ -1,32 +1,43 @@
 id: hacienda-ovef
-name: Hacienda – Oficina Virtual de Coordinación Financiera con las EELL y CCAA
+name: Hacienda – Entidades locales, presupuestos, deuda viva, financiación y tributos
 org: Secretaría General de Financiación Autonómica y Local
 ministry: Hacienda
 level: age
 sector: hacienda-presupuestos
-tags: [ayuntamientos, comunidades-autonomas, presupuestos, liquidaciones, deuda-local, financiacion]
+tags: [ayuntamientos, entidades-locales, presupuestos, liquidaciones, deuda-viva, financiacion-local, tributos-locales, pmp]
 summary: >-
-  Presupuestos y liquidaciones de todas las entidades locales y CCAA, deuda viva por ayuntamiento, periodo medio
-  de pago, tributos locales (tipos impositivos por municipio), financiación autonómica. Descargas masivas en Excel/CSV.
-access: [portal, download]
+  Datos de todas las entidades locales: deuda viva por ayuntamiento, entregas a cuenta y cesión de tributos,
+  ejecución presupuestaria trimestral, liquidaciones y cumplimiento de estabilidad, periodo medio de pago y tipos
+  impositivos municipales. Ficheros xlsx anuales y consultas web con sesión.
+access: [download, portal]
 auth: none
-formats: [xlsx, csv, pdf]
+formats: [xlsx, xls, pdf]
 update: annual
-coverage: "2002-"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.hacienda.gob.es/es-ES/Areas%20Tematicas/Administracion%20Electronica/OVEELL/Paginas/OVEntidadesLocales.aspx
-docs_url: https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PublicacionPresupuestos/aspx/inicio.aspx
+docs_url: https://www.hacienda.gob.es/es-ES/Areas%20Tematicas/Administracion%20Electronica/OVEELL/Paginas/OVEntidadesLocales.aspx
 endpoints:
+  - path: https://www.hacienda.gob.es/cdi/sist%20financiacion%20y%20deuda/informacioneells/{AAAA}/deuda-viva-ayuntamientos-{AAAA}12.xlsx
+    desc: Deuda viva a 31 de diciembre por ayuntamiento; en la misma carpeta deuda-viva-dipycab y deuda-viva-restoeell
+    example: curl -sO "https://www.hacienda.gob.es/cdi/sist%20financiacion%20y%20deuda/informacioneells/2025/deuda-viva-ayuntamientos-202512.xlsx"
+  - path: https://www.hacienda.gob.es/es-es/cdi/paginas/sistemasfinanciaciondeuda/informacioneells/datosfinanciacionel.aspx
+    desc: Entregas a cuenta mensuales, cesión de tributos y variables de financiación local, xlsx por ejercicio
+  - path: https://www.hacienda.gob.es/es-es/cdi/paginas/informacionpresupuestaria/informacioneells/consultaejecprestrimestral.aspx
+    desc: Resumen de ejecución presupuestaria trimestral de las EELL, un xls por trimestre desde 2017
+  - path: https://www.hacienda.gob.es/es-ES/CDI/Paginas/EstabilidadPresupuestaria/InformacionCCLLs/Cumplimiento_objetivoestabilidad_EELL.aspx
+    desc: Liquidación anual por entidad con saldo no financiero y cumplimiento de estabilidad, xlsx por ejercicio
   - path: https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PublicacionPresupuestos/aspx/inicio.aspx
-    desc: Consulta y descarga de presupuestos y liquidaciones de entidades locales
-  - path: https://www.hacienda.gob.es/es-ES/CDI/Paginas/SistemasFinanciacionDeuda/InformacionEELLs/DeudaViva.aspx
-    desc: Deuda viva de los ayuntamientos a 31 de diciembre
-  - path: https://www.hacienda.gob.es/es-ES/CDI/Paginas/ImpuestosTasasEELL/ImpuestosTasasEELL.aspx
+    desc: Consulta y descarga de presupuestos y liquidaciones detalladas por entidad
+  - path: https://serviciostelematicosext.hacienda.gob.es/SGFAL/ConsultaTipos/html/portadaconsultasm.aspx
     desc: Tipos de IBI, IAE, IVTM y otros tributos por municipio
+  - path: https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PMP_NET/aspx/consulta/consulta.aspx?tipoPublicacion=2
+    desc: Periodo medio de pago a proveedores por entidad local
 gotchas:
-  - Las descargas masivas por ejercicio están como ficheros Excel de varias decenas de MB con múltiples hojas.
-  - La clasificación funcional cambió en 2015; series largas requieren mapear programas.
-  - Cada ayuntamiento se identifica por código INE de municipio más código de entidad; no usar el nombre.
+  - SelDescargaDC.aspx y SeldescargaDF.aspx (descarga de presupuestos) devuelven sesion_expirada por URL directa, incluso con cookies y Referer; la sesión nace en la navegación del menú. Automatizar con navegador.
+  - Los xlsx de hacienda.gob.es tienen rutas con espacios (sist financiacion y deuda); codificar como %20.
+  - Los nombres de fichero llevan la fecha de publicación (liquidacion2024eell-...-13022026.xlsx); hay que rascar la página para obtener el enlace. Solo la deuda viva sigue un patrón fijo.
+  - Hasta 2022 los ficheros son xls (Excel 97) y desde 2023 xlsx; usar una librería que lea ambos.
+  - La página de tributos locales de la ficha anterior (ImpuestosTasasEELL.aspx) no existe; la consulta está en SGFAL/ConsultaTipos.
 related: [igae-ejecucion-presupuestaria, ine-codigos-territoriales]
 status: active
-verified: null
+verified: "2026-09-30"

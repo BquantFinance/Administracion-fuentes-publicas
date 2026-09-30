@@ -1,32 +1,42 @@
 id: aeat-servicios-web
-name: AEAT – Servicios web y trámites automatizables
+name: AEAT – Servicios web SII y VERI*FACTU
 org: Agencia Estatal de Administración Tributaria (AEAT)
 ministry: Hacienda
 level: age
 sector: hacienda-presupuestos
-tags: [aeat, sii, censo, nif, certificados, presentacion-telematica, facturacion, verifactu]
+tags: [aeat, sii, verifactu, facturacion, soap, wsdl, certificado, presentacion-telematica]
 summary: >-
-  Servicios web SOAP para presentar declaraciones, el Suministro Inmediato de Información del IVA (SII),
-  VERI*FACTU, consulta y validación de NIF, y descarga de datos fiscales. Requieren certificado electrónico.
+  Servicios web SOAP con certificado electrónico para el Suministro Inmediato de Información del IVA (SII), los
+  sistemas de facturación VERI*FACTU y la presentación de modelos. WSDL y XSD públicos, entorno de pruebas con
+  host propio y portal de desarrolladores separado de la sede.
 access: [api-soap]
 auth: certificate
 formats: [xml]
 update: realtime
 license: Uso conforme a la normativa tributaria; no son datos abiertos
 base_url: https://www1.agenciatributaria.gob.es/wlpl/
-docs_url: https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-tecnicos.html
+docs_url: https://www.agenciatributaria.es/AEAT.desarrolladores/Desarrolladores/Desarrolladores.html
 endpoints:
-  - path: https://sede.agenciatributaria.gob.es/Sede/iva/suministro-inmediato-informacion.html
-    desc: SII, WSDL y esquemas para remitir registros de facturación
-  - path: https://sede.agenciatributaria.gob.es/Sede/iva/sistemas-informaticos-facturacion-verifactu.html
-    desc: VERI*FACTU, especificaciones técnicas y entorno de pruebas
-  - path: https://sede.agenciatributaria.gob.es/Sede/procedimientoini/ZZ09.shtml
-    desc: Comprobación de NIF de terceros a efectos censales
+  - path: https://www1.agenciatributaria.gob.es/wlpl/SSII-FACT/ws/fe/SiiFactFEV1SOAP
+    desc: SII, suministro de facturas emitidas en producción; el resto de libros en las rutas que declara cada WSDL
+  - path: https://sede.agenciatributaria.gob.es/static_files/Sede/Procedimiento_ayuda/G417/FicherosSuministros/V_1_1/WSDL/{servicio}.wsdl
+    desc: WSDL del SII v1.1 (SuministroFactEmitidas, SuministroFactRecibidas, ConsultaLLAA...) con los XSD al lado
+    example: curl -sO "https://sede.agenciatributaria.gob.es/static_files/Sede/Procedimiento_ayuda/G417/FicherosSuministros/V_1_1/WSDL/SuministroFactEmitidas.wsdl"
+  - path: https://www1.agenciatributaria.gob.es/wlpl/TIKE-CONT/ws/SistemaFacturacion/VerifactuSOAP
+    desc: VERI*FACTU, remisión de registros de facturación en producción
+  - path: https://prewww2.aeat.es/static_files/common/internet/dep/aplicaciones/es/aeat/tikeV1.0/cont/ws/SistemaFacturacion.wsdl
+    desc: WSDL de VERI*FACTU con los endpoints de producción y de pruebas
+    example: curl -s "https://prewww2.aeat.es/static_files/common/internet/dep/aplicaciones/es/aeat/tikeV1.0/cont/ws/SistemaFacturacion.wsdl" | grep location
+  - path: https://sede.agenciatributaria.gob.es/Sede/iva/suministro-inmediato-informacion/informacion-tecnica.html
+    desc: Documentación técnica del SII (diseños de registro, validaciones, errores)
+  - path: https://sede.agenciatributaria.gob.es/Sede/iva/sistemas-informaticos-facturacion-verifactu/informacion-tecnica.html
+    desc: Documentación técnica de VERI*FACTU
 gotchas:
-  - Todo requiere certificado electrónico de persona física, jurídica o de sello; no hay API key ni OAuth.
-  - Existe entorno de pruebas (preproducción) con host distinto para SII y VERI*FACTU; consultar cada manual.
-  - La validación de NIF de terceros está limitada a colaboradores sociales y presentadores, no es abierta.
-  - Los WSDL cambian de versión con la normativa; fijar versión y vigilar los cambios anunciados en la sede.
+  - Todo requiere certificado electrónico (persona física, jurídica o sello) en TLS mutuo; no hay API key ni OAuth. Sin certificado, www1 redirige a una página de error de la sede.
+  - Cada WSDL declara dos endpoints de producción (www1 y www10.agenciatributaria.gob.es) y dos de pruebas (prewww1 y prewww10.aeat.es) con la misma ruta; la documentación indica cuál usar según el certificado.
+  - Los WSDL, XSD y diseños de registro viven en el portal de desarrolladores (agenciatributaria.es/AEAT.desarrolladores) y en static_files de la sede; la ruta antigua de manuales técnicos da 404.
+  - VIES (/Sede/procedimientoini/ZZ09.shtml) es la validación de NIF-IVA intracomunitario, no una consulta censal de NIF.
+  - Los WSDL cambian de versión con la normativa (SII v1.1 vigente); fijar versión y vigilar Novedades del portal de desarrolladores.
 related: [aeat-estadisticas]
 status: active
-verified: null
+verified: "2026-09-30"
