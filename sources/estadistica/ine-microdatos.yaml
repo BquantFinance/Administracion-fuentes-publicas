@@ -4,27 +4,38 @@ org: Instituto Nacional de Estadística (INE)
 ministry: Economía, Comercio y Empresa
 level: age
 sector: estadistica
-tags: [ine, microdatos, epa, ecv, encuestas, censo, registros-individuales]
+tags: [ine, microdatos, epa, ecv, encuestas, censo, registros-individuales, parquet]
 summary: >-
-  Ficheros de microdatos anonimizados de encuestas (EPA, Encuesta de Condiciones de Vida, Presupuestos Familiares,
-  Estructura Salarial, Censo, Movimiento Natural de la Población) con diseño de registro y programas de lectura.
+  Ficheros de microdatos anonimizados de encuestas (EPA, Condiciones de Vida, Presupuestos Familiares, Estructura
+  Salarial, Censo, Movimiento Natural de la Población). Cada ZIP trae el fichero en ancho fijo, CSV tabulado,
+  parquet, RData, SAS, SPSS y Stata, más el diseño de registro en xlsx y JSON.
 access: [download]
 auth: none
-formats: [csv, txt, zip, sql]
+formats: [csv, txt, parquet, zip, xlsx, json]
 update: quarterly
-coverage: "EPA desde 2005 en formato actual; otras según encuesta"
+coverage: "EPA trimestral desde 2000 (datos_1t00.zip); ECV desde 2004; otras según encuesta"
 license: Reutilización libre con cita de la fuente
-base_url: https://www.ine.es/prodyser/microdatos.htm
-docs_url: https://www.ine.es/prodyser/microdatos.htm
+base_url: https://www.ine.es/dyngs/SER/index.htm?cid=1388
+docs_url: https://www.ine.es/dyngs/SER/index.htm?cid=1388
 endpoints:
+  - path: https://www.ine.es/ftp/microdatos/epa/datos_{T}t{AA}.zip
+    desc: EPA del trimestre T del año AA (dos dígitos), 21 MB con todos los formatos
+    example: curl -sO "https://www.ine.es/ftp/microdatos/epa/datos_2t26.zip"
+  - path: https://www.ine.es/ftp/microdatos/epa/dr_EPA_{AAAA}.xlsx
+    desc: Diseño de registro anual de la EPA en Excel
+  - path: https://www.ine.es/ftp/microdatos/ecv/ecv_b{AAAA}/ecvb{AA}_{AAAA}.zip
+    desc: Encuesta de Condiciones de Vida por base y año
   - path: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176918&menu=resultados&idp=1254735976595
-    desc: Microdatos de la EPA por trimestre
-  - path: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176807&menu=resultados&idp=1254735976608
-    desc: Microdatos de la Encuesta de Condiciones de Vida
+    desc: Página de la EPA con los enlaces a todos los ZIP de microdatos
 gotchas:
-  - Los ficheros son de ancho fijo o CSV con separador tabulador; el diseño de registro va en Excel aparte y cambia entre años.
-  - Los ZIP incluyen programas de lectura para SAS, SPSS, R y Stata, pero no siempre para Python.
-  - Los factores de elevación son obligatorios para cualquier estimación; no contar registros.
+  - La ruta /prodyser/microdatos.htm de la ficha anterior es una redirección; el índice es /dyngs/SER/index.htm?cid=1388.
+  - Dentro del ZIP, CSV/{op}_{periodo}.tab va con tabulador y cabecera entrecomillada; md_{op}_{periodo}.txt es ancho fijo sin cabecera y md_{op}_{periodo}.parquet lo mismo en parquet. Los códigos llevan ceros a la izquierda, leer como texto.
+  - dr_{op}_{AAAA}.json tiene claves layout (name, position, length, type, codelist_ref), metadata y codelists; sirve para parsear el ancho fijo sin abrir el Excel.
+  - El diseño de registro cambia entre años; no reutilizar el de un año para otro.
+  - Los factores de elevación (FACTOREL en la EPA) son obligatorios para cualquier estimación; no contar registros.
+  - Leeme.txt va en ISO-8859-1.
+tips:
+  - Para Python, leer directamente el parquet del ZIP; evita el diseño de registro y pesa 3 MB frente a 18 del tab.
 related: [ine-api-tempus]
 status: active
-verified: null
+verified: "2026-09-30"

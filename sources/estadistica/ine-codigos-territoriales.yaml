@@ -1,34 +1,41 @@
 id: ine-codigos-territoriales
-name: INE – Códigos de municipios, provincias y unidades territoriales
+name: INE – Códigos de municipios, provincias, comunidades e islas
 org: Instituto Nacional de Estadística (INE)
 ministry: Economía, Comercio y Empresa
 level: age
 sector: estadistica
-tags: [ine, codigos, municipios, provincias, ccaa, nuts, callejero, relacion-municipios]
+tags: [ine, codigos, municipios, provincias, ccaa, islas, relacion-municipios]
 summary: >-
-  Relación oficial de municipios con código INE (5 dígitos, provincia + municipio + dígito de control),
-  provincias, comunidades autónomas, NUTS, islas y variaciones anuales (altas, bajas, cambios de nombre).
-  Es la clave para cruzar cualquier dataset territorial español.
+  Relación oficial anual de los 8132 municipios con código INE (provincia, municipio y dígito de control),
+  comunidades autónomas, provincias e islas. Es la clave para cruzar cualquier dataset territorial español.
 access: [download]
 auth: none
-formats: [xlsx, csv]
+formats: [xlsx, html]
 update: annual
-coverage: "Relación anual desde 1996; variaciones desde 1842 en Alteraciones de municipios"
+coverage: "Relación a 1 de enero de cada año; ficheros anuales desde los años 90"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=ultiDatos&idp=1254734710990
-docs_url: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=metodologia&idp=1254734710990
+docs_url: https://www.ine.es/daco/daco42/codmun/cod_num_muni_provincia_ccaa.htm
 endpoints:
   - path: https://www.ine.es/daco/daco42/codmun/diccionario{AA}.xlsx
-    desc: Diccionario de municipios del año AA (dos dígitos)
-    example: curl -sO "https://www.ine.es/daco/daco42/codmun/diccionario24.xlsx"
+    desc: Diccionario de municipios a 1 de enero del año AA en una sola hoja (CODAUTO, CPRO, CMUN, DC, NOMBRE)
+    example: curl -sO "https://www.ine.es/daco/daco42/codmun/diccionario26.xlsx"
+  - path: https://www.ine.es/daco/daco42/codmun/{AA}codmun.xlsx
+    desc: Misma relación con una hoja por provincia (01 a 52)
+  - path: https://www.ine.es/daco/daco42/codmun/{AA}codislas.xlsx
+    desc: Municipios de Baleares, Las Palmas y Santa Cruz de Tenerife con código de isla (CISLA)
   - path: https://www.ine.es/daco/daco42/codmun/cod_ccaa_provincia.htm
-    desc: Códigos de comunidades autónomas y provincias
-  - path: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=resultados&idp=1254734710990
-    desc: Relación de municipios y variaciones por año
+    desc: Códigos de comunidades autónomas y provincias en HTML; también cod_ccaa.htm, cod_provincia.htm y cod_islas.htm
+  - path: https://www.ine.es/daco/daco42/codmun/codmun_anual.htm
+    desc: Índice de las relaciones anuales anteriores
 gotchas:
-  - El código INE de municipio completo tiene 5 dígitos (CPRO 2 + CMUN 3) y el dígito de control es un sexto dígito aparte; muchos datasets omiten el DC y otros lo incluyen.
-  - Algunos municipios cambian de código al fusionarse; hay que aplicar la tabla de variaciones para series largas.
-  - Los códigos del Catastro y de la DGT no coinciden con los del INE; existen tablas de equivalencia en el propio Catastro.
-related: [ine-api-tempus, hacienda-ovef, catastro-ovc]
+  - El código completo son 5 dígitos, CPRO (2) más CMUN (3); el dígito de control DC es una columna aparte. Muchos datasets omiten el DC y otros lo pegan como sexto dígito.
+  - Los códigos vienen como texto con ceros a la izquierda; al leer con pandas forzar dtype str o se pierden (01 pasa a 1).
+  - El diccionario tiene una fila de título antes de la cabecera (leer con header=1); la hoja se llama con el año anterior (dic25 en diccionario26.xlsx) y el título de codislas también va con retraso.
+  - La página menu=resultados de la ficha anterior devuelve 404; la relación cuelga de menu=ultiDatos.
+  - Los municipios cambian de código al fusionarse o segregarse; para series largas aplicar las variaciones anuales (codmun{AA}/{AA}codmunmod.htm).
+tips:
+  - Cruce típico. La deuda viva y liquidaciones de Hacienda (hacienda-ovef) y las estadísticas municipales de la AEAT (aeat-estadisticas) se casan por CPRO+CMUN.
+related: [ine-api-tempus, hacienda-ovef, catastro-ovc, aeat-estadisticas]
 status: active
-verified: null
+verified: "2026-09-30"
