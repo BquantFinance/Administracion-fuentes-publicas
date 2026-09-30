@@ -2,7 +2,7 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 67 · Generado: 2026-09-30 · Formato: un bloque por fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar.
+Fuentes: 67 · Generado: 2026-09-30 · Formato: un bloque por fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
 
 # SECTOR legislacion-boletines: Legislación y boletines oficiales
 
@@ -479,6 +479,7 @@ docs_url: https://www.infosubvenciones.es/bdnstrans/GE/es/api
 rate_limit: No documentado; pageSize se limita en silencio a 10000 (4 MB y 6 s por página). El aviso legal se reserva bloquear usos abusivos.
 quirks: latin1, errors-html-or-xml
 ids: bdns, nif, invente
+! Con un Accept de navegador (que incluye application/xml) la API responde XML (raíz ObjectNode) con el mismo contenido; pedir Accept: application/json para JSON.
 ! Las fechas de filtro van en dd/mm/aaaa; en ISO (2026-09-01) responde 400 con JSON de campos codigo y errores.
 ! pageSize mayor de 10000 no da error, devuelve 10000. La respuesta es un Page de Spring (content, totalElements, totalPages, last) más el campo advertencia con el aviso legal.
 ! Los beneficiarios personas físicas van con el DNI parcialmente oculto (***1490**) y nombre; las jurídicas con el NIF completo delante del nombre, todo en el mismo campo beneficiario.
@@ -573,6 +574,7 @@ docs_url: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupue
 quirks: waf-intermittent-403, url-drift, static-html
 ids: cnae
 ! El WAF (Akamai) responde 403 "Acceso denegado" a una de cada dos o tres peticiones, también en las descargas; reintentar la misma URL tras 2 a 5 segundos funciona.
+! Enviar también Accept de navegador (text/html,application/xhtml+xml...); con el Accept */* de requests recibí 403 en 15 peticiones seguidas el 30/09/2026 y 200 al cambiarlo.
 ! Los códigos ESTnn son estables y se anidan (EST8/EST10/EST290); las hojas finales llevan un uuid en la ruta y cada fichero otro uuid distinto en wps/wcm/connect.
 ! Afiliación media mensual (EST290) y afiliación a último día (EST305) son series distintas con cifras distintas.
 ! Los xlsx tienen varias hojas con fila de título y cabeceras combinadas; no leer como CSV ni con header=0.
@@ -1149,8 +1151,8 @@ coverage: MoMo 2015-; COVID-19 2020-2023; boletines semanales 2019-; informes an
 license: Reutilización libre con cita de la fuente
 base_url: https://cne.isciii.es/
 docs_url: https://cne.isciii.es/servicios/enfermedades-transmisibles/vigilancia-mortalidad-momo
-- https://momo.isciii.es/public/momo/data :: CSV completo de MoMo (719 MB, se regenera a diario hasta el día anterior); admite Range para descargas parciales
-  ej: curl -sS -r 0-2000 "https://momo.isciii.es/public/momo/data"
+- https://momo.isciii.es/public/momo/data :: CSV completo de MoMo (719 MB, regenerado a diario hasta el día anterior); ignora la cabecera Range y envía el fichero entero, leer en streaming
+  ej: curl -sS "https://momo.isciii.es/public/momo/data" | head -c 2000
 - https://momo.isciii.es/panel_momo/ :: Panel MoMo con gráficos por ámbito; enlaza la metodología en gesdoc.isciii.es
 - https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres.csv :: COVID-19 diario por provincia de residencia, sexo y edad (38 MB; num_casos, num_hosp, num_uci, num_def); variantes _60_mas y todas_edades
   ej: curl -sSL -o covid.csv "https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres.csv"

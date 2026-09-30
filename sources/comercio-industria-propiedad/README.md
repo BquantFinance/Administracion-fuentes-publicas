@@ -2,6 +2,13 @@
 
 Sector `comercio-industria-propiedad` · 4 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Comercio exterior por producto, país y provincia → `datacomex` (API con token de usuario gratuito)
+- Inversión extranjera en España y española en el exterior → `datainvex` (aplicación ASP.NET con viewstate; sin API)
+- Estadísticas de industria, series BADASE y datos turísticos (DATAESTUR) → `mincotur-industria-turismo`
+- Patentes, marcas y Boletín de la Propiedad Industrial → `oepm-invenes` (bloqueado por el cortafuegos de la OEPM desde el entorno de verificación)
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [datacomex](datacomex.yaml) | DataComex – Estadísticas de comercio exterior de España (portal y API con token) | api-rest, portal, download | registration | json, csv, xlsx, html | monthly | session-required, js-rendered | 2026-09-30 |

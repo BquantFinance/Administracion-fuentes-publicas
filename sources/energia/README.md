@@ -2,6 +2,14 @@
 
 Sector `energia` · 3 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Precios de carburantes por gasolinera → `minetur-precios-carburantes`
+- Comercializadoras, cambios de suministrador, bono social, garantías de origen → `cnmc-data`
+- Consumo de productos petrolíferos y gas por provincia, balances energéticos → `miteco-energia-estadisticas` (series de CORES en xlsx; el ministerio publica PDF)
+- Registro de instalaciones de producción eléctrica y autoconsumo → `miteco-energia-estadisticas` (no localizada descarga abierta; PRETOR da 404)
+- Telecomunicaciones (líneas, operadores, audiovisual) → `cnmc-data`
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [cnmc-data](cnmc-data.yaml) | CNMC Data – Estadísticas de energía, telecomunicaciones, audiovisual y postal | api-rest, download, portal | none | csv, json, xml | quarterly | url-drift, js-rendered | 2026-09-30 |

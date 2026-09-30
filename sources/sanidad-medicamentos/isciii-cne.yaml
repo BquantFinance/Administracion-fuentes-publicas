@@ -19,8 +19,8 @@ base_url: https://cne.isciii.es/
 docs_url: https://cne.isciii.es/servicios/enfermedades-transmisibles/vigilancia-mortalidad-momo
 endpoints:
   - path: https://momo.isciii.es/public/momo/data
-    desc: CSV completo de MoMo (719 MB, se regenera a diario hasta el día anterior); admite Range para descargas parciales
-    example: curl -sS -r 0-2000 "https://momo.isciii.es/public/momo/data"
+    desc: CSV completo de MoMo (719 MB, regenerado a diario hasta el día anterior); ignora la cabecera Range y envía el fichero entero, leer en streaming
+    example: curl -sS "https://momo.isciii.es/public/momo/data" | head -c 2000
   - path: https://momo.isciii.es/panel_momo/
     desc: Panel MoMo con gráficos por ámbito; enlaza la metodología en gesdoc.isciii.es
   - path: https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres.csv

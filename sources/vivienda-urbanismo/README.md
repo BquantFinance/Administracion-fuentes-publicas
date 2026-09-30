@@ -2,6 +2,10 @@
 
 Sector `vivienda-urbanismo` · 1 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Precios de vivienda, transacciones, alquiler (SERPAVI) y suelo → `mivau-precios-vivienda-alquiler`
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [mivau-precios-vivienda-alquiler](mivau-precios-vivienda-alquiler.yaml) | Ministerio de Vivienda – Estadísticas de vivienda (Boletín Online en XLS) y SERPAVI | download, portal | none | xls, pdf, html | quarterly | url-drift, js-rendered | 2026-09-30 |

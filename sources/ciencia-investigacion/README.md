@@ -2,6 +2,14 @@
 
 Sector `ciencia-investigacion` · 6 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Presencia de especies (ocurrencias, datasets de biodiversidad) → `gbif-es`
+- Ayudas de investigación concedidas por la AEI → `aei-convocatorias`
+- Publicaciones científicas en acceso abierto → `csic-digital` (OAI-PMH; RECOLECTA (fecyt-recolecta) ya no expone OAI)
+- Geología, hidrogeología, puntos de agua y minería → `igme-geologia`
+- Terremotos recientes y catálogo sísmico → `ign-sismologia` (tablas HTML; el catálogo solo se descargó desde navegador)
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [aei-convocatorias](aei-convocatorias.yaml) | AEI – Ayudas concedidas (CSV completo) y convocatorias de I+D+i | download, portal | none | csv, html, pdf | irregular | — | 2026-09-30 |

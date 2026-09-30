@@ -55,7 +55,9 @@ schema/source.schema.json    esquema de ficha
 schema/vocab.yaml            vocabulario controlado: sectores, acceso, auth, formatos
 catalog.json                 todo el catálogo (generado)
 llms.txt / llms-full.txt     entrada para agentes (generado)
-scripts/                     validate.py, build.py, check_links.py
+indices/*.yaml               recetas por intención, necesidades, identificadores, rutas muertas (fuente de verdad)
+indices/README.md            los cuatro índices en texto (generado)
+scripts/                     validate.py, build.py, check_links.py, check_recetas.py, fnmt_bundle.py
 templates/source.yaml        plantilla de ficha
 guides/                      guías transversales (identificadores para cruzar datasets, etc.)
 ```
@@ -69,6 +71,17 @@ curl -s https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-p
 # Fuentes de un sector con API REST y sin autenticación
 curl -s .../catalog.json | jq '.sources[] | select(.sector=="economia-finanzas" and (.access|index("api-rest")) and .auth=="none") | .id'
 ```
+
+## Índices para agentes
+
+Además de las fichas, `indices/` responde a las preguntas que se hacen antes de elegir una fuente:
+
+- **Recetas por intención**: 37 procedimientos verificados que encadenan fichas (de un NIF a sus subvenciones y contratos, de unas coordenadas a la referencia catastral, del sumario del BOE al texto consolidado). Cada receta lleva comprobaciones que `python scripts/check_recetas.py` ejecuta contra los servidores reales.
+- **Dónde está cada cosa**: 91 necesidades habituales con la ficha que las resuelve y la nota que evita el desvío típico.
+- **Identificadores**: los 19 códigos que cruzan datasets, con regex, ejemplo, emisor y vías verificadas de conversión.
+- **Rutas muertas**: 58 URLs de documentación antigua que ya no sirven y su sustituta.
+
+Todo en [indices/README.md](indices/README.md) y, para consumo programático, bajo la clave `indices` de `catalog.json`.
 
 ## Contribuir
 

@@ -2,6 +2,13 @@
 
 Sector `medio-ambiente-agua-biodiversidad` · 4 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Calidad del aire validada por estación y contaminante → `miteco-calidad-aire` (datos anuales validados; el tiempo real lo sirve cada comunidad autónoma, fuera del alcance)
+- Emisiones industriales por complejo (PRTR) → `miteco-prtr`
+- Reserva de embalses, caudales y estaciones de aforo → `miteco-saih-boletin-hidrologico`
+- Red Natura 2000, espacios protegidos, hábitats, humedales, inventario forestal → `miteco-banco-datos-naturaleza` (descargas con desafío ALTCHA (resuelto en la guía); los WMS de mapama están rotos)
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [miteco-banco-datos-naturaleza](miteco-banco-datos-naturaleza.yaml) | MITECO – Banco de Datos de la Naturaleza e Inventario del Patrimonio Natural (IEPNB) | download, portal | none | shp, gml, gdb, geojson, kml, xlsx, zip, xml | irregular | captcha-required, url-drift | 2026-09-30 |

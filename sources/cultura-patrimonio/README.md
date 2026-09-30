@@ -2,6 +2,10 @@
 
 Sector `cultura-patrimonio` · 1 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Catálogo bibliográfico de la BNE y patrimonio digital (Hispana) → `bne-datos` (datos.bne.es bloqueado desde el entorno; Hispana por OAI-PMH)
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [bne-datos](bne-datos.yaml) | BNE – datos.bne.es (linked data, SPARQL) e Hispana (OAI-PMH) | oai-pmh, sparql, api-rest, download | none | xml, rdf, ttl, jsonld, json | monthly | waf-blocks-bots, url-drift | 2026-09-30 |

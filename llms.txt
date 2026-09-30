@@ -2,25 +2,163 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 67 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
+Fuentes: 67 · Recetas: 37 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
 
 ## Cómo usar este repo
 
-- Todo el catálogo en un fichero: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/catalog.json
+- Todo el catálogo (fichas e índices) en un fichero: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/catalog.json
 - Todas las fichas en texto compacto: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/llms-full.txt
 - Una ficha: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/<sector>/<id>.yaml
+- Índices para agentes (recetas paso a paso, identificadores con regex y cruces, rutas muertas con sustituta): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/README.md
 - Esquema de ficha: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json
-- Vocabulario (sectores, acceso, auth, formatos): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml
+- Vocabulario (sectores, acceso, auth, formatos, quirks, ids): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml
 - `verified: null` significa que la ficha se redactó a partir de documentación oficial pero aún no se ha probado el endpoint.
 
 ## Reglas rápidas antes de programar contra una fuente
 
 - Lee `quirks`, `ids` y `gotchas` de la ficha: son hechos verificados con llamadas reales, no documentación oficial. `quirks` dice cómo configurar el cliente; `ids` con qué otras fuentes se cruza.
-- Muchos servidores .gob.es sirven certificados FNMT sin la cadena intermedia; curl y requests fallan hasta añadirla al bundle. Arreglo copiable en la guía Cliente HTTP.
-- Envía siempre un User-Agent de navegador; varios sitios (tesoro.es) devuelven 403 al User-Agent de curl.
+- Muchos servidores .gob.es sirven certificados FNMT sin la cadena intermedia; curl y requests fallan hasta añadirla al bundle. Arreglo copiable en la guía Cliente HTTP (`python scripts/fnmt_bundle.py` genera ca-age.pem).
+- Envía siempre User-Agent y Accept de navegador; varios sitios (tesoro.es, seg-social.es) devuelven 403 a los valores por defecto de curl y requests.
 - Las APIs del BOE exigen Accept explícito (application/json o application/xml) y devuelven los errores siempre en XML.
 - Espera ISO-8859-1 en feeds del BOE y CSV del Banco de España; convierte antes de parsear.
-- Ninguna fuente verificada documenta límites ni devolvió 429; para descargas masivas, peticiones secuenciales y reintento con espera ante 5xx.
+- Ninguna fuente verificada documenta límites ni devolvió 429; para descargas masivas, peticiones secuenciales y reintento con espera ante 5xx. El Catastro bloquea la IP tras ráfagas de unas 15 peticiones.
+- Si una URL que recuerdas falla, busca en la tabla de rutas muertas antes de dar la fuente por perdida.
+
+## Dónde está cada cosa
+
+- Sumario diario del BOE con identificador y URLs de cada disposición → boe-api-sumario
+- Texto consolidado, vigencia y versiones de una norma → boe-api-legislacion-consolidada (incluye normas autonómicas; los boletines autonómicos no están en el catálogo)
+- URI estable de una norma para citar o enlazar → boe-eli
+- Vigilar novedades del BOE, BORME, ayudas o licitaciones sin programar contra la API → boe-feeds (RSS en ISO-8859-1)
+- Actos societarios inscritos en el Registro Mercantil → borme-api-sumario (sin búsqueda por empresa; recorrer días y provincias)
+- Euríbor, tipos de interés y de cambio, crédito, balanza de pagos → bde-estadisticas
+- Deuda pública por Administración (Protocolo de Déficit Excesivo) → bde-estadisticas (capítulo SB_DEUAAPP; histórico también en airef-datos)
+- Subastas del Tesoro y deuda del Estado por instrumento y tenedor → tesoro-estadisticas
+- Previsiones macroeconómicas y estimación del PIB en tiempo real → airef-datos
+- Entidades supervisadas, hechos relevantes e informes financieros de cotizadas → cnmv-registros (sin API; formularios ASP.NET, XML mensual de IIC y RSS)
+- Líneas ICO y avales por beneficiario → ico-datos (no hay datos descargables, solo memoria y cuentas en PDF)
+- Cotizaciones bursátiles y precios de mercado (BME, OMIE) → ninguna (fuera del alcance actual; BME es privado y OMIE no está aún en el catálogo)
+- Renta y declarantes de IRPF por municipio, código postal o tramo → aeat-estadisticas
+- Recaudación tributaria mensual por figura → aeat-estadisticas
+- Suministro Inmediato de Información, VERI*FACTU y presentación de modelos → aeat-servicios-web (SOAP con certificado electrónico)
+- Presupuestos, liquidaciones y deuda viva de ayuntamientos y diputaciones → hacienda-ovef
+- Tipos de IBI, IAE e IVTM por municipio → hacienda-ovef (consulta web con sesión (SGFAL))
+- Déficit de las Administraciones Públicas y ejecución del presupuesto del Estado → igae-ejecucion-presupuestaria
+- Inventario de entes del sector público (INVENTE) → igae-ejecucion-presupuestaria
+- Cualquier estadística oficial del INE (IPC, EPA, PIB, padrón, natalidad, empresas) → ine-api-tempus
+- Códigos INE de municipios, provincias y comunidades → ine-codigos-territoriales
+- Microdatos de encuestas (EPA, condiciones de vida, presupuestos familiares, censo) → ine-microdatos
+- Turismo (FRONTUR, EGATUR, ocupación hotelera) → ine-api-tempus (las operaciones son del INE; DATAESTUR (mincotur-industria-turismo) las reagrega con API de clave)
+- Renta por sección censal (Atlas de distribución de renta) → ine-api-tempus (operación del INE; localizar la tabla con TABLAS_OPERACION, no verificada en esta sesión)
+- Empresas activas por actividad y tamaño (DIRCE) → ine-api-tempus
+- Licitaciones, adjudicaciones y contratos menores de todas las Administraciones → placsp-datos-abiertos
+- Convocatorias y concesiones de subvenciones, ayudas de Estado, minimis, grandes beneficiarios → bdns-api
+- Beneficiarios de la PAC → fega-beneficiarios-pac (no verificable el 30/09/2026 (el servidor cierra la conexión); probar bdns-api concesiones con el órgano FEGA)
+- Empresas clasificadas para contratar (ROLECE) → hacienda-registro-licitadores (solo con certificado electrónico)
+- Paro registrado, demandantes y contratos por municipio → sepe-estadisticas
+- Tasa de paro, ocupados y activos (EPA) → ine-api-tempus (la EPA es del INE, no del SEPE)
+- Afiliación a la Seguridad Social por régimen, actividad, provincia y municipio → segsocial-estadisticas
+- Pensiones contributivas e Ingreso Mínimo Vital → segsocial-estadisticas
+- Muestra Continua de Vidas Laborales → segsocial-estadisticas (no se descarga; se solicita bajo convenio)
+- Convenios colectivos (REGCON), huelgas, accidentes de trabajo, regulación de empleo → mites-estadisticas
+- Salarios → ine-api-tempus (Encuesta de Estructura Salarial en el INE; salarios en fuentes tributarias por municipio en aeat-estadisticas (modelo190_salarios))
+- Catálogo de datasets abiertos de todas las Administraciones → datos-gob-es-api (solo metadatos; el fichero vive en el portal del publicador)
+- Códigos DIR3 de unidades, entidades y oficinas → dir3-directorio (la API relations de face-facturas da DIR3 y NIF sin WAF)
+- NIF y relaciones de facturación de un organismo público → face-facturas
+- Boletín de empleo público y códigos SIA de procedimientos → pag-administracion-gob-es
+- Altos cargos, retribuciones, agendas y estadísticas de derecho de acceso → transparencia-portal (pocas descargas; contratos y subvenciones sin ficheros)
+- Datos de un inmueble o parcela por referencia catastral, dirección o coordenadas → catastro-ovc (bloqueo por IP tras ráfagas de unas 15 peticiones)
+- Parcelario, edificios y direcciones vectoriales por municipio (INSPIRE) → catastro-ovc
+- Ortofotos PNOA, modelos del terreno, LiDAR y límites municipales → cnig-centro-descargas (descargas con reCAPTCHA; WMS, WMTS y WFS sin restricción)
+- Geocodificar una dirección y obtener su código INE → cnig-centro-descargas (geocoder CartoCiudad)
+- Localizar cualquier servicio WMS, WFS o CSW de una Administración → idee-servicios
+- Recintos agrícolas, usos del suelo y referencia catastral rústica → mapa-sigpac
+- Predicción, observación, climatología, avisos y radar → aemet-opendata (clave gratuita obligatoria; el cuerpo vacío con 200 es fallo de autenticación)
+- Proyecciones de cambio climático y series centenarias → aemet-otros-servicios (sin descarga directa verificada)
+- Calidad del aire validada por estación y contaminante → miteco-calidad-aire (datos anuales validados; el tiempo real lo sirve cada comunidad autónoma, fuera del alcance)
+- Emisiones industriales por complejo (PRTR) → miteco-prtr
+- Reserva de embalses, caudales y estaciones de aforo → miteco-saih-boletin-hidrologico
+- Red Natura 2000, espacios protegidos, hábitats, humedales, inventario forestal → miteco-banco-datos-naturaleza (descargas con desafío ALTCHA (resuelto en la guía); los WMS de mapama están rotos)
+- Presencia de especies (ocurrencias, datasets de biodiversidad) → gbif-es
+- Precios de carburantes por gasolinera → minetur-precios-carburantes
+- Comercializadoras, cambios de suministrador, bono social, garantías de origen → cnmc-data
+- Consumo de productos petrolíferos y gas por provincia, balances energéticos → miteco-energia-estadisticas (series de CORES en xlsx; el ministerio publica PDF)
+- Generación eléctrica, demanda y precios del mercado (REE, OMIE) → ninguna (no está aún en el catálogo (REData y OMIE, siguientes por impacto))
+- Registro de instalaciones de producción eléctrica y autoconsumo → miteco-energia-estadisticas (no localizada descarga abierta; PRETOR da 404)
+- Medicamentos, presentaciones, fichas técnicas y problemas de suministro → aemps-cima-api
+- Ensayos clínicos (REEC) y alertas de seguridad → aemps-otros-registros (sin API; el REEC exige sesión)
+- Exceso de mortalidad (MoMo), COVID-19, boletines epidemiológicos, gripe → isciii-cne
+- Hospitales, altas hospitalarias e indicadores del Sistema Nacional de Salud → sanidad-portal-estadistico (solo el Catálogo de Hospitales tiene descarga directa)
+- Defunciones por causa de muerte → ine-api-tempus (estadística del INE; Sanidad solo publica PDF)
+- Ayudas de investigación concedidas por la AEI → aei-convocatorias
+- Publicaciones científicas en acceso abierto → csic-digital (OAI-PMH; RECOLECTA (fecyt-recolecta) ya no expone OAI)
+- Geología, hidrogeología, puntos de agua y minería → igme-geologia
+- Terremotos recientes y catálogo sísmico → ign-sismologia (tablas HTML; el catálogo solo se descargó desde navegador)
+- Datos oceanográficos en tiempo real (oleaje, mareas, boyas) → puertos-estado-datos (Portus es una aplicación con API interna no reproducida)
+- Anuario de estadística agraria, precios percibidos y pagados, consumo alimentario → mapa-estadisticas-agrarias
+- Flota pesquera, capturas y acuicultura → mapa-pesca (el identificador de buque es CODIGOBUQUE, no el CFR)
+- Incidencias de tráfico, detectores, radares, zonas de bajas emisiones, puntos de recarga → dgt-datex-trafico
+- Matriculaciones, bajas, parque de vehículos y conductores (microdatos) → dgt-estadisticas (no localizados microdatos de accidentes, solo tablas)
+- Matrices origen-destino de movilidad por telefonía móvil → mitma-opendata-movilidad (el host de datos respondió 403 desde el entorno de verificación)
+- Tráfico portuario mensual por autoridad portuaria → puertos-estado-datos
+- Tráfico aéreo por aeropuerto y registro de aeronaves → aesa-aviacion (degradada; sin ficheros verificados)
+- Comercio exterior por producto, país y provincia → datacomex (API con token de usuario gratuito)
+- Inversión extranjera en España y española en el exterior → datainvex (aplicación ASP.NET con viewstate; sin API)
+- Estadísticas de industria, series BADASE y datos turísticos (DATAESTUR) → mincotur-industria-turismo
+- Patentes, marcas y Boletín de la Propiedad Industrial → oepm-invenes (bloqueado por el cortafuegos de la OEPM desde el entorno de verificación)
+- Alumnado, profesorado y centros no universitarios → educacion-estadisticas-ruct (EDUCAbase con el patrón PC-Axis del INE)
+- Universidades, matriculados y egresados por titulación, títulos oficiales (RUCT) → educacion-estadisticas-ruct
+- Criminalidad por tipología, comunidad, provincia y municipio → interior-criminalidad
+- Estadística judicial y sentencias → ninguna (Poder Judicial (CGPJ, CENDOJ) fuera del alcance actual)
+- Catálogo bibliográfico de la BNE y patrimonio digital (Hispana) → bne-datos (datos.bne.es bloqueado desde el entorno; Hispana por OAI-PMH)
+- Padrón, nacimientos, defunciones y migraciones → ine-api-tempus
+- Extranjeros con autorización de residencia y afiliados extranjeros → segsocial-estadisticas (afiliados extranjeros en EST292; las estadísticas de extranjería del Ministerio de Inclusión no están aún en el catálogo)
+- Precios de vivienda, transacciones, alquiler (SERPAVI) y suelo → mivau-precios-vivienda-alquiler
+- Índice de precios de vivienda y de alquiler → ine-api-tempus
+- Telecomunicaciones (líneas, operadores, audiovisual) → cnmc-data
+- Ayuda oficial al desarrollo y acción exterior → ninguna (sin fuente en el catálogo todavía)
+
+## Recetas por intención
+
+Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/recetas.yaml
+
+- ipc-ultimo-dato: Último IPC general nacional con variación mensual y anual → ine-api-tempus
+- localizar-tabla-ine: Encontrar y descargar una tabla del INE por operación (EPA, padrón, PIB, natalidad) sin conocer su id → ine-api-tempus
+- municipio-a-codigo-ine: Código INE de un municipio a partir de su nombre, o la relación completa de municipios → cnig-centro-descargas, ine-codigos-territoriales, catastro-ovc
+- coordenadas-a-referencia-catastral: De unas coordenadas a la parcela (recinto SIGPAC y referencia catastral) y a los datos del inmueble → mapa-sigpac, catastro-ovc
+- parcela-a-red-natura-y-nitratos: Saber si un recinto agrícola está en Red Natura 2000 o en zona vulnerable a nitratos → mapa-sigpac
+- empresa-nif-a-ayudas-y-contratos: Subvenciones, ayudas de investigación y contratos públicos de una empresa o entidad por su NIF → bdns-api, aei-convocatorias, placsp-datos-abiertos, borme-api-sumario
+- organismo-a-dir3-y-nif: Código DIR3 y NIF de un organismo público a partir de su nombre, y su jerarquía → face-facturas, dir3-directorio, datos-gob-es-api
+- boe-sumario-y-texto-consolidado: Qué se publicó en el BOE un día y cómo pasar de una disposición a su texto y a la norma consolidada → boe-api-sumario, boe-api-legislacion-consolidada, boe-eli
+- buscar-norma-por-titulo: Encontrar normas por palabras del título, rango o fecha y seguir sus cambios → boe-api-legislacion-consolidada, boe-feeds
+- licitaciones-nuevas: Licitaciones y adjudicaciones publicadas hoy en toda la contratación pública → placsp-datos-abiertos, boe-feeds
+- subvenciones-convocatorias-recientes: Convocatorias de subvenciones publicadas en un rango de fechas y su detalle → bdns-api
+- deuda-publica-por-administracion: Deuda de un ayuntamiento, de una comunidad autónoma o del Estado → hacienda-ovef, bde-estadisticas, tesoro-estadisticas, airef-datos
+- irpf-por-municipio: Renta y declarantes de IRPF por municipio y tramo, todos los ejercicios → aeat-estadisticas
+- paro-registrado-por-municipio: Paro registrado y demandantes por municipio, sexo, edad y actividad de un mes → sepe-estadisticas, ine-codigos-territoriales
+- afiliacion-y-pensiones: Afiliados a la Seguridad Social por régimen, provincia, CNAE o municipio, y pensiones del mes → segsocial-estadisticas
+- precio-carburantes-municipio: Precios de hoy de las gasolineras de un municipio o provincia, y el histórico de un día → minetur-precios-carburantes
+- incidencias-trafico-tiempo-real: Incidencias, obras, cortes y velocidades de la red de carreteras en este momento → dgt-datex-trafico
+- matriculaciones-diarias: Vehículos matriculados o dados de baja cada día, con marca, modelo y municipio → dgt-estadisticas
+- calidad-aire-estacion: Serie horaria o diaria de un contaminante en una estación de calidad del aire → miteco-calidad-aire
+- embalses-y-caudales: Reserva de agua de un embalse y caudal diario de un río en una estación de aforo → miteco-saih-boletin-hidrologico
+- capa-red-natura-2000: Descargar la capa oficial de Red Natura 2000 u otra capa de biodiversidad → miteco-banco-datos-naturaleza, mapa-sigpac
+- prediccion-meteo-municipio: Predicción diaria u horaria de un municipio y observación de la estación más cercana → aemet-opendata
+- medicamento-por-cn-o-nombre: Datos de un medicamento por código nacional, nombre o principio activo, con ficha técnica y problemas de suministro → aemps-cima-api
+- exceso-mortalidad-momo: Defunciones observadas y esperadas por día, ámbito, sexo y edad (MoMo) → isciii-cne
+- cosecha-oai-publicaciones: Cosechar publicaciones científicas o patrimonio digital de forma incremental → csic-digital, bne-datos, fecyt-recolecta
+- tabla-pcaxis-a-csv: Descargar como CSV una tabla de cualquier portal PC-Axis (INE, EDUCAbase, criminalidad) sin navegador → ine-api-tempus, educacion-estadisticas-ruct, interior-criminalidad
+- ocurrencias-especie-espana: Registros de presencia de una especie en España, con recuento y descarga → gbif-es
+- geologia-y-aguas-subterraneas-punto: Unidad geológica en un punto y puntos de agua subterránea de una provincia → igme-geologia
+- buscar-dataset-datos-gob-es: Localizar un dataset abierto de cualquier Administración y su URL de descarga real → datos-gob-es-api
+- series-banco-de-espana: Último dato o serie completa de un indicador del Banco de España (euríbor, tipos, crédito, deuda) → bde-estadisticas
+- flota-pesquera: Buques de la flota pesquera por puerto base, caladero y modalidad, y capturas por especie → mapa-pesca
+- criminalidad-municipio: Infracciones penales por tipología y trimestre en una comunidad, provincia o municipio de más de 20.000 habitantes → interior-criminalidad
+- actos-mercantiles-borme: Constituciones, nombramientos, ceses y disoluciones de sociedades publicados en el BORME → borme-api-sumario, boe-feeds
+- hospitales-catalogo: Listado de hospitales con camas, dependencia, complejo y municipio → sanidad-portal-estadistico
+- dataset-cnmc-a-csv: Descargar un dataset de la CNMC (energía, telecomunicaciones, postal) como CSV o consultarlo por API → cnmc-data
+- convenio-colectivo-regcon: Consultar un convenio colectivo por código, denominación o CNAE en REGCON → mites-estadisticas
+- deficit-y-ejecucion-presupuestaria: Déficit mensual de las Administraciones Públicas y ejecución del presupuesto del Estado → igae-ejecucion-presupuestaria, hacienda-ovef
 
 ## Sectores
 

@@ -31,9 +31,9 @@ Cada línea que no ahorre una búsqueda, una prueba fallida o una hora de depura
    Si falta un valor, se añade al vocabulario en el mismo commit, no se improvisa.
 7. **Castellano en valores, inglés en claves.** Sin markdown dentro de los valores. Sin dos puntos seguidos de
    espacio en valores sin comillas, porque rompe el YAML.
-8. **Fuente única de verdad.** Solo se editan `sources/**/*.yaml`, `guides/*.md`, `schema/` y `scripts/`.
-   `catalog.json`, `llms.txt`, `llms-full.txt`, los `README.md` de sector y la tabla del README raíz se
-   regeneran con `python scripts/build.py` y se suben en el mismo commit.
+8. **Fuente única de verdad.** Solo se editan `sources/**/*.yaml`, `indices/*.yaml`, `guides/*.md`, `schema/` y
+   `scripts/`. `catalog.json`, `llms.txt`, `llms-full.txt`, `indices/README.md`, los `README.md` de sector y la
+   tabla del README raíz se regeneran con `python scripts/build.py` y se suben en el mismo commit.
 9. **No borrar fichas.** Una fuente muerta pasa a `status: deprecated` con la sustituta en `gotchas`.
 10. **Rendimientos decrecientes.** Si un sector solo tiene portales sin API y datos que ya da el INE, una
     ficha o ninguna. Mejor 50 fichas exactas que 500 aproximadas.
@@ -45,10 +45,28 @@ pip install -r scripts/requirements.txt
 python scripts/validate.py        # esquema, vocabulario, ids, referencias
 python scripts/build.py           # regenera todo lo derivado
 python scripts/check_links.py     # informe de URLs (necesita red)
+python scripts/check_recetas.py   # batería de regresión de las recetas (necesita red; --report, --fail)
+python scripts/fnmt_bundle.py     # genera ca-age.pem (certifi + CA de FNMT) para los hosts con cadena incompleta
 ```
 
 Antes de cada commit: validate y build limpios. Commits pequeños por sector o por lote verificado.
 Sin subagentes salvo petición expresa: el trabajo es secuencial y de precisión.
+
+## Índices agregados (`indices/`)
+
+Cuatro ficheros que responden a lo que una ficha sola no responde; `validate.py` comprueba que solo citan ids
+de fichas y del vocabulario, y `build.py` los vuelca en `indices/README.md`, `llms.txt` y `catalog.json`.
+
+- `recetas.yaml`: procedimiento por intención que encadena fichas. Entra una receta si cruza dos o más fuentes
+  o si la vía directa esconde una trampa. Cada paso cita una ficha; cada receta lleva al menos un `check`
+  (URL, cabeceras, texto esperado) que `check_recetas.py` ejecuta como regresión. `verified` con fecha solo si
+  todos los pasos se probaron; si no, `null` y `note` con lo que falta.
+- `necesidades.yaml`: una línea por necesidad habitual con la ficha que la resuelve y la nota que evita el
+  desvío típico (FRONTUR es del INE, la EPA no es del SEPE). `source: null` con nota cuando no hay fuente.
+- `identificadores.yaml`: una entrada por valor del vocabulario `ids`, con formato, regex, ejemplo, emisor y
+  los cruces verificados hacia otras fuentes.
+- `rutas-muertas.yaml`: URL antigua que un agente puede recordar, estado observado, sustituta y fecha. Se
+  añade una ruta cuando se comprueba que ha muerto, nunca por suposición.
 
 ## Orden de prioridad
 
@@ -67,7 +85,8 @@ siguen en `null` (aemet-opendata exige clave de API; fega-beneficiarios-pac, oep
 mitma-opendata-movilidad no respondieron desde el entorno de verificación). Al empezar una sesión con red,
 re-verificar primero esas cuatro y las fichas en `degraded` o `unknown`; después añadir fuentes nuevas por
 impacto. Las verificaciones se hacen con el bundle FNMT y el User-Agent de navegador que describe
-`guides/cliente-http.md`.
+`guides/cliente-http.md`. Las 37 recetas se comprobaron el 2026-09-30 con `check_recetas.py` (69 de 72
+comprobaciones ok; el Catastro bloqueó la IP tras la ráfaga de pruebas y datos.gob.es exigió reintentos).
 
 ## Lo que no se hace
 

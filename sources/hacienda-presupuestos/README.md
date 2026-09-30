@@ -2,6 +2,16 @@
 
 Sector `hacienda-presupuestos` · 4 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Renta y declarantes de IRPF por municipio, código postal o tramo → `aeat-estadisticas`
+- Recaudación tributaria mensual por figura → `aeat-estadisticas`
+- Suministro Inmediato de Información, VERI*FACTU y presentación de modelos → `aeat-servicios-web` (SOAP con certificado electrónico)
+- Presupuestos, liquidaciones y deuda viva de ayuntamientos y diputaciones → `hacienda-ovef`
+- Tipos de IBI, IAE e IVTM por municipio → `hacienda-ovef` (consulta web con sesión (SGFAL))
+- Déficit de las Administraciones Públicas y ejecución del presupuesto del Estado → `igae-ejecucion-presupuestaria`
+- Inventario de entes del sector público (INVENTE) → `igae-ejecucion-presupuestaria`
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [aeat-estadisticas](aeat-estadisticas.yaml) | AEAT – Estadísticas tributarias y descarga masiva | download, portal | none | csv, xlsx, html, pdf | monthly | static-html, overwritten-in-place | 2026-09-30 |

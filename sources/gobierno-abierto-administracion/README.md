@@ -2,6 +2,14 @@
 
 Sector `gobierno-abierto-administracion` · 5 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Catálogo de datasets abiertos de todas las Administraciones → `datos-gob-es-api` (solo metadatos; el fichero vive en el portal del publicador)
+- Códigos DIR3 de unidades, entidades y oficinas → `dir3-directorio` (la API relations de face-facturas da DIR3 y NIF sin WAF)
+- NIF y relaciones de facturación de un organismo público → `face-facturas`
+- Boletín de empleo público y códigos SIA de procedimientos → `pag-administracion-gob-es`
+- Altos cargos, retribuciones, agendas y estadísticas de derecho de acceso → `transparencia-portal` (pocas descargas; contratos y subvenciones sin ficheros)
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [datos-gob-es-api](datos-gob-es-api.yaml) | datos.gob.es – Catálogo nacional de datos abiertos (API) | api-rest, sparql, portal | none | json, xml, csv, rdf | daily | waf-intermittent-403, errors-html-or-xml, static-html | 2026-09-30 |

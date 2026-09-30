@@ -2,6 +2,10 @@
 
 Sector `justicia-interior-seguridad` · 1 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Criminalidad por tipología, comunidad, provincia y municipio → `interior-criminalidad`
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [interior-criminalidad](interior-criminalidad.yaml) | Ministerio del Interior – Portal Estadístico de Criminalidad (balances en PC-Axis) | download, portal | none | csv, px, xlsx, html | quarterly | latin1, js-rendered, url-drift | 2026-09-30 |

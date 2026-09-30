@@ -2,6 +2,15 @@
 
 Sector `empleo-seguridad-social` · 3 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Paro registrado, demandantes y contratos por municipio → `sepe-estadisticas`
+- Afiliación a la Seguridad Social por régimen, actividad, provincia y municipio → `segsocial-estadisticas`
+- Pensiones contributivas e Ingreso Mínimo Vital → `segsocial-estadisticas`
+- Muestra Continua de Vidas Laborales → `segsocial-estadisticas` (no se descarga; se solicita bajo convenio)
+- Convenios colectivos (REGCON), huelgas, accidentes de trabajo, regulación de empleo → `mites-estadisticas`
+- Extranjeros con autorización de residencia y afiliados extranjeros → `segsocial-estadisticas` (afiliados extranjeros en EST292; las estadísticas de extranjería del Ministerio de Inclusión no están aún en el catálogo)
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [mites-estadisticas](mites-estadisticas.yaml) | Ministerio de Trabajo – Estadísticas laborales y REGCON | download, portal | none | xlsx, pdf, html | monthly | tls-chain-incomplete, static-html, session-required | 2026-09-30 |

@@ -2,6 +2,13 @@
 
 Sector `agricultura-pesca-alimentacion` · 4 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Beneficiarios de la PAC → `fega-beneficiarios-pac` (no verificable el 30/09/2026 (el servidor cierra la conexión); probar bdns-api concesiones con el órgano FEGA)
+- Recintos agrícolas, usos del suelo y referencia catastral rústica → `mapa-sigpac`
+- Anuario de estadística agraria, precios percibidos y pagados, consumo alimentario → `mapa-estadisticas-agrarias`
+- Flota pesquera, capturas y acuicultura → `mapa-pesca` (el identificador de buque es CODIGOBUQUE, no el CFR)
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [fega-beneficiarios-pac](fega-beneficiarios-pac.yaml) | FEGA – Beneficiarios de ayudas de la PAC y datos de pagos | portal, download | none | csv, xlsx, pdf | annual | waf-blocks-bots | — |

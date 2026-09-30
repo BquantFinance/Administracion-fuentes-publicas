@@ -1,0 +1,337 @@
+# Rutas que un agente puede recordar de documentación antigua y que ya no sirven, con la sustituta verificada.
+# status: 404 | 400 | 403 | 503 | redirect (a otra página distinta de la esperada) | moved (responde, pero ya no
+# da los datos) | reset (cierra la conexión) | blocked (WAF o filtro antibots) | dns | error | empty
+# new: null cuando no hay sustituta conocida. source: ficha donde está la vía vigente. checked: fecha de la prueba.
+
+- old: https://www.airef.es/es/datalab/
+  status: redirect
+  new: https://www.airef.es/es/datalab/datos-economicos/observatorio-de-deuda/
+  source: airef-datos
+  note: redirige con 301 a /ca/datalab-2/
+  checked: "2026-09-30"
+- old: https://www.airef.es/es/previsiones/
+  status: redirect
+  new: https://www.airef.es/es/datalab/previsiones-del-pib-en-tiempo-real/
+  source: airef-datos
+  note: redirige a las previsiones demográficas de 2018
+  checked: "2026-09-30"
+- old: https://www.cnmv.es/portal/Consultas/Busqueda.aspx
+  status: 400
+  new: https://www.cnmv.es/portal/hr/busquedahr.aspx?division=2
+  source: cnmv-registros
+  note: redirige a la ruta sin .aspx, que responde 400; division 2 es información privilegiada y 3 otra información relevante
+  checked: "2026-09-30"
+- old: https://www.cnmv.es/portal/HR/ResultadoBusquedaHR.aspx
+  status: 400
+  new: https://www.cnmv.es/portal/hr/busquedahr.aspx?division=3
+  source: cnmv-registros
+  checked: "2026-09-30"
+- old: https://www.cnmv.es/portal/RSS/
+  status: 403
+  new: https://www.cnmv.es/portal/RSS/RSS.asmx/GetDatos?iID=1
+  source: cnmv-registros
+  checked: "2026-09-30"
+- old: https://www.ico.es/web/ico/estadisticas
+  status: redirect
+  new: null
+  source: ico-datos
+  note: redirige a la portada; el ICO no publica estadísticas descargables
+  checked: "2026-09-30"
+- old: https://www.ico.es/web/ico/transparencia
+  status: redirect
+  new: https://www.ico.es/web/guest/ico/informe-anual
+  source: ico-datos
+  checked: "2026-09-30"
+- old: https://www.mites.gob.es/estadisticas/cct/welcome.htm
+  status: moved
+  new: https://www.mites.gob.es/es/estadisticas/condiciones_trabajo_relac_laborales/CCT/welcome.htm
+  source: mites-estadisticas
+  note: responde 200 con una página de aviso sin datos; igual para /estadisticas/eat/welcome.htm
+  checked: "2026-09-30"
+- old: https://administracionelectronica.gob.es/ctt/dir3
+  status: redirect
+  new: https://administracionelectronica.gob.es/ctt/verPestanaGeneral.htm?idIniciativa=dir3
+  source: dir3-directorio
+  note: página de 1,4 KB que redirige por script; /ctt/dir3/descargas va a verPestanaDescargas.htm?idIniciativa=dir3
+  checked: "2026-09-30"
+- old: https://face.gob.es/es/directorio/administraciones
+  status: moved
+  new: https://proveedores.face.gob.es/api/v1/relations
+  source: face-facturas
+  note: face.gob.es es solo consulta histórica desde el 27/02/2026; la API y el portal viven en proveedores.face.gob.es
+  checked: "2026-09-30"
+- old: https://administracion.gob.es/pag_Home/
+  status: redirect
+  new: https://administracion.gob.es/
+  source: pag-administracion-gob-es
+  note: cualquier ruta bajo pag_Home/ redirige o da 404; las nuevas son cortas (/empleopublico/boletin, /ayudas/boletin, /espanaadmon/sia)
+  checked: "2026-09-30"
+- old: https://transparencia.gob.es/transparencia/transparencia_Home/index.html
+  status: redirect
+  new: https://transparencia.gob.es/
+  source: transparencia-portal
+  note: portal rediseñado; contenidos bajo /publicidad-activa/por-materias/ y /derecho-acceso/
+  checked: "2026-09-30"
+- old: https://www.hacienda.gob.es/es-ES/CDI/Paginas/OVEELL/OVEntidadesLocales.aspx
+  status: 404
+  new: https://www.hacienda.gob.es/es-ES/Areas%20Tematicas/Administracion%20Electronica/OVEELL/Paginas/OVEntidadesLocales.aspx
+  source: hacienda-ovef
+  checked: "2026-09-30"
+- old: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadPublica/CPE/EjecucionPresupuestaria/Paginas/imMensualEstado.aspx
+  status: 404
+  new: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadPublica/CPE/EjecucionPresupuestaria/Paginas/imejecucionpresupuesto.aspx
+  source: igae-ejecucion-presupuestaria
+  checked: "2026-09-30"
+- old: https://pap.hacienda.gob.es/invente2/
+  status: blocked
+  new: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/BasesDatos/Invente/Paginas/inicio.aspx
+  source: igae-ejecucion-presupuestaria
+  note: rechazado por el WAF en la verificación; el 30/09/2026 ni siquiera se estableció la conexión
+  checked: "2026-09-30"
+- old: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=resultados&idp=1254734710990
+  status: 404
+  new: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=ultiDatos&idp=1254734710990
+  source: ine-codigos-territoriales
+  note: la relación de municipios cuelga de menu=ultiDatos; los xlsx tienen URL fija en daco/daco42/codmun/
+  checked: "2026-09-30"
+- old: https://www.mapama.gob.es/app/descargas/descargafichero.aspx
+  status: 404
+  new: https://gis.miteco.gob.es/descargas/app/DescargaFichero
+  source: miteco-banco-datos-naturaleza
+  note: es la URL de los recursos ZIP del catálogo CKAN de MITECO; redirige a descargas-gis-miteco/descargafichero, que da 404
+  checked: "2026-09-30"
+- old: https://www.mapama.gob.es/
+  status: redirect
+  new: https://www.miteco.gob.es/
+  source: miteco-banco-datos-naturaleza
+  note: el dominio antiguo redirige a mapa.gob.es (agricultura); lo ambiental está en miteco.gob.es
+  checked: "2026-09-30"
+- old: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/calidad-del-aire/evaluacion-datos/datos.html
+  status: 404
+  new: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/evaluacion-y-datos-de-calidad-del-aire/datos.html
+  source: miteco-calidad-aire
+  checked: "2026-09-30"
+- old: https://sig.mapama.gob.es/calidad-aire/
+  status: redirect
+  new: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/evaluacion-y-datos-de-calidad-del-aire/datos.html
+  source: miteco-calidad-aire
+  note: redirige al índice de visores de mapa.gob.es; igual sig.mapama.gob.es/redes-seguimiento/
+  checked: "2026-09-30"
+- old: https://wms.mapama.gob.es/sig/
+  status: error
+  new: https://gis.miteco.gob.es/descargas/app/DescargaFichero
+  source: miteco-banco-datos-naturaleza
+  note: todos los WMS bajo wms.mapama.gob.es/sig/ responden NullReferenceException; descargar la capa o usar sigpac-hubcloud.es para Red Natura
+  checked: "2026-09-30"
+- old: http://www.prtr-es.es/
+  status: error
+  new: https://prtr-es.miteco.gob.es/
+  source: miteco-prtr
+  note: 503 el 30/09/2026 y 404 con certificado incorrecto en las pruebas anteriores
+  checked: "2026-09-30"
+- old: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/historico-de-boletines.html
+  status: 404
+  new: https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/Historico-de-embalses/BD-Embalses.zip
+  source: miteco-saih-boletin-hidrologico
+  checked: "2026-09-30"
+- old: https://data.cnmc.es/api/3/action/package_search
+  status: 404
+  new: https://catalogodatos.cnmc.es/api/3/action/package_search
+  source: cnmc-data
+  checked: "2026-09-30"
+- old: https://energia.gob.es/balances/Balances/Paginas/Balances.aspx
+  status: redirect
+  new: https://www.miteco.gob.es/es/energia/estrategia-normativa/balances/balances.html
+  source: miteco-energia-estadisticas
+  note: todo energia.gob.es redirige a miteco.gob.es/es/energia; las páginas SharePoint (Paginas/*.aspx) dan 404 allí
+  checked: "2026-09-30"
+- old: https://sedeaplicaciones.minetur.gob.es/PRETOR
+  status: 404
+  new: null
+  source: miteco-energia-estadisticas
+  note: registro de instalaciones de producción eléctrica; no se localizó sustituto con descarga
+  checked: "2026-09-30"
+- old: https://www.aemps.gob.es/informa/
+  status: 403
+  new: https://www.aemps.gob.es/comunicacion/notas-informativas/notas-informativas-aemps/
+  source: aemps-otros-registros
+  note: el índice da 403 con cualquier User-Agent; cada nota bajo /informa/{slug}/ sí responde
+  checked: "2026-09-30"
+- old: https://cne.isciii.es/servicios/renave
+  status: 404
+  new: https://cne.isciii.es/servicios/enfermedades-transmisibles/objetivos-boletines
+  source: isciii-cne
+  note: igual /servicios/renave/boletines; los documentos cuelgan de /documents/d/cne/{slug}
+  checked: "2026-09-30"
+- old: https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/home.htm
+  status: 404
+  new: https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/UltDatos.htm
+  source: sanidad-portal-estadistico
+  checked: "2026-09-30"
+- old: https://www.sanidad.gob.es/ciudadanos/prestaciones/centrosServiciosSNS/hospitales/home.htm
+  status: redirect
+  new: https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/home.htm
+  source: sanidad-portal-estadistico
+  note: responde 200 con un meta refresh, no con 30x
+  checked: "2026-09-30"
+- old: https://www.aei.gob.es/datos-abiertos
+  status: 404
+  new: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All
+  source: aei-convocatorias
+  checked: "2026-09-30"
+- old: https://digital.csic.es/rest/
+  status: blocked
+  new: https://digital.csic.es/dspace-oai/request
+  source: csic-digital
+  note: filtro antibots Anubis (200 con página de prueba de trabajo en JavaScript); el OAI-PMH queda fuera del filtro
+  checked: "2026-09-30"
+- old: https://recolecta.fecyt.es/oai
+  status: 404
+  new: null
+  source: fecyt-recolecta
+  note: también /oai/request, /oai-pmh y /oai/openaire; cosechar cada repositorio por separado (csic-digital y otros)
+  checked: "2026-09-30"
+- old: https://buscador.recolecta.fecyt.es/
+  status: blocked
+  new: null
+  source: fecyt-recolecta
+  note: comprobación de navegador Voight-Kampff con 403
+  checked: "2026-09-30"
+- old: https://registros.gbif.es/
+  status: blocked
+  new: https://api.gbif.org/v1/occurrence/search?country=ES
+  source: gbif-es
+  note: 418 con página de comprobación antibots; api.gbif.es presenta un certificado que no coincide con el host
+  checked: "2026-09-30"
+- old: https://www.ign.es/resources/sismologia/tproximos/
+  status: 404
+  new: https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/get10dias
+  source: ign-sismologia
+  note: el RSS y el KML de últimos terremotos que colgaban aquí dan 404 (el directorio, 403); www.ign.es/fdsnws no existe
+  checked: "2026-09-30"
+- old: https://www.fega.gob.es/
+  status: reset
+  new: null
+  source: fega-beneficiarios-pac
+  note: el servidor cierra la conexión tras el TLS con cualquier User-Agent (también fega.gob.es y www.fega.es); las ayudas están en bdns-api y el SIGPAC en mapa-sigpac
+  checked: "2026-09-30"
+- old: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/economia/precios-percibidos-pagados-salarios/
+  status: 404
+  new: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/economia/precios-percibidos-pagados/precios-percibidos-por-los-agricultores-y-ganaderos
+  source: mapa-estadisticas-agrarias
+  checked: "2026-09-30"
+- old: https://www.mapa.gob.es/es/pesca/temas/registro-flota/censo-flota-pesquera-operativa/
+  status: 404
+  new: https://www.mapa.gob.es/es/pesca/temas/registro-flota/informacion-sobre-flota-pesquera
+  source: mapa-pesca
+  checked: "2026-09-30"
+- old: https://www.mapa.gob.es/es/cartografia-y-sig/ide/descargas/agricultura/sigpac/descarga.aspx
+  status: 404
+  new: https://sigpac-hubcloud.es/
+  source: mapa-sigpac
+  note: redirige a la ruta sin .aspx, que da 404; descargas, WMS, MVT y API en sigpac-hubcloud.es
+  checked: "2026-09-30"
+- old: https://infocar.dgt.es/datex2/dgt/SituationPublication/all/content.xml
+  status: 404
+  new: https://nap.dgt.es/datex2/v3/dgt/SituationPublication/datex2_v37.xml
+  source: dgt-datex-trafico
+  checked: "2026-09-30"
+- old: https://nap.dgt.es/api/3/action/package_search
+  status: 403
+  new: https://nap.dgt.es/dataset
+  source: dgt-datex-trafico
+  note: la API CKAN del NAP está cerrada; el catálogo se lee en HTML
+  checked: "2026-09-30"
+- old: https://sedeapl.dgt.gob.es/WEB_IEST_CONSULTA/
+  status: redirect
+  new: https://www.dgt.es/menusecundario/dgt-en-cifras/
+  source: dgt-estadisticas
+  checked: "2026-09-30"
+- old: https://www.dgt.es/menusecundario/dgt-en-cifras/matraba-listados/transferencias-automoviles-mensual.html
+  status: 404
+  new: null
+  source: dgt-estadisticas
+  note: solo existen los listados de matriculaciones y bajas (diario y mensual)
+  checked: "2026-09-30"
+- old: https://movilidad-opendata.mitma.es/
+  status: blocked
+  new: null
+  source: mitma-opendata-movilidad
+  note: 403 con cuerpo Internal Server Error para cualquier ruta desde el entorno de verificación; posible bloqueo por red
+  checked: "2026-09-30"
+- old: https://www.puertos.es/es-es/estadisticas/Paginas/estadistica_mensual.aspx
+  status: redirect
+  new: https://www.puertos.es/datos/estadisticas/mensuales
+  source: puertos-estado-datos
+  note: todas las rutas SharePoint es-es/estadisticas/Paginas/*.aspx redirigen a /datos/estadisticas/
+  checked: "2026-09-30"
+- old: https://www.mincotur.gob.es/es-es/IndicadoresyEstadisticas/Paginas/Estadisticas.aspx
+  status: 404
+  new: https://industria.gob.es/es-es/estadisticas
+  source: mincotur-industria-turismo
+  note: redirige a mintur.gob.es con la misma ruta, que da 404
+  checked: "2026-09-30"
+- old: https://consultas2.oepm.es/InvenesWeb/faces/busquedaInternet.jsp
+  status: blocked
+  new: null
+  source: oepm-invenes
+  note: F5 rechaza toda petición con 403 y un support ID; ninguna ruta de la OEPM se pudo verificar
+  checked: "2026-09-30"
+- old: http://datos.bne.es/
+  status: blocked
+  new: https://hispana.mcu.es/oai/oai.cmd
+  source: bne-datos
+  note: 403 con una página de bloqueo de 1,3 MB (también www.bne.es/es/catalogos/datos-enlazados); Hispana sí responde
+  checked: "2026-09-30"
+- old: https://hispana.mcu.es/es/oai
+  status: 404
+  new: https://hispana.mcu.es/oai/oai.cmd
+  source: bne-datos
+  checked: "2026-09-30"
+- old: https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm
+  status: redirect
+  new: https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm?type=pcaxis&path=/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos&file=pcaxis&l=s0
+  source: educacion-estadisticas-ruct
+  note: la raíz sin path redirige a un 404 del ministerio; con path completo funciona
+  checked: "2026-09-30"
+- old: https://www.universidades.gob.es/
+  status: redirect
+  new: https://www.ciencia.gob.es/Ministerio/Estadisticas/SIIU/Estudiantes.html
+  source: educacion-estadisticas-ruct
+  checked: "2026-09-30"
+- old: https://www.mivau.gob.es/vivienda/estadisticas
+  status: 404
+  new: https://www.mivau.gob.es/el-ministerio/observatorios-y-estadisticas
+  source: mivau-precios-vivienda-alquiler
+  note: los datos siguen en apps.fomento.gob.es, dominio antiguo sin redirección al nuevo
+  checked: "2026-09-30"
+- old: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios/2020/enero-2020.html
+  status: 404
+  new: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios-20-45/2020/enero.html
+  source: sepe-estadisticas
+  note: la ruta municipios/{AAAA}/{mes}-{AAAA}.html solo existe hasta 2019
+  checked: "2026-09-30"
+- old: https://ftpdatos.aemet.es/
+  status: dns
+  new: https://opendata.aemet.es/opendata/api
+  source: aemet-otros-servicios
+  note: el FTP histórico de AEMET no resuelve
+  checked: "2026-09-30"
+- old: https://app.bde.es/bie_www/
+  status: blocked
+  new: https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472
+  source: bde-estadisticas
+  note: el buscador BIEST responde Request Rejected a las consultas automatizadas; la API bierest y los CSV no tienen ese bloqueo
+  checked: "2026-09-30"
+- old: https://datos.gob.es/virtuoso/sparql
+  status: blocked
+  new: https://datos.gob.es/apidata/catalog/dataset.json?_pageSize=100&_page=0
+  source: datos-gob-es-api
+  note: 403 del WAF en todos los intentos; la API REST pasa con reintentos
+  checked: "2026-09-30"
+- old: https://registrodelicitadores.gob.es/rolece/public/consulta_publica
+  status: 404
+  new: https://visor.registrodelicitadores.gob.es/
+  source: hacienda-registro-licitadores
+  note: ya no hay consulta pública sin certificado; solo el visor de certificados y el DEUC
+  checked: "2026-09-30"

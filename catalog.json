@@ -1202,6 +1202,7 @@
     "invente"
    ],
    "gotchas": [
+    "Con un Accept de navegador (que incluye application/xml) la API responde XML (raíz ObjectNode) con el mismo contenido; pedir Accept: application/json para JSON.",
     "Las fechas de filtro van en dd/mm/aaaa; en ISO (2026-09-01) responde 400 con JSON de campos codigo y errores.",
     "pageSize mayor de 10000 no da error, devuelve 10000. La respuesta es un Page de Spring (content, totalElements, totalPages, last) más el campo advertencia con el aviso legal.",
     "Los beneficiarios personas físicas van con el DNI parcialmente oculto (***1490**) y nombre; las jurídicas con el NIF completo delante del nombre, todo en el mismo campo beneficiario.",
@@ -2037,6 +2038,7 @@
    ],
    "gotchas": [
     "El WAF (Akamai) responde 403 \"Acceso denegado\" a una de cada dos o tres peticiones, también en las descargas; reintentar la misma URL tras 2 a 5 segundos funciona.",
+    "Enviar también Accept de navegador (text/html,application/xhtml+xml...); con el Accept */* de requests recibí 403 en 15 peticiones seguidas el 30/09/2026 y 200 al cambiarlo.",
     "Los códigos ESTnn son estables y se anidan (EST8/EST10/EST290); las hojas finales llevan un uuid en la ruta y cada fichero otro uuid distinto en wps/wcm/connect.",
     "Afiliación media mensual (EST290) y afiliación a último día (EST305) son series distintas con cifras distintas.",
     "Los xlsx tienen varias hojas con fila de título y cabeceras combinadas; no leer como CSV ni con header=0.",
@@ -4612,8 +4614,8 @@
    "endpoints": [
     {
      "path": "https://momo.isciii.es/public/momo/data",
-     "desc": "CSV completo de MoMo (719 MB, se regenera a diario hasta el día anterior); admite Range para descargas parciales",
-     "example": "curl -sS -r 0-2000 \"https://momo.isciii.es/public/momo/data\""
+     "desc": "CSV completo de MoMo (719 MB, regenerado a diario hasta el día anterior); ignora la cabecera Range y envía el fichero entero, leer en streaming",
+     "example": "curl -sS \"https://momo.isciii.es/public/momo/data\" | head -c 2000"
     },
     {
      "path": "https://momo.isciii.es/panel_momo/",
@@ -5506,5 +5508,2543 @@
    "status": "active",
    "verified": "2026-09-30"
   }
- ]
+ ],
+ "indices": {
+  "recetas": [
+   {
+    "id": "ipc-ultimo-dato",
+    "intent": "Último IPC general nacional con variación mensual y anual",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "ine-api-tempus",
+      "do": "GET DATOS_SERIE/{cod}?nult=1&tip=A con IPC290751 (índice), IPC290752 (variación mensual) e IPC290750 (variación anual); Data[0].Fecha es ISO y T3_TipoDato distingue Avance de Definitivo",
+      "example": "curl -s \"https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/IPC290750?nult=1&tip=A\""
+     },
+     {
+      "source": "ine-api-tempus",
+      "do": "Serie completa con date=19610101:20261231 en vez de nult (sin nult ni date responde 404); las tablas vigentes son 24077 (índice) y 76134 (tasas), comprobables en TABLAS_OPERACION/IPC"
+     }
+    ],
+    "output": "JSON con COD, Nombre y Data (Fecha, T3_Periodo, Anyo, Valor)",
+    "checks": [
+     {
+      "url": "https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/IPC290750?nult=1&tip=A",
+      "contains": "\"COD\":\"IPC290750\""
+     },
+     {
+      "url": "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/24077?nult=1&tip=A",
+      "contains": "IPC290751"
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "localizar-tabla-ine",
+    "intent": "Encontrar y descargar una tabla del INE por operación (EPA, padrón, PIB, natalidad) sin conocer su id",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "ine-api-tempus",
+      "do": "GET OPERACIONES_DISPONIBLES para el Codigo de la operación (IPC, EPA...) y TABLAS_OPERACION/{Codigo} para sus tablas vigentes con Id y Nombre",
+      "example": "curl -s \"https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/EPA\""
+     },
+     {
+      "source": "ine-api-tempus",
+      "do": "DATOS_TABLA/{Id}?nult=4&tip=A devuelve todas las series de la tabla; para filtrar, VARIABLES_OPERACION y VALORES_VARIABLEOPERACION dan los pares tv=id_variable:id_valor"
+     },
+     {
+      "source": "ine-api-tempus",
+      "do": "Cambiar js por csv en la URL para obtener CSV (tabulador, ISO-8859-15 con BOM)",
+      "example": "curl -s \"https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=1\""
+     }
+    ],
+    "output": "JSON con una entrada por serie (COD, Nombre, Data) o CSV de la tabla",
+    "checks": [
+     {
+      "url": "https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES",
+      "contains": "\"Codigo\":\"IPC\""
+     },
+     {
+      "url": "https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/EPA",
+      "contains": "Nombre"
+     },
+     {
+      "url": "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=1",
+      "contains": "Periodo"
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "municipio-a-codigo-ine",
+    "intent": "Código INE de un municipio a partir de su nombre, o la relación completa de municipios",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "cnig-centro-descargas",
+      "do": "GET del geocoder CartoCiudad find?q={nombre}; devuelve muniCode (INE de 5 dígitos), provinceCode, comunidadAutonomaCode y la geometría; acepta tildes",
+      "example": "curl -s \"https://www.cartociudad.es/geocoder/api/geocoder/find?q=Alcal%C3%A1%20de%20Henares\""
+     },
+     {
+      "source": "ine-codigos-territoriales",
+      "do": "Relación completa en diccionario{AA}.xlsx con CPRO, CMUN y DC; el código es CPRO+CMUN (5 dígitos, conservar ceros) y DC es el dígito de control que algunos ficheros añaden",
+      "example": "curl -sO \"https://www.ine.es/daco/daco42/codmun/diccionario26.xlsx\""
+     },
+     {
+      "source": "catastro-ovc",
+      "do": "Equivalencia con el código catastral en ObtenerMunicipios?Provincia={NOMBRE}&Municipio={texto} (loine es el INE, locat el catastral); el OVC bloquea la IP tras ráfagas de unas 15 peticiones"
+     }
+    ],
+    "output": "código INE de municipio (5 dígitos) y de provincia (2)",
+    "checks": [
+     {
+      "url": "https://www.cartociudad.es/geocoder/api/geocoder/find?q=Alcal%C3%A1%20de%20Henares",
+      "contains": "muniCode"
+     },
+     {
+      "url": "https://www.ine.es/daco/daco42/codmun/diccionario26.xlsx",
+      "read_bytes": 100000,
+      "min_bytes": 50000
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "coordenadas-a-referencia-catastral",
+    "intent": "De unas coordenadas a la parcela (recinto SIGPAC y referencia catastral) y a los datos del inmueble",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "mapa-sigpac",
+      "do": "refrecinbycoord/4326/{lon}/{lat}.json devuelve la referencia SIGPAC pr:mu:ag:zo:po:pa:re; recinfobypoint añade uso, superficie, pendiente y geometría WKT",
+      "example": "curl -s \"https://sigpac-hubcloud.es/servicioconsultassigpac/query/refrecinbycoord/4326/-3.9/40.3.json\""
+     },
+     {
+      "source": "mapa-sigpac",
+      "do": "refcatparcela/{pr}/{mu}/{ag}/{zo}/{po}/{pa}.json devuelve referencia_cat (14 caracteres, parcela)",
+      "example": "curl -s \"https://sigpac-hubcloud.es/servicioconsultassigpac/query/refcatparcela/28/15/0/0/3/9000.json\""
+     },
+     {
+      "source": "catastro-ovc",
+      "do": "En suelo urbano, Consulta_RCCOOR (XML, pc1+pc2 son los 14 caracteres) y después Consulta_DNPRC?RefCat= para uso, superficie, año y municipio INE; el OVC bloquea la IP tras unas 15 peticiones seguidas (403 Petición HTTP bloqueada durante más de media hora el 30/09/2026)",
+      "example": "curl -s \"https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS=EPSG:4326&Coordenada_X=-3.6960&Coordenada_Y=40.4185\""
+     }
+    ],
+    "output": "referencia SIGPAC, referencia catastral de 14 caracteres y datos no protegidos del inmueble",
+    "checks": [
+     {
+      "url": "https://sigpac-hubcloud.es/servicioconsultassigpac/query/refrecinbycoord/4326/-3.9/40.3.json",
+      "contains": "refrecinto"
+     },
+     {
+      "url": "https://sigpac-hubcloud.es/servicioconsultassigpac/query/refcatparcela/28/15/0/0/3/9000.json",
+      "contains": "referencia_cat"
+     },
+     {
+      "url": "https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS=EPSG:4326&Coordenada_X=-3.6960&Coordenada_Y=40.4185",
+      "contains": "<pc1>"
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "parcela-a-red-natura-y-nitratos",
+    "intent": "Saber si un recinto agrícola está en Red Natura 2000 o en zona vulnerable a nitratos",
+    "inputs": [
+     "referencia-sigpac"
+    ],
+    "steps": [
+     {
+      "source": "mapa-sigpac",
+      "do": "Obtener los siete códigos del recinto con refrecinbycoord/4326/{lon}/{lat}.json o recinfobypoint"
+     },
+     {
+      "source": "mapa-sigpac",
+      "do": "intersection/red_natura/{pr}/{mu}/{ag}/{zo}/{po}/{pa}/{re}.json devuelve lic_code, lic_name, zepa_code, surface_intersection y surface_tpc; intersection/nitratos igual para zonas vulnerables",
+      "example": "curl -s \"https://sigpac-hubcloud.es/servicioconsultassigpac/intersection/red_natura/28/15/0/0/3/9000/6.json\""
+     }
+    ],
+    "output": "lista JSON de intersecciones con códigos LIC y ZEPA y superficie afectada",
+    "checks": [
+     {
+      "url": "https://sigpac-hubcloud.es/servicioconsultassigpac/intersection/red_natura/28/15/0/0/3/9000/6.json",
+      "contains": "lic_code"
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "empresa-nif-a-ayudas-y-contratos",
+    "intent": "Subvenciones, ayudas de investigación y contratos públicos de una empresa o entidad por su NIF",
+    "inputs": [
+     "nif"
+    ],
+    "steps": [
+     {
+      "source": "bdns-api",
+      "do": "concesiones/busqueda?nifCif={NIF}&page=0&pageSize=100 con Accept application/json (con Accept de navegador responde XML); beneficiario trae NIF y nombre en un solo campo, con importe, ayudaEquivalente, numeroConvocatoria y fechaConcesion; el parámetro beneficiario= no existe (400)",
+      "example": "curl -s -H \"Accept: application/json\" \"https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=100&nifCif=Q1132001G\""
+     },
+     {
+      "source": "bdns-api",
+      "do": "grandesbeneficiarios, ayudasestado y minimis tienen el mismo patrón de búsqueda (nifCif verificado solo en concesiones); exportación con concesiones/exportar?vpd=GE&tipoDoc=csv y los mismos filtros"
+     },
+     {
+      "source": "aei-convocatorias",
+      "do": "Ayudas de investigación en el CSV completo, filtrar la columna C.I.F. (separador ;, UTF-8 con BOM)"
+     },
+     {
+      "source": "placsp-datos-abiertos",
+      "do": "Contratos en los feeds ATOM y ZIP mensuales; los documentos CODICE llevan cbc:ID con schemeName NIF (adjudicatarios y órganos), filtrar por el valor y comprobar el elemento padre"
+     },
+     {
+      "source": "borme-api-sumario",
+      "do": "Actos societarios solo por nombre y fecha en el XML de cada provincia (receta actos-mercantiles-borme)"
+     }
+    ],
+    "output": "concesiones BDNS (JSON), ayudas AEI (filas CSV) y expedientes PLACSP (XML CODICE)",
+    "checks": [
+     {
+      "url": "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=5&nifCif=Q1132001G",
+      "headers": {
+       "Accept": "application/json"
+      },
+      "contains": "\"beneficiario\":\"Q1132001G"
+     },
+     {
+      "url": "https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All",
+      "contains": "C.I.F.",
+      "read_bytes": 4096
+     },
+     {
+      "url": "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom",
+      "contains": "schemeName=\"NIF\"",
+      "read_bytes": 400000
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "organismo-a-dir3-y-nif",
+    "intent": "Código DIR3 y NIF de un organismo público a partir de su nombre, y su jerarquía",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "face-facturas",
+      "do": "relations?fulltext={nombre}&limit=100&page=1; cada item trae oc, og y ut con code (DIR3) y og.identifier con el NIF; relations.csv sin filtro descarga las 50186 relaciones",
+      "example": "curl -s \"https://proveedores.face.gob.es/api/v1/relations?fulltext=Ayuntamiento%20de%20Madrid&limit=100&page=1\""
+     },
+     {
+      "source": "dir3-directorio",
+      "do": "Jerarquía completa y unidades ausentes de FACe en los xlsx por nivel (AGE 2741, CCAA 2742, EELL 2744); descargar en dos pasos con cookie jar y User-Agent de navegador"
+     },
+     {
+      "source": "datos-gob-es-api",
+      "do": "Con el DIR3, catalog/dataset/publisher/{dir3}.json lista los datasets que publica ese organismo"
+     }
+    ],
+    "output": "DIR3 (E, L, LA, A, U...), NIF y nombres oficiales",
+    "checks": [
+     {
+      "url": "https://proveedores.face.gob.es/api/v1/relations?fulltext=Ayuntamiento%20de%20Madrid&limit=2&page=1",
+      "contains": "\"identifier\""
+     },
+     {
+      "url": "https://administracionelectronica.gob.es/ctt/verPestanaDescargas.htm?idIniciativa=dir3",
+      "headers": {
+       "Accept": "text/html"
+      },
+      "min_bytes": 50000,
+      "read_bytes": 400000
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "boe-sumario-y-texto-consolidado",
+    "intent": "Qué se publicó en el BOE un día y cómo pasar de una disposición a su texto y a la norma consolidada",
+    "inputs": [
+     "boe-id",
+     "eli"
+    ],
+    "steps": [
+     {
+      "source": "boe-api-sumario",
+      "do": "GET /boe/sumario/{AAAAMMDD} con Accept application/json; recorrer diario, seccion, departamento, epigrafe e item (cada nivel puede ser objeto o lista); cada item trae identificador, titulo y url_pdf, url_html, url_xml",
+      "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/boe/sumario/20240102\""
+     },
+     {
+      "source": "boe-api-sumario",
+      "do": "Texto completo en xml.php?id={identificador} (raíz documento con metadatos, analisis y texto), sin cabecera Accept",
+      "example": "curl -s \"https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-87\""
+     },
+     {
+      "source": "boe-api-legislacion-consolidada",
+      "do": "/id/{identificador}/metadatos da vigencia, estado de consolidación y url_eli; /texto/indice los bloques y /texto/bloque/{id} cada artículo con sus versiones (solo XML)",
+      "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/metadatos\""
+     },
+     {
+      "source": "boe-eli",
+      "do": "La URI ELI más /con devuelve el consolidado vigente en HTML con RDFa; sin sufijo, la versión publicada en el diario"
+     }
+    ],
+    "output": "sumario JSON, XML de cada disposición y consolidado por bloques; 404 los domingos y festivos",
+    "checks": [
+     {
+      "url": "https://www.boe.es/datosabiertos/api/boe/sumario/20240102",
+      "headers": {
+       "Accept": "application/json"
+      },
+      "contains": "BOE-A-2024"
+     },
+     {
+      "url": "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-87",
+      "contains": "<documento"
+     },
+     {
+      "url": "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/metadatos",
+      "headers": {
+       "Accept": "application/json"
+      },
+      "contains": "url_eli"
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "buscar-norma-por-titulo",
+    "intent": "Encontrar normas por palabras del título, rango o fecha y seguir sus cambios",
+    "inputs": [
+     "boe-id"
+    ],
+    "steps": [
+     {
+      "source": "boe-api-legislacion-consolidada",
+      "do": "GET con query (JSON url-encoded con query_string sobre titulo, range sobre fecha_publicacion o fecha_disposicion y sort) y limit; devuelve identificador, titulo, fechas y ámbito de cada norma",
+      "example": "curl -s -G -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada\" --data-urlencode 'query={\"query\":{\"query_string\":{\"query\":\"titulo:vivienda\"}},\"sort\":[{\"fecha_publicacion\":\"desc\"}]}' --data-urlencode \"limit=20\""
+     },
+     {
+      "source": "boe-api-legislacion-consolidada",
+      "do": "Listado por fecha de última actualización del consolidado con from y to (AAAAMMDD) para detectar normas modificadas; datos-auxiliares/rangos y /materias dan los códigos de filtro",
+      "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/legislacion-consolidada?from=20260901&limit=100\""
+     },
+     {
+      "source": "boe-feeds",
+      "do": "Para vigilar novedades sin API, RSS diario del BOE por sección (ISO-8859-1)"
+     }
+    ],
+    "output": "lista JSON de normas con identificador BOE; vigencia y url_eli en /id/{id}/metadatos",
+    "checks": [
+     {
+      "url": "https://www.boe.es/datosabiertos/api/legislacion-consolidada?query=%7B%22query%22%3A%7B%22query_string%22%3A%7B%22query%22%3A%22titulo%3Avivienda%22%7D%7D%7D&limit=2",
+      "headers": {
+       "Accept": "application/json"
+      },
+      "contains": "identificador"
+     },
+     {
+      "url": "https://www.boe.es/datosabiertos/api/legislacion-consolidada?from=20260901&limit=2",
+      "headers": {
+       "Accept": "application/json"
+      },
+      "contains": "identificador"
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "licitaciones-nuevas",
+    "intent": "Licitaciones y adjudicaciones publicadas hoy en toda la contratación pública",
+    "inputs": [
+     "dir3",
+     "cpv"
+    ],
+    "steps": [
+     {
+      "source": "placsp-datos-abiertos",
+      "do": "GET del feed ATOM vigente (unas 235 entradas, 6 MB); cada entry lleva un documento CODICE con el órgano (cbc:ID schemeName DIR3), CPV, importes (TotalAmount con IVA, TaxExclusiveAmount sin) y estado; link rel=next enlaza la instantánea anterior",
+      "example": "curl -s \"https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom\""
+     },
+     {
+      "source": "placsp-datos-abiertos",
+      "do": "Histórico en ZIP mensual por feed (12 a 19 MB) con el mismo XML; PlataformasAgregadasSinMenores.atom para CCAA y EELL y contratosMenoresPerfilesContratantes.atom para menores",
+      "example": "curl -sO \"https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_202508.zip\""
+     },
+     {
+      "source": "boe-feeds",
+      "do": "Anuncios de licitación publicados en el BOE por división CPV en RSS (canal_cpv.php)"
+     }
+    ],
+    "output": "entradas ATOM con CODICE (XML basado en UBL) por expediente",
+    "checks": [
+     {
+      "url": "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom",
+      "contains": "<entry>",
+      "read_bytes": 300000
+     },
+     {
+      "url": "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_202508.zip",
+      "read_bytes": 1024
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "subvenciones-convocatorias-recientes",
+    "intent": "Convocatorias de subvenciones publicadas en un rango de fechas y su detalle",
+    "inputs": [
+     "bdns"
+    ],
+    "steps": [
+     {
+      "source": "bdns-api",
+      "do": "convocatorias/busqueda?page=0&pageSize=100&fechaDesde={dd/mm/aaaa}&fechaHasta={dd/mm/aaaa}&order=fechaRecepcion&direccion=desc (tipoAdministracion=C solo estatales); content[] con numeroConvocatoria, descripcion, nivel1 a nivel3 y mrr",
+      "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=50&fechaDesde=01/09/2026&fechaHasta=30/09/2026&order=fechaRecepcion&direccion=desc\""
+     },
+     {
+      "source": "bdns-api",
+      "do": "convocatorias?numConv={numero} da órgano, instrumentos, presupuesto, bases y documentos; codigoBDNS es la clave estable",
+      "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv=800000\""
+     },
+     {
+      "source": "bdns-api",
+      "do": "Exportación masiva con convocatorias/exportar?vpd=GE&tipoDoc=csv y los mismos filtros (windows-1252; tope de 10000 filas sin aviso)"
+     }
+    ],
+    "output": "JSON paginado de convocatorias y detalle por número BDNS",
+    "checks": [
+     {
+      "url": "https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=2&fechaDesde=01/09/2026&fechaHasta=30/09/2026&order=fechaRecepcion&direccion=desc",
+      "headers": {
+       "Accept": "application/json"
+      },
+      "contains": "numeroConvocatoria"
+     },
+     {
+      "url": "https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv=800000",
+      "headers": {
+       "Accept": "application/json"
+      },
+      "contains": "codigoBDNS"
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "deuda-publica-por-administracion",
+    "intent": "Deuda de un ayuntamiento, de una comunidad autónoma o del Estado",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "hacienda-ovef",
+      "do": "Deuda viva a 31 de diciembre por ayuntamiento en deuda-viva-ayuntamientos-{AAAA}12.xlsx (dipycab y restoeell en la misma carpeta)",
+      "example": "curl -sO \"https://www.hacienda.gob.es/cdi/sist%20financiacion%20y%20deuda/informacioneells/2025/deuda-viva-ayuntamientos-202512.xlsx\""
+     },
+     {
+      "source": "bde-estadisticas",
+      "do": "Deuda según el Protocolo de Déficit Excesivo por subsector y por comunidad autónoma en el capítulo SB_DEUAAPP.zip del Boletín Estadístico (CSV con 6 filas de cabecera)",
+      "example": "curl -sO \"https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_DEUAAPP.zip\""
+     },
+     {
+      "source": "tesoro-estadisticas",
+      "do": "Deuda del Estado por instrumento, vida media, tenedores y vencimientos en los cuadros mensuales {NN}.xlsx (01 nominal en circulación), con User-Agent de navegador",
+      "example": "curl -sO -A \"Mozilla/5.0\" \"https://www.tesoro.es/sites/default/files/estadisticas/01.xlsx\""
+     },
+     {
+      "source": "airef-datos",
+      "do": "Histórico de deuda por Administración en Historico_Deuda.xlsx; la URL cambia con cada publicación, localizarla en la página del observatorio de deuda"
+     }
+    ],
+    "output": "xlsx por entidad (Hacienda), CSV por serie (BdE) y cuadros mensuales (Tesoro)",
+    "checks": [
+     {
+      "url": "https://www.hacienda.gob.es/cdi/sist%20financiacion%20y%20deuda/informacioneells/2025/deuda-viva-ayuntamientos-202512.xlsx",
+      "min_bytes": 500000,
+      "read_bytes": 1024
+     },
+     {
+      "url": "https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_DEUAAPP.zip",
+      "read_bytes": 1024
+     },
+     {
+      "url": "https://www.tesoro.es/sites/default/files/estadisticas/01.xlsx",
+      "read_bytes": 1024,
+      "fnmt": true
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "irpf-por-municipio",
+    "intent": "Renta y declarantes de IRPF por municipio y tramo, todos los ejercicios",
+    "inputs": [
+     "ine-municipio"
+    ],
+    "steps": [
+     {
+      "source": "aeat-estadisticas",
+      "do": "IRPFmunicipios.csv (31 MB, separador ;, decimal coma) con una fila por ejercicio (EJER), tramo (TRAMO) y municipio (MUNI_DEF) y una columna MUNI_n por variable; MUNI_DEF es un código propio, comprobar en la documentación de la estadística la equivalencia con el INE antes de cruzar",
+      "example": "curl -sO \"https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Anuario_estadistico/Exportacion/IRPFmunicipios.csv\""
+     },
+     {
+      "source": "aeat-estadisticas",
+      "do": "Recaudación mensual por figura tributaria en Cuadros_estadisticos_series_es_es.xlsx (URL fija, contenido sobrescrito en cada publicación)"
+     }
+    ],
+    "output": "CSV masivo de todos los ejercicios",
+    "checks": [
+     {
+      "url": "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Anuario_estadistico/Exportacion/IRPFmunicipios.csv",
+      "contains": "EJER;TRAMO",
+      "read_bytes": 4096
+     },
+     {
+      "url": "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Recaudacion_Tributaria/Informes_mensuales/Cuadros_estadisticos_series_es_es.xlsx",
+      "read_bytes": 1024
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "paro-registrado-por-municipio",
+    "intent": "Paro registrado y demandantes por municipio, sexo, edad y actividad de un mes",
+    "inputs": [
+     "ine-municipio"
+    ],
+    "steps": [
+     {
+      "source": "sepe-estadisticas",
+      "do": "La página del mes municipios-20-45/{AAAA}/{mes}.html (2020 en adelante) enlaza un xls por comunidad autónoma en {AAAA}/{mes}_{AAAA}/Muniacteco_20-45_{CCAA}.xls; de 2005 a 2019 en municipios/{AAAA}/{mes}-{AAAA}.html",
+      "example": "curl -sO -A \"Mozilla/5.0\" \"https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_20_45/2026/agosto_2026/Muniacteco_20-45_ANDALUCIA.xls\""
+     },
+     {
+      "source": "sepe-estadisticas",
+      "do": "Los xls son de formato informe, sin código INE (solo nombre del municipio); xlrd no los abre, calamine sí (pandas engine=calamine)"
+     },
+     {
+      "source": "sepe-estadisticas",
+      "do": "Series nacionales y provinciales con URL fija en evolparoseries.xls y paroprovsector.xls",
+      "example": "curl -sO -A \"Mozilla/5.0\" \"https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/evolparoseries.xls\""
+     },
+     {
+      "source": "ine-codigos-territoriales",
+      "do": "Asignar el código INE por nombre y provincia con el diccionario anual"
+     }
+    ],
+    "output": "xls por comunidad con demandantes parados por municipio",
+    "checks": [
+     {
+      "url": "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_20_45/2026/agosto_2026/Muniacteco_20-45_ANDALUCIA.xls",
+      "min_bytes": 1000000,
+      "read_bytes": 1024
+     },
+     {
+      "url": "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/evolparoseries.xls",
+      "read_bytes": 1024
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "afiliacion-y-pensiones",
+    "intent": "Afiliados a la Seguridad Social por régimen, provincia, CNAE o municipio, y pensiones del mes",
+    "inputs": [
+     "cnae",
+     "ine-municipio"
+    ],
+    "steps": [
+     {
+      "source": "segsocial-estadisticas",
+      "do": "GET de la página de la estadística (EST8/EST10/EST290 afiliación media; EST8/EST10/EST305 último día por municipio y CNAE; EST23/EST24 pensiones) con User-Agent y Accept de navegador; extraer los enlaces wcm/connect, que llevan un uuid nuevo en cada publicación",
+      "example": "curl -sL -A \"Mozilla/5.0\" -H \"Accept: text/html,application/xhtml+xml\" \"https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST23/EST24\" | grep -o 'href=\"[^\"]*wcm/connect[^\"]*\"'"
+     },
+     {
+      "source": "segsocial-estadisticas",
+      "do": "Descargar el xlsx con las mismas cabeceras; ante 403 repetir la misma URL tras 2 a 5 segundos (el WAF rechaza una de cada dos o tres peticiones; con Accept */* recibí 403 en 15 intentos seguidos)"
+     },
+     {
+      "source": "segsocial-estadisticas",
+      "do": "Pensiones mensuales con nombre {SERIE}{AAAAMM} (PI, IP, JUCOVI, TC, EDPR, TRCA); la afiliación por actividad pasa a CNAE 2025 en 2026"
+     }
+    ],
+    "output": "xlsx con varias hojas y cabeceras combinadas (no leer con header=0)",
+    "checks": [
+     {
+      "url": "https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST23/EST24",
+      "headers": {
+       "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      },
+      "contains": "wcm/connect",
+      "retries": 5,
+      "read_bytes": 400000
+     },
+     {
+      "url": "https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST8/EST10/EST290",
+      "headers": {
+       "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      },
+      "contains": "wcm/connect",
+      "retries": 5,
+      "read_bytes": 400000
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "precio-carburantes-municipio",
+    "intent": "Precios de hoy de las gasolineras de un municipio o provincia, y el histórico de un día",
+    "inputs": [
+     "ine-provincia"
+    ],
+    "steps": [
+     {
+      "source": "minetur-precios-carburantes",
+      "do": "Listados/Municipios/ devuelve IDMunicipio (código propio, no INE; Madrid 4354, Alcalá de Henares 4280) e IDProvincia en código INE",
+      "example": "curl -s -H \"Accept: application/json\" \"https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/Listados/Municipios/\""
+     },
+     {
+      "source": "minetur-precios-carburantes",
+      "do": "EstacionesTerrestres/FiltroMunicipio/{IDMunicipio} o FiltroProvincia/{INE2}; ListaEESSPrecio trae Rótulo, Dirección, Latitud, Longitud (WGS84) y un precio por carburante con coma decimal; con Accept de navegador responde XML, pedir application/json",
+      "example": "curl -s -H \"Accept: application/json\" \"https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroMunicipio/4354\""
+     },
+     {
+      "source": "minetur-precios-carburantes",
+      "do": "Histórico con EstacionesTerrestresHist/FiltroProvincia/{DD-MM-AAAA}/{INE2}; IDEESS es estable desde 2010 para seguir una estación"
+     }
+    ],
+    "output": "JSON con Fecha y ListaEESSPrecio",
+    "checks": [
+     {
+      "url": "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/Listados/Municipios/",
+      "headers": {
+       "Accept": "application/json"
+      },
+      "contains": "IDMunicipio",
+      "read_bytes": 4096
+     },
+     {
+      "url": "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroMunicipio/4354",
+      "headers": {
+       "Accept": "application/json"
+      },
+      "contains": "ListaEESSPrecio",
+      "read_bytes": 4096
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "incidencias-trafico-tiempo-real",
+    "intent": "Incidencias, obras, cortes y velocidades de la red de carreteras en este momento",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "dgt-datex-trafico",
+      "do": "nap.dgt.es/datex2/v3/dgt/SituationPublication/datex2_v37.xml, DATEX II 3.7 con una situation por incidencia; se regenera cada minuto",
+      "example": "curl -s \"https://nap.dgt.es/datex2/v3/dgt/SituationPublication/datex2_v37.xml\""
+     },
+     {
+      "source": "dgt-datex-trafico",
+      "do": "Velocidades e intensidades de 5.569 detectores en MeasuredDataPublication/detectores/content.xml (18,7 MB por minuto, DATEX II 1.0) con sus localizaciones en PredefinedLocationsPublication/detectores; radares fijos en /radares/content.xml",
+      "example": "curl -s \"https://infocar.dgt.es/datex2/dgt/PredefinedLocationsPublication/radares/content.xml\""
+     },
+     {
+      "source": "dgt-datex-trafico",
+      "do": "Cataluña y Gipuzkoa en sct y dt-gv SituationPublication/all/content.xml; zonas de bajas emisiones y puntos de recarga bajo /datex2/v3/"
+     }
+    ],
+    "output": "XML DATEX II (namespaces distintos por versión; parsear con lxml)",
+    "checks": [
+     {
+      "url": "https://nap.dgt.es/datex2/v3/dgt/SituationPublication/datex2_v37.xml",
+      "contains": "SituationPublication",
+      "read_bytes": 100000
+     },
+     {
+      "url": "https://infocar.dgt.es/datex2/dgt/PredefinedLocationsPublication/radares/content.xml",
+      "contains": "predefinedLocation"
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "matriculaciones-diarias",
+    "intent": "Vehículos matriculados o dados de baja cada día, con marca, modelo y municipio",
+    "inputs": [
+     "ine-municipio"
+    ],
+    "steps": [
+     {
+      "source": "dgt-estadisticas",
+      "do": "Listado de ficheros en matraba-listados/matriculaciones-automoviles-diario.html (24 diarios del mes) y -mensual.html (desde 2014-12); bajas en bajas-automoviles-diario y -mensual",
+      "example": "curl -s \"https://www.dgt.es/menusecundario/dgt-en-cifras/matraba-listados/matriculaciones-automoviles-diario.html\" | grep -o 'href=\"[^\"]*export_mat_[^\"]*\"'"
+     },
+     {
+      "source": "dgt-estadisticas",
+      "do": "ZIP en /microdatos/salida/{AAAA}/{M}/vehiculos/matriculaciones/export_mat_{AAAAMMDD}.zip (mes sin cero); dentro un txt de ancho fijo en Latin-1 con bastidor enmascarado y municipio INE; el diseño de registro está en PDF en la ficha del producto",
+      "example": "curl -sSL -o mat.zip \"https://www.dgt.es/microdatos/salida/2026/9/vehiculos/matriculaciones/export_mat_20260929.zip\""
+     },
+     {
+      "source": "dgt-estadisticas",
+      "do": "Parque completo por vehículo en /microdatos/Parque/{AAAA}/parque_consolidado_{AAAA}.zip (1,6 GB en 2025) y mensual desde 2025-03"
+     }
+    ],
+    "output": "txt de ancho fijo por día",
+    "checks": [
+     {
+      "url": "https://www.dgt.es/menusecundario/dgt-en-cifras/matraba-listados/matriculaciones-automoviles-diario.html",
+      "contains": "export_mat_",
+      "read_bytes": 300000
+     },
+     {
+      "url": "https://www.dgt.es/microdatos/salida/2026/9/vehiculos/matriculaciones/export_mat_20260929.zip",
+      "min_bytes": 1000000,
+      "read_bytes": 1024
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "calidad-aire-estacion",
+    "intent": "Serie horaria o diaria de un contaminante en una estación de calidad del aire",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "miteco-calidad-aire",
+      "do": "Metainformacion_{AAAA}.xlsx, hoja Estaciones_{AAAA}, con COD_LOCAL, código europeo, red, latitud, longitud, altitud y tipo de estación; elegir la estación por coordenadas"
+     },
+     {
+      "source": "miteco-calidad-aire",
+      "do": "Datos_HH_{AAAA}.zip (27 MB) trae un CSV por contaminante con una fila por estación y día y columnas H01 a H24 (separador ;, punto decimal, vacío = sin dato); Datos_DD para diarios con D01 a D31",
+      "example": "curl -sSL -o Datos_HH_2024.zip \"https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_HH_2024.zip\""
+     },
+     {
+      "source": "miteco-calidad-aire",
+      "do": "Cada año tiene su página (datos-oficiales-{AAAA}.html desde 2022) y nombres de fichero distintos; tomar los enlaces de la página en cada ejecución"
+     }
+    ],
+    "output": "CSV anuales por contaminante",
+    "checks": [
+     {
+      "url": "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Metainformacion_2024.xlsx",
+      "min_bytes": 100000,
+      "read_bytes": 1024
+     },
+     {
+      "url": "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_HH_2024.zip",
+      "min_bytes": 20000000,
+      "read_bytes": 1024
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "embalses-y-caudales",
+    "intent": "Reserva de agua de un embalse y caudal diario de un río en una estación de aforo",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "miteco-saih-boletin-hidrologico",
+      "do": "BD-Embalses.zip (Access, 10 MB) con la tabla T_Datos Embalses (AMBITO_NOMBRE, EMBALSE_NOMBRE, FECHA, AGUA_TOTAL, AGUA_ACTUAL, ELECTRICO_FLAG) semanal desde 1988; leer con mdbtools (mdb-export) o un driver ODBC, en la verificación no se consiguió leerlo con librerías Python puras",
+      "example": "curl -sSL -o BD-Embalses.zip \"https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/Historico-de-embalses/BD-Embalses.zip\""
+     },
+     {
+      "source": "miteco-saih-boletin-hidrologico",
+      "do": "listado-estaciones-aforo.zip (cuatro CSV con COD_HIDRO, COD_SAIH, UTM huso 30 y municipio) y Anuario-21-22-csv.zip (136 MB, afliq.csv por cuenca con indroea;fecha;altura;caudal diarios)",
+      "example": "curl -sSL -o estaciones.zip \"https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/listado-estaciones-aforo.zip\""
+     },
+     {
+      "source": "miteco-saih-boletin-hidrologico",
+      "do": "Tiempo real solo en el SAIH de cada confederación (enlaces en saih.html), cada uno con su formato"
+     }
+    ],
+    "output": "tabla Access de embalses y CSV de caudales diarios por estación",
+    "checks": [
+     {
+      "url": "https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/Historico-de-embalses/BD-Embalses.zip",
+      "min_bytes": 5000000,
+      "read_bytes": 1024
+     },
+     {
+      "url": "https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/listado-estaciones-aforo.zip",
+      "read_bytes": 1024
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "capa-red-natura-2000",
+    "intent": "Descargar la capa oficial de Red Natura 2000 u otra capa de biodiversidad",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "miteco-banco-datos-naturaleza",
+      "do": "DescargaFichero?f=rn2000.zip exige resolver un desafío ALTCHA (prueba de trabajo SHA-256) y enviarlo en el POST ?handler=Download; código completo en guides/cliente-http.md; 133 MB con el shapefile PS_Natura2000_2025",
+      "example": "curl -s \"https://gis.miteco.gob.es/descargas/app/DescargaFichero?handler=Altcha\""
+     },
+     {
+      "source": "miteco-banco-datos-naturaleza",
+      "do": "Descargas directas sin desafío en storage.googleapis.com para IEZH, MFE, hábitats y el resto de capas del IEPNB (lista en iepnb.gob.es/nuestros-datos/descargas)",
+      "example": "curl -sSL -o IEZH_shp_2025.zip \"https://storage.googleapis.com/gestor-doc-portal-iepnb/Ecosistemas/inventario_esp_zonas_humedas/zonas_humedas/IEZH_shp_2025.zip\""
+     },
+     {
+      "source": "mapa-sigpac",
+      "do": "Para una parcela concreta, intersection/red_natura evita descargar la capa (receta parcela-a-red-natura-y-nitratos)"
+     }
+    ],
+    "output": "ZIP con shapefile o GML",
+    "checks": [
+     {
+      "url": "https://gis.miteco.gob.es/descargas/app/DescargaFichero?handler=Altcha",
+      "contains": "challenge"
+     },
+     {
+      "url": "https://storage.googleapis.com/gestor-doc-portal-iepnb/Ecosistemas/inventario_esp_zonas_humedas/zonas_humedas/IEZH_shp_2025.zip",
+      "min_bytes": 1000000,
+      "read_bytes": 1024
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "prediccion-meteo-municipio",
+    "intent": "Predicción diaria u horaria de un municipio y observación de la estación más cercana",
+    "inputs": [
+     "ine-municipio",
+     "idema"
+    ],
+    "steps": [
+     {
+      "source": "aemet-opendata",
+      "do": "Con clave gratuita en la cabecera api_key, GET prediccion/especifica/municipio/diaria/{INE de 5 dígitos sin dígito de control}; la respuesta es un JSON intermedio (estado, datos) y los datos se descargan con una segunda petición a la URL del campo datos; sin clave llega 200 con cuerpo vacío",
+      "example": "curl -s -H \"api_key: $AEMET_KEY\" \"https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/28079\""
+     },
+     {
+      "source": "aemet-opendata",
+      "do": "valores/climatologicos/inventarioestaciones/todasestaciones da idema y coordenadas; elegir la más cercana y pedir observacion/convencional/datos/estacion/{idema}"
+     },
+     {
+      "source": "aemet-opendata",
+      "do": "Las 64 rutas y sus parámetros están en AEMET_OpenData_specification.json (OpenAPI 3.0.1), sin clave",
+      "example": "curl -s \"https://opendata.aemet.es/AEMET_OpenData_specification.json\""
+     }
+    ],
+    "output": "JSON de predicción por día; coma decimal en algunos ficheros de datos",
+    "checks": [
+     {
+      "url": "https://opendata.aemet.es/AEMET_OpenData_specification.json",
+      "contains": "/prediccion/especifica/municipio/diaria/{municipio}",
+      "read_bytes": 200000
+     }
+    ],
+    "verified": null,
+    "note": "Sin clave solo se verificaron la especificación y el comportamiento sin autenticación (30/09/2026); las respuestas de datos están pendientes"
+   },
+   {
+    "id": "medicamento-por-cn-o-nombre",
+    "intent": "Datos de un medicamento por código nacional, nombre o principio activo, con ficha técnica y problemas de suministro",
+    "inputs": [
+     "cn-medicamento"
+    ],
+    "steps": [
+     {
+      "source": "aemps-cima-api",
+      "do": "medicamento?cn={cn} o ?nregistro={nreg} devuelve nregistro, pactivos, atcs, presentaciones (cn, estado), docs (PDF y HTML) y estado; medicamentos?nombre= o ?practiv1= busca (páginas de 200; un cn inexistente responde 204 sin cuerpo)",
+      "example": "curl -s \"https://cima.aemps.es/cima/rest/medicamento?cn=708201\""
+     },
+     {
+      "source": "aemps-cima-api",
+      "do": "docSegmentado/contenido/1?nregistro={nreg}&seccion=4.1 devuelve una sección de la ficha técnica en HTML; PDF estable en /cima/pdfs/ft/{nreg}/FT_{nreg}.pdf"
+     },
+     {
+      "source": "aemps-cima-api",
+      "do": "psuministro lista los problemas de suministro activos por cn; registroCambios?fecha=dd/mm/aaaa permite sincronizar sin rebajar todo; nomenclátor completo en prescripcion.zip, regenerado a diario",
+      "example": "curl -s \"https://cima.aemps.es/cima/rest/psuministro\""
+     }
+    ],
+    "output": "JSON del medicamento (solo JSON; Accept XML responde 406)",
+    "checks": [
+     {
+      "url": "https://cima.aemps.es/cima/rest/medicamento?cn=708201",
+      "contains": "nregistro"
+     },
+     {
+      "url": "https://cima.aemps.es/cima/rest/psuministro",
+      "contains": "tipoProblemaSuministro"
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "exceso-mortalidad-momo",
+    "intent": "Defunciones observadas y esperadas por día, ámbito, sexo y edad (MoMo)",
+    "inputs": [
+     "ccaa"
+    ],
+    "steps": [
+     {
+      "source": "isciii-cne",
+      "do": "momo.isciii.es/public/momo/data es un único CSV de 719 MB (comillas, coma) regenerado a diario; el servidor ignora Range y devuelve el fichero entero con 200, así que leer en streaming y filtrar por ambito (nacional, ccaa), cod_ine_ambito, cod_sexo y cod_gedad",
+      "example": "curl -sS \"https://momo.isciii.es/public/momo/data\" | head -c 2000"
+     },
+     {
+      "source": "isciii-cne",
+      "do": "Columnas defunciones_observadas, defunciones_estimadas_base, _q01, _q99 y atribuibles a exceso y defecto de temperatura; las últimas semanas se revisan en cada descarga"
+     }
+    ],
+    "output": "CSV diario desde 2015",
+    "checks": [
+     {
+      "url": "https://momo.isciii.es/public/momo/data",
+      "contains": "defunciones_observadas",
+      "read_bytes": 4096
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "cosecha-oai-publicaciones",
+    "intent": "Cosechar publicaciones científicas o patrimonio digital de forma incremental",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "csic-digital",
+      "do": "?verb=ListRecords&metadataPrefix=oai_dc&from={AAAA-MM-DD} (100 por página, resumptionToken al final del XML); set=com_10261_NN por instituto; 13 formatos (datacite, oai_cerif_openaire, mods, marc)",
+      "example": "curl -s \"https://digital.csic.es/dspace-oai/request?verb=ListRecords&metadataPrefix=oai_dc&from=2026-09-01\""
+     },
+     {
+      "source": "bne-datos",
+      "do": "Hispana en hispana.mcu.es/oai/oai.cmd con los mismos verbos (10,6 millones de registros, 124 sets, formatos oai_dc, edm, ese y didl)",
+      "example": "curl -s \"https://hispana.mcu.es/oai/oai.cmd?verb=Identify\""
+     },
+     {
+      "source": "fecyt-recolecta",
+      "do": "RECOLECTA ya no expone OAI-PMH (404 en cuatro rutas el 30/09/2026); cosechar cada repositorio universitario por separado"
+     }
+    ],
+    "output": "XML OAI-PMH paginado con resumptionToken",
+    "checks": [
+     {
+      "url": "https://digital.csic.es/dspace-oai/request?verb=ListRecords&metadataPrefix=oai_dc&from=2026-09-20",
+      "contains": "<ListRecords>"
+     },
+     {
+      "url": "https://hispana.mcu.es/oai/oai.cmd?verb=Identify",
+      "contains": "<Identify>"
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "tabla-pcaxis-a-csv",
+    "intent": "Descargar como CSV una tabla de cualquier portal PC-Axis (INE, EDUCAbase, criminalidad) sin navegador",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "ine-api-tempus",
+      "do": "INE, cambiar js por csv en la API (csv/ES/DATOS_TABLA/{id}?nult=n): tabulador, ISO-8859-15 con BOM",
+      "example": "curl -s \"https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=12\""
+     },
+     {
+      "source": "educacion-estadisticas-ruct",
+      "do": "EDUCAbase, del enlace Tabla.htm?path=...&file=X.px deducir EducaJaxiPx/files/_px/es/csv_bdsc{path}{file}?nocab=1 (separador ;, ISO-8859-15, miles con punto)",
+      "example": "curl -s \"https://estadisticas.educacion.gob.es/EducaJaxiPx/files/_px/es/csv_bdsc/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos/l0/adul_01.px?nocab=1\""
+     },
+     {
+      "source": "interior-criminalidad",
+      "do": "Criminalidad, mismo patrón en sec/jaxiPx/files/_px/es/csv_bdsc{path}{file}?nocab=1 (último trimestre en /DatosBalanceAct/l0/)",
+      "example": "curl -s \"https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09004.px?nocab=1\""
+     }
+    ],
+    "output": "CSV con la tabla completa; px y xlsx cambiando csv_bdsc por px o xlsx",
+    "checks": [
+     {
+      "url": "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=1",
+      "contains": "Periodo"
+     },
+     {
+      "url": "https://estadisticas.educacion.gob.es/EducaJaxiPx/files/_px/es/csv_bdsc/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos/l0/adul_01.px?nocab=1",
+      "contains": "Total"
+     },
+     {
+      "url": "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09004.px?nocab=1",
+      "contains": "Periodos"
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "ocurrencias-especie-espana",
+    "intent": "Registros de presencia de una especie en España, con recuento y descarga",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "gbif-es",
+      "do": "species/match?name={nombre científico} devuelve usageKey (taxón), rank, matchType y confidence",
+      "example": "curl -s \"https://api.gbif.org/v1/species/match?name=Lynx%20pardinus\""
+     },
+     {
+      "source": "gbif-es",
+      "do": "occurrence/search?country=ES&taxonKey={usageKey}&limit=300&offset={n} (offset máximo 100000; filtros hasCoordinate, year, gadmGid); occurrence/count con los mismos filtros para el total",
+      "example": "curl -s \"https://api.gbif.org/v1/occurrence/count?country=ES&taxonKey=2435261\""
+     },
+     {
+      "source": "gbif-es",
+      "do": "Más de 100000 registros exige una descarga asíncrona (occurrence/download/request con usuario GBIF gratuito)"
+     }
+    ],
+    "output": "JSON Darwin Core con results, count y endOfRecords",
+    "checks": [
+     {
+      "url": "https://api.gbif.org/v1/species/match?name=Lynx%20pardinus",
+      "contains": "usageKey"
+     },
+     {
+      "url": "https://api.gbif.org/v1/occurrence/count?country=ES&taxonKey=2435261",
+      "min_bytes": 1
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "geologia-y-aguas-subterraneas-punto",
+    "intent": "Unidad geológica en un punto y puntos de agua subterránea de una provincia",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "igme-geologia",
+      "do": "IGME_Geode_50/MapServer/8/query con geometry={lon},{lat}, inSR=4326 y spatialRel=esriSpatialRelIntersects devuelve CODE_UNIO, DESC_UNIT y edades",
+      "example": "curl -s \"https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geode_50/MapServer/8/query?geometry=-3.70,40.42&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=CODE_UNIO,DESC_UNIT,NAME_EDA1&returnGeometry=false&f=json\""
+     },
+     {
+      "source": "igme-geologia",
+      "do": "BasesDatos/IGME_PuntosAgua/MapServer/0/query?where=Provincia='Madrid'&outFields=*&resultRecordCount={n} (139.697 puntos con acuífero, caudal, profundidad y usos)",
+      "example": "curl -s \"https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_PuntosAgua/MapServer/0/query?where=Provincia%3D%27Madrid%27&outFields=*&resultRecordCount=5&f=json\""
+     },
+     {
+      "source": "igme-geologia",
+      "do": "La hoja MAGNA 50 en vectorial y PDF con URL estable por número de hoja (VRF_MAGNA50_{hoja}.zip)"
+     }
+    ],
+    "output": "JSON ArcGIS (features[].attributes)",
+    "checks": [
+     {
+      "url": "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geode_50/MapServer/8/query?geometry=-3.70,40.42&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=CODE_UNIO,DESC_UNIT,NAME_EDA1&returnGeometry=false&f=json",
+      "contains": "DESC_UNIT"
+     },
+     {
+      "url": "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_PuntosAgua/MapServer/0/query?where=Provincia%3D%27Madrid%27&outFields=*&resultRecordCount=2&f=json",
+      "contains": "features"
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "buscar-dataset-datos-gob-es",
+    "intent": "Localizar un dataset abierto de cualquier Administración y su URL de descarga real",
+    "inputs": [
+     "dir3"
+    ],
+    "steps": [
+     {
+      "source": "datos-gob-es-api",
+      "do": "catalog/dataset/title/{texto}.json?_pageSize=50 o theme/{tema}.json; cada dataset trae distribution[] con accessURL y format; el WAF (Incapsula) responde 403 a la mayoría de las peticiones, reintentar hasta 10 veces con espera",
+      "example": "curl -s -A \"Mozilla/5.0\" \"https://datos.gob.es/apidata/catalog/dataset/title/paro.json?_pageSize=50\""
+     },
+     {
+      "source": "datos-gob-es-api",
+      "do": "publisher/{dir3}.json para todos los datasets de un organismo (DIR3 con la receta organismo-a-dir3-y-nif)"
+     },
+     {
+      "source": "datos-gob-es-api",
+      "do": "El fichero vive en el portal del publicador; datos.gob.es solo guarda metadatos y el enlace puede estar muerto, comprobarlo"
+     }
+    ],
+    "output": "JSON Linked Data API (result.items[])",
+    "checks": [
+     {
+      "url": "https://datos.gob.es/apidata/catalog/dataset/title/paro.json?_pageSize=5",
+      "headers": {
+       "Accept": "application/json"
+      },
+      "contains": "result",
+      "retries": 10
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "series-banco-de-espana",
+    "intent": "Último dato o serie completa de un indicador del Banco de España (euríbor, tipos, crédito, deuda)",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "bde-estadisticas",
+      "do": "Código de serie en los catálogos catalogo_{be|tc|ti|si|pb}.csv (ISO-8859-1; nombre, alias, fichero del cuadro, descripción, frecuencia, primera y última observación)",
+      "example": "curl -sO \"https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_tc.csv\""
+     },
+     {
+      "source": "bde-estadisticas",
+      "do": "favoritas?idioma=es&series={cod} da el último valor; listaSeries?idioma=es&series={cod}&rango=MAX la serie completa (rangos por frecuencia); la respuesta va siempre en gzip, usar --compressed",
+      "example": "curl -s --compressed \"https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472\""
+     },
+     {
+      "source": "bde-estadisticas",
+      "do": "CSV del cuadro entero en csv/{cuadro}.csv (nombre en minúsculas, 6 filas de cabecera, fechas en español) o ZIP por capítulo del Boletín"
+     }
+    ],
+    "output": "JSON con serie, fechaValor, valor y metadatos",
+    "checks": [
+     {
+      "url": "https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472",
+      "contains": "D_1NBAF472"
+     },
+     {
+      "url": "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_tc.csv",
+      "contains": "Alias de la serie",
+      "read_bytes": 4096
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "flota-pesquera",
+    "intent": "Buques de la flota pesquera por puerto base, caladero y modalidad, y capturas por especie",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "mapa-pesca",
+      "do": "Registro de flota 2006-2025 en un xlsx (15 MB, hoja Datos con AÑO, CODIGOBUQUE, PUERTO BASE, PROVINCIA, CCAA, CALADERO, modalidad, ARQUEO GT, POTENCIA KW, ESLORA, EDAD); el nombre lleva marca de tiempo, localizar el enlace rgfp_bi_excel en la página del registro",
+      "example": "curl -s \"https://www.mapa.gob.es/es/pesca/temas/registro-flota/informacion-sobre-flota-pesquera\" | grep -o 'href=\"[^\"]*rgfp_bi_excel[^\"]*\"'"
+     },
+     {
+      "source": "mapa-pesca",
+      "do": "Capturas y desembarcos por especie, destino y zona en xlsx en estadistica-capturas-desembarcos (serie 1992-2024)"
+     }
+    ],
+    "output": "xlsx con una fila por buque y año; el identificador es CODIGOBUQUE, no el CFR europeo",
+    "checks": [
+     {
+      "url": "https://www.mapa.gob.es/es/pesca/temas/registro-flota/informacion-sobre-flota-pesquera",
+      "contains": "rgfp_bi_excel",
+      "read_bytes": 400000
+     },
+     {
+      "url": "https://www.mapa.gob.es/dam/mapa/contenido/pesca/temas--nuevo/registro-de-flota--flota-pesquera-espanola/registro-general-de-la-flota-pesquera/informacion-sobre-la-flota-pesquera/rgfp_bi_excel_2006_2025_20260127.xlsx",
+      "min_bytes": 10000000,
+      "read_bytes": 1024
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "criminalidad-municipio",
+    "intent": "Infracciones penales por tipología y trimestre en una comunidad, provincia o municipio de más de 20.000 habitantes",
+    "inputs": [
+     "ine-municipio"
+    ],
+    "steps": [
+     {
+      "source": "interior-criminalidad",
+      "do": "Índice del trimestre en sec/dynPx/inebase/index.htm?type=pcaxis&path=/DatosBalanceAnt/{AAAA}{T}/&file=pcaxis (el último en /DatosBalanceAct/)",
+      "example": "curl -s \"https://estadisticasdecriminalidad.ses.mir.es/sec/dynPx/inebase/index.htm?type=pcaxis&path=/DatosBalanceAnt/20262/&file=pcaxis\""
+     },
+     {
+      "source": "interior-criminalidad",
+      "do": "CSV con jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09006.px?nocab=1 (municipios; 09005 provincias, 09004 CCAA); cabecera Geografía;Tipología penal;Periodos:;Total, ISO-8859-15, miles con punto y decimales con coma",
+      "example": "curl -s \"https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09006.px?nocab=1\""
+     }
+    ],
+    "output": "CSV con periodo actual, anterior y variación por tipología",
+    "checks": [
+     {
+      "url": "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09006.px?nocab=1",
+      "contains": "Periodos"
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "actos-mercantiles-borme",
+    "intent": "Constituciones, nombramientos, ceses y disoluciones de sociedades publicados en el BORME",
+    "inputs": [
+     "boe-id"
+    ],
+    "steps": [
+     {
+      "source": "borme-api-sumario",
+      "do": "GET /borme/sumario/{AAAAMMDD} con Accept application/json; la sección A trae un item por provincia con identificador BORME-A-AAAA-NNN-PP (PP es el código de provincia)",
+      "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/borme/sumario/20240102\""
+     },
+     {
+      "source": "borme-api-sumario",
+      "do": "xml.php?id={BORME-A-...} devuelve los actos de la provincia (raíz documento, un par de párrafos por empresa con denominación y actos); no hay búsqueda por empresa, hay que recorrer días y provincias",
+      "example": "curl -s \"https://www.boe.es/diario_borme/xml.php?id=BORME-A-2024-1-01\""
+     },
+     {
+      "source": "boe-feeds",
+      "do": "RSS diario del BORME para vigilar novedades (ISO-8859-1)"
+     }
+    ],
+    "output": "XML por provincia y día; sin publicación sábados, domingos ni festivos (404)",
+    "checks": [
+     {
+      "url": "https://www.boe.es/datosabiertos/api/borme/sumario/20240102",
+      "headers": {
+       "Accept": "application/json"
+      },
+      "contains": "BORME-A-2024-1-01"
+     },
+     {
+      "url": "https://www.boe.es/diario_borme/xml.php?id=BORME-A-2024-1-01",
+      "contains": "<documento"
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "hospitales-catalogo",
+    "intent": "Listado de hospitales con camas, dependencia, complejo y municipio",
+    "inputs": [
+     "ine-municipio"
+    ],
+    "steps": [
+     {
+      "source": "sanidad-portal-estadistico",
+      "do": "CNH_{AAAA}.xlsx (9 hojas, 849 hospitales en 2025) con código de hospital, camas, dependencia funcional y código de municipio INE con dígito de control (6 dígitos; quitar el último para cruzar)",
+      "example": "curl -sSL -o CNH_2025.xlsx \"https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/docs/CNH_2025.xlsx\""
+     }
+    ],
+    "output": "xlsx",
+    "checks": [
+     {
+      "url": "https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/docs/CNH_2025.xlsx",
+      "min_bytes": 400000,
+      "read_bytes": 1024
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "dataset-cnmc-a-csv",
+    "intent": "Descargar un dataset de la CNMC (energía, telecomunicaciones, postal) como CSV o consultarlo por API",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "cnmc-data",
+      "do": "package_search?q={texto}&rows=1000 (210 datasets) devuelve name, title y resources[] con url y datastore_active",
+      "example": "curl -s \"https://catalogodatos.cnmc.es/api/3/action/package_search?q=comercializadoras&rows=5\""
+     },
+     {
+      "source": "cnmc-data",
+      "do": "datastore/dump/{resource_id}?format=csv vuelca el recurso entero (coma, primera columna _id); datastore_search?resource_id=&limit= consulta en JSON con campos tipados",
+      "example": "curl -s \"https://catalogodatos.cnmc.es/datastore/dump/522dcc75-b5c4-4c8d-9ec3-c8d8cf66d6b2?format=csv\""
+     }
+    ],
+    "output": "CSV o JSON del datastore",
+    "checks": [
+     {
+      "url": "https://catalogodatos.cnmc.es/api/3/action/package_search?q=comercializadoras&rows=1",
+      "contains": "\"count\""
+     },
+     {
+      "url": "https://catalogodatos.cnmc.es/datastore/dump/522dcc75-b5c4-4c8d-9ec3-c8d8cf66d6b2?format=csv",
+      "contains": "_id",
+      "read_bytes": 4096
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "convenio-colectivo-regcon",
+    "intent": "Consultar un convenio colectivo por código, denominación o CNAE en REGCON",
+    "inputs": [
+     "codigo-convenio",
+     "cnae"
+    ],
+    "steps": [
+     {
+      "source": "mites-estadisticas",
+      "do": "GET de consultaPublicaEstatal conservando cookies para obtener consulta_token_value_id; POST del formulario con codigoConvenio, denominacion, cnae2009Pub o cnae2025Pub y el token; el servidor no envía el intermedio FNMT (bundle de la guía)",
+      "example": "curl -s -c cj -b cj --cacert ca-age.pem \"https://expinterweb.mites.gob.es/regcon/pub/consultaPublicaEstatal\" | grep -o 'consulta_token_value_id\" value=\"[^\"]*\"'"
+     }
+    ],
+    "output": "HTML con la lista de convenios (sin API ni exportación localizada)",
+    "checks": [
+     {
+      "url": "https://expinterweb.mites.gob.es/regcon/pub/consultaPublicaEstatal",
+      "contains": "consulta_token_value_id",
+      "fnmt": true,
+      "read_bytes": 400000
+     }
+    ],
+    "verified": "2026-09-30"
+   },
+   {
+    "id": "deficit-y-ejecucion-presupuestaria",
+    "intent": "Déficit mensual de las Administraciones Públicas y ejecución del presupuesto del Estado",
+    "inputs": [],
+    "steps": [
+     {
+      "source": "igae-ejecucion-presupuestaria",
+      "do": "Operaciones no financieras mensuales por subsector en M_AACC_{AAAA}.xlsx (URL predecible por año) y serie anual en CAP_Serie.xlsx",
+      "example": "curl -sO \"https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AACC-M/M_AACC_2026.xlsx\""
+     },
+     {
+      "source": "igae-ejecucion-presupuestaria",
+      "do": "Ejecución mensual del presupuesto del Estado desde la página imejecucionpresupuesto.aspx (enlaces a xlsx por mes)"
+     },
+     {
+      "source": "hacienda-ovef",
+      "do": "Ejecución trimestral de las entidades locales en un xls por trimestre desde 2017"
+     }
+    ],
+    "output": "xlsx con cuadros por subsector",
+    "checks": [
+     {
+      "url": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AACC-M/M_AACC_2026.xlsx",
+      "min_bytes": 10000,
+      "read_bytes": 1024
+     }
+    ],
+    "verified": "2026-09-30"
+   }
+  ],
+  "necesidades": [
+   {
+    "need": "Sumario diario del BOE con identificador y URLs de cada disposición",
+    "source": "boe-api-sumario"
+   },
+   {
+    "need": "Texto consolidado, vigencia y versiones de una norma",
+    "source": "boe-api-legislacion-consolidada",
+    "note": "incluye normas autonómicas; los boletines autonómicos no están en el catálogo"
+   },
+   {
+    "need": "URI estable de una norma para citar o enlazar",
+    "source": "boe-eli"
+   },
+   {
+    "need": "Vigilar novedades del BOE, BORME, ayudas o licitaciones sin programar contra la API",
+    "source": "boe-feeds",
+    "note": "RSS en ISO-8859-1"
+   },
+   {
+    "need": "Actos societarios inscritos en el Registro Mercantil",
+    "source": "borme-api-sumario",
+    "note": "sin búsqueda por empresa; recorrer días y provincias"
+   },
+   {
+    "need": "Euríbor, tipos de interés y de cambio, crédito, balanza de pagos",
+    "source": "bde-estadisticas"
+   },
+   {
+    "need": "Deuda pública por Administración (Protocolo de Déficit Excesivo)",
+    "source": "bde-estadisticas",
+    "note": "capítulo SB_DEUAAPP; histórico también en airef-datos"
+   },
+   {
+    "need": "Subastas del Tesoro y deuda del Estado por instrumento y tenedor",
+    "source": "tesoro-estadisticas"
+   },
+   {
+    "need": "Previsiones macroeconómicas y estimación del PIB en tiempo real",
+    "source": "airef-datos"
+   },
+   {
+    "need": "Entidades supervisadas, hechos relevantes e informes financieros de cotizadas",
+    "source": "cnmv-registros",
+    "note": "sin API; formularios ASP.NET, XML mensual de IIC y RSS"
+   },
+   {
+    "need": "Líneas ICO y avales por beneficiario",
+    "source": "ico-datos",
+    "note": "no hay datos descargables, solo memoria y cuentas en PDF"
+   },
+   {
+    "need": "Cotizaciones bursátiles y precios de mercado (BME, OMIE)",
+    "source": null,
+    "note": "fuera del alcance actual; BME es privado y OMIE no está aún en el catálogo"
+   },
+   {
+    "need": "Renta y declarantes de IRPF por municipio, código postal o tramo",
+    "source": "aeat-estadisticas"
+   },
+   {
+    "need": "Recaudación tributaria mensual por figura",
+    "source": "aeat-estadisticas"
+   },
+   {
+    "need": "Suministro Inmediato de Información, VERI*FACTU y presentación de modelos",
+    "source": "aeat-servicios-web",
+    "note": "SOAP con certificado electrónico"
+   },
+   {
+    "need": "Presupuestos, liquidaciones y deuda viva de ayuntamientos y diputaciones",
+    "source": "hacienda-ovef"
+   },
+   {
+    "need": "Tipos de IBI, IAE e IVTM por municipio",
+    "source": "hacienda-ovef",
+    "note": "consulta web con sesión (SGFAL)"
+   },
+   {
+    "need": "Déficit de las Administraciones Públicas y ejecución del presupuesto del Estado",
+    "source": "igae-ejecucion-presupuestaria"
+   },
+   {
+    "need": "Inventario de entes del sector público (INVENTE)",
+    "source": "igae-ejecucion-presupuestaria"
+   },
+   {
+    "need": "Cualquier estadística oficial del INE (IPC, EPA, PIB, padrón, natalidad, empresas)",
+    "source": "ine-api-tempus"
+   },
+   {
+    "need": "Códigos INE de municipios, provincias y comunidades",
+    "source": "ine-codigos-territoriales"
+   },
+   {
+    "need": "Microdatos de encuestas (EPA, condiciones de vida, presupuestos familiares, censo)",
+    "source": "ine-microdatos"
+   },
+   {
+    "need": "Turismo (FRONTUR, EGATUR, ocupación hotelera)",
+    "source": "ine-api-tempus",
+    "note": "las operaciones son del INE; DATAESTUR (mincotur-industria-turismo) las reagrega con API de clave"
+   },
+   {
+    "need": "Renta por sección censal (Atlas de distribución de renta)",
+    "source": "ine-api-tempus",
+    "note": "operación del INE; localizar la tabla con TABLAS_OPERACION, no verificada en esta sesión"
+   },
+   {
+    "need": "Empresas activas por actividad y tamaño (DIRCE)",
+    "source": "ine-api-tempus"
+   },
+   {
+    "need": "Licitaciones, adjudicaciones y contratos menores de todas las Administraciones",
+    "source": "placsp-datos-abiertos"
+   },
+   {
+    "need": "Convocatorias y concesiones de subvenciones, ayudas de Estado, minimis, grandes beneficiarios",
+    "source": "bdns-api"
+   },
+   {
+    "need": "Beneficiarios de la PAC",
+    "source": "fega-beneficiarios-pac",
+    "note": "no verificable el 30/09/2026 (el servidor cierra la conexión); probar bdns-api concesiones con el órgano FEGA"
+   },
+   {
+    "need": "Empresas clasificadas para contratar (ROLECE)",
+    "source": "hacienda-registro-licitadores",
+    "note": "solo con certificado electrónico"
+   },
+   {
+    "need": "Paro registrado, demandantes y contratos por municipio",
+    "source": "sepe-estadisticas"
+   },
+   {
+    "need": "Tasa de paro, ocupados y activos (EPA)",
+    "source": "ine-api-tempus",
+    "note": "la EPA es del INE, no del SEPE"
+   },
+   {
+    "need": "Afiliación a la Seguridad Social por régimen, actividad, provincia y municipio",
+    "source": "segsocial-estadisticas"
+   },
+   {
+    "need": "Pensiones contributivas e Ingreso Mínimo Vital",
+    "source": "segsocial-estadisticas"
+   },
+   {
+    "need": "Muestra Continua de Vidas Laborales",
+    "source": "segsocial-estadisticas",
+    "note": "no se descarga; se solicita bajo convenio"
+   },
+   {
+    "need": "Convenios colectivos (REGCON), huelgas, accidentes de trabajo, regulación de empleo",
+    "source": "mites-estadisticas"
+   },
+   {
+    "need": "Salarios",
+    "source": "ine-api-tempus",
+    "note": "Encuesta de Estructura Salarial en el INE; salarios en fuentes tributarias por municipio en aeat-estadisticas (modelo190_salarios)"
+   },
+   {
+    "need": "Catálogo de datasets abiertos de todas las Administraciones",
+    "source": "datos-gob-es-api",
+    "note": "solo metadatos; el fichero vive en el portal del publicador"
+   },
+   {
+    "need": "Códigos DIR3 de unidades, entidades y oficinas",
+    "source": "dir3-directorio",
+    "note": "la API relations de face-facturas da DIR3 y NIF sin WAF"
+   },
+   {
+    "need": "NIF y relaciones de facturación de un organismo público",
+    "source": "face-facturas"
+   },
+   {
+    "need": "Boletín de empleo público y códigos SIA de procedimientos",
+    "source": "pag-administracion-gob-es"
+   },
+   {
+    "need": "Altos cargos, retribuciones, agendas y estadísticas de derecho de acceso",
+    "source": "transparencia-portal",
+    "note": "pocas descargas; contratos y subvenciones sin ficheros"
+   },
+   {
+    "need": "Datos de un inmueble o parcela por referencia catastral, dirección o coordenadas",
+    "source": "catastro-ovc",
+    "note": "bloqueo por IP tras ráfagas de unas 15 peticiones"
+   },
+   {
+    "need": "Parcelario, edificios y direcciones vectoriales por municipio (INSPIRE)",
+    "source": "catastro-ovc"
+   },
+   {
+    "need": "Ortofotos PNOA, modelos del terreno, LiDAR y límites municipales",
+    "source": "cnig-centro-descargas",
+    "note": "descargas con reCAPTCHA; WMS, WMTS y WFS sin restricción"
+   },
+   {
+    "need": "Geocodificar una dirección y obtener su código INE",
+    "source": "cnig-centro-descargas",
+    "note": "geocoder CartoCiudad"
+   },
+   {
+    "need": "Localizar cualquier servicio WMS, WFS o CSW de una Administración",
+    "source": "idee-servicios"
+   },
+   {
+    "need": "Recintos agrícolas, usos del suelo y referencia catastral rústica",
+    "source": "mapa-sigpac"
+   },
+   {
+    "need": "Predicción, observación, climatología, avisos y radar",
+    "source": "aemet-opendata",
+    "note": "clave gratuita obligatoria; el cuerpo vacío con 200 es fallo de autenticación"
+   },
+   {
+    "need": "Proyecciones de cambio climático y series centenarias",
+    "source": "aemet-otros-servicios",
+    "note": "sin descarga directa verificada"
+   },
+   {
+    "need": "Calidad del aire validada por estación y contaminante",
+    "source": "miteco-calidad-aire",
+    "note": "datos anuales validados; el tiempo real lo sirve cada comunidad autónoma, fuera del alcance"
+   },
+   {
+    "need": "Emisiones industriales por complejo (PRTR)",
+    "source": "miteco-prtr"
+   },
+   {
+    "need": "Reserva de embalses, caudales y estaciones de aforo",
+    "source": "miteco-saih-boletin-hidrologico"
+   },
+   {
+    "need": "Red Natura 2000, espacios protegidos, hábitats, humedales, inventario forestal",
+    "source": "miteco-banco-datos-naturaleza",
+    "note": "descargas con desafío ALTCHA (resuelto en la guía); los WMS de mapama están rotos"
+   },
+   {
+    "need": "Presencia de especies (ocurrencias, datasets de biodiversidad)",
+    "source": "gbif-es"
+   },
+   {
+    "need": "Precios de carburantes por gasolinera",
+    "source": "minetur-precios-carburantes"
+   },
+   {
+    "need": "Comercializadoras, cambios de suministrador, bono social, garantías de origen",
+    "source": "cnmc-data"
+   },
+   {
+    "need": "Consumo de productos petrolíferos y gas por provincia, balances energéticos",
+    "source": "miteco-energia-estadisticas",
+    "note": "series de CORES en xlsx; el ministerio publica PDF"
+   },
+   {
+    "need": "Generación eléctrica, demanda y precios del mercado (REE, OMIE)",
+    "source": null,
+    "note": "no está aún en el catálogo (REData y OMIE, siguientes por impacto)"
+   },
+   {
+    "need": "Registro de instalaciones de producción eléctrica y autoconsumo",
+    "source": "miteco-energia-estadisticas",
+    "note": "no localizada descarga abierta; PRETOR da 404"
+   },
+   {
+    "need": "Medicamentos, presentaciones, fichas técnicas y problemas de suministro",
+    "source": "aemps-cima-api"
+   },
+   {
+    "need": "Ensayos clínicos (REEC) y alertas de seguridad",
+    "source": "aemps-otros-registros",
+    "note": "sin API; el REEC exige sesión"
+   },
+   {
+    "need": "Exceso de mortalidad (MoMo), COVID-19, boletines epidemiológicos, gripe",
+    "source": "isciii-cne"
+   },
+   {
+    "need": "Hospitales, altas hospitalarias e indicadores del Sistema Nacional de Salud",
+    "source": "sanidad-portal-estadistico",
+    "note": "solo el Catálogo de Hospitales tiene descarga directa"
+   },
+   {
+    "need": "Defunciones por causa de muerte",
+    "source": "ine-api-tempus",
+    "note": "estadística del INE; Sanidad solo publica PDF"
+   },
+   {
+    "need": "Ayudas de investigación concedidas por la AEI",
+    "source": "aei-convocatorias"
+   },
+   {
+    "need": "Publicaciones científicas en acceso abierto",
+    "source": "csic-digital",
+    "note": "OAI-PMH; RECOLECTA (fecyt-recolecta) ya no expone OAI"
+   },
+   {
+    "need": "Geología, hidrogeología, puntos de agua y minería",
+    "source": "igme-geologia"
+   },
+   {
+    "need": "Terremotos recientes y catálogo sísmico",
+    "source": "ign-sismologia",
+    "note": "tablas HTML; el catálogo solo se descargó desde navegador"
+   },
+   {
+    "need": "Datos oceanográficos en tiempo real (oleaje, mareas, boyas)",
+    "source": "puertos-estado-datos",
+    "note": "Portus es una aplicación con API interna no reproducida"
+   },
+   {
+    "need": "Anuario de estadística agraria, precios percibidos y pagados, consumo alimentario",
+    "source": "mapa-estadisticas-agrarias"
+   },
+   {
+    "need": "Flota pesquera, capturas y acuicultura",
+    "source": "mapa-pesca",
+    "note": "el identificador de buque es CODIGOBUQUE, no el CFR"
+   },
+   {
+    "need": "Incidencias de tráfico, detectores, radares, zonas de bajas emisiones, puntos de recarga",
+    "source": "dgt-datex-trafico"
+   },
+   {
+    "need": "Matriculaciones, bajas, parque de vehículos y conductores (microdatos)",
+    "source": "dgt-estadisticas",
+    "note": "no localizados microdatos de accidentes, solo tablas"
+   },
+   {
+    "need": "Matrices origen-destino de movilidad por telefonía móvil",
+    "source": "mitma-opendata-movilidad",
+    "note": "el host de datos respondió 403 desde el entorno de verificación"
+   },
+   {
+    "need": "Tráfico portuario mensual por autoridad portuaria",
+    "source": "puertos-estado-datos"
+   },
+   {
+    "need": "Tráfico aéreo por aeropuerto y registro de aeronaves",
+    "source": "aesa-aviacion",
+    "note": "degradada; sin ficheros verificados"
+   },
+   {
+    "need": "Comercio exterior por producto, país y provincia",
+    "source": "datacomex",
+    "note": "API con token de usuario gratuito"
+   },
+   {
+    "need": "Inversión extranjera en España y española en el exterior",
+    "source": "datainvex",
+    "note": "aplicación ASP.NET con viewstate; sin API"
+   },
+   {
+    "need": "Estadísticas de industria, series BADASE y datos turísticos (DATAESTUR)",
+    "source": "mincotur-industria-turismo"
+   },
+   {
+    "need": "Patentes, marcas y Boletín de la Propiedad Industrial",
+    "source": "oepm-invenes",
+    "note": "bloqueado por el cortafuegos de la OEPM desde el entorno de verificación"
+   },
+   {
+    "need": "Alumnado, profesorado y centros no universitarios",
+    "source": "educacion-estadisticas-ruct",
+    "note": "EDUCAbase con el patrón PC-Axis del INE"
+   },
+   {
+    "need": "Universidades, matriculados y egresados por titulación, títulos oficiales (RUCT)",
+    "source": "educacion-estadisticas-ruct"
+   },
+   {
+    "need": "Criminalidad por tipología, comunidad, provincia y municipio",
+    "source": "interior-criminalidad"
+   },
+   {
+    "need": "Estadística judicial y sentencias",
+    "source": null,
+    "note": "Poder Judicial (CGPJ, CENDOJ) fuera del alcance actual"
+   },
+   {
+    "need": "Catálogo bibliográfico de la BNE y patrimonio digital (Hispana)",
+    "source": "bne-datos",
+    "note": "datos.bne.es bloqueado desde el entorno; Hispana por OAI-PMH"
+   },
+   {
+    "need": "Padrón, nacimientos, defunciones y migraciones",
+    "source": "ine-api-tempus"
+   },
+   {
+    "need": "Extranjeros con autorización de residencia y afiliados extranjeros",
+    "source": "segsocial-estadisticas",
+    "note": "afiliados extranjeros en EST292; las estadísticas de extranjería del Ministerio de Inclusión no están aún en el catálogo"
+   },
+   {
+    "need": "Precios de vivienda, transacciones, alquiler (SERPAVI) y suelo",
+    "source": "mivau-precios-vivienda-alquiler"
+   },
+   {
+    "need": "Índice de precios de vivienda y de alquiler",
+    "source": "ine-api-tempus"
+   },
+   {
+    "need": "Telecomunicaciones (líneas, operadores, audiovisual)",
+    "source": "cnmc-data"
+   },
+   {
+    "need": "Ayuda oficial al desarrollo y acción exterior",
+    "source": null,
+    "note": "sin fuente en el catálogo todavía"
+   }
+  ],
+  "identificadores": {
+   "ine-municipio": {
+    "format": "5 dígitos, provincia (2) + municipio (3); algunos ficheros añaden un sexto dígito de control",
+    "regex": "^\\d{5}$",
+    "example": "28079",
+    "issuer": "ine-codigos-territoriales",
+    "gotcha": "cargar siempre como texto; como entero pierde el cero inicial de Álava a Barcelona (01 a 08)",
+    "joins": [
+     {
+      "via": "cnig-centro-descargas",
+      "how": "nombre o dirección a código INE con el geocoder CartoCiudad (muniCode)"
+     },
+     {
+      "via": "catastro-ovc",
+      "how": "código catastral (locat) a INE (loine) con ObtenerMunicipios"
+     },
+     {
+      "via": "aemet-opendata",
+      "how": "las predicciones por municipio se piden con el INE de 5 dígitos sin dígito de control"
+     },
+     {
+      "via": "minetur-precios-carburantes",
+      "how": "sin equivalencia; Listados/Municipios usa IDMunicipio propio y solo comparte IDProvincia (INE)"
+     },
+     {
+      "via": "sanidad-portal-estadistico",
+      "how": "el Catálogo de Hospitales lo guarda con dígito de control (6 dígitos)"
+     }
+    ],
+    "used_by": [
+     "mapa-sigpac",
+     "ine-codigos-territoriales",
+     "miteco-calidad-aire",
+     "aemet-opendata",
+     "sanidad-portal-estadistico",
+     "catastro-ovc",
+     "cnig-centro-descargas",
+     "dgt-estadisticas",
+     "mitma-opendata-movilidad"
+    ]
+   },
+   "ine-provincia": {
+    "format": "2 dígitos, 01 a 52",
+    "regex": "^(0[1-9]|[1-4]\\d|5[0-2])$",
+    "example": "28",
+    "issuer": "ine-codigos-territoriales",
+    "gotcha": "Ceuta 51 y Melilla 52; el ISO 3166-2 (provincia_iso en los CSV COVID del ISCIII) es otro sistema",
+    "joins": [
+     {
+      "via": "minetur-precios-carburantes",
+      "how": "IDProvincia coincide con el código INE"
+     },
+     {
+      "via": "dir3-directorio",
+      "how": "catálogo de provincias con idElemento 427"
+     }
+    ],
+    "used_by": [
+     "mapa-sigpac",
+     "datacomex",
+     "minetur-precios-carburantes",
+     "miteco-energia-estadisticas",
+     "ine-codigos-territoriales",
+     "ine-microdatos",
+     "dir3-directorio",
+     "miteco-calidad-aire",
+     "sanidad-portal-estadistico",
+     "catastro-ovc",
+     "cnig-centro-descargas",
+     "dgt-estadisticas"
+    ]
+   },
+   "ccaa": {
+    "format": "2 dígitos, 01 Andalucía a 19 Melilla, en el orden del INE",
+    "regex": "^(0[1-9]|1\\d)$",
+    "example": "13",
+    "issuer": "ine-codigos-territoriales",
+    "gotcha": "el orden no es alfabético ni el de Eurostat (NUTS2 ES11...)",
+    "joins": [
+     {
+      "via": "isciii-cne",
+      "how": "MoMo usa cod_ine_ambito con este código para ambito ccaa"
+     }
+    ],
+    "used_by": [
+     "ine-codigos-territoriales",
+     "ine-microdatos",
+     "isciii-cne",
+     "sanidad-portal-estadistico",
+     "cnig-centro-descargas"
+    ]
+   },
+   "nuts": {
+    "format": "ES más 1 a 3 caracteres (ES1, ES11, ES111)",
+    "regex": "^ES[1-7]\\d{0,2}$",
+    "example": "ES300",
+    "issuer": null,
+    "gotcha": "NUTS3 coincide con la provincia salvo islas, Ceuta y Melilla; lo emite Eurostat, no hay fuente en el catálogo",
+    "joins": [],
+    "used_by": []
+   },
+   "seccion-censal": {
+    "format": "10 dígitos, municipio (5) + distrito (2) + sección (3)",
+    "regex": "^\\d{10}$",
+    "example": "2807901001",
+    "issuer": null,
+    "gotcha": "las secciones se redibujan cada año; usar la geometría del mismo año que el dato",
+    "joins": [
+     {
+      "via": "ine-api-tempus",
+      "how": "renta por sección en el Atlas de distribución de renta (operación del INE)"
+     },
+     {
+      "via": "mitma-opendata-movilidad",
+      "how": "zonificación por distritos y municipios de los estudios de movilidad (host no verificable)"
+     }
+    ],
+    "used_by": []
+   },
+   "referencia-catastral": {
+    "format": "14 caracteres alfanuméricos (parcela) o 20 (inmueble, con 4 dígitos y 2 letras de control)",
+    "regex": "^[0-9A-Z]{14}(\\d{4}[A-Z]{2})?$",
+    "example": "9872023VH5797S0001WX",
+    "issuer": "catastro-ovc",
+    "gotcha": "los códigos de municipio del Catastro son propios, no INE",
+    "joins": [
+     {
+      "via": "catastro-ovc",
+      "how": "coordenadas a referencia con Consulta_RCCOOR; datos del inmueble con Consulta_DNPRC"
+     },
+     {
+      "via": "mapa-sigpac",
+      "how": "parcela SIGPAC a referencia catastral de 14 caracteres con refcatparcela"
+     }
+    ],
+    "used_by": [
+     "mapa-sigpac",
+     "catastro-ovc"
+    ]
+   },
+   "referencia-sigpac": {
+    "format": "provincia:municipio:agregado:zona:polígono:parcela:recinto, números separados por dos puntos",
+    "regex": "^\\d{1,2}:\\d{1,3}:\\d+:\\d+:\\d+:\\d+:\\d+$",
+    "example": "28:15:0:0:3:9000:6",
+    "issuer": "mapa-sigpac",
+    "gotcha": "los códigos de provincia y municipio son los del INE; polígono y parcela coinciden con Catastro en rústica, el resto no",
+    "joins": [
+     {
+      "via": "mapa-sigpac",
+      "how": "coordenadas a recinto con refrecinbycoord; recinto a Red Natura o nitratos con intersection"
+     }
+    ],
+    "used_by": [
+     "mapa-sigpac"
+    ]
+   },
+   "idema": {
+    "format": "4 o 5 caracteres alfanuméricos",
+    "regex": "^[0-9A-Z]{4,5}$",
+    "example": "3195",
+    "issuer": "aemet-opendata",
+    "gotcha": "las predicciones no usan idema sino el código INE de municipio; inventario en valores/climatologicos/inventarioestaciones",
+    "joins": [],
+    "used_by": [
+     "aemet-opendata"
+    ]
+   },
+   "nif": {
+    "format": "DNI (8 dígitos y letra), NIE (X, Y o Z, 7 dígitos y letra) o NIF de persona jurídica (letra, 7 dígitos y control)",
+    "regex": "^(\\d{8}[A-Z]|[XYZ]\\d{7}[A-Z]|[A-HJ-NP-SUVW]\\d{7}[0-9A-J])$",
+    "example": "Q1132001G",
+    "issuer": null,
+    "gotcha": "la letra inicial indica el tipo de entidad (P ayuntamientos, Q organismos autónomos, S órganos de la AGE, G asociaciones); la BDNS ofusca los DNI",
+    "joins": [
+     {
+      "via": "bdns-api",
+      "how": "concesiones/busqueda?nifCif= devuelve las subvenciones del titular"
+     },
+     {
+      "via": "face-facturas",
+      "how": "relations trae el NIF del órgano gestor (og.identifier) junto a su DIR3"
+     },
+     {
+      "via": "aei-convocatorias",
+      "how": "columna C.I.F. del CSV de ayudas concedidas"
+     },
+     {
+      "via": "placsp-datos-abiertos",
+      "how": "cbc:ID con schemeName NIF en los documentos CODICE"
+     }
+    ],
+    "used_by": [
+     "fega-beneficiarios-pac",
+     "aei-convocatorias",
+     "bdns-api",
+     "dir3-directorio",
+     "face-facturas"
+    ]
+   },
+   "dir3": {
+    "format": "letra (E, L, A, U, I) y 8 dígitos, o dos letras (LA, EA) y 7 dígitos",
+    "regex": "^([A-Z]\\d{8}|[A-Z]{2}\\d{7})$",
+    "example": "E00003901",
+    "issuer": "dir3-directorio",
+    "gotcha": "las unidades cambian con cada reestructuración ministerial; el código antiguo queda extinguido con sucesor",
+    "joins": [
+     {
+      "via": "face-facturas",
+      "how": "nombre a DIR3 y NIF con relations?fulltext="
+     },
+     {
+      "via": "datos-gob-es-api",
+      "how": "datasets de un organismo con catalog/dataset/publisher/{dir3}.json"
+     },
+     {
+      "via": "placsp-datos-abiertos",
+      "how": "cbc:ID con schemeName DIR3 identifica el órgano de contratación"
+     }
+    ],
+    "used_by": [
+     "placsp-datos-abiertos",
+     "datos-gob-es-api",
+     "dir3-directorio",
+     "face-facturas"
+    ]
+   },
+   "sia": {
+    "format": "6 o 7 dígitos",
+    "regex": "^\\d{6,7}$",
+    "example": "200125",
+    "issuer": "pag-administracion-gob-es",
+    "gotcha": "identifica el procedimiento, no el organismo; sin descarga abierta del catálogo SIA",
+    "joins": [],
+    "used_by": []
+   },
+   "invente": {
+    "format": "código numérico del Inventario de Entes del Sector Público",
+    "regex": null,
+    "example": null,
+    "issuer": "igae-ejecucion-presupuestaria",
+    "gotcha": "formato no verificado; consultar en BasesDatos/Invente",
+    "joins": [],
+    "used_by": [
+     "bdns-api"
+    ]
+   },
+   "bdns": {
+    "format": "6 dígitos",
+    "regex": "^\\d{6}$",
+    "example": "800000",
+    "issuer": "bdns-api",
+    "gotcha": "es la clave estable de la convocatoria; el título varía y los extractos en el BOE lo citan",
+    "joins": [
+     {
+      "via": "bdns-api",
+      "how": "convocatorias?numConv= para el detalle; concesiones/busqueda?numeroConvocatoria= para sus concesiones"
+     }
+    ],
+    "used_by": [
+     "bdns-api"
+    ]
+   },
+   "cpv": {
+    "format": "8 dígitos, opcionalmente guion y dígito de control",
+    "regex": "^\\d{8}(-\\d)?$",
+    "example": "45000000-7",
+    "issuer": null,
+    "gotcha": "vocabulario europeo; en CODICE va en cbc:ItemClassificationCode",
+    "joins": [
+     {
+      "via": "boe-feeds",
+      "how": "RSS de anuncios de licitación por división CPV (canal_cpv.php)"
+     }
+    ],
+    "used_by": [
+     "placsp-datos-abiertos"
+    ]
+   },
+   "cnae": {
+    "format": "sección (letra A a U) o 2 a 4 dígitos (división, grupo, clase)",
+    "regex": "^([A-U]|\\d{2,4})$",
+    "example": "4711",
+    "issuer": null,
+    "gotcha": "CNAE 2025 sustituye a CNAE 2009 desde 2026 en Seguridad Social y REGCON; no encadenar series sin recodificar",
+    "joins": [
+     {
+      "via": "segsocial-estadisticas",
+      "how": "afiliación por CNAE a dos dígitos (EST305)"
+     },
+     {
+      "via": "mites-estadisticas",
+      "how": "REGCON filtra por cnae2009Pub y cnae2025Pub"
+     },
+     {
+      "via": "miteco-prtr",
+      "how": "inventario de complejos industriales con CNAE"
+     }
+    ],
+    "used_by": [
+     "mites-estadisticas",
+     "segsocial-estadisticas",
+     "miteco-prtr"
+    ]
+   },
+   "codigo-convenio": {
+    "format": "14 dígitos",
+    "regex": "^\\d{14}$",
+    "example": null,
+    "issuer": "mites-estadisticas",
+    "gotcha": "se consulta en REGCON con codigoConvenio; ejemplo no verificado en esta sesión",
+    "joins": [],
+    "used_by": [
+     "mites-estadisticas"
+    ]
+   },
+   "cn-medicamento": {
+    "format": "6 dígitos",
+    "regex": "^\\d{6}$",
+    "example": "708201",
+    "issuer": "aemps-cima-api",
+    "gotcha": "identifica la presentación; el nregistro identifica el medicamento",
+    "joins": [
+     {
+      "via": "aemps-cima-api",
+      "how": "medicamento?cn= devuelve el nregistro y todas las presentaciones; psuministro lista problemas por cn"
+     }
+    ],
+    "used_by": [
+     "aemps-cima-api"
+    ]
+   },
+   "boe-id": {
+    "format": "BOE-A-AAAA-NNNNN (disposición), BOE-B-AAAA-NNNNN (anuncio), BORME-A-AAAA-NNN-PP (PP código de provincia)",
+    "regex": "^(BOE-[ABC]-\\d{4}-\\d{1,6}|BORME-[ABC]-\\d{4}-\\d{1,5}(-\\d{2})?)$",
+    "example": "BOE-A-1978-31229",
+    "issuer": "boe-api-sumario",
+    "gotcha": "el número no lleva ceros a la izquierda (BOE-A-2024-87)",
+    "joins": [
+     {
+      "via": "boe-api-legislacion-consolidada",
+      "how": "/id/{boe-id}/metadatos devuelve url_eli y vigencia"
+     },
+     {
+      "via": "boe-api-sumario",
+      "how": "xml.php?id= devuelve el texto completo"
+     }
+    ],
+    "used_by": [
+     "boe-api-legislacion-consolidada",
+     "boe-api-sumario",
+     "boe-eli",
+     "borme-api-sumario"
+    ]
+   },
+   "eli": {
+    "format": "URI https://www.boe.es/eli/es/{tipo}/{AAAA}/{MM}/{DD}/{num} con sufijo /con (consolidado) o /dof (publicado)",
+    "regex": "^https://www\\.boe\\.es/eli/es(-[a-z]{2})?/[a-z]+/\\d{4}/\\d{2}/\\d{2}/[^/]+(/(con|dof))?$",
+    "example": "https://www.boe.es/eli/es/lo/2018/12/05/3/con",
+    "issuer": "boe-eli",
+    "gotcha": "el sufijo cambia la versión, no la norma; sin sufijo equivale a dof",
+    "joins": [
+     {
+      "via": "boe-api-legislacion-consolidada",
+      "how": "url_eli en los metadatos de cada norma"
+     }
+    ],
+    "used_by": [
+     "boe-api-legislacion-consolidada",
+     "boe-eli"
+    ]
+   }
+  },
+  "rutas_muertas": [
+   {
+    "old": "https://www.airef.es/es/datalab/",
+    "status": "redirect",
+    "new": "https://www.airef.es/es/datalab/datos-economicos/observatorio-de-deuda/",
+    "source": "airef-datos",
+    "note": "redirige con 301 a /ca/datalab-2/",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.airef.es/es/previsiones/",
+    "status": "redirect",
+    "new": "https://www.airef.es/es/datalab/previsiones-del-pib-en-tiempo-real/",
+    "source": "airef-datos",
+    "note": "redirige a las previsiones demográficas de 2018",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.cnmv.es/portal/Consultas/Busqueda.aspx",
+    "status": 400,
+    "new": "https://www.cnmv.es/portal/hr/busquedahr.aspx?division=2",
+    "source": "cnmv-registros",
+    "note": "redirige a la ruta sin .aspx, que responde 400; division 2 es información privilegiada y 3 otra información relevante",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.cnmv.es/portal/HR/ResultadoBusquedaHR.aspx",
+    "status": 400,
+    "new": "https://www.cnmv.es/portal/hr/busquedahr.aspx?division=3",
+    "source": "cnmv-registros",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.cnmv.es/portal/RSS/",
+    "status": 403,
+    "new": "https://www.cnmv.es/portal/RSS/RSS.asmx/GetDatos?iID=1",
+    "source": "cnmv-registros",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.ico.es/web/ico/estadisticas",
+    "status": "redirect",
+    "new": null,
+    "source": "ico-datos",
+    "note": "redirige a la portada; el ICO no publica estadísticas descargables",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.ico.es/web/ico/transparencia",
+    "status": "redirect",
+    "new": "https://www.ico.es/web/guest/ico/informe-anual",
+    "source": "ico-datos",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.mites.gob.es/estadisticas/cct/welcome.htm",
+    "status": "moved",
+    "new": "https://www.mites.gob.es/es/estadisticas/condiciones_trabajo_relac_laborales/CCT/welcome.htm",
+    "source": "mites-estadisticas",
+    "note": "responde 200 con una página de aviso sin datos; igual para /estadisticas/eat/welcome.htm",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://administracionelectronica.gob.es/ctt/dir3",
+    "status": "redirect",
+    "new": "https://administracionelectronica.gob.es/ctt/verPestanaGeneral.htm?idIniciativa=dir3",
+    "source": "dir3-directorio",
+    "note": "página de 1,4 KB que redirige por script; /ctt/dir3/descargas va a verPestanaDescargas.htm?idIniciativa=dir3",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://face.gob.es/es/directorio/administraciones",
+    "status": "moved",
+    "new": "https://proveedores.face.gob.es/api/v1/relations",
+    "source": "face-facturas",
+    "note": "face.gob.es es solo consulta histórica desde el 27/02/2026; la API y el portal viven en proveedores.face.gob.es",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://administracion.gob.es/pag_Home/",
+    "status": "redirect",
+    "new": "https://administracion.gob.es/",
+    "source": "pag-administracion-gob-es",
+    "note": "cualquier ruta bajo pag_Home/ redirige o da 404; las nuevas son cortas (/empleopublico/boletin, /ayudas/boletin, /espanaadmon/sia)",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://transparencia.gob.es/transparencia/transparencia_Home/index.html",
+    "status": "redirect",
+    "new": "https://transparencia.gob.es/",
+    "source": "transparencia-portal",
+    "note": "portal rediseñado; contenidos bajo /publicidad-activa/por-materias/ y /derecho-acceso/",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.hacienda.gob.es/es-ES/CDI/Paginas/OVEELL/OVEntidadesLocales.aspx",
+    "status": 404,
+    "new": "https://www.hacienda.gob.es/es-ES/Areas%20Tematicas/Administracion%20Electronica/OVEELL/Paginas/OVEntidadesLocales.aspx",
+    "source": "hacienda-ovef",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadPublica/CPE/EjecucionPresupuestaria/Paginas/imMensualEstado.aspx",
+    "status": 404,
+    "new": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadPublica/CPE/EjecucionPresupuestaria/Paginas/imejecucionpresupuesto.aspx",
+    "source": "igae-ejecucion-presupuestaria",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://pap.hacienda.gob.es/invente2/",
+    "status": "blocked",
+    "new": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/BasesDatos/Invente/Paginas/inicio.aspx",
+    "source": "igae-ejecucion-presupuestaria",
+    "note": "rechazado por el WAF en la verificación; el 30/09/2026 ni siquiera se estableció la conexión",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=resultados&idp=1254734710990",
+    "status": 404,
+    "new": "https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=ultiDatos&idp=1254734710990",
+    "source": "ine-codigos-territoriales",
+    "note": "la relación de municipios cuelga de menu=ultiDatos; los xlsx tienen URL fija en daco/daco42/codmun/",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.mapama.gob.es/app/descargas/descargafichero.aspx",
+    "status": 404,
+    "new": "https://gis.miteco.gob.es/descargas/app/DescargaFichero",
+    "source": "miteco-banco-datos-naturaleza",
+    "note": "es la URL de los recursos ZIP del catálogo CKAN de MITECO; redirige a descargas-gis-miteco/descargafichero, que da 404",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.mapama.gob.es/",
+    "status": "redirect",
+    "new": "https://www.miteco.gob.es/",
+    "source": "miteco-banco-datos-naturaleza",
+    "note": "el dominio antiguo redirige a mapa.gob.es (agricultura); lo ambiental está en miteco.gob.es",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/calidad-del-aire/evaluacion-datos/datos.html",
+    "status": 404,
+    "new": "https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/evaluacion-y-datos-de-calidad-del-aire/datos.html",
+    "source": "miteco-calidad-aire",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://sig.mapama.gob.es/calidad-aire/",
+    "status": "redirect",
+    "new": "https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/evaluacion-y-datos-de-calidad-del-aire/datos.html",
+    "source": "miteco-calidad-aire",
+    "note": "redirige al índice de visores de mapa.gob.es; igual sig.mapama.gob.es/redes-seguimiento/",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://wms.mapama.gob.es/sig/",
+    "status": "error",
+    "new": "https://gis.miteco.gob.es/descargas/app/DescargaFichero",
+    "source": "miteco-banco-datos-naturaleza",
+    "note": "todos los WMS bajo wms.mapama.gob.es/sig/ responden NullReferenceException; descargar la capa o usar sigpac-hubcloud.es para Red Natura",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "http://www.prtr-es.es/",
+    "status": "error",
+    "new": "https://prtr-es.miteco.gob.es/",
+    "source": "miteco-prtr",
+    "note": "503 el 30/09/2026 y 404 con certificado incorrecto en las pruebas anteriores",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/historico-de-boletines.html",
+    "status": 404,
+    "new": "https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/Historico-de-embalses/BD-Embalses.zip",
+    "source": "miteco-saih-boletin-hidrologico",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://data.cnmc.es/api/3/action/package_search",
+    "status": 404,
+    "new": "https://catalogodatos.cnmc.es/api/3/action/package_search",
+    "source": "cnmc-data",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://energia.gob.es/balances/Balances/Paginas/Balances.aspx",
+    "status": "redirect",
+    "new": "https://www.miteco.gob.es/es/energia/estrategia-normativa/balances/balances.html",
+    "source": "miteco-energia-estadisticas",
+    "note": "todo energia.gob.es redirige a miteco.gob.es/es/energia; las páginas SharePoint (Paginas/*.aspx) dan 404 allí",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://sedeaplicaciones.minetur.gob.es/PRETOR",
+    "status": 404,
+    "new": null,
+    "source": "miteco-energia-estadisticas",
+    "note": "registro de instalaciones de producción eléctrica; no se localizó sustituto con descarga",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.aemps.gob.es/informa/",
+    "status": 403,
+    "new": "https://www.aemps.gob.es/comunicacion/notas-informativas/notas-informativas-aemps/",
+    "source": "aemps-otros-registros",
+    "note": "el índice da 403 con cualquier User-Agent; cada nota bajo /informa/{slug}/ sí responde",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://cne.isciii.es/servicios/renave",
+    "status": 404,
+    "new": "https://cne.isciii.es/servicios/enfermedades-transmisibles/objetivos-boletines",
+    "source": "isciii-cne",
+    "note": "igual /servicios/renave/boletines; los documentos cuelgan de /documents/d/cne/{slug}",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/home.htm",
+    "status": 404,
+    "new": "https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/UltDatos.htm",
+    "source": "sanidad-portal-estadistico",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.sanidad.gob.es/ciudadanos/prestaciones/centrosServiciosSNS/hospitales/home.htm",
+    "status": "redirect",
+    "new": "https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/home.htm",
+    "source": "sanidad-portal-estadistico",
+    "note": "responde 200 con un meta refresh, no con 30x",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.aei.gob.es/datos-abiertos",
+    "status": 404,
+    "new": "https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All",
+    "source": "aei-convocatorias",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://digital.csic.es/rest/",
+    "status": "blocked",
+    "new": "https://digital.csic.es/dspace-oai/request",
+    "source": "csic-digital",
+    "note": "filtro antibots Anubis (200 con página de prueba de trabajo en JavaScript); el OAI-PMH queda fuera del filtro",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://recolecta.fecyt.es/oai",
+    "status": 404,
+    "new": null,
+    "source": "fecyt-recolecta",
+    "note": "también /oai/request, /oai-pmh y /oai/openaire; cosechar cada repositorio por separado (csic-digital y otros)",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://buscador.recolecta.fecyt.es/",
+    "status": "blocked",
+    "new": null,
+    "source": "fecyt-recolecta",
+    "note": "comprobación de navegador Voight-Kampff con 403",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://registros.gbif.es/",
+    "status": "blocked",
+    "new": "https://api.gbif.org/v1/occurrence/search?country=ES",
+    "source": "gbif-es",
+    "note": "418 con página de comprobación antibots; api.gbif.es presenta un certificado que no coincide con el host",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.ign.es/resources/sismologia/tproximos/",
+    "status": 404,
+    "new": "https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/get10dias",
+    "source": "ign-sismologia",
+    "note": "el RSS y el KML de últimos terremotos que colgaban aquí dan 404 (el directorio, 403); www.ign.es/fdsnws no existe",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.fega.gob.es/",
+    "status": "reset",
+    "new": null,
+    "source": "fega-beneficiarios-pac",
+    "note": "el servidor cierra la conexión tras el TLS con cualquier User-Agent (también fega.gob.es y www.fega.es); las ayudas están en bdns-api y el SIGPAC en mapa-sigpac",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/economia/precios-percibidos-pagados-salarios/",
+    "status": 404,
+    "new": "https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/economia/precios-percibidos-pagados/precios-percibidos-por-los-agricultores-y-ganaderos",
+    "source": "mapa-estadisticas-agrarias",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.mapa.gob.es/es/pesca/temas/registro-flota/censo-flota-pesquera-operativa/",
+    "status": 404,
+    "new": "https://www.mapa.gob.es/es/pesca/temas/registro-flota/informacion-sobre-flota-pesquera",
+    "source": "mapa-pesca",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.mapa.gob.es/es/cartografia-y-sig/ide/descargas/agricultura/sigpac/descarga.aspx",
+    "status": 404,
+    "new": "https://sigpac-hubcloud.es/",
+    "source": "mapa-sigpac",
+    "note": "redirige a la ruta sin .aspx, que da 404; descargas, WMS, MVT y API en sigpac-hubcloud.es",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://infocar.dgt.es/datex2/dgt/SituationPublication/all/content.xml",
+    "status": 404,
+    "new": "https://nap.dgt.es/datex2/v3/dgt/SituationPublication/datex2_v37.xml",
+    "source": "dgt-datex-trafico",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://nap.dgt.es/api/3/action/package_search",
+    "status": 403,
+    "new": "https://nap.dgt.es/dataset",
+    "source": "dgt-datex-trafico",
+    "note": "la API CKAN del NAP está cerrada; el catálogo se lee en HTML",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://sedeapl.dgt.gob.es/WEB_IEST_CONSULTA/",
+    "status": "redirect",
+    "new": "https://www.dgt.es/menusecundario/dgt-en-cifras/",
+    "source": "dgt-estadisticas",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.dgt.es/menusecundario/dgt-en-cifras/matraba-listados/transferencias-automoviles-mensual.html",
+    "status": 404,
+    "new": null,
+    "source": "dgt-estadisticas",
+    "note": "solo existen los listados de matriculaciones y bajas (diario y mensual)",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://movilidad-opendata.mitma.es/",
+    "status": "blocked",
+    "new": null,
+    "source": "mitma-opendata-movilidad",
+    "note": "403 con cuerpo Internal Server Error para cualquier ruta desde el entorno de verificación; posible bloqueo por red",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.puertos.es/es-es/estadisticas/Paginas/estadistica_mensual.aspx",
+    "status": "redirect",
+    "new": "https://www.puertos.es/datos/estadisticas/mensuales",
+    "source": "puertos-estado-datos",
+    "note": "todas las rutas SharePoint es-es/estadisticas/Paginas/*.aspx redirigen a /datos/estadisticas/",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.mincotur.gob.es/es-es/IndicadoresyEstadisticas/Paginas/Estadisticas.aspx",
+    "status": 404,
+    "new": "https://industria.gob.es/es-es/estadisticas",
+    "source": "mincotur-industria-turismo",
+    "note": "redirige a mintur.gob.es con la misma ruta, que da 404",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://consultas2.oepm.es/InvenesWeb/faces/busquedaInternet.jsp",
+    "status": "blocked",
+    "new": null,
+    "source": "oepm-invenes",
+    "note": "F5 rechaza toda petición con 403 y un support ID; ninguna ruta de la OEPM se pudo verificar",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "http://datos.bne.es/",
+    "status": "blocked",
+    "new": "https://hispana.mcu.es/oai/oai.cmd",
+    "source": "bne-datos",
+    "note": "403 con una página de bloqueo de 1,3 MB (también www.bne.es/es/catalogos/datos-enlazados); Hispana sí responde",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://hispana.mcu.es/es/oai",
+    "status": 404,
+    "new": "https://hispana.mcu.es/oai/oai.cmd",
+    "source": "bne-datos",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm",
+    "status": "redirect",
+    "new": "https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm?type=pcaxis&path=/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos&file=pcaxis&l=s0",
+    "source": "educacion-estadisticas-ruct",
+    "note": "la raíz sin path redirige a un 404 del ministerio; con path completo funciona",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.universidades.gob.es/",
+    "status": "redirect",
+    "new": "https://www.ciencia.gob.es/Ministerio/Estadisticas/SIIU/Estudiantes.html",
+    "source": "educacion-estadisticas-ruct",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.mivau.gob.es/vivienda/estadisticas",
+    "status": 404,
+    "new": "https://www.mivau.gob.es/el-ministerio/observatorios-y-estadisticas",
+    "source": "mivau-precios-vivienda-alquiler",
+    "note": "los datos siguen en apps.fomento.gob.es, dominio antiguo sin redirección al nuevo",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios/2020/enero-2020.html",
+    "status": 404,
+    "new": "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios-20-45/2020/enero.html",
+    "source": "sepe-estadisticas",
+    "note": "la ruta municipios/{AAAA}/{mes}-{AAAA}.html solo existe hasta 2019",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://ftpdatos.aemet.es/",
+    "status": "dns",
+    "new": "https://opendata.aemet.es/opendata/api",
+    "source": "aemet-otros-servicios",
+    "note": "el FTP histórico de AEMET no resuelve",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://app.bde.es/bie_www/",
+    "status": "blocked",
+    "new": "https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472",
+    "source": "bde-estadisticas",
+    "note": "el buscador BIEST responde Request Rejected a las consultas automatizadas; la API bierest y los CSV no tienen ese bloqueo",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://datos.gob.es/virtuoso/sparql",
+    "status": "blocked",
+    "new": "https://datos.gob.es/apidata/catalog/dataset.json?_pageSize=100&_page=0",
+    "source": "datos-gob-es-api",
+    "note": "403 del WAF en todos los intentos; la API REST pasa con reintentos",
+    "checked": "2026-09-30"
+   },
+   {
+    "old": "https://registrodelicitadores.gob.es/rolece/public/consulta_publica",
+    "status": 404,
+    "new": "https://visor.registrodelicitadores.gob.es/",
+    "source": "hacienda-registro-licitadores",
+    "note": "ya no hay consulta pública sin certificado; solo el visor de certificados y el DEUC",
+    "checked": "2026-09-30"
+   }
+  ]
+ }
 }

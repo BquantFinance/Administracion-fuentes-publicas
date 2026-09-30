@@ -2,6 +2,11 @@
 
 Sector `meteorologia-clima` · 2 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Predicción, observación, climatología, avisos y radar → `aemet-opendata` (clave gratuita obligatoria; el cuerpo vacío con 200 es fallo de autenticación)
+- Proyecciones de cambio climático y series centenarias → `aemet-otros-servicios` (sin descarga directa verificada)
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [aemet-opendata](aemet-opendata.yaml) | AEMET OpenData – API meteorológica y climatológica | api-rest | api-key | json, xml, csv, png | hourly | latin1 | — |

@@ -13,6 +13,13 @@
    ```
    y sube también los ficheros generados. El CI falla si no están al día.
 
+## Añadir una receta, una necesidad o una ruta muerta
+
+Los índices de `indices/*.yaml` siguen las mismas reglas que las fichas: solo hechos probados, ids del vocabulario y de
+las fichas, castellano en valores. Una receta necesita al menos un `check` que pase con `python scripts/check_recetas.py
+--only <id>`; una ruta muerta necesita la fecha de la prueba y, si existe, la sustituta. `validate.py` rechaza
+referencias a fichas o identificadores que no existen.
+
 ## Criterios de redacción
 
 Las fichas las leen agentes con presupuesto de tokens. Por eso:

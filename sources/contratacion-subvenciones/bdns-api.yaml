@@ -41,6 +41,7 @@ rate_limit: No documentado; pageSize se limita en silencio a 10000 (4 MB y 6 s p
 quirks: [latin1, errors-html-or-xml]
 ids: [bdns, nif, invente]
 gotchas:
+  - "Con un Accept de navegador (que incluye application/xml) la API responde XML (raíz ObjectNode) con el mismo contenido; pedir Accept: application/json para JSON."
   - Las fechas de filtro van en dd/mm/aaaa; en ISO (2026-09-01) responde 400 con JSON de campos codigo y errores.
   - pageSize mayor de 10000 no da error, devuelve 10000. La respuesta es un Page de Spring (content, totalElements, totalPages, last) más el campo advertencia con el aviso legal.
   - Los beneficiarios personas físicas van con el DNI parcialmente oculto (***1490**) y nombre; las jurídicas con el NIF completo delante del nombre, todo en el mismo campo beneficiario.

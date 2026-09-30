@@ -1,0 +1,195 @@
+# Identificadores que cruzan datasets: formato, expresión regular, ejemplo, quién los emite y cómo convertirlos.
+# Las claves son las del vocabulario ids de schema/vocab.yaml; build.py añade qué fichas usa cada una.
+# joins: vía verificada para pasar de este identificador a otro (via es el id de una ficha).
+
+ine-municipio:
+  format: 5 dígitos, provincia (2) + municipio (3); algunos ficheros añaden un sexto dígito de control
+  regex: '^\d{5}$'
+  example: "28079"
+  issuer: ine-codigos-territoriales
+  gotcha: cargar siempre como texto; como entero pierde el cero inicial de Álava a Barcelona (01 a 08)
+  joins:
+    - via: cnig-centro-descargas
+      how: nombre o dirección a código INE con el geocoder CartoCiudad (muniCode)
+    - via: catastro-ovc
+      how: código catastral (locat) a INE (loine) con ObtenerMunicipios
+    - via: aemet-opendata
+      how: las predicciones por municipio se piden con el INE de 5 dígitos sin dígito de control
+    - via: minetur-precios-carburantes
+      how: sin equivalencia; Listados/Municipios usa IDMunicipio propio y solo comparte IDProvincia (INE)
+    - via: sanidad-portal-estadistico
+      how: el Catálogo de Hospitales lo guarda con dígito de control (6 dígitos)
+ine-provincia:
+  format: 2 dígitos, 01 a 52
+  regex: '^(0[1-9]|[1-4]\d|5[0-2])$'
+  example: "28"
+  issuer: ine-codigos-territoriales
+  gotcha: Ceuta 51 y Melilla 52; el ISO 3166-2 (provincia_iso en los CSV COVID del ISCIII) es otro sistema
+  joins:
+    - via: minetur-precios-carburantes
+      how: IDProvincia coincide con el código INE
+    - via: dir3-directorio
+      how: catálogo de provincias con idElemento 427
+ccaa:
+  format: 2 dígitos, 01 Andalucía a 19 Melilla, en el orden del INE
+  regex: '^(0[1-9]|1\d)$'
+  example: "13"
+  issuer: ine-codigos-territoriales
+  gotcha: el orden no es alfabético ni el de Eurostat (NUTS2 ES11...)
+  joins:
+    - via: isciii-cne
+      how: MoMo usa cod_ine_ambito con este código para ambito ccaa
+nuts:
+  format: ES más 1 a 3 caracteres (ES1, ES11, ES111)
+  regex: '^ES[1-7]\d{0,2}$'
+  example: ES300
+  issuer: null
+  gotcha: NUTS3 coincide con la provincia salvo islas, Ceuta y Melilla; lo emite Eurostat, no hay fuente en el catálogo
+  joins: []
+seccion-censal:
+  format: 10 dígitos, municipio (5) + distrito (2) + sección (3)
+  regex: '^\d{10}$'
+  example: "2807901001"
+  issuer: null
+  gotcha: las secciones se redibujan cada año; usar la geometría del mismo año que el dato
+  joins:
+    - via: ine-api-tempus
+      how: renta por sección en el Atlas de distribución de renta (operación del INE)
+    - via: mitma-opendata-movilidad
+      how: zonificación por distritos y municipios de los estudios de movilidad (host no verificable)
+referencia-catastral:
+  format: 14 caracteres alfanuméricos (parcela) o 20 (inmueble, con 4 dígitos y 2 letras de control)
+  regex: '^[0-9A-Z]{14}(\d{4}[A-Z]{2})?$'
+  example: 9872023VH5797S0001WX
+  issuer: catastro-ovc
+  gotcha: los códigos de municipio del Catastro son propios, no INE
+  joins:
+    - via: catastro-ovc
+      how: coordenadas a referencia con Consulta_RCCOOR; datos del inmueble con Consulta_DNPRC
+    - via: mapa-sigpac
+      how: parcela SIGPAC a referencia catastral de 14 caracteres con refcatparcela
+referencia-sigpac:
+  format: provincia:municipio:agregado:zona:polígono:parcela:recinto, números separados por dos puntos
+  regex: '^\d{1,2}:\d{1,3}:\d+:\d+:\d+:\d+:\d+$'
+  example: 28:15:0:0:3:9000:6
+  issuer: mapa-sigpac
+  gotcha: los códigos de provincia y municipio son los del INE; polígono y parcela coinciden con Catastro en rústica, el resto no
+  joins:
+    - via: mapa-sigpac
+      how: coordenadas a recinto con refrecinbycoord; recinto a Red Natura o nitratos con intersection
+idema:
+  format: 4 o 5 caracteres alfanuméricos
+  regex: '^[0-9A-Z]{4,5}$'
+  example: "3195"
+  issuer: aemet-opendata
+  gotcha: las predicciones no usan idema sino el código INE de municipio; inventario en valores/climatologicos/inventarioestaciones
+  joins: []
+nif:
+  format: DNI (8 dígitos y letra), NIE (X, Y o Z, 7 dígitos y letra) o NIF de persona jurídica (letra, 7 dígitos y control)
+  regex: '^(\d{8}[A-Z]|[XYZ]\d{7}[A-Z]|[A-HJ-NP-SUVW]\d{7}[0-9A-J])$'
+  example: Q1132001G
+  issuer: null
+  gotcha: la letra inicial indica el tipo de entidad (P ayuntamientos, Q organismos autónomos, S órganos de la AGE, G asociaciones); la BDNS ofusca los DNI
+  joins:
+    - via: bdns-api
+      how: concesiones/busqueda?nifCif= devuelve las subvenciones del titular
+    - via: face-facturas
+      how: relations trae el NIF del órgano gestor (og.identifier) junto a su DIR3
+    - via: aei-convocatorias
+      how: columna C.I.F. del CSV de ayudas concedidas
+    - via: placsp-datos-abiertos
+      how: cbc:ID con schemeName NIF en los documentos CODICE
+dir3:
+  format: letra (E, L, A, U, I) y 8 dígitos, o dos letras (LA, EA) y 7 dígitos
+  regex: '^([A-Z]\d{8}|[A-Z]{2}\d{7})$'
+  example: E00003901
+  issuer: dir3-directorio
+  gotcha: las unidades cambian con cada reestructuración ministerial; el código antiguo queda extinguido con sucesor
+  joins:
+    - via: face-facturas
+      how: nombre a DIR3 y NIF con relations?fulltext=
+    - via: datos-gob-es-api
+      how: datasets de un organismo con catalog/dataset/publisher/{dir3}.json
+    - via: placsp-datos-abiertos
+      how: cbc:ID con schemeName DIR3 identifica el órgano de contratación
+sia:
+  format: 6 o 7 dígitos
+  regex: '^\d{6,7}$'
+  example: "200125"
+  issuer: pag-administracion-gob-es
+  gotcha: identifica el procedimiento, no el organismo; sin descarga abierta del catálogo SIA
+  joins: []
+invente:
+  format: código numérico del Inventario de Entes del Sector Público
+  regex: null
+  example: null
+  issuer: igae-ejecucion-presupuestaria
+  gotcha: formato no verificado; consultar en BasesDatos/Invente
+  joins: []
+bdns:
+  format: 6 dígitos
+  regex: '^\d{6}$'
+  example: "800000"
+  issuer: bdns-api
+  gotcha: es la clave estable de la convocatoria; el título varía y los extractos en el BOE lo citan
+  joins:
+    - via: bdns-api
+      how: convocatorias?numConv= para el detalle; concesiones/busqueda?numeroConvocatoria= para sus concesiones
+cpv:
+  format: 8 dígitos, opcionalmente guion y dígito de control
+  regex: '^\d{8}(-\d)?$'
+  example: 45000000-7
+  issuer: null
+  gotcha: vocabulario europeo; en CODICE va en cbc:ItemClassificationCode
+  joins:
+    - via: boe-feeds
+      how: RSS de anuncios de licitación por división CPV (canal_cpv.php)
+cnae:
+  format: sección (letra A a U) o 2 a 4 dígitos (división, grupo, clase)
+  regex: '^([A-U]|\d{2,4})$'
+  example: "4711"
+  issuer: null
+  gotcha: CNAE 2025 sustituye a CNAE 2009 desde 2026 en Seguridad Social y REGCON; no encadenar series sin recodificar
+  joins:
+    - via: segsocial-estadisticas
+      how: afiliación por CNAE a dos dígitos (EST305)
+    - via: mites-estadisticas
+      how: REGCON filtra por cnae2009Pub y cnae2025Pub
+    - via: miteco-prtr
+      how: inventario de complejos industriales con CNAE
+codigo-convenio:
+  format: 14 dígitos
+  regex: '^\d{14}$'
+  example: null
+  issuer: mites-estadisticas
+  gotcha: se consulta en REGCON con codigoConvenio; ejemplo no verificado en esta sesión
+  joins: []
+cn-medicamento:
+  format: 6 dígitos
+  regex: '^\d{6}$'
+  example: "708201"
+  issuer: aemps-cima-api
+  gotcha: identifica la presentación; el nregistro identifica el medicamento
+  joins:
+    - via: aemps-cima-api
+      how: medicamento?cn= devuelve el nregistro y todas las presentaciones; psuministro lista problemas por cn
+boe-id:
+  format: BOE-A-AAAA-NNNNN (disposición), BOE-B-AAAA-NNNNN (anuncio), BORME-A-AAAA-NNN-PP (PP código de provincia)
+  regex: '^(BOE-[ABC]-\d{4}-\d{1,6}|BORME-[ABC]-\d{4}-\d{1,5}(-\d{2})?)$'
+  example: BOE-A-1978-31229
+  issuer: boe-api-sumario
+  gotcha: el número no lleva ceros a la izquierda (BOE-A-2024-87)
+  joins:
+    - via: boe-api-legislacion-consolidada
+      how: /id/{boe-id}/metadatos devuelve url_eli y vigencia
+    - via: boe-api-sumario
+      how: xml.php?id= devuelve el texto completo
+eli:
+  format: URI https://www.boe.es/eli/es/{tipo}/{AAAA}/{MM}/{DD}/{num} con sufijo /con (consolidado) o /dof (publicado)
+  regex: '^https://www\.boe\.es/eli/es(-[a-z]{2})?/[a-z]+/\d{4}/\d{2}/\d{2}/[^/]+(/(con|dof))?$'
+  example: https://www.boe.es/eli/es/lo/2018/12/05/3/con
+  issuer: boe-eli
+  gotcha: el sufijo cambia la versión, no la norma; sin sufijo equivale a dof
+  joins:
+    - via: boe-api-legislacion-consolidada
+      how: url_eli en los metadatos de cada norma

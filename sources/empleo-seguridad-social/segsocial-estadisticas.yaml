@@ -35,6 +35,7 @@ quirks: [waf-intermittent-403, url-drift, static-html]
 ids: [cnae]
 gotchas:
   - El WAF (Akamai) responde 403 "Acceso denegado" a una de cada dos o tres peticiones, también en las descargas; reintentar la misma URL tras 2 a 5 segundos funciona.
+  - Enviar también Accept de navegador (text/html,application/xhtml+xml...); con el Accept */* de requests recibí 403 en 15 peticiones seguidas el 30/09/2026 y 200 al cambiarlo.
   - Los códigos ESTnn son estables y se anidan (EST8/EST10/EST290); las hojas finales llevan un uuid en la ruta y cada fichero otro uuid distinto en wps/wcm/connect.
   - Afiliación media mensual (EST290) y afiliación a último día (EST305) son series distintas con cifras distintas.
   - Los xlsx tienen varias hojas con fila de título y cabeceras combinadas; no leer como CSV ni con header=0.

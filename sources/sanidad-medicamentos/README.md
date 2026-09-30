@@ -2,6 +2,13 @@
 
 Sector `sanidad-medicamentos` · 4 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Medicamentos, presentaciones, fichas técnicas y problemas de suministro → `aemps-cima-api`
+- Ensayos clínicos (REEC) y alertas de seguridad → `aemps-otros-registros` (sin API; el REEC exige sesión)
+- Exceso de mortalidad (MoMo), COVID-19, boletines epidemiológicos, gripe → `isciii-cne`
+- Hospitales, altas hospitalarias e indicadores del Sistema Nacional de Salud → `sanidad-portal-estadistico` (solo el Catálogo de Hospitales tiene descarga directa)
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [aemps-cima-api](aemps-cima-api.yaml) | AEMPS CIMA – API REST de medicamentos autorizados y nomenclátor de prescripción | api-rest, download | none | json, xml, pdf, html, zip | daily | — | 2026-09-30 |

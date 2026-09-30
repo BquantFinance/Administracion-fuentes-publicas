@@ -36,3 +36,16 @@ def load_sources() -> list[dict]:
 def die(msg: str) -> None:
     print(f"ERROR: {msg}", file=sys.stderr)
     sys.exit(1)
+
+INDICES = ROOT / "indices"
+INDEX_FILES = ("recetas", "rutas-muertas", "identificadores", "necesidades")
+
+
+def load_indices() -> dict:
+    """Carga los cuatro índices agregados de indices/*.yaml (listas, salvo identificadores que es un dict)."""
+    out = {}
+    for name in INDEX_FILES:
+        path = INDICES / f"{name}.yaml"
+        with path.open(encoding="utf-8") as fh:
+            out[name] = yaml.safe_load(fh) or ([] if name != "identificadores" else {})
+    return out

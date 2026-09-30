@@ -2,6 +2,15 @@
 
 Sector `economia-finanzas` · 5 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Euríbor, tipos de interés y de cambio, crédito, balanza de pagos → `bde-estadisticas`
+- Deuda pública por Administración (Protocolo de Déficit Excesivo) → `bde-estadisticas` (capítulo SB_DEUAAPP; histórico también en airef-datos)
+- Subastas del Tesoro y deuda del Estado por instrumento y tenedor → `tesoro-estadisticas`
+- Previsiones macroeconómicas y estimación del PIB en tiempo real → `airef-datos`
+- Entidades supervisadas, hechos relevantes e informes financieros de cotizadas → `cnmv-registros` (sin API; formularios ASP.NET, XML mensual de IIC y RSS)
+- Líneas ICO y avales por beneficiario → `ico-datos` (no hay datos descargables, solo memoria y cuentas en PDF)
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [airef-datos](airef-datos.yaml) | AIReF – Datalab, observatorio de deuda y previsiones | download, portal | none | xlsx, pdf | quarterly | tls-chain-incomplete, static-html, url-drift | 2026-09-30 |

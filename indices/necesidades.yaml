@@ -1,0 +1,232 @@
+# Dónde está cada cosa: necesidad habitual, ficha que la resuelve y la nota que evita el desvío típico.
+# source: null cuando no hay fuente en el catálogo (la nota dice por qué). build.py agrupa por sector de la fuente.
+
+- need: Sumario diario del BOE con identificador y URLs de cada disposición
+  source: boe-api-sumario
+- need: Texto consolidado, vigencia y versiones de una norma
+  source: boe-api-legislacion-consolidada
+  note: incluye normas autonómicas; los boletines autonómicos no están en el catálogo
+- need: URI estable de una norma para citar o enlazar
+  source: boe-eli
+- need: Vigilar novedades del BOE, BORME, ayudas o licitaciones sin programar contra la API
+  source: boe-feeds
+  note: RSS en ISO-8859-1
+- need: Actos societarios inscritos en el Registro Mercantil
+  source: borme-api-sumario
+  note: sin búsqueda por empresa; recorrer días y provincias
+- need: Euríbor, tipos de interés y de cambio, crédito, balanza de pagos
+  source: bde-estadisticas
+- need: Deuda pública por Administración (Protocolo de Déficit Excesivo)
+  source: bde-estadisticas
+  note: capítulo SB_DEUAAPP; histórico también en airef-datos
+- need: Subastas del Tesoro y deuda del Estado por instrumento y tenedor
+  source: tesoro-estadisticas
+- need: Previsiones macroeconómicas y estimación del PIB en tiempo real
+  source: airef-datos
+- need: Entidades supervisadas, hechos relevantes e informes financieros de cotizadas
+  source: cnmv-registros
+  note: sin API; formularios ASP.NET, XML mensual de IIC y RSS
+- need: Líneas ICO y avales por beneficiario
+  source: ico-datos
+  note: no hay datos descargables, solo memoria y cuentas en PDF
+- need: Cotizaciones bursátiles y precios de mercado (BME, OMIE)
+  source: null
+  note: fuera del alcance actual; BME es privado y OMIE no está aún en el catálogo
+- need: Renta y declarantes de IRPF por municipio, código postal o tramo
+  source: aeat-estadisticas
+- need: Recaudación tributaria mensual por figura
+  source: aeat-estadisticas
+- need: Suministro Inmediato de Información, VERI*FACTU y presentación de modelos
+  source: aeat-servicios-web
+  note: SOAP con certificado electrónico
+- need: Presupuestos, liquidaciones y deuda viva de ayuntamientos y diputaciones
+  source: hacienda-ovef
+- need: Tipos de IBI, IAE e IVTM por municipio
+  source: hacienda-ovef
+  note: consulta web con sesión (SGFAL)
+- need: Déficit de las Administraciones Públicas y ejecución del presupuesto del Estado
+  source: igae-ejecucion-presupuestaria
+- need: Inventario de entes del sector público (INVENTE)
+  source: igae-ejecucion-presupuestaria
+- need: Cualquier estadística oficial del INE (IPC, EPA, PIB, padrón, natalidad, empresas)
+  source: ine-api-tempus
+- need: Códigos INE de municipios, provincias y comunidades
+  source: ine-codigos-territoriales
+- need: Microdatos de encuestas (EPA, condiciones de vida, presupuestos familiares, censo)
+  source: ine-microdatos
+- need: Turismo (FRONTUR, EGATUR, ocupación hotelera)
+  source: ine-api-tempus
+  note: las operaciones son del INE; DATAESTUR (mincotur-industria-turismo) las reagrega con API de clave
+- need: Renta por sección censal (Atlas de distribución de renta)
+  source: ine-api-tempus
+  note: operación del INE; localizar la tabla con TABLAS_OPERACION, no verificada en esta sesión
+- need: Empresas activas por actividad y tamaño (DIRCE)
+  source: ine-api-tempus
+- need: Licitaciones, adjudicaciones y contratos menores de todas las Administraciones
+  source: placsp-datos-abiertos
+- need: Convocatorias y concesiones de subvenciones, ayudas de Estado, minimis, grandes beneficiarios
+  source: bdns-api
+- need: Beneficiarios de la PAC
+  source: fega-beneficiarios-pac
+  note: no verificable el 30/09/2026 (el servidor cierra la conexión); probar bdns-api concesiones con el órgano FEGA
+- need: Empresas clasificadas para contratar (ROLECE)
+  source: hacienda-registro-licitadores
+  note: solo con certificado electrónico
+- need: Paro registrado, demandantes y contratos por municipio
+  source: sepe-estadisticas
+- need: Tasa de paro, ocupados y activos (EPA)
+  source: ine-api-tempus
+  note: la EPA es del INE, no del SEPE
+- need: Afiliación a la Seguridad Social por régimen, actividad, provincia y municipio
+  source: segsocial-estadisticas
+- need: Pensiones contributivas e Ingreso Mínimo Vital
+  source: segsocial-estadisticas
+- need: Muestra Continua de Vidas Laborales
+  source: segsocial-estadisticas
+  note: no se descarga; se solicita bajo convenio
+- need: Convenios colectivos (REGCON), huelgas, accidentes de trabajo, regulación de empleo
+  source: mites-estadisticas
+- need: Salarios
+  source: ine-api-tempus
+  note: Encuesta de Estructura Salarial en el INE; salarios en fuentes tributarias por municipio en aeat-estadisticas (modelo190_salarios)
+- need: Catálogo de datasets abiertos de todas las Administraciones
+  source: datos-gob-es-api
+  note: solo metadatos; el fichero vive en el portal del publicador
+- need: Códigos DIR3 de unidades, entidades y oficinas
+  source: dir3-directorio
+  note: la API relations de face-facturas da DIR3 y NIF sin WAF
+- need: NIF y relaciones de facturación de un organismo público
+  source: face-facturas
+- need: Boletín de empleo público y códigos SIA de procedimientos
+  source: pag-administracion-gob-es
+- need: Altos cargos, retribuciones, agendas y estadísticas de derecho de acceso
+  source: transparencia-portal
+  note: pocas descargas; contratos y subvenciones sin ficheros
+- need: Datos de un inmueble o parcela por referencia catastral, dirección o coordenadas
+  source: catastro-ovc
+  note: bloqueo por IP tras ráfagas de unas 15 peticiones
+- need: Parcelario, edificios y direcciones vectoriales por municipio (INSPIRE)
+  source: catastro-ovc
+- need: Ortofotos PNOA, modelos del terreno, LiDAR y límites municipales
+  source: cnig-centro-descargas
+  note: descargas con reCAPTCHA; WMS, WMTS y WFS sin restricción
+- need: Geocodificar una dirección y obtener su código INE
+  source: cnig-centro-descargas
+  note: geocoder CartoCiudad
+- need: Localizar cualquier servicio WMS, WFS o CSW de una Administración
+  source: idee-servicios
+- need: Recintos agrícolas, usos del suelo y referencia catastral rústica
+  source: mapa-sigpac
+- need: Predicción, observación, climatología, avisos y radar
+  source: aemet-opendata
+  note: clave gratuita obligatoria; el cuerpo vacío con 200 es fallo de autenticación
+- need: Proyecciones de cambio climático y series centenarias
+  source: aemet-otros-servicios
+  note: sin descarga directa verificada
+- need: Calidad del aire validada por estación y contaminante
+  source: miteco-calidad-aire
+  note: datos anuales validados; el tiempo real lo sirve cada comunidad autónoma, fuera del alcance
+- need: Emisiones industriales por complejo (PRTR)
+  source: miteco-prtr
+- need: Reserva de embalses, caudales y estaciones de aforo
+  source: miteco-saih-boletin-hidrologico
+- need: Red Natura 2000, espacios protegidos, hábitats, humedales, inventario forestal
+  source: miteco-banco-datos-naturaleza
+  note: descargas con desafío ALTCHA (resuelto en la guía); los WMS de mapama están rotos
+- need: Presencia de especies (ocurrencias, datasets de biodiversidad)
+  source: gbif-es
+- need: Precios de carburantes por gasolinera
+  source: minetur-precios-carburantes
+- need: Comercializadoras, cambios de suministrador, bono social, garantías de origen
+  source: cnmc-data
+- need: Consumo de productos petrolíferos y gas por provincia, balances energéticos
+  source: miteco-energia-estadisticas
+  note: series de CORES en xlsx; el ministerio publica PDF
+- need: Generación eléctrica, demanda y precios del mercado (REE, OMIE)
+  source: null
+  note: no está aún en el catálogo (REData y OMIE, siguientes por impacto)
+- need: Registro de instalaciones de producción eléctrica y autoconsumo
+  source: miteco-energia-estadisticas
+  note: no localizada descarga abierta; PRETOR da 404
+- need: Medicamentos, presentaciones, fichas técnicas y problemas de suministro
+  source: aemps-cima-api
+- need: Ensayos clínicos (REEC) y alertas de seguridad
+  source: aemps-otros-registros
+  note: sin API; el REEC exige sesión
+- need: Exceso de mortalidad (MoMo), COVID-19, boletines epidemiológicos, gripe
+  source: isciii-cne
+- need: Hospitales, altas hospitalarias e indicadores del Sistema Nacional de Salud
+  source: sanidad-portal-estadistico
+  note: solo el Catálogo de Hospitales tiene descarga directa
+- need: Defunciones por causa de muerte
+  source: ine-api-tempus
+  note: estadística del INE; Sanidad solo publica PDF
+- need: Ayudas de investigación concedidas por la AEI
+  source: aei-convocatorias
+- need: Publicaciones científicas en acceso abierto
+  source: csic-digital
+  note: OAI-PMH; RECOLECTA (fecyt-recolecta) ya no expone OAI
+- need: Geología, hidrogeología, puntos de agua y minería
+  source: igme-geologia
+- need: Terremotos recientes y catálogo sísmico
+  source: ign-sismologia
+  note: tablas HTML; el catálogo solo se descargó desde navegador
+- need: Datos oceanográficos en tiempo real (oleaje, mareas, boyas)
+  source: puertos-estado-datos
+  note: Portus es una aplicación con API interna no reproducida
+- need: Anuario de estadística agraria, precios percibidos y pagados, consumo alimentario
+  source: mapa-estadisticas-agrarias
+- need: Flota pesquera, capturas y acuicultura
+  source: mapa-pesca
+  note: el identificador de buque es CODIGOBUQUE, no el CFR
+- need: Incidencias de tráfico, detectores, radares, zonas de bajas emisiones, puntos de recarga
+  source: dgt-datex-trafico
+- need: Matriculaciones, bajas, parque de vehículos y conductores (microdatos)
+  source: dgt-estadisticas
+  note: no localizados microdatos de accidentes, solo tablas
+- need: Matrices origen-destino de movilidad por telefonía móvil
+  source: mitma-opendata-movilidad
+  note: el host de datos respondió 403 desde el entorno de verificación
+- need: Tráfico portuario mensual por autoridad portuaria
+  source: puertos-estado-datos
+- need: Tráfico aéreo por aeropuerto y registro de aeronaves
+  source: aesa-aviacion
+  note: degradada; sin ficheros verificados
+- need: Comercio exterior por producto, país y provincia
+  source: datacomex
+  note: API con token de usuario gratuito
+- need: Inversión extranjera en España y española en el exterior
+  source: datainvex
+  note: aplicación ASP.NET con viewstate; sin API
+- need: Estadísticas de industria, series BADASE y datos turísticos (DATAESTUR)
+  source: mincotur-industria-turismo
+- need: Patentes, marcas y Boletín de la Propiedad Industrial
+  source: oepm-invenes
+  note: bloqueado por el cortafuegos de la OEPM desde el entorno de verificación
+- need: Alumnado, profesorado y centros no universitarios
+  source: educacion-estadisticas-ruct
+  note: EDUCAbase con el patrón PC-Axis del INE
+- need: Universidades, matriculados y egresados por titulación, títulos oficiales (RUCT)
+  source: educacion-estadisticas-ruct
+- need: Criminalidad por tipología, comunidad, provincia y municipio
+  source: interior-criminalidad
+- need: Estadística judicial y sentencias
+  source: null
+  note: Poder Judicial (CGPJ, CENDOJ) fuera del alcance actual
+- need: Catálogo bibliográfico de la BNE y patrimonio digital (Hispana)
+  source: bne-datos
+  note: datos.bne.es bloqueado desde el entorno; Hispana por OAI-PMH
+- need: Padrón, nacimientos, defunciones y migraciones
+  source: ine-api-tempus
+- need: Extranjeros con autorización de residencia y afiliados extranjeros
+  source: segsocial-estadisticas
+  note: afiliados extranjeros en EST292; las estadísticas de extranjería del Ministerio de Inclusión no están aún en el catálogo
+- need: Precios de vivienda, transacciones, alquiler (SERPAVI) y suelo
+  source: mivau-precios-vivienda-alquiler
+- need: Índice de precios de vivienda y de alquiler
+  source: ine-api-tempus
+- need: Telecomunicaciones (líneas, operadores, audiovisual)
+  source: cnmc-data
+- need: Ayuda oficial al desarrollo y acción exterior
+  source: null
+  note: sin fuente en el catálogo todavía

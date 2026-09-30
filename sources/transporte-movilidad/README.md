@@ -2,6 +2,15 @@
 
 Sector `transporte-movilidad` · 5 fuentes · índice generado por `scripts/build.py`, no editar.
 
+## Dónde está cada cosa
+
+- Datos oceanográficos en tiempo real (oleaje, mareas, boyas) → `puertos-estado-datos` (Portus es una aplicación con API interna no reproducida)
+- Incidencias de tráfico, detectores, radares, zonas de bajas emisiones, puntos de recarga → `dgt-datex-trafico`
+- Matriculaciones, bajas, parque de vehículos y conductores (microdatos) → `dgt-estadisticas` (no localizados microdatos de accidentes, solo tablas)
+- Matrices origen-destino de movilidad por telefonía móvil → `mitma-opendata-movilidad` (el host de datos respondió 403 desde el entorno de verificación)
+- Tráfico portuario mensual por autoridad portuaria → `puertos-estado-datos`
+- Tráfico aéreo por aeropuerto y registro de aeronaves → `aesa-aviacion` (degradada; sin ficheros verificados)
+
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [aesa-aviacion](aesa-aviacion.yaml) | AESA y Aena – Registro de aeronaves, operadores UAS y estadísticas de tráfico aéreo | portal | registration | html, pdf | monthly | js-rendered, session-required | 2026-09-30 |
