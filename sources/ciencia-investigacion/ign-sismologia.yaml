@@ -1,31 +1,42 @@
 id: ign-sismologia
-name: IGN – Catálogo sísmico y red de vigilancia volcánica
+name: IGN – Catálogo sísmico y últimos terremotos
 org: Instituto Geográfico Nacional (IGN)
 ministry: Transportes y Movilidad Sostenible
 level: age
 sector: ciencia-investigacion
 tags: [terremotos, sismicidad, catalogo-sismico, volcanes, geofisica, tiempo-real]
 summary: >-
-  Catálogo de terremotos localizados por la Red Sísmica Nacional desde 1370, últimos sismos en tiempo casi real,
-  mapas de peligrosidad sísmica y vigilancia volcánica de Canarias. Consulta con exportación y feeds.
-access: [portal, download, feed]
+  Terremotos localizados por la Red Sísmica Nacional: tablas HTML de los últimos 5, 10 y 30 días y del año
+  (magnitud 1,5 o superior o sentidos) y catálogo histórico con formulario por fechas, zona, magnitud,
+  intensidad y profundidad, descargable en csv, txt, kmz, zip o geojson solo desde el navegador.
+access: [portal, scraping]
 auth: none
-formats: [csv, txt, xml, kml, pdf]
+formats: [html, csv, txt, kml, geojson]
 update: realtime
-coverage: "1370-"
+coverage: "Catálogo histórico y sismicidad reciente"
 license: Reutilización libre con cita de la fuente
-base_url: https://www.ign.es/web/ign/portal/sis-area-sismicidad
-docs_url: https://www.ign.es/web/ign/portal/sis-catalogo-terremotos
+base_url: https://www.ign.es/web/ign/portal/ultimos-terremotos
+docs_url: https://www.ign.es/web/ign/portal/sis-area-sismicidad
 endpoints:
+  - path: https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/{get5dias|get10dias|get30dias|getAnio}
+    desc: Tabla HTML con evento (es2026tefhw), fecha, hora UTC y local, latitud, longitud, profundidad, magnitud, tipo de magnitud, intensidad máxima y localización
+    example: curl -s "https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/get10dias"
   - path: https://www.ign.es/web/ign/portal/sis-catalogo-terremotos
-    desc: Formulario de consulta del catálogo con exportación a texto/CSV
-  - path: https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/get10dias
-    desc: Terremotos de los últimos 10 días
-  - path: https://www.ign.es/ign/resources/sismologia/tproximos/rss/ultimos_terremotos.rss
-    desc: Feed RSS de últimos terremotos (alternativa KML en la misma carpeta)
+    desc: Formulario del catálogo (POST a /-/catalogo-terremotos/searchTerremoto) con startDate y endDate dd/mm/aaaa, caja lat/lon, magnitud, intensidad y profundidad
+  - path: https://www.ign.es/web/ign/portal/sis-catalogo-acelerogramas
+    desc: Catálogos de acelerogramas, shakemaps y tsunamis enlazados desde el área de sismicidad
+  - path: https://visualizadores.ign.es/tproximos
+    desc: Visor de terremotos próximos (aplicación Next.js con teselas propias)
+quirks: [js-rendered, session-required, url-drift]
+ids: []
 gotchas:
-  - El formulario del catálogo limita el número de registros por consulta; dividir por años para descargas masivas.
-  - Las magnitudes históricas anteriores a 1920 son intensidades macrosísmicas, no magnitudes instrumentales.
+  - No hay API, feed ni fichero estable. El RSS y el KML de la ficha anterior (resources/sismologia/tproximos/) responden 404 y no existe servicio FDSN en www.ign.es/fdsnws.
+  - Las páginas getNdias son la única fuente automatizable; parsear la tabla HTML (200 KB para 10 días). Las horas se dan en UTC y en hora local en columnas separadas.
+  - El catálogo es un portlet Liferay. La búsqueda y la descarga (selector csv, txt, kmz, zip, geojson) se resuelven con JavaScript y estado de sesión; enviando el formulario desde un script solo se obtuvo la cabecera.
+  - La descarga del catálogo devuelve un fichero de anchos fijos (Evento, Fecha, Hora, Latitud, Longitud, Prof., Inten., Mag., Tipo Mag., Localización) aunque se elija csv.
+  - El tipo de magnitud varía por evento (mb, mbLg, Mw); las magnitudes históricas anteriores a la red instrumental son intensidades macrosísmicas.
+tips:
+  - "pandas.read_html(get10dias)[0] recupera la tabla de últimos terremotos en una línea; convertir Fecha y Hora UTC a datetime con dayfirst=True."
 related: [igme-geologia, cnig-centro-descargas]
 status: active
-verified: null
+verified: "2026-09-30"

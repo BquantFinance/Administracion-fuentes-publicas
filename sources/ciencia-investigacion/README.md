@@ -4,16 +4,16 @@ Sector `ciencia-investigacion` · 6 fuentes · índice generado por `scripts/bui
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
-| [aei-convocatorias](aei-convocatorias.yaml) | AEI – Convocatorias y proyectos financiados de I+D+i | portal, download | none | pdf, xlsx, html | irregular | — | — |
-| [csic-digital](csic-digital.yaml) | Digital.CSIC – Repositorio institucional del CSIC (OAI-PMH) | oai-pmh, api-rest, portal | none | xml, json, pdf | daily | — | — |
-| [fecyt-recolecta](fecyt-recolecta.yaml) | FECYT – RECOLECTA y recursos de ciencia abierta | oai-pmh, portal, download | none | xml, xlsx, pdf, csv | weekly | — | — |
-| [gbif-es](gbif-es.yaml) | GBIF España – Ocurrencias de biodiversidad (nodo nacional, CSIC) | api-rest, download, portal | none | json, csv, zip | daily | — | — |
-| [igme-geologia](igme-geologia.yaml) | IGME-CSIC – Información geológica, hidrogeológica y minera | download, ogc, portal | none | shp, geotiff, pdf, xlsx, gml | irregular | — | — |
-| [ign-sismologia](ign-sismologia.yaml) | IGN – Catálogo sísmico y red de vigilancia volcánica | portal, download, feed | none | csv, txt, xml, kml, pdf | realtime | — | — |
+| [aei-convocatorias](aei-convocatorias.yaml) | AEI – Ayudas concedidas (CSV completo) y convocatorias de I+D+i | download, portal | none | csv, html, pdf | irregular | — | 2026-09-30 |
+| [csic-digital](csic-digital.yaml) | Digital.CSIC – Repositorio institucional del CSIC (OAI-PMH) | oai-pmh, portal | none | xml, pdf | daily | waf-blocks-bots, js-rendered | 2026-09-30 |
+| [fecyt-recolecta](fecyt-recolecta.yaml) | FECYT – RECOLECTA (agregador de repositorios) e ICONO | portal | none | html | irregular | waf-blocks-bots, url-drift | 2026-09-30 |
+| [gbif-es](gbif-es.yaml) | GBIF España – Ocurrencias de biodiversidad (API global filtrada por España) | api-rest, download, portal | none | json, csv, zip | daily | waf-blocks-bots | 2026-09-30 |
+| [igme-geologia](igme-geologia.yaml) | IGME-CSIC – Cartografía geológica, bases de datos geocientíficas y servicios ArcGIS | api-rest, ogc, download, portal | none | json, xml, shp, pdf, jpg, zip | irregular | js-rendered | 2026-09-30 |
+| [ign-sismologia](ign-sismologia.yaml) | IGN – Catálogo sísmico y últimos terremotos | portal, scraping | none | html, csv, txt, kml, geojson | realtime | js-rendered, session-required, url-drift | 2026-09-30 |
 
-- **aei-convocatorias**: Convocatorias del Plan Estatal de I+D+i, resoluciones de concesión con proyectos financiados (referencia, IP, entidad, importe), y datos de ayudas concedidas. Publicadas como PDF y Excel por convocatoria.
-- **csic-digital**: Más de 300.000 publicaciones, datasets y documentos científicos del CSIC en acceso abierto (biología, química, física, ciencias sociales). Cosechable por OAI-PMH y consultable por API REST DSpace.
-- **fecyt-recolecta**: Agregador nacional de repositorios científicos de acceso abierto (universidades, CSIC, OPIs) cosechable por OAI-PMH, más indicadores del sistema español de ciencia (ICONO) y encuestas de percepción social de la ciencia.
-- **gbif-es**: Más de 50 millones de registros de presencia de especies en España (colecciones, herbarios, observaciones) publicados por instituciones españolas en Darwin Core. Accesibles vía la API global de GBIF filtrando por país o publicador, y por el portal nacional.
-- **igme-geologia**: Mapa geológico MAGNA 1:50.000, cartografía geológica continua, bases de datos de aguas subterráneas y puntos de agua, movimientos del terreno, patrimonio geológico, catastro minero histórico. Descarga y servicios WMS/WFS.
-- **ign-sismologia**: Catálogo de terremotos localizados por la Red Sísmica Nacional desde 1370, últimos sismos en tiempo casi real, mapas de peligrosidad sísmica y vigilancia volcánica de Canarias. Consulta con exportación y feeds.
+- **aei-convocatorias**: Todas las ayudas concedidas por la AEI desde 2008 (130.000 filas) en un CSV descargable con año, convocatoria, referencia, género del IP, área, título, CIF y entidad beneficiaria, CCAA, provincia e importe, más el buscador de convocatorias con sus páginas de detalle y estadísticas en PDF.
+- **csic-digital**: Publicaciones, datasets y documentos científicos del CSIC en acceso abierto. Cosecha por OAI-PMH con trece formatos de metadatos (oai_dc, datacite, oai_cerif_openaire, mods, marc) y sets por instituto. La web y la API REST están tras un filtro antibots; OAI-PMH es la única vía automatizable.
+- **fecyt-recolecta**: Agregador nacional de repositorios científicos de acceso abierto y observatorio de indicadores ICONO. En la verificación el endpoint OAI-PMH ya no existe, el buscador está tras un filtro antibots e ICONO no respondió; solo quedan las páginas informativas. Cosechar cada repositorio por separado.
+- **gbif-es**: 95,8 millones de registros de presencia de especies en España (country=ES) y 666 datasets publicados por instituciones españolas, en Darwin Core, a través de la API global de GBIF (JSON, sin clave para consultar). El portal nacional y su API propia no son utilizables desde scripts.
+- **igme-geologia**: Mapa geológico continuo GEODE 1:50.000 y decenas de capas más (hidrogeología, puntos de agua, minería, movimientos del terreno, fallas activas, geoquímica) consultables por ArcGIS REST (JSON, consultas espaciales y por atributos) y WMS, más las hojas MAGNA 50 descargables (vector, PDF, memoria).
+- **ign-sismologia**: Terremotos localizados por la Red Sísmica Nacional: tablas HTML de los últimos 5, 10 y 30 días y del año (magnitud 1,5 o superior o sentidos) y catálogo histórico con formulario por fechas, zona, magnitud, intensidad y profundidad, descargable en csv, txt, kmz, zip o geojson solo desde el navegador.

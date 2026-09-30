@@ -1,31 +1,52 @@
 id: igme-geologia
-name: IGME-CSIC – Información geológica, hidrogeológica y minera
+name: IGME-CSIC – Cartografía geológica, bases de datos geocientíficas y servicios ArcGIS
 org: Instituto Geológico y Minero de España (IGME-CSIC)
 ministry: Ciencia, Innovación y Universidades
 level: age
 sector: ciencia-investigacion
-tags: [geologia, mapa-geologico, magna, hidrogeologia, acuiferos, sismicidad, minas, riesgos-geologicos, wms]
+tags: [geologia, mapa-geologico, magna, geode, hidrogeologia, puntos-agua, minas, fallas-activas, wms, arcgis-rest]
 summary: >-
-  Mapa geológico MAGNA 1:50.000, cartografía geológica continua, bases de datos de aguas subterráneas y puntos de
-  agua, movimientos del terreno, patrimonio geológico, catastro minero histórico. Descarga y servicios WMS/WFS.
-access: [download, ogc, portal]
+  Mapa geológico continuo GEODE 1:50.000 y decenas de capas más (hidrogeología, puntos de agua, minería,
+  movimientos del terreno, fallas activas, geoquímica) consultables por ArcGIS REST (JSON, consultas espaciales
+  y por atributos) y WMS, más las hojas MAGNA 50 descargables (vector, PDF, memoria).
+access: [api-rest, ogc, download, portal]
 auth: none
-formats: [shp, geotiff, pdf, xlsx, gml]
+formats: [json, xml, shp, pdf, jpg, zip]
 update: irregular
-coverage: "Cartografía desde 1970"
+coverage: "MAGNA 1972-2003; GEODE continuo; bases de datos actualizadas de forma irregular"
 license: Reutilización libre con cita de la fuente
-base_url: https://info.igme.es/
+base_url: https://mapas.igme.es/gis/rest/services
 docs_url: https://info.igme.es/catalogo/
 endpoints:
-  - path: https://info.igme.es/catalogo/
-    desc: Catálogo de información geocientífica con descarga
+  - path: /?f=json
+    desc: Carpetas de servicios (Cartografia_Geologica, Cartografia_Tematica, BasesDatos, Catastro_Minero_DOM, Geologia_Marina, AtlasGeoquimico...)
+    example: curl -s "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica?f=json"
+  - path: /Cartografia_Geologica/IGME_Geode_50/MapServer/8/query?geometry={lon},{lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&f=json
+    desc: Unidad geológica en un punto (capa 8 Recintos geología, campos CODE_UNIO, DESC_UNIT, NAME_EDA1, NAME_EDA2, ZONA)
+    example: curl -s "https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geode_50/MapServer/8/query?geometry=-3.70,40.42&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=CODE_UNIO,DESC_UNIT,NAME_EDA1&returnGeometry=false&f=json"
+  - path: /BasesDatos/IGME_PuntosAgua/MapServer/0/query?where={sql}&outFields=*&f=json
+    desc: Puntos de agua subterránea (139.697; HOJA, PUNTO, cuenca, unidad hidrogeológica, acuífero, provincia, municipio, caudal, cota, profundidad, usos)
+    example: curl -s "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_PuntosAgua/MapServer/0/query?where=Provincia%3D%27Madrid%27&outFields=*&resultRecordCount=5&f=json"
+  - path: /BasesDatos/{servicio}/MapServer
+    desc: Otras bases de datos (IGME_BDMIN_Explotaciones e Indicios, IGME_BDMoves_ES, IGME_QAFI_v4, IGME_IELIG, IGME_InventarioBalsas, IGME_MuestrasGeoquimica)
   - path: https://mapas.igme.es/gis/services/Cartografia_Geologica/IGME_Geode_50/MapServer/WMSServer?REQUEST=GetCapabilities&SERVICE=WMS
-    desc: WMS de cartografía geológica continua GEODE 1:50.000
+    desc: WMS 1.3.0 de GEODE 50 (CRS 84, 102100, 23028-23030, 25828-25830); cada MapServer tiene su WMSServer
+  - path: https://info.igme.es/cartografiadigital/geologica/Magna50Hoja.aspx?Id={hoja}
+    desc: Hoja MAGNA 50 con enlaces a datos/magna50/jpgs/d0_G50/VRF_MAGNA50_{hoja}.zip (vectorial), pdfs/d0_G50/Magna50_{hoja}.pdf y memorias/MMagna{hoja 4 cifras}.pdf
+    example: curl -sSL -o hoja1.zip "https://info.igme.es/cartografiadigital/datos/magna50/jpgs/d0_G50/VRF_MAGNA50_1.zip"
   - path: https://info.igme.es/BDAguas/
-    desc: Base de datos de puntos de agua subterránea
+    desc: Consulta web de puntos de agua (aplicación con mapa y exportación en cliente); la vía programática es el servicio ArcGIS
+quirks: [js-rendered]
+ids: []
 gotchas:
-  - Los servicios ArcGIS Server exponen también REST propio (MapServer/query) además de WMS; más cómodo para JSON.
-  - El sismo y la red sísmica los gestiona el IGN, no el IGME (ficha ign-sismologia).
-related: [cnig-centro-descargas, ign-sismologia]
+  - Los servicios ArcGIS responden en Web Mercator (wkid 102100) por defecto; pedir outSR=4326 o pasar inSR=4326 en consultas por punto. maxRecordCount es 1000, paginar con resultOffset.
+  - GEODE 50 tiene 10 capas; las unidades están en la 8 (Recintos geología) y el Cuaternario en la 6; la consulta por punto en la 6 devuelve vacío fuera de recintos cuaternarios.
+  - info.igme.es y /cartografiadigital/ redirigen por JavaScript (window.location), no por HTTP; seguir a /catalogo/default.aspx y /cartografiadigital/portada/default.aspx.
+  - El catálogo (catalog.aspx) es una aplicación ASP.NET; los documentos históricos se sirven como PDF en info.igme.es/SidPDF/.
+  - Las hojas MAGNA se identifican por el número de hoja MTN50 (1 a 1114 más islas); el Id de la URL coincide con ese número.
+  - La sismicidad y la red sísmica son del IGN, no del IGME (ficha ign-sismologia).
+tips:
+  - "Con geopandas: read_file(url_query + '&f=geojson') funciona sobre cualquier capa de MapServer; añadir resultRecordCount y resultOffset para recorrerla entera."
+related: [cnig-centro-descargas, ign-sismologia, miteco-saih-boletin-hidrologico]
 status: active
-verified: null
+verified: "2026-09-30"

@@ -258,7 +258,7 @@
   },
   {
    "id": "aei-convocatorias",
-   "name": "AEI – Convocatorias y proyectos financiados de I+D+i",
+   "name": "AEI – Ayudas concedidas (CSV completo) y convocatorias de I+D+i",
    "org": "Agencia Estatal de Investigación (AEI)",
    "ministry": "Ciencia, Innovación y Universidades",
    "level": "age",
@@ -267,47 +267,68 @@
     "aei",
     "proyectos",
     "convocatorias",
+    "ayudas-concedidas",
     "financiacion-investigacion",
     "plan-estatal",
-    "resoluciones"
+    "referencias-proyecto"
    ],
-   "summary": "Convocatorias del Plan Estatal de I+D+i, resoluciones de concesión con proyectos financiados (referencia, IP, entidad, importe), y datos de ayudas concedidas. Publicadas como PDF y Excel por convocatoria.",
+   "summary": "Todas las ayudas concedidas por la AEI desde 2008 (130.000 filas) en un CSV descargable con año, convocatoria, referencia, género del IP, área, título, CIF y entidad beneficiaria, CCAA, provincia e importe, más el buscador de convocatorias con sus páginas de detalle y estadísticas en PDF.",
    "access": [
-    "portal",
-    "download"
+    "download",
+    "portal"
    ],
    "auth": "none",
    "formats": [
-    "pdf",
-    "xlsx",
-    "html"
+    "csv",
+    "html",
+    "pdf"
    ],
    "update": "irregular",
-   "coverage": "2008- (Plan Nacional y Estatal)",
+   "coverage": "2008-2026",
    "license": "Reutilización libre con cita de la fuente",
-   "base_url": "https://www.aei.gob.es/",
-   "docs_url": "https://www.aei.gob.es/convocatorias/buscador-convocatorias",
+   "base_url": "https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas",
+   "docs_url": "https://www.aei.gob.es/ayudas-concedidas/informacion-estadistica",
    "endpoints": [
     {
-     "path": "https://www.aei.gob.es/convocatorias/buscador-convocatorias",
-     "desc": "Buscador de convocatorias y sus resoluciones"
+     "path": "https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All",
+     "desc": "CSV completo de ayudas concedidas (36 MB, 130.389 filas, UTF-8 con BOM, separador ;)",
+     "example": "curl -sSL -o ayudas_aei.csv \"https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All\""
     },
     {
-     "path": "https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas",
-     "desc": "Buscador de ayudas concedidas por convocatoria y entidad"
+     "path": "https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas?keys={texto}&convocatory=All&area=All&ccaa=All&province=All",
+     "desc": "Buscador web (GET) con filtros name, cif, code, convocatory, area, ccaa, province, gender y granted[min|max]; resultados en HTML paginado"
+    },
+    {
+     "path": "https://www.aei.gob.es/convocatorias/buscador-convocatorias?status=1&page={n}",
+     "desc": "Listado de convocatorias (status=1 abiertas) con páginas de detalle en /convocatorias/buscador-convocatorias/{slug}"
+    },
+    {
+     "path": "https://www.aei.gob.es/ayudas-concedidas/informacion-estadistica",
+     "desc": "Informes estadísticos de ayudas por periodo (PDF)"
     }
    ],
+   "quirks": [],
+   "ids": [
+    "nif"
+   ],
    "gotchas": [
-    "Las resoluciones de concesión están en PDF con tablas; el Excel solo existe en algunas convocatorias.",
-    "Toda ayuda de la AEI aparece también en la BDNS con más estructura; usar bdns-api para automatizar.",
-    "Las referencias de proyecto (p. ej. PID2021-123456OB-I00) son la clave para cruzar con publicaciones en RECOLECTA."
+    "Columnas del CSV: Año;Convocatoria;Referencia;Género;Área;Subárea;Título;C.I.F.;Entidad;CC.AA.;Provincia;€ Conced. Importe con punto de miles y coma decimal (192.480,00).",
+    "La descarga devolvió el fichero completo tanto con keys vacío como con keys=clima (mismo tamaño); filtrar en local en vez de confiar en los parámetros.",
+    "La propia página advierte de agrupar por Referencia para obtener importes globales, porque una referencia puede repetirse en varias filas.",
+    "Las referencias (PID2021-123456OB-I00, RYC-2008-03681) son la clave para cruzar con publicaciones (acknowledgements) y con la BDNS, donde la misma ayuda aparece con más estructura.",
+    "CC.AA. y Provincia vienen como nombres en mayúsculas sin código INE; Área y Subárea están vacías en convocatorias antiguas.",
+    "Las páginas de detalle de convocatoria no enlazan ficheros descargables; las resoluciones se publican en la sede electrónica y en la BDNS.",
+    "La ruta /datos-abiertos no existe (404); el CSV de ayudas es la única descarga masiva."
+   ],
+   "tips": [
+    "pandas.read_csv(url, sep=';', encoding='utf-8-sig', thousands='.', decimal=',') carga el fichero directamente; agrupar por Referencia antes de sumar."
    ],
    "related": [
     "bdns-api",
     "fecyt-recolecta"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "csic-digital",
@@ -325,49 +346,66 @@
     "repositorio",
     "dspace"
    ],
-   "summary": "Más de 300.000 publicaciones, datasets y documentos científicos del CSIC en acceso abierto (biología, química, física, ciencias sociales). Cosechable por OAI-PMH y consultable por API REST DSpace.",
+   "summary": "Publicaciones, datasets y documentos científicos del CSIC en acceso abierto. Cosecha por OAI-PMH con trece formatos de metadatos (oai_dc, datacite, oai_cerif_openaire, mods, marc) y sets por instituto. La web y la API REST están tras un filtro antibots; OAI-PMH es la única vía automatizable.",
    "access": [
     "oai-pmh",
-    "api-rest",
     "portal"
    ],
    "auth": "none",
    "formats": [
     "xml",
-    "json",
     "pdf"
    ],
    "update": "daily",
-   "coverage": "Publicaciones desde 1900; repositorio desde 2008",
-   "license": "Metadatos CC0; contenidos según licencia de cada ítem",
-   "base_url": "https://digital.csic.es/",
+   "coverage": "Repositorio desde 2008; documentos desde principios del siglo XX",
+   "license": "Metadatos libres; contenidos según licencia de cada ítem",
+   "base_url": "https://digital.csic.es/dspace-oai/request",
    "docs_url": "https://digital.csic.es/dspace-oai/request?verb=Identify",
    "endpoints": [
     {
-     "path": "https://digital.csic.es/dspace-oai/request?verb=ListRecords&metadataPrefix=oai_dc&set={coleccion}",
-     "desc": "Cosecha OAI-PMH en Dublin Core",
-     "example": "curl -s \"https://digital.csic.es/dspace-oai/request?verb=Identify\""
+     "path": "?verb=ListRecords&metadataPrefix=oai_dc&from={AAAA-MM-DD}&set={set}",
+     "desc": "Cosecha incremental; 100 registros por página y resumptionToken con completeListSize (2450 registros desde el 01/09/2026)",
+     "example": "curl -s \"https://digital.csic.es/dspace-oai/request?verb=ListRecords&metadataPrefix=oai_dc&from=2026-09-01\""
     },
     {
-     "path": "https://digital.csic.es/rest/",
-     "desc": "API REST DSpace (ítems, colecciones, búsqueda)"
+     "path": "?verb=ListSets",
+     "desc": "Sets por comunidad e instituto (com_10261_NN)",
+     "example": "curl -s \"https://digital.csic.es/dspace-oai/request?verb=ListSets\""
+    },
+    {
+     "path": "?verb=ListMetadataFormats",
+     "desc": "didl, mods, ore, mets, datacite, oai_cerif_openaire, dim, uketd_dc, qdc, oai_dc, rdf, marc y etdms"
+    },
+    {
+     "path": "?verb=ListIdentifiers&metadataPrefix=oai_dc&set={set}&from={AAAA-MM-DD}&until={AAAA-MM-DD}",
+     "desc": "Solo identificadores, útil para detectar altas y cambios por instituto"
     }
    ],
+   "quirks": [
+    "waf-blocks-bots",
+    "js-rendered"
+   ],
+   "ids": [],
    "gotchas": [
-    "Los sets OAI corresponden a institutos del CSIC (com_10261_xxx); listarlos con verb=ListSets.",
-    "Tras la migración a DSpace 7 la API REST cambió de esquema; comprobar la versión en /server/api.",
-    "Digital.CSIC está agregado en RECOLECTA (FECYT), que permite cosechar todos los repositorios españoles de una vez."
+    "digital.csic.es/rest/, /server/api y las páginas handle responden 200 con una página Anubis (prueba de trabajo en JavaScript, \"Making sure you're not a bot\") en vez de datos; el endpoint OAI-PMH no está filtrado.",
+    "Sin acceso a la API REST no se puede buscar por texto; localizar ítems cosechando el set del instituto y filtrando en local.",
+    "El resumptionToken codifica formato, fecha y cursor (oai_dc/2026-09-01T00:00:00Z///100); se pasa tal cual en verb=ListRecords&resumptionToken=.",
+    "Los registros oai_dc repiten dc:identifier (handle, DOI, URL) y dc:relation (proyecto financiador); oai_cerif_openaire trae la financiación estructurada.",
+    "Digital.CSIC estaba agregado en RECOLECTA, cuyo OAI ya no responde (ficha fecyt-recolecta); cosechar aquí directamente."
+   ],
+   "tips": [
+    "Con la librería sickle: Sickle(base_url).ListRecords(metadataPrefix='oai_dc', **{'from': '2026-09-01'}) gestiona el resumptionToken automáticamente."
    ],
    "related": [
     "gbif-es",
     "fecyt-recolecta"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "fecyt-recolecta",
-   "name": "FECYT – RECOLECTA y recursos de ciencia abierta",
+   "name": "FECYT – RECOLECTA (agregador de repositorios) e ICONO",
    "org": "Fundación Española para la Ciencia y la Tecnología (FECYT)",
    "ministry": "Ciencia, Innovación y Universidades",
    "level": "age",
@@ -378,51 +416,53 @@
     "acceso-abierto",
     "oai-pmh",
     "ciencia-abierta",
-    "indicadores-ciencia",
-    "percepcion-social"
+    "indicadores-ciencia"
    ],
-   "summary": "Agregador nacional de repositorios científicos de acceso abierto (universidades, CSIC, OPIs) cosechable por OAI-PMH, más indicadores del sistema español de ciencia (ICONO) y encuestas de percepción social de la ciencia.",
+   "summary": "Agregador nacional de repositorios científicos de acceso abierto y observatorio de indicadores ICONO. En la verificación el endpoint OAI-PMH ya no existe, el buscador está tras un filtro antibots e ICONO no respondió; solo quedan las páginas informativas. Cosechar cada repositorio por separado.",
    "access": [
-    "oai-pmh",
-    "portal",
-    "download"
+    "portal"
    ],
    "auth": "none",
    "formats": [
-    "xml",
-    "xlsx",
-    "pdf",
-    "csv"
+    "html"
    ],
-   "update": "weekly",
+   "update": "irregular",
    "coverage": "RECOLECTA desde 2007",
    "license": "Metadatos libres; datos FECYT con cita de la fuente",
    "base_url": "https://recolecta.fecyt.es/",
-   "docs_url": "https://recolecta.fecyt.es/",
+   "docs_url": "https://recolecta.fecyt.es/servicios/recoleccion-de-datos-de-investigacion",
    "endpoints": [
     {
-     "path": "https://recolecta.fecyt.es/oai?verb=Identify",
-     "desc": "Endpoint OAI-PMH agregado de todos los repositorios españoles"
+     "path": "https://buscador.recolecta.fecyt.es/buscador-recolecta?search_api_fulltext={texto}",
+     "desc": "Buscador web de RECOLECTA; responde 403 con una comprobación de navegador (Voight-Kampff Browser Test) a clientes no interactivos"
     },
     {
      "path": "https://icono.fecyt.es/",
-     "desc": "ICONO, observatorio de indicadores de I+D+i con descargas"
+     "desc": "ICONO, indicadores del sistema español de ciencia; sin respuesta desde este entorno (error del proxy), no verificado"
     }
    ],
-   "gotchas": [
-    "Cosechar RECOLECTA completo son millones de registros; usar from y until para incrementales.",
-    "Los metadatos siguen OpenAIRE Guidelines; los campos de financiación (projectID) permiten cruzar con la AEI."
+   "quirks": [
+    "waf-blocks-bots",
+    "url-drift"
    ],
+   "ids": [],
+   "gotchas": [
+    "recolecta.fecyt.es/oai, /oai/request, /oai-pmh y /oai/openaire responden 404 (página Drupal); no se localizó ningún endpoint OAI-PMH vigente.",
+    "buscador.recolecta.fecyt.es devuelve 403 y una página de comprobación de navegador para curl y requests con cualquier User-Agent.",
+    "Para cosechar la producción científica española sin RECOLECTA, ir repositorio a repositorio (Digital.CSIC, repositorios universitarios) o al agregador europeo OpenAIRE, que los recoge.",
+    "icono.fecyt.es no pudo verificarse (fallo de conexión en el proxy); comprobar antes de depender de él."
+   ],
+   "tips": [],
    "related": [
     "csic-digital",
     "aei-convocatorias"
    ],
-   "status": "active",
-   "verified": null
+   "status": "degraded",
+   "verified": "2026-09-30"
   },
   {
    "id": "gbif-es",
-   "name": "GBIF España – Ocurrencias de biodiversidad (nodo nacional, CSIC)",
+   "name": "GBIF España – Ocurrencias de biodiversidad (API global filtrada por España)",
    "org": "Nodo Nacional de GBIF en España (Unidad de Coordinación GBIF.ES, CSIC)",
    "ministry": "Ciencia, Innovación y Universidades",
    "level": "age",
@@ -437,7 +477,7 @@
     "gbif",
     "colecciones"
    ],
-   "summary": "Más de 50 millones de registros de presencia de especies en España (colecciones, herbarios, observaciones) publicados por instituciones españolas en Darwin Core. Accesibles vía la API global de GBIF filtrando por país o publicador, y por el portal nacional.",
+   "summary": "95,8 millones de registros de presencia de especies en España (country=ES) y 666 datasets publicados por instituciones españolas, en Darwin Core, a través de la API global de GBIF (JSON, sin clave para consultar). El portal nacional y su API propia no son utilizables desde scripts.",
    "access": [
     "api-rest",
     "download",
@@ -451,44 +491,64 @@
    ],
    "update": "daily",
    "coverage": "Registros históricos desde el siglo XVIII hasta hoy",
-   "license": "CC0, CC BY o CC BY-NC según dataset",
+   "license": "CC0, CC BY o CC BY-NC según dataset (campo license de cada registro)",
    "base_url": "https://api.gbif.org/v1",
-   "docs_url": "https://www.gbif.es/",
+   "docs_url": "https://techdocs.gbif.org/en/openapi/",
    "endpoints": [
     {
-     "path": "/occurrence/search?country=ES&scientificName={nombre}&limit={n}",
-     "desc": "Ocurrencias en España de un taxón",
+     "path": "/occurrence/search?country=ES&scientificName={nombre}&limit={n}&offset={o}",
+     "desc": "Ocurrencias en España (sobre con offset, limit, endOfRecords, count, results, facets); limit máximo 300",
      "example": "curl -s \"https://api.gbif.org/v1/occurrence/search?country=ES&scientificName=Lynx%20pardinus&limit=5\""
     },
     {
+     "path": "/occurrence/count?country=ES",
+     "desc": "Recuento rápido con los mismos filtros que search (publishingCountry, taxonKey, year, gadmGid, hasCoordinate)",
+     "example": "curl -s \"https://api.gbif.org/v1/occurrence/count?country=ES\""
+    },
+    {
      "path": "/species/match?name={nombre}",
-     "desc": "Resolver un nombre científico al taxón GBIF (taxonKey)",
+     "desc": "Resolver un nombre científico al taxón (usageKey, rank, status, matchType, confidence)",
      "example": "curl -s \"https://api.gbif.org/v1/species/match?name=Quercus%20ilex\""
     },
     {
-     "path": "/dataset/search?publishingCountry=ES",
-     "desc": "Datasets publicados por instituciones españolas"
+     "path": "/dataset/search?publishingCountry=ES&limit={n}",
+     "desc": "Datasets publicados desde España (key, title, doi, type, publishingOrganizationTitle)",
+     "example": "curl -s \"https://api.gbif.org/v1/dataset/search?publishingCountry=ES&limit=5\""
+    },
+    {
+     "path": "/occurrence/download/request",
+     "desc": "Descargas masivas asíncronas (POST con predicado JSON); exigen usuario y contraseña de GBIF gratuitos"
     },
     {
      "path": "https://datos.gbif.es/",
-     "desc": "Portal nacional de datos con visor y descargas"
+     "desc": "Portal nacional (Living Atlases) con visor y datasets del nodo; enlaza al IPT en ipt.gbif.es"
     }
    ],
+   "quirks": [
+    "waf-blocks-bots"
+   ],
+   "ids": [],
    "gotchas": [
-    "La API de búsqueda limita a 100.000 registros por consulta paginada (offset máximo); para más usar descargas asíncronas con cuenta gratuita.",
-    "Filtrar por country=ES incluye registros de Canarias y Ceuta/Melilla; hay registros marinos fuera de aguas territoriales con country vacío.",
-    "La calidad de coordenadas varía; usar hasCoordinate=true y hasGeospatialIssue=false."
+    "La paginación de search no pasa de offset 100000 (400 \"Max offset of 100001 exceeded\"); para más registros usar descargas asíncronas o dividir por taxonKey, year o gadmGid.",
+    "Filtrar por nombre científico es impreciso; resolver primero con species/match y filtrar por taxonKey, que incluye sinónimos y subespecies.",
+    "gadmGid permite acotar por unidades administrativas GADM (ESP.8_1 es una comunidad autónoma, 5 millones de registros), sin equivalencia oficial con los códigos INE.",
+    "Cada registro trae issues (COORDINATE_ROUNDED, TAXON_ID_NOT_FOUND...); filtrar con hasCoordinate=true y hasGeospatialIssue=false para análisis espacial.",
+    "country=ES cuenta 95,8 millones y publishingCountry=ES 80,7 millones; son conjuntos distintos (dónde ocurre frente a quién publica).",
+    "El portal nacional registros.gbif.es responde 418 con una comprobación antibots y api.gbif.es sirve un certificado que no cubre ese nombre; usar api.gbif.org."
+   ],
+   "tips": [
+    "La librería pygbif (occurrences.search, species.name_backbone) envuelve estos endpoints; para volúmenes grandes, occurrences.download con usuario GBIF y predicado country=ES."
    ],
    "related": [
     "miteco-banco-datos-naturaleza",
     "csic-digital"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "igme-geologia",
-   "name": "IGME-CSIC – Información geológica, hidrogeológica y minera",
+   "name": "IGME-CSIC – Cartografía geológica, bases de datos geocientíficas y servicios ArcGIS",
    "org": "Instituto Geológico y Minero de España (IGME-CSIC)",
    "ministry": "Ciencia, Innovación y Universidades",
    "level": "age",
@@ -497,60 +557,95 @@
     "geologia",
     "mapa-geologico",
     "magna",
+    "geode",
     "hidrogeologia",
-    "acuiferos",
-    "sismicidad",
+    "puntos-agua",
     "minas",
-    "riesgos-geologicos",
-    "wms"
+    "fallas-activas",
+    "wms",
+    "arcgis-rest"
    ],
-   "summary": "Mapa geológico MAGNA 1:50.000, cartografía geológica continua, bases de datos de aguas subterráneas y puntos de agua, movimientos del terreno, patrimonio geológico, catastro minero histórico. Descarga y servicios WMS/WFS.",
+   "summary": "Mapa geológico continuo GEODE 1:50.000 y decenas de capas más (hidrogeología, puntos de agua, minería, movimientos del terreno, fallas activas, geoquímica) consultables por ArcGIS REST (JSON, consultas espaciales y por atributos) y WMS, más las hojas MAGNA 50 descargables (vector, PDF, memoria).",
    "access": [
-    "download",
+    "api-rest",
     "ogc",
+    "download",
     "portal"
    ],
    "auth": "none",
    "formats": [
+    "json",
+    "xml",
     "shp",
-    "geotiff",
     "pdf",
-    "xlsx",
-    "gml"
+    "jpg",
+    "zip"
    ],
    "update": "irregular",
-   "coverage": "Cartografía desde 1970",
+   "coverage": "MAGNA 1972-2003; GEODE continuo; bases de datos actualizadas de forma irregular",
    "license": "Reutilización libre con cita de la fuente",
-   "base_url": "https://info.igme.es/",
+   "base_url": "https://mapas.igme.es/gis/rest/services",
    "docs_url": "https://info.igme.es/catalogo/",
    "endpoints": [
     {
-     "path": "https://info.igme.es/catalogo/",
-     "desc": "Catálogo de información geocientífica con descarga"
+     "path": "/?f=json",
+     "desc": "Carpetas de servicios (Cartografia_Geologica, Cartografia_Tematica, BasesDatos, Catastro_Minero_DOM, Geologia_Marina, AtlasGeoquimico...)",
+     "example": "curl -s \"https://mapas.igme.es/gis/rest/services/Cartografia_Geologica?f=json\""
+    },
+    {
+     "path": "/Cartografia_Geologica/IGME_Geode_50/MapServer/8/query?geometry={lon},{lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&f=json",
+     "desc": "Unidad geológica en un punto (capa 8 Recintos geología, campos CODE_UNIO, DESC_UNIT, NAME_EDA1, NAME_EDA2, ZONA)",
+     "example": "curl -s \"https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geode_50/MapServer/8/query?geometry=-3.70,40.42&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=CODE_UNIO,DESC_UNIT,NAME_EDA1&returnGeometry=false&f=json\""
+    },
+    {
+     "path": "/BasesDatos/IGME_PuntosAgua/MapServer/0/query?where={sql}&outFields=*&f=json",
+     "desc": "Puntos de agua subterránea (139.697; HOJA, PUNTO, cuenca, unidad hidrogeológica, acuífero, provincia, municipio, caudal, cota, profundidad, usos)",
+     "example": "curl -s \"https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_PuntosAgua/MapServer/0/query?where=Provincia%3D%27Madrid%27&outFields=*&resultRecordCount=5&f=json\""
+    },
+    {
+     "path": "/BasesDatos/{servicio}/MapServer",
+     "desc": "Otras bases de datos (IGME_BDMIN_Explotaciones e Indicios, IGME_BDMoves_ES, IGME_QAFI_v4, IGME_IELIG, IGME_InventarioBalsas, IGME_MuestrasGeoquimica)"
     },
     {
      "path": "https://mapas.igme.es/gis/services/Cartografia_Geologica/IGME_Geode_50/MapServer/WMSServer?REQUEST=GetCapabilities&SERVICE=WMS",
-     "desc": "WMS de cartografía geológica continua GEODE 1:50.000"
+     "desc": "WMS 1.3.0 de GEODE 50 (CRS 84, 102100, 23028-23030, 25828-25830); cada MapServer tiene su WMSServer"
+    },
+    {
+     "path": "https://info.igme.es/cartografiadigital/geologica/Magna50Hoja.aspx?Id={hoja}",
+     "desc": "Hoja MAGNA 50 con enlaces a datos/magna50/jpgs/d0_G50/VRF_MAGNA50_{hoja}.zip (vectorial), pdfs/d0_G50/Magna50_{hoja}.pdf y memorias/MMagna{hoja 4 cifras}.pdf",
+     "example": "curl -sSL -o hoja1.zip \"https://info.igme.es/cartografiadigital/datos/magna50/jpgs/d0_G50/VRF_MAGNA50_1.zip\""
     },
     {
      "path": "https://info.igme.es/BDAguas/",
-     "desc": "Base de datos de puntos de agua subterránea"
+     "desc": "Consulta web de puntos de agua (aplicación con mapa y exportación en cliente); la vía programática es el servicio ArcGIS"
     }
    ],
+   "quirks": [
+    "js-rendered"
+   ],
+   "ids": [],
    "gotchas": [
-    "Los servicios ArcGIS Server exponen también REST propio (MapServer/query) además de WMS; más cómodo para JSON.",
-    "El sismo y la red sísmica los gestiona el IGN, no el IGME (ficha ign-sismologia)."
+    "Los servicios ArcGIS responden en Web Mercator (wkid 102100) por defecto; pedir outSR=4326 o pasar inSR=4326 en consultas por punto. maxRecordCount es 1000, paginar con resultOffset.",
+    "GEODE 50 tiene 10 capas; las unidades están en la 8 (Recintos geología) y el Cuaternario en la 6; la consulta por punto en la 6 devuelve vacío fuera de recintos cuaternarios.",
+    "info.igme.es y /cartografiadigital/ redirigen por JavaScript (window.location), no por HTTP; seguir a /catalogo/default.aspx y /cartografiadigital/portada/default.aspx.",
+    "El catálogo (catalog.aspx) es una aplicación ASP.NET; los documentos históricos se sirven como PDF en info.igme.es/SidPDF/.",
+    "Las hojas MAGNA se identifican por el número de hoja MTN50 (1 a 1114 más islas); el Id de la URL coincide con ese número.",
+    "La sismicidad y la red sísmica son del IGN, no del IGME (ficha ign-sismologia)."
+   ],
+   "tips": [
+    "Con geopandas: read_file(url_query + '&f=geojson') funciona sobre cualquier capa de MapServer; añadir resultRecordCount y resultOffset para recorrerla entera."
    ],
    "related": [
     "cnig-centro-descargas",
-    "ign-sismologia"
+    "ign-sismologia",
+    "miteco-saih-boletin-hidrologico"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "ign-sismologia",
-   "name": "IGN – Catálogo sísmico y red de vigilancia volcánica",
+   "name": "IGN – Catálogo sísmico y últimos terremotos",
    "org": "Instituto Geográfico Nacional (IGN)",
    "ministry": "Transportes y Movilidad Sostenible",
    "level": "age",
@@ -563,49 +658,65 @@
     "geofisica",
     "tiempo-real"
    ],
-   "summary": "Catálogo de terremotos localizados por la Red Sísmica Nacional desde 1370, últimos sismos en tiempo casi real, mapas de peligrosidad sísmica y vigilancia volcánica de Canarias. Consulta con exportación y feeds.",
+   "summary": "Terremotos localizados por la Red Sísmica Nacional: tablas HTML de los últimos 5, 10 y 30 días y del año (magnitud 1,5 o superior o sentidos) y catálogo histórico con formulario por fechas, zona, magnitud, intensidad y profundidad, descargable en csv, txt, kmz, zip o geojson solo desde el navegador.",
    "access": [
     "portal",
-    "download",
-    "feed"
+    "scraping"
    ],
    "auth": "none",
    "formats": [
+    "html",
     "csv",
     "txt",
-    "xml",
     "kml",
-    "pdf"
+    "geojson"
    ],
    "update": "realtime",
-   "coverage": "1370-",
+   "coverage": "Catálogo histórico y sismicidad reciente",
    "license": "Reutilización libre con cita de la fuente",
-   "base_url": "https://www.ign.es/web/ign/portal/sis-area-sismicidad",
-   "docs_url": "https://www.ign.es/web/ign/portal/sis-catalogo-terremotos",
+   "base_url": "https://www.ign.es/web/ign/portal/ultimos-terremotos",
+   "docs_url": "https://www.ign.es/web/ign/portal/sis-area-sismicidad",
    "endpoints": [
     {
+     "path": "https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/{get5dias|get10dias|get30dias|getAnio}",
+     "desc": "Tabla HTML con evento (es2026tefhw), fecha, hora UTC y local, latitud, longitud, profundidad, magnitud, tipo de magnitud, intensidad máxima y localización",
+     "example": "curl -s \"https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/get10dias\""
+    },
+    {
      "path": "https://www.ign.es/web/ign/portal/sis-catalogo-terremotos",
-     "desc": "Formulario de consulta del catálogo con exportación a texto/CSV"
+     "desc": "Formulario del catálogo (POST a /-/catalogo-terremotos/searchTerremoto) con startDate y endDate dd/mm/aaaa, caja lat/lon, magnitud, intensidad y profundidad"
     },
     {
-     "path": "https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/get10dias",
-     "desc": "Terremotos de los últimos 10 días"
+     "path": "https://www.ign.es/web/ign/portal/sis-catalogo-acelerogramas",
+     "desc": "Catálogos de acelerogramas, shakemaps y tsunamis enlazados desde el área de sismicidad"
     },
     {
-     "path": "https://www.ign.es/ign/resources/sismologia/tproximos/rss/ultimos_terremotos.rss",
-     "desc": "Feed RSS de últimos terremotos (alternativa KML en la misma carpeta)"
+     "path": "https://visualizadores.ign.es/tproximos",
+     "desc": "Visor de terremotos próximos (aplicación Next.js con teselas propias)"
     }
    ],
+   "quirks": [
+    "js-rendered",
+    "session-required",
+    "url-drift"
+   ],
+   "ids": [],
    "gotchas": [
-    "El formulario del catálogo limita el número de registros por consulta; dividir por años para descargas masivas.",
-    "Las magnitudes históricas anteriores a 1920 son intensidades macrosísmicas, no magnitudes instrumentales."
+    "No hay API, feed ni fichero estable. El RSS y el KML de la ficha anterior (resources/sismologia/tproximos/) responden 404 y no existe servicio FDSN en www.ign.es/fdsnws.",
+    "Las páginas getNdias son la única fuente automatizable; parsear la tabla HTML (200 KB para 10 días). Las horas se dan en UTC y en hora local en columnas separadas.",
+    "El catálogo es un portlet Liferay. La búsqueda y la descarga (selector csv, txt, kmz, zip, geojson) se resuelven con JavaScript y estado de sesión; enviando el formulario desde un script solo se obtuvo la cabecera.",
+    "La descarga del catálogo devuelve un fichero de anchos fijos (Evento, Fecha, Hora, Latitud, Longitud, Prof., Inten., Mag., Tipo Mag., Localización) aunque se elija csv.",
+    "El tipo de magnitud varía por evento (mb, mbLg, Mw); las magnitudes históricas anteriores a la red instrumental son intensidades macrosísmicas."
+   ],
+   "tips": [
+    "pandas.read_html(get10dias)[0] recupera la tabla de últimos terremotos en una línea; convertir Fecha y Hora UTC a datetime con dayfirst=True."
    ],
    "related": [
     "igme-geologia",
     "cnig-centro-descargas"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "datacomex",

@@ -1,30 +1,44 @@
 id: aei-convocatorias
-name: AEI – Convocatorias y proyectos financiados de I+D+i
+name: AEI – Ayudas concedidas (CSV completo) y convocatorias de I+D+i
 org: Agencia Estatal de Investigación (AEI)
 ministry: Ciencia, Innovación y Universidades
 level: age
 sector: ciencia-investigacion
-tags: [aei, proyectos, convocatorias, financiacion-investigacion, plan-estatal, resoluciones]
+tags: [aei, proyectos, convocatorias, ayudas-concedidas, financiacion-investigacion, plan-estatal, referencias-proyecto]
 summary: >-
-  Convocatorias del Plan Estatal de I+D+i, resoluciones de concesión con proyectos financiados (referencia,
-  IP, entidad, importe), y datos de ayudas concedidas. Publicadas como PDF y Excel por convocatoria.
-access: [portal, download]
+  Todas las ayudas concedidas por la AEI desde 2008 (130.000 filas) en un CSV descargable con año, convocatoria,
+  referencia, género del IP, área, título, CIF y entidad beneficiaria, CCAA, provincia e importe, más el buscador
+  de convocatorias con sus páginas de detalle y estadísticas en PDF.
+access: [download, portal]
 auth: none
-formats: [pdf, xlsx, html]
+formats: [csv, html, pdf]
 update: irregular
-coverage: "2008- (Plan Nacional y Estatal)"
+coverage: "2008-2026"
 license: Reutilización libre con cita de la fuente
-base_url: https://www.aei.gob.es/
-docs_url: https://www.aei.gob.es/convocatorias/buscador-convocatorias
+base_url: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas
+docs_url: https://www.aei.gob.es/ayudas-concedidas/informacion-estadistica
 endpoints:
-  - path: https://www.aei.gob.es/convocatorias/buscador-convocatorias
-    desc: Buscador de convocatorias y sus resoluciones
-  - path: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas
-    desc: Buscador de ayudas concedidas por convocatoria y entidad
+  - path: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All
+    desc: CSV completo de ayudas concedidas (36 MB, 130.389 filas, UTF-8 con BOM, separador ;)
+    example: curl -sSL -o ayudas_aei.csv "https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All"
+  - path: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas?keys={texto}&convocatory=All&area=All&ccaa=All&province=All
+    desc: Buscador web (GET) con filtros name, cif, code, convocatory, area, ccaa, province, gender y granted[min|max]; resultados en HTML paginado
+  - path: https://www.aei.gob.es/convocatorias/buscador-convocatorias?status=1&page={n}
+    desc: Listado de convocatorias (status=1 abiertas) con páginas de detalle en /convocatorias/buscador-convocatorias/{slug}
+  - path: https://www.aei.gob.es/ayudas-concedidas/informacion-estadistica
+    desc: Informes estadísticos de ayudas por periodo (PDF)
+quirks: []
+ids: [nif]
 gotchas:
-  - Las resoluciones de concesión están en PDF con tablas; el Excel solo existe en algunas convocatorias.
-  - Toda ayuda de la AEI aparece también en la BDNS con más estructura; usar bdns-api para automatizar.
-  - Las referencias de proyecto (p. ej. PID2021-123456OB-I00) son la clave para cruzar con publicaciones en RECOLECTA.
+  - "Columnas del CSV: Año;Convocatoria;Referencia;Género;Área;Subárea;Título;C.I.F.;Entidad;CC.AA.;Provincia;€ Conced. Importe con punto de miles y coma decimal (192.480,00)."
+  - La descarga devolvió el fichero completo tanto con keys vacío como con keys=clima (mismo tamaño); filtrar en local en vez de confiar en los parámetros.
+  - La propia página advierte de agrupar por Referencia para obtener importes globales, porque una referencia puede repetirse en varias filas.
+  - Las referencias (PID2021-123456OB-I00, RYC-2008-03681) son la clave para cruzar con publicaciones (acknowledgements) y con la BDNS, donde la misma ayuda aparece con más estructura.
+  - CC.AA. y Provincia vienen como nombres en mayúsculas sin código INE; Área y Subárea están vacías en convocatorias antiguas.
+  - Las páginas de detalle de convocatoria no enlazan ficheros descargables; las resoluciones se publican en la sede electrónica y en la BDNS.
+  - La ruta /datos-abiertos no existe (404); el CSV de ayudas es la única descarga masiva.
+tips:
+  - "pandas.read_csv(url, sep=';', encoding='utf-8-sig', thousands='.', decimal=',') carga el fichero directamente; agrupar por Referencia antes de sumar."
 related: [bdns-api, fecyt-recolecta]
 status: active
-verified: null
+verified: "2026-09-30"

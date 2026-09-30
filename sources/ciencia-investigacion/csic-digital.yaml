@@ -6,26 +6,38 @@ level: age
 sector: ciencia-investigacion
 tags: [csic, publicaciones, acceso-abierto, oai-pmh, datasets-investigacion, repositorio, dspace]
 summary: >-
-  Más de 300.000 publicaciones, datasets y documentos científicos del CSIC en acceso abierto (biología, química,
-  física, ciencias sociales). Cosechable por OAI-PMH y consultable por API REST DSpace.
-access: [oai-pmh, api-rest, portal]
+  Publicaciones, datasets y documentos científicos del CSIC en acceso abierto. Cosecha por OAI-PMH con trece
+  formatos de metadatos (oai_dc, datacite, oai_cerif_openaire, mods, marc) y sets por instituto. La web y la
+  API REST están tras un filtro antibots; OAI-PMH es la única vía automatizable.
+access: [oai-pmh, portal]
 auth: none
-formats: [xml, json, pdf]
+formats: [xml, pdf]
 update: daily
-coverage: "Publicaciones desde 1900; repositorio desde 2008"
-license: Metadatos CC0; contenidos según licencia de cada ítem
-base_url: https://digital.csic.es/
+coverage: "Repositorio desde 2008; documentos desde principios del siglo XX"
+license: Metadatos libres; contenidos según licencia de cada ítem
+base_url: https://digital.csic.es/dspace-oai/request
 docs_url: https://digital.csic.es/dspace-oai/request?verb=Identify
 endpoints:
-  - path: https://digital.csic.es/dspace-oai/request?verb=ListRecords&metadataPrefix=oai_dc&set={coleccion}
-    desc: Cosecha OAI-PMH en Dublin Core
-    example: curl -s "https://digital.csic.es/dspace-oai/request?verb=Identify"
-  - path: https://digital.csic.es/rest/
-    desc: API REST DSpace (ítems, colecciones, búsqueda)
+  - path: ?verb=ListRecords&metadataPrefix=oai_dc&from={AAAA-MM-DD}&set={set}
+    desc: Cosecha incremental; 100 registros por página y resumptionToken con completeListSize (2450 registros desde el 01/09/2026)
+    example: curl -s "https://digital.csic.es/dspace-oai/request?verb=ListRecords&metadataPrefix=oai_dc&from=2026-09-01"
+  - path: ?verb=ListSets
+    desc: Sets por comunidad e instituto (com_10261_NN)
+    example: curl -s "https://digital.csic.es/dspace-oai/request?verb=ListSets"
+  - path: ?verb=ListMetadataFormats
+    desc: didl, mods, ore, mets, datacite, oai_cerif_openaire, dim, uketd_dc, qdc, oai_dc, rdf, marc y etdms
+  - path: ?verb=ListIdentifiers&metadataPrefix=oai_dc&set={set}&from={AAAA-MM-DD}&until={AAAA-MM-DD}
+    desc: Solo identificadores, útil para detectar altas y cambios por instituto
+quirks: [waf-blocks-bots, js-rendered]
+ids: []
 gotchas:
-  - Los sets OAI corresponden a institutos del CSIC (com_10261_xxx); listarlos con verb=ListSets.
-  - Tras la migración a DSpace 7 la API REST cambió de esquema; comprobar la versión en /server/api.
-  - Digital.CSIC está agregado en RECOLECTA (FECYT), que permite cosechar todos los repositorios españoles de una vez.
+  - digital.csic.es/rest/, /server/api y las páginas handle responden 200 con una página Anubis (prueba de trabajo en JavaScript, "Making sure you're not a bot") en vez de datos; el endpoint OAI-PMH no está filtrado.
+  - Sin acceso a la API REST no se puede buscar por texto; localizar ítems cosechando el set del instituto y filtrando en local.
+  - El resumptionToken codifica formato, fecha y cursor (oai_dc/2026-09-01T00:00:00Z///100); se pasa tal cual en verb=ListRecords&resumptionToken=.
+  - Los registros oai_dc repiten dc:identifier (handle, DOI, URL) y dc:relation (proyecto financiador); oai_cerif_openaire trae la financiación estructurada.
+  - Digital.CSIC estaba agregado en RECOLECTA, cuyo OAI ya no responde (ficha fecyt-recolecta); cosechar aquí directamente.
+tips:
+  - "Con la librería sickle: Sickle(base_url).ListRecords(metadataPrefix='oai_dc', **{'from': '2026-09-01'}) gestiona el resumptionToken automáticamente."
 related: [gbif-es, fecyt-recolecta]
 status: active
-verified: null
+verified: "2026-09-30"

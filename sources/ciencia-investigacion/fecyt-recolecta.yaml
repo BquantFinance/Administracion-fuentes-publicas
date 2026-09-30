@@ -1,29 +1,35 @@
 id: fecyt-recolecta
-name: FECYT – RECOLECTA y recursos de ciencia abierta
+name: FECYT – RECOLECTA (agregador de repositorios) e ICONO
 org: Fundación Española para la Ciencia y la Tecnología (FECYT)
 ministry: Ciencia, Innovación y Universidades
 level: age
 sector: ciencia-investigacion
-tags: [recolecta, repositorios, acceso-abierto, oai-pmh, ciencia-abierta, indicadores-ciencia, percepcion-social]
+tags: [recolecta, repositorios, acceso-abierto, oai-pmh, ciencia-abierta, indicadores-ciencia]
 summary: >-
-  Agregador nacional de repositorios científicos de acceso abierto (universidades, CSIC, OPIs) cosechable por
-  OAI-PMH, más indicadores del sistema español de ciencia (ICONO) y encuestas de percepción social de la ciencia.
-access: [oai-pmh, portal, download]
+  Agregador nacional de repositorios científicos de acceso abierto y observatorio de indicadores ICONO. En la
+  verificación el endpoint OAI-PMH ya no existe, el buscador está tras un filtro antibots e ICONO no respondió;
+  solo quedan las páginas informativas. Cosechar cada repositorio por separado.
+access: [portal]
 auth: none
-formats: [xml, xlsx, pdf, csv]
-update: weekly
+formats: [html]
+update: irregular
 coverage: "RECOLECTA desde 2007"
 license: Metadatos libres; datos FECYT con cita de la fuente
 base_url: https://recolecta.fecyt.es/
-docs_url: https://recolecta.fecyt.es/
+docs_url: https://recolecta.fecyt.es/servicios/recoleccion-de-datos-de-investigacion
 endpoints:
-  - path: https://recolecta.fecyt.es/oai?verb=Identify
-    desc: Endpoint OAI-PMH agregado de todos los repositorios españoles
+  - path: https://buscador.recolecta.fecyt.es/buscador-recolecta?search_api_fulltext={texto}
+    desc: Buscador web de RECOLECTA; responde 403 con una comprobación de navegador (Voight-Kampff Browser Test) a clientes no interactivos
   - path: https://icono.fecyt.es/
-    desc: ICONO, observatorio de indicadores de I+D+i con descargas
+    desc: ICONO, indicadores del sistema español de ciencia; sin respuesta desde este entorno (error del proxy), no verificado
+quirks: [waf-blocks-bots, url-drift]
+ids: []
 gotchas:
-  - Cosechar RECOLECTA completo son millones de registros; usar from y until para incrementales.
-  - Los metadatos siguen OpenAIRE Guidelines; los campos de financiación (projectID) permiten cruzar con la AEI.
+  - recolecta.fecyt.es/oai, /oai/request, /oai-pmh y /oai/openaire responden 404 (página Drupal); no se localizó ningún endpoint OAI-PMH vigente.
+  - buscador.recolecta.fecyt.es devuelve 403 y una página de comprobación de navegador para curl y requests con cualquier User-Agent.
+  - Para cosechar la producción científica española sin RECOLECTA, ir repositorio a repositorio (Digital.CSIC, repositorios universitarios) o al agregador europeo OpenAIRE, que los recoge.
+  - icono.fecyt.es no pudo verificarse (fallo de conexión en el proxy); comprobar antes de depender de él.
+tips: []
 related: [csic-digital, aei-convocatorias]
-status: active
-verified: null
+status: degraded
+verified: "2026-09-30"
