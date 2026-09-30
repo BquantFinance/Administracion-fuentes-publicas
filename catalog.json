@@ -2356,7 +2356,7 @@
   },
   {
    "id": "aeat-estadisticas",
-   "name": "AEAT – Estadísticas tributarias",
+   "name": "AEAT – Estadísticas tributarias y descarga masiva",
    "org": "Agencia Estatal de Administración Tributaria (AEAT)",
    "ministry": "Hacienda",
    "level": "age",
@@ -2366,56 +2366,74 @@
     "irpf",
     "iva",
     "sociedades",
+    "patrimonio",
     "recaudacion",
     "estadisticas-tributarias",
-    "declarantes"
+    "municipios"
    ],
-   "summary": "Estadísticas de declarantes de IRPF, IVA, Sociedades y Patrimonio por tramos, provincia y municipio; informes mensuales de recaudación; ventas, empleo y salarios en fuentes tributarias; comercio exterior.",
+   "summary": "Estadísticas de declarantes de IRPF (nacional, por municipio y por código postal), IVA, Sociedades y Patrimonio, informes mensuales y anuales de recaudación, ventas, empleo y salarios en fuentes tributarias, comercio exterior. CSV masivos del anuario y series de recaudación en xlsx con URL estable.",
    "access": [
-    "portal",
-    "download"
+    "download",
+    "portal"
    ],
    "auth": "none",
    "formats": [
-    "html",
-    "xlsx",
     "csv",
+    "xlsx",
+    "html",
     "pdf"
    ],
    "update": "monthly",
    "coverage": "1992- según estadística",
    "license": "Reutilización libre con cita de la fuente",
    "base_url": "https://sede.agenciatributaria.gob.es/Sede/estadisticas.html",
-   "docs_url": "https://sede.agenciatributaria.gob.es/Sede/estadisticas.html",
+   "docs_url": "https://sede.agenciatributaria.gob.es/Sede/estadisticas/anuario-estadistico/acceso-descarga-masiva-datos.html",
    "endpoints": [
     {
-     "path": "https://sede.agenciatributaria.gob.es/Sede/estadisticas/recaudacion-tributaria/informes-mensuales-recaudacion-tributaria.html",
-     "desc": "Informes mensuales de recaudación con anexos en Excel"
+     "path": "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Anuario_estadistico/Exportacion/{fichero}.csv",
+     "desc": "CSV masivos del anuario, todos los ejercicios en un fichero",
+     "params": "fichero en IRPFmunicipios, modelo100 (IRPF), modelo190_salarios, modelo190_pensiones, modelo200 (Sociedades), modelo390 (IVA), modelo714 (Patrimonio)",
+     "example": "curl -sO \"https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Anuario_estadistico/Exportacion/IRPFmunicipios.csv\""
     },
     {
-     "path": "https://sede.agenciatributaria.gob.es/Sede/estadisticas/estadisticas-irpf.html",
-     "desc": "IRPF por municipios, tramos de renta y partidas"
+     "path": "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Recaudacion_Tributaria/Informes_mensuales/Cuadros_estadisticos_series_es_es.xlsx",
+     "desc": "Series mensuales de recaudación por figura tributaria; en la misma carpeta Ingresos_por_Delegaciones.xlsx",
+     "example": "curl -sO \"https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Recaudacion_Tributaria/Informes_mensuales/Cuadros_estadisticos_series_es_es.xlsx\""
     },
     {
-     "path": "https://sede.agenciatributaria.gob.es/Sede/datos-abiertos.html",
-     "desc": "Conjuntos de datos abiertos publicados por la AEAT"
+     "path": "https://sede.agenciatributaria.gob.es/static_files/AEAT/Estudios/Estadisticas/Informes_Estadisticos/Informes_mensuales_recaudacion_tributaria/{AAAA}/IMR_{AA}_{MM}_es_es.pdf",
+     "desc": "Informe mensual de recaudación en PDF"
+    },
+    {
+     "path": "https://sede.agenciatributaria.gob.es/Sede/datosabiertos/catalogo/hacienda/{Estadistica}.shtml",
+     "desc": "Ficha de cada estadística con enlaces a las tablas HTML por ejercicio y a su documentación"
+    },
+    {
+     "path": "https://sede.agenciatributaria.gob.es/Sede/estadisticas/estadisticas-impuesto.html",
+     "desc": "Índice de estadísticas por impuesto con enlace a la ficha de cada una"
     }
    ],
    "gotchas": [
-    "Las tablas se sirven como HTML paginado; la exportación a Excel está enlace a enlace, sin descarga masiva.",
-    "La estadística de IRPF por municipios solo cubre municipios de más de 1.000 habitantes en territorio de régimen común (excluye País Vasco y Navarra).",
-    "Las URLs de la sede cambiaron en 2021 (de agenciatributaria.es a sede.agenciatributaria.gob.es); enlaces antiguos redirigen de forma inconsistente."
+    "Los CSV usan punto y coma como separador, coma decimal y CRLF; las columnas son códigos (MUNI_1, M714_3) descritos en AyudaCSV_AnuarioTotal.pdf y AyudaCSV_AnuarioMunicipal.pdf de la misma carpeta.",
+    "IRPFmunicipios.csv pesa 30 MB y trae todos los ejercicios en una sola tabla (columnas EJER y TRAMO).",
+    "Las rutas estadisticas-irpf.html, informes-mensuales-recaudacion-tributaria.html y datos-abiertos.html no existen; el índice es estadisticas-impuesto.html y las fichas cuelgan de datosabiertos/catalogo/hacienda/.",
+    "Las tablas de cada estadística son sitios HTML estáticos por ejercicio bajo /AEAT/Contenidos_Comunes/.../Publicaciones/sites/{impuesto}/{AAAA}/; exportación a Excel tabla a tabla.",
+    "Los xlsx de series se sobreescriben cada mes en la misma URL; guardar copia si se necesita el histórico de revisiones."
+   ],
+   "tips": [
+    "El CSV masivo del anuario evita rascar las tablas HTML; para series de recaudación usar el xlsx de cuadros."
    ],
    "related": [
     "aeat-servicios-web",
-    "igae-ejecucion-presupuestaria"
+    "igae-ejecucion-presupuestaria",
+    "ine-codigos-territoriales"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "aeat-servicios-web",
-   "name": "AEAT – Servicios web y trámites automatizables",
+   "name": "AEAT – Servicios web SII y VERI*FACTU",
    "org": "Agencia Estatal de Administración Tributaria (AEAT)",
    "ministry": "Hacienda",
    "level": "age",
@@ -2423,14 +2441,14 @@
    "tags": [
     "aeat",
     "sii",
-    "censo",
-    "nif",
-    "certificados",
-    "presentacion-telematica",
+    "verifactu",
     "facturacion",
-    "verifactu"
+    "soap",
+    "wsdl",
+    "certificado",
+    "presentacion-telematica"
    ],
-   "summary": "Servicios web SOAP para presentar declaraciones, el Suministro Inmediato de Información del IVA (SII), VERI*FACTU, consulta y validación de NIF, y descarga de datos fiscales. Requieren certificado electrónico.",
+   "summary": "Servicios web SOAP con certificado electrónico para el Suministro Inmediato de Información del IVA (SII), los sistemas de facturación VERI*FACTU y la presentación de modelos. WSDL y XSD públicos, entorno de pruebas con host propio y portal de desarrolladores separado de la sede.",
    "access": [
     "api-soap"
    ],
@@ -2441,89 +2459,124 @@
    "update": "realtime",
    "license": "Uso conforme a la normativa tributaria; no son datos abiertos",
    "base_url": "https://www1.agenciatributaria.gob.es/wlpl/",
-   "docs_url": "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-tecnicos.html",
+   "docs_url": "https://www.agenciatributaria.es/AEAT.desarrolladores/Desarrolladores/Desarrolladores.html",
    "endpoints": [
     {
-     "path": "https://sede.agenciatributaria.gob.es/Sede/iva/suministro-inmediato-informacion.html",
-     "desc": "SII, WSDL y esquemas para remitir registros de facturación"
+     "path": "https://www1.agenciatributaria.gob.es/wlpl/SSII-FACT/ws/fe/SiiFactFEV1SOAP",
+     "desc": "SII, suministro de facturas emitidas en producción; el resto de libros en las rutas que declara cada WSDL"
     },
     {
-     "path": "https://sede.agenciatributaria.gob.es/Sede/iva/sistemas-informaticos-facturacion-verifactu.html",
-     "desc": "VERI*FACTU, especificaciones técnicas y entorno de pruebas"
+     "path": "https://sede.agenciatributaria.gob.es/static_files/Sede/Procedimiento_ayuda/G417/FicherosSuministros/V_1_1/WSDL/{servicio}.wsdl",
+     "desc": "WSDL del SII v1.1 (SuministroFactEmitidas, SuministroFactRecibidas, ConsultaLLAA...) con los XSD al lado",
+     "example": "curl -sO \"https://sede.agenciatributaria.gob.es/static_files/Sede/Procedimiento_ayuda/G417/FicherosSuministros/V_1_1/WSDL/SuministroFactEmitidas.wsdl\""
     },
     {
-     "path": "https://sede.agenciatributaria.gob.es/Sede/procedimientoini/ZZ09.shtml",
-     "desc": "Comprobación de NIF de terceros a efectos censales"
+     "path": "https://www1.agenciatributaria.gob.es/wlpl/TIKE-CONT/ws/SistemaFacturacion/VerifactuSOAP",
+     "desc": "VERI*FACTU, remisión de registros de facturación en producción"
+    },
+    {
+     "path": "https://prewww2.aeat.es/static_files/common/internet/dep/aplicaciones/es/aeat/tikeV1.0/cont/ws/SistemaFacturacion.wsdl",
+     "desc": "WSDL de VERI*FACTU con los endpoints de producción y de pruebas",
+     "example": "curl -s \"https://prewww2.aeat.es/static_files/common/internet/dep/aplicaciones/es/aeat/tikeV1.0/cont/ws/SistemaFacturacion.wsdl\" | grep location"
+    },
+    {
+     "path": "https://sede.agenciatributaria.gob.es/Sede/iva/suministro-inmediato-informacion/informacion-tecnica.html",
+     "desc": "Documentación técnica del SII (diseños de registro, validaciones, errores)"
+    },
+    {
+     "path": "https://sede.agenciatributaria.gob.es/Sede/iva/sistemas-informaticos-facturacion-verifactu/informacion-tecnica.html",
+     "desc": "Documentación técnica de VERI*FACTU"
     }
    ],
    "gotchas": [
-    "Todo requiere certificado electrónico de persona física, jurídica o de sello; no hay API key ni OAuth.",
-    "Existe entorno de pruebas (preproducción) con host distinto para SII y VERI*FACTU; consultar cada manual.",
-    "La validación de NIF de terceros está limitada a colaboradores sociales y presentadores, no es abierta.",
-    "Los WSDL cambian de versión con la normativa; fijar versión y vigilar los cambios anunciados en la sede."
+    "Todo requiere certificado electrónico (persona física, jurídica o sello) en TLS mutuo; no hay API key ni OAuth. Sin certificado, www1 redirige a una página de error de la sede.",
+    "Cada WSDL declara dos endpoints de producción (www1 y www10.agenciatributaria.gob.es) y dos de pruebas (prewww1 y prewww10.aeat.es) con la misma ruta; la documentación indica cuál usar según el certificado.",
+    "Los WSDL, XSD y diseños de registro viven en el portal de desarrolladores (agenciatributaria.es/AEAT.desarrolladores) y en static_files de la sede; la ruta antigua de manuales técnicos da 404.",
+    "VIES (/Sede/procedimientoini/ZZ09.shtml) es la validación de NIF-IVA intracomunitario, no una consulta censal de NIF.",
+    "Los WSDL cambian de versión con la normativa (SII v1.1 vigente); fijar versión y vigilar Novedades del portal de desarrolladores."
    ],
    "related": [
     "aeat-estadisticas"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "hacienda-ovef",
-   "name": "Hacienda – Oficina Virtual de Coordinación Financiera con las EELL y CCAA",
+   "name": "Hacienda – Entidades locales, presupuestos, deuda viva, financiación y tributos",
    "org": "Secretaría General de Financiación Autonómica y Local",
    "ministry": "Hacienda",
    "level": "age",
    "sector": "hacienda-presupuestos",
    "tags": [
     "ayuntamientos",
-    "comunidades-autonomas",
+    "entidades-locales",
     "presupuestos",
     "liquidaciones",
-    "deuda-local",
-    "financiacion"
+    "deuda-viva",
+    "financiacion-local",
+    "tributos-locales",
+    "pmp"
    ],
-   "summary": "Presupuestos y liquidaciones de todas las entidades locales y CCAA, deuda viva por ayuntamiento, periodo medio de pago, tributos locales (tipos impositivos por municipio), financiación autonómica. Descargas masivas en Excel/CSV.",
+   "summary": "Datos de todas las entidades locales: deuda viva por ayuntamiento, entregas a cuenta y cesión de tributos, ejecución presupuestaria trimestral, liquidaciones y cumplimiento de estabilidad, periodo medio de pago y tipos impositivos municipales. Ficheros xlsx anuales y consultas web con sesión.",
    "access": [
-    "portal",
-    "download"
+    "download",
+    "portal"
    ],
    "auth": "none",
    "formats": [
     "xlsx",
-    "csv",
+    "xls",
     "pdf"
    ],
    "update": "annual",
-   "coverage": "2002-",
    "license": "Reutilización libre con cita de la fuente",
    "base_url": "https://www.hacienda.gob.es/es-ES/Areas%20Tematicas/Administracion%20Electronica/OVEELL/Paginas/OVEntidadesLocales.aspx",
-   "docs_url": "https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PublicacionPresupuestos/aspx/inicio.aspx",
+   "docs_url": "https://www.hacienda.gob.es/es-ES/Areas%20Tematicas/Administracion%20Electronica/OVEELL/Paginas/OVEntidadesLocales.aspx",
    "endpoints": [
     {
+     "path": "https://www.hacienda.gob.es/cdi/sist%20financiacion%20y%20deuda/informacioneells/{AAAA}/deuda-viva-ayuntamientos-{AAAA}12.xlsx",
+     "desc": "Deuda viva a 31 de diciembre por ayuntamiento; en la misma carpeta deuda-viva-dipycab y deuda-viva-restoeell",
+     "example": "curl -sO \"https://www.hacienda.gob.es/cdi/sist%20financiacion%20y%20deuda/informacioneells/2025/deuda-viva-ayuntamientos-202512.xlsx\""
+    },
+    {
+     "path": "https://www.hacienda.gob.es/es-es/cdi/paginas/sistemasfinanciaciondeuda/informacioneells/datosfinanciacionel.aspx",
+     "desc": "Entregas a cuenta mensuales, cesión de tributos y variables de financiación local, xlsx por ejercicio"
+    },
+    {
+     "path": "https://www.hacienda.gob.es/es-es/cdi/paginas/informacionpresupuestaria/informacioneells/consultaejecprestrimestral.aspx",
+     "desc": "Resumen de ejecución presupuestaria trimestral de las EELL, un xls por trimestre desde 2017"
+    },
+    {
+     "path": "https://www.hacienda.gob.es/es-ES/CDI/Paginas/EstabilidadPresupuestaria/InformacionCCLLs/Cumplimiento_objetivoestabilidad_EELL.aspx",
+     "desc": "Liquidación anual por entidad con saldo no financiero y cumplimiento de estabilidad, xlsx por ejercicio"
+    },
+    {
      "path": "https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PublicacionPresupuestos/aspx/inicio.aspx",
-     "desc": "Consulta y descarga de presupuestos y liquidaciones de entidades locales"
+     "desc": "Consulta y descarga de presupuestos y liquidaciones detalladas por entidad"
     },
     {
-     "path": "https://www.hacienda.gob.es/es-ES/CDI/Paginas/SistemasFinanciacionDeuda/InformacionEELLs/DeudaViva.aspx",
-     "desc": "Deuda viva de los ayuntamientos a 31 de diciembre"
-    },
-    {
-     "path": "https://www.hacienda.gob.es/es-ES/CDI/Paginas/ImpuestosTasasEELL/ImpuestosTasasEELL.aspx",
+     "path": "https://serviciostelematicosext.hacienda.gob.es/SGFAL/ConsultaTipos/html/portadaconsultasm.aspx",
      "desc": "Tipos de IBI, IAE, IVTM y otros tributos por municipio"
+    },
+    {
+     "path": "https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PMP_NET/aspx/consulta/consulta.aspx?tipoPublicacion=2",
+     "desc": "Periodo medio de pago a proveedores por entidad local"
     }
    ],
    "gotchas": [
-    "Las descargas masivas por ejercicio están como ficheros Excel de varias decenas de MB con múltiples hojas.",
-    "La clasificación funcional cambió en 2015; series largas requieren mapear programas.",
-    "Cada ayuntamiento se identifica por código INE de municipio más código de entidad; no usar el nombre."
+    "SelDescargaDC.aspx y SeldescargaDF.aspx (descarga de presupuestos) devuelven sesion_expirada por URL directa, incluso con cookies y Referer; la sesión nace en la navegación del menú. Automatizar con navegador.",
+    "Los xlsx de hacienda.gob.es tienen rutas con espacios (sist financiacion y deuda); codificar como %20.",
+    "Los nombres de fichero llevan la fecha de publicación (liquidacion2024eell-...-13022026.xlsx); hay que rascar la página para obtener el enlace. Solo la deuda viva sigue un patrón fijo.",
+    "Hasta 2022 los ficheros son xls (Excel 97) y desde 2023 xlsx; usar una librería que lea ambos.",
+    "La página de tributos locales de la ficha anterior (ImpuestosTasasEELL.aspx) no existe; la consulta está en SGFAL/ConsultaTipos."
    ],
    "related": [
     "igae-ejecucion-presupuestaria",
     "ine-codigos-territoriales"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "igae-ejecucion-presupuestaria",
@@ -2539,51 +2592,62 @@
     "deficit",
     "contabilidad-nacional",
     "sector-publico",
-    "cuentas"
+    "invente",
+    "pmp"
    ],
-   "summary": "Ejecución mensual del presupuesto del Estado y de la Seguridad Social, déficit por Administraciones en contabilidad nacional, Cuenta General del Estado, datos de entidades públicas (INVENTE) y CIMCA de entes locales.",
+   "summary": "Déficit y operaciones no financieras de las AAPP en contabilidad nacional (mensual por subsector, trimestral y anual), ejecución mensual del presupuesto del Estado en caja, cuentas anuales de las AAPP e inventario de entes públicos (INVENTE). Ficheros xlsx anuales con URL predecible.",
    "access": [
-    "portal",
-    "download"
+    "download",
+    "portal"
    ],
    "auth": "none",
    "formats": [
     "xlsx",
     "pdf",
-    "html",
-    "csv"
+    "html"
    ],
    "update": "monthly",
-   "coverage": "1995-",
    "license": "Reutilización libre con cita de la fuente",
-   "base_url": "https://www.igae.pap.hacienda.gob.es/",
-   "docs_url": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/imMensualEstado.aspx",
+   "base_url": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/Publicaciones.aspx",
+   "docs_url": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Paginas/Calendario.aspx",
    "endpoints": [
     {
-     "path": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/imMensualEstado.aspx",
-     "desc": "Informe mensual de ejecución del Estado en contabilidad nacional"
+     "path": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AACC-M/M_AACC_{AAAA}.xlsx",
+     "desc": "Operaciones no financieras mensuales de la Administración Central en contabilidad nacional, un xlsx por año desde 2013",
+     "example": "curl -sO \"https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AACC-M/M_AACC_2026.xlsx\""
     },
     {
-     "path": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/iaCuentasAAPP.aspx",
-     "desc": "Cuentas anuales de las Administraciones Públicas"
+     "path": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/{im|it|ia}nofinancieras{AC|CA|CL|SS|Total|AAPP}.aspx",
+     "desc": "Páginas de operaciones no financieras mensuales (im), trimestrales (it) y anuales (ia) por subsector"
     },
     {
-     "path": "https://www.pap.hacienda.gob.es/invente2/",
+     "path": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/CAAP/CAP_Serie.xlsx",
+     "desc": "Cuentas anuales de las AAPP, serie completa; liquidaciones y subvenciones por año en la misma carpeta"
+    },
+    {
+     "path": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadPublica/CPE/EjecucionPresupuestaria/Paginas/imejecucionpresupuesto.aspx",
+     "desc": "Ejecución mensual del presupuesto del Estado en caja; PDF por mes y xlsx con anexos"
+    },
+    {
+     "path": "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/BasesDatos/Invente/Paginas/inicio.aspx",
      "desc": "INVENTE, inventario de entes del sector público estatal, autonómico y local"
     }
    ],
    "gotchas": [
-    "Sitio SharePoint; las URLs con .aspx son estables pero los ficheros Excel cambian de nombre cada mes.",
-    "Contabilidad nacional (SEC 2010) y contabilidad presupuestaria (caja) dan cifras distintas para el mismo periodo.",
-    "Los datos de CCAA y ayuntamientos están en la Oficina Virtual de Coordinación Financiera (otra ficha)."
+    "Las rutas imMensualEstado.aspx y pap.hacienda.gob.es/invente2/ de la ficha anterior no existen (404 y rechazo del WAF); INVENTE cuelga de BasesDatos/Invente.",
+    "Sitio SharePoint. Los xlsx de contabilidad nacional siguen patrón por año (M_AACC_{AAAA}.xlsx); los de ejecución en caja llevan el mes en mayúsculas y espacios (MENSUAL ABRIL 2026.xlsx), codificar %20.",
+    "Los trimestrales del total de AAPP (itnofinancierasAAPP) solo se publican en PDF.",
+    "Contabilidad nacional (SEC 2010, devengo) y ejecución presupuestaria (caja) dan cifras distintas para el mismo periodo.",
+    "Los datos por CCAA y por ayuntamiento están en Hacienda (hacienda-ovef), no en la IGAE."
    ],
    "related": [
     "hacienda-ovef",
     "airef-datos",
-    "tesoro-estadisticas"
+    "tesoro-estadisticas",
+    "bde-estadisticas"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "interior-criminalidad",

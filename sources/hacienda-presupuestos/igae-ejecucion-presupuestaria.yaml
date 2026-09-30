@@ -7,8 +7,8 @@ sector: hacienda-presupuestos
 tags: [igae, presupuestos, ejecucion, deficit, contabilidad-nacional, sector-publico, invente, pmp]
 summary: >-
   Déficit y operaciones no financieras de las AAPP en contabilidad nacional (mensual por subsector, trimestral y
-  anual), ejecución mensual del presupuesto del Estado en caja, cuentas anuales de las AAPP, periodo medio de pago
-  e inventario de entes públicos (INVENTE). Ficheros xlsx anuales con URL predecible.
+  anual), ejecución mensual del presupuesto del Estado en caja, cuentas anuales de las AAPP e inventario de entes
+  públicos (INVENTE). Ficheros xlsx anuales con URL predecible.
 access: [download, portal]
 auth: none
 formats: [xlsx, pdf, html]

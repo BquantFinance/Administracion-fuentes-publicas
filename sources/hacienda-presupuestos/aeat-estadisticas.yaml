@@ -19,7 +19,8 @@ base_url: https://sede.agenciatributaria.gob.es/Sede/estadisticas.html
 docs_url: https://sede.agenciatributaria.gob.es/Sede/estadisticas/anuario-estadistico/acceso-descarga-masiva-datos.html
 endpoints:
   - path: https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Anuario_estadistico/Exportacion/{fichero}.csv
-    desc: CSV masivos del anuario. IRPFmunicipios, modelo100 (IRPF), modelo190_salarios, modelo190_pensiones, modelo200 (Sociedades), modelo390 (IVA), modelo714 (Patrimonio)
+    desc: CSV masivos del anuario, todos los ejercicios en un fichero
+    params: "fichero en IRPFmunicipios, modelo100 (IRPF), modelo190_salarios, modelo190_pensiones, modelo200 (Sociedades), modelo390 (IVA), modelo714 (Patrimonio)"
     example: curl -sO "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Anuario_estadistico/Exportacion/IRPFmunicipios.csv"
   - path: https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Recaudacion_Tributaria/Informes_mensuales/Cuadros_estadisticos_series_es_es.xlsx
     desc: Series mensuales de recaudación por figura tributaria; en la misma carpeta Ingresos_por_Delegaciones.xlsx
@@ -33,7 +34,7 @@ endpoints:
 gotchas:
   - Los CSV usan punto y coma como separador, coma decimal y CRLF; las columnas son códigos (MUNI_1, M714_3) descritos en AyudaCSV_AnuarioTotal.pdf y AyudaCSV_AnuarioMunicipal.pdf de la misma carpeta.
   - IRPFmunicipios.csv pesa 30 MB y trae todos los ejercicios en una sola tabla (columnas EJER y TRAMO).
-  - Las rutas estadisticas-irpf.html, informes-mensuales-recaudacion-tributaria.html y /Sede/datos-abiertos.html no existen (404); el índice real es estadisticas-impuesto.html y las fichas cuelgan de /Sede/datosabiertos/catalogo/hacienda/.
+  - Las rutas estadisticas-irpf.html, informes-mensuales-recaudacion-tributaria.html y datos-abiertos.html no existen; el índice es estadisticas-impuesto.html y las fichas cuelgan de datosabiertos/catalogo/hacienda/.
   - Las tablas de cada estadística son sitios HTML estáticos por ejercicio bajo /AEAT/Contenidos_Comunes/.../Publicaciones/sites/{impuesto}/{AAAA}/; exportación a Excel tabla a tabla.
   - Los xlsx de series se sobreescriben cada mes en la misma URL; guardar copia si se necesita el histórico de revisiones.
 tips:
