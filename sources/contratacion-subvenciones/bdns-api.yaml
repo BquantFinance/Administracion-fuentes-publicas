@@ -1,0 +1,38 @@
+id: bdns-api
+name: BDNS – Base de Datos Nacional de Subvenciones (API REST)
+org: Intervención General de la Administración del Estado (IGAE)
+ministry: Hacienda
+level: age
+sector: contratacion-subvenciones
+tags: [subvenciones, ayudas, convocatorias, concesiones, beneficiarios, ayudas-de-estado, minimis]
+summary: >-
+  Convocatorias, concesiones y beneficiarios de subvenciones de todas las Administraciones (Estado, CCAA, EELL),
+  ayudas de Estado, minimis, sanciones e inhabilitaciones. API REST pública con paginación y descarga CSV.
+access: [api-rest, portal, download]
+auth: none
+formats: [json, csv, xlsx, pdf]
+update: daily
+coverage: "2014- (convocatorias); concesiones desde 2016"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.infosubvenciones.es/bdnstrans/
+docs_url: https://www.infosubvenciones.es/bdnstrans/GE/es/api
+endpoints:
+  - path: https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page={n}&pageSize={n}&descripcion={texto}
+    desc: Búsqueda paginada de convocatorias
+    example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=20&descripcion=investigacion"
+  - path: https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv={numero}
+    desc: Detalle de una convocatoria por su número BDNS
+  - path: https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page={n}&pageSize={n}
+    desc: Concesiones (importe, beneficiario, convocatoria, fecha)
+  - path: https://www.infosubvenciones.es/bdnstrans/api/ayudasestado/busqueda
+    desc: Ayudas de Estado publicadas
+  - path: https://www.infosubvenciones.es/bdnstrans/api/minimis/busqueda
+    desc: Ayudas de minimis
+gotchas:
+  - Los beneficiarios personas físicas aparecen con nombre y apellidos truncados o anonimizados salvo cuando la ley obliga a publicar.
+  - El número de convocatoria BDNS es el identificador estable; el código de la administración concedente sigue DIR3.
+  - pageSize máximo en torno a 10000 según endpoint; respuestas grandes tardan.
+  - El extracto de la convocatoria se publica también en el BOE o diario oficial correspondiente, con enlace en la ficha.
+related: [placsp-datos-abiertos, dir3-directorio, boe-api-sumario]
+status: active
+verified: null

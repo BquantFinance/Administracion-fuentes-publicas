@@ -1,0 +1,28 @@
+id: datacomex
+name: DataComex – Estadísticas de comercio exterior de España
+org: Secretaría de Estado de Comercio
+ministry: Economía, Comercio y Empresa
+level: age
+sector: comercio-industria-propiedad
+tags: [comercio-exterior, exportaciones, importaciones, aduanas, taric, paises, provincias]
+summary: >-
+  Exportaciones e importaciones mensuales por producto (TARIC hasta 8 dígitos, CNAE, CUCI), país, provincia y
+  CCAA, en valor y volumen, desde 1995. Consulta multidimensional con exportación a CSV y Excel.
+access: [portal, download]
+auth: none
+formats: [csv, xlsx, html]
+update: monthly
+coverage: "1995-"
+license: Reutilización libre con cita de la fuente
+base_url: https://datacomex.comercio.es/
+docs_url: https://datacomex.comercio.es/
+endpoints:
+  - path: https://datacomex.comercio.es/
+    desc: Consulta interactiva con selección de dimensiones y descarga
+gotchas:
+  - Requiere registro gratuito para consultas grandes; las pequeñas funcionan sin cuenta.
+  - Los datos provisionales de los últimos meses se revisan; los definitivos llegan con un año de retardo.
+  - La fuente primaria es la AEAT (Aduanas); DataComex reorganiza pero no cambia cifras.
+related: [datainvex, aeat-estadisticas]
+status: active
+verified: null

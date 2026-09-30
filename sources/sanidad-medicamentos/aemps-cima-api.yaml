@@ -1,0 +1,48 @@
+id: aemps-cima-api
+name: AEMPS CIMA – API REST de medicamentos autorizados
+org: Agencia Española de Medicamentos y Productos Sanitarios (AEMPS)
+ministry: Sanidad
+level: age
+sector: sanidad-medicamentos
+tags: [medicamentos, cima, aemps, principios-activos, fichas-tecnicas, prospectos, codigo-nacional, atc, problemas-suministro]
+summary: >-
+  Todos los medicamentos autorizados en España: composición, principios activos, código ATC, código nacional,
+  ficha técnica y prospecto en HTML/PDF, estado de comercialización, problemas de suministro, laboratorio.
+  API REST JSON sin autenticación.
+access: [api-rest, download]
+auth: none
+formats: [json, xml, pdf, html]
+update: daily
+coverage: "Medicamentos autorizados vigentes y revocados"
+license: Reutilización libre con cita de la fuente
+base_url: https://cima.aemps.es/cima/rest
+docs_url: https://cima.aemps.es/cima/publico/nomenclator.html
+endpoints:
+  - path: /medicamentos?nombre={texto}&pagina={n}
+    desc: Búsqueda de medicamentos por nombre, principio activo, laboratorio, ATC (parámetros combinables)
+    example: curl -s "https://cima.aemps.es/cima/rest/medicamentos?nombre=ibuprofeno&pagina=1"
+  - path: /medicamento?cn={codigo_nacional}
+    desc: Detalle de un medicamento por código nacional (o nregistro=)
+    example: curl -s "https://cima.aemps.es/cima/rest/medicamento?cn=654210"
+  - path: /presentaciones?cn={cn}
+    desc: Presentaciones comerciales
+  - path: /psuministro
+    desc: Problemas de suministro activos
+    example: curl -s "https://cima.aemps.es/cima/rest/psuministro"
+  - path: /docSegmentado/contenido/1?nregistro={nreg}
+    desc: Ficha técnica segmentada por secciones (1 ficha técnica, 2 prospecto)
+  - path: /maestras?maestra={id}
+    desc: Tablas maestras (1 principios activos, 3 formas farmacéuticas, 4 vías, 6 laboratorios, 7 ATC...)
+  - path: https://cima.aemps.es/cima/publico/nomenclator.html
+    desc: Nomenclátor de prescripción, descarga completa mensual en XML
+gotchas:
+  - Paginación de 25 resultados por página con el parámetro pagina; el total va en el campo totalFilas.
+  - Los parámetros de búsqueda por principio activo (practiv1) y ATC (atc) aceptan códigos parciales.
+  - El código nacional (cn) identifica la presentación; el nregistro identifica el medicamento. Un medicamento tiene varias presentaciones.
+  - Las fichas técnicas en PDF cambian de URL con cada actualización; guardar nregistro y regenerar la URL.
+  - Documentación técnica completa en el PDF "CIMA REST API" enlazado desde la página de nomenclátor.
+tips:
+  - Para un maestro completo de medicamentos descargar el nomenclátor XML mensual en vez de paginar la API.
+related: [sanidad-portal-estadistico, aemps-otros-registros]
+status: active
+verified: null

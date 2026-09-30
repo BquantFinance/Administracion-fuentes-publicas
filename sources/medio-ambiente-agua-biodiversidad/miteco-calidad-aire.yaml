@@ -1,0 +1,30 @@
+id: miteco-calidad-aire
+name: MITECO – Calidad del aire (datos oficiales de estaciones)
+org: Dirección General de Calidad y Evaluación Ambiental
+ministry: Para la Transición Ecológica y el Reto Demográfico
+level: age
+sector: medio-ambiente-agua-biodiversidad
+tags: [calidad-aire, contaminacion, no2, pm10, pm25, ozono, estaciones, emisiones]
+summary: >-
+  Datos horarios validados de contaminantes (NO2, PM10, PM2.5, O3, SO2, CO) de todas las estaciones de las redes
+  autonómicas y locales, por año, e inventario de estaciones. Ficheros anuales por contaminante.
+access: [download, portal]
+auth: none
+formats: [csv, xlsx, xml]
+update: annual
+coverage: "2001-"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/calidad-del-aire/evaluacion-datos/datos.html
+docs_url: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/calidad-del-aire/evaluacion-datos/datos.html
+endpoints:
+  - path: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/calidad-del-aire/evaluacion-datos/datos.html
+    desc: Datos oficiales validados por año y contaminante, e inventario de estaciones
+  - path: https://sig.mapama.gob.es/calidad-aire/
+    desc: Visor SIG de calidad del aire con datos en tiempo casi real
+gotchas:
+  - Los datos validados llegan con más de un año de retraso; para tiempo real hay que ir a cada red autonómica o al visor.
+  - Los ficheros usan un código de estación de 8 dígitos (provincia, municipio, número) y el contaminante por código numérico europeo.
+  - Formato de ancho fijo en años antiguos y CSV en recientes; los valores -9999 o V/N marcan validez.
+related: [miteco-prtr, aemet-opendata]
+status: active
+verified: null

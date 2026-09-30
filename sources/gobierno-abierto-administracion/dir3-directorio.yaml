@@ -1,0 +1,31 @@
+id: dir3-directorio
+name: DIR3 – Directorio Común de Unidades Orgánicas y Oficinas
+org: Secretaría General de Administración Digital
+ministry: Transformación Digital y de la Función Pública
+level: age
+sector: gobierno-abierto-administracion
+tags: [dir3, organismos, unidades-organicas, oficinas-registro, codigos, estructura-administrativa]
+summary: >-
+  Inventario oficial de todas las unidades orgánicas, organismos y oficinas de registro y atención de las
+  Administraciones españolas con código DIR3 único, jerarquía y estado. Es la clave que usan facturación
+  electrónica (FACe), contratación, subvenciones y notificaciones.
+access: [download, api-soap]
+auth: none
+formats: [csv, xlsx, xml]
+update: daily
+coverage: "Vigente e histórico de unidades extinguidas"
+license: Reutilización libre con cita de la fuente
+base_url: https://administracionelectronica.gob.es/ctt/dir3
+docs_url: https://administracionelectronica.gob.es/ctt/dir3/descargas
+endpoints:
+  - path: https://administracionelectronica.gob.es/ctt/dir3/descargas
+    desc: Descarga de la base completa (unidades y oficinas) en CSV/Excel actualizada a diario
+  - path: https://administracionelectronica.gob.es/ctt/dir3
+    desc: Documentación funcional, esquemas y servicios web SOAP de consulta
+gotchas:
+  - Los códigos DIR3 tienen formato letra + dígitos (E para Estado, A para CCAA, L para local, U universidades, I instituciones); no son numéricos.
+  - Los servicios web SOAP requieren alta previa de la aplicación consumidora; la descarga completa no.
+  - Hay unidades extinguidas que conservan código; filtrar por estado vigente.
+related: [datos-gob-es-api, bdns-api, placsp-datos-abiertos, face-facturas]
+status: active
+verified: null

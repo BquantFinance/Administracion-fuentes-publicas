@@ -1,0 +1,28 @@
+id: idee-servicios
+name: IDEE – Infraestructura de Datos Espaciales de España
+org: Consejo Superior Geográfico / CNIG
+ministry: Transportes y Movilidad Sostenible
+level: age
+sector: territorio-cartografia
+tags: [idee, inspire, wms, wfs, catalogo-metadatos, csw, geoportal]
+summary: >-
+  Catálogo de servicios geográficos interoperables de todas las Administraciones (más de 3.000 WMS, WFS, WMTS,
+  CSW) y directorio de nodos IDE. Punto de partida para localizar cualquier capa geográfica oficial.
+access: [ogc, api-rest, portal]
+auth: none
+formats: [xml, gml, geojson, json]
+update: daily
+license: Metadatos libres; cada servicio con su licencia
+base_url: https://www.idee.es/
+docs_url: https://www.idee.es/web/idee/directorio-de-servicios
+endpoints:
+  - path: https://www.idee.es/csw-inspire-idee/srv/spa/csw?SERVICE=CSW&REQUEST=GetCapabilities
+    desc: Catálogo CSW de metadatos INSPIRE
+  - path: https://www.idee.es/web/idee/directorio-de-servicios
+    desc: Directorio navegable de servicios OGC por tema y organismo
+gotchas:
+  - Muchos servicios listados son autonómicos o locales y tienen disponibilidad irregular; comprobar GetCapabilities antes de depender de ellos.
+  - El CSW usa perfil INSPIRE con esquemas ISO 19139; las búsquedas por texto libre van en el filtro AnyText.
+related: [cnig-centro-descargas, catastro-ovc]
+status: active
+verified: null

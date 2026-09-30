@@ -1,0 +1,32 @@
+id: face-facturas
+name: FACe – Punto general de entrada de facturas electrónicas
+org: Secretaría General de Administración Digital
+ministry: Transformación Digital y de la Función Pública
+level: age
+sector: gobierno-abierto-administracion
+tags: [face, factura-electronica, facturae, proveedores, oficinas-contables, dir3]
+summary: >-
+  Servicios web para presentar y consultar facturas electrónicas (Facturae 3.2.x) a las Administraciones adheridas,
+  directorio de unidades receptoras (DIR3) y estadísticas de facturación.
+access: [api-soap, download]
+auth: certificate
+formats: [xml, xlsx]
+update: realtime
+coverage: "2015-"
+license: Servicio administrativo; directorio y estadísticas reutilizables
+base_url: https://face.gob.es/
+docs_url: https://face.gob.es/es/proveedores
+endpoints:
+  - path: https://face.gob.es/es/directorio/administraciones
+    desc: Directorio de administraciones y unidades DIR3 que reciben por FACe (descargable)
+  - path: https://face.gob.es/es/facturas/estadisticas
+    desc: Estadísticas de facturas recibidas
+  - path: https://webservice.face.gob.es/facturasspp2
+    desc: Servicio web SOAP de presentación y consulta (requiere certificado y firma WS-Security)
+gotchas:
+  - Las facturas deben ir en Facturae 3.2, 3.2.1 o 3.2.2 firmadas con XAdES; otros formatos se rechazan.
+  - Cada factura necesita tres códigos DIR3 (oficina contable, órgano gestor, unidad tramitadora) obtenidos del directorio.
+  - Existe entorno de pruebas (se-face-webservice) con certificados de prueba.
+related: [dir3-directorio]
+status: active
+verified: null

@@ -1,0 +1,32 @@
+id: igae-ejecucion-presupuestaria
+name: IGAE – Ejecución presupuestaria y contabilidad nacional
+org: Intervención General de la Administración del Estado (IGAE)
+ministry: Hacienda
+level: age
+sector: hacienda-presupuestos
+tags: [igae, presupuestos, ejecucion, deficit, contabilidad-nacional, sector-publico, cuentas]
+summary: >-
+  Ejecución mensual del presupuesto del Estado y de la Seguridad Social, déficit por Administraciones en
+  contabilidad nacional, Cuenta General del Estado, datos de entidades públicas (INVENTE) y CIMCA de entes locales.
+access: [portal, download]
+auth: none
+formats: [xlsx, pdf, html, csv]
+update: monthly
+coverage: "1995-"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.igae.pap.hacienda.gob.es/
+docs_url: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/imMensualEstado.aspx
+endpoints:
+  - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/imMensualEstado.aspx
+    desc: Informe mensual de ejecución del Estado en contabilidad nacional
+  - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/iaCuentasAAPP.aspx
+    desc: Cuentas anuales de las Administraciones Públicas
+  - path: https://www.pap.hacienda.gob.es/invente2/
+    desc: INVENTE, inventario de entes del sector público estatal, autonómico y local
+gotchas:
+  - Sitio SharePoint; las URLs con .aspx son estables pero los ficheros Excel cambian de nombre cada mes.
+  - Contabilidad nacional (SEC 2010) y contabilidad presupuestaria (caja) dan cifras distintas para el mismo periodo.
+  - Los datos de CCAA y ayuntamientos están en la Oficina Virtual de Coordinación Financiera (otra ficha).
+related: [hacienda-ovef, airef-datos, tesoro-estadisticas]
+status: active
+verified: null

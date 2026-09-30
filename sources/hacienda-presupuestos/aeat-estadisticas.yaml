@@ -1,0 +1,32 @@
+id: aeat-estadisticas
+name: AEAT – Estadísticas tributarias
+org: Agencia Estatal de Administración Tributaria (AEAT)
+ministry: Hacienda
+level: age
+sector: hacienda-presupuestos
+tags: [aeat, irpf, iva, sociedades, recaudacion, estadisticas-tributarias, declarantes]
+summary: >-
+  Estadísticas de declarantes de IRPF, IVA, Sociedades y Patrimonio por tramos, provincia y municipio;
+  informes mensuales de recaudación; ventas, empleo y salarios en fuentes tributarias; comercio exterior.
+access: [portal, download]
+auth: none
+formats: [html, xlsx, csv, pdf]
+update: monthly
+coverage: "1992- según estadística"
+license: Reutilización libre con cita de la fuente
+base_url: https://sede.agenciatributaria.gob.es/Sede/estadisticas.html
+docs_url: https://sede.agenciatributaria.gob.es/Sede/estadisticas.html
+endpoints:
+  - path: https://sede.agenciatributaria.gob.es/Sede/estadisticas/recaudacion-tributaria/informes-mensuales-recaudacion-tributaria.html
+    desc: Informes mensuales de recaudación con anexos en Excel
+  - path: https://sede.agenciatributaria.gob.es/Sede/estadisticas/estadisticas-irpf.html
+    desc: IRPF por municipios, tramos de renta y partidas
+  - path: https://sede.agenciatributaria.gob.es/Sede/datos-abiertos.html
+    desc: Conjuntos de datos abiertos publicados por la AEAT
+gotchas:
+  - Las tablas se sirven como HTML paginado; la exportación a Excel está enlace a enlace, sin descarga masiva.
+  - La estadística de IRPF por municipios solo cubre municipios de más de 1.000 habitantes en territorio de régimen común (excluye País Vasco y Navarra).
+  - Las URLs de la sede cambiaron en 2021 (de agenciatributaria.es a sede.agenciatributaria.gob.es); enlaces antiguos redirigen de forma inconsistente.
+related: [aeat-servicios-web, igae-ejecucion-presupuestaria]
+status: active
+verified: null

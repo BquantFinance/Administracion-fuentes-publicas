@@ -1,0 +1,30 @@
+id: miteco-prtr
+name: PRTR-España – Registro Estatal de Emisiones y Fuentes Contaminantes
+org: Dirección General de Calidad y Evaluación Ambiental
+ministry: Para la Transición Ecológica y el Reto Demográfico
+level: age
+sector: medio-ambiente-agua-biodiversidad
+tags: [prtr, emisiones, contaminantes, industria, residuos, complejos-industriales, quimica]
+summary: >-
+  Emisiones anuales a aire, agua y suelo y transferencias de residuos de cada complejo industrial afectado
+  (más de 6.000 instalaciones), por sustancia química y actividad. Consulta y descarga por complejo, sustancia y año.
+access: [portal, download]
+auth: none
+formats: [xlsx, csv, html]
+update: annual
+coverage: "2001-"
+license: Reutilización libre con cita de la fuente
+base_url: https://prtr-es.es/
+docs_url: https://prtr-es.es/informes/descargas.aspx
+endpoints:
+  - path: https://prtr-es.es/informes/descargas.aspx
+    desc: Descarga de datos completos por año
+  - path: https://prtr-es.es/Informes/InventarioInstalacionesIPPC.aspx
+    desc: Inventario de instalaciones con coordenadas y actividad
+gotchas:
+  - Solo se publican emisiones que superan umbrales por sustancia; ausencia no significa emisión cero.
+  - Los datos del año N se publican en el segundo semestre de N+1 tras validación.
+  - Sustancias identificadas por código PRTR europeo, no CAS; existe tabla de equivalencia en el portal.
+related: [miteco-calidad-aire]
+status: active
+verified: null

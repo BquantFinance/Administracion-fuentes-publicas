@@ -1,0 +1,29 @@
+id: fecyt-recolecta
+name: FECYT – RECOLECTA y recursos de ciencia abierta
+org: Fundación Española para la Ciencia y la Tecnología (FECYT)
+ministry: Ciencia, Innovación y Universidades
+level: age
+sector: ciencia-investigacion
+tags: [recolecta, repositorios, acceso-abierto, oai-pmh, ciencia-abierta, indicadores-ciencia, percepcion-social]
+summary: >-
+  Agregador nacional de repositorios científicos de acceso abierto (universidades, CSIC, OPIs) cosechable por
+  OAI-PMH, más indicadores del sistema español de ciencia (ICONO) y encuestas de percepción social de la ciencia.
+access: [oai-pmh, portal, download]
+auth: none
+formats: [xml, xlsx, pdf, csv]
+update: weekly
+coverage: "RECOLECTA desde 2007"
+license: Metadatos libres; datos FECYT con cita de la fuente
+base_url: https://recolecta.fecyt.es/
+docs_url: https://recolecta.fecyt.es/
+endpoints:
+  - path: https://recolecta.fecyt.es/oai?verb=Identify
+    desc: Endpoint OAI-PMH agregado de todos los repositorios españoles
+  - path: https://icono.fecyt.es/
+    desc: ICONO, observatorio de indicadores de I+D+i con descargas
+gotchas:
+  - Cosechar RECOLECTA completo son millones de registros; usar from y until para incrementales.
+  - Los metadatos siguen OpenAIRE Guidelines; los campos de financiación (projectID) permiten cruzar con la AEI.
+related: [csic-digital, aei-convocatorias]
+status: active
+verified: null

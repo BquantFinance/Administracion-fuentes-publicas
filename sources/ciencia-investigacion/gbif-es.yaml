@@ -1,0 +1,37 @@
+id: gbif-es
+name: GBIF España – Ocurrencias de biodiversidad (nodo nacional, CSIC)
+org: Nodo Nacional de GBIF en España (Unidad de Coordinación GBIF.ES, CSIC)
+ministry: Ciencia, Innovación y Universidades
+level: age
+sector: ciencia-investigacion
+tags: [biodiversidad, especies, ocurrencias, biologia, taxonomia, darwin-core, gbif, colecciones]
+summary: >-
+  Más de 50 millones de registros de presencia de especies en España (colecciones, herbarios, observaciones)
+  publicados por instituciones españolas en Darwin Core. Accesibles vía la API global de GBIF filtrando por país
+  o publicador, y por el portal nacional.
+access: [api-rest, download, portal]
+auth: none
+formats: [json, csv, zip]
+update: daily
+coverage: "Registros históricos desde el siglo XVIII hasta hoy"
+license: CC0, CC BY o CC BY-NC según dataset
+base_url: https://api.gbif.org/v1
+docs_url: https://www.gbif.es/
+endpoints:
+  - path: /occurrence/search?country=ES&scientificName={nombre}&limit={n}
+    desc: Ocurrencias en España de un taxón
+    example: curl -s "https://api.gbif.org/v1/occurrence/search?country=ES&scientificName=Lynx%20pardinus&limit=5"
+  - path: /species/match?name={nombre}
+    desc: Resolver un nombre científico al taxón GBIF (taxonKey)
+    example: curl -s "https://api.gbif.org/v1/species/match?name=Quercus%20ilex"
+  - path: /dataset/search?publishingCountry=ES
+    desc: Datasets publicados por instituciones españolas
+  - path: https://datos.gbif.es/
+    desc: Portal nacional de datos con visor y descargas
+gotchas:
+  - La API de búsqueda limita a 100.000 registros por consulta paginada (offset máximo); para más usar descargas asíncronas con cuenta gratuita.
+  - Filtrar por country=ES incluye registros de Canarias y Ceuta/Melilla; hay registros marinos fuera de aguas territoriales con country vacío.
+  - La calidad de coordenadas varía; usar hasCoordinate=true y hasGeospatialIssue=false.
+related: [miteco-banco-datos-naturaleza, csic-digital]
+status: active
+verified: null

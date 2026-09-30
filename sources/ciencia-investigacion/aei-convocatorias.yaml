@@ -1,0 +1,30 @@
+id: aei-convocatorias
+name: AEI – Convocatorias y proyectos financiados de I+D+i
+org: Agencia Estatal de Investigación (AEI)
+ministry: Ciencia, Innovación y Universidades
+level: age
+sector: ciencia-investigacion
+tags: [aei, proyectos, convocatorias, financiacion-investigacion, plan-estatal, resoluciones]
+summary: >-
+  Convocatorias del Plan Estatal de I+D+i, resoluciones de concesión con proyectos financiados (referencia,
+  IP, entidad, importe), y datos de ayudas concedidas. Publicadas como PDF y Excel por convocatoria.
+access: [portal, download]
+auth: none
+formats: [pdf, xlsx, html]
+update: irregular
+coverage: "2008- (Plan Nacional y Estatal)"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.aei.gob.es/
+docs_url: https://www.aei.gob.es/convocatorias/buscador-convocatorias
+endpoints:
+  - path: https://www.aei.gob.es/convocatorias/buscador-convocatorias
+    desc: Buscador de convocatorias y sus resoluciones
+  - path: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas
+    desc: Buscador de ayudas concedidas por convocatoria y entidad
+gotchas:
+  - Las resoluciones de concesión están en PDF con tablas; el Excel solo existe en algunas convocatorias.
+  - Toda ayuda de la AEI aparece también en la BDNS con más estructura; usar bdns-api para automatizar.
+  - Las referencias de proyecto (p. ej. PID2021-123456OB-I00) son la clave para cruzar con publicaciones en RECOLECTA.
+related: [bdns-api, fecyt-recolecta]
+status: active
+verified: null

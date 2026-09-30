@@ -1,0 +1,33 @@
+id: segsocial-estadisticas
+name: Seguridad Social – Afiliación, pensiones y estadísticas
+org: Secretaría de Estado de la Seguridad Social y Pensiones (TGSS, INSS)
+ministry: Inclusión, Seguridad Social y Migraciones
+level: age
+sector: empleo-seguridad-social
+tags: [seguridad-social, afiliacion, pensiones, cotizaciones, autonomos, regimenes, ingreso-minimo-vital]
+summary: >-
+  Afiliados por régimen, provincia, sector y nacionalidad (media mensual y último día), pensiones contributivas
+  por clase e importe, Ingreso Mínimo Vital, recaudación y presupuestos. Excel mensuales y series históricas.
+access: [download, portal]
+auth: none
+formats: [xlsx, pdf, csv]
+update: monthly
+coverage: "2001- según serie"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas
+docs_url: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas
+endpoints:
+  - path: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST8
+    desc: Afiliación de trabajadores al sistema
+  - path: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST23
+    desc: Pensiones contributivas del sistema
+  - path: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST45
+    desc: Ingreso Mínimo Vital
+gotchas:
+  - Las URLs del portal WebSphere (wps/portal) son largas pero estables por código ESTnn.
+  - Afiliación media mensual y afiliación a último día son series distintas con cifras distintas.
+  - Los Excel tienen varias hojas con cabeceras combinadas; no leer con parsers CSV.
+  - Los datos por municipio de afiliados solo se publican para municipios de más de 40.000 habitantes.
+related: [sepe-estadisticas, igae-ejecucion-presupuestaria]
+status: active
+verified: null

@@ -1,0 +1,40 @@
+id: placsp-datos-abiertos
+name: Plataforma de Contratación del Sector Público – Datos abiertos (ATOM/CODICE)
+org: Dirección General del Patrimonio del Estado
+ministry: Hacienda
+level: age
+sector: contratacion-subvenciones
+tags: [contratacion-publica, licitaciones, adjudicaciones, contratos-menores, codice, atom, placsp]
+summary: >-
+  Todas las licitaciones y adjudicaciones publicadas en la Plataforma (Estado, y CCAA y EELL que agregan):
+  feeds ATOM con documentos CODICE (XML basado en UBL) por licitación, más ZIP mensuales históricos.
+access: [feed, download]
+auth: none
+formats: [atom, xml, zip]
+update: realtime
+coverage: "2012-"
+license: Reutilización libre con cita de la fuente
+base_url: https://contrataciondelestado.es/
+docs_url: https://contrataciondelestado.es/wps/portal/DatosAbiertos
+endpoints:
+  - path: https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom
+    desc: Licitaciones de perfiles alojados en la Plataforma (feed paginado hacia atrás con rel=next)
+    example: curl -s "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom"
+  - path: https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores.atom
+    desc: Licitaciones agregadas desde plataformas autonómicas
+  - path: https://contrataciondelestado.es/sindicacion/sindicacion_1143/contratosMenoresPerfilesContratantes.atom
+    desc: Contratos menores
+  - path: https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_{AAAA}{MM}.zip
+    desc: Histórico mensual comprimido, mismo formato ATOM
+gotchas:
+  - Cada entrada ATOM incluye el XML CODICE completo con espacios de nombres cac y cbc; hay que registrar los namespaces al parsear.
+  - El feed se recorre hacia atrás con el enlace rel=next; una licitación aparece varias veces (una por cambio de estado) y hay que quedarse con la última por id.
+  - Los importes van sin IVA en TotalAmount y con IVA en TaxExclusiveAmount/PayableAmount según nodo; comprobar siempre cuál se usa.
+  - Los ZIP mensuales pesan cientos de MB y se publican con semanas de retraso.
+  - No existe API de búsqueda; para consultas puntuales usar el buscador web o cargar los feeds en base de datos propia.
+tips:
+  - Parsear con lxml registrando namespaces cac, cbc y cac-place-ext; el id estable de licitación es el elemento id de cada entry ATOM.
+  - Para histórico completo cargar los ZIP mensuales en una tabla y deduplicar por id quedándose con la entrada de fecha updated mayor.
+related: [bdns-api, hacienda-registro-licitadores]
+status: active
+verified: null

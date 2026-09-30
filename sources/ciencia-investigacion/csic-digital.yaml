@@ -1,0 +1,31 @@
+id: csic-digital
+name: Digital.CSIC – Repositorio institucional del CSIC (OAI-PMH)
+org: Consejo Superior de Investigaciones Científicas (CSIC)
+ministry: Ciencia, Innovación y Universidades
+level: age
+sector: ciencia-investigacion
+tags: [csic, publicaciones, acceso-abierto, oai-pmh, datasets-investigacion, repositorio, dspace]
+summary: >-
+  Más de 300.000 publicaciones, datasets y documentos científicos del CSIC en acceso abierto (biología, química,
+  física, ciencias sociales). Cosechable por OAI-PMH y consultable por API REST DSpace.
+access: [oai-pmh, api-rest, portal]
+auth: none
+formats: [xml, json, pdf]
+update: daily
+coverage: "Publicaciones desde 1900; repositorio desde 2008"
+license: Metadatos CC0; contenidos según licencia de cada ítem
+base_url: https://digital.csic.es/
+docs_url: https://digital.csic.es/dspace-oai/request?verb=Identify
+endpoints:
+  - path: https://digital.csic.es/dspace-oai/request?verb=ListRecords&metadataPrefix=oai_dc&set={coleccion}
+    desc: Cosecha OAI-PMH en Dublin Core
+    example: curl -s "https://digital.csic.es/dspace-oai/request?verb=Identify"
+  - path: https://digital.csic.es/rest/
+    desc: API REST DSpace (ítems, colecciones, búsqueda)
+gotchas:
+  - Los sets OAI corresponden a institutos del CSIC (com_10261_xxx); listarlos con verb=ListSets.
+  - Tras la migración a DSpace 7 la API REST cambió de esquema; comprobar la versión en /server/api.
+  - Digital.CSIC está agregado en RECOLECTA (FECYT), que permite cosechar todos los repositorios españoles de una vez.
+related: [gbif-es, fecyt-recolecta]
+status: active
+verified: null

@@ -1,0 +1,30 @@
+id: fega-beneficiarios-pac
+name: FEGA – Beneficiarios de ayudas de la PAC y datos de pagos
+org: Fondo Español de Garantía Agraria (FEGA)
+ministry: Agricultura, Pesca y Alimentación
+level: age
+sector: agricultura-pesca-alimentacion
+tags: [pac, feaga, feader, ayudas-agrarias, beneficiarios, pagos-directos, subvenciones]
+summary: >-
+  Consulta pública y descarga de beneficiarios de la PAC (FEAGA y FEADER) por ejercicio con importe y medida,
+  informes de pagos por CCAA y línea de ayuda, datos abiertos del organismo.
+access: [portal, download]
+auth: none
+formats: [csv, xlsx, pdf]
+update: annual
+coverage: "Ejercicios financieros desde 2014 (publicación 2 años)"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.fega.gob.es/
+docs_url: https://www.fega.gob.es/es/datos-abiertos
+endpoints:
+  - path: https://www.fega.gob.es/es/datos-abiertos/consulta-de-beneficiarios-pac
+    desc: Consulta y descarga de beneficiarios por ejercicio
+  - path: https://www.fega.gob.es/es/datos-abiertos
+    desc: Conjuntos de datos abiertos del FEGA
+gotchas:
+  - Por normativa europea los beneficiarios solo se publican durante dos años; los ejercicios antiguos desaparecen del portal.
+  - Personas físicas con ayudas por debajo del umbral (1.250 euros) aparecen anonimizadas.
+  - Las mismas ayudas están en la BDNS con estructura homogénea (bdns-api).
+related: [bdns-api, mapa-estadisticas-agrarias]
+status: active
+verified: null

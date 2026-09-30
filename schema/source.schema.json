@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BquantFinance/Administracion-fuentes-publicas/schema/source.schema.json",
+  "title": "Ficha de fuente pública",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "org",
+    "level",
+    "sector",
+    "summary",
+    "access",
+    "auth",
+    "formats",
+    "update",
+    "base_url",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Identificador único kebab-case. Debe coincidir con el nombre del fichero."
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 90
+    },
+    "org": {
+      "type": "string",
+      "description": "Organismo titular de la fuente."
+    },
+    "ministry": {
+      "type": "string",
+      "description": "Ministerio de adscripción (puede cambiar con reestructuraciones)."
+    },
+    "level": {
+      "type": "string"
+    },
+    "sector": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      },
+      "maxItems": 12,
+      "uniqueItems": true
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "Qué datos hay y para qué sirven. Máx. 300 caracteres."
+    },
+    "access": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "auth": {
+      "type": "string"
+    },
+    "formats": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "update": {
+      "type": "string"
+    },
+    "coverage": {
+      "type": "string",
+      "description": "Cobertura temporal, p. ej. '1960-' o '2015-2023'."
+    },
+    "license": {
+      "type": "string",
+      "description": "Condiciones de reutilización, texto breve."
+    },
+    "base_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "docs_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "endpoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "desc"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Ruta relativa a base_url o URL absoluta. Parámetros entre llaves."
+          },
+          "desc": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "example": {
+            "type": "string",
+            "description": "Llamada completa lista para copiar (curl o URL)."
+          },
+          "params": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      }
+    },
+    "rate_limit": {
+      "type": "string"
+    },
+    "gotchas": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 220
+      },
+      "maxItems": 10,
+      "description": "Trampas y detalles no obvios. Una frase cada una."
+    },
+    "related": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "description": "ids de otras fichas."
+    },
+    "status": {
+      "type": "string"
+    },
+    "verified": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "Fecha de última verificación manual. null si pendiente."
+    },
+    "tips": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 220
+      },
+      "maxItems": 6,
+      "description": "Contexto positivo que acelera: librerías, patrones de uso, cruces típicos. Una frase cada uno."
+    }
+  }
+}

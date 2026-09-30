@@ -1,0 +1,27 @@
+id: datainvex
+name: DataInvex – Inversiones exteriores directas
+org: Secretaría de Estado de Comercio
+ministry: Economía, Comercio y Empresa
+level: age
+sector: comercio-industria-propiedad
+tags: [inversion-extranjera, inversion-exterior, ied, flujos, stock, paises, sectores]
+summary: >-
+  Flujos y stock de inversión extranjera en España y española en el exterior, por país de origen y destino,
+  sector CNAE y CCAA, a partir del Registro de Inversiones Exteriores. Consulta multidimensional.
+access: [portal, download]
+auth: none
+formats: [csv, xlsx, html]
+update: quarterly
+coverage: "1993-"
+license: Reutilización libre con cita de la fuente
+base_url: https://datainvex.comercio.es/
+docs_url: https://datainvex.comercio.es/
+endpoints:
+  - path: https://datainvex.comercio.es/
+    desc: Consulta interactiva de flujos y posición de inversión
+gotchas:
+  - Distingue país inmediato y país último (ETVE, holdings); elegir la dimensión correcta cambia mucho las cifras.
+  - No coincide con la balanza de pagos del Banco de España por diferencias metodológicas.
+related: [datacomex, bde-estadisticas]
+status: active
+verified: null

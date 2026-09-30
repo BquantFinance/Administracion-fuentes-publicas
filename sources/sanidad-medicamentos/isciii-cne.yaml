@@ -1,0 +1,31 @@
+id: isciii-cne
+name: ISCIII – Centro Nacional de Epidemiología y vigilancia (RENAVE, SiVIRA)
+org: Instituto de Salud Carlos III (ISCIII)
+ministry: Ciencia, Innovación y Universidades
+level: age
+sector: sanidad-medicamentos
+tags: [epidemiologia, renave, vigilancia, gripe, covid, enfermedades-transmisibles, mortalidad-momo, sivira]
+summary: >-
+  Vigilancia epidemiológica nacional: boletines semanales de enfermedades de declaración obligatoria, sistema
+  SiVIRA de infecciones respiratorias, MoMo (exceso de mortalidad diario), datos históricos COVID-19 por provincia.
+access: [portal, download]
+auth: none
+formats: [csv, xlsx, pdf, html]
+update: weekly
+coverage: "EDO desde 1997; MoMo desde 2015; COVID 2020-2023"
+license: Reutilización libre con cita de la fuente
+base_url: https://cne.isciii.es/
+docs_url: https://cne.isciii.es/servicios/renave
+endpoints:
+  - path: https://momo.isciii.es/panel_momo/
+    desc: Panel MoMo de exceso de mortalidad con descarga de datos diarios
+  - path: https://cnecovid.isciii.es/covid19/
+    desc: Datos históricos COVID-19 por provincia, edad y sexo (CSV)
+  - path: https://cne.isciii.es/servicios/renave/boletines
+    desc: Boletines epidemiológicos semanales
+gotchas:
+  - Los CSV COVID dejaron de actualizarse en 2023 pero siguen disponibles como histórico.
+  - MoMo publica estimaciones que se revisan retrospectivamente; las últimas semanas cambian.
+related: [sanidad-portal-estadistico]
+status: active
+verified: null

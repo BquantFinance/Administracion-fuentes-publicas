@@ -1,0 +1,32 @@
+id: miteco-saih-boletin-hidrologico
+name: MITECO – Boletín hidrológico, embalses y redes SAIH
+org: Dirección General del Agua
+ministry: Para la Transición Ecológica y el Reto Demográfico
+level: age
+sector: medio-ambiente-agua-biodiversidad
+tags: [agua, embalses, reservas, saih, caudales, sequia, cuencas, confederaciones]
+summary: >-
+  Reserva hídrica semanal por embalse y cuenca, boletín hidrológico, redes SAIH de las confederaciones
+  (caudales, niveles, pluviometría en tiempo real) e indicadores de sequía. Datos históricos desde 1988.
+access: [download, portal]
+auth: none
+formats: [xlsx, csv, pdf, html]
+update: weekly
+coverage: "1988-"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico.html
+docs_url: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico.html
+endpoints:
+  - path: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico.html
+    desc: Boletín hidrológico semanal con datos por embalse
+  - path: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/historico-de-boletines.html
+    desc: Histórico de boletines y ficheros de reserva por embalse
+  - path: https://sig.mapama.gob.es/redes-seguimiento/
+    desc: Visor de redes de seguimiento del estado de las aguas
+gotchas:
+  - Cada confederación hidrográfica (Ebro, Tajo, Duero, Guadalquivir...) tiene su propio SAIH con web y formatos distintos; el ministerio solo agrega el semanal.
+  - El histórico por embalse se publica como base de datos Access/Excel con códigos de embalse propios.
+  - Los datos semanales se refieren al martes de cada semana.
+related: [aemet-opendata, miteco-calidad-aire]
+status: active
+verified: null

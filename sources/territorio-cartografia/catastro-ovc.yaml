@@ -1,0 +1,44 @@
+id: catastro-ovc
+name: Catastro – Servicios web de la Oficina Virtual (OVC) e INSPIRE
+org: Dirección General del Catastro
+ministry: Hacienda
+level: age
+sector: territorio-cartografia
+tags: [catastro, referencia-catastral, parcelas, inmuebles, inspire, wfs, wms, callejero]
+summary: >-
+  Consulta de referencias catastrales por dirección, coordenadas o RC; datos no protegidos de inmuebles
+  (superficie, uso, año); cartografía parcelaria vectorial vía INSPIRE (WFS/ATOM) y WMS. Sin autenticación
+  para datos no protegidos; titularidad y valor requieren certificado.
+access: [api-rest, api-soap, ogc, download]
+auth: none
+formats: [json, xml, gml, shp, dxf, png]
+update: daily
+coverage: "Territorio de régimen común (excluye País Vasco y Navarra, con catastros forales propios)"
+license: Reutilización libre con cita de la fuente (licencia Catastro)
+base_url: https://ovc.catastro.meh.es/
+docs_url: https://www.catastro.hacienda.gob.es/esp/ws_serviciosweb.asp
+endpoints:
+  - path: https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPRC?RefCat={RC}
+    desc: Datos no protegidos de un inmueble por referencia catastral (JSON)
+    example: curl -s "https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPRC?RefCat=9872023VH5797S0001WX"
+  - path: https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPLOC?Provincia={p}&Municipio={m}&TipoVia={tv}&NombreVia={nv}&Numero={n}
+    desc: Inmuebles por dirección postal
+  - path: https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS=EPSG:4326&Coordenada_X={lon}&Coordenada_Y={lat}
+    desc: Referencia catastral a partir de coordenadas
+  - path: https://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx?service=wfs&request=getfeature&STOREDQUERIE_ID=GetParcel&refcat={RC}&srsname=EPSG::25830
+    desc: Geometría de una parcela (GML INSPIRE Cadastral Parcels)
+  - path: https://ovc.catastro.meh.es/Cartografia/WMS/ServidorWMS.aspx
+    desc: WMS de cartografía catastral
+  - path: https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/ES.SDGC.CP.atom.xml
+    desc: Descarga masiva INSPIRE por municipio (parcelas, edificios, direcciones) vía ATOM
+gotchas:
+  - Los códigos de provincia y municipio del Catastro no son los del INE; la API expone Consulta_Municipio para obtenerlos.
+  - Titulares, valor catastral y planos detallados solo por Sede Electrónica con certificado o Cl@ve.
+  - El servicio JSON devuelve estructuras anidadas con claves abreviadas (consulta_dnprcResult, bico, bi, dt); mirar el XML equivalente para entender campos.
+  - Cartografía en EPSG:25829/25830/25831 según huso; Canarias en 32628. El WFS INSPIRE acepta EPSG:4326 pero devuelve en UTM.
+  - Límite práctico de peticiones por IP no documentado; descargas masivas mejor por los ficheros ATOM municipales.
+tips:
+  - Para geocodificar direcciones es más robusto CartoCiudad (cnig-centro-descargas) y luego pedir la RC por coordenadas al Catastro.
+related: [ine-codigos-territoriales, cnig-centro-descargas, idee-servicios]
+status: active
+verified: null

@@ -1,0 +1,46 @@
+# Administración fuentes públicas (España)
+
+> Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
+
+Fuentes: 67 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
+
+## Cómo usar este repo
+
+- Todo el catálogo en un fichero: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/catalog.json
+- Todas las fichas en texto compacto: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/llms-full.txt
+- Una ficha: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/<sector>/<id>.yaml
+- Esquema de ficha: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json
+- Vocabulario (sectores, acceso, auth, formatos): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml
+- `verified: null` significa que la ficha se redactó a partir de documentación oficial pero aún no se ha probado el endpoint.
+
+## Sectores
+
+- [Legislación y boletines oficiales](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/legislacion-boletines/README.md): boe-api-legislacion-consolidada, boe-api-sumario, boe-eli, boe-feeds, borme-api-sumario
+- [Economía, finanzas y mercados](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/economia-finanzas/README.md): airef-datos, bde-estadisticas, cnmv-registros, ico-datos, tesoro-estadisticas
+- [Hacienda, tributos y presupuestos](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/hacienda-presupuestos/README.md): aeat-estadisticas, aeat-servicios-web, hacienda-ovef, igae-ejecucion-presupuestaria
+- [Estadística oficial](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/estadistica/README.md): ine-api-tempus, ine-codigos-territoriales, ine-microdatos
+- [Contratación pública y subvenciones](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/contratacion-subvenciones/README.md): bdns-api, hacienda-registro-licitadores, placsp-datos-abiertos
+- [Empleo y Seguridad Social](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/empleo-seguridad-social/README.md): mites-estadisticas, segsocial-estadisticas, sepe-estadisticas
+- [Gobierno abierto, transparencia y organización administrativa](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/gobierno-abierto-administracion/README.md): datos-gob-es-api, dir3-directorio, face-facturas, pag-administracion-gob-es, transparencia-portal
+- [Territorio, catastro y cartografía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/territorio-cartografia/README.md): catastro-ovc, cnig-centro-descargas, idee-servicios
+- [Meteorología y clima](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/meteorologia-clima/README.md): aemet-opendata, aemet-otros-servicios
+- [Medio ambiente, agua y biodiversidad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/medio-ambiente-agua-biodiversidad/README.md): miteco-banco-datos-naturaleza, miteco-calidad-aire, miteco-prtr, miteco-saih-boletin-hidrologico
+- [Energía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/energia/README.md): cnmc-data, minetur-precios-carburantes, miteco-energia-estadisticas
+- [Sanidad y medicamentos](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/sanidad-medicamentos/README.md): aemps-cima-api, aemps-otros-registros, isciii-cne, sanidad-portal-estadistico
+- [Ciencia e investigación (biología, química, geología, oceanografía)](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/ciencia-investigacion/README.md): aei-convocatorias, csic-digital, fecyt-recolecta, gbif-es, igme-geologia, ign-sismologia
+- [Agricultura, pesca y alimentación](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/agricultura-pesca-alimentacion/README.md): fega-beneficiarios-pac, mapa-estadisticas-agrarias, mapa-pesca, mapa-sigpac
+- [Transporte y movilidad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/transporte-movilidad/README.md): aesa-aviacion, dgt-datex-trafico, dgt-estadisticas, mitma-opendata-movilidad, puertos-estado-datos
+- [Comercio exterior, industria y propiedad industrial](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/comercio-industria-propiedad/README.md): datacomex, datainvex, mincotur-industria-turismo, oepm-invenes
+- [Educación y universidades](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/educacion-universidades/README.md): educacion-estadisticas-ruct
+- [Justicia, interior y seguridad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/justicia-interior-seguridad/README.md): interior-criminalidad
+- [Cultura y patrimonio](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/cultura-patrimonio/README.md): bne-datos
+- [Vivienda y urbanismo](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/vivienda-urbanismo/README.md): mivau-precios-vivienda-alquiler
+
+## Guías transversales
+
+- [Identificadores clave para cruzar datos públicos españoles](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/identificadores-clave.md)
+
+## Optional
+
+- [Contribuir](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/CONTRIBUTING.md)
+- [Plantilla de ficha](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/templates/source.yaml)

@@ -1,0 +1,29 @@
+id: puertos-estado-datos
+name: Puertos del Estado – Estadísticas portuarias y datos oceanográficos
+org: Organismo Público Puertos del Estado
+ministry: Transportes y Movilidad Sostenible
+level: age
+sector: transporte-movilidad
+tags: [puertos, trafico-portuario, contenedores, mercancias, oceanografia, boyas, oleaje, mareas, portus]
+summary: >-
+  Tráfico mensual de mercancías, contenedores, pasajeros y buques por autoridad portuaria; red de boyas y
+  mareógrafos con datos de oleaje, viento y nivel del mar en tiempo real e histórico (Portus); predicciones de oleaje.
+access: [portal, download, api-rest]
+auth: none
+formats: [xlsx, csv, json, pdf]
+update: hourly
+coverage: "Estadísticas desde 1962; oceanografía desde 1990"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.puertos.es/
+docs_url: https://www.puertos.es/es-es/estadisticas
+endpoints:
+  - path: https://www.puertos.es/es-es/estadisticas/Paginas/estadistica_mensual.aspx
+    desc: Estadística mensual de tráfico por puerto
+  - path: https://portus.puertos.es/
+    desc: Portus, datos oceanográficos en tiempo real e históricos por estación
+gotchas:
+  - Portus es una aplicación web con API interna JSON no documentada; los históricos se piden por formulario y llegan por correo.
+  - Las estadísticas mensuales están en Excel por puerto y año con estructura fija desde 2010.
+related: [mapa-pesca, aemet-opendata]
+status: active
+verified: null

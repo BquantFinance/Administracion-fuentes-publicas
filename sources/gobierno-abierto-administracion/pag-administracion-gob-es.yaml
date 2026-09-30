@@ -1,0 +1,30 @@
+id: pag-administracion-gob-es
+name: Punto de Acceso General – Trámites, sedes y empleo público
+org: Secretaría General de Administración Digital
+ministry: Transformación Digital y de la Función Pública
+level: age
+sector: gobierno-abierto-administracion
+tags: [tramites, sedes-electronicas, empleo-publico, oposiciones, sia, catalogo-procedimientos]
+summary: >-
+  Catálogo de procedimientos y servicios de la AGE (SIA), convocatorias de empleo público, directorio de sedes
+  electrónicas y organigramas. Base para localizar el trámite y la sede competentes.
+access: [portal, feed]
+auth: none
+formats: [html, rss, xlsx]
+update: daily
+license: Reutilización libre con cita de la fuente
+base_url: https://administracion.gob.es/
+docs_url: https://administracion.gob.es/pag_Home/empleoBecas/empleo/boletinEmpleoPublico.html
+endpoints:
+  - path: https://administracion.gob.es/pag_Home/empleoBecas/empleo/boletinEmpleoPublico.html
+    desc: Boletín semanal de empleo público con convocatorias de todas las Administraciones
+  - path: https://administracion.gob.es/pag_Home/atencionCiudadana/OficinasAtencion.html
+    desc: Oficinas de asistencia en materia de registro
+  - path: https://administracionelectronica.gob.es/ctt/sia
+    desc: SIA, Sistema de Información Administrativa, inventario de procedimientos con código SIA
+gotchas:
+  - El código SIA identifica cada procedimiento y aparece en sedes, BDNS y notificaciones; el inventario completo se descarga desde el CTT previa solicitud.
+  - Las convocatorias de empleo público remiten al BOE; usar la API del BOE para el texto.
+related: [boe-api-sumario, dir3-directorio]
+status: active
+verified: null

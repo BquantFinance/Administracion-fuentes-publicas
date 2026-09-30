@@ -1,0 +1,32 @@
+id: aeat-servicios-web
+name: AEAT – Servicios web y trámites automatizables
+org: Agencia Estatal de Administración Tributaria (AEAT)
+ministry: Hacienda
+level: age
+sector: hacienda-presupuestos
+tags: [aeat, sii, censo, nif, certificados, presentacion-telematica, facturacion, verifactu]
+summary: >-
+  Servicios web SOAP para presentar declaraciones, el Suministro Inmediato de Información del IVA (SII),
+  VERI*FACTU, consulta y validación de NIF, y descarga de datos fiscales. Requieren certificado electrónico.
+access: [api-soap]
+auth: certificate
+formats: [xml]
+update: realtime
+license: Uso conforme a la normativa tributaria; no son datos abiertos
+base_url: https://www1.agenciatributaria.gob.es/wlpl/
+docs_url: https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-tecnicos.html
+endpoints:
+  - path: https://sede.agenciatributaria.gob.es/Sede/iva/suministro-inmediato-informacion.html
+    desc: SII, WSDL y esquemas para remitir registros de facturación
+  - path: https://sede.agenciatributaria.gob.es/Sede/iva/sistemas-informaticos-facturacion-verifactu.html
+    desc: VERI*FACTU, especificaciones técnicas y entorno de pruebas
+  - path: https://sede.agenciatributaria.gob.es/Sede/procedimientoini/ZZ09.shtml
+    desc: Comprobación de NIF de terceros a efectos censales
+gotchas:
+  - Todo requiere certificado electrónico de persona física, jurídica o de sello; no hay API key ni OAuth.
+  - Existe entorno de pruebas (preproducción) con host distinto para SII y VERI*FACTU; consultar cada manual.
+  - La validación de NIF de terceros está limitada a colaboradores sociales y presentadores, no es abierta.
+  - Los WSDL cambian de versión con la normativa; fijar versión y vigilar los cambios anunciados en la sede.
+related: [aeat-estadisticas]
+status: active
+verified: null

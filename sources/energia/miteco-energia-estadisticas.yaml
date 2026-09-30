@@ -1,0 +1,31 @@
+id: miteco-energia-estadisticas
+name: MITECO – Balances energéticos, hidrocarburos y registro de instalaciones
+org: Secretaría de Estado de Energía
+ministry: Para la Transición Ecológica y el Reto Demográfico
+level: age
+sector: energia
+tags: [energia, balance-energetico, hidrocarburos, renovables, registro-instalaciones, autoconsumo, cores]
+summary: >-
+  Balances energéticos anuales, estadísticas de hidrocarburos (consumo de productos petrolíferos y gas por provincia,
+  vía CORES), registro administrativo de instalaciones de producción eléctrica, autoconsumo y planes energéticos.
+access: [portal, download]
+auth: none
+formats: [xlsx, pdf, csv]
+update: monthly
+coverage: "1990-"
+license: Reutilización libre con cita de la fuente
+base_url: https://energia.gob.es/
+docs_url: https://energia.gob.es/balances/Publicaciones/Paginas/Publicaciones.aspx
+endpoints:
+  - path: https://energia.gob.es/balances/Balances/Paginas/Balances.aspx
+    desc: Balances energéticos y libros de la energía
+  - path: https://www.cores.es/es/estadisticas
+    desc: CORES, estadísticas mensuales de consumo de productos petrolíferos y gas
+  - path: https://sede.serviciosmin.gob.es/es-es/datosabiertos/Paginas/Index.aspx
+    desc: Datos abiertos de la sede del ministerio (registro de instalaciones, etc.)
+gotchas:
+  - La web de energía cambió de dominio varias veces (minetur, mincotur, miteco, energia.gob.es); enlaces antiguos rotos.
+  - CORES es una corporación de derecho público con datos propios; los consumos provinciales son su fuente primaria.
+related: [cnmc-data, minetur-precios-carburantes]
+status: active
+verified: null

@@ -1,0 +1,31 @@
+id: ign-sismologia
+name: IGN – Catálogo sísmico y red de vigilancia volcánica
+org: Instituto Geográfico Nacional (IGN)
+ministry: Transportes y Movilidad Sostenible
+level: age
+sector: ciencia-investigacion
+tags: [terremotos, sismicidad, catalogo-sismico, volcanes, geofisica, tiempo-real]
+summary: >-
+  Catálogo de terremotos localizados por la Red Sísmica Nacional desde 1370, últimos sismos en tiempo casi real,
+  mapas de peligrosidad sísmica y vigilancia volcánica de Canarias. Consulta con exportación y feeds.
+access: [portal, download, feed]
+auth: none
+formats: [csv, txt, xml, kml, pdf]
+update: realtime
+coverage: "1370-"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.ign.es/web/ign/portal/sis-area-sismicidad
+docs_url: https://www.ign.es/web/ign/portal/sis-catalogo-terremotos
+endpoints:
+  - path: https://www.ign.es/web/ign/portal/sis-catalogo-terremotos
+    desc: Formulario de consulta del catálogo con exportación a texto/CSV
+  - path: https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/get10dias
+    desc: Terremotos de los últimos 10 días
+  - path: https://www.ign.es/ign/resources/sismologia/tproximos/rss/ultimos_terremotos.rss
+    desc: Feed RSS de últimos terremotos (alternativa KML en la misma carpeta)
+gotchas:
+  - El formulario del catálogo limita el número de registros por consulta; dividir por años para descargas masivas.
+  - Las magnitudes históricas anteriores a 1920 son intensidades macrosísmicas, no magnitudes instrumentales.
+related: [igme-geologia, cnig-centro-descargas]
+status: active
+verified: null

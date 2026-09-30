@@ -1,0 +1,32 @@
+id: sepe-estadisticas
+name: SEPE – Paro registrado, contratos y prestaciones
+org: Servicio Público de Empleo Estatal (SEPE)
+ministry: Trabajo y Economía Social
+level: age
+sector: empleo-seguridad-social
+tags: [sepe, paro-registrado, contratos, prestaciones, demandantes, municipios, ocupaciones]
+summary: >-
+  Datos mensuales de paro registrado, demandantes, contratos y prestaciones por desempleo desglosados por
+  municipio, sexo, edad, sector y ocupación. Ficheros CSV/Excel mensuales y datos abiertos en datos.gob.es.
+access: [download, portal]
+auth: none
+formats: [csv, xlsx, pdf]
+update: monthly
+coverage: "2005- (municipios); series nacionales desde 1996"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas.html
+docs_url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos.html
+endpoints:
+  - path: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-avance/paro.html
+    desc: Avance mensual de paro registrado (nota de prensa y tablas)
+  - path: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios.html
+    desc: Paro y contratos por municipio, un fichero por mes
+  - path: https://datos.gob.es/es/catalogo?publisher_display_name=Servicio+P%C3%BAblico+de+Empleo+Estatal
+    desc: Conjuntos del SEPE en datos.gob.es (paro y contratos por municipio en CSV)
+gotchas:
+  - Los CSV por municipio usan codificación Latin-1 y separador punto y coma; los códigos de municipio son INE sin dígito de control.
+  - Paro registrado no es lo mismo que desempleo EPA (INE); no comparar niveles.
+  - Los ficheros mensuales cambian ligeramente de columnas entre años; validar cabeceras.
+related: [ine-api-tempus, segsocial-estadisticas, ine-codigos-territoriales]
+status: active
+verified: null

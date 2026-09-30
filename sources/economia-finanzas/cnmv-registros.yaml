@@ -1,0 +1,35 @@
+id: cnmv-registros
+name: CNMV – Registros oficiales y hechos relevantes
+org: Comisión Nacional del Mercado de Valores (CNMV)
+ministry: Organismo independiente adscrito a Economía, Comercio y Empresa
+level: age
+sector: economia-finanzas
+tags: [cnmv, mercados, cotizadas, hechos-relevantes, fondos, participaciones-significativas, emisiones]
+summary: >-
+  Registros oficiales de entidades supervisadas, información privilegiada y otra información relevante (OIR),
+  participaciones significativas, informes financieros anuales y semestrales, folletos, fondos de inversión.
+access: [portal, feed, download]
+auth: none
+formats: [html, xml, pdf, xlsx, xbrl]
+update: realtime
+coverage: "Registros históricos desde 1989 según tipo"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.cnmv.es/portal/
+docs_url: https://www.cnmv.es/portal/Consultas/Busqueda.aspx
+endpoints:
+  - path: https://www.cnmv.es/portal/Consultas/BusquedaPorEntidad.aspx
+    desc: Buscador de entidades y su documentación registrada
+  - path: https://www.cnmv.es/portal/HR/ResultadoBusquedaHR.aspx
+    desc: Consulta de información privilegiada y relevante por entidad y fechas
+  - path: https://www.cnmv.es/portal/Consultas/IFI/ListaIFI.aspx
+    desc: Informes financieros anuales y semestrales de cotizadas (XBRL/PDF)
+  - path: https://www.cnmv.es/portal/RSS/
+    desc: Canales RSS de comunicaciones y registros
+gotchas:
+  - No hay API REST documentada; las consultas son formularios ASP.NET con ViewState, difíciles de automatizar.
+  - Los informes financieros están en XBRL con la taxonomía propia de la CNMV, no ESEF puro.
+  - Las "IPP" y "OIR" sustituyeron a los "hechos relevantes" en 2020; los históricos siguen bajo esa etiqueta.
+  - Fondos de inversión, la información periódica es trimestral y va en PDF y XML por fondo.
+related: [bde-estadisticas, borme-api-sumario]
+status: active
+verified: null

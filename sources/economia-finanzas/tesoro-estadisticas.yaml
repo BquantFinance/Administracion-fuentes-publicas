@@ -1,0 +1,32 @@
+id: tesoro-estadisticas
+name: Tesoro Público – Subastas, emisiones y estadísticas de deuda
+org: Secretaría General del Tesoro y Financiación Internacional
+ministry: Economía, Comercio y Empresa
+level: age
+sector: economia-finanzas
+tags: [tesoro, deuda-publica, subastas, letras, bonos, obligaciones]
+summary: >-
+  Resultados de subastas de Letras, Bonos y Obligaciones, calendario de emisiones, saldo vivo y composición
+  de la deuda del Estado, tenedores, estadísticas mensuales en Excel.
+access: [download, portal]
+auth: none
+formats: [xlsx, pdf, html]
+update: monthly
+coverage: "1990-"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.tesoro.es/
+docs_url: https://www.tesoro.es/deuda-publica/estadisticas
+endpoints:
+  - path: https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas
+    desc: Resultado de las últimas subastas
+  - path: https://www.tesoro.es/deuda-publica/estadisticas
+    desc: Boletín mensual y series históricas en Excel
+  - path: https://www.tesoro.es/deuda-publica/subastas/calendario
+    desc: Calendario anual de subastas
+gotchas:
+  - No hay API; los Excel cambian de estructura entre años.
+  - Los resultados de cada subasta se publican en PDF y HTML el mismo día; el Excel mensual llega con retardo.
+  - Series largas de deuda y coste medio también en el Banco de España con códigos estables.
+related: [bde-estadisticas, igae-ejecucion-presupuestaria]
+status: active
+verified: null

@@ -1,0 +1,28 @@
+id: ico-datos
+name: ICO – Líneas de financiación y estadísticas
+org: Instituto de Crédito Oficial (ICO)
+ministry: Economía, Comercio y Empresa
+level: age
+sector: economia-finanzas
+tags: [ico, financiacion, avales, pymes, lineas-ico]
+summary: >-
+  Estadísticas de operaciones formalizadas en las Líneas ICO y avales públicos (COVID, Ucrania) por sector,
+  provincia y tamaño de empresa, más informes anuales y datos de transparencia.
+access: [portal, download]
+auth: none
+formats: [xlsx, pdf, html]
+update: monthly
+coverage: "2010-"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.ico.es/
+docs_url: https://www.ico.es/web/ico/estadisticas
+endpoints:
+  - path: https://www.ico.es/web/ico/estadisticas
+    desc: Estadísticas de líneas de mediación y avales
+  - path: https://www.ico.es/web/ico/transparencia
+    desc: Portal de transparencia con informes y datos
+gotchas:
+  - Sin API; los datos de avales COVID se publicaron como Excel agregados, sin detalle por beneficiario.
+related: [bdns-api]
+status: active
+verified: null

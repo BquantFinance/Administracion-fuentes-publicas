@@ -1,0 +1,39 @@
+id: minetur-precios-carburantes
+name: Geoportal de gasolineras – API de precios de carburantes
+org: Secretaría de Estado de Energía
+ministry: Para la Transición Ecológica y el Reto Demográfico
+level: age
+sector: energia
+tags: [carburantes, gasolineras, precios, gasolina, gasoleo, glp, estaciones-servicio]
+summary: >-
+  Precios diarios de todos los carburantes en todas las estaciones de servicio de España con coordenadas,
+  dirección, horario y rótulo. API REST JSON sin autenticación, también histórico por fecha.
+access: [api-rest]
+auth: none
+formats: [json, xml]
+update: daily
+coverage: "2007- (histórico por fecha)"
+license: Reutilización libre con cita de la fuente
+base_url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes
+docs_url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/help
+endpoints:
+  - path: /EstacionesTerrestres/
+    desc: Todas las estaciones terrestres con precios del día
+    example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/"
+  - path: /EstacionesTerrestres/FiltroProvincia/{id_provincia}
+    desc: Estaciones de una provincia (código INE de 2 dígitos)
+    example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroProvincia/28"
+  - path: /EstacionesTerrestres/FiltroMunicipio/{id_municipio}
+    desc: Estaciones de un municipio (id propio, ver Listados/Municipios)
+  - path: /EstacionesTerrestresHist/{DD-MM-AAAA}
+    desc: Histórico de un día concreto
+  - path: /Listados/Municipios/ y /Listados/Provincias/ y /Listados/ProductosPetroliferos/
+    desc: Tablas de códigos usadas por los filtros
+gotchas:
+  - Los precios y coordenadas vienen como texto con coma decimal ("1,459"); convertir antes de operar.
+  - El id de municipio es propio de la aplicación, no el INE; obtenerlo de /Listados/Municipios/.
+  - Precio vacío significa que la estación no vende ese producto.
+  - La respuesta completa pesa más de 10 MB; filtrar por provincia si no se necesita todo.
+related: [cnmc-data, ine-codigos-territoriales]
+status: active
+verified: null

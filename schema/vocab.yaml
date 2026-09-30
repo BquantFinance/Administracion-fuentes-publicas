@@ -1,0 +1,74 @@
+# Vocabulario controlado. Los valores de las fichas deben estar aquí.
+# Orden de sectores = prioridad top-down del proyecto.
+
+level:
+  age: Administración General del Estado
+  # Reservados para fases posteriores:
+  ccaa: Comunidades autónomas
+  local: Entidades locales
+  otros-poderes: Cortes Generales, Poder Judicial, órganos constitucionales
+  ue: Unión Europea (datos sobre España)
+
+sector:
+  legislacion-boletines: Legislación y boletines oficiales
+  economia-finanzas: Economía, finanzas y mercados
+  hacienda-presupuestos: Hacienda, tributos y presupuestos
+  estadistica: Estadística oficial
+  contratacion-subvenciones: Contratación pública y subvenciones
+  empleo-seguridad-social: Empleo y Seguridad Social
+  gobierno-abierto-administracion: Gobierno abierto, transparencia y organización administrativa
+  territorio-cartografia: Territorio, catastro y cartografía
+  meteorologia-clima: Meteorología y clima
+  medio-ambiente-agua-biodiversidad: Medio ambiente, agua y biodiversidad
+  energia: Energía
+  sanidad-medicamentos: Sanidad y medicamentos
+  ciencia-investigacion: Ciencia e investigación (biología, química, geología, oceanografía)
+  agricultura-pesca-alimentacion: Agricultura, pesca y alimentación
+  transporte-movilidad: Transporte y movilidad
+  comercio-industria-propiedad: Comercio exterior, industria y propiedad industrial
+  educacion-universidades: Educación y universidades
+  justicia-interior-seguridad: Justicia, interior y seguridad
+  cultura-patrimonio: Cultura y patrimonio
+  demografia-migraciones-sociedad: Demografía, migraciones y sociedad
+  vivienda-urbanismo: Vivienda y urbanismo
+  telecomunicaciones-digital: Telecomunicaciones y sociedad digital
+  exterior-cooperacion: Acción exterior y cooperación
+  consumo-seguridad-alimentaria: Consumo y seguridad alimentaria
+  defensa: Defensa
+
+access:
+  api-rest: API HTTP con respuestas estructuradas (JSON/XML)
+  api-soap: Servicio web SOAP/WSDL
+  sparql: Endpoint SPARQL
+  oai-pmh: Protocolo OAI-PMH para metadatos
+  ogc: Servicios geográficos OGC (WMS, WFS, WMTS, WCS)
+  feed: Sindicación RSS/ATOM
+  download: Ficheros descargables con URL estable
+  portal: Portal web con consultas y exportación manual; sin API documentada
+  scraping: Solo HTML; requiere scraping
+
+auth:
+  none: Sin autenticación
+  api-key: Clave gratuita previo registro
+  registration: Registro de usuario sin clave técnica
+  certificate: Certificado digital / Cl@ve
+  oauth: OAuth2
+
+update:
+  realtime: Continuo o subhorario
+  hourly: Horaria
+  daily: Diaria
+  weekly: Semanal
+  monthly: Mensual
+  quarterly: Trimestral
+  annual: Anual
+  irregular: Sin periodicidad fija
+  static: Histórico cerrado
+
+status:
+  active: Operativa
+  degraded: Operativa con problemas conocidos
+  deprecated: Anunciada su retirada o sustituida
+  unknown: Sin confirmar
+
+formats: [json, xml, csv, tsv, xlsx, xls, pdf, html, rdf, ttl, jsonld, xbrl, geojson, shp, gml, gpkg, kml, dxf, dgn, ecw, tiff, geotiff, laz, sdmx, px, zip, txt, atom, rss, parquet, sql, netcdf, grib, jpg, png, marc]

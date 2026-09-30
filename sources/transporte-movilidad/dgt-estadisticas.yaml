@@ -1,0 +1,30 @@
+id: dgt-estadisticas
+name: DGT – Estadísticas de parque, matriculaciones, conductores y siniestralidad
+org: Dirección General de Tráfico (DGT)
+ministry: Interior
+level: age
+sector: transporte-movilidad
+tags: [dgt, matriculaciones, parque-vehiculos, conductores, accidentes, siniestralidad, microdatos, transferencias]
+summary: >-
+  Parque de vehículos, matriculaciones y transferencias mensuales (con microdatos diarios por vehículo anonimizado),
+  censo de conductores, accidentes con víctimas (microdatos anuales), sanciones. Portal estadístico y descargas.
+access: [portal, download]
+auth: none
+formats: [xlsx, csv, txt, pdf]
+update: monthly
+coverage: "1990- agregados; microdatos matriculaciones desde 2014"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.dgt.es/menusecundario/dgt-en-cifras/
+docs_url: https://www.dgt.es/menusecundario/dgt-en-cifras/
+endpoints:
+  - path: https://www.dgt.es/menusecundario/dgt-en-cifras/dgt-en-cifras-resultados/
+    desc: Tablas por tema (vehículos, conductores, accidentes) con descarga
+  - path: https://sedeapl.dgt.gob.es/WEB_IEST_CONSULTA/
+    desc: Portal estadístico IEST con consultas y microdatos de matriculaciones, bajas y transferencias
+gotchas:
+  - Los microdatos de matriculaciones son ficheros de texto de ancho fijo con diseño de registro en PDF aparte; incluyen marca, modelo, combustible, código INE de municipio.
+  - Los microdatos de accidentes se distribuyen anonimizados con retardo de más de un año.
+  - Los códigos de municipio de la DGT son INE sin dígito de control.
+related: [dgt-datex-trafico, ine-codigos-territoriales]
+status: active
+verified: null

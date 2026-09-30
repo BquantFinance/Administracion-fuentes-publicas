@@ -1,0 +1,1162 @@
+# Administración fuentes públicas (España)
+
+> Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
+
+Fuentes: 67 · Generado: 2026-09-30 · Formato: un bloque por fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar.
+
+# SECTOR legislacion-boletines: Legislación y boletines oficiales
+
+## boe-api-legislacion-consolidada
+BOE – API de legislación consolidada | Agencia Estatal Boletín Oficial del Estado (AEBOE)
+summary: Textos consolidados de normas estatales y autonómicas con estructura por artículos, versiones históricas, metadatos, análisis jurídico (materias, referencias anteriores y posteriores) y estado de vigencia.
+access: api-rest | auth: none | formats: json, xml | update: daily | status: active | verified: pending
+coverage: Normas vigentes y derogadas desde 1978, algunas anteriores
+license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
+base_url: https://www.boe.es/datosabiertos/api/legislacion-consolidada
+docs_url: https://www.boe.es/datosabiertos/documentos/APIlegislacionConsolidada.pdf
+- /id/{BOE-A-AAAA-NNNNN} :: Norma completa consolidada (metadatos, análisis, texto por bloques)
+  ej: curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229"
+- /id/{id}/metadatos :: Solo metadatos (título, rango, fechas, vigencia)
+- /id/{id}/analisis :: Materias, notas, referencias anteriores y posteriores
+- /id/{id}/texto :: Texto consolidado dividido en bloques (artículos, disposiciones)
+- /id/{id}/texto/bloque/{id_bloque} :: Un artículo o bloque concreto
+- /id/{id}/texto/indice :: Índice de bloques de la norma
+- /legislacion-consolidada?from={AAAAMMDD}&offset={n}&limit={n} :: Listado de normas, filtrable por fecha de actualización
+rate_limit: No documentado
+! Cabecera Accept obligatoria (application/json o application/xml).
+! El identificador es el del BOE original de la norma, p. ej. la Constitución es BOE-A-1978-31229.
+! Los bloques de texto llevan fecha de vigencia; una norma tiene varias versiones del mismo artículo.
+! Solo cubre normas con texto consolidado, no todas las disposiciones publicadas.
+related: boe-api-sumario
+
+## boe-api-sumario
+BOE – API de sumarios | Agencia Estatal Boletín Oficial del Estado (AEBOE)
+summary: Sumario diario del BOE en JSON/XML: todas las disposiciones publicadas cada día con identificador, título, sección, departamento y enlaces a PDF, HTML y XML del texto completo.
+access: api-rest | auth: none | formats: json, xml | update: daily | status: active | verified: pending
+coverage: 1960-
+license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
+base_url: https://www.boe.es/datosabiertos/api
+docs_url: https://www.boe.es/datosabiertos/documentos/APIsumarioBOE.pdf
+- /boe/sumario/{AAAAMMDD} :: Sumario completo del BOE del día indicado
+  ej: curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/boe/sumario/20240102"
+- https://www.boe.es/diario_boe/xml.php?id={BOE-A-AAAA-NNNNN} :: Texto completo y metadatos de una disposición en XML
+  ej: curl -s "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-1"
+- https://www.boe.es/boe/dias/{AAAA}/{MM}/{DD}/pdfs/{id}.pdf :: PDF de una disposición
+rate_limit: No documentado; peticiones masivas pueden bloquearse temporalmente
+! La cabecera Accept es obligatoria; sin ella devuelve XML por defecto o error 400.
+! No hay BOE los domingos ni festivos nacionales; la API devuelve 404 para esos días.
+! Los identificadores siguen el patrón BOE-A-AAAA-NNNNN (disposiciones) y BOE-B-AAAA-NNNNN (anuncios).
+! Para búsquedas por texto no hay API; usar el buscador web o descargar sumarios y filtrar en local.
+related: boe-api-legislacion-consolidada, borme-api-sumario, boe-feeds
+
+## boe-eli
+ELI – Identificador Europeo de Legislación en el BOE | Agencia Estatal Boletín Oficial del Estado (AEBOE)
+summary: URIs estables tipo ELI para normas estatales, con metadatos RDFa embebidos en las páginas de legislación consolidada, interoperables con EUR-Lex y otros boletines europeos.
+access: download | auth: none | formats: html, rdf | update: daily | status: active | verified: pending
+license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
+base_url: https://www.boe.es/eli/
+docs_url: https://www.boe.es/legislacion/eli.php
+- https://www.boe.es/eli/es/{tipo}/{AAAA}/{MM}/{DD}/{num}/con :: Texto consolidado de una norma por su URI ELI
+  ej: curl -sL "https://www.boe.es/eli/es/lo/2018/12/05/3/con"
+- https://www.boe.es/eli/es/{tipo}/{AAAA}/{MM}/{DD}/{num}/dof :: Versión publicada en el diario oficial
+! Los tipos de norma en la URI son abreviaturas (lo ley orgánica, l ley, rd real decreto, rdl real decreto-ley, o orden).
+! La URI ELI redirige a la página HTML; para JSON usar la API de legislación consolidada con el id BOE.
+related: boe-api-legislacion-consolidada
+
+## boe-feeds
+BOE y BORME – Feeds RSS y alertas | Agencia Estatal Boletín Oficial del Estado (AEBOE)
+summary: Canales RSS del sumario diario del BOE por secciones y del BORME, útiles para detectar publicaciones nuevas sin consultar la API.
+access: feed | auth: none | formats: rss, xml | update: daily | status: active | verified: pending
+license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
+base_url: https://www.boe.es/rss/
+docs_url: https://www.boe.es/rss/
+- https://www.boe.es/rss/boe.php :: Sumario del BOE del día
+- https://www.boe.es/rss/boe.php?s={seccion} :: Sumario filtrado por sección (1 disposiciones generales, 2A, 2B, 3, 4, 5A, 5B, 5C)
+- https://www.boe.es/rss/borme.php :: Sumario del BORME del día
+- https://www.boe.es/rss/canal.php?c={tema} :: Canales temáticos (legislación consolidada actualizada, ayudas, empleo público)
+! Los feeds solo contienen el día en curso; para histórico usar la API de sumarios.
+! El servicio de alertas personalizadas por correo requiere cuenta en Mi BOE y no tiene API.
+related: boe-api-sumario, borme-api-sumario
+
+## borme-api-sumario
+BORME – API de sumarios y actos mercantiles | Agencia Estatal Boletín Oficial del Estado (AEBOE)
+summary: Sumario diario del Boletín Oficial del Registro Mercantil: actos inscritos por provincia (constituciones, nombramientos, ceses, ampliaciones, disoluciones), anuncios y convocatorias, con enlaces a PDF y XML.
+access: api-rest, download | auth: none | formats: json, xml, pdf | update: daily | status: active | verified: pending
+coverage: 2009- (PDF); sumarios estructurados desde 2009
+license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
+base_url: https://www.boe.es/datosabiertos/api
+docs_url: https://www.boe.es/datosabiertos/documentos/APIsumarioBORME.pdf
+- /borme/sumario/{AAAAMMDD} :: Sumario del BORME del día, con un ítem por provincia y sección
+  ej: curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/borme/sumario/20240102"
+- https://www.boe.es/borme/dias/{AAAA}/{MM}/{DD}/pdfs/{BORME-A-AAAA-NNN-XX}.pdf :: PDF de actos inscritos de una provincia (sección A)
+  ej: curl -sO "https://www.boe.es/borme/dias/2024/01/02/pdfs/BORME-A-2024-1-01.pdf"
+- https://www.boe.es/diario_borme/xml.php?id={BORME-C-AAAA-NNNNN} :: XML de un anuncio de la sección C
+rate_limit: No documentado
+! Los actos de la sección A (inscripciones) solo existen en PDF; el detalle por empresa exige parsear el PDF.
+! El sufijo del PDF de sección A es el código de provincia (01 Álava ... 52 Melilla), no un correlativo.
+! No se publica sábados, domingos ni festivos; 404 esos días.
+! El BORME no incluye cuentas anuales ni datos de socios; eso está en el Registro Mercantil (no AGE, de pago).
+related: boe-api-sumario
+
+# SECTOR economia-finanzas: Economía, finanzas y mercados
+
+## airef-datos
+AIReF – Previsiones, informes y datos fiscales | Autoridad Independiente de Responsabilidad Fiscal (AIReF)
+summary: Previsiones macroeconómicas y fiscales, observatorio de deuda por Administración, evaluaciones de gasto (spending reviews) y datos de ejecución de reglas fiscales por CCAA y ayuntamientos, con descargas Excel.
+access: download, portal | auth: none | formats: xlsx, pdf, csv | update: quarterly | status: active | verified: pending
+coverage: 2014-
+license: Reutilización libre con cita de la fuente
+base_url: https://www.airef.es/
+docs_url: https://www.airef.es/es/datalab/
+- https://www.airef.es/es/datalab/ :: Datalab con visualizaciones y descarga de datos
+- https://www.airef.es/es/observatorio-de-deuda/ :: Observatorio de deuda pública por subsector
+- https://www.airef.es/es/previsiones/ :: Previsiones macro y fiscales trimestrales
+! Muchas descargas están detrás de visores embebidos; buscar el enlace "descargar datos" en cada gráfico.
+! Las previsiones se publican en PDF con anexos Excel no siempre enlazados desde la ficha.
+related: igae-ejecucion-presupuestaria, bde-estadisticas
+
+## bde-estadisticas
+Banco de España – Portal de estadísticas y descarga de series | Banco de España
+summary: Miles de series estadísticas: tipos de interés y de cambio, crédito y depósitos, deuda pública, balanza de pagos, cuentas financieras, Central de Balances. Descarga completa por capítulos en CSV y consulta de series individuales.
+access: download, portal | auth: none | formats: csv, xlsx, pdf | update: monthly | status: active | verified: pending
+coverage: Series desde 1962 según indicador
+license: Reutilización libre con cita de la fuente
+base_url: https://www.bde.es/webbe/es/estadisticas/
+docs_url: https://www.bde.es/webbe/es/estadisticas/recursos/descargas-completas.html
+- https://www.bde.es/webbe/es/estadisticas/recursos/descargas-completas.html :: Ficheros CSV completos por capítulo del Boletín Estadístico y otras publicaciones
+- https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/{fichero}.csv :: Patrón de descarga directa de los CSV de series
+- https://app.bde.es/bie_www/faces/bie_wwwias/jsp/op/Home/pHome.jsp :: Buscador de series BIEST con exportación
+! Los CSV usan codificación Latin-1 y separador coma con decimales con punto; primeras filas son cabeceras de metadatos.
+! Cada serie tiene un código alfanumérico estable (p. ej. D_1NBAF...) que es la clave para automatizar; el nombre descriptivo cambia.
+! Los tipos de cambio oficiales del euro provienen del BCE; el BdE los redistribuye con retardo.
+! No hay API REST pública; para SDMX usar el BCE (Statistical Data Warehouse) que republica muchas series españolas.
+related: tesoro-estadisticas, cnmv-registros
+
+## cnmv-registros
+CNMV – Registros oficiales y hechos relevantes | Comisión Nacional del Mercado de Valores (CNMV)
+summary: Registros oficiales de entidades supervisadas, información privilegiada y otra información relevante (OIR), participaciones significativas, informes financieros anuales y semestrales, folletos, fondos de inversión.
+access: portal, feed, download | auth: none | formats: html, xml, pdf, xlsx, xbrl | update: realtime | status: active | verified: pending
+coverage: Registros históricos desde 1989 según tipo
+license: Reutilización libre con cita de la fuente
+base_url: https://www.cnmv.es/portal/
+docs_url: https://www.cnmv.es/portal/Consultas/Busqueda.aspx
+- https://www.cnmv.es/portal/Consultas/BusquedaPorEntidad.aspx :: Buscador de entidades y su documentación registrada
+- https://www.cnmv.es/portal/HR/ResultadoBusquedaHR.aspx :: Consulta de información privilegiada y relevante por entidad y fechas
+- https://www.cnmv.es/portal/Consultas/IFI/ListaIFI.aspx :: Informes financieros anuales y semestrales de cotizadas (XBRL/PDF)
+- https://www.cnmv.es/portal/RSS/ :: Canales RSS de comunicaciones y registros
+! No hay API REST documentada; las consultas son formularios ASP.NET con ViewState, difíciles de automatizar.
+! Los informes financieros están en XBRL con la taxonomía propia de la CNMV, no ESEF puro.
+! Las "IPP" y "OIR" sustituyeron a los "hechos relevantes" en 2020; los históricos siguen bajo esa etiqueta.
+! Fondos de inversión, la información periódica es trimestral y va en PDF y XML por fondo.
+related: bde-estadisticas, borme-api-sumario
+
+## ico-datos
+ICO – Líneas de financiación y estadísticas | Instituto de Crédito Oficial (ICO)
+summary: Estadísticas de operaciones formalizadas en las Líneas ICO y avales públicos (COVID, Ucrania) por sector, provincia y tamaño de empresa, más informes anuales y datos de transparencia.
+access: portal, download | auth: none | formats: xlsx, pdf, html | update: monthly | status: active | verified: pending
+coverage: 2010-
+license: Reutilización libre con cita de la fuente
+base_url: https://www.ico.es/
+docs_url: https://www.ico.es/web/ico/estadisticas
+- https://www.ico.es/web/ico/estadisticas :: Estadísticas de líneas de mediación y avales
+- https://www.ico.es/web/ico/transparencia :: Portal de transparencia con informes y datos
+! Sin API; los datos de avales COVID se publicaron como Excel agregados, sin detalle por beneficiario.
+related: bdns-api
+
+## tesoro-estadisticas
+Tesoro Público – Subastas, emisiones y estadísticas de deuda | Secretaría General del Tesoro y Financiación Internacional
+summary: Resultados de subastas de Letras, Bonos y Obligaciones, calendario de emisiones, saldo vivo y composición de la deuda del Estado, tenedores, estadísticas mensuales en Excel.
+access: download, portal | auth: none | formats: xlsx, pdf, html | update: monthly | status: active | verified: pending
+coverage: 1990-
+license: Reutilización libre con cita de la fuente
+base_url: https://www.tesoro.es/
+docs_url: https://www.tesoro.es/deuda-publica/estadisticas
+- https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas :: Resultado de las últimas subastas
+- https://www.tesoro.es/deuda-publica/estadisticas :: Boletín mensual y series históricas en Excel
+- https://www.tesoro.es/deuda-publica/subastas/calendario :: Calendario anual de subastas
+! No hay API; los Excel cambian de estructura entre años.
+! Los resultados de cada subasta se publican en PDF y HTML el mismo día; el Excel mensual llega con retardo.
+! Series largas de deuda y coste medio también en el Banco de España con códigos estables.
+related: bde-estadisticas, igae-ejecucion-presupuestaria
+
+# SECTOR hacienda-presupuestos: Hacienda, tributos y presupuestos
+
+## aeat-estadisticas
+AEAT – Estadísticas tributarias | Agencia Estatal de Administración Tributaria (AEAT)
+summary: Estadísticas de declarantes de IRPF, IVA, Sociedades y Patrimonio por tramos, provincia y municipio; informes mensuales de recaudación; ventas, empleo y salarios en fuentes tributarias; comercio exterior.
+access: portal, download | auth: none | formats: html, xlsx, csv, pdf | update: monthly | status: active | verified: pending
+coverage: 1992- según estadística
+license: Reutilización libre con cita de la fuente
+base_url: https://sede.agenciatributaria.gob.es/Sede/estadisticas.html
+docs_url: https://sede.agenciatributaria.gob.es/Sede/estadisticas.html
+- https://sede.agenciatributaria.gob.es/Sede/estadisticas/recaudacion-tributaria/informes-mensuales-recaudacion-tributaria.html :: Informes mensuales de recaudación con anexos en Excel
+- https://sede.agenciatributaria.gob.es/Sede/estadisticas/estadisticas-irpf.html :: IRPF por municipios, tramos de renta y partidas
+- https://sede.agenciatributaria.gob.es/Sede/datos-abiertos.html :: Conjuntos de datos abiertos publicados por la AEAT
+! Las tablas se sirven como HTML paginado; la exportación a Excel está enlace a enlace, sin descarga masiva.
+! La estadística de IRPF por municipios solo cubre municipios de más de 1.000 habitantes en territorio de régimen común (excluye País Vasco y Navarra).
+! Las URLs de la sede cambiaron en 2021 (de agenciatributaria.es a sede.agenciatributaria.gob.es); enlaces antiguos redirigen de forma inconsistente.
+related: aeat-servicios-web, igae-ejecucion-presupuestaria
+
+## aeat-servicios-web
+AEAT – Servicios web y trámites automatizables | Agencia Estatal de Administración Tributaria (AEAT)
+summary: Servicios web SOAP para presentar declaraciones, el Suministro Inmediato de Información del IVA (SII), VERI*FACTU, consulta y validación de NIF, y descarga de datos fiscales. Requieren certificado electrónico.
+access: api-soap | auth: certificate | formats: xml | update: realtime | status: active | verified: pending
+license: Uso conforme a la normativa tributaria; no son datos abiertos
+base_url: https://www1.agenciatributaria.gob.es/wlpl/
+docs_url: https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-tecnicos.html
+- https://sede.agenciatributaria.gob.es/Sede/iva/suministro-inmediato-informacion.html :: SII, WSDL y esquemas para remitir registros de facturación
+- https://sede.agenciatributaria.gob.es/Sede/iva/sistemas-informaticos-facturacion-verifactu.html :: VERI*FACTU, especificaciones técnicas y entorno de pruebas
+- https://sede.agenciatributaria.gob.es/Sede/procedimientoini/ZZ09.shtml :: Comprobación de NIF de terceros a efectos censales
+! Todo requiere certificado electrónico de persona física, jurídica o de sello; no hay API key ni OAuth.
+! Existe entorno de pruebas (preproducción) con host distinto para SII y VERI*FACTU; consultar cada manual.
+! La validación de NIF de terceros está limitada a colaboradores sociales y presentadores, no es abierta.
+! Los WSDL cambian de versión con la normativa; fijar versión y vigilar los cambios anunciados en la sede.
+related: aeat-estadisticas
+
+## hacienda-ovef
+Hacienda – Oficina Virtual de Coordinación Financiera con las EELL y CCAA | Secretaría General de Financiación Autonómica y Local
+summary: Presupuestos y liquidaciones de todas las entidades locales y CCAA, deuda viva por ayuntamiento, periodo medio de pago, tributos locales (tipos impositivos por municipio), financiación autonómica. Descargas masivas en Excel/CSV.
+access: portal, download | auth: none | formats: xlsx, csv, pdf | update: annual | status: active | verified: pending
+coverage: 2002-
+license: Reutilización libre con cita de la fuente
+base_url: https://www.hacienda.gob.es/es-ES/Areas%20Tematicas/Administracion%20Electronica/OVEELL/Paginas/OVEntidadesLocales.aspx
+docs_url: https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PublicacionPresupuestos/aspx/inicio.aspx
+- https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PublicacionPresupuestos/aspx/inicio.aspx :: Consulta y descarga de presupuestos y liquidaciones de entidades locales
+- https://www.hacienda.gob.es/es-ES/CDI/Paginas/SistemasFinanciacionDeuda/InformacionEELLs/DeudaViva.aspx :: Deuda viva de los ayuntamientos a 31 de diciembre
+- https://www.hacienda.gob.es/es-ES/CDI/Paginas/ImpuestosTasasEELL/ImpuestosTasasEELL.aspx :: Tipos de IBI, IAE, IVTM y otros tributos por municipio
+! Las descargas masivas por ejercicio están como ficheros Excel de varias decenas de MB con múltiples hojas.
+! La clasificación funcional cambió en 2015; series largas requieren mapear programas.
+! Cada ayuntamiento se identifica por código INE de municipio más código de entidad; no usar el nombre.
+related: igae-ejecucion-presupuestaria, ine-codigos-territoriales
+
+## igae-ejecucion-presupuestaria
+IGAE – Ejecución presupuestaria y contabilidad nacional | Intervención General de la Administración del Estado (IGAE)
+summary: Ejecución mensual del presupuesto del Estado y de la Seguridad Social, déficit por Administraciones en contabilidad nacional, Cuenta General del Estado, datos de entidades públicas (INVENTE) y CIMCA de entes locales.
+access: portal, download | auth: none | formats: xlsx, pdf, html, csv | update: monthly | status: active | verified: pending
+coverage: 1995-
+license: Reutilización libre con cita de la fuente
+base_url: https://www.igae.pap.hacienda.gob.es/
+docs_url: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/imMensualEstado.aspx
+- https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/imMensualEstado.aspx :: Informe mensual de ejecución del Estado en contabilidad nacional
+- https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/iaCuentasAAPP.aspx :: Cuentas anuales de las Administraciones Públicas
+- https://www.pap.hacienda.gob.es/invente2/ :: INVENTE, inventario de entes del sector público estatal, autonómico y local
+! Sitio SharePoint; las URLs con .aspx son estables pero los ficheros Excel cambian de nombre cada mes.
+! Contabilidad nacional (SEC 2010) y contabilidad presupuestaria (caja) dan cifras distintas para el mismo periodo.
+! Los datos de CCAA y ayuntamientos están en la Oficina Virtual de Coordinación Financiera (otra ficha).
+related: hacienda-ovef, airef-datos, tesoro-estadisticas
+
+# SECTOR estadistica: Estadística oficial
+
+## ine-api-tempus
+INE – API JSON (Tempus3) | Instituto Nacional de Estadística (INE)
+summary: Acceso programático a todas las operaciones estadísticas del INE: metadatos (operaciones, tablas, variables, valores) y datos de tablas y series (IPC, EPA, PIB, padrón, natalidad, empresas). JSON y CSV, sin autenticación.
+access: api-rest | auth: none | formats: json, csv, px | update: daily | status: active | verified: pending
+coverage: Según operación; IPC desde 2002 en base actual, series históricas enlazadas
+license: Reutilización libre con cita de la fuente (licencia INE compatible CC BY 4.0)
+base_url: https://servicios.ine.es/wstempus/js/ES
+docs_url: https://www.ine.es/dyngs/DAB/index.htm?cid=1099
+- /OPERACIONES_DISPONIBLES :: Lista de operaciones estadísticas con sus códigos
+  ej: curl -s "https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES"
+- /TABLAS_OPERACION/{id_operacion} :: Tablas publicadas de una operación (p. ej. IPC = 25)
+  ej: curl -s "https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/IPC"
+- /DATOS_TABLA/{id_tabla}?nult={n} :: Datos de una tabla, últimos n periodos
+  ej: curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/50902?nult=3"
+- /DATOS_SERIE/{cod_serie}?nult={n} :: Datos de una serie por su código
+  ej: curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/IPC251856?nult=12"
+- /SERIES_TABLA/{id_tabla} :: Series que componen una tabla, con sus metadatos
+- /VARIABLES_OPERACION/{id_operacion} y /VALORES_VARIABLEOPERACION/{id_var}/{id_op} :: Variables y valores para filtrar
+- https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/{id_tabla} :: Misma API con salida CSV cambiando js por csv
+  ej: curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/50902?nult=1"
+rate_limit: No documentado; respuestas grandes se truncan, usar nult, date o filtros tv
+! Los ids de tabla del portal INEbase (t=NNNNN en la URL) son los mismos que acepta DATOS_TABLA.
+! Filtrar por variable con el parámetro tv=id_variable:id_valor; puede repetirse.
+! Fechas con date=AAAAMMDD:AAAAMMDD; sin nult ni date devuelve toda la serie, que puede ser enorme.
+! Cambiar ES por EN en la ruta devuelve metadatos en inglés.
+! Existe /wstempus/jsCache/ES/... con caché agresiva; usar /js/ para datos recién publicados.
+! Los valores llevan campo Secreto=true cuando están protegidos por secreto estadístico; el dato viene vacío.
++ Flujo típico, OPERACIONES_DISPONIBLES para el id, TABLAS_OPERACION para la tabla, SERIES_TABLA para elegir series, DATOS_SERIE con nult para bajar.
++ En Python, pandas.json_normalize sobre el campo Data de cada serie; la fecha viene en Fecha (epoch ms) y Anyo/FK_Periodo.
+related: ine-codigos-territoriales, ine-microdatos
+
+## ine-codigos-territoriales
+INE – Códigos de municipios, provincias y unidades territoriales | Instituto Nacional de Estadística (INE)
+summary: Relación oficial de municipios con código INE (5 dígitos, provincia + municipio + dígito de control), provincias, comunidades autónomas, NUTS, islas y variaciones anuales (altas, bajas, cambios de nombre). Es la clave para cruzar cualquier dataset territorial español.
+access: download | auth: none | formats: xlsx, csv | update: annual | status: active | verified: pending
+coverage: Relación anual desde 1996; variaciones desde 1842 en Alteraciones de municipios
+license: Reutilización libre con cita de la fuente
+base_url: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=ultiDatos&idp=1254734710990
+docs_url: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=metodologia&idp=1254734710990
+- https://www.ine.es/daco/daco42/codmun/diccionario{AA}.xlsx :: Diccionario de municipios del año AA (dos dígitos)
+  ej: curl -sO "https://www.ine.es/daco/daco42/codmun/diccionario24.xlsx"
+- https://www.ine.es/daco/daco42/codmun/cod_ccaa_provincia.htm :: Códigos de comunidades autónomas y provincias
+- https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=resultados&idp=1254734710990 :: Relación de municipios y variaciones por año
+! El código INE de municipio completo tiene 5 dígitos (CPRO 2 + CMUN 3) y el dígito de control es un sexto dígito aparte; muchos datasets omiten el DC y otros lo incluyen.
+! Algunos municipios cambian de código al fusionarse; hay que aplicar la tabla de variaciones para series largas.
+! Los códigos del Catastro y de la DGT no coinciden con los del INE; existen tablas de equivalencia en el propio Catastro.
+related: ine-api-tempus, hacienda-ovef, catastro-ovc
+
+## ine-microdatos
+INE – Microdatos anonimizados | Instituto Nacional de Estadística (INE)
+summary: Ficheros de microdatos anonimizados de encuestas (EPA, Encuesta de Condiciones de Vida, Presupuestos Familiares, Estructura Salarial, Censo, Movimiento Natural de la Población) con diseño de registro y programas de lectura.
+access: download | auth: none | formats: csv, txt, zip, sql | update: quarterly | status: active | verified: pending
+coverage: EPA desde 2005 en formato actual; otras según encuesta
+license: Reutilización libre con cita de la fuente
+base_url: https://www.ine.es/prodyser/microdatos.htm
+docs_url: https://www.ine.es/prodyser/microdatos.htm
+- https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176918&menu=resultados&idp=1254735976595 :: Microdatos de la EPA por trimestre
+- https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176807&menu=resultados&idp=1254735976608 :: Microdatos de la Encuesta de Condiciones de Vida
+! Los ficheros son de ancho fijo o CSV con separador tabulador; el diseño de registro va en Excel aparte y cambia entre años.
+! Los ZIP incluyen programas de lectura para SAS, SPSS, R y Stata, pero no siempre para Python.
+! Los factores de elevación son obligatorios para cualquier estimación; no contar registros.
+related: ine-api-tempus
+
+# SECTOR contratacion-subvenciones: Contratación pública y subvenciones
+
+## bdns-api
+BDNS – Base de Datos Nacional de Subvenciones (API REST) | Intervención General de la Administración del Estado (IGAE)
+summary: Convocatorias, concesiones y beneficiarios de subvenciones de todas las Administraciones (Estado, CCAA, EELL), ayudas de Estado, minimis, sanciones e inhabilitaciones. API REST pública con paginación y descarga CSV.
+access: api-rest, portal, download | auth: none | formats: json, csv, xlsx, pdf | update: daily | status: active | verified: pending
+coverage: 2014- (convocatorias); concesiones desde 2016
+license: Reutilización libre con cita de la fuente
+base_url: https://www.infosubvenciones.es/bdnstrans/
+docs_url: https://www.infosubvenciones.es/bdnstrans/GE/es/api
+- https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page={n}&pageSize={n}&descripcion={texto} :: Búsqueda paginada de convocatorias
+  ej: curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=20&descripcion=investigacion"
+- https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv={numero} :: Detalle de una convocatoria por su número BDNS
+- https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page={n}&pageSize={n} :: Concesiones (importe, beneficiario, convocatoria, fecha)
+- https://www.infosubvenciones.es/bdnstrans/api/ayudasestado/busqueda :: Ayudas de Estado publicadas
+- https://www.infosubvenciones.es/bdnstrans/api/minimis/busqueda :: Ayudas de minimis
+! Los beneficiarios personas físicas aparecen con nombre y apellidos truncados o anonimizados salvo cuando la ley obliga a publicar.
+! El número de convocatoria BDNS es el identificador estable; el código de la administración concedente sigue DIR3.
+! pageSize máximo en torno a 10000 según endpoint; respuestas grandes tardan.
+! El extracto de la convocatoria se publica también en el BOE o diario oficial correspondiente, con enlace en la ficha.
+related: placsp-datos-abiertos, dir3-directorio, boe-api-sumario
+
+## hacienda-registro-licitadores
+ROLECE – Registro Oficial de Licitadores y Empresas Clasificadas | Dirección General del Patrimonio del Estado
+summary: Registro de empresas inscritas para contratar con el sector público, con clasificación de contratistas de obras y servicios por grupos y categorías. Consulta pública por NIF o denominación.
+access: portal | auth: none | formats: html, pdf | update: daily | status: active | verified: pending
+license: Consulta pública; reutilización sujeta a protección de datos
+base_url: https://registrodelicitadores.gob.es/
+docs_url: https://registrodelicitadores.gob.es/
+- https://registrodelicitadores.gob.es/consulta_publica :: Consulta pública de empresas inscritas y su clasificación
+! Sin API ni descarga masiva; las inscripciones incluyen datos de administradores y apoderados con acceso restringido.
+! La clasificación caduca y debe renovarse; comprobar fecha de vigencia.
+related: placsp-datos-abiertos
+
+## placsp-datos-abiertos
+Plataforma de Contratación del Sector Público – Datos abiertos (ATOM/CODICE) | Dirección General del Patrimonio del Estado
+summary: Todas las licitaciones y adjudicaciones publicadas en la Plataforma (Estado, y CCAA y EELL que agregan): feeds ATOM con documentos CODICE (XML basado en UBL) por licitación, más ZIP mensuales históricos.
+access: feed, download | auth: none | formats: atom, xml, zip | update: realtime | status: active | verified: pending
+coverage: 2012-
+license: Reutilización libre con cita de la fuente
+base_url: https://contrataciondelestado.es/
+docs_url: https://contrataciondelestado.es/wps/portal/DatosAbiertos
+- https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom :: Licitaciones de perfiles alojados en la Plataforma (feed paginado hacia atrás con rel=next)
+  ej: curl -s "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom"
+- https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores.atom :: Licitaciones agregadas desde plataformas autonómicas
+- https://contrataciondelestado.es/sindicacion/sindicacion_1143/contratosMenoresPerfilesContratantes.atom :: Contratos menores
+- https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_{AAAA}{MM}.zip :: Histórico mensual comprimido, mismo formato ATOM
+! Cada entrada ATOM incluye el XML CODICE completo con espacios de nombres cac y cbc; hay que registrar los namespaces al parsear.
+! El feed se recorre hacia atrás con el enlace rel=next; una licitación aparece varias veces (una por cambio de estado) y hay que quedarse con la última por id.
+! Los importes van sin IVA en TotalAmount y con IVA en TaxExclusiveAmount/PayableAmount según nodo; comprobar siempre cuál se usa.
+! Los ZIP mensuales pesan cientos de MB y se publican con semanas de retraso.
+! No existe API de búsqueda; para consultas puntuales usar el buscador web o cargar los feeds en base de datos propia.
++ Parsear con lxml registrando namespaces cac, cbc y cac-place-ext; el id estable de licitación es el elemento id de cada entry ATOM.
++ Para histórico completo cargar los ZIP mensuales en una tabla y deduplicar por id quedándose con la entrada de fecha updated mayor.
+related: bdns-api, hacienda-registro-licitadores
+
+# SECTOR empleo-seguridad-social: Empleo y Seguridad Social
+
+## mites-estadisticas
+Ministerio de Trabajo – Estadísticas laborales y convenios | Subdirección General de Estadística y Análisis Sociolaboral
+summary: Estadísticas de convenios colectivos (REGCON), huelgas y cierres, accidentes de trabajo, regulación de empleo, ETT, cooperativas y sociedades laborales, mediación, arbitraje y conciliación. Tablas descargables y anuario.
+access: portal, download | auth: none | formats: xlsx, pdf, html | update: monthly | status: active | verified: pending
+coverage: 1990-
+license: Reutilización libre con cita de la fuente
+base_url: https://www.mites.gob.es/es/estadisticas/index.htm
+docs_url: https://www.mites.gob.es/es/estadisticas/index.htm
+- https://www.mites.gob.es/estadisticas/cct/welcome.htm :: Estadística de convenios colectivos de trabajo
+- https://www.mites.gob.es/estadisticas/eat/welcome.htm :: Estadística de accidentes de trabajo
+- https://expinterweb.mites.gob.es/regcon/ :: REGCON, registro y depósito de convenios colectivos con texto íntegro
+! El buscador REGCON exige seleccionar ámbito y no devuelve más de unas decenas de resultados por página.
+! Las tablas de accidentes distinguen con baja y sin baja; usar la serie correcta.
+related: sepe-estadisticas, segsocial-estadisticas
+
+## segsocial-estadisticas
+Seguridad Social – Afiliación, pensiones y estadísticas | Secretaría de Estado de la Seguridad Social y Pensiones (TGSS, INSS)
+summary: Afiliados por régimen, provincia, sector y nacionalidad (media mensual y último día), pensiones contributivas por clase e importe, Ingreso Mínimo Vital, recaudación y presupuestos. Excel mensuales y series históricas.
+access: download, portal | auth: none | formats: xlsx, pdf, csv | update: monthly | status: active | verified: pending
+coverage: 2001- según serie
+license: Reutilización libre con cita de la fuente
+base_url: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas
+docs_url: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas
+- https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST8 :: Afiliación de trabajadores al sistema
+- https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST23 :: Pensiones contributivas del sistema
+- https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST45 :: Ingreso Mínimo Vital
+! Las URLs del portal WebSphere (wps/portal) son largas pero estables por código ESTnn.
+! Afiliación media mensual y afiliación a último día son series distintas con cifras distintas.
+! Los Excel tienen varias hojas con cabeceras combinadas; no leer con parsers CSV.
+! Los datos por municipio de afiliados solo se publican para municipios de más de 40.000 habitantes.
+related: sepe-estadisticas, igae-ejecucion-presupuestaria
+
+## sepe-estadisticas
+SEPE – Paro registrado, contratos y prestaciones | Servicio Público de Empleo Estatal (SEPE)
+summary: Datos mensuales de paro registrado, demandantes, contratos y prestaciones por desempleo desglosados por municipio, sexo, edad, sector y ocupación. Ficheros CSV/Excel mensuales y datos abiertos en datos.gob.es.
+access: download, portal | auth: none | formats: csv, xlsx, pdf | update: monthly | status: active | verified: pending
+coverage: 2005- (municipios); series nacionales desde 1996
+license: Reutilización libre con cita de la fuente
+base_url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas.html
+docs_url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos.html
+- https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-avance/paro.html :: Avance mensual de paro registrado (nota de prensa y tablas)
+- https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios.html :: Paro y contratos por municipio, un fichero por mes
+- https://datos.gob.es/es/catalogo?publisher_display_name=Servicio+P%C3%BAblico+de+Empleo+Estatal :: Conjuntos del SEPE en datos.gob.es (paro y contratos por municipio en CSV)
+! Los CSV por municipio usan codificación Latin-1 y separador punto y coma; los códigos de municipio son INE sin dígito de control.
+! Paro registrado no es lo mismo que desempleo EPA (INE); no comparar niveles.
+! Los ficheros mensuales cambian ligeramente de columnas entre años; validar cabeceras.
+related: ine-api-tempus, segsocial-estadisticas, ine-codigos-territoriales
+
+# SECTOR gobierno-abierto-administracion: Gobierno abierto, transparencia y organización administrativa
+
+## datos-gob-es-api
+datos.gob.es – Catálogo nacional de datos abiertos (API y SPARQL) | Dirección General del Dato / Entidad Pública Empresarial Red.es
+summary: Catálogo federado de datasets abiertos de todas las Administraciones españolas (más de 90.000 conjuntos) con metadatos DCAT-AP. API REST para buscar datasets, distribuciones y publicadores, y endpoint SPARQL.
+access: api-rest, sparql, download | auth: none | formats: json, xml, csv, rdf, ttl | update: daily | status: active | verified: pending
+coverage: 2011-
+license: Metadatos CC BY 4.0; cada dataset tiene su licencia
+base_url: https://datos.gob.es/apidata
+docs_url: https://datos.gob.es/es/accessible-apidata
+- /catalog/dataset?_pageSize={n}&_page={n} :: Listado paginado de datasets
+  ej: curl -s "https://datos.gob.es/apidata/catalog/dataset?_pageSize=10&_page=0"
+- /catalog/dataset/title/{texto} :: Búsqueda de datasets por título
+  ej: curl -s "https://datos.gob.es/apidata/catalog/dataset/title/paro"
+- /catalog/dataset/publisher/{id_publicador} :: Datasets de un publicador (id DIR3 del organismo)
+- /catalog/dataset/theme/{tema} :: Datasets por tema NTI (economia, sector-publico, medio-ambiente...)
+- /catalog/publisher :: Lista de organismos publicadores
+- https://datos.gob.es/virtuoso/sparql :: Endpoint SPARQL sobre el catálogo DCAT
+! Añadir .json, .xml, .csv o .rdf al final de la ruta fuerza el formato; sin extensión negocia por Accept.
+! _pageSize máximo 50; usar _page para paginar y _sort para ordenar.
+! Es un catálogo de metadatos, no de datos; las URLs de descarga (accessURL) apuntan al organismo origen y pueden estar rotas.
+! Muchos datasets autonómicos y locales solo existen aquí como metadatos federados del portal de origen.
+related: dir3-directorio, transparencia-portal
+
+## dir3-directorio
+DIR3 – Directorio Común de Unidades Orgánicas y Oficinas | Secretaría General de Administración Digital
+summary: Inventario oficial de todas las unidades orgánicas, organismos y oficinas de registro y atención de las Administraciones españolas con código DIR3 único, jerarquía y estado. Es la clave que usan facturación electrónica (FACe), contratación, subvenciones y notificaciones.
+access: download, api-soap | auth: none | formats: csv, xlsx, xml | update: daily | status: active | verified: pending
+coverage: Vigente e histórico de unidades extinguidas
+license: Reutilización libre con cita de la fuente
+base_url: https://administracionelectronica.gob.es/ctt/dir3
+docs_url: https://administracionelectronica.gob.es/ctt/dir3/descargas
+- https://administracionelectronica.gob.es/ctt/dir3/descargas :: Descarga de la base completa (unidades y oficinas) en CSV/Excel actualizada a diario
+- https://administracionelectronica.gob.es/ctt/dir3 :: Documentación funcional, esquemas y servicios web SOAP de consulta
+! Los códigos DIR3 tienen formato letra + dígitos (E para Estado, A para CCAA, L para local, U universidades, I instituciones); no son numéricos.
+! Los servicios web SOAP requieren alta previa de la aplicación consumidora; la descarga completa no.
+! Hay unidades extinguidas que conservan código; filtrar por estado vigente.
+related: datos-gob-es-api, bdns-api, placsp-datos-abiertos, face-facturas
+
+## face-facturas
+FACe – Punto general de entrada de facturas electrónicas | Secretaría General de Administración Digital
+summary: Servicios web para presentar y consultar facturas electrónicas (Facturae 3.2.x) a las Administraciones adheridas, directorio de unidades receptoras (DIR3) y estadísticas de facturación.
+access: api-soap, download | auth: certificate | formats: xml, xlsx | update: realtime | status: active | verified: pending
+coverage: 2015-
+license: Servicio administrativo; directorio y estadísticas reutilizables
+base_url: https://face.gob.es/
+docs_url: https://face.gob.es/es/proveedores
+- https://face.gob.es/es/directorio/administraciones :: Directorio de administraciones y unidades DIR3 que reciben por FACe (descargable)
+- https://face.gob.es/es/facturas/estadisticas :: Estadísticas de facturas recibidas
+- https://webservice.face.gob.es/facturasspp2 :: Servicio web SOAP de presentación y consulta (requiere certificado y firma WS-Security)
+! Las facturas deben ir en Facturae 3.2, 3.2.1 o 3.2.2 firmadas con XAdES; otros formatos se rechazan.
+! Cada factura necesita tres códigos DIR3 (oficina contable, órgano gestor, unidad tramitadora) obtenidos del directorio.
+! Existe entorno de pruebas (se-face-webservice) con certificados de prueba.
+related: dir3-directorio
+
+## pag-administracion-gob-es
+Punto de Acceso General – Trámites, sedes y empleo público | Secretaría General de Administración Digital
+summary: Catálogo de procedimientos y servicios de la AGE (SIA), convocatorias de empleo público, directorio de sedes electrónicas y organigramas. Base para localizar el trámite y la sede competentes.
+access: portal, feed | auth: none | formats: html, rss, xlsx | update: daily | status: active | verified: pending
+license: Reutilización libre con cita de la fuente
+base_url: https://administracion.gob.es/
+docs_url: https://administracion.gob.es/pag_Home/empleoBecas/empleo/boletinEmpleoPublico.html
+- https://administracion.gob.es/pag_Home/empleoBecas/empleo/boletinEmpleoPublico.html :: Boletín semanal de empleo público con convocatorias de todas las Administraciones
+- https://administracion.gob.es/pag_Home/atencionCiudadana/OficinasAtencion.html :: Oficinas de asistencia en materia de registro
+- https://administracionelectronica.gob.es/ctt/sia :: SIA, Sistema de Información Administrativa, inventario de procedimientos con código SIA
+! El código SIA identifica cada procedimiento y aparece en sedes, BDNS y notificaciones; el inventario completo se descarga desde el CTT previa solicitud.
+! Las convocatorias de empleo público remiten al BOE; usar la API del BOE para el texto.
+related: boe-api-sumario, dir3-directorio
+
+## transparencia-portal
+Portal de la Transparencia de la AGE | Dirección General de Gobernanza Pública
+summary: Publicidad activa de la AGE: altos cargos y sus retribuciones, agendas, contratos, convenios, subvenciones, presupuestos, informes, y estadísticas de solicitudes de derecho de acceso. Muchos datasets en CSV/XLSX.
+access: portal, download | auth: none | formats: csv, xlsx, pdf, html | update: monthly | status: active | verified: pending
+coverage: 2014-
+license: Reutilización libre con cita de la fuente
+base_url: https://transparencia.gob.es/
+docs_url: https://transparencia.gob.es/transparencia/transparencia_Home/index/Datos-abiertos.html
+- https://transparencia.gob.es/transparencia/transparencia_Home/index/PublicidadActiva/Contratos.html :: Contratos, convenios y encomiendas por ministerio
+- https://transparencia.gob.es/transparencia/transparencia_Home/index/PublicidadActiva/AltosCargos.html :: Altos cargos, retribuciones, agendas y declaraciones de bienes
+- https://transparencia.gob.es/transparencia/transparencia_Home/index/Derecho-de-acceso.html :: Solicitudes de acceso a información pública y sus resoluciones
+! Los datasets se publican por ministerio y trimestre en ficheros separados; agregarlos requiere normalizar nombres de organismos (usar DIR3).
+! Las agendas de altos cargos son HTML por persona; no hay descarga masiva.
+! El derecho de acceso se ejerce vía Cl@ve; las resoluciones se publican sin datos del solicitante.
+related: datos-gob-es-api, dir3-directorio, bdns-api
+
+# SECTOR territorio-cartografia: Territorio, catastro y cartografía
+
+## catastro-ovc
+Catastro – Servicios web de la Oficina Virtual (OVC) e INSPIRE | Dirección General del Catastro
+summary: Consulta de referencias catastrales por dirección, coordenadas o RC; datos no protegidos de inmuebles (superficie, uso, año); cartografía parcelaria vectorial vía INSPIRE (WFS/ATOM) y WMS. Sin autenticación para datos no protegidos; titularidad y valor requieren certificado.
+access: api-rest, api-soap, ogc, download | auth: none | formats: json, xml, gml, shp, dxf, png | update: daily | status: active | verified: pending
+coverage: Territorio de régimen común (excluye País Vasco y Navarra, con catastros forales propios)
+license: Reutilización libre con cita de la fuente (licencia Catastro)
+base_url: https://ovc.catastro.meh.es/
+docs_url: https://www.catastro.hacienda.gob.es/esp/ws_serviciosweb.asp
+- https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPRC?RefCat={RC} :: Datos no protegidos de un inmueble por referencia catastral (JSON)
+  ej: curl -s "https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPRC?RefCat=9872023VH5797S0001WX"
+- https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPLOC?Provincia={p}&Municipio={m}&TipoVia={tv}&NombreVia={nv}&Numero={n} :: Inmuebles por dirección postal
+- https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS=EPSG:4326&Coordenada_X={lon}&Coordenada_Y={lat} :: Referencia catastral a partir de coordenadas
+- https://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx?service=wfs&request=getfeature&STOREDQUERIE_ID=GetParcel&refcat={RC}&srsname=EPSG::25830 :: Geometría de una parcela (GML INSPIRE Cadastral Parcels)
+- https://ovc.catastro.meh.es/Cartografia/WMS/ServidorWMS.aspx :: WMS de cartografía catastral
+- https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/ES.SDGC.CP.atom.xml :: Descarga masiva INSPIRE por municipio (parcelas, edificios, direcciones) vía ATOM
+! Los códigos de provincia y municipio del Catastro no son los del INE; la API expone Consulta_Municipio para obtenerlos.
+! Titulares, valor catastral y planos detallados solo por Sede Electrónica con certificado o Cl@ve.
+! El servicio JSON devuelve estructuras anidadas con claves abreviadas (consulta_dnprcResult, bico, bi, dt); mirar el XML equivalente para entender campos.
+! Cartografía en EPSG:25829/25830/25831 según huso; Canarias en 32628. El WFS INSPIRE acepta EPSG:4326 pero devuelve en UTM.
+! Límite práctico de peticiones por IP no documentado; descargas masivas mejor por los ficheros ATOM municipales.
++ Para geocodificar direcciones es más robusto CartoCiudad (cnig-centro-descargas) y luego pedir la RC por coordenadas al Catastro.
+related: ine-codigos-territoriales, cnig-centro-descargas, idee-servicios
+
+## cnig-centro-descargas
+IGN/CNIG – Centro de Descargas de cartografía y geodatos | Instituto Geográfico Nacional / Centro Nacional de Información Geográfica
+summary: Descarga gratuita de toda la producción del IGN: ortofotos PNOA, modelos digitales del terreno, LiDAR, mapas topográficos, límites municipales oficiales, redes de transporte, SIOSE, nomenclátor geográfico. Servicios WMS/WMTS.
+access: download, ogc, api-rest | auth: none | formats: shp, gpkg, geotiff, laz, ecw, pdf, jpg, kml | update: irregular | status: active | verified: pending
+coverage: Cartografía histórica desde 1875; PNOA desde 2004
+license: CC BY 4.0 (licencia IGN compatible)
+base_url: https://centrodedescargas.cnig.es/CentroDescargas/
+docs_url: https://www.ign.es/web/ign/portal/ide-area-nodo-ide-ign
+- https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie=LILIM :: Líneas límite municipales, provinciales y autonómicas oficiales
+- https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie=MDT05 :: Modelo digital del terreno de 5 m
+- https://www.ign.es/wms-inspire/pnoa-ma?SERVICE=WMS&REQUEST=GetCapabilities :: WMS de ortofotos PNOA máxima actualidad
+- https://www.ign.es/wmts/pnoa-ma?SERVICE=WMTS&REQUEST=GetCapabilities :: WMTS teselado de PNOA
+- https://www.ign.es/wms-inspire/ign-base?SERVICE=WMS&REQUEST=GetCapabilities :: WMS del mapa base IGN
+- https://www.cartociudad.es/geocoder/api/geocoder/findJsonp?q={direccion} :: Geocodificador CartoCiudad (direcciones, topónimos, referencias catastrales)
+  ej: curl -s "https://www.cartociudad.es/geocoder/api/geocoder/findJsonp?q=Calle%20Alcala%2050%20Madrid"
+! Las descargas masivas del Centro de Descargas exigen aceptar la licencia por sesión; para automatizar usar los servicios ATOM/WFS del IGN o pedir acceso a la API de descargas.
+! Los límites municipales del IGN son la geometría oficial; los del Catastro difieren en zonas.
+! El geocoder devuelve JSONP aunque el nombre del endpoint lo indique; hay que quitar el callback o usar el endpoint find.
+! Sistema de referencia oficial ETRS89 (EPSG:4258 geográficas, 258xx UTM); Canarias REGCAN95.
+related: idee-servicios, catastro-ovc
+
+## idee-servicios
+IDEE – Infraestructura de Datos Espaciales de España | Consejo Superior Geográfico / CNIG
+summary: Catálogo de servicios geográficos interoperables de todas las Administraciones (más de 3.000 WMS, WFS, WMTS, CSW) y directorio de nodos IDE. Punto de partida para localizar cualquier capa geográfica oficial.
+access: ogc, api-rest, portal | auth: none | formats: xml, gml, geojson, json | update: daily | status: active | verified: pending
+license: Metadatos libres; cada servicio con su licencia
+base_url: https://www.idee.es/
+docs_url: https://www.idee.es/web/idee/directorio-de-servicios
+- https://www.idee.es/csw-inspire-idee/srv/spa/csw?SERVICE=CSW&REQUEST=GetCapabilities :: Catálogo CSW de metadatos INSPIRE
+- https://www.idee.es/web/idee/directorio-de-servicios :: Directorio navegable de servicios OGC por tema y organismo
+! Muchos servicios listados son autonómicos o locales y tienen disponibilidad irregular; comprobar GetCapabilities antes de depender de ellos.
+! El CSW usa perfil INSPIRE con esquemas ISO 19139; las búsquedas por texto libre van en el filtro AnyText.
+related: cnig-centro-descargas, catastro-ovc
+
+# SECTOR meteorologia-clima: Meteorología y clima
+
+## aemet-opendata
+AEMET OpenData – API meteorológica y climatológica | Agencia Estatal de Meteorología (AEMET)
+summary: Predicciones por municipio, observación horaria de estaciones, valores climatológicos diarios y normales, avisos, radar, satélite, índice UV, predicción marítima y de montaña. API REST con clave gratuita.
+access: api-rest | auth: api-key | formats: json, xml, csv, png | update: hourly | status: active | verified: pending
+coverage: Climatología diaria desde 1920 según estación
+license: Reutilización libre con cita de la fuente (aviso legal AEMET)
+base_url: https://opendata.aemet.es/opendata/api
+docs_url: https://opendata.aemet.es/dist/index.html
+- /prediccion/especifica/municipio/diaria/{cod_municipio_ine} :: Predicción diaria a 7 días para un municipio
+  ej: curl -s "https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/28079?api_key=$AEMET_KEY"
+- /prediccion/especifica/municipio/horaria/{cod_municipio_ine} :: Predicción horaria a 48 h
+- /observacion/convencional/todas :: Últimas 24 h de observación de todas las estaciones
+- /observacion/convencional/datos/estacion/{idema} :: Observación de una estación
+- /valores/climatologicos/inventarioestaciones/todasestaciones :: Inventario de estaciones con idema y coordenadas
+- /valores/climatologicos/diarios/datos/fechaini/{AAAA-MM-DDTHH:MM:SSUTC}/fechafin/{...}/estacion/{idema} :: Climatología diaria de una estación en un rango
+  ej: curl -s "https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2024-01-01T00:00:00UTC/fechafin/2024-01-31T23:59:59UTC/estacion/3195?api_key=$AEMET_KEY"
+- /avisos_cap/ultimoelaborado/area/{area} :: Avisos meteorológicos en formato CAP
+rate_limit: Aprox. 50 peticiones por minuto por clave; la clave caduca si no se usa en 3 meses
+! Toda llamada responde con un JSON intermedio que contiene la URL real en el campo datos; hay que hacer una segunda petición a esa URL.
+! La clave se pasa como parámetro api_key o cabecera api_key; se solicita en opendata.aemet.es/centrodedescargas/altaUsuario y llega por correo.
+! El código de municipio es el INE de 5 dígitos sin dígito de control (Madrid 28079).
+! Rango máximo de climatología diaria por petición de 6 meses (5 años en versiones recientes); dividir rangos largos.
+! Los ficheros de datos devuelven codificación Latin-1 en algunos endpoints; el JSON declara ISO-8859-15.
+! Los decimales usan coma como separador en climatología (campo tmed "12,3").
++ Envolver siempre las dos peticiones (metadatos y datos) en una función; el JSON intermedio trae estado 200 aunque falle la segunda.
++ Cachear el inventario de estaciones; cambia raramente y evita gastar cuota.
+related: ine-codigos-territoriales, miteco-saih-boletin-hidrologico
+
+## aemet-otros-servicios
+AEMET – Datos de radiación, ozono, polen y modelos numéricos | Agencia Estatal de Meteorología (AEMET)
+summary: Complementos fuera de la API principal: descargas de salidas de modelos numéricos, series climáticas homogeneizadas, radiación solar, ozono y datos históricos en ficheros. Acceso vía portal y FTP anónimo.
+access: download, portal | auth: none | formats: csv, grib, netcdf, pdf, txt | update: daily | status: active | verified: pending
+license: Reutilización libre con cita de la fuente (aviso legal AEMET)
+base_url: https://www.aemet.es/es/datos_abiertos
+docs_url: https://www.aemet.es/es/datos_abiertos/AEMET_OpenData
+- https://www.aemet.es/es/serviciosclimaticos/datosclimatologicos :: Servicios climáticos, valores normales, efemérides y series homogeneizadas
+- https://www.aemet.es/es/serviciosclimaticos/cambio_climat/result_graficos :: Proyecciones regionalizadas de cambio climático (escenarios PNACC)
+! Las salidas de modelos (HARMONIE-AROME) se distribuyen en GRIB2 y requieren eccodes o cfgrib para leerlas.
+! Las proyecciones climáticas se descargan por variable y escenario en ficheros grandes, sin API.
+related: aemet-opendata
+
+# SECTOR medio-ambiente-agua-biodiversidad: Medio ambiente, agua y biodiversidad
+
+## miteco-banco-datos-naturaleza
+MITECO – Banco de Datos de la Naturaleza e Inventario del Patrimonio Natural | Dirección General de Biodiversidad, Bosques y Desertificación
+summary: Cartografía y datos de biodiversidad: Red Natura 2000, espacios naturales protegidos, hábitats, distribución de especies (cuadrículas 10x10 km), Inventario Forestal Nacional, Mapa Forestal, humedales, vías pecuarias. Descarga de capas y servicios WMS/WFS.
+access: download, ogc, portal | auth: none | formats: shp, gpkg, geojson, xlsx, pdf, xml | update: irregular | status: active | verified: pending
+coverage: Inventario Forestal desde 1966; especies según atlas
+license: Reutilización libre con cita de la fuente
+base_url: https://www.miteco.gob.es/es/biodiversidad/servicios/banco-datos-naturaleza.html
+docs_url: https://www.miteco.gob.es/es/biodiversidad/servicios/banco-datos-naturaleza/informacion-disponible.html
+- https://www.miteco.gob.es/es/biodiversidad/servicios/banco-datos-naturaleza/informacion-disponible.html :: Catálogo de capas descargables por tema
+- https://wms.mapama.gob.es/sig/Biodiversidad/RedNatura/wms.aspx?SERVICE=WMS&REQUEST=GetCapabilities :: WMS de Red Natura 2000
+- https://iepnb.gob.es/ :: Inventario Español del Patrimonio Natural y de la Biodiversidad, con catálogo y visor
+! Las capas se sirven en ETRS89 UTM por husos o en geográficas según capa; unificar antes de cruzar.
+! Los datos de especies protegidas sensibles se publican con resolución degradada.
+! Ocurrencias puntuales de especies están en GBIF a través del nodo español (ficha gbif-es).
+related: gbif-es, cnig-centro-descargas
+
+## miteco-calidad-aire
+MITECO – Calidad del aire (datos oficiales de estaciones) | Dirección General de Calidad y Evaluación Ambiental
+summary: Datos horarios validados de contaminantes (NO2, PM10, PM2.5, O3, SO2, CO) de todas las estaciones de las redes autonómicas y locales, por año, e inventario de estaciones. Ficheros anuales por contaminante.
+access: download, portal | auth: none | formats: csv, xlsx, xml | update: annual | status: active | verified: pending
+coverage: 2001-
+license: Reutilización libre con cita de la fuente
+base_url: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/calidad-del-aire/evaluacion-datos/datos.html
+docs_url: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/calidad-del-aire/evaluacion-datos/datos.html
+- https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/calidad-del-aire/evaluacion-datos/datos.html :: Datos oficiales validados por año y contaminante, e inventario de estaciones
+- https://sig.mapama.gob.es/calidad-aire/ :: Visor SIG de calidad del aire con datos en tiempo casi real
+! Los datos validados llegan con más de un año de retraso; para tiempo real hay que ir a cada red autonómica o al visor.
+! Los ficheros usan un código de estación de 8 dígitos (provincia, municipio, número) y el contaminante por código numérico europeo.
+! Formato de ancho fijo en años antiguos y CSV en recientes; los valores -9999 o V/N marcan validez.
+related: miteco-prtr, aemet-opendata
+
+## miteco-prtr
+PRTR-España – Registro Estatal de Emisiones y Fuentes Contaminantes | Dirección General de Calidad y Evaluación Ambiental
+summary: Emisiones anuales a aire, agua y suelo y transferencias de residuos de cada complejo industrial afectado (más de 6.000 instalaciones), por sustancia química y actividad. Consulta y descarga por complejo, sustancia y año.
+access: portal, download | auth: none | formats: xlsx, csv, html | update: annual | status: active | verified: pending
+coverage: 2001-
+license: Reutilización libre con cita de la fuente
+base_url: https://prtr-es.es/
+docs_url: https://prtr-es.es/informes/descargas.aspx
+- https://prtr-es.es/informes/descargas.aspx :: Descarga de datos completos por año
+- https://prtr-es.es/Informes/InventarioInstalacionesIPPC.aspx :: Inventario de instalaciones con coordenadas y actividad
+! Solo se publican emisiones que superan umbrales por sustancia; ausencia no significa emisión cero.
+! Los datos del año N se publican en el segundo semestre de N+1 tras validación.
+! Sustancias identificadas por código PRTR europeo, no CAS; existe tabla de equivalencia en el portal.
+related: miteco-calidad-aire
+
+## miteco-saih-boletin-hidrologico
+MITECO – Boletín hidrológico, embalses y redes SAIH | Dirección General del Agua
+summary: Reserva hídrica semanal por embalse y cuenca, boletín hidrológico, redes SAIH de las confederaciones (caudales, niveles, pluviometría en tiempo real) e indicadores de sequía. Datos históricos desde 1988.
+access: download, portal | auth: none | formats: xlsx, csv, pdf, html | update: weekly | status: active | verified: pending
+coverage: 1988-
+license: Reutilización libre con cita de la fuente
+base_url: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico.html
+docs_url: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico.html
+- https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico.html :: Boletín hidrológico semanal con datos por embalse
+- https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/historico-de-boletines.html :: Histórico de boletines y ficheros de reserva por embalse
+- https://sig.mapama.gob.es/redes-seguimiento/ :: Visor de redes de seguimiento del estado de las aguas
+! Cada confederación hidrográfica (Ebro, Tajo, Duero, Guadalquivir...) tiene su propio SAIH con web y formatos distintos; el ministerio solo agrega el semanal.
+! El histórico por embalse se publica como base de datos Access/Excel con códigos de embalse propios.
+! Los datos semanales se refieren al martes de cada semana.
+related: aemet-opendata, miteco-calidad-aire
+
+# SECTOR energia: Energía
+
+## cnmc-data
+CNMC Data – Estadísticas de energía, telecomunicaciones y audiovisual | Comisión Nacional de los Mercados y la Competencia (CNMC)
+summary: Portal de datos abiertos de la CNMC: mercado eléctrico y gasista (comercializadoras, cambios de suministrador, precios, autoconsumo), telecomunicaciones (líneas, ingresos, cuotas por operador), audiovisual y postal. Descarga por indicador con API CKAN.
+access: portal, download, api-rest | auth: none | formats: csv, xlsx, json | update: quarterly | status: active | verified: pending
+coverage: 2010- según indicador
+license: CC BY 4.0
+base_url: https://data.cnmc.es/
+docs_url: https://data.cnmc.es/
+- https://data.cnmc.es/energia :: Datasets de electricidad y gas
+- https://data.cnmc.es/telecomunicaciones :: Datasets de telecomunicaciones (trimestrales y anuales)
+- https://data.cnmc.es/api/3/action/package_search?q={texto} :: API CKAN de búsqueda de datasets
+  ej: curl -s "https://data.cnmc.es/api/3/action/package_search?q=comercializadoras"
+! El portal es CKAN; la API estándar package_show y datastore_search funcionan para la mayoría de datasets.
+! Los datos de precios de electricidad para consumidores se publican con desfase de dos trimestres.
+! Los datos de operación del sistema eléctrico (demanda, generación en tiempo real) no están aquí sino en Red Eléctrica (empresa participada, fase posterior).
+related: minetur-precios-carburantes
+
+## minetur-precios-carburantes
+Geoportal de gasolineras – API de precios de carburantes | Secretaría de Estado de Energía
+summary: Precios diarios de todos los carburantes en todas las estaciones de servicio de España con coordenadas, dirección, horario y rótulo. API REST JSON sin autenticación, también histórico por fecha.
+access: api-rest | auth: none | formats: json, xml | update: daily | status: active | verified: pending
+coverage: 2007- (histórico por fecha)
+license: Reutilización libre con cita de la fuente
+base_url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes
+docs_url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/help
+- /EstacionesTerrestres/ :: Todas las estaciones terrestres con precios del día
+  ej: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/"
+- /EstacionesTerrestres/FiltroProvincia/{id_provincia} :: Estaciones de una provincia (código INE de 2 dígitos)
+  ej: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroProvincia/28"
+- /EstacionesTerrestres/FiltroMunicipio/{id_municipio} :: Estaciones de un municipio (id propio, ver Listados/Municipios)
+- /EstacionesTerrestresHist/{DD-MM-AAAA} :: Histórico de un día concreto
+- /Listados/Municipios/ y /Listados/Provincias/ y /Listados/ProductosPetroliferos/ :: Tablas de códigos usadas por los filtros
+! Los precios y coordenadas vienen como texto con coma decimal ("1,459"); convertir antes de operar.
+! El id de municipio es propio de la aplicación, no el INE; obtenerlo de /Listados/Municipios/.
+! Precio vacío significa que la estación no vende ese producto.
+! La respuesta completa pesa más de 10 MB; filtrar por provincia si no se necesita todo.
+related: cnmc-data, ine-codigos-territoriales
+
+## miteco-energia-estadisticas
+MITECO – Balances energéticos, hidrocarburos y registro de instalaciones | Secretaría de Estado de Energía
+summary: Balances energéticos anuales, estadísticas de hidrocarburos (consumo de productos petrolíferos y gas por provincia, vía CORES), registro administrativo de instalaciones de producción eléctrica, autoconsumo y planes energéticos.
+access: portal, download | auth: none | formats: xlsx, pdf, csv | update: monthly | status: active | verified: pending
+coverage: 1990-
+license: Reutilización libre con cita de la fuente
+base_url: https://energia.gob.es/
+docs_url: https://energia.gob.es/balances/Publicaciones/Paginas/Publicaciones.aspx
+- https://energia.gob.es/balances/Balances/Paginas/Balances.aspx :: Balances energéticos y libros de la energía
+- https://www.cores.es/es/estadisticas :: CORES, estadísticas mensuales de consumo de productos petrolíferos y gas
+- https://sede.serviciosmin.gob.es/es-es/datosabiertos/Paginas/Index.aspx :: Datos abiertos de la sede del ministerio (registro de instalaciones, etc.)
+! La web de energía cambió de dominio varias veces (minetur, mincotur, miteco, energia.gob.es); enlaces antiguos rotos.
+! CORES es una corporación de derecho público con datos propios; los consumos provinciales son su fuente primaria.
+related: cnmc-data, minetur-precios-carburantes
+
+# SECTOR sanidad-medicamentos: Sanidad y medicamentos
+
+## aemps-cima-api
+AEMPS CIMA – API REST de medicamentos autorizados | Agencia Española de Medicamentos y Productos Sanitarios (AEMPS)
+summary: Todos los medicamentos autorizados en España: composición, principios activos, código ATC, código nacional, ficha técnica y prospecto en HTML/PDF, estado de comercialización, problemas de suministro, laboratorio. API REST JSON sin autenticación.
+access: api-rest, download | auth: none | formats: json, xml, pdf, html | update: daily | status: active | verified: pending
+coverage: Medicamentos autorizados vigentes y revocados
+license: Reutilización libre con cita de la fuente
+base_url: https://cima.aemps.es/cima/rest
+docs_url: https://cima.aemps.es/cima/publico/nomenclator.html
+- /medicamentos?nombre={texto}&pagina={n} :: Búsqueda de medicamentos por nombre, principio activo, laboratorio, ATC (parámetros combinables)
+  ej: curl -s "https://cima.aemps.es/cima/rest/medicamentos?nombre=ibuprofeno&pagina=1"
+- /medicamento?cn={codigo_nacional} :: Detalle de un medicamento por código nacional (o nregistro=)
+  ej: curl -s "https://cima.aemps.es/cima/rest/medicamento?cn=654210"
+- /presentaciones?cn={cn} :: Presentaciones comerciales
+- /psuministro :: Problemas de suministro activos
+  ej: curl -s "https://cima.aemps.es/cima/rest/psuministro"
+- /docSegmentado/contenido/1?nregistro={nreg} :: Ficha técnica segmentada por secciones (1 ficha técnica, 2 prospecto)
+- /maestras?maestra={id} :: Tablas maestras (1 principios activos, 3 formas farmacéuticas, 4 vías, 6 laboratorios, 7 ATC...)
+- https://cima.aemps.es/cima/publico/nomenclator.html :: Nomenclátor de prescripción, descarga completa mensual en XML
+! Paginación de 25 resultados por página con el parámetro pagina; el total va en el campo totalFilas.
+! Los parámetros de búsqueda por principio activo (practiv1) y ATC (atc) aceptan códigos parciales.
+! El código nacional (cn) identifica la presentación; el nregistro identifica el medicamento. Un medicamento tiene varias presentaciones.
+! Las fichas técnicas en PDF cambian de URL con cada actualización; guardar nregistro y regenerar la URL.
+! Documentación técnica completa en el PDF "CIMA REST API" enlazado desde la página de nomenclátor.
++ Para un maestro completo de medicamentos descargar el nomenclátor XML mensual en vez de paginar la API.
+related: sanidad-portal-estadistico, aemps-otros-registros
+
+## aemps-otros-registros
+AEMPS – Registro de ensayos clínicos, productos sanitarios y cosméticos | Agencia Española de Medicamentos y Productos Sanitarios (AEMPS)
+summary: Registro Español de Estudios Clínicos (REEC) con búsqueda y ficha por ensayo, distribuidores y fabricantes de productos sanitarios, alertas de seguridad y calidad, notas informativas y datos de farmacovigilancia.
+access: portal, feed | auth: none | formats: html, pdf, rss, xlsx | update: daily | status: active | verified: pending
+coverage: REEC desde 2013
+license: Reutilización libre con cita de la fuente
+base_url: https://www.aemps.gob.es/
+docs_url: https://reec.aemps.es/
+- https://reec.aemps.es/reec/public/web.html :: Buscador del Registro Español de Estudios Clínicos
+- https://www.aemps.gob.es/informa/ :: Notas informativas y alertas (medicamentos, productos sanitarios, cosméticos), con RSS
+- https://www.aemps.gob.es/medicamentos-de-uso-humano/farmacovigilancia-de-medicamentos-de-uso-humano/ :: Farmacovigilancia y acceso a datos de notificaciones
+! El REEC es una aplicación JavaScript con API interna no documentada; los datos completos de ensayos europeos están en CTIS/EU CTR.
+! Las alertas de productos sanitarios se publican como PDF individuales sin identificador estructurado.
+related: aemps-cima-api
+
+## isciii-cne
+ISCIII – Centro Nacional de Epidemiología y vigilancia (RENAVE, SiVIRA) | Instituto de Salud Carlos III (ISCIII)
+summary: Vigilancia epidemiológica nacional: boletines semanales de enfermedades de declaración obligatoria, sistema SiVIRA de infecciones respiratorias, MoMo (exceso de mortalidad diario), datos históricos COVID-19 por provincia.
+access: portal, download | auth: none | formats: csv, xlsx, pdf, html | update: weekly | status: active | verified: pending
+coverage: EDO desde 1997; MoMo desde 2015; COVID 2020-2023
+license: Reutilización libre con cita de la fuente
+base_url: https://cne.isciii.es/
+docs_url: https://cne.isciii.es/servicios/renave
+- https://momo.isciii.es/panel_momo/ :: Panel MoMo de exceso de mortalidad con descarga de datos diarios
+- https://cnecovid.isciii.es/covid19/ :: Datos históricos COVID-19 por provincia, edad y sexo (CSV)
+- https://cne.isciii.es/servicios/renave/boletines :: Boletines epidemiológicos semanales
+! Los CSV COVID dejaron de actualizarse en 2023 pero siguen disponibles como histórico.
+! MoMo publica estimaciones que se revisan retrospectivamente; las últimas semanas cambian.
+related: sanidad-portal-estadistico
+
+## sanidad-portal-estadistico
+Ministerio de Sanidad – Portal Estadístico y Sistema de Información Sanitaria | Secretaría General de Salud Digital, Información e Innovación del SNS
+summary: Portal Estadístico del SNS: altas hospitalarias (RAE-CMBD), Indicadores Clave del SNS, gasto sanitario, recursos y actividad de hospitales y atención primaria (SIAP), consumo farmacéutico, encuestas de salud, catálogo de hospitales y centros. Consulta interactiva y descarga.
+access: portal, download | auth: none | formats: xlsx, csv, pdf, html | update: annual | status: active | verified: pending
+coverage: CMBD desde 1997; indicadores según serie
+license: Reutilización libre con cita de la fuente
+base_url: https://pestadistico.inteligenciadegestion.sanidad.gob.es/
+docs_url: https://www.sanidad.gob.es/estadEstudios/portada/home.htm
+- https://pestadistico.inteligenciadegestion.sanidad.gob.es/publicoSNS/ :: Consulta interactiva de cubos estadísticos del SNS
+- https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/home.htm :: Sistema de Información Sanitaria, publicaciones y descargas
+- https://www.sanidad.gob.es/ciudadanos/prestaciones/centrosServiciosSNS/hospitales/home.htm :: Catálogo Nacional de Hospitales (descargable)
+- https://www.sanidad.gob.es/estadEstudios/estadisticas/estadisticas/estMinisterio/mortalidad/mortalidad.htm :: Mortalidad por causa (a partir de datos del INE)
+! Los microdatos del CMBD se solicitan formalmente y se entregan anonimizados; no hay descarga directa.
+! El Portal Estadístico usa cubos OLAP con exportación por consulta, sin API.
+! La vigilancia epidemiológica (RENAVE, gripe, COVID) la publica el ISCIII, no el ministerio (ficha isciii-cne).
+related: isciii-cne, aemps-cima-api
+
+# SECTOR ciencia-investigacion: Ciencia e investigación (biología, química, geología, oceanografía)
+
+## aei-convocatorias
+AEI – Convocatorias y proyectos financiados de I+D+i | Agencia Estatal de Investigación (AEI)
+summary: Convocatorias del Plan Estatal de I+D+i, resoluciones de concesión con proyectos financiados (referencia, IP, entidad, importe), y datos de ayudas concedidas. Publicadas como PDF y Excel por convocatoria.
+access: portal, download | auth: none | formats: pdf, xlsx, html | update: irregular | status: active | verified: pending
+coverage: 2008- (Plan Nacional y Estatal)
+license: Reutilización libre con cita de la fuente
+base_url: https://www.aei.gob.es/
+docs_url: https://www.aei.gob.es/convocatorias/buscador-convocatorias
+- https://www.aei.gob.es/convocatorias/buscador-convocatorias :: Buscador de convocatorias y sus resoluciones
+- https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas :: Buscador de ayudas concedidas por convocatoria y entidad
+! Las resoluciones de concesión están en PDF con tablas; el Excel solo existe en algunas convocatorias.
+! Toda ayuda de la AEI aparece también en la BDNS con más estructura; usar bdns-api para automatizar.
+! Las referencias de proyecto (p. ej. PID2021-123456OB-I00) son la clave para cruzar con publicaciones en RECOLECTA.
+related: bdns-api, fecyt-recolecta
+
+## csic-digital
+Digital.CSIC – Repositorio institucional del CSIC (OAI-PMH) | Consejo Superior de Investigaciones Científicas (CSIC)
+summary: Más de 300.000 publicaciones, datasets y documentos científicos del CSIC en acceso abierto (biología, química, física, ciencias sociales). Cosechable por OAI-PMH y consultable por API REST DSpace.
+access: oai-pmh, api-rest, portal | auth: none | formats: xml, json, pdf | update: daily | status: active | verified: pending
+coverage: Publicaciones desde 1900; repositorio desde 2008
+license: Metadatos CC0; contenidos según licencia de cada ítem
+base_url: https://digital.csic.es/
+docs_url: https://digital.csic.es/dspace-oai/request?verb=Identify
+- https://digital.csic.es/dspace-oai/request?verb=ListRecords&metadataPrefix=oai_dc&set={coleccion} :: Cosecha OAI-PMH en Dublin Core
+  ej: curl -s "https://digital.csic.es/dspace-oai/request?verb=Identify"
+- https://digital.csic.es/rest/ :: API REST DSpace (ítems, colecciones, búsqueda)
+! Los sets OAI corresponden a institutos del CSIC (com_10261_xxx); listarlos con verb=ListSets.
+! Tras la migración a DSpace 7 la API REST cambió de esquema; comprobar la versión en /server/api.
+! Digital.CSIC está agregado en RECOLECTA (FECYT), que permite cosechar todos los repositorios españoles de una vez.
+related: gbif-es, fecyt-recolecta
+
+## fecyt-recolecta
+FECYT – RECOLECTA y recursos de ciencia abierta | Fundación Española para la Ciencia y la Tecnología (FECYT)
+summary: Agregador nacional de repositorios científicos de acceso abierto (universidades, CSIC, OPIs) cosechable por OAI-PMH, más indicadores del sistema español de ciencia (ICONO) y encuestas de percepción social de la ciencia.
+access: oai-pmh, portal, download | auth: none | formats: xml, xlsx, pdf, csv | update: weekly | status: active | verified: pending
+coverage: RECOLECTA desde 2007
+license: Metadatos libres; datos FECYT con cita de la fuente
+base_url: https://recolecta.fecyt.es/
+docs_url: https://recolecta.fecyt.es/
+- https://recolecta.fecyt.es/oai?verb=Identify :: Endpoint OAI-PMH agregado de todos los repositorios españoles
+- https://icono.fecyt.es/ :: ICONO, observatorio de indicadores de I+D+i con descargas
+! Cosechar RECOLECTA completo son millones de registros; usar from y until para incrementales.
+! Los metadatos siguen OpenAIRE Guidelines; los campos de financiación (projectID) permiten cruzar con la AEI.
+related: csic-digital, aei-convocatorias
+
+## gbif-es
+GBIF España – Ocurrencias de biodiversidad (nodo nacional, CSIC) | Nodo Nacional de GBIF en España (Unidad de Coordinación GBIF.ES, CSIC)
+summary: Más de 50 millones de registros de presencia de especies en España (colecciones, herbarios, observaciones) publicados por instituciones españolas en Darwin Core. Accesibles vía la API global de GBIF filtrando por país o publicador, y por el portal nacional.
+access: api-rest, download, portal | auth: none | formats: json, csv, zip | update: daily | status: active | verified: pending
+coverage: Registros históricos desde el siglo XVIII hasta hoy
+license: CC0, CC BY o CC BY-NC según dataset
+base_url: https://api.gbif.org/v1
+docs_url: https://www.gbif.es/
+- /occurrence/search?country=ES&scientificName={nombre}&limit={n} :: Ocurrencias en España de un taxón
+  ej: curl -s "https://api.gbif.org/v1/occurrence/search?country=ES&scientificName=Lynx%20pardinus&limit=5"
+- /species/match?name={nombre} :: Resolver un nombre científico al taxón GBIF (taxonKey)
+  ej: curl -s "https://api.gbif.org/v1/species/match?name=Quercus%20ilex"
+- /dataset/search?publishingCountry=ES :: Datasets publicados por instituciones españolas
+- https://datos.gbif.es/ :: Portal nacional de datos con visor y descargas
+! La API de búsqueda limita a 100.000 registros por consulta paginada (offset máximo); para más usar descargas asíncronas con cuenta gratuita.
+! Filtrar por country=ES incluye registros de Canarias y Ceuta/Melilla; hay registros marinos fuera de aguas territoriales con country vacío.
+! La calidad de coordenadas varía; usar hasCoordinate=true y hasGeospatialIssue=false.
+related: miteco-banco-datos-naturaleza, csic-digital
+
+## igme-geologia
+IGME-CSIC – Información geológica, hidrogeológica y minera | Instituto Geológico y Minero de España (IGME-CSIC)
+summary: Mapa geológico MAGNA 1:50.000, cartografía geológica continua, bases de datos de aguas subterráneas y puntos de agua, movimientos del terreno, patrimonio geológico, catastro minero histórico. Descarga y servicios WMS/WFS.
+access: download, ogc, portal | auth: none | formats: shp, geotiff, pdf, xlsx, gml | update: irregular | status: active | verified: pending
+coverage: Cartografía desde 1970
+license: Reutilización libre con cita de la fuente
+base_url: https://info.igme.es/
+docs_url: https://info.igme.es/catalogo/
+- https://info.igme.es/catalogo/ :: Catálogo de información geocientífica con descarga
+- https://mapas.igme.es/gis/services/Cartografia_Geologica/IGME_Geode_50/MapServer/WMSServer?REQUEST=GetCapabilities&SERVICE=WMS :: WMS de cartografía geológica continua GEODE 1:50.000
+- https://info.igme.es/BDAguas/ :: Base de datos de puntos de agua subterránea
+! Los servicios ArcGIS Server exponen también REST propio (MapServer/query) además de WMS; más cómodo para JSON.
+! El sismo y la red sísmica los gestiona el IGN, no el IGME (ficha ign-sismologia).
+related: cnig-centro-descargas, ign-sismologia
+
+## ign-sismologia
+IGN – Catálogo sísmico y red de vigilancia volcánica | Instituto Geográfico Nacional (IGN)
+summary: Catálogo de terremotos localizados por la Red Sísmica Nacional desde 1370, últimos sismos en tiempo casi real, mapas de peligrosidad sísmica y vigilancia volcánica de Canarias. Consulta con exportación y feeds.
+access: portal, download, feed | auth: none | formats: csv, txt, xml, kml, pdf | update: realtime | status: active | verified: pending
+coverage: 1370-
+license: Reutilización libre con cita de la fuente
+base_url: https://www.ign.es/web/ign/portal/sis-area-sismicidad
+docs_url: https://www.ign.es/web/ign/portal/sis-catalogo-terremotos
+- https://www.ign.es/web/ign/portal/sis-catalogo-terremotos :: Formulario de consulta del catálogo con exportación a texto/CSV
+- https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/get10dias :: Terremotos de los últimos 10 días
+- https://www.ign.es/ign/resources/sismologia/tproximos/rss/ultimos_terremotos.rss :: Feed RSS de últimos terremotos (alternativa KML en la misma carpeta)
+! El formulario del catálogo limita el número de registros por consulta; dividir por años para descargas masivas.
+! Las magnitudes históricas anteriores a 1920 son intensidades macrosísmicas, no magnitudes instrumentales.
+related: igme-geologia, cnig-centro-descargas
+
+# SECTOR agricultura-pesca-alimentacion: Agricultura, pesca y alimentación
+
+## fega-beneficiarios-pac
+FEGA – Beneficiarios de ayudas de la PAC y datos de pagos | Fondo Español de Garantía Agraria (FEGA)
+summary: Consulta pública y descarga de beneficiarios de la PAC (FEAGA y FEADER) por ejercicio con importe y medida, informes de pagos por CCAA y línea de ayuda, datos abiertos del organismo.
+access: portal, download | auth: none | formats: csv, xlsx, pdf | update: annual | status: active | verified: pending
+coverage: Ejercicios financieros desde 2014 (publicación 2 años)
+license: Reutilización libre con cita de la fuente
+base_url: https://www.fega.gob.es/
+docs_url: https://www.fega.gob.es/es/datos-abiertos
+- https://www.fega.gob.es/es/datos-abiertos/consulta-de-beneficiarios-pac :: Consulta y descarga de beneficiarios por ejercicio
+- https://www.fega.gob.es/es/datos-abiertos :: Conjuntos de datos abiertos del FEGA
+! Por normativa europea los beneficiarios solo se publican durante dos años; los ejercicios antiguos desaparecen del portal.
+! Personas físicas con ayudas por debajo del umbral (1.250 euros) aparecen anonimizadas.
+! Las mismas ayudas están en la BDNS con estructura homogénea (bdns-api).
+related: bdns-api, mapa-estadisticas-agrarias
+
+## mapa-estadisticas-agrarias
+MAPA – Estadísticas agrarias, precios y encuestas | Subdirección General de Análisis, Coordinación y Estadística
+summary: Superficies y producciones por cultivo y provincia, precios percibidos y pagados, precios semanales de mercados (origen y destino), encuesta ESYRCE, efectivos ganaderos, sacrificio, leche, anuario de estadística. Excel y consultas.
+access: portal, download | auth: none | formats: xlsx, pdf, csv, html | update: monthly | status: active | verified: pending
+coverage: 1990-
+license: Reutilización libre con cita de la fuente
+base_url: https://www.mapa.gob.es/es/estadistica/temas/
+docs_url: https://www.mapa.gob.es/es/estadistica/temas/default.aspx
+- https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/agricultura/superficies-producciones-anuales-cultivos/ :: Superficies y producciones anuales por cultivo
+- https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/economia/precios-percibidos-pagados-salarios/ :: Precios percibidos y pagados por los agricultores
+- https://www.mapa.gob.es/es/estadistica/temas/estadisticas-alimentacion/consumo-alimentario/ :: Panel de consumo alimentario en hogares por producto y CCAA
+- https://www.mapa.gob.es/es/estadistica/temas/publicaciones/anuario-de-estadistica/ :: Anuario de Estadística con todas las tablas
+! Los ficheros del anuario están por capítulo y año con nombres no sistemáticos; no automatizable sin scraping del índice.
+! Los precios semanales de mercados se publican también en el Observatorio de Precios con series descargables.
+related: fega-beneficiarios-pac, mapa-sigpac
+
+## mapa-pesca
+MAPA – Pesca, flota, capturas, desembarques y precios en lonja | Secretaría General de Pesca
+summary: Censo de la flota pesquera operativa por buque, estadísticas de capturas y desembarques, ventas en lonja (notas de venta agregadas), acuicultura, y cartografía de caladeros y zonas de pesca.
+access: portal, download | auth: none | formats: xlsx, csv, pdf, shp | update: monthly | status: active | verified: pending
+coverage: 2004-
+license: Reutilización libre con cita de la fuente
+base_url: https://www.mapa.gob.es/es/pesca/temas/
+docs_url: https://www.mapa.gob.es/es/pesca/temas/registro-flota/
+- https://www.mapa.gob.es/es/pesca/temas/registro-flota/censo-flota-pesquera-operativa/ :: Censo de Flota Pesquera Operativa descargable
+- https://www.mapa.gob.es/es/estadistica/temas/estadisticas-pesqueras/ :: Estadísticas pesqueras (capturas, desembarques, acuicultura)
+! El censo de flota se publica con el código CFR europeo por buque, clave para cruzar con el registro de flota de la UE.
+! Las notas de venta individuales no son públicas; solo agregados por especie y puerto.
+related: mapa-estadisticas-agrarias, puertos-estado-datos
+
+## mapa-sigpac
+SIGPAC – Sistema de Información Geográfica de Parcelas Agrícolas | Fondo Español de Garantía Agraria (FEGA) / MAPA
+summary: Recintos agrícolas con uso del suelo, superficie, pendiente y coeficiente de regadío para toda España, actualizados anualmente. Visor, WMS y descarga masiva por provincia y municipio.
+access: ogc, download, portal | auth: none | formats: shp, gpkg, kml, xml | update: annual | status: active | verified: pending
+coverage: 2005-
+license: Reutilización libre con cita de la fuente
+base_url: https://sigpac.mapa.gob.es/fega/visor/
+docs_url: https://www.mapa.gob.es/es/agricultura/temas/sistema-de-informacion-geografica-de-parcelas-agricolas-sigpac-/
+- https://www.mapa.gob.es/es/agricultura/temas/sistema-de-informacion-geografica-de-parcelas-agricolas-sigpac-/descarga.aspx :: Descarga de recintos SIGPAC por provincia y campaña
+- https://sigpac-hubcloud.es/wms?SERVICE=WMS&REQUEST=GetCapabilities :: WMS de recintos y usos SIGPAC
+! La referencia SIGPAC (provincia, municipio, agregado, zona, polígono, parcela, recinto) no es la referencia catastral, aunque comparten polígono y parcela en rústica.
+! Las capas cambian cada campaña; guardar la campaña usada porque los recintos se renumeran.
+! La descarga por CCAA a veces la sirven los servicios autonómicos, no el FEGA.
+related: catastro-ovc, fega-beneficiarios-pac
+
+# SECTOR transporte-movilidad: Transporte y movilidad
+
+## aesa-aviacion
+AESA y Aena – Registro de aeronaves, operadores y tráfico aéreo | Agencia Estatal de Seguridad Aérea (AESA) / Aena SME
+summary: Registro de Matrícula de Aeronaves, operadores y escuelas certificadas, registro de operadores de drones (UAS), estadísticas de tráfico de pasajeros, operaciones y carga por aeropuerto de Aena.
+access: portal, download | auth: none | formats: xlsx, pdf, html, csv | update: monthly | status: active | verified: pending
+coverage: Tráfico Aena desde 2004
+license: Reutilización libre con cita de la fuente
+base_url: https://www.seguridadaerea.gob.es/
+docs_url: https://www.seguridadaerea.gob.es/es/ambitos/aeronaves-y-aeronavegabilidad/matriculacion-de-aeronaves
+- https://www.seguridadaerea.gob.es/es/ambitos/aeronaves-y-aeronavegabilidad/matriculacion-de-aeronaves :: Registro de Matrícula de Aeronaves (consulta y listado)
+- https://www.aena.es/es/estadisticas/inicio.html :: Estadísticas de tráfico aéreo de Aena por aeropuerto y mes
+! Aena es una sociedad mercantil estatal (51 % público) que publica datos por cuenta propia; se incluye por su relevancia.
+! El listado de aeronaves se publica en Excel con fecha; no hay API ni histórico.
+related: dgt-estadisticas
+
+## dgt-datex-trafico
+DGT – Incidencias de tráfico en tiempo real (DATEX II) y cámaras | Dirección General de Tráfico (DGT)
+summary: Incidencias de tráfico (accidentes, obras, retenciones, meteorología adversa) de la red interurbana en formato DATEX II actualizado cada pocos minutos, más cámaras y paneles. Sin autenticación.
+access: download, api-rest | auth: none | formats: xml | update: realtime | status: active | verified: pending
+license: Reutilización libre con cita de la fuente
+base_url: https://infocar.dgt.es/datex2/
+docs_url: https://infocar.dgt.es/datex2/
+- https://infocar.dgt.es/datex2/dgt/SituationPublication/all/content.xml :: Todas las incidencias activas (DATEX II SituationPublication)
+  ej: curl -s "https://infocar.dgt.es/datex2/dgt/SituationPublication/all/content.xml" | head -50
+- https://infocar.dgt.es/datex2/dgt/PredefinedLocationsPublication/all/content.xml :: Localizaciones predefinidas referenciadas por las incidencias
+! No incluye Cataluña ni País Vasco, que tienen competencia propia de tráfico (Servei Català de Trànsit, Trafikoa).
+! DATEX II versión 2 con esquemas europeos; las coordenadas van en WGS84 dentro de groupOfLocations.
+! Volumen alto de XML; consultar cada 5 minutos como máximo para no ser bloqueado.
+related: dgt-estadisticas
+
+## dgt-estadisticas
+DGT – Estadísticas de parque, matriculaciones, conductores y siniestralidad | Dirección General de Tráfico (DGT)
+summary: Parque de vehículos, matriculaciones y transferencias mensuales (con microdatos diarios por vehículo anonimizado), censo de conductores, accidentes con víctimas (microdatos anuales), sanciones. Portal estadístico y descargas.
+access: portal, download | auth: none | formats: xlsx, csv, txt, pdf | update: monthly | status: active | verified: pending
+coverage: 1990- agregados; microdatos matriculaciones desde 2014
+license: Reutilización libre con cita de la fuente
+base_url: https://www.dgt.es/menusecundario/dgt-en-cifras/
+docs_url: https://www.dgt.es/menusecundario/dgt-en-cifras/
+- https://www.dgt.es/menusecundario/dgt-en-cifras/dgt-en-cifras-resultados/ :: Tablas por tema (vehículos, conductores, accidentes) con descarga
+- https://sedeapl.dgt.gob.es/WEB_IEST_CONSULTA/ :: Portal estadístico IEST con consultas y microdatos de matriculaciones, bajas y transferencias
+! Los microdatos de matriculaciones son ficheros de texto de ancho fijo con diseño de registro en PDF aparte; incluyen marca, modelo, combustible, código INE de municipio.
+! Los microdatos de accidentes se distribuyen anonimizados con retardo de más de un año.
+! Los códigos de municipio de la DGT son INE sin dígito de control.
+related: dgt-datex-trafico, ine-codigos-territoriales
+
+## mitma-opendata-movilidad
+Ministerio de Transportes – Estudio de movilidad con big data (Open Data) | Secretaría General de Transportes y Movilidad
+summary: Matrices diarias de viajes origen-destino entre distritos, municipios y grandes áreas, por hora, distancia y motivo, estimadas a partir de telefonía móvil desde 2020. Ficheros CSV comprimidos diarios y zonificaciones.
+access: download | auth: none | formats: csv, zip, shp, geojson | update: daily | status: active | verified: pending
+coverage: 2020-02 -
+license: Reutilización libre con cita de la fuente
+base_url: https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/opendata-movilidad
+docs_url: https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/opendata-movilidad
+- https://movilidad-opendata.mitma.es/ :: Índice de ficheros diarios por versión de estudio, nivel de zonificación y tipo
+- https://movilidad-opendata.mitma.es/zonificacion/ :: Capas de zonificación (distritos, municipios, GAU) y relación con códigos INE
+! Hay dos estudios con metodologías distintas, 2020-2021 (versión 1) y 2022 en adelante (versión 2); no mezclar series.
+! Cada día son cientos de MB comprimidos en gzip; hay ficheros por distrito, municipio y gran área urbana.
+! Los ids de zona son códigos INE (municipio) o INE + distrito censal; algunos municipios pequeños están agrupados.
+! Existe también un paquete R y Python (spanishoddata) de terceros que facilita la descarga.
+related: ine-codigos-territoriales, dgt-estadisticas
+
+## puertos-estado-datos
+Puertos del Estado – Estadísticas portuarias y datos oceanográficos | Organismo Público Puertos del Estado
+summary: Tráfico mensual de mercancías, contenedores, pasajeros y buques por autoridad portuaria; red de boyas y mareógrafos con datos de oleaje, viento y nivel del mar en tiempo real e histórico (Portus); predicciones de oleaje.
+access: portal, download, api-rest | auth: none | formats: xlsx, csv, json, pdf | update: hourly | status: active | verified: pending
+coverage: Estadísticas desde 1962; oceanografía desde 1990
+license: Reutilización libre con cita de la fuente
+base_url: https://www.puertos.es/
+docs_url: https://www.puertos.es/es-es/estadisticas
+- https://www.puertos.es/es-es/estadisticas/Paginas/estadistica_mensual.aspx :: Estadística mensual de tráfico por puerto
+- https://portus.puertos.es/ :: Portus, datos oceanográficos en tiempo real e históricos por estación
+! Portus es una aplicación web con API interna JSON no documentada; los históricos se piden por formulario y llegan por correo.
+! Las estadísticas mensuales están en Excel por puerto y año con estructura fija desde 2010.
+related: mapa-pesca, aemet-opendata
+
+# SECTOR comercio-industria-propiedad: Comercio exterior, industria y propiedad industrial
+
+## datacomex
+DataComex – Estadísticas de comercio exterior de España | Secretaría de Estado de Comercio
+summary: Exportaciones e importaciones mensuales por producto (TARIC hasta 8 dígitos, CNAE, CUCI), país, provincia y CCAA, en valor y volumen, desde 1995. Consulta multidimensional con exportación a CSV y Excel.
+access: portal, download | auth: none | formats: csv, xlsx, html | update: monthly | status: active | verified: pending
+coverage: 1995-
+license: Reutilización libre con cita de la fuente
+base_url: https://datacomex.comercio.es/
+docs_url: https://datacomex.comercio.es/
+- https://datacomex.comercio.es/ :: Consulta interactiva con selección de dimensiones y descarga
+! Requiere registro gratuito para consultas grandes; las pequeñas funcionan sin cuenta.
+! Los datos provisionales de los últimos meses se revisan; los definitivos llegan con un año de retardo.
+! La fuente primaria es la AEAT (Aduanas); DataComex reorganiza pero no cambia cifras.
+related: datainvex, aeat-estadisticas
+
+## datainvex
+DataInvex – Inversiones exteriores directas | Secretaría de Estado de Comercio
+summary: Flujos y stock de inversión extranjera en España y española en el exterior, por país de origen y destino, sector CNAE y CCAA, a partir del Registro de Inversiones Exteriores. Consulta multidimensional.
+access: portal, download | auth: none | formats: csv, xlsx, html | update: quarterly | status: active | verified: pending
+coverage: 1993-
+license: Reutilización libre con cita de la fuente
+base_url: https://datainvex.comercio.es/
+docs_url: https://datainvex.comercio.es/
+- https://datainvex.comercio.es/ :: Consulta interactiva de flujos y posición de inversión
+! Distingue país inmediato y país último (ETVE, holdings); elegir la dimensión correcta cambia mucho las cifras.
+! No coincide con la balanza de pagos del Banco de España por diferencias metodológicas.
+related: datacomex, bde-estadisticas
+
+## mincotur-industria-turismo
+Ministerio de Industria y Turismo – Estadísticas industriales y de turismo | Secretaría de Estado de Industria / Secretaría de Estado de Turismo (Turespaña)
+summary: Indicadores industriales, Registro Integrado Industrial, y estadísticas de turismo (llegadas FRONTUR, gasto EGATUR, ocupación hotelera, movimientos aeroportuarios) reunidas en DATAESTUR con descarga.
+access: portal, download | auth: none | formats: xlsx, csv, pdf | update: monthly | status: active | verified: pending
+coverage: Turismo desde 2001
+license: Reutilización libre con cita de la fuente
+base_url: https://www.mintur.gob.es/
+docs_url: https://www.dataestur.es/
+- https://www.dataestur.es/ :: DATAESTUR, plataforma de datos turísticos con descargas por indicador
+- https://www.mintur.gob.es/es-ES/IndicadoresyEstadisticas/Paginas/Index.aspx :: Indicadores y estadísticas industriales
+! FRONTUR y EGATUR las produce el INE desde 2015; DATAESTUR redistribuye. Para series largas ir al INE.
+! El dominio del ministerio ha cambiado varias veces (minetur, mincotur, mintur); enlaces antiguos rotos.
+related: ine-api-tempus, miteco-energia-estadisticas
+
+## oepm-invenes
+OEPM – Patentes, marcas y diseños (INVENES, bases de datos) | Oficina Española de Patentes y Marcas (OEPM)
+summary: Bases de datos de patentes y modelos de utilidad (INVENES), marcas y nombres comerciales, diseños industriales, Boletín Oficial de la Propiedad Industrial (BOPI) y estadísticas anuales. Consulta pública y descargas del BOPI.
+access: portal, download | auth: none | formats: html, pdf, xml, xlsx | update: daily | status: active | verified: pending
+coverage: Patentes desde 1826; marcas desde 1880
+license: Reutilización libre con cita de la fuente
+base_url: https://www.oepm.es/
+docs_url: https://www.oepm.es/es/Bases_de_Datos_Invenciones/index.html
+- https://consultas2.oepm.es/InvenesWeb/faces/busquedaInternet.jsp :: INVENES, búsqueda de patentes y modelos de utilidad españoles
+- https://consultas2.oepm.es/LocalizadorWeb/ :: Localizador de marcas, nombres comerciales y diseños
+- https://www.oepm.es/es/sobre_oepm/actividades_estadisticas/estadisticas/ :: Estadísticas anuales de solicitudes y concesiones
+! Las aplicaciones de consulta son JSF con sesión; scraping frágil. Para datos masivos usar Espacenet/OPS (EPO) o TMview (EUIPO), que incluyen los registros españoles.
+! El BOPI se publica en PDF y XML diario; el XML es la vía más limpia para automatizar novedades.
+related: borme-api-sumario
+
+# SECTOR educacion-universidades: Educación y universidades
+
+## educacion-estadisticas-ruct
+Educación y Universidades – Estadísticas (EDUCAbase, SIIU), RUCT y registro de centros | Subdirección General de Estadística y Estudios / Secretaría General de Universidades
+summary: Estadísticas de enseñanza no universitaria (alumnado, profesorado, resultados, gasto) en EDUCAbase con exportación PC-Axis/CSV, estadísticas universitarias (SIIU), Registro de Universidades, Centros y Títulos (RUCT) y Registro Estatal de Centros Docentes no universitarios con datos por centro.
+access: portal, download | auth: none | formats: px, csv, xlsx, pdf, html | update: annual | status: active | verified: pending
+coverage: 1990-
+license: Reutilización libre con cita de la fuente
+base_url: https://www.educacionfpydeportes.gob.es/servicios-al-ciudadano/estadisticas.html
+docs_url: https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm
+- https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm :: EDUCAbase, cubos estadísticos con exportación a CSV, Excel y PC-Axis
+- https://www.educacion.gob.es/ruct/home :: RUCT, universidades, centros y títulos oficiales con código
+- https://www.educacion.gob.es/centros/home.do :: Registro Estatal de Centros Docentes no universitarios (buscador y descarga)
+- https://www.universidades.gob.es/estadisticas-e-informes/ :: Estadísticas universitarias SIIU (matrícula, egresados, PDI, inserción laboral)
+! EDUCAbase es PC-Axis (PX-Web) con API interna de tablas; los ficheros .px se leen con pyaxis o pxweb.
+! Los códigos de centro (8 dígitos) y de título RUCT son las claves estables; los nombres cambian.
+! Las CCAA publican datos más desagregados y recientes que el ministerio.
+related: ine-api-tempus
+
+# SECTOR justicia-interior-seguridad: Justicia, interior y seguridad
+
+## interior-criminalidad
+Ministerio del Interior – Portal Estadístico de Criminalidad | Secretaría de Estado de Seguridad
+summary: Infracciones penales conocidas y esclarecidas, detenciones y víctimas por tipología, trimestre, provincia y municipio de más de 20.000 habitantes (balances trimestrales), más series anuales y cubos consultables.
+access: portal, download | auth: none | formats: xlsx, csv, pdf, html | update: quarterly | status: active | verified: pending
+coverage: 2010- (balances); series anuales anteriores
+license: Reutilización libre con cita de la fuente
+base_url: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/
+docs_url: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/
+- https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/balances.html :: Balances trimestrales de criminalidad con Excel por provincia y municipio
+- https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/datos.html :: Consulta dinámica de cubos (SEC) con exportación
+! No incluye datos de Mossos d'Esquadra ni Ertzaintza salvo en los totales nacionales agregados; el detalle municipal de Cataluña y País Vasco es parcial.
+! La tipología penal cambió con la reforma de 2015; series largas requieren reagrupar.
+! Los datos judiciales (sentencias, juzgados) los publica el CGPJ, fuera del alcance AGE actual.
+related: ine-codigos-territoriales
+
+# SECTOR cultura-patrimonio: Cultura y patrimonio
+
+## bne-datos
+BNE – datos.bne.es (linked data, SPARQL) y Hispana | Biblioteca Nacional de España (BNE) / Ministerio de Cultura
+summary: Catálogo bibliográfico y de autoridades de la BNE como datos enlazados (RDF, SPARQL, JSON), Biblioteca Digital Hispánica y Hemeroteca Digital con OAI-PMH, y Hispana, agregador nacional de repositorios de patrimonio digital (más de 10 millones de objetos) también por OAI-PMH.
+access: sparql, oai-pmh, api-rest, download | auth: none | formats: rdf, ttl, jsonld, json, xml, marc | update: monthly | status: active | verified: pending
+coverage: Fondos desde el siglo XV
+license: CC0 (datos.bne.es); Hispana según repositorio
+base_url: https://datos.bne.es/
+docs_url: https://www.bne.es/es/catalogos/datos-enlazados
+- https://datos.bne.es/sparql :: Endpoint SPARQL sobre obras, autores, ediciones y temas
+- https://datos.bne.es/resource/{id}.jsonld :: Cualquier recurso en JSON-LD, Turtle o RDF/XML cambiando la extensión
+- https://www.bne.es/es/catalogos/datos-enlazados :: Volcados completos RDF y documentación del modelo (FRBR)
+- https://hispana.mcu.es/es/oai :: OAI-PMH de Hispana (Dublin Core y EDM)
+! El modelo es FRBR (obra, expresión, manifestación); un libro es una manifestación enlazada a una obra y un autor.
+! Los ids de datos.bne.es (XX1234567 autoridades, bimo... obras) no son ISBN; el ISBN está como propiedad.
+! La Hemeroteca Digital permite descarga de texto OCR por página pero sin API de búsqueda documentada.
+related: csic-digital
+
+# SECTOR vivienda-urbanismo: Vivienda y urbanismo
+
+## mivau-precios-vivienda-alquiler
+Ministerio de Vivienda – Precios de vivienda, alquiler y estadísticas de vivienda | Dirección General de Vivienda y Suelo
+summary: Sistema Estatal de Referencia del Precio del Alquiler (SERPAVI) por sección censal y municipio, valor tasado de vivienda por municipio, transacciones inmobiliarias, visados de obra, parque de viviendas, precios del suelo.
+access: portal, download | auth: none | formats: xlsx, csv, pdf | update: quarterly | status: active | verified: pending
+coverage: Valor tasado desde 1995; SERPAVI desde 2015 (fiscal)
+license: Reutilización libre con cita de la fuente
+base_url: https://www.mivau.gob.es/vivienda/estadisticas
+docs_url: https://www.mivau.gob.es/vivienda/alquila-bien-es-tu-derecho/serpavi
+- https://www.mivau.gob.es/vivienda/alquila-bien-es-tu-derecho/serpavi :: SERPAVI, índices de alquiler por municipio, distrito y sección censal con descarga
+- https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden=34000000 :: Boletín estadístico online con series de vivienda y suelo (valor tasado, transacciones)
+! SERPAVI se construye con datos fiscales (IRPF) de arrendadores; excluye País Vasco y Navarra y llega con dos años de retardo.
+! El Boletín Online conserva el dominio antiguo fomento.gob.es y redirige de forma inestable.
+! Las transacciones inmobiliarias vienen del Consejo General del Notariado y los precios del Colegio de Registradores; el ministerio agrega.
+related: catastro-ovc, ine-api-tempus, ine-codigos-territoriales

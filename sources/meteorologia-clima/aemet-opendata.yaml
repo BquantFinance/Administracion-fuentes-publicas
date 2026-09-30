@@ -1,0 +1,49 @@
+id: aemet-opendata
+name: AEMET OpenData – API meteorológica y climatológica
+org: Agencia Estatal de Meteorología (AEMET)
+ministry: Para la Transición Ecológica y el Reto Demográfico
+level: age
+sector: meteorologia-clima
+tags: [aemet, meteorologia, prediccion, observacion, climatologia, estaciones, avisos, radar]
+summary: >-
+  Predicciones por municipio, observación horaria de estaciones, valores climatológicos diarios y normales,
+  avisos, radar, satélite, índice UV, predicción marítima y de montaña. API REST con clave gratuita.
+access: [api-rest]
+auth: api-key
+formats: [json, xml, csv, png]
+update: hourly
+coverage: "Climatología diaria desde 1920 según estación"
+license: Reutilización libre con cita de la fuente (aviso legal AEMET)
+base_url: https://opendata.aemet.es/opendata/api
+docs_url: https://opendata.aemet.es/dist/index.html
+endpoints:
+  - path: /prediccion/especifica/municipio/diaria/{cod_municipio_ine}
+    desc: Predicción diaria a 7 días para un municipio
+    example: curl -s "https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/28079?api_key=$AEMET_KEY"
+  - path: /prediccion/especifica/municipio/horaria/{cod_municipio_ine}
+    desc: Predicción horaria a 48 h
+  - path: /observacion/convencional/todas
+    desc: Últimas 24 h de observación de todas las estaciones
+  - path: /observacion/convencional/datos/estacion/{idema}
+    desc: Observación de una estación
+  - path: /valores/climatologicos/inventarioestaciones/todasestaciones
+    desc: Inventario de estaciones con idema y coordenadas
+  - path: /valores/climatologicos/diarios/datos/fechaini/{AAAA-MM-DDTHH:MM:SSUTC}/fechafin/{...}/estacion/{idema}
+    desc: Climatología diaria de una estación en un rango
+    example: curl -s "https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2024-01-01T00:00:00UTC/fechafin/2024-01-31T23:59:59UTC/estacion/3195?api_key=$AEMET_KEY"
+  - path: /avisos_cap/ultimoelaborado/area/{area}
+    desc: Avisos meteorológicos en formato CAP
+rate_limit: Aprox. 50 peticiones por minuto por clave; la clave caduca si no se usa en 3 meses
+gotchas:
+  - Toda llamada responde con un JSON intermedio que contiene la URL real en el campo datos; hay que hacer una segunda petición a esa URL.
+  - La clave se pasa como parámetro api_key o cabecera api_key; se solicita en opendata.aemet.es/centrodedescargas/altaUsuario y llega por correo.
+  - El código de municipio es el INE de 5 dígitos sin dígito de control (Madrid 28079).
+  - Rango máximo de climatología diaria por petición de 6 meses (5 años en versiones recientes); dividir rangos largos.
+  - Los ficheros de datos devuelven codificación Latin-1 en algunos endpoints; el JSON declara ISO-8859-15.
+  - Los decimales usan coma como separador en climatología (campo tmed "12,3").
+tips:
+  - Envolver siempre las dos peticiones (metadatos y datos) en una función; el JSON intermedio trae estado 200 aunque falle la segunda.
+  - Cachear el inventario de estaciones; cambia raramente y evita gastar cuota.
+related: [ine-codigos-territoriales, miteco-saih-boletin-hidrologico]
+status: active
+verified: null

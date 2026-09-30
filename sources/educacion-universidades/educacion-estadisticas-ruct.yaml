@@ -1,0 +1,35 @@
+id: educacion-estadisticas-ruct
+name: Educación y Universidades – Estadísticas (EDUCAbase, SIIU), RUCT y registro de centros
+org: Subdirección General de Estadística y Estudios / Secretaría General de Universidades
+ministry: Educación, Formación Profesional y Deportes; Ciencia, Innovación y Universidades
+level: age
+sector: educacion-universidades
+tags: [educacion, universidades, ruct, titulaciones, centros-educativos, alumnado, profesorado, becas, siiu]
+summary: >-
+  Estadísticas de enseñanza no universitaria (alumnado, profesorado, resultados, gasto) en EDUCAbase con exportación
+  PC-Axis/CSV, estadísticas universitarias (SIIU), Registro de Universidades, Centros y Títulos (RUCT) y Registro
+  Estatal de Centros Docentes no universitarios con datos por centro.
+access: [portal, download]
+auth: none
+formats: [px, csv, xlsx, pdf, html]
+update: annual
+coverage: "1990-"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.educacionfpydeportes.gob.es/servicios-al-ciudadano/estadisticas.html
+docs_url: https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm
+endpoints:
+  - path: https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm
+    desc: EDUCAbase, cubos estadísticos con exportación a CSV, Excel y PC-Axis
+  - path: https://www.educacion.gob.es/ruct/home
+    desc: RUCT, universidades, centros y títulos oficiales con código
+  - path: https://www.educacion.gob.es/centros/home.do
+    desc: Registro Estatal de Centros Docentes no universitarios (buscador y descarga)
+  - path: https://www.universidades.gob.es/estadisticas-e-informes/
+    desc: Estadísticas universitarias SIIU (matrícula, egresados, PDI, inserción laboral)
+gotchas:
+  - EDUCAbase es PC-Axis (PX-Web) con API interna de tablas; los ficheros .px se leen con pyaxis o pxweb.
+  - Los códigos de centro (8 dígitos) y de título RUCT son las claves estables; los nombres cambian.
+  - Las CCAA publican datos más desagregados y recientes que el ministerio.
+related: [ine-api-tempus]
+status: active
+verified: null

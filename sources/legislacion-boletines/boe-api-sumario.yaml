@@ -1,0 +1,36 @@
+id: boe-api-sumario
+name: BOE – API de sumarios
+org: Agencia Estatal Boletín Oficial del Estado (AEBOE)
+ministry: Presidencia, Justicia y Relaciones con las Cortes
+level: age
+sector: legislacion-boletines
+tags: [boe, diario-oficial, legislacion, sumario, disposiciones]
+summary: >-
+  Sumario diario del BOE en JSON/XML: todas las disposiciones publicadas cada día con identificador,
+  título, sección, departamento y enlaces a PDF, HTML y XML del texto completo.
+access: [api-rest]
+auth: none
+formats: [json, xml]
+update: daily
+coverage: "1960-"
+license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
+base_url: https://www.boe.es/datosabiertos/api
+docs_url: https://www.boe.es/datosabiertos/documentos/APIsumarioBOE.pdf
+endpoints:
+  - path: /boe/sumario/{AAAAMMDD}
+    desc: Sumario completo del BOE del día indicado
+    example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/boe/sumario/20240102"'
+  - path: https://www.boe.es/diario_boe/xml.php?id={BOE-A-AAAA-NNNNN}
+    desc: Texto completo y metadatos de una disposición en XML
+    example: curl -s "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-1"
+  - path: https://www.boe.es/boe/dias/{AAAA}/{MM}/{DD}/pdfs/{id}.pdf
+    desc: PDF de una disposición
+rate_limit: No documentado; peticiones masivas pueden bloquearse temporalmente
+gotchas:
+  - La cabecera Accept es obligatoria; sin ella devuelve XML por defecto o error 400.
+  - No hay BOE los domingos ni festivos nacionales; la API devuelve 404 para esos días.
+  - Los identificadores siguen el patrón BOE-A-AAAA-NNNNN (disposiciones) y BOE-B-AAAA-NNNNN (anuncios).
+  - Para búsquedas por texto no hay API; usar el buscador web o descargar sumarios y filtrar en local.
+related: [boe-api-legislacion-consolidada, borme-api-sumario, boe-feeds]
+status: active
+verified: null

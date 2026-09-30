@@ -1,0 +1,29 @@
+id: aesa-aviacion
+name: AESA y Aena – Registro de aeronaves, operadores y tráfico aéreo
+org: Agencia Estatal de Seguridad Aérea (AESA) / Aena SME
+ministry: Transportes y Movilidad Sostenible
+level: age
+sector: transporte-movilidad
+tags: [aviacion, aeronaves, matriculas, operadores, drones, aeropuertos, pasajeros, trafico-aereo]
+summary: >-
+  Registro de Matrícula de Aeronaves, operadores y escuelas certificadas, registro de operadores de drones (UAS),
+  estadísticas de tráfico de pasajeros, operaciones y carga por aeropuerto de Aena.
+access: [portal, download]
+auth: none
+formats: [xlsx, pdf, html, csv]
+update: monthly
+coverage: "Tráfico Aena desde 2004"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.seguridadaerea.gob.es/
+docs_url: https://www.seguridadaerea.gob.es/es/ambitos/aeronaves-y-aeronavegabilidad/matriculacion-de-aeronaves
+endpoints:
+  - path: https://www.seguridadaerea.gob.es/es/ambitos/aeronaves-y-aeronavegabilidad/matriculacion-de-aeronaves
+    desc: Registro de Matrícula de Aeronaves (consulta y listado)
+  - path: https://www.aena.es/es/estadisticas/inicio.html
+    desc: Estadísticas de tráfico aéreo de Aena por aeropuerto y mes
+gotchas:
+  - Aena es una sociedad mercantil estatal (51 % público) que publica datos por cuenta propia; se incluye por su relevancia.
+  - El listado de aeronaves se publica en Excel con fecha; no hay API ni histórico.
+related: [dgt-estadisticas]
+status: active
+verified: null

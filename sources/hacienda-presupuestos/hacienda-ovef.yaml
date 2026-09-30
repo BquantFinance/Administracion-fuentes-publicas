@@ -1,0 +1,32 @@
+id: hacienda-ovef
+name: Hacienda – Oficina Virtual de Coordinación Financiera con las EELL y CCAA
+org: Secretaría General de Financiación Autonómica y Local
+ministry: Hacienda
+level: age
+sector: hacienda-presupuestos
+tags: [ayuntamientos, comunidades-autonomas, presupuestos, liquidaciones, deuda-local, financiacion]
+summary: >-
+  Presupuestos y liquidaciones de todas las entidades locales y CCAA, deuda viva por ayuntamiento, periodo medio
+  de pago, tributos locales (tipos impositivos por municipio), financiación autonómica. Descargas masivas en Excel/CSV.
+access: [portal, download]
+auth: none
+formats: [xlsx, csv, pdf]
+update: annual
+coverage: "2002-"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.hacienda.gob.es/es-ES/Areas%20Tematicas/Administracion%20Electronica/OVEELL/Paginas/OVEntidadesLocales.aspx
+docs_url: https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PublicacionPresupuestos/aspx/inicio.aspx
+endpoints:
+  - path: https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PublicacionPresupuestos/aspx/inicio.aspx
+    desc: Consulta y descarga de presupuestos y liquidaciones de entidades locales
+  - path: https://www.hacienda.gob.es/es-ES/CDI/Paginas/SistemasFinanciacionDeuda/InformacionEELLs/DeudaViva.aspx
+    desc: Deuda viva de los ayuntamientos a 31 de diciembre
+  - path: https://www.hacienda.gob.es/es-ES/CDI/Paginas/ImpuestosTasasEELL/ImpuestosTasasEELL.aspx
+    desc: Tipos de IBI, IAE, IVTM y otros tributos por municipio
+gotchas:
+  - Las descargas masivas por ejercicio están como ficheros Excel de varias decenas de MB con múltiples hojas.
+  - La clasificación funcional cambió en 2015; series largas requieren mapear programas.
+  - Cada ayuntamiento se identifica por código INE de municipio más código de entidad; no usar el nombre.
+related: [igae-ejecucion-presupuestaria, ine-codigos-territoriales]
+status: active
+verified: null

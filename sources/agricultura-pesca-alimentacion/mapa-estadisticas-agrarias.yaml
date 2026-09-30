@@ -1,0 +1,33 @@
+id: mapa-estadisticas-agrarias
+name: MAPA – Estadísticas agrarias, precios y encuestas
+org: Subdirección General de Análisis, Coordinación y Estadística
+ministry: Agricultura, Pesca y Alimentación
+level: age
+sector: agricultura-pesca-alimentacion
+tags: [agricultura, ganaderia, precios-agrarios, superficies, producciones, anuario, esyrce, censo-agrario]
+summary: >-
+  Superficies y producciones por cultivo y provincia, precios percibidos y pagados, precios semanales de mercados
+  (origen y destino), encuesta ESYRCE, efectivos ganaderos, sacrificio, leche, anuario de estadística. Excel y consultas.
+access: [portal, download]
+auth: none
+formats: [xlsx, pdf, csv, html]
+update: monthly
+coverage: "1990-"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.mapa.gob.es/es/estadistica/temas/
+docs_url: https://www.mapa.gob.es/es/estadistica/temas/default.aspx
+endpoints:
+  - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/agricultura/superficies-producciones-anuales-cultivos/
+    desc: Superficies y producciones anuales por cultivo
+  - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/economia/precios-percibidos-pagados-salarios/
+    desc: Precios percibidos y pagados por los agricultores
+  - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-alimentacion/consumo-alimentario/
+    desc: Panel de consumo alimentario en hogares por producto y CCAA
+  - path: https://www.mapa.gob.es/es/estadistica/temas/publicaciones/anuario-de-estadistica/
+    desc: Anuario de Estadística con todas las tablas
+gotchas:
+  - Los ficheros del anuario están por capítulo y año con nombres no sistemáticos; no automatizable sin scraping del índice.
+  - Los precios semanales de mercados se publican también en el Observatorio de Precios con series descargables.
+related: [fega-beneficiarios-pac, mapa-sigpac]
+status: active
+verified: null

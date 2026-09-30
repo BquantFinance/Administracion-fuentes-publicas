@@ -1,0 +1,22 @@
+name: Proponer fuente
+description: Propón una fuente pública que falta en el catálogo
+title: "[fuente] "
+labels: [nueva-fuente]
+body:
+  - type: input
+    id: name
+    attributes: {label: Nombre de la fuente y organismo}
+    validations: {required: true}
+  - type: input
+    id: url
+    attributes: {label: URL base o de documentación}
+    validations: {required: true}
+  - type: dropdown
+    id: sector
+    attributes:
+      label: Sector
+      options: [legislacion-boletines, economia-finanzas, hacienda-presupuestos, estadistica, contratacion-subvenciones, empleo-seguridad-social, gobierno-abierto-administracion, territorio-cartografia, meteorologia-clima, medio-ambiente-agua-biodiversidad, energia, sanidad-medicamentos, ciencia-investigacion, agricultura-pesca-alimentacion, transporte-movilidad, comercio-industria-propiedad, educacion-universidades, justicia-interior-seguridad, cultura-patrimonio, demografia-migraciones-sociedad, vivienda-urbanismo, telecomunicaciones-digital, exterior-cooperacion, consumo-seguridad-alimentaria, defensa, otro]
+    validations: {required: true}
+  - type: textarea
+    id: notes
+    attributes: {label: Qué datos tiene, cómo se accede y trampas conocidas}

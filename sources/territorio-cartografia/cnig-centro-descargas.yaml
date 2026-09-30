@@ -1,0 +1,40 @@
+id: cnig-centro-descargas
+name: IGN/CNIG – Centro de Descargas de cartografía y geodatos
+org: Instituto Geográfico Nacional / Centro Nacional de Información Geográfica
+ministry: Transportes y Movilidad Sostenible
+level: age
+sector: territorio-cartografia
+tags: [ign, cnig, cartografia, mdt, lidar, pnoa, ortofotos, limites-administrativos, nomenclator, siose]
+summary: >-
+  Descarga gratuita de toda la producción del IGN: ortofotos PNOA, modelos digitales del terreno, LiDAR, mapas
+  topográficos, límites municipales oficiales, redes de transporte, SIOSE, nomenclátor geográfico. Servicios WMS/WMTS.
+access: [download, ogc, api-rest]
+auth: none
+formats: [shp, gpkg, geotiff, laz, ecw, pdf, jpg, kml]
+update: irregular
+coverage: "Cartografía histórica desde 1875; PNOA desde 2004"
+license: CC BY 4.0 (licencia IGN compatible)
+base_url: https://centrodedescargas.cnig.es/CentroDescargas/
+docs_url: https://www.ign.es/web/ign/portal/ide-area-nodo-ide-ign
+endpoints:
+  - path: https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie=LILIM
+    desc: Líneas límite municipales, provinciales y autonómicas oficiales
+  - path: https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie=MDT05
+    desc: Modelo digital del terreno de 5 m
+  - path: https://www.ign.es/wms-inspire/pnoa-ma?SERVICE=WMS&REQUEST=GetCapabilities
+    desc: WMS de ortofotos PNOA máxima actualidad
+  - path: https://www.ign.es/wmts/pnoa-ma?SERVICE=WMTS&REQUEST=GetCapabilities
+    desc: WMTS teselado de PNOA
+  - path: https://www.ign.es/wms-inspire/ign-base?SERVICE=WMS&REQUEST=GetCapabilities
+    desc: WMS del mapa base IGN
+  - path: https://www.cartociudad.es/geocoder/api/geocoder/findJsonp?q={direccion}
+    desc: Geocodificador CartoCiudad (direcciones, topónimos, referencias catastrales)
+    example: curl -s "https://www.cartociudad.es/geocoder/api/geocoder/findJsonp?q=Calle%20Alcala%2050%20Madrid"
+gotchas:
+  - Las descargas masivas del Centro de Descargas exigen aceptar la licencia por sesión; para automatizar usar los servicios ATOM/WFS del IGN o pedir acceso a la API de descargas.
+  - Los límites municipales del IGN son la geometría oficial; los del Catastro difieren en zonas.
+  - El geocoder devuelve JSONP aunque el nombre del endpoint lo indique; hay que quitar el callback o usar el endpoint find.
+  - Sistema de referencia oficial ETRS89 (EPSG:4258 geográficas, 258xx UTM); Canarias REGCAN95.
+related: [idee-servicios, catastro-ovc]
+status: active
+verified: null

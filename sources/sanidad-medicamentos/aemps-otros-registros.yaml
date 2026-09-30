@@ -1,0 +1,31 @@
+id: aemps-otros-registros
+name: AEMPS – Registro de ensayos clínicos, productos sanitarios y cosméticos
+org: Agencia Española de Medicamentos y Productos Sanitarios (AEMPS)
+ministry: Sanidad
+level: age
+sector: sanidad-medicamentos
+tags: [ensayos-clinicos, reec, productos-sanitarios, cosmeticos, farmacovigilancia, notas-seguridad, alertas]
+summary: >-
+  Registro Español de Estudios Clínicos (REEC) con búsqueda y ficha por ensayo, distribuidores y fabricantes
+  de productos sanitarios, alertas de seguridad y calidad, notas informativas y datos de farmacovigilancia.
+access: [portal, feed]
+auth: none
+formats: [html, pdf, rss, xlsx]
+update: daily
+coverage: "REEC desde 2013"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.aemps.gob.es/
+docs_url: https://reec.aemps.es/
+endpoints:
+  - path: https://reec.aemps.es/reec/public/web.html
+    desc: Buscador del Registro Español de Estudios Clínicos
+  - path: https://www.aemps.gob.es/informa/
+    desc: Notas informativas y alertas (medicamentos, productos sanitarios, cosméticos), con RSS
+  - path: https://www.aemps.gob.es/medicamentos-de-uso-humano/farmacovigilancia-de-medicamentos-de-uso-humano/
+    desc: Farmacovigilancia y acceso a datos de notificaciones
+gotchas:
+  - El REEC es una aplicación JavaScript con API interna no documentada; los datos completos de ensayos europeos están en CTIS/EU CTR.
+  - Las alertas de productos sanitarios se publican como PDF individuales sin identificador estructurado.
+related: [aemps-cima-api]
+status: active
+verified: null

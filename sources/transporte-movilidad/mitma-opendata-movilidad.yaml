@@ -1,0 +1,31 @@
+id: mitma-opendata-movilidad
+name: Ministerio de Transportes – Estudio de movilidad con big data (Open Data)
+org: Secretaría General de Transportes y Movilidad
+ministry: Transportes y Movilidad Sostenible
+level: age
+sector: transporte-movilidad
+tags: [movilidad, matrices-origen-destino, telefonia-movil, viajes, distritos, big-data]
+summary: >-
+  Matrices diarias de viajes origen-destino entre distritos, municipios y grandes áreas, por hora, distancia y
+  motivo, estimadas a partir de telefonía móvil desde 2020. Ficheros CSV comprimidos diarios y zonificaciones.
+access: [download]
+auth: none
+formats: [csv, zip, shp, geojson]
+update: daily
+coverage: "2020-02 -"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/opendata-movilidad
+docs_url: https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/opendata-movilidad
+endpoints:
+  - path: https://movilidad-opendata.mitma.es/
+    desc: Índice de ficheros diarios por versión de estudio, nivel de zonificación y tipo
+  - path: https://movilidad-opendata.mitma.es/zonificacion/
+    desc: Capas de zonificación (distritos, municipios, GAU) y relación con códigos INE
+gotchas:
+  - Hay dos estudios con metodologías distintas, 2020-2021 (versión 1) y 2022 en adelante (versión 2); no mezclar series.
+  - Cada día son cientos de MB comprimidos en gzip; hay ficheros por distrito, municipio y gran área urbana.
+  - Los ids de zona son códigos INE (municipio) o INE + distrito censal; algunos municipios pequeños están agrupados.
+  - Existe también un paquete R y Python (spanishoddata) de terceros que facilita la descarga.
+related: [ine-codigos-territoriales, dgt-estadisticas]
+status: active
+verified: null

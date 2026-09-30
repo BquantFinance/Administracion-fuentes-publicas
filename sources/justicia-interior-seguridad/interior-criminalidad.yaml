@@ -1,0 +1,30 @@
+id: interior-criminalidad
+name: Ministerio del Interior – Portal Estadístico de Criminalidad
+org: Secretaría de Estado de Seguridad
+ministry: Interior
+level: age
+sector: justicia-interior-seguridad
+tags: [criminalidad, delitos, infracciones-penales, balances, victimizaciones, detenciones, municipios]
+summary: >-
+  Infracciones penales conocidas y esclarecidas, detenciones y víctimas por tipología, trimestre, provincia y
+  municipio de más de 20.000 habitantes (balances trimestrales), más series anuales y cubos consultables.
+access: [portal, download]
+auth: none
+formats: [xlsx, csv, pdf, html]
+update: quarterly
+coverage: "2010- (balances); series anuales anteriores"
+license: Reutilización libre con cita de la fuente
+base_url: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/
+docs_url: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/
+endpoints:
+  - path: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/balances.html
+    desc: Balances trimestrales de criminalidad con Excel por provincia y municipio
+  - path: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/datos.html
+    desc: Consulta dinámica de cubos (SEC) con exportación
+gotchas:
+  - No incluye datos de Mossos d'Esquadra ni Ertzaintza salvo en los totales nacionales agregados; el detalle municipal de Cataluña y País Vasco es parcial.
+  - La tipología penal cambió con la reforma de 2015; series largas requieren reagrupar.
+  - Los datos judiciales (sentencias, juzgados) los publica el CGPJ, fuera del alcance AGE actual.
+related: [ine-codigos-territoriales]
+status: active
+verified: null

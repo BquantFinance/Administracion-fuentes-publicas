@@ -1,0 +1,30 @@
+id: mivau-precios-vivienda-alquiler
+name: Ministerio de Vivienda – Precios de vivienda, alquiler y estadísticas de vivienda
+org: Dirección General de Vivienda y Suelo
+ministry: Vivienda y Agenda Urbana
+level: age
+sector: vivienda-urbanismo
+tags: [vivienda, alquiler, precios, valor-tasado, transacciones, visados, serpavi, indice-alquiler]
+summary: >-
+  Sistema Estatal de Referencia del Precio del Alquiler (SERPAVI) por sección censal y municipio, valor tasado de
+  vivienda por municipio, transacciones inmobiliarias, visados de obra, parque de viviendas, precios del suelo.
+access: [portal, download]
+auth: none
+formats: [xlsx, csv, pdf]
+update: quarterly
+coverage: "Valor tasado desde 1995; SERPAVI desde 2015 (fiscal)"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.mivau.gob.es/vivienda/estadisticas
+docs_url: https://www.mivau.gob.es/vivienda/alquila-bien-es-tu-derecho/serpavi
+endpoints:
+  - path: https://www.mivau.gob.es/vivienda/alquila-bien-es-tu-derecho/serpavi
+    desc: SERPAVI, índices de alquiler por municipio, distrito y sección censal con descarga
+  - path: https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden=34000000
+    desc: Boletín estadístico online con series de vivienda y suelo (valor tasado, transacciones)
+gotchas:
+  - SERPAVI se construye con datos fiscales (IRPF) de arrendadores; excluye País Vasco y Navarra y llega con dos años de retardo.
+  - El Boletín Online conserva el dominio antiguo fomento.gob.es y redirige de forma inestable.
+  - Las transacciones inmobiliarias vienen del Consejo General del Notariado y los precios del Colegio de Registradores; el ministerio agrega.
+related: [catastro-ovc, ine-api-tempus, ine-codigos-territoriales]
+status: active
+verified: null

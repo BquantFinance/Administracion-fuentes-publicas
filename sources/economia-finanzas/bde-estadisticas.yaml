@@ -1,0 +1,33 @@
+id: bde-estadisticas
+name: Banco de España – Portal de estadísticas y descarga de series
+org: Banco de España
+ministry: Organismo independiente adscrito a efectos administrativos a Economía, Comercio y Empresa
+level: age
+sector: economia-finanzas
+tags: [banco-de-espana, series-temporales, tipos-de-interes, tipos-de-cambio, credito, deuda, balanza-pagos]
+summary: >-
+  Miles de series estadísticas: tipos de interés y de cambio, crédito y depósitos, deuda pública, balanza de pagos,
+  cuentas financieras, Central de Balances. Descarga completa por capítulos en CSV y consulta de series individuales.
+access: [download, portal]
+auth: none
+formats: [csv, xlsx, pdf]
+update: monthly
+coverage: "Series desde 1962 según indicador"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.bde.es/webbe/es/estadisticas/
+docs_url: https://www.bde.es/webbe/es/estadisticas/recursos/descargas-completas.html
+endpoints:
+  - path: https://www.bde.es/webbe/es/estadisticas/recursos/descargas-completas.html
+    desc: Ficheros CSV completos por capítulo del Boletín Estadístico y otras publicaciones
+  - path: https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/{fichero}.csv
+    desc: Patrón de descarga directa de los CSV de series
+  - path: https://app.bde.es/bie_www/faces/bie_wwwias/jsp/op/Home/pHome.jsp
+    desc: Buscador de series BIEST con exportación
+gotchas:
+  - Los CSV usan codificación Latin-1 y separador coma con decimales con punto; primeras filas son cabeceras de metadatos.
+  - Cada serie tiene un código alfanumérico estable (p. ej. D_1NBAF...) que es la clave para automatizar; el nombre descriptivo cambia.
+  - Los tipos de cambio oficiales del euro provienen del BCE; el BdE los redistribuye con retardo.
+  - No hay API REST pública; para SDMX usar el BCE (Statistical Data Warehouse) que republica muchas series españolas.
+related: [tesoro-estadisticas, cnmv-registros]
+status: active
+verified: null

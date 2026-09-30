@@ -1,0 +1,29 @@
+id: mincotur-industria-turismo
+name: Ministerio de Industria y Turismo – Estadísticas industriales y de turismo
+org: Secretaría de Estado de Industria / Secretaría de Estado de Turismo (Turespaña)
+ministry: Industria y Turismo
+level: age
+sector: comercio-industria-propiedad
+tags: [industria, turismo, frontur, egatur, registro-industrial, seguridad-industrial, dataestur]
+summary: >-
+  Indicadores industriales, Registro Integrado Industrial, y estadísticas de turismo (llegadas FRONTUR, gasto
+  EGATUR, ocupación hotelera, movimientos aeroportuarios) reunidas en DATAESTUR con descarga.
+access: [portal, download]
+auth: none
+formats: [xlsx, csv, pdf]
+update: monthly
+coverage: "Turismo desde 2001"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.mintur.gob.es/
+docs_url: https://www.dataestur.es/
+endpoints:
+  - path: https://www.dataestur.es/
+    desc: DATAESTUR, plataforma de datos turísticos con descargas por indicador
+  - path: https://www.mintur.gob.es/es-ES/IndicadoresyEstadisticas/Paginas/Index.aspx
+    desc: Indicadores y estadísticas industriales
+gotchas:
+  - FRONTUR y EGATUR las produce el INE desde 2015; DATAESTUR redistribuye. Para series largas ir al INE.
+  - El dominio del ministerio ha cambiado varias veces (minetur, mincotur, mintur); enlaces antiguos rotos.
+related: [ine-api-tempus, miteco-energia-estadisticas]
+status: active
+verified: null

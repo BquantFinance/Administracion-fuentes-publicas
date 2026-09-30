@@ -1,0 +1,43 @@
+id: boe-api-legislacion-consolidada
+name: BOE – API de legislación consolidada
+org: Agencia Estatal Boletín Oficial del Estado (AEBOE)
+ministry: Presidencia, Justicia y Relaciones con las Cortes
+level: age
+sector: legislacion-boletines
+tags: [boe, legislacion, consolidada, normas, texto-vigente]
+summary: >-
+  Textos consolidados de normas estatales y autonómicas con estructura por artículos, versiones históricas,
+  metadatos, análisis jurídico (materias, referencias anteriores y posteriores) y estado de vigencia.
+access: [api-rest]
+auth: none
+formats: [json, xml]
+update: daily
+coverage: "Normas vigentes y derogadas desde 1978, algunas anteriores"
+license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
+base_url: https://www.boe.es/datosabiertos/api/legislacion-consolidada
+docs_url: https://www.boe.es/datosabiertos/documentos/APIlegislacionConsolidada.pdf
+endpoints:
+  - path: /id/{BOE-A-AAAA-NNNNN}
+    desc: Norma completa consolidada (metadatos, análisis, texto por bloques)
+    example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229"'
+  - path: /id/{id}/metadatos
+    desc: Solo metadatos (título, rango, fechas, vigencia)
+  - path: /id/{id}/analisis
+    desc: Materias, notas, referencias anteriores y posteriores
+  - path: /id/{id}/texto
+    desc: Texto consolidado dividido en bloques (artículos, disposiciones)
+  - path: /id/{id}/texto/bloque/{id_bloque}
+    desc: Un artículo o bloque concreto
+  - path: /id/{id}/texto/indice
+    desc: Índice de bloques de la norma
+  - path: /legislacion-consolidada?from={AAAAMMDD}&offset={n}&limit={n}
+    desc: Listado de normas, filtrable por fecha de actualización
+rate_limit: No documentado
+gotchas:
+  - Cabecera Accept obligatoria (application/json o application/xml).
+  - El identificador es el del BOE original de la norma, p. ej. la Constitución es BOE-A-1978-31229.
+  - Los bloques de texto llevan fecha de vigencia; una norma tiene varias versiones del mismo artículo.
+  - Solo cubre normas con texto consolidado, no todas las disposiciones publicadas.
+related: [boe-api-sumario]
+status: active
+verified: null

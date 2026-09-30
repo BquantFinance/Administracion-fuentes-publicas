@@ -1,0 +1,30 @@
+# Copia este fichero a sources/<sector>/<id>.yaml y rellénalo.
+# Valores permitidos: schema/vocab.yaml. Esquema: schema/source.schema.json.
+# Regla de oro: cada línea debe ahorrarle una búsqueda a quien la lea. Sin relleno.
+id: organismo-servicio
+name: Nombre corto de la fuente
+org: Organismo titular
+ministry: Ministerio de adscripción
+level: age
+sector: sector-del-vocabulario
+tags: [tema1, tema2]
+summary: >-
+  Qué datos contiene y para qué sirve. Máx. 300 caracteres.
+access: [api-rest]
+auth: none
+formats: [json]
+update: daily
+coverage: "2010-"
+license: Reutilización libre con cita de la fuente
+base_url: https://ejemplo.gob.es/api
+docs_url: https://ejemplo.gob.es/docs
+endpoints:
+  - path: /recurso/{id}
+    desc: Qué devuelve
+    example: curl -s "https://ejemplo.gob.es/api/recurso/123"
+rate_limit: No documentado
+gotchas:
+  - Detalle no obvio que hace perder tiempo.
+related: []
+status: active
+verified: null

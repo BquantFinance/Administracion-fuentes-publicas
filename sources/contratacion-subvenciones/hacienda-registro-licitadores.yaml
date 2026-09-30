@@ -1,0 +1,26 @@
+id: hacienda-registro-licitadores
+name: ROLECE – Registro Oficial de Licitadores y Empresas Clasificadas
+org: Dirección General del Patrimonio del Estado
+ministry: Hacienda
+level: age
+sector: contratacion-subvenciones
+tags: [rolece, licitadores, clasificacion-empresas, contratistas, solvencia]
+summary: >-
+  Registro de empresas inscritas para contratar con el sector público, con clasificación de contratistas
+  de obras y servicios por grupos y categorías. Consulta pública por NIF o denominación.
+access: [portal]
+auth: none
+formats: [html, pdf]
+update: daily
+license: Consulta pública; reutilización sujeta a protección de datos
+base_url: https://registrodelicitadores.gob.es/
+docs_url: https://registrodelicitadores.gob.es/
+endpoints:
+  - path: https://registrodelicitadores.gob.es/consulta_publica
+    desc: Consulta pública de empresas inscritas y su clasificación
+gotchas:
+  - Sin API ni descarga masiva; las inscripciones incluyen datos de administradores y apoderados con acceso restringido.
+  - La clasificación caduca y debe renovarse; comprobar fecha de vigencia.
+related: [placsp-datos-abiertos]
+status: active
+verified: null

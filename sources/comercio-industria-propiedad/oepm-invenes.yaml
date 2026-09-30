@@ -1,0 +1,31 @@
+id: oepm-invenes
+name: OEPM – Patentes, marcas y diseños (INVENES, bases de datos)
+org: Oficina Española de Patentes y Marcas (OEPM)
+ministry: Industria y Turismo
+level: age
+sector: comercio-industria-propiedad
+tags: [patentes, marcas, disenos, propiedad-industrial, invenes, modelos-utilidad, bopi]
+summary: >-
+  Bases de datos de patentes y modelos de utilidad (INVENES), marcas y nombres comerciales, diseños industriales,
+  Boletín Oficial de la Propiedad Industrial (BOPI) y estadísticas anuales. Consulta pública y descargas del BOPI.
+access: [portal, download]
+auth: none
+formats: [html, pdf, xml, xlsx]
+update: daily
+coverage: "Patentes desde 1826; marcas desde 1880"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.oepm.es/
+docs_url: https://www.oepm.es/es/Bases_de_Datos_Invenciones/index.html
+endpoints:
+  - path: https://consultas2.oepm.es/InvenesWeb/faces/busquedaInternet.jsp
+    desc: INVENES, búsqueda de patentes y modelos de utilidad españoles
+  - path: https://consultas2.oepm.es/LocalizadorWeb/
+    desc: Localizador de marcas, nombres comerciales y diseños
+  - path: https://www.oepm.es/es/sobre_oepm/actividades_estadisticas/estadisticas/
+    desc: Estadísticas anuales de solicitudes y concesiones
+gotchas:
+  - Las aplicaciones de consulta son JSF con sesión; scraping frágil. Para datos masivos usar Espacenet/OPS (EPO) o TMview (EUIPO), que incluyen los registros españoles.
+  - El BOPI se publica en PDF y XML diario; el XML es la vía más limpia para automatizar novedades.
+related: [borme-api-sumario]
+status: active
+verified: null

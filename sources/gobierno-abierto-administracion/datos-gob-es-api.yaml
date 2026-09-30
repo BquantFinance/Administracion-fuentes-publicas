@@ -1,0 +1,41 @@
+id: datos-gob-es-api
+name: datos.gob.es – Catálogo nacional de datos abiertos (API y SPARQL)
+org: Dirección General del Dato / Entidad Pública Empresarial Red.es
+ministry: Transformación Digital y de la Función Pública
+level: age
+sector: gobierno-abierto-administracion
+tags: [datos-abiertos, catalogo, dcat, sparql, metadatos, federacion]
+summary: >-
+  Catálogo federado de datasets abiertos de todas las Administraciones españolas (más de 90.000 conjuntos) con
+  metadatos DCAT-AP. API REST para buscar datasets, distribuciones y publicadores, y endpoint SPARQL.
+access: [api-rest, sparql, download]
+auth: none
+formats: [json, xml, csv, rdf, ttl]
+update: daily
+coverage: "2011-"
+license: Metadatos CC BY 4.0; cada dataset tiene su licencia
+base_url: https://datos.gob.es/apidata
+docs_url: https://datos.gob.es/es/accessible-apidata
+endpoints:
+  - path: /catalog/dataset?_pageSize={n}&_page={n}
+    desc: Listado paginado de datasets
+    example: curl -s "https://datos.gob.es/apidata/catalog/dataset?_pageSize=10&_page=0"
+  - path: /catalog/dataset/title/{texto}
+    desc: Búsqueda de datasets por título
+    example: curl -s "https://datos.gob.es/apidata/catalog/dataset/title/paro"
+  - path: /catalog/dataset/publisher/{id_publicador}
+    desc: Datasets de un publicador (id DIR3 del organismo)
+  - path: /catalog/dataset/theme/{tema}
+    desc: Datasets por tema NTI (economia, sector-publico, medio-ambiente...)
+  - path: /catalog/publisher
+    desc: Lista de organismos publicadores
+  - path: https://datos.gob.es/virtuoso/sparql
+    desc: Endpoint SPARQL sobre el catálogo DCAT
+gotchas:
+  - Añadir .json, .xml, .csv o .rdf al final de la ruta fuerza el formato; sin extensión negocia por Accept.
+  - _pageSize máximo 50; usar _page para paginar y _sort para ordenar.
+  - Es un catálogo de metadatos, no de datos; las URLs de descarga (accessURL) apuntan al organismo origen y pueden estar rotas.
+  - Muchos datasets autonómicos y locales solo existen aquí como metadatos federados del portal de origen.
+related: [dir3-directorio, transparencia-portal]
+status: active
+verified: null

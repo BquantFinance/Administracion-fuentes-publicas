@@ -1,0 +1,28 @@
+id: aemet-otros-servicios
+name: AEMET – Datos de radiación, ozono, polen y modelos numéricos
+org: Agencia Estatal de Meteorología (AEMET)
+ministry: Para la Transición Ecológica y el Reto Demográfico
+level: age
+sector: meteorologia-clima
+tags: [aemet, radiacion, ozono, modelo-harmonie, ftp, datos-abiertos, series-homogeneizadas]
+summary: >-
+  Complementos fuera de la API principal: descargas de salidas de modelos numéricos, series climáticas homogeneizadas,
+  radiación solar, ozono y datos históricos en ficheros. Acceso vía portal y FTP anónimo.
+access: [download, portal]
+auth: none
+formats: [csv, grib, netcdf, pdf, txt]
+update: daily
+license: Reutilización libre con cita de la fuente (aviso legal AEMET)
+base_url: https://www.aemet.es/es/datos_abiertos
+docs_url: https://www.aemet.es/es/datos_abiertos/AEMET_OpenData
+endpoints:
+  - path: https://www.aemet.es/es/serviciosclimaticos/datosclimatologicos
+    desc: Servicios climáticos, valores normales, efemérides y series homogeneizadas
+  - path: https://www.aemet.es/es/serviciosclimaticos/cambio_climat/result_graficos
+    desc: Proyecciones regionalizadas de cambio climático (escenarios PNACC)
+gotchas:
+  - Las salidas de modelos (HARMONIE-AROME) se distribuyen en GRIB2 y requieren eccodes o cfgrib para leerlas.
+  - Las proyecciones climáticas se descargan por variable y escenario en ficheros grandes, sin API.
+related: [aemet-opendata]
+status: active
+verified: null

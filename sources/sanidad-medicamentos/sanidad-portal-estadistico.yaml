@@ -1,0 +1,35 @@
+id: sanidad-portal-estadistico
+name: Ministerio de Sanidad – Portal Estadístico y Sistema de Información Sanitaria
+org: Secretaría General de Salud Digital, Información e Innovación del SNS
+ministry: Sanidad
+level: age
+sector: sanidad-medicamentos
+tags: [sanidad, sns, hospitales, cmbd, altas-hospitalarias, mortalidad, indicadores-clave, gasto-sanitario, recetas]
+summary: >-
+  Portal Estadístico del SNS: altas hospitalarias (RAE-CMBD), Indicadores Clave del SNS, gasto sanitario,
+  recursos y actividad de hospitales y atención primaria (SIAP), consumo farmacéutico, encuestas de salud,
+  catálogo de hospitales y centros. Consulta interactiva y descarga.
+access: [portal, download]
+auth: none
+formats: [xlsx, csv, pdf, html]
+update: annual
+coverage: "CMBD desde 1997; indicadores según serie"
+license: Reutilización libre con cita de la fuente
+base_url: https://pestadistico.inteligenciadegestion.sanidad.gob.es/
+docs_url: https://www.sanidad.gob.es/estadEstudios/portada/home.htm
+endpoints:
+  - path: https://pestadistico.inteligenciadegestion.sanidad.gob.es/publicoSNS/
+    desc: Consulta interactiva de cubos estadísticos del SNS
+  - path: https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/home.htm
+    desc: Sistema de Información Sanitaria, publicaciones y descargas
+  - path: https://www.sanidad.gob.es/ciudadanos/prestaciones/centrosServiciosSNS/hospitales/home.htm
+    desc: Catálogo Nacional de Hospitales (descargable)
+  - path: https://www.sanidad.gob.es/estadEstudios/estadisticas/estadisticas/estMinisterio/mortalidad/mortalidad.htm
+    desc: Mortalidad por causa (a partir de datos del INE)
+gotchas:
+  - Los microdatos del CMBD se solicitan formalmente y se entregan anonimizados; no hay descarga directa.
+  - El Portal Estadístico usa cubos OLAP con exportación por consulta, sin API.
+  - La vigilancia epidemiológica (RENAVE, gripe, COVID) la publica el ISCIII, no el ministerio (ficha isciii-cne).
+related: [isciii-cne, aemps-cima-api]
+status: active
+verified: null

@@ -1,0 +1,13 @@
+name: Corregir ficha
+description: Una URL no responde, un endpoint cambió o un dato es incorrecto
+title: "[ficha] "
+labels: [correccion]
+body:
+  - type: input
+    id: source
+    attributes: {label: id de la ficha}
+    validations: {required: true}
+  - type: textarea
+    id: detail
+    attributes: {label: Qué está mal y cuál es el valor correcto}
+    validations: {required: true}

@@ -1,0 +1,32 @@
+id: boe-feeds
+name: BOE y BORME – Feeds RSS y alertas
+org: Agencia Estatal Boletín Oficial del Estado (AEBOE)
+ministry: Presidencia, Justicia y Relaciones con las Cortes
+level: age
+sector: legislacion-boletines
+tags: [boe, borme, rss, sindicacion, alertas]
+summary: >-
+  Canales RSS del sumario diario del BOE por secciones y del BORME, útiles para detectar publicaciones
+  nuevas sin consultar la API.
+access: [feed]
+auth: none
+formats: [rss, xml]
+update: daily
+license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
+base_url: https://www.boe.es/rss/
+docs_url: https://www.boe.es/rss/
+endpoints:
+  - path: https://www.boe.es/rss/boe.php
+    desc: Sumario del BOE del día
+  - path: https://www.boe.es/rss/boe.php?s={seccion}
+    desc: Sumario filtrado por sección (1 disposiciones generales, 2A, 2B, 3, 4, 5A, 5B, 5C)
+  - path: https://www.boe.es/rss/borme.php
+    desc: Sumario del BORME del día
+  - path: https://www.boe.es/rss/canal.php?c={tema}
+    desc: Canales temáticos (legislación consolidada actualizada, ayudas, empleo público)
+gotchas:
+  - Los feeds solo contienen el día en curso; para histórico usar la API de sumarios.
+  - El servicio de alertas personalizadas por correo requiere cuenta en Mi BOE y no tiene API.
+related: [boe-api-sumario, borme-api-sumario]
+status: active
+verified: null

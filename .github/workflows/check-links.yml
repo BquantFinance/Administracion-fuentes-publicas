@@ -1,0 +1,20 @@
+name: check-links
+on:
+  schedule:
+    - cron: "17 5 * * 1"   # lunes 05:17 UTC
+  workflow_dispatch:
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r scripts/requirements.txt
+      - run: python scripts/check_links.py | tee link-report.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: link-report
+          path: link-report.md
+      - name: Publicar resumen
+        run: cat link-report.md >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,34 @@
+id: cnmc-data
+name: CNMC Data – Estadísticas de energía, telecomunicaciones y audiovisual
+org: Comisión Nacional de los Mercados y la Competencia (CNMC)
+ministry: Organismo independiente adscrito a Economía, Comercio y Empresa
+level: age
+sector: energia
+tags: [cnmc, electricidad, gas, telecomunicaciones, audiovisual, comercializadoras, cuotas-mercado, precios]
+summary: >-
+  Portal de datos abiertos de la CNMC: mercado eléctrico y gasista (comercializadoras, cambios de suministrador,
+  precios, autoconsumo), telecomunicaciones (líneas, ingresos, cuotas por operador), audiovisual y postal.
+  Descarga por indicador con API CKAN.
+access: [portal, download, api-rest]
+auth: none
+formats: [csv, xlsx, json]
+update: quarterly
+coverage: "2010- según indicador"
+license: CC BY 4.0
+base_url: https://data.cnmc.es/
+docs_url: https://data.cnmc.es/
+endpoints:
+  - path: https://data.cnmc.es/energia
+    desc: Datasets de electricidad y gas
+  - path: https://data.cnmc.es/telecomunicaciones
+    desc: Datasets de telecomunicaciones (trimestrales y anuales)
+  - path: https://data.cnmc.es/api/3/action/package_search?q={texto}
+    desc: API CKAN de búsqueda de datasets
+    example: curl -s "https://data.cnmc.es/api/3/action/package_search?q=comercializadoras"
+gotchas:
+  - El portal es CKAN; la API estándar package_show y datastore_search funcionan para la mayoría de datasets.
+  - Los datos de precios de electricidad para consumidores se publican con desfase de dos trimestres.
+  - Los datos de operación del sistema eléctrico (demanda, generación en tiempo real) no están aquí sino en Red Eléctrica (empresa participada, fase posterior).
+related: [minetur-precios-carburantes]
+status: active
+verified: null

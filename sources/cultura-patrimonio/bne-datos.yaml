@@ -1,0 +1,35 @@
+id: bne-datos
+name: BNE – datos.bne.es (linked data, SPARQL) y Hispana
+org: Biblioteca Nacional de España (BNE) / Ministerio de Cultura
+ministry: Cultura
+level: age
+sector: cultura-patrimonio
+tags: [bne, bibliografia, autoridades, linked-data, sparql, oai-pmh, hispana, patrimonio-digital, hemeroteca]
+summary: >-
+  Catálogo bibliográfico y de autoridades de la BNE como datos enlazados (RDF, SPARQL, JSON), Biblioteca Digital
+  Hispánica y Hemeroteca Digital con OAI-PMH, y Hispana, agregador nacional de repositorios de patrimonio digital
+  (más de 10 millones de objetos) también por OAI-PMH.
+access: [sparql, oai-pmh, api-rest, download]
+auth: none
+formats: [rdf, ttl, jsonld, json, xml, marc]
+update: monthly
+coverage: "Fondos desde el siglo XV"
+license: CC0 (datos.bne.es); Hispana según repositorio
+base_url: https://datos.bne.es/
+docs_url: https://www.bne.es/es/catalogos/datos-enlazados
+endpoints:
+  - path: https://datos.bne.es/sparql
+    desc: Endpoint SPARQL sobre obras, autores, ediciones y temas
+  - path: https://datos.bne.es/resource/{id}.jsonld
+    desc: Cualquier recurso en JSON-LD, Turtle o RDF/XML cambiando la extensión
+  - path: https://www.bne.es/es/catalogos/datos-enlazados
+    desc: Volcados completos RDF y documentación del modelo (FRBR)
+  - path: https://hispana.mcu.es/es/oai
+    desc: OAI-PMH de Hispana (Dublin Core y EDM)
+gotchas:
+  - El modelo es FRBR (obra, expresión, manifestación); un libro es una manifestación enlazada a una obra y un autor.
+  - Los ids de datos.bne.es (XX1234567 autoridades, bimo... obras) no son ISBN; el ISBN está como propiedad.
+  - La Hemeroteca Digital permite descarga de texto OCR por página pero sin API de búsqueda documentada.
+related: [csic-digital]
+status: active
+verified: null

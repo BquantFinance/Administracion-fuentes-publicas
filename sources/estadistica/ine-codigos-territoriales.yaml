@@ -1,0 +1,34 @@
+id: ine-codigos-territoriales
+name: INE – Códigos de municipios, provincias y unidades territoriales
+org: Instituto Nacional de Estadística (INE)
+ministry: Economía, Comercio y Empresa
+level: age
+sector: estadistica
+tags: [ine, codigos, municipios, provincias, ccaa, nuts, callejero, relacion-municipios]
+summary: >-
+  Relación oficial de municipios con código INE (5 dígitos, provincia + municipio + dígito de control),
+  provincias, comunidades autónomas, NUTS, islas y variaciones anuales (altas, bajas, cambios de nombre).
+  Es la clave para cruzar cualquier dataset territorial español.
+access: [download]
+auth: none
+formats: [xlsx, csv]
+update: annual
+coverage: "Relación anual desde 1996; variaciones desde 1842 en Alteraciones de municipios"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=ultiDatos&idp=1254734710990
+docs_url: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=metodologia&idp=1254734710990
+endpoints:
+  - path: https://www.ine.es/daco/daco42/codmun/diccionario{AA}.xlsx
+    desc: Diccionario de municipios del año AA (dos dígitos)
+    example: curl -sO "https://www.ine.es/daco/daco42/codmun/diccionario24.xlsx"
+  - path: https://www.ine.es/daco/daco42/codmun/cod_ccaa_provincia.htm
+    desc: Códigos de comunidades autónomas y provincias
+  - path: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=resultados&idp=1254734710990
+    desc: Relación de municipios y variaciones por año
+gotchas:
+  - El código INE de municipio completo tiene 5 dígitos (CPRO 2 + CMUN 3) y el dígito de control es un sexto dígito aparte; muchos datasets omiten el DC y otros lo incluyen.
+  - Algunos municipios cambian de código al fusionarse; hay que aplicar la tabla de variaciones para series largas.
+  - Los códigos del Catastro y de la DGT no coinciden con los del INE; existen tablas de equivalencia en el propio Catastro.
+related: [ine-api-tempus, hacienda-ovef, catastro-ovc]
+status: active
+verified: null

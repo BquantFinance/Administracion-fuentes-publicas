@@ -1,0 +1,32 @@
+id: transparencia-portal
+name: Portal de la Transparencia de la AGE
+org: Dirección General de Gobernanza Pública
+ministry: Transformación Digital y de la Función Pública
+level: age
+sector: gobierno-abierto-administracion
+tags: [transparencia, publicidad-activa, altos-cargos, retribuciones, agendas, contratos, convenios, derecho-de-acceso]
+summary: >-
+  Publicidad activa de la AGE: altos cargos y sus retribuciones, agendas, contratos, convenios, subvenciones,
+  presupuestos, informes, y estadísticas de solicitudes de derecho de acceso. Muchos datasets en CSV/XLSX.
+access: [portal, download]
+auth: none
+formats: [csv, xlsx, pdf, html]
+update: monthly
+coverage: "2014-"
+license: Reutilización libre con cita de la fuente
+base_url: https://transparencia.gob.es/
+docs_url: https://transparencia.gob.es/transparencia/transparencia_Home/index/Datos-abiertos.html
+endpoints:
+  - path: https://transparencia.gob.es/transparencia/transparencia_Home/index/PublicidadActiva/Contratos.html
+    desc: Contratos, convenios y encomiendas por ministerio
+  - path: https://transparencia.gob.es/transparencia/transparencia_Home/index/PublicidadActiva/AltosCargos.html
+    desc: Altos cargos, retribuciones, agendas y declaraciones de bienes
+  - path: https://transparencia.gob.es/transparencia/transparencia_Home/index/Derecho-de-acceso.html
+    desc: Solicitudes de acceso a información pública y sus resoluciones
+gotchas:
+  - Los datasets se publican por ministerio y trimestre en ficheros separados; agregarlos requiere normalizar nombres de organismos (usar DIR3).
+  - Las agendas de altos cargos son HTML por persona; no hay descarga masiva.
+  - El derecho de acceso se ejerce vía Cl@ve; las resoluciones se publican sin datos del solicitante.
+related: [datos-gob-es-api, dir3-directorio, bdns-api]
+status: active
+verified: null

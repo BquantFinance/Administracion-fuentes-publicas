@@ -1,0 +1,30 @@
+id: ine-microdatos
+name: INE – Microdatos anonimizados
+org: Instituto Nacional de Estadística (INE)
+ministry: Economía, Comercio y Empresa
+level: age
+sector: estadistica
+tags: [ine, microdatos, epa, ecv, encuestas, censo, registros-individuales]
+summary: >-
+  Ficheros de microdatos anonimizados de encuestas (EPA, Encuesta de Condiciones de Vida, Presupuestos Familiares,
+  Estructura Salarial, Censo, Movimiento Natural de la Población) con diseño de registro y programas de lectura.
+access: [download]
+auth: none
+formats: [csv, txt, zip, sql]
+update: quarterly
+coverage: "EPA desde 2005 en formato actual; otras según encuesta"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.ine.es/prodyser/microdatos.htm
+docs_url: https://www.ine.es/prodyser/microdatos.htm
+endpoints:
+  - path: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176918&menu=resultados&idp=1254735976595
+    desc: Microdatos de la EPA por trimestre
+  - path: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176807&menu=resultados&idp=1254735976608
+    desc: Microdatos de la Encuesta de Condiciones de Vida
+gotchas:
+  - Los ficheros son de ancho fijo o CSV con separador tabulador; el diseño de registro va en Excel aparte y cambia entre años.
+  - Los ZIP incluyen programas de lectura para SAS, SPSS, R y Stata, pero no siempre para Python.
+  - Los factores de elevación son obligatorios para cualquier estimación; no contar registros.
+related: [ine-api-tempus]
+status: active
+verified: null

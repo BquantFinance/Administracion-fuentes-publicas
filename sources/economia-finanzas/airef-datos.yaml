@@ -1,0 +1,31 @@
+id: airef-datos
+name: AIReF – Previsiones, informes y datos fiscales
+org: Autoridad Independiente de Responsabilidad Fiscal (AIReF)
+ministry: Organismo independiente adscrito a Hacienda
+level: age
+sector: economia-finanzas
+tags: [airef, previsiones, deuda, deficit, reglas-fiscales, spending-review, observatorio]
+summary: >-
+  Previsiones macroeconómicas y fiscales, observatorio de deuda por Administración, evaluaciones de gasto
+  (spending reviews) y datos de ejecución de reglas fiscales por CCAA y ayuntamientos, con descargas Excel.
+access: [download, portal]
+auth: none
+formats: [xlsx, pdf, csv]
+update: quarterly
+coverage: "2014-"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.airef.es/
+docs_url: https://www.airef.es/es/datalab/
+endpoints:
+  - path: https://www.airef.es/es/datalab/
+    desc: Datalab con visualizaciones y descarga de datos
+  - path: https://www.airef.es/es/observatorio-de-deuda/
+    desc: Observatorio de deuda pública por subsector
+  - path: https://www.airef.es/es/previsiones/
+    desc: Previsiones macro y fiscales trimestrales
+gotchas:
+  - Muchas descargas están detrás de visores embebidos; buscar el enlace "descargar datos" en cada gráfico.
+  - Las previsiones se publican en PDF con anexos Excel no siempre enlazados desde la ficha.
+related: [igae-ejecucion-presupuestaria, bde-estadisticas]
+status: active
+verified: null

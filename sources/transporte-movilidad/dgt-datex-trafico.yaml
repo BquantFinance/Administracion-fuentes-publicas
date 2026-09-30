@@ -1,0 +1,30 @@
+id: dgt-datex-trafico
+name: DGT – Incidencias de tráfico en tiempo real (DATEX II) y cámaras
+org: Dirección General de Tráfico (DGT)
+ministry: Interior
+level: age
+sector: transporte-movilidad
+tags: [dgt, trafico, incidencias, datex2, carreteras, camaras, obras, tiempo-real]
+summary: >-
+  Incidencias de tráfico (accidentes, obras, retenciones, meteorología adversa) de la red interurbana en formato
+  DATEX II actualizado cada pocos minutos, más cámaras y paneles. Sin autenticación.
+access: [download, api-rest]
+auth: none
+formats: [xml]
+update: realtime
+license: Reutilización libre con cita de la fuente
+base_url: https://infocar.dgt.es/datex2/
+docs_url: https://infocar.dgt.es/datex2/
+endpoints:
+  - path: https://infocar.dgt.es/datex2/dgt/SituationPublication/all/content.xml
+    desc: Todas las incidencias activas (DATEX II SituationPublication)
+    example: curl -s "https://infocar.dgt.es/datex2/dgt/SituationPublication/all/content.xml" | head -50
+  - path: https://infocar.dgt.es/datex2/dgt/PredefinedLocationsPublication/all/content.xml
+    desc: Localizaciones predefinidas referenciadas por las incidencias
+gotchas:
+  - No incluye Cataluña ni País Vasco, que tienen competencia propia de tráfico (Servei Català de Trànsit, Trafikoa).
+  - DATEX II versión 2 con esquemas europeos; las coordenadas van en WGS84 dentro de groupOfLocations.
+  - Volumen alto de XML; consultar cada 5 minutos como máximo para no ser bloqueado.
+related: [dgt-estadisticas]
+status: active
+verified: null

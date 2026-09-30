@@ -1,0 +1,31 @@
+id: mites-estadisticas
+name: Ministerio de Trabajo – Estadísticas laborales y convenios
+org: Subdirección General de Estadística y Análisis Sociolaboral
+ministry: Trabajo y Economía Social
+level: age
+sector: empleo-seguridad-social
+tags: [convenios-colectivos, huelgas, accidentes-laborales, regulacion-empleo, ere, empresas-trabajo-temporal]
+summary: >-
+  Estadísticas de convenios colectivos (REGCON), huelgas y cierres, accidentes de trabajo, regulación de empleo,
+  ETT, cooperativas y sociedades laborales, mediación, arbitraje y conciliación. Tablas descargables y anuario.
+access: [portal, download]
+auth: none
+formats: [xlsx, pdf, html]
+update: monthly
+coverage: "1990-"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.mites.gob.es/es/estadisticas/index.htm
+docs_url: https://www.mites.gob.es/es/estadisticas/index.htm
+endpoints:
+  - path: https://www.mites.gob.es/estadisticas/cct/welcome.htm
+    desc: Estadística de convenios colectivos de trabajo
+  - path: https://www.mites.gob.es/estadisticas/eat/welcome.htm
+    desc: Estadística de accidentes de trabajo
+  - path: https://expinterweb.mites.gob.es/regcon/
+    desc: REGCON, registro y depósito de convenios colectivos con texto íntegro
+gotchas:
+  - El buscador REGCON exige seleccionar ámbito y no devuelve más de unas decenas de resultados por página.
+  - Las tablas de accidentes distinguen con baja y sin baja; usar la serie correcta.
+related: [sepe-estadisticas, segsocial-estadisticas]
+status: active
+verified: null

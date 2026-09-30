@@ -1,0 +1,33 @@
+id: miteco-banco-datos-naturaleza
+name: MITECO – Banco de Datos de la Naturaleza e Inventario del Patrimonio Natural
+org: Dirección General de Biodiversidad, Bosques y Desertificación
+ministry: Para la Transición Ecológica y el Reto Demográfico
+level: age
+sector: medio-ambiente-agua-biodiversidad
+tags: [biodiversidad, especies, habitats, red-natura-2000, espacios-protegidos, inventario-forestal, wms]
+summary: >-
+  Cartografía y datos de biodiversidad: Red Natura 2000, espacios naturales protegidos, hábitats, distribución
+  de especies (cuadrículas 10x10 km), Inventario Forestal Nacional, Mapa Forestal, humedales, vías pecuarias.
+  Descarga de capas y servicios WMS/WFS.
+access: [download, ogc, portal]
+auth: none
+formats: [shp, gpkg, geojson, xlsx, pdf, xml]
+update: irregular
+coverage: "Inventario Forestal desde 1966; especies según atlas"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.miteco.gob.es/es/biodiversidad/servicios/banco-datos-naturaleza.html
+docs_url: https://www.miteco.gob.es/es/biodiversidad/servicios/banco-datos-naturaleza/informacion-disponible.html
+endpoints:
+  - path: https://www.miteco.gob.es/es/biodiversidad/servicios/banco-datos-naturaleza/informacion-disponible.html
+    desc: Catálogo de capas descargables por tema
+  - path: https://wms.mapama.gob.es/sig/Biodiversidad/RedNatura/wms.aspx?SERVICE=WMS&REQUEST=GetCapabilities
+    desc: WMS de Red Natura 2000
+  - path: https://iepnb.gob.es/
+    desc: Inventario Español del Patrimonio Natural y de la Biodiversidad, con catálogo y visor
+gotchas:
+  - Las capas se sirven en ETRS89 UTM por husos o en geográficas según capa; unificar antes de cruzar.
+  - Los datos de especies protegidas sensibles se publican con resolución degradada.
+  - Ocurrencias puntuales de especies están en GBIF a través del nodo español (ficha gbif-es).
+related: [gbif-es, cnig-centro-descargas]
+status: active
+verified: null

@@ -1,0 +1,52 @@
+id: ine-api-tempus
+name: INE – API JSON (Tempus3)
+org: Instituto Nacional de Estadística (INE)
+ministry: Economía, Comercio y Empresa
+level: age
+sector: estadistica
+tags: [ine, api, series-temporales, ipc, epa, pib, padron, demografia, empresas]
+summary: >-
+  Acceso programático a todas las operaciones estadísticas del INE: metadatos (operaciones, tablas, variables,
+  valores) y datos de tablas y series (IPC, EPA, PIB, padrón, natalidad, empresas). JSON y CSV, sin autenticación.
+access: [api-rest]
+auth: none
+formats: [json, csv, px]
+update: daily
+coverage: "Según operación; IPC desde 2002 en base actual, series históricas enlazadas"
+license: Reutilización libre con cita de la fuente (licencia INE compatible CC BY 4.0)
+base_url: https://servicios.ine.es/wstempus/js/ES
+docs_url: https://www.ine.es/dyngs/DAB/index.htm?cid=1099
+endpoints:
+  - path: /OPERACIONES_DISPONIBLES
+    desc: Lista de operaciones estadísticas con sus códigos
+    example: curl -s "https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES"
+  - path: /TABLAS_OPERACION/{id_operacion}
+    desc: Tablas publicadas de una operación (p. ej. IPC = 25)
+    example: curl -s "https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/IPC"
+  - path: /DATOS_TABLA/{id_tabla}?nult={n}
+    desc: Datos de una tabla, últimos n periodos
+    example: curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/50902?nult=3"
+  - path: /DATOS_SERIE/{cod_serie}?nult={n}
+    desc: Datos de una serie por su código
+    example: curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/IPC251856?nult=12"
+  - path: /SERIES_TABLA/{id_tabla}
+    desc: Series que componen una tabla, con sus metadatos
+  - path: /VARIABLES_OPERACION/{id_operacion} y /VALORES_VARIABLEOPERACION/{id_var}/{id_op}
+    desc: Variables y valores para filtrar
+  - path: https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/{id_tabla}
+    desc: Misma API con salida CSV cambiando js por csv
+    example: curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/50902?nult=1"
+rate_limit: No documentado; respuestas grandes se truncan, usar nult, date o filtros tv
+gotchas:
+  - Los ids de tabla del portal INEbase (t=NNNNN en la URL) son los mismos que acepta DATOS_TABLA.
+  - Filtrar por variable con el parámetro tv=id_variable:id_valor; puede repetirse.
+  - Fechas con date=AAAAMMDD:AAAAMMDD; sin nult ni date devuelve toda la serie, que puede ser enorme.
+  - Cambiar ES por EN en la ruta devuelve metadatos en inglés.
+  - Existe /wstempus/jsCache/ES/... con caché agresiva; usar /js/ para datos recién publicados.
+  - Los valores llevan campo Secreto=true cuando están protegidos por secreto estadístico; el dato viene vacío.
+tips:
+  - Flujo típico, OPERACIONES_DISPONIBLES para el id, TABLAS_OPERACION para la tabla, SERIES_TABLA para elegir series, DATOS_SERIE con nult para bajar.
+  - En Python, pandas.json_normalize sobre el campo Data de cada serie; la fecha viene en Fecha (epoch ms) y Anyo/FK_Periodo.
+related: [ine-codigos-territoriales, ine-microdatos]
+status: active
+verified: null

@@ -1,0 +1,29 @@
+id: mapa-pesca
+name: MAPA – Pesca, flota, capturas, desembarques y precios en lonja
+org: Secretaría General de Pesca
+ministry: Agricultura, Pesca y Alimentación
+level: age
+sector: agricultura-pesca-alimentacion
+tags: [pesca, flota, censo-flota, capturas, desembarques, lonjas, acuicultura, caladeros]
+summary: >-
+  Censo de la flota pesquera operativa por buque, estadísticas de capturas y desembarques, ventas en lonja
+  (notas de venta agregadas), acuicultura, y cartografía de caladeros y zonas de pesca.
+access: [portal, download]
+auth: none
+formats: [xlsx, csv, pdf, shp]
+update: monthly
+coverage: "2004-"
+license: Reutilización libre con cita de la fuente
+base_url: https://www.mapa.gob.es/es/pesca/temas/
+docs_url: https://www.mapa.gob.es/es/pesca/temas/registro-flota/
+endpoints:
+  - path: https://www.mapa.gob.es/es/pesca/temas/registro-flota/censo-flota-pesquera-operativa/
+    desc: Censo de Flota Pesquera Operativa descargable
+  - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-pesqueras/
+    desc: Estadísticas pesqueras (capturas, desembarques, acuicultura)
+gotchas:
+  - El censo de flota se publica con el código CFR europeo por buque, clave para cruzar con el registro de flota de la UE.
+  - Las notas de venta individuales no son públicas; solo agregados por especie y puerto.
+related: [mapa-estadisticas-agrarias, puertos-estado-datos]
+status: active
+verified: null

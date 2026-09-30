@@ -1,0 +1,30 @@
+id: mapa-sigpac
+name: SIGPAC – Sistema de Información Geográfica de Parcelas Agrícolas
+org: Fondo Español de Garantía Agraria (FEGA) / MAPA
+ministry: Agricultura, Pesca y Alimentación
+level: age
+sector: agricultura-pesca-alimentacion
+tags: [sigpac, parcelas-agricolas, recintos, usos-suelo, wms, cartografia-agraria]
+summary: >-
+  Recintos agrícolas con uso del suelo, superficie, pendiente y coeficiente de regadío para toda España,
+  actualizados anualmente. Visor, WMS y descarga masiva por provincia y municipio.
+access: [ogc, download, portal]
+auth: none
+formats: [shp, gpkg, kml, xml]
+update: annual
+coverage: "2005-"
+license: Reutilización libre con cita de la fuente
+base_url: https://sigpac.mapa.gob.es/fega/visor/
+docs_url: https://www.mapa.gob.es/es/agricultura/temas/sistema-de-informacion-geografica-de-parcelas-agricolas-sigpac-/
+endpoints:
+  - path: https://www.mapa.gob.es/es/agricultura/temas/sistema-de-informacion-geografica-de-parcelas-agricolas-sigpac-/descarga.aspx
+    desc: Descarga de recintos SIGPAC por provincia y campaña
+  - path: https://sigpac-hubcloud.es/wms?SERVICE=WMS&REQUEST=GetCapabilities
+    desc: WMS de recintos y usos SIGPAC
+gotchas:
+  - La referencia SIGPAC (provincia, municipio, agregado, zona, polígono, parcela, recinto) no es la referencia catastral, aunque comparten polígono y parcela en rústica.
+  - Las capas cambian cada campaña; guardar la campaña usada porque los recintos se renumeran.
+  - La descarga por CCAA a veces la sirven los servicios autonómicos, no el FEGA.
+related: [catastro-ovc, fega-beneficiarios-pac]
+status: active
+verified: null

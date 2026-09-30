@@ -1,0 +1,36 @@
+id: borme-api-sumario
+name: BORME – API de sumarios y actos mercantiles
+org: Agencia Estatal Boletín Oficial del Estado (AEBOE)
+ministry: Presidencia, Justicia y Relaciones con las Cortes
+level: age
+sector: legislacion-boletines
+tags: [borme, registro-mercantil, empresas, sociedades, constituciones, nombramientos]
+summary: >-
+  Sumario diario del Boletín Oficial del Registro Mercantil: actos inscritos por provincia (constituciones,
+  nombramientos, ceses, ampliaciones, disoluciones), anuncios y convocatorias, con enlaces a PDF y XML.
+access: [api-rest, download]
+auth: none
+formats: [json, xml, pdf]
+update: daily
+coverage: "2009- (PDF); sumarios estructurados desde 2009"
+license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
+base_url: https://www.boe.es/datosabiertos/api
+docs_url: https://www.boe.es/datosabiertos/documentos/APIsumarioBORME.pdf
+endpoints:
+  - path: /borme/sumario/{AAAAMMDD}
+    desc: Sumario del BORME del día, con un ítem por provincia y sección
+    example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/borme/sumario/20240102"'
+  - path: https://www.boe.es/borme/dias/{AAAA}/{MM}/{DD}/pdfs/{BORME-A-AAAA-NNN-XX}.pdf
+    desc: PDF de actos inscritos de una provincia (sección A)
+    example: curl -sO "https://www.boe.es/borme/dias/2024/01/02/pdfs/BORME-A-2024-1-01.pdf"
+  - path: https://www.boe.es/diario_borme/xml.php?id={BORME-C-AAAA-NNNNN}
+    desc: XML de un anuncio de la sección C
+rate_limit: No documentado
+gotchas:
+  - Los actos de la sección A (inscripciones) solo existen en PDF; el detalle por empresa exige parsear el PDF.
+  - El sufijo del PDF de sección A es el código de provincia (01 Álava ... 52 Melilla), no un correlativo.
+  - No se publica sábados, domingos ni festivos; 404 esos días.
+  - El BORME no incluye cuentas anuales ni datos de socios; eso está en el Registro Mercantil (no AGE, de pago).
+related: [boe-api-sumario]
+status: active
+verified: null
