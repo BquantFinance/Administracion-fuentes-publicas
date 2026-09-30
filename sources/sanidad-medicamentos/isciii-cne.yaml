@@ -1,31 +1,51 @@
 id: isciii-cne
-name: ISCIII – Centro Nacional de Epidemiología y vigilancia (RENAVE, SiVIRA)
+name: ISCIII – Centro Nacional de Epidemiología (RENAVE, MoMo, SiVIRA, COVID-19)
 org: Instituto de Salud Carlos III (ISCIII)
 ministry: Ciencia, Innovación y Universidades
 level: age
 sector: sanidad-medicamentos
-tags: [epidemiologia, renave, vigilancia, gripe, covid, enfermedades-transmisibles, mortalidad-momo, sivira]
+tags: [epidemiologia, renave, vigilancia, gripe, covid, enfermedades-transmisibles, mortalidad, momo, sivira]
 summary: >-
-  Vigilancia epidemiológica nacional: boletines semanales de enfermedades de declaración obligatoria, sistema
-  SiVIRA de infecciones respiratorias, MoMo (exceso de mortalidad diario), datos históricos COVID-19 por provincia.
-access: [portal, download]
+  Vigilancia epidemiológica nacional: exceso de mortalidad diario MoMo en CSV (nacional y CCAA por sexo y
+  edad desde 2015), histórico COVID-19 por provincia, sexo y edad en CSV (2020-2023), boletines semanales,
+  informes anuales RENAVE e informes semanales SiVIRA (gripe, COVID-19, VRS) en PDF.
+access: [download, portal]
 auth: none
-formats: [csv, xlsx, pdf, html]
+formats: [csv, pdf, html]
 update: weekly
-coverage: "EDO desde 1997; MoMo desde 2015; COVID 2020-2023"
+coverage: "MoMo 2015-; COVID-19 2020-2023; boletines semanales 2019-; informes anuales RENAVE 2012-"
 license: Reutilización libre con cita de la fuente
 base_url: https://cne.isciii.es/
-docs_url: https://cne.isciii.es/servicios/renave
+docs_url: https://cne.isciii.es/servicios/enfermedades-transmisibles/vigilancia-mortalidad-momo
 endpoints:
+  - path: https://momo.isciii.es/public/momo/data
+    desc: CSV completo de MoMo (719 MB, se regenera a diario hasta el día anterior); admite Range para descargas parciales
+    example: curl -sS -r 0-2000 "https://momo.isciii.es/public/momo/data"
   - path: https://momo.isciii.es/panel_momo/
-    desc: Panel MoMo de exceso de mortalidad con descarga de datos diarios
-  - path: https://cnecovid.isciii.es/covid19/
-    desc: Datos históricos COVID-19 por provincia, edad y sexo (CSV)
-  - path: https://cne.isciii.es/servicios/renave/boletines
-    desc: Boletines epidemiológicos semanales
+    desc: Panel MoMo con gráficos por ámbito; enlaza la metodología en gesdoc.isciii.es
+  - path: https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres.csv
+    desc: COVID-19 diario por provincia de residencia, sexo y edad (38 MB; num_casos, num_hosp, num_uci, num_def); variantes _60_mas y todas_edades
+    example: curl -sSL -o covid.csv "https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres.csv"
+  - path: https://cne.isciii.es/servicios/enfermedades-transmisibles/objetivos-boletines
+    desc: Boletín epidemiológico semanal en PDF, un documento por semana en /documents/d/cne/is-{AAMMDD}-web-pdf
+  - path: https://cne.isciii.es/servicios/enfermedades-transmisibles/informes
+    desc: Informes anuales RENAVE (/documents/d/cne/ano-{AAAA} desde 2019, renave_informe_anual_{AAAA} anteriores)
+  - path: https://cne.isciii.es/servicios/enfermedades-transmisibles/enfermedades-a-z/{enfermedad}
+    desc: Página por enfermedad con protocolo e informes anuales (por ejemplo dengue, con informe_renave_dengue-{AAAA})
+  - path: https://cne.isciii.es/servicios/enfermedades-transmisibles/enfermedades-a-z/gripe-covid-19-y-otros-virus-respiratorios
+    desc: Informes semanales SiVIRA en PDF (informe-20semanal_sivira_{SS}{AAAA}-pdf) e informes de temporada
+quirks: [url-drift, static-html]
+ids: [ccaa]
 gotchas:
-  - Los CSV COVID dejaron de actualizarse en 2023 pero siguen disponibles como histórico.
-  - MoMo publica estimaciones que se revisan retrospectivamente; las últimas semanas cambian.
-related: [sanidad-portal-estadistico]
+  - Las rutas cne.isciii.es/servicios/renave y /servicios/renave/boletines dan 404; el portal es Liferay y los documentos cuelgan de /documents/d/cne/{slug}, con slugs irregulares (espacios codificados como -20).
+  - MoMo es un solo CSV de 719 MB (comillas, coma); columnas ambito (nacional, ccaa), cod_ine_ambito, cod_sexo (all, 1, 6), cod_gedad, fecha_defuncion, defunciones observadas, estimadas (base, q01, q99) y por temperatura.
+  - Las estimaciones MoMo se revisan de forma retrospectiva; las últimas semanas cambian en cada descarga y las defunciones observadas de los últimos días están incompletas.
+  - Los CSV COVID no se actualizan desde el 23/01/2024; provincia_iso es el código ISO 3166-2 de provincia (A, AB, AL), no el INE, y grupo_edad NC es no consta.
+  - La página cnecovid.isciii.es/covid19/ pesa 18 MB (gráficos incrustados); ir directamente a los CSV de resources.
+  - sivira.isciii.es no respondió desde este entorno (error de proxy); los informes SiVIRA se publican como PDF en cne.isciii.es y no hay datos tabulares descargables.
+  - Los boletines y los informes anuales son PDF; los datos de enfermedades de declaración obligatoria no se publican en CSV.
+tips:
+  - "MoMo con pandas: read_csv(url, parse_dates=['fecha_defuncion']) y filtrar ambito == 'nacional' y cod_gedad == 'all' para la serie diaria nacional; cod_ine_ambito enlaza con el código INE de CCAA."
+related: [sanidad-portal-estadistico, ine-api-tempus]
 status: active
-verified: null
+verified: "2026-09-30"

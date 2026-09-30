@@ -1,31 +1,47 @@
 id: aemps-otros-registros
-name: AEMPS – Registro de ensayos clínicos, productos sanitarios y cosméticos
+name: AEMPS – Registro Español de Estudios Clínicos (REEC), notas informativas y alertas
 org: Agencia Española de Medicamentos y Productos Sanitarios (AEMPS)
 ministry: Sanidad
 level: age
 sector: sanidad-medicamentos
-tags: [ensayos-clinicos, reec, productos-sanitarios, cosmeticos, farmacovigilancia, notas-seguridad, alertas]
+tags: [ensayos-clinicos, reec, eudract, productos-sanitarios, notas-informativas, alertas, farmacovigilancia, rss]
 summary: >-
-  Registro Español de Estudios Clínicos (REEC) con búsqueda y ficha por ensayo, distribuidores y fabricantes
-  de productos sanitarios, alertas de seguridad y calidad, notas informativas y datos de farmacovigilancia.
+  Registro Español de Estudios Clínicos (11.926 estudios) con buscador y ficha pública por estudio, notas
+  informativas y alertas de seguridad de medicamentos, productos sanitarios y cosméticos con RSS. Sin API
+  documentada ni descarga masiva; el REEC es una aplicación JavaScript con sesión.
 access: [portal, feed]
 auth: none
-formats: [html, pdf, rss, xlsx]
+formats: [html, rss, pdf]
 update: daily
-coverage: "REEC desde 2013"
+coverage: "REEC desde 2013; notas informativas desde 2010"
 license: Reutilización libre con cita de la fuente
-base_url: https://www.aemps.gob.es/
-docs_url: https://reec.aemps.es/
+base_url: https://reec.aemps.es/reec/public/web.html
+docs_url: https://www.aemps.gob.es/comunicacion/notas-informativas/notas-informativas-aemps/
 endpoints:
   - path: https://reec.aemps.es/reec/public/web.html
-    desc: Buscador del Registro Español de Estudios Clínicos
-  - path: https://www.aemps.gob.es/informa/
-    desc: Notas informativas y alertas (medicamentos, productos sanitarios, cosméticos), con RSS
-  - path: https://www.aemps.gob.es/medicamentos-de-uso-humano/farmacovigilancia-de-medicamentos-de-uso-humano/
-    desc: Farmacovigilancia y acceso a datos de notificaciones
+    desc: Buscador del REEC (texto libre y búsqueda avanzada); los resultados se cargan por POST a /reec/buscador/* con sesión
+  - path: https://reec.aemps.es/reec/estudio/{id}
+    desc: Ficha pública de un estudio por identificador (número EudraCT, por ejemplo 2020-000001-01)
+    example: curl -s "https://reec.aemps.es/reec/estudio/2020-000001-01"
+  - path: https://reec.aemps.es/reec/buscador/count
+    desc: Número total de estudios registrados (POST con cuerpo JSON vacío; GET responde 405)
+    example: 'curl -s -X POST -H "Content-Type: application/json" -d "{}" "https://reec.aemps.es/reec/buscador/count"'
+  - path: https://www.aemps.gob.es/feed/
+    desc: RSS 2.0 de todas las publicaciones de la AEMPS (notas informativas, alertas, boletines)
+    example: curl -s "https://www.aemps.gob.es/feed/"
+  - path: https://www.aemps.gob.es/comunicacion/notas-informativas/notas-informativas-aemps/
+    desc: Listado de notas informativas por tipo (medicamentos de uso humano, veterinarios, productos sanitarios, cosméticos)
+quirks: [session-required, js-rendered, waf-blocks-bots]
+ids: []
 gotchas:
-  - El REEC es una aplicación JavaScript con API interna no documentada; los datos completos de ensayos europeos están en CTIS/EU CTR.
-  - Las alertas de productos sanitarios se publican como PDF individuales sin identificador estructurado.
+  - El REEC no tiene API pública. Sus endpoints internos (buscador/count, getEstudiosIdByLikes, getEstudiosIdByFiltro, getEstudiosByIdSession) son POST con sesión y devuelven vacío fuera de la secuencia del buscador.
+  - Las fichas /reec/estudio/{id} son HTML sin datos estructurados; para datos completos y descarga masiva de ensayos europeos usar CTIS o EU CTR, que incluyen los españoles.
+  - La ruta /informa/ (índice y búsqueda) responde 403 Forbidden con cualquier User-Agent, pero cada nota bajo /informa/{slug}/ y el listado en /comunicacion/ responden 200.
+  - Los feeds por categoría (por ejemplo /comunicacion/notas-informativas-productos-sanitarios/feed/) existen pero vienen casi vacíos; usar el feed global y filtrar por categoría.
+  - Las alertas de productos sanitarios se publican como notas HTML y PDF sin identificador estructurado ni tabla descargable.
+  - Los datos de notificaciones de farmacovigilancia (FEDRA) no son abiertos; labofar.aemps.es (registro de laboratorios) y los registros RECOPS y RPS solo ofrecen trámites con certificado.
+tips:
+  - Para seguir alertas en tiempo real, sondear el feed global cada hora y filtrar por category (Notas informativas, Alertas) en cada item.
 related: [aemps-cima-api]
 status: active
-verified: null
+verified: "2026-09-30"

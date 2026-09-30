@@ -1,48 +1,65 @@
 id: aemps-cima-api
-name: AEMPS CIMA – API REST de medicamentos autorizados
+name: AEMPS CIMA – API REST de medicamentos autorizados y nomenclátor de prescripción
 org: Agencia Española de Medicamentos y Productos Sanitarios (AEMPS)
 ministry: Sanidad
 level: age
 sector: sanidad-medicamentos
-tags: [medicamentos, cima, aemps, principios-activos, fichas-tecnicas, prospectos, codigo-nacional, atc, problemas-suministro]
+tags: [medicamentos, cima, aemps, principios-activos, fichas-tecnicas, prospectos, codigo-nacional, atc, problemas-suministro, snomed]
 summary: >-
-  Todos los medicamentos autorizados en España: composición, principios activos, código ATC, código nacional,
-  ficha técnica y prospecto en HTML/PDF, estado de comercialización, problemas de suministro, laboratorio.
-  API REST JSON sin autenticación.
+  Todos los medicamentos autorizados en España (unos 25.000): composición, principios activos, ATC,
+  presentaciones con código nacional, estado, ficha técnica y prospecto en PDF, HTML y por secciones,
+  problemas de suministro y registro de cambios. JSON sin autenticación y nomenclátor XML diario.
 access: [api-rest, download]
 auth: none
-formats: [json, xml, pdf, html]
+formats: [json, xml, pdf, html, zip]
 update: daily
-coverage: "Medicamentos autorizados vigentes y revocados"
+coverage: "Medicamentos autorizados, suspendidos y revocados; registro de cambios por fecha"
 license: Reutilización libre con cita de la fuente
 base_url: https://cima.aemps.es/cima/rest
-docs_url: https://cima.aemps.es/cima/publico/nomenclator.html
+docs_url: https://sede.aemps.gob.es/docs/CIMA-REST-API_1_19.pdf
 endpoints:
   - path: /medicamentos?nombre={texto}&pagina={n}
-    desc: Búsqueda de medicamentos por nombre, principio activo, laboratorio, ATC (parámetros combinables)
+    desc: Búsqueda paginada; también practiv1 (principio activo), atc, laboratorio, comerc, receta y otros filtros del manual, combinables
     example: curl -s "https://cima.aemps.es/cima/rest/medicamentos?nombre=ibuprofeno&pagina=1"
-  - path: /medicamento?cn={codigo_nacional}
-    desc: Detalle de un medicamento por código nacional (o nregistro=)
-    example: curl -s "https://cima.aemps.es/cima/rest/medicamento?cn=654210"
+  - path: /medicamento?nregistro={nreg}
+    desc: Detalle completo (pactivos, atcs, presentaciones con cn y estado, docs con url PDF y urlHtml, fotos, vtm, dosis, estado aut/rev); también ?cn={cn}
+    example: curl -s "https://cima.aemps.es/cima/rest/medicamento?nregistro=80298"
   - path: /presentaciones?cn={cn}
-    desc: Presentaciones comerciales
+    desc: Presentaciones comerciales por código nacional o por nregistro
   - path: /psuministro
-    desc: Problemas de suministro activos
+    desc: Problemas de suministro activos (cn, nombre, tipoProblemaSuministro, fini, ffin, activo, observ), 860 en la fecha de verificación
     example: curl -s "https://cima.aemps.es/cima/rest/psuministro"
-  - path: /docSegmentado/contenido/1?nregistro={nreg}
-    desc: Ficha técnica segmentada por secciones (1 ficha técnica, 2 prospecto)
-  - path: /maestras?maestra={id}
-    desc: Tablas maestras (1 principios activos, 3 formas farmacéuticas, 4 vías, 6 laboratorios, 7 ATC...)
-  - path: https://cima.aemps.es/cima/publico/nomenclator.html
-    desc: Nomenclátor de prescripción, descarga completa mensual en XML
+  - path: /docSegmentado/secciones/{1|2}?nregistro={nreg} y /docSegmentado/contenido/{1|2}?nregistro={nreg}&seccion={s}
+    desc: Ficha técnica (1) o prospecto (2) por secciones; contenido devuelve HTML de la sección (4.1 indicaciones, etc.)
+    example: curl -s "https://cima.aemps.es/cima/rest/docSegmentado/contenido/1?nregistro=80298&seccion=4.1"
+  - path: /registroCambios?fecha={dd/mm/aaaa}
+    desc: Medicamentos cambiados desde la fecha (nregistro, fecha, tipoCambio, cambio), para sincronizar sin rebajar todo
+    example: curl -s "https://cima.aemps.es/cima/rest/registroCambios?fecha=01/09/2026"
+  - path: /maestras?maestra={id}&nombre={texto}
+    desc: Tablas maestras filtradas por texto (1 principios activos, 3 formas farmacéuticas, 4 vías, 6 laboratorios, 7 ATC); sin filtro responde 204
+    example: curl -s "https://cima.aemps.es/cima/rest/maestras?maestra=1&nombre=ibu"
+  - path: /vmpp
+    desc: Equivalencias SNOMED CT del nomenclátor (vmp, vmpDesc, vmpp), 7016 filas
+  - path: https://listadomedicamentos.aemps.gob.es/prescripcion.zip
+    desc: Nomenclátor de prescripción completo (16 MB; Prescripcion.xml de 193 MB con una entrada por presentación más 13 diccionarios XML), regenerado a diario
+    example: curl -sSL -o prescripcion.zip "https://listadomedicamentos.aemps.gob.es/prescripcion.zip"
+  - path: https://cima.aemps.es/cima/pdfs/{ft|p}/{nreg}/{FT|P}_{nreg}.pdf
+    desc: Ficha técnica y prospecto en PDF con URL estable por nregistro; versión HTML en /cima/dochtml/{ft|p}/{nreg}/{FT|P}_{nreg}.html
+rate_limit: No documentado; sin 429 ni cortes con peticiones secuenciales
+quirks: []
+ids: [cn-medicamento]
 gotchas:
-  - Paginación de 25 resultados por página con el parámetro pagina; el total va en el campo totalFilas.
-  - Los parámetros de búsqueda por principio activo (practiv1) y ATC (atc) aceptan códigos parciales.
-  - El código nacional (cn) identifica la presentación; el nregistro identifica el medicamento. Un medicamento tiene varias presentaciones.
-  - Las fichas técnicas en PDF cambian de URL con cada actualización; guardar nregistro y regenerar la URL.
-  - Documentación técnica completa en el PDF "CIMA REST API" enlazado desde la página de nomenclátor.
+  - Páginas de 200 resultados (tamanioPagina fijo, el parámetro se ignora); totalFilas da el total y pagina empieza en 1. Sin resultados responde 200 con totalFilas 0.
+  - Un nregistro o cn inexistente responde 204 sin cuerpo, no 404; comprobar el código de estado antes de parsear.
+  - Solo JSON; Accept application/xml devuelve 406. La raíz /cima/rest da 404 HTML.
+  - nregistro identifica el medicamento y cn cada presentación; un medicamento tiene varias presentaciones. Las fechas (estado.aut, estado.rev, docs.fecha, fini, ffin) son epoch en milisegundos.
+  - Los booleanos comerc, receta, generico, huerfano, biosimilar y psum vienen en el listado; el ATC y los principios activos con código solo en el detalle (atcs, principiosActivos).
+  - El registro de cambios devuelve más de 100.000 filas desde una fecha antigua; pedir desde la última sincronización y paginar.
+  - El nomenclátor se regenera a diario (listprescriptiondate) con códigos SNOMED (cod_dcsa, cod_dcp, cod_dcpf) que no están en la API salvo en vmpp.
+  - La documentación de la ficha anterior (nomenclator.html) es solo la página de descarga; el manual de la API es el PDF CIMA-REST-API (docs_url) y la descripción técnica del nomenclátor está en app-docs.aemps.es.
 tips:
-  - Para un maestro completo de medicamentos descargar el nomenclátor XML mensual en vez de paginar la API.
+  - Para un maestro completo, descargar prescripcion.zip y parsear Prescripcion.xml con iterparse (193 MB); para mantenerlo al día, registroCambios con la fecha de la última descarga.
+  - "Secciones útiles de ficha técnica: 4.1 indicaciones, 4.2 posología, 4.3 contraindicaciones, 4.8 reacciones adversas; el HTML de contenido conserva estilos de Word, limpiar con BeautifulSoup get_text."
 related: [sanidad-portal-estadistico, aemps-otros-registros]
 status: active
-verified: null
+verified: "2026-09-30"

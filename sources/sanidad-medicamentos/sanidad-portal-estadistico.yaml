@@ -1,35 +1,48 @@
 id: sanidad-portal-estadistico
-name: Ministerio de Sanidad – Portal Estadístico y Sistema de Información Sanitaria
+name: Ministerio de Sanidad – Portal Estadístico del SNS y Catálogo Nacional de Hospitales
 org: Secretaría General de Salud Digital, Información e Innovación del SNS
 ministry: Sanidad
 level: age
 sector: sanidad-medicamentos
-tags: [sanidad, sns, hospitales, cmbd, altas-hospitalarias, mortalidad, indicadores-clave, gasto-sanitario, recetas]
+tags: [sanidad, sns, hospitales, cmbd, altas-hospitalarias, indicadores-clave, gasto-sanitario, catalogo-hospitales, barometro]
 summary: >-
-  Portal Estadístico del SNS: altas hospitalarias (RAE-CMBD), Indicadores Clave del SNS, gasto sanitario,
-  recursos y actividad de hospitales y atención primaria (SIAP), consumo farmacéutico, encuestas de salud,
-  catálogo de hospitales y centros. Consulta interactiva y descarga.
+  Catálogo Nacional de Hospitales en xlsx (849 hospitales con código, camas, municipio, dependencia y
+  complejo), consulta interactiva de cubos del SNS (altas RAE-CMBD, SIAP, recursos, gasto), Indicadores Clave
+  del SNS, Barómetro Sanitario y BDCAP. Solo el catálogo tiene descarga directa.
 access: [portal, download]
 auth: none
-formats: [xlsx, csv, pdf, html]
+formats: [xlsx, pdf, html]
 update: annual
-coverage: "CMBD desde 1997; indicadores según serie"
+coverage: "CNH 2025; RAE-CMBD desde 1997; indicadores según serie"
 license: Reutilización libre con cita de la fuente
-base_url: https://pestadistico.inteligenciadegestion.sanidad.gob.es/
-docs_url: https://www.sanidad.gob.es/estadEstudios/portada/home.htm
+base_url: https://www.sanidad.gob.es/estadEstudios/portada/home.htm
+docs_url: https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/tablasEstadisticas/home.htm
 endpoints:
-  - path: https://pestadistico.inteligenciadegestion.sanidad.gob.es/publicoSNS/
-    desc: Consulta interactiva de cubos estadísticos del SNS
-  - path: https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/home.htm
-    desc: Sistema de Información Sanitaria, publicaciones y descargas
-  - path: https://www.sanidad.gob.es/ciudadanos/prestaciones/centrosServiciosSNS/hospitales/home.htm
-    desc: Catálogo Nacional de Hospitales (descargable)
+  - path: https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/docs/CNH_2025.xlsx
+    desc: Catálogo Nacional de Hospitales (hojas DIRECTORIO, ESTRUCTURA FUNCIONAL, BAJAS, ALTAS y tablas de códigos de CCAA, provincias, municipios, clase y dependencia)
+    example: curl -sSL -o CNH_2025.xlsx "https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/docs/CNH_2025.xlsx"
+  - path: https://pestadistico.inteligenciadegestion.sanidad.gob.es/publicoSNS/S
+    desc: Consulta Interactiva del SNS (cubos de altas, actividad, recursos y gasto); aplicación ASP.NET con __VIEWSTATE, exportación manual
+  - path: https://inclasns.sanidad.gob.es/
+    desc: Indicadores Clave del SNS por CCAA, año y sexo (gráficos, mapas y tablas en la web)
+  - path: https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/UltDatos.htm
+    desc: Últimos datos publicados (Barómetro Sanitario, BDCAP, visualización interactiva)
+  - path: https://www.sanidad.gob.es/estadEstudios/estadisticas/estadisticas/estMinisterio/SolicitudCMBD.htm
+    desc: Solicitud formal de microdatos RAE-CMBD (entrega anonimizada, sin descarga directa)
   - path: https://www.sanidad.gob.es/estadEstudios/estadisticas/estadisticas/estMinisterio/mortalidad/mortalidad.htm
-    desc: Mortalidad por causa (a partir de datos del INE)
+    desc: Informes de mortalidad por causa (PDF, elaborados con datos del INE)
+quirks: [tls-chain-incomplete, viewstate-forms, url-drift]
+ids: [ine-municipio, ine-provincia, ccaa]
 gotchas:
-  - Los microdatos del CMBD se solicitan formalmente y se entregan anonimizados; no hay descarga directa.
-  - El Portal Estadístico usa cubos OLAP con exportación por consulta, sin API.
-  - La vigilancia epidemiológica (RENAVE, gripe, COVID) la publica el ISCIII, no el ministerio (ficha isciii-cne).
-related: [isciii-cne, aemps-cima-api]
+  - pestadistico.inteligenciadegestion.sanidad.gob.es envía solo el certificado hoja (FNMT AC Componentes Informáticos); añadir los intermedios FNMT o falla la verificación TLS.
+  - El Portal Estadístico es una aplicación WebForms sin API ni URL por consulta; cada cubo se explora y exporta a mano. No hay ficheros masivos de altas.
+  - En el CNH el código de municipio lleva 6 dígitos (INE de 5 más dígito de control, 310977 es Estella-Lizarra 31097); CCN es el código del centro y CODCNH el del catálogo.
+  - Las rutas sisInfSanSNS/home.htm y ciudadanos/.../hospitales/home.htm ya no existen o redirigen (meta refresh) a ofertaRecursos/hospitales/home.htm.
+  - Los microdatos RAE-CMBD se solicitan formalmente y se entregan anonimizados; no hay descarga directa.
+  - Mortalidad por causa es una reelaboración de los datos del INE; para tablas y microdatos ir al INE (defunciones según la causa de muerte).
+  - La vigilancia epidemiológica (RENAVE, MoMo, gripe, COVID) la publica el ISCIII, no el ministerio (ficha isciii-cne).
+tips:
+  - "CNH con pandas: read_excel(f, sheet_name='DIRECTORIO DE HOSPITALES', dtype=str) y merge con ESTRUCTURA FUNCIONAL por CCN para dependencia, concierto y complejo."
+related: [isciii-cne, aemps-cima-api, ine-api-tempus]
 status: active
-verified: null
+verified: "2026-09-30"
