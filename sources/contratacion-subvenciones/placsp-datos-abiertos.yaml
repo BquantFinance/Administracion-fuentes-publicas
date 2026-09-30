@@ -1,40 +1,44 @@
 id: placsp-datos-abiertos
-name: Plataforma de Contratación del Sector Público – Datos abiertos (ATOM/CODICE)
+name: Plataforma de Contratación del Sector Público – Sindicación ATOM (CODICE)
 org: Dirección General del Patrimonio del Estado
 ministry: Hacienda
 level: age
 sector: contratacion-subvenciones
-tags: [contratacion-publica, licitaciones, adjudicaciones, contratos-menores, codice, atom, placsp]
+tags: [contratacion-publica, licitaciones, adjudicaciones, contratos-menores, codice, atom, placsp, cpv]
 summary: >-
-  Todas las licitaciones y adjudicaciones publicadas en la Plataforma (Estado, y CCAA y EELL que agregan):
-  feeds ATOM con documentos CODICE (XML basado en UBL) por licitación, más ZIP mensuales históricos.
+  Todas las licitaciones, adjudicaciones y contratos menores publicados en la Plataforma (Estado y perfiles
+  alojados) y los agregados de plataformas autonómicas, como feeds ATOM con el documento CODICE (XML basado
+  en UBL) de cada expediente y ZIP mensuales del histórico.
 access: [feed, download]
 auth: none
 formats: [atom, xml, zip]
 update: realtime
 coverage: "2012-"
 license: Reutilización libre con cita de la fuente
-base_url: https://contrataciondelestado.es/
+base_url: https://contrataciondelestado.es/sindicacion/
 docs_url: https://contrataciondelestado.es/wps/portal/DatosAbiertos
 endpoints:
-  - path: https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom
-    desc: Licitaciones de perfiles alojados en la Plataforma (feed paginado hacia atrás con rel=next)
+  - path: sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom
+    desc: Licitaciones de perfiles alojados en la Plataforma; unas 235 entradas y 6 MB por página
     example: curl -s "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom"
-  - path: https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores.atom
-    desc: Licitaciones agregadas desde plataformas autonómicas
-  - path: https://contrataciondelestado.es/sindicacion/sindicacion_1143/contratosMenoresPerfilesContratantes.atom
-    desc: Contratos menores
-  - path: https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_{AAAA}{MM}.zip
-    desc: Histórico mensual comprimido, mismo formato ATOM
+  - path: sindicacion_1044/PlataformasAgregadasSinMenores.atom
+    desc: Licitaciones agregadas desde plataformas autonómicas y locales, sin contratos menores
+  - path: sindicacion_1143/contratosMenoresPerfilesContratantes.atom
+    desc: Contratos menores de perfiles alojados
+  - path: sindicacion_{n}/{nombre_feed}_{AAAA}{MM}.zip
+    desc: Histórico mensual de cada feed en el mismo formato ATOM; entre 12 y 19 MB por mes en 2026
+    example: curl -sO "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_202508.zip"
 gotchas:
-  - Cada entrada ATOM incluye el XML CODICE completo con espacios de nombres cac y cbc; hay que registrar los namespaces al parsear.
-  - El feed se recorre hacia atrás con el enlace rel=next; una licitación aparece varias veces (una por cambio de estado) y hay que quedarse con la última por id.
-  - Los importes van sin IVA en TotalAmount y con IVA en TaxExclusiveAmount/PayableAmount según nodo; comprobar siempre cuál se usa.
-  - Los ZIP mensuales pesan cientos de MB y se publican con semanas de retraso.
-  - No existe API de búsqueda; para consultas puntuales usar el buscador web o cargar los feeds en base de datos propia.
+  - El feed se recorre hacia atrás con el link rel=next, que apunta a instantáneas con fecha y hora en el nombre (Completo3_20260929_201515.atom); no hay paginación por número.
+  - Un expediente aparece varias veces (una por cambio de estado); quedarse con la entry de updated mayor por id (sindicacion/licitacionesPerfilContratante/{n}).
+  - cbc:TotalAmount lleva el IVA incluido y cbc:TaxExclusiveAmount va sin IVA; cbc:EstimatedOverallContractAmount es el valor estimado. La ficha anterior lo tenía al revés.
+  - Espacios de nombres cac y cbc (urn:dgpe:names:draft:codice) más las extensiones cac-place-ext y cbc-place-ext; registrarlos en lxml. El feed declara at (tombstones) para entradas borradas.
+  - Los ZIP no admiten HEAD (respuesta vacía) ni Range; descargar completos.
+  - El PDF de especificación enlazado en datos abiertos (DGPE_PLACSP_OpenPLACSP_v.2.2.pdf) responde HTML; la documentación de CODICE está en la propia página del portal.
+  - No hay API de búsqueda; el link de cada entry es un deeplink al detalle web, no un recurso estructurado.
 tips:
-  - Parsear con lxml registrando namespaces cac, cbc y cac-place-ext; el id estable de licitación es el elemento id de cada entry ATOM.
-  - Para histórico completo cargar los ZIP mensuales en una tabla y deduplicar por id quedándose con la entrada de fecha updated mayor.
-related: [bdns-api, hacienda-registro-licitadores]
+  - Identificadores útiles en cada entry. cbc:ContractFolderID (expediente), cbc:ItemClassificationCode (CPV), cbc:ID del órgano (código DIR3, p. ej. L01280647) y cbc:TypeCode (tipo de contrato).
+  - Para el histórico completo, cargar los ZIP mensuales de los tres feeds y deduplicar por id con updated máximo. La página de datos abiertos publica OpenPLACSP, la herramienta oficial de descarga.
+related: [bdns-api, hacienda-registro-licitadores, dir3-directorio]
 status: active
-verified: null
+verified: "2026-09-30"

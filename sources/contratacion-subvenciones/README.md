@@ -4,10 +4,10 @@ Sector `contratacion-subvenciones` · 3 fuentes · índice generado por `scripts
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
-| [bdns-api](bdns-api.yaml) | BDNS – Base de Datos Nacional de Subvenciones (API REST) | api-rest, portal, download | none | json, csv, xlsx, pdf | daily | — | — |
-| [hacienda-registro-licitadores](hacienda-registro-licitadores.yaml) | ROLECE – Registro Oficial de Licitadores y Empresas Clasificadas | portal | none | html, pdf | daily | — | — |
-| [placsp-datos-abiertos](placsp-datos-abiertos.yaml) | Plataforma de Contratación del Sector Público – Datos abiertos (ATOM/CODICE) | feed, download | none | atom, xml, zip | realtime | — | — |
+| [bdns-api](bdns-api.yaml) | BDNS – Base de Datos Nacional de Subvenciones (API REST) | api-rest, download, portal | none | json, csv, xlsx | daily | latin1 | 2026-09-30 |
+| [hacienda-registro-licitadores](hacienda-registro-licitadores.yaml) | ROLECSP – Registro Oficial de Licitadores y Empresas Clasificadas del Sector Público | portal | certificate | html, xml, pdf | daily | tls-chain-incomplete | 2026-09-30 |
+| [placsp-datos-abiertos](placsp-datos-abiertos.yaml) | Plataforma de Contratación del Sector Público – Sindicación ATOM (CODICE) | feed, download | none | atom, xml, zip | realtime | — | 2026-09-30 |
 
-- **bdns-api**: Convocatorias, concesiones y beneficiarios de subvenciones de todas las Administraciones (Estado, CCAA, EELL), ayudas de Estado, minimis, sanciones e inhabilitaciones. API REST pública con paginación y descarga CSV.
-- **hacienda-registro-licitadores**: Registro de empresas inscritas para contratar con el sector público, con clasificación de contratistas de obras y servicios por grupos y categorías. Consulta pública por NIF o denominación.
-- **placsp-datos-abiertos**: Todas las licitaciones y adjudicaciones publicadas en la Plataforma (Estado, y CCAA y EELL que agregan): feeds ATOM con documentos CODICE (XML basado en UBL) por licitación, más ZIP mensuales históricos.
+- **bdns-api**: Convocatorias (655000), concesiones, ayudas de Estado, minimis, grandes beneficiarios, sanciones, planes estratégicos y subvenciones a partidos políticos de todas las Administraciones (Estado, CCAA, EELL). API REST JSON paginada sin autenticación y exportación a CSV y xlsx.
+- **hacienda-registro-licitadores**: Registro de empresas inscritas para contratar con el sector público y su clasificación. No hay consulta pública abierta: el acceso exige certificado electrónico y AutoFirma. Solo son públicos el visor de certificados ROLECE y DEUC en XML y el generador del DEUC.
+- **placsp-datos-abiertos**: Todas las licitaciones, adjudicaciones y contratos menores publicados en la Plataforma (Estado y perfiles alojados) y los agregados de plataformas autonómicas, como feeds ATOM con el documento CODICE (XML basado en UBL) de cada expediente y ZIP mensuales del histórico.

@@ -830,54 +830,74 @@
     "concesiones",
     "beneficiarios",
     "ayudas-de-estado",
-    "minimis"
+    "minimis",
+    "sanciones"
    ],
-   "summary": "Convocatorias, concesiones y beneficiarios de subvenciones de todas las Administraciones (Estado, CCAA, EELL), ayudas de Estado, minimis, sanciones e inhabilitaciones. API REST pública con paginación y descarga CSV.",
+   "summary": "Convocatorias (655000), concesiones, ayudas de Estado, minimis, grandes beneficiarios, sanciones, planes estratégicos y subvenciones a partidos políticos de todas las Administraciones (Estado, CCAA, EELL). API REST JSON paginada sin autenticación y exportación a CSV y xlsx.",
    "access": [
     "api-rest",
-    "portal",
-    "download"
+    "download",
+    "portal"
    ],
    "auth": "none",
    "formats": [
     "json",
     "csv",
-    "xlsx",
-    "pdf"
+    "xlsx"
    ],
    "update": "daily",
-   "coverage": "2014- (convocatorias); concesiones desde 2016",
-   "license": "Reutilización libre con cita de la fuente",
-   "base_url": "https://www.infosubvenciones.es/bdnstrans/",
+   "coverage": "Convocatorias desde 2014; concesiones desde 2016 según administración",
+   "license": "Reutilización con las restricciones del aviso legal, repetido en cada respuesta (campo advertencia)",
+   "base_url": "https://www.infosubvenciones.es/bdnstrans/api",
    "docs_url": "https://www.infosubvenciones.es/bdnstrans/GE/es/api",
    "endpoints": [
     {
-     "path": "https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page={n}&pageSize={n}&descripcion={texto}",
-     "desc": "Búsqueda paginada de convocatorias",
-     "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=20&descripcion=investigacion\""
+     "path": "/convocatorias/busqueda?page={n}&pageSize={n}",
+     "desc": "Búsqueda paginada de convocatorias (numeroConvocatoria, descripcion, fechaRecepcion, nivel1 a nivel3, mrr)",
+     "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=50&fechaDesde=01/09/2026&fechaHasta=30/09/2026&order=fechaRecepcion&direccion=desc\"",
+     "params": "descripcion, fechaDesde y fechaHasta en dd/mm/aaaa, tipoAdministracion=C (estatal), numeroConvocatoria, mrr, vpd, order y direccion"
     },
     {
-     "path": "https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv={numero}",
-     "desc": "Detalle de una convocatoria por su número BDNS"
+     "path": "/convocatorias?numConv={numero_bdns}",
+     "desc": "Detalle completo de una convocatoria (órgano, instrumentos, presupuesto, bases, documentos)",
+     "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv=800000\""
     },
     {
-     "path": "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page={n}&pageSize={n}",
-     "desc": "Concesiones (importe, beneficiario, convocatoria, fecha)"
+     "path": "/concesiones/busqueda?page={n}&pageSize={n}",
+     "desc": "Concesiones con beneficiario, importe, ayuda equivalente, instrumento y convocatoria",
+     "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=50&numeroConvocatoria=931918\"",
+     "params": "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa"
     },
     {
-     "path": "https://www.infosubvenciones.es/bdnstrans/api/ayudasestado/busqueda",
-     "desc": "Ayudas de Estado publicadas"
+     "path": "/{coleccion}/busqueda?page={n}&pageSize={n}",
+     "desc": "Mismo patrón para ayudasestado, minimis, grandesbeneficiarios, sanciones, planesestrategicos y partidospoliticos",
+     "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/grandesbeneficiarios/busqueda?page=0&pageSize=50\""
     },
     {
-     "path": "https://www.infosubvenciones.es/bdnstrans/api/minimis/busqueda",
-     "desc": "Ayudas de minimis"
+     "path": "/{coleccion}/exportar?vpd=GE&tipoDoc={csv|xlsx}",
+     "desc": "Exportación con los mismos filtros que la búsqueda; verificada en convocatorias y concesiones",
+     "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/concesiones/exportar?vpd=GE&tipoDoc=csv&fechaDesde=29/09/2026&fechaHasta=29/09/2026\" | iconv -f WINDOWS-1252 -t UTF-8"
+    },
+    {
+     "path": "/convocatorias/ultimas?page={n}&pageSize={n}",
+     "desc": "Últimas convocatorias registradas"
     }
    ],
+   "rate_limit": "No documentado; pageSize se limita en silencio a 10000 (4 MB y 6 s por página). El aviso legal se reserva bloquear usos abusivos.",
+   "quirks": [
+    "latin1"
+   ],
    "gotchas": [
-    "Los beneficiarios personas físicas aparecen con nombre y apellidos truncados o anonimizados salvo cuando la ley obliga a publicar.",
-    "El número de convocatoria BDNS es el identificador estable; el código de la administración concedente sigue DIR3.",
-    "pageSize máximo en torno a 10000 según endpoint; respuestas grandes tardan.",
-    "El extracto de la convocatoria se publica también en el BOE o diario oficial correspondiente, con enlace en la ficha."
+    "Las fechas de filtro van en dd/mm/aaaa; en ISO (2026-09-01) responde 400 con JSON de campos codigo y errores.",
+    "pageSize mayor de 10000 no da error, devuelve 10000. La respuesta es un Page de Spring (content, totalElements, totalPages, last) más el campo advertencia con el aviso legal.",
+    "Los beneficiarios personas físicas van con el DNI parcialmente oculto (***1490**) y nombre; las jurídicas con el NIF completo delante del nombre, todo en el mismo campo beneficiario.",
+    "La exportación exige vpd (GE es el portal general) o responde 400 \"No se ha informado el portal\"; el CSV llega en windows-1252, no en UTF-8.",
+    "El filtro beneficiario en concesiones/busqueda devolvió 400 en la verificación; filtrar por convocatoria o fechas y cribar en local.",
+    "La documentación es un Swagger UI dentro de la aplicación Angular (docs_url); no hay URL estable del fichero OpenAPI. Un endpoint inexistente devuelve 404 con HTML de Tomcat."
+   ],
+   "tips": [
+    "Para descargar todo, paginar con pageSize=10000 y trocear por fechaDesde y fechaHasta mensuales; totalElements indica el volumen antes de empezar.",
+    "numeroConvocatoria (código BDNS) es el identificador estable y público; id es interno y significa cosas distintas en cada colección."
    ],
    "related": [
     "placsp-datos-abiertos",
@@ -885,54 +905,64 @@
     "boe-api-sumario"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "hacienda-registro-licitadores",
-   "name": "ROLECE – Registro Oficial de Licitadores y Empresas Clasificadas",
+   "name": "ROLECSP – Registro Oficial de Licitadores y Empresas Clasificadas del Sector Público",
    "org": "Dirección General del Patrimonio del Estado",
    "ministry": "Hacienda",
    "level": "age",
    "sector": "contratacion-subvenciones",
    "tags": [
     "rolece",
+    "rolecsp",
     "licitadores",
     "clasificacion-empresas",
     "contratistas",
-    "solvencia"
+    "deuc"
    ],
-   "summary": "Registro de empresas inscritas para contratar con el sector público, con clasificación de contratistas de obras y servicios por grupos y categorías. Consulta pública por NIF o denominación.",
+   "summary": "Registro de empresas inscritas para contratar con el sector público y su clasificación. No hay consulta pública abierta: el acceso exige certificado electrónico y AutoFirma. Solo son públicos el visor de certificados ROLECE y DEUC en XML y el generador del DEUC.",
    "access": [
     "portal"
    ],
-   "auth": "none",
+   "auth": "certificate",
    "formats": [
     "html",
+    "xml",
     "pdf"
    ],
    "update": "daily",
-   "license": "Consulta pública; reutilización sujeta a protección de datos",
-   "base_url": "https://registrodelicitadores.gob.es/",
-   "docs_url": "https://registrodelicitadores.gob.es/",
+   "license": "Consulta restringida; incluye datos personales de administradores y apoderados",
+   "base_url": "https://registrodelicitadores.gob.es/rolece/public/inicio.action",
+   "docs_url": "https://registrodelicitadores.gob.es/rolece/public/manuales.action?accion=caratulas",
    "endpoints": [
     {
-     "path": "https://registrodelicitadores.gob.es/consulta_publica",
-     "desc": "Consulta pública de empresas inscritas y su clasificación"
+     "path": "https://visor.registrodelicitadores.gob.es/",
+     "desc": "Visor que transforma a HTML o PDF un XML de certificado ROLECE o de DEUC subido por el usuario"
+    },
+    {
+     "path": "https://visor.registrodelicitadores.gob.es/espd-web/filter?lang=es",
+     "desc": "Generador del Documento Europeo Único de Contratación (DEUC 1.02)"
     }
    ],
+   "quirks": [
+    "tls-chain-incomplete"
+   ],
    "gotchas": [
-    "Sin API ni descarga masiva; las inscripciones incluyen datos de administradores y apoderados con acceso restringido.",
-    "La clasificación caduca y debe renovarse; comprobar fecha de vigencia."
+    "La ruta /consulta_publica de la ficha anterior devuelve 404; la raíz redirige por meta refresh a /rolece y de ahí a public/inicio.action.",
+    "El servidor no envía el intermedio FNMT AC Servidores Seguros Tipo2; añadirlo al bundle o falla la verificación TLS (ver guía).",
+    "No hay API, descarga ni búsqueda por NIF sin certificado; la inscripción de un licitador se acredita con el certificado XML que él mismo aporta."
    ],
    "related": [
     "placsp-datos-abiertos"
    ],
-   "status": "active",
-   "verified": null
+   "status": "degraded",
+   "verified": "2026-09-30"
   },
   {
    "id": "placsp-datos-abiertos",
-   "name": "Plataforma de Contratación del Sector Público – Datos abiertos (ATOM/CODICE)",
+   "name": "Plataforma de Contratación del Sector Público – Sindicación ATOM (CODICE)",
    "org": "Dirección General del Patrimonio del Estado",
    "ministry": "Hacienda",
    "level": "age",
@@ -944,9 +974,10 @@
     "contratos-menores",
     "codice",
     "atom",
-    "placsp"
+    "placsp",
+    "cpv"
    ],
-   "summary": "Todas las licitaciones y adjudicaciones publicadas en la Plataforma (Estado, y CCAA y EELL que agregan): feeds ATOM con documentos CODICE (XML basado en UBL) por licitación, más ZIP mensuales históricos.",
+   "summary": "Todas las licitaciones, adjudicaciones y contratos menores publicados en la Plataforma (Estado y perfiles alojados) y los agregados de plataformas autonómicas, como feeds ATOM con el documento CODICE (XML basado en UBL) de cada expediente y ZIP mensuales del histórico.",
    "access": [
     "feed",
     "download"
@@ -960,44 +991,48 @@
    "update": "realtime",
    "coverage": "2012-",
    "license": "Reutilización libre con cita de la fuente",
-   "base_url": "https://contrataciondelestado.es/",
+   "base_url": "https://contrataciondelestado.es/sindicacion/",
    "docs_url": "https://contrataciondelestado.es/wps/portal/DatosAbiertos",
    "endpoints": [
     {
-     "path": "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom",
-     "desc": "Licitaciones de perfiles alojados en la Plataforma (feed paginado hacia atrás con rel=next)",
+     "path": "sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom",
+     "desc": "Licitaciones de perfiles alojados en la Plataforma; unas 235 entradas y 6 MB por página",
      "example": "curl -s \"https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom\""
     },
     {
-     "path": "https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores.atom",
-     "desc": "Licitaciones agregadas desde plataformas autonómicas"
+     "path": "sindicacion_1044/PlataformasAgregadasSinMenores.atom",
+     "desc": "Licitaciones agregadas desde plataformas autonómicas y locales, sin contratos menores"
     },
     {
-     "path": "https://contrataciondelestado.es/sindicacion/sindicacion_1143/contratosMenoresPerfilesContratantes.atom",
-     "desc": "Contratos menores"
+     "path": "sindicacion_1143/contratosMenoresPerfilesContratantes.atom",
+     "desc": "Contratos menores de perfiles alojados"
     },
     {
-     "path": "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_{AAAA}{MM}.zip",
-     "desc": "Histórico mensual comprimido, mismo formato ATOM"
+     "path": "sindicacion_{n}/{nombre_feed}_{AAAA}{MM}.zip",
+     "desc": "Histórico mensual de cada feed en el mismo formato ATOM; entre 12 y 19 MB por mes en 2026",
+     "example": "curl -sO \"https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_202508.zip\""
     }
    ],
    "gotchas": [
-    "Cada entrada ATOM incluye el XML CODICE completo con espacios de nombres cac y cbc; hay que registrar los namespaces al parsear.",
-    "El feed se recorre hacia atrás con el enlace rel=next; una licitación aparece varias veces (una por cambio de estado) y hay que quedarse con la última por id.",
-    "Los importes van sin IVA en TotalAmount y con IVA en TaxExclusiveAmount/PayableAmount según nodo; comprobar siempre cuál se usa.",
-    "Los ZIP mensuales pesan cientos de MB y se publican con semanas de retraso.",
-    "No existe API de búsqueda; para consultas puntuales usar el buscador web o cargar los feeds en base de datos propia."
+    "El feed se recorre hacia atrás con el link rel=next, que apunta a instantáneas con fecha y hora en el nombre (Completo3_20260929_201515.atom); no hay paginación por número.",
+    "Un expediente aparece varias veces (una por cambio de estado); quedarse con la entry de updated mayor por id (sindicacion/licitacionesPerfilContratante/{n}).",
+    "cbc:TotalAmount lleva el IVA incluido y cbc:TaxExclusiveAmount va sin IVA; cbc:EstimatedOverallContractAmount es el valor estimado. La ficha anterior lo tenía al revés.",
+    "Espacios de nombres cac y cbc (urn:dgpe:names:draft:codice) más las extensiones cac-place-ext y cbc-place-ext; registrarlos en lxml. El feed declara at (tombstones) para entradas borradas.",
+    "Los ZIP no admiten HEAD (respuesta vacía) ni Range; descargar completos.",
+    "El PDF de especificación enlazado en datos abiertos (DGPE_PLACSP_OpenPLACSP_v.2.2.pdf) responde HTML; la documentación de CODICE está en la propia página del portal.",
+    "No hay API de búsqueda; el link de cada entry es un deeplink al detalle web, no un recurso estructurado."
    ],
    "tips": [
-    "Parsear con lxml registrando namespaces cac, cbc y cac-place-ext; el id estable de licitación es el elemento id de cada entry ATOM.",
-    "Para histórico completo cargar los ZIP mensuales en una tabla y deduplicar por id quedándose con la entrada de fecha updated mayor."
+    "Identificadores útiles en cada entry. cbc:ContractFolderID (expediente), cbc:ItemClassificationCode (CPV), cbc:ID del órgano (código DIR3, p. ej. L01280647) y cbc:TypeCode (tipo de contrato).",
+    "Para el histórico completo, cargar los ZIP mensuales de los tres feeds y deduplicar por id con updated máximo. La página de datos abiertos publica OpenPLACSP, la herramienta oficial de descarga."
    ],
    "related": [
     "bdns-api",
-    "hacienda-registro-licitadores"
+    "hacienda-registro-licitadores",
+    "dir3-directorio"
    ],
    "status": "active",
-   "verified": null
+   "verified": "2026-09-30"
   },
   {
    "id": "bne-datos",

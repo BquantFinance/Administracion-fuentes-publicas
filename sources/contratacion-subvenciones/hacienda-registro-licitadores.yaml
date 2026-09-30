@@ -1,26 +1,31 @@
 id: hacienda-registro-licitadores
-name: ROLECE – Registro Oficial de Licitadores y Empresas Clasificadas
+name: ROLECSP – Registro Oficial de Licitadores y Empresas Clasificadas del Sector Público
 org: Dirección General del Patrimonio del Estado
 ministry: Hacienda
 level: age
 sector: contratacion-subvenciones
-tags: [rolece, licitadores, clasificacion-empresas, contratistas, solvencia]
+tags: [rolece, rolecsp, licitadores, clasificacion-empresas, contratistas, deuc]
 summary: >-
-  Registro de empresas inscritas para contratar con el sector público, con clasificación de contratistas
-  de obras y servicios por grupos y categorías. Consulta pública por NIF o denominación.
+  Registro de empresas inscritas para contratar con el sector público y su clasificación. No hay consulta pública
+  abierta: el acceso exige certificado electrónico y AutoFirma. Solo son públicos el visor de certificados
+  ROLECE y DEUC en XML y el generador del DEUC.
 access: [portal]
-auth: none
-formats: [html, pdf]
+auth: certificate
+formats: [html, xml, pdf]
 update: daily
-license: Consulta pública; reutilización sujeta a protección de datos
-base_url: https://registrodelicitadores.gob.es/
-docs_url: https://registrodelicitadores.gob.es/
+license: Consulta restringida; incluye datos personales de administradores y apoderados
+base_url: https://registrodelicitadores.gob.es/rolece/public/inicio.action
+docs_url: https://registrodelicitadores.gob.es/rolece/public/manuales.action?accion=caratulas
 endpoints:
-  - path: https://registrodelicitadores.gob.es/consulta_publica
-    desc: Consulta pública de empresas inscritas y su clasificación
+  - path: https://visor.registrodelicitadores.gob.es/
+    desc: Visor que transforma a HTML o PDF un XML de certificado ROLECE o de DEUC subido por el usuario
+  - path: https://visor.registrodelicitadores.gob.es/espd-web/filter?lang=es
+    desc: Generador del Documento Europeo Único de Contratación (DEUC 1.02)
+quirks: [tls-chain-incomplete]
 gotchas:
-  - Sin API ni descarga masiva; las inscripciones incluyen datos de administradores y apoderados con acceso restringido.
-  - La clasificación caduca y debe renovarse; comprobar fecha de vigencia.
+  - La ruta /consulta_publica de la ficha anterior devuelve 404; la raíz redirige por meta refresh a /rolece y de ahí a public/inicio.action.
+  - El servidor no envía el intermedio FNMT AC Servidores Seguros Tipo2; añadirlo al bundle o falla la verificación TLS (ver guía).
+  - No hay API, descarga ni búsqueda por NIF sin certificado; la inscripción de un licitador se acredita con el certificado XML que él mismo aporta.
 related: [placsp-datos-abiertos]
-status: active
-verified: null
+status: degraded
+verified: "2026-09-30"

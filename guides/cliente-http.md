@@ -6,16 +6,24 @@ antes de la primera petición.
 
 ## tls-chain-incomplete: certificados FNMT sin intermedio
 
-Muchos servidores públicos (airef.es, tesoro.es, energia.gob.es, mites.gob.es, universidades.gob.es,
-wms.mapama.gob.es, pestadistico.inteligenciadegestion.sanidad.gob.es) presentan solo el certificado final, emitido
-por FNMT-RCM "AC Componentes Informáticos", y no envían el intermedio. Los navegadores lo recuperan por AIA; curl,
-requests, urllib y Node no. La raíz "AC RAIZ FNMT-RCM" sí está en certifi y en los sistemas, así que basta añadir el
-intermedio. Nunca desactivar la verificación.
+Muchos servidores públicos (airef.es, tesoro.es, registrodelicitadores.gob.es, energia.gob.es, mites.gob.es,
+universidades.gob.es, wms.mapama.gob.es, pestadistico.inteligenciadegestion.sanidad.gob.es) presentan solo el
+certificado final, emitido por una CA intermedia de FNMT-RCM (AC Componentes Informáticos, AC Servidores Seguros
+Tipo2...), y no envían el intermedio. Los navegadores lo recuperan por AIA; curl, requests, urllib y Node no. Las
+raíces FNMT sí están en certifi y en los sistemas, así que basta añadir los intermedios. Nunca desactivar la
+verificación.
 
 ```bash
-curl -sO "https://www.sede.fnmt.gob.es/documents/10445900/10526749/AC_Componentes_Informaticos_SHA256.cer"
-openssl x509 -inform DER -in AC_Componentes_Informaticos_SHA256.cer -out fnmt-ci.pem
-cat "$(python3 -c 'import certifi;print(certifi.where())')" fnmt-ci.pem > ca-age.pem
+B=https://www.sede.fnmt.gob.es/documents/10445900/10526749
+: > fnmt-intermedios.pem
+for c in AC_Componentes_Informaticos_SHA256 AC_Servidores_Seguros_Tipo1 AC_Servidores_Seguros_Tipo2 \
+         AC_Servidores_Seguros_Tipo1_G2 AC_Servidores_Seguros_Tipo2_G2 AC_Servidores_Seguros_Tipo2_G2R \
+         AC_Administracion_Publica_SHA256 AC_Sector_Publico AC_Sector_Publico_G2 \
+         AC_Raiz_FNMT-RCM-SS AC_Raiz_FNMT-RCM_G2 AC_RAIZ_FNMTRCM_Servidores_Seguros_G2R; do
+  curl -sS -o c.cer "$B/$c.cer"
+  (openssl x509 -inform DER -in c.cer 2>/dev/null || openssl x509 -in c.cer) >> fnmt-intermedios.pem
+done
+cat "$(python3 -c 'import certifi;print(certifi.where())')" fnmt-intermedios.pem > ca-age.pem
 curl --cacert ca-age.pem -A "Mozilla/5.0" "https://www.tesoro.es/deuda-publica/estadisticas"
 ```
 
@@ -24,7 +32,8 @@ import requests
 r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, verify="ca-age.pem", timeout=30)
 ```
 
-O bien `export REQUESTS_CA_BUNDLE=ca-age.pem` y `export SSL_CERT_FILE=ca-age.pem` para todo el proceso.
+O bien `export REQUESTS_CA_BUNDLE=ca-age.pem` y `export SSL_CERT_FILE=ca-age.pem` para todo el proceso. La lista
+completa de certificados de FNMT está en https://www.sede.fnmt.gob.es/descargas/certificados-raiz-de-la-fnmt.
 
 ## user-agent-browser
 

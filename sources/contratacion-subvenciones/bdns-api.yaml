@@ -4,35 +4,51 @@ org: Intervención General de la Administración del Estado (IGAE)
 ministry: Hacienda
 level: age
 sector: contratacion-subvenciones
-tags: [subvenciones, ayudas, convocatorias, concesiones, beneficiarios, ayudas-de-estado, minimis]
+tags: [subvenciones, ayudas, convocatorias, concesiones, beneficiarios, ayudas-de-estado, minimis, sanciones]
 summary: >-
-  Convocatorias, concesiones y beneficiarios de subvenciones de todas las Administraciones (Estado, CCAA, EELL),
-  ayudas de Estado, minimis, sanciones e inhabilitaciones. API REST pública con paginación y descarga CSV.
-access: [api-rest, portal, download]
+  Convocatorias (655000), concesiones, ayudas de Estado, minimis, grandes beneficiarios, sanciones, planes
+  estratégicos y subvenciones a partidos políticos de todas las Administraciones (Estado, CCAA, EELL). API REST
+  JSON paginada sin autenticación y exportación a CSV y xlsx.
+access: [api-rest, download, portal]
 auth: none
-formats: [json, csv, xlsx, pdf]
+formats: [json, csv, xlsx]
 update: daily
-coverage: "2014- (convocatorias); concesiones desde 2016"
-license: Reutilización libre con cita de la fuente
-base_url: https://www.infosubvenciones.es/bdnstrans/
+coverage: "Convocatorias desde 2014; concesiones desde 2016 según administración"
+license: Reutilización con las restricciones del aviso legal, repetido en cada respuesta (campo advertencia)
+base_url: https://www.infosubvenciones.es/bdnstrans/api
 docs_url: https://www.infosubvenciones.es/bdnstrans/GE/es/api
 endpoints:
-  - path: https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page={n}&pageSize={n}&descripcion={texto}
-    desc: Búsqueda paginada de convocatorias
-    example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=20&descripcion=investigacion"
-  - path: https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv={numero}
-    desc: Detalle de una convocatoria por su número BDNS
-  - path: https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page={n}&pageSize={n}
-    desc: Concesiones (importe, beneficiario, convocatoria, fecha)
-  - path: https://www.infosubvenciones.es/bdnstrans/api/ayudasestado/busqueda
-    desc: Ayudas de Estado publicadas
-  - path: https://www.infosubvenciones.es/bdnstrans/api/minimis/busqueda
-    desc: Ayudas de minimis
+  - path: /convocatorias/busqueda?page={n}&pageSize={n}
+    desc: Búsqueda paginada de convocatorias (numeroConvocatoria, descripcion, fechaRecepcion, nivel1 a nivel3, mrr)
+    example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=50&fechaDesde=01/09/2026&fechaHasta=30/09/2026&order=fechaRecepcion&direccion=desc"
+    params: "descripcion, fechaDesde y fechaHasta en dd/mm/aaaa, tipoAdministracion=C (estatal), numeroConvocatoria, mrr, vpd, order y direccion"
+  - path: /convocatorias?numConv={numero_bdns}
+    desc: Detalle completo de una convocatoria (órgano, instrumentos, presupuesto, bases, documentos)
+    example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv=800000"
+  - path: /concesiones/busqueda?page={n}&pageSize={n}
+    desc: Concesiones con beneficiario, importe, ayuda equivalente, instrumento y convocatoria
+    example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=50&numeroConvocatoria=931918"
+    params: "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa"
+  - path: /{coleccion}/busqueda?page={n}&pageSize={n}
+    desc: Mismo patrón para ayudasestado, minimis, grandesbeneficiarios, sanciones, planesestrategicos y partidospoliticos
+    example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/grandesbeneficiarios/busqueda?page=0&pageSize=50"
+  - path: /{coleccion}/exportar?vpd=GE&tipoDoc={csv|xlsx}
+    desc: Exportación con los mismos filtros que la búsqueda; verificada en convocatorias y concesiones
+    example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/exportar?vpd=GE&tipoDoc=csv&fechaDesde=29/09/2026&fechaHasta=29/09/2026" | iconv -f WINDOWS-1252 -t UTF-8
+  - path: /convocatorias/ultimas?page={n}&pageSize={n}
+    desc: Últimas convocatorias registradas
+rate_limit: No documentado; pageSize se limita en silencio a 10000 (4 MB y 6 s por página). El aviso legal se reserva bloquear usos abusivos.
+quirks: [latin1]
 gotchas:
-  - Los beneficiarios personas físicas aparecen con nombre y apellidos truncados o anonimizados salvo cuando la ley obliga a publicar.
-  - El número de convocatoria BDNS es el identificador estable; el código de la administración concedente sigue DIR3.
-  - pageSize máximo en torno a 10000 según endpoint; respuestas grandes tardan.
-  - El extracto de la convocatoria se publica también en el BOE o diario oficial correspondiente, con enlace en la ficha.
+  - Las fechas de filtro van en dd/mm/aaaa; en ISO (2026-09-01) responde 400 con JSON de campos codigo y errores.
+  - pageSize mayor de 10000 no da error, devuelve 10000. La respuesta es un Page de Spring (content, totalElements, totalPages, last) más el campo advertencia con el aviso legal.
+  - Los beneficiarios personas físicas van con el DNI parcialmente oculto (***1490**) y nombre; las jurídicas con el NIF completo delante del nombre, todo en el mismo campo beneficiario.
+  - La exportación exige vpd (GE es el portal general) o responde 400 "No se ha informado el portal"; el CSV llega en windows-1252, no en UTF-8.
+  - El filtro beneficiario en concesiones/busqueda devolvió 400 en la verificación; filtrar por convocatoria o fechas y cribar en local.
+  - La documentación es un Swagger UI dentro de la aplicación Angular (docs_url); no hay URL estable del fichero OpenAPI. Un endpoint inexistente devuelve 404 con HTML de Tomcat.
+tips:
+  - Para descargar todo, paginar con pageSize=10000 y trocear por fechaDesde y fechaHasta mensuales; totalElements indica el volumen antes de empezar.
+  - numeroConvocatoria (código BDNS) es el identificador estable y público; id es interno y significa cosas distintas en cada colección.
 related: [placsp-datos-abiertos, dir3-directorio, boe-api-sumario]
 status: active
-verified: null
+verified: "2026-09-30"
