@@ -763,6 +763,7 @@
       contains: consulta_token_value_id
       fnmt: true
       read_bytes: 400000
+      retries: 2
   verified: "2026-09-30"
 
 - id: deficit-y-ejecucion-presupuestaria
@@ -856,6 +857,7 @@
     - url: https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip
       min_bytes: 500000
       read_bytes: 1024
+      retries: 3
     - url: https://ssl.renfe.com/ftransit/Fichero_estaciones/estaciones.csv
       contains: CODIGO
       read_bytes: 4096

@@ -85,8 +85,10 @@ siguen en `null` (aemet-opendata exige clave de API; fega-beneficiarios-pac, oep
 mitma-opendata-movilidad no respondieron desde el entorno de verificación). Al empezar una sesión con red,
 re-verificar primero esas cuatro y las fichas en `degraded` o `unknown`; después añadir fuentes nuevas por
 impacto. Las verificaciones se hacen con el bundle FNMT y el User-Agent de navegador que describe
-`guides/cliente-http.md`. Las 37 recetas se comprobaron el 2026-09-30 con `check_recetas.py` (69 de 72
-comprobaciones ok; el Catastro bloqueó la IP tras la ráfaga de pruebas y datos.gob.es exigió reintentos).
+`guides/cliente-http.md`. Después se añadieron 9 fichas verificadas el mismo día (REData, OMIE, cartografía censal,
+Renfe, nomenclátor de facturación, inventario de emisiones, AESAN, CULTURAbase, IEO). Las 41 recetas se comprobaron
+el 2026-09-30 con `check_recetas.py` (77 de 81 comprobaciones ok; el Catastro bloqueó la IP tras la ráfaga de
+pruebas, datos.gob.es agotó los reintentos del WAF y ssl.renfe.com y REGCON cortaron una conexión).
 
 ## Lo que no se hace
 
