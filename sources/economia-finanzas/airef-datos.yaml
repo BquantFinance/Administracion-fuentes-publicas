@@ -1,31 +1,42 @@
 id: airef-datos
-name: AIReF – Previsiones, informes y datos fiscales
+name: AIReF – Datalab, observatorio de deuda y previsiones
 org: Autoridad Independiente de Responsabilidad Fiscal (AIReF)
-ministry: Organismo independiente adscrito a Hacienda
+ministry: Autoridad administrativa independiente adscrita a Hacienda
 level: age
 sector: economia-finanzas
-tags: [airef, previsiones, deuda, deficit, reglas-fiscales, spending-review, observatorio]
+tags: [airef, previsiones, deuda, deficit, reglas-fiscales, pib-tiempo-real, ccaa]
 summary: >-
-  Previsiones macroeconómicas y fiscales, observatorio de deuda por Administración, evaluaciones de gasto
-  (spending reviews) y datos de ejecución de reglas fiscales por CCAA y ayuntamientos, con descargas Excel.
+  Ficheros xlsx de la AIReF: histórico de deuda por Administración, cuadro macro de previsiones, estimación en
+  tiempo real del PIB trimestral (MIPred) y por CCAA, y seguimiento del objetivo de estabilidad. Sin API; los
+  Excel se enlazan desde páginas WordPress.
 access: [download, portal]
 auth: none
-formats: [xlsx, pdf, csv]
+formats: [xlsx, pdf]
 update: quarterly
 coverage: "2014-"
 license: Reutilización libre con cita de la fuente
-base_url: https://www.airef.es/
-docs_url: https://www.airef.es/es/datalab/
+base_url: https://www.airef.es/es/acceso-a-datos/
+docs_url: https://www.airef.es/es/acceso-a-datos/
 endpoints:
-  - path: https://www.airef.es/es/datalab/
-    desc: Datalab con visualizaciones y descarga de datos
-  - path: https://www.airef.es/es/observatorio-de-deuda/
-    desc: Observatorio de deuda pública por subsector
-  - path: https://www.airef.es/es/previsiones/
-    desc: Previsiones macro y fiscales trimestrales
+  - path: https://www.airef.es/es/datalab/datos-economicos/observatorio-de-deuda/
+    desc: Observatorio de deuda; enlaza Historico_Deuda.xlsx y los informes trimestrales en PDF
+    example: curl -sLO "https://www.airef.es/wp-content/uploads/2025/03/Historico_Deuda.xlsx"
+  - path: https://www.airef.es/es/datalab/previsiones-del-pib-en-tiempo-real/
+    desc: Previsión MIPred del PIB trimestral; un xlsx Datos_MIPred-{fecha}.xlsx por actualización
+    example: curl -sLO "https://www.airef.es/wp-content/uploads/DATOS-MIPRED/Datos_MIPred-2026925.xlsx"
+  - path: https://www.airef.es/es/datalab-previsiones-macroeconomicas-historicas/
+    desc: Cuadro macro de previsiones de la AIReF en xlsx (Cuadro_macro_web)
+  - path: https://www.airef.es/es/datalab/datos-economicos/seguimiento-del-objetivo-de-estabilidad/
+    desc: Seguimiento del objetivo de estabilidad por subsector
+  - path: https://www.airef.es/es/datalab/datos-economicos/estimacion-pib-trimestral-por-ccaa/
+    desc: Estimación del PIB trimestral por comunidad autónoma
 gotchas:
-  - Muchas descargas están detrás de visores embebidos; buscar el enlace "descargar datos" en cada gráfico.
-  - Las previsiones se publican en PDF con anexos Excel no siempre enlazados desde la ficha.
+  - El servidor envía el certificado sin la cadena intermedia FNMT; curl y requests fallan la verificación TLS salvo que se añada AC Componentes Informáticos al bundle (ver guía).
+  - Los xlsx cuelgan de wp-content/uploads con rutas que cambian en cada actualización; rascar la página para localizar el enlace vigente.
+  - Algunas URLs /es/ redirigen con 301 a la versión /ca/ con el mismo contenido; no descartar por el idioma de la URL final.
+  - Las rutas antiguas /es/datalab/ y /es/previsiones/ redirigen a páginas distintas de las esperadas; usar las de esta ficha.
+  - La API REST de WordPress (wp-json) responde 403; no sirve para listar ficheros.
+  - La fecha del nombre Datos_MIPred va sin ceros (2026925 es 25 de septiembre de 2026).
 related: [igae-ejecucion-presupuestaria, bde-estadisticas]
 status: active
-verified: null
+verified: "2026-09-30"

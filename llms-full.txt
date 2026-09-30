@@ -148,82 +148,116 @@ related: boe-api-sumario, boe-feeds
 # SECTOR economia-finanzas: Economía, finanzas y mercados
 
 ## airef-datos
-AIReF – Previsiones, informes y datos fiscales | Autoridad Independiente de Responsabilidad Fiscal (AIReF)
-summary: Previsiones macroeconómicas y fiscales, observatorio de deuda por Administración, evaluaciones de gasto (spending reviews) y datos de ejecución de reglas fiscales por CCAA y ayuntamientos, con descargas Excel.
-access: download, portal | auth: none | formats: xlsx, pdf, csv | update: quarterly | status: active | verified: pending
+AIReF – Datalab, observatorio de deuda y previsiones | Autoridad Independiente de Responsabilidad Fiscal (AIReF)
+summary: Ficheros xlsx de la AIReF: histórico de deuda por Administración, cuadro macro de previsiones, estimación en tiempo real del PIB trimestral (MIPred) y por CCAA, y seguimiento del objetivo de estabilidad. Sin API; los Excel se enlazan desde páginas WordPress.
+access: download, portal | auth: none | formats: xlsx, pdf | update: quarterly | status: active | verified: 2026-09-30
 coverage: 2014-
 license: Reutilización libre con cita de la fuente
-base_url: https://www.airef.es/
-docs_url: https://www.airef.es/es/datalab/
-- https://www.airef.es/es/datalab/ :: Datalab con visualizaciones y descarga de datos
-- https://www.airef.es/es/observatorio-de-deuda/ :: Observatorio de deuda pública por subsector
-- https://www.airef.es/es/previsiones/ :: Previsiones macro y fiscales trimestrales
-! Muchas descargas están detrás de visores embebidos; buscar el enlace "descargar datos" en cada gráfico.
-! Las previsiones se publican en PDF con anexos Excel no siempre enlazados desde la ficha.
+base_url: https://www.airef.es/es/acceso-a-datos/
+docs_url: https://www.airef.es/es/acceso-a-datos/
+- https://www.airef.es/es/datalab/datos-economicos/observatorio-de-deuda/ :: Observatorio de deuda; enlaza Historico_Deuda.xlsx y los informes trimestrales en PDF
+  ej: curl -sLO "https://www.airef.es/wp-content/uploads/2025/03/Historico_Deuda.xlsx"
+- https://www.airef.es/es/datalab/previsiones-del-pib-en-tiempo-real/ :: Previsión MIPred del PIB trimestral; un xlsx Datos_MIPred-{fecha}.xlsx por actualización
+  ej: curl -sLO "https://www.airef.es/wp-content/uploads/DATOS-MIPRED/Datos_MIPred-2026925.xlsx"
+- https://www.airef.es/es/datalab-previsiones-macroeconomicas-historicas/ :: Cuadro macro de previsiones de la AIReF en xlsx (Cuadro_macro_web)
+- https://www.airef.es/es/datalab/datos-economicos/seguimiento-del-objetivo-de-estabilidad/ :: Seguimiento del objetivo de estabilidad por subsector
+- https://www.airef.es/es/datalab/datos-economicos/estimacion-pib-trimestral-por-ccaa/ :: Estimación del PIB trimestral por comunidad autónoma
+! El servidor envía el certificado sin la cadena intermedia FNMT; curl y requests fallan la verificación TLS salvo que se añada AC Componentes Informáticos al bundle (ver guía).
+! Los xlsx cuelgan de wp-content/uploads con rutas que cambian en cada actualización; rascar la página para localizar el enlace vigente.
+! Algunas URLs /es/ redirigen con 301 a la versión /ca/ con el mismo contenido; no descartar por el idioma de la URL final.
+! Las rutas antiguas /es/datalab/ y /es/previsiones/ redirigen a páginas distintas de las esperadas; usar las de esta ficha.
+! La API REST de WordPress (wp-json) responde 403; no sirve para listar ficheros.
+! La fecha del nombre Datos_MIPred va sin ceros (2026925 es 25 de septiembre de 2026).
 related: igae-ejecucion-presupuestaria, bde-estadisticas
 
 ## bde-estadisticas
-Banco de España – Portal de estadísticas y descarga de series | Banco de España
-summary: Miles de series estadísticas: tipos de interés y de cambio, crédito y depósitos, deuda pública, balanza de pagos, cuentas financieras, Central de Balances. Descarga completa por capítulos en CSV y consulta de series individuales.
-access: download, portal | auth: none | formats: csv, xlsx, pdf | update: monthly | status: active | verified: pending
+Banco de España – API de estadísticas y CSV de series | Banco de España
+summary: Más de 14000 series (tipos de interés y de cambio, euríbor, crédito, deuda pública, balanza de pagos, cuentas financieras) por API JSON, por CSV de cada cuadro del Boletín Estadístico y por ZIP de capítulo. Los códigos de serie se localizan en catálogos CSV.
+access: api-rest, download | auth: none | formats: json, csv, xlsx, zip | update: daily | status: active | verified: 2026-09-30
 coverage: Series desde 1962 según indicador
 license: Reutilización libre con cita de la fuente
-base_url: https://www.bde.es/webbe/es/estadisticas/
-docs_url: https://www.bde.es/webbe/es/estadisticas/recursos/descargas-completas.html
-- https://www.bde.es/webbe/es/estadisticas/recursos/descargas-completas.html :: Ficheros CSV completos por capítulo del Boletín Estadístico y otras publicaciones
-- https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/{fichero}.csv :: Patrón de descarga directa de los CSV de series
-- https://app.bde.es/bie_www/faces/bie_wwwias/jsp/op/Home/pHome.jsp :: Buscador de series BIEST con exportación
-! Los CSV usan codificación Latin-1 y separador coma con decimales con punto; primeras filas son cabeceras de metadatos.
-! Cada serie tiene un código alfanumérico estable (p. ej. D_1NBAF...) que es la clave para automatizar; el nombre descriptivo cambia.
-! Los tipos de cambio oficiales del euro provienen del BCE; el BdE los redistribuye con retardo.
-! No hay API REST pública; para SDMX usar el BCE (Statistical Data Warehouse) que republica muchas series españolas.
-related: tesoro-estadisticas, cnmv-registros
+base_url: https://app.bde.es/bierest/resources/srdatosapp
+docs_url: https://www.bde.es/webbe/es/estadisticas/recursos/api-estadisticas-bde.html
+- /favoritas?idioma={es|en}&series={cod1,cod2} :: Último dato de una o varias series, con frecuencia, tendencia y fecha
+  ej: curl -s --compressed "https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472"
+- /listaSeries?idioma={es|en}&series={cod1,cod2}&rango={rango} :: Serie completa con metadatos, fechas y valores [rango según frecuencia. Diaria 3M, 12M, 36M; mensual y trimestral 30M, 60M, MAX; anual 60M, MAX; o un año concreto (rango=2024)]
+  ej: curl -s --compressed "https://app.bde.es/bierest/resources/srdatosapp/listaSeries?idioma=es&series=DTNPDE2010_P0000P_PS_APU&rango=MAX"
+- https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_{be|tc|ti|si|pb}.csv :: Catálogos de series (código, alias, fichero del cuadro, descripción, frecuencia, primera y última observación)
+  ej: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_tc.csv"
+- https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/{cuadro}.csv :: CSV de un cuadro completo con sus series en columnas; también en /datos/xlsx/{cuadro}.xlsx
+  ej: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/tc_1_1.csv"
+- https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_{capitulo}.zip :: ZIP con los CSV de un capítulo del Boletín Estadístico; lista de capítulos en descargas-completas.html
+  ej: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_DEUAAPP.zip"
+rate_limit: No documentado
+! La API comprime siempre en gzip; sin Accept-Encoding el cuerpo llega comprimido y sin cabecera Content-Encoding. Con curl usar --compressed; requests lo descomprime solo.
+! idioma es obligatorio y rango debe ser compatible con la frecuencia de la serie; si no, 412 con JSON de campos errNum, errMsgUsr y errMsgDebug. Serie inexistente también da 412.
+! fechas y valores vienen en orden descendente (el más reciente primero). La fecha lleva la hora de publicación; en mensuales es el día 1 del mes.
+! Sin rango devuelve el tramo mínimo (30M en mensuales); para toda la serie pedir rango=MAX.
+! No hay endpoint de búsqueda; los códigos salen de los catálogos CSV o del alias del cuadro. Los caracteres # y % del código se envían como %23 y %25.
+! Los catálogos escriben el fichero del cuadro en mayúsculas (BE0101.csv) pero la URL real va en minúsculas (be0101.csv); en mayúsculas responde 404.
+! CSV y catálogos en ISO-8859-1, separador coma, decimal punto; seis filas de cabecera (código, secuencial, alias, descripción, unidades, frecuencia), dato ausente como _, y filas FUENTE y NOTAS al final.
+! Las fechas de los CSV van en español (04 ENE 1999, DIC 1995); parsear con un mapa de meses, no con locale.
+! El buscador BIEST (app.bde.es/bie_www) rechaza clientes que no son navegador con Request Rejected.
++ Flujo típico. Buscar el código en catalogo_*.csv por la columna de descripción y pedir listaSeries con rango=MAX.
++ Códigos verificados. D_1NBAF472 euríbor a un año mensual, DTCCBCEUSDEUR.B USD/EUR diario, DTNPDE2010_P0000P_PS_APU deuda PDE sobre PIB trimestral.
++ El BdE publica ejemplos oficiales en Python y R (notebook enlazado desde docs_url).
+related: tesoro-estadisticas, cnmv-registros, igae-ejecucion-presupuestaria
 
 ## cnmv-registros
-CNMV – Registros oficiales y hechos relevantes | Comisión Nacional del Mercado de Valores (CNMV)
-summary: Registros oficiales de entidades supervisadas, información privilegiada y otra información relevante (OIR), participaciones significativas, informes financieros anuales y semestrales, folletos, fondos de inversión.
-access: portal, feed, download | auth: none | formats: html, xml, pdf, xlsx, xbrl | update: realtime | status: active | verified: pending
+CNMV – Registros oficiales, información regulada y estadísticas | Comisión Nacional del Mercado de Valores (CNMV)
+summary: Registros oficiales de entidades supervisadas, información privilegiada (IPP) y otra información relevante (OIR), informes financieros de cotizadas, información pública de IIC en XML mensual, series estadísticas y feeds RSS. Portal ASP.NET sin API pública.
+access: portal, feed, download | auth: none | formats: html, xml, pdf, xlsx, rss | update: realtime | status: active | verified: 2026-09-30
 coverage: Registros históricos desde 1989 según tipo
 license: Reutilización libre con cita de la fuente
-base_url: https://www.cnmv.es/portal/
-docs_url: https://www.cnmv.es/portal/Consultas/Busqueda.aspx
+base_url: https://www.cnmv.es/portal/home
+docs_url: https://www.cnmv.es/portal/gpage.aspx?id=RSS
 - https://www.cnmv.es/portal/Consultas/BusquedaPorEntidad.aspx :: Buscador de entidades y su documentación registrada
-- https://www.cnmv.es/portal/HR/ResultadoBusquedaHR.aspx :: Consulta de información privilegiada y relevante por entidad y fechas
-- https://www.cnmv.es/portal/Consultas/IFI/ListaIFI.aspx :: Informes financieros anuales y semestrales de cotizadas (XBRL/PDF)
-- https://www.cnmv.es/portal/RSS/ :: Canales RSS de comunicaciones y registros
-! No hay API REST documentada; las consultas son formularios ASP.NET con ViewState, difíciles de automatizar.
-! Los informes financieros están en XBRL con la taxonomía propia de la CNMV, no ESEF puro.
-! Las "IPP" y "OIR" sustituyeron a los "hechos relevantes" en 2020; los históricos siguen bajo esa etiqueta.
-! Fondos de inversión, la información periódica es trimestral y va en PDF y XML por fondo.
+- https://www.cnmv.es/portal/hr/busquedahr.aspx?division={2|3} :: Búsqueda de información privilegiada (2) y otra información relevante (3) por entidad, tipo y fechas
+- https://www.cnmv.es/portal/Consultas/IFI/ListaIFI.aspx :: Informes financieros anuales y semestrales de cotizadas
+- https://www.cnmv.es/portal/publicaciones/Descarga-Informacion-Individual.aspx?ejercicio={AAAA} :: Ficheros XML mensuales con la información pública individual de IIC, con esquemas XSD
+- https://www.cnmv.es/portal/publicaciones/seriesweb/inicio.aspx?codrama={1295|153|3|707} :: Series estadísticas (indicadores de estrés, inversión colectiva, servicios de inversión, emisores)
+- https://www.cnmv.es/portal/RSS/RSS.asmx/GetDatos?iID={1|3|4} :: RSS de notas de prensa (1), discursos (3) e información al sector (4)
+  ej: curl -s "https://www.cnmv.es/portal/RSS/RSS.asmx/GetDatos?iID=1"
+- https://www.cnmv.es/portal/informacion-privilegiada/RSS.asmx/GetNoticiasCNMV :: RSS de información privilegiada del día, desde el cierre de la sesión anterior
+! La raíz /portal/ y /portal/RSS/ devuelven 403; la portada es /portal/home. Las rutas funcionan con y sin extensión .aspx.
+! Consultas/Busqueda.aspx y HR/ResultadoBusquedaHR.aspx ya no existen (400); las búsquedas de IPP y OIR están en hr/busquedahr.aspx con division 2 y 3.
+! Formularios ASP.NET con __VIEWSTATE; para automatizar hay que hacer GET del formulario y reenviar los campos ocultos en el POST.
+! El feed de IPP solo contiene el día en curso y puede venir vacío; el de OIR (Otra-Informacion-Relevante/RSS.asmx/GetNoticiasCNMV) devolvía 500 en la verificación.
+! Los documentos se sirven por webservices/verdocumento/ver?e={token} con tokens opacos que no se pueden construir; la descarga no se pudo verificar desde este entorno.
+! IPP y OIR sustituyeron a los hechos relevantes en 2020; los anteriores siguen archivados bajo esa etiqueta.
 related: bde-estadisticas, borme-api-sumario
 
 ## ico-datos
-ICO – Líneas de financiación y estadísticas | Instituto de Crédito Oficial (ICO)
-summary: Estadísticas de operaciones formalizadas en las Líneas ICO y avales públicos (COVID, Ucrania) por sector, provincia y tamaño de empresa, más informes anuales y datos de transparencia.
-access: portal, download | auth: none | formats: xlsx, pdf, html | update: monthly | status: active | verified: pending
-coverage: 2010-
+ICO – Informe anual y cuentas | Instituto de Crédito Oficial (ICO)
+summary: Solo documentos PDF: memoria anual, cuentas anuales consolidadas e información con relevancia prudencial. No publica estadísticas descargables de las Líneas ICO ni de los avales por beneficiario.
+access: portal | auth: none | formats: pdf, html | update: annual | status: degraded | verified: 2026-09-30
 license: Reutilización libre con cita de la fuente
-base_url: https://www.ico.es/
-docs_url: https://www.ico.es/web/ico/estadisticas
-- https://www.ico.es/web/ico/estadisticas :: Estadísticas de líneas de mediación y avales
-- https://www.ico.es/web/ico/transparencia :: Portal de transparencia con informes y datos
-! Sin API; los datos de avales COVID se publicaron como Excel agregados, sin detalle por beneficiario.
+base_url: https://www.ico.es/web/guest/ico/informe-anual
+docs_url: https://www.ico.es/web/guest/datos-abiertos
+- https://www.ico.es/web/guest/ico/informe-anual :: Memoria, cuentas anuales e informe de relevancia prudencial en PDF
+! Las rutas /web/ico/estadisticas y /web/ico/transparencia ya no existen; redirigen a la portada.
+! La página de datos abiertos solo recoge la normativa RISP, sin conjuntos de datos.
+! Los PDF cuelgan de /documents/ con identificadores opacos y parámetro t de caché; los enlaces cambian con cada publicación.
 related: bdns-api
 
 ## tesoro-estadisticas
-Tesoro Público – Subastas, emisiones y estadísticas de deuda | Secretaría General del Tesoro y Financiación Internacional
-summary: Resultados de subastas de Letras, Bonos y Obligaciones, calendario de emisiones, saldo vivo y composición de la deuda del Estado, tenedores, estadísticas mensuales en Excel.
-access: download, portal | auth: none | formats: xlsx, pdf, html | update: monthly | status: active | verified: pending
-coverage: 1990-
+Tesoro Público – Subastas, deuda en circulación y estadísticas mensuales | Secretaría General del Tesoro y Financiación Internacional
+summary: Resultados de subastas de Letras, Bonos y Obligaciones (tablas HTML por instrumento e histórico en xlsx), boletín mensual en 19 cuadros xlsx (nominal en circulación, vida media, tenedores, vencimientos, negociación) e históricos de tipos marginales, medios y efectivos.
+access: download, portal | auth: none | formats: xlsx, pdf, html | update: monthly | status: active | verified: 2026-09-30
 license: Reutilización libre con cita de la fuente
-base_url: https://www.tesoro.es/
+base_url: https://www.tesoro.es/deuda-publica/estadisticas
 docs_url: https://www.tesoro.es/deuda-publica/estadisticas
-- https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas :: Resultado de las últimas subastas
-- https://www.tesoro.es/deuda-publica/estadisticas :: Boletín mensual y series históricas en Excel
-- https://www.tesoro.es/deuda-publica/subastas/calendario :: Calendario anual de subastas
-! No hay API; los Excel cambian de estructura entre años.
-! Los resultados de cada subasta se publican en PDF y HTML el mismo día; el Excel mensual llega con retardo.
-! Series largas de deuda y coste medio también en el Banco de España con códigos estables.
+- https://www.tesoro.es/deuda-publica/estad%C3%ADsticas-mensuales :: Boletín mensual; cuadros 01 a 19 en /sites/default/files/estadisticas/{NN}.xlsx (01 nominal en circulación, 12 tipos marginales, 14 vencimientos)
+  ej: curl -sO -A "Mozilla/5.0" "https://www.tesoro.es/sites/default/files/estadisticas/01.xlsx"
+- https://www.tesoro.es/sites/default/files/estadisticas/historico/historico_subastas.xlsx :: Histórico de subastas; en la misma carpeta historico_t.marg, historico_t.int.medio, historico_t.int.nuevas_em y historico_distribucion_tenedores (.xlsx)
+  ej: curl -sO -A "Mozilla/5.0" "https://www.tesoro.es/sites/default/files/estadisticas/historico/historico_subastas.xlsx"
+- https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/{letras-del-tesoro|bonos-del-estado|obligaciones-del-estado} :: Última subasta por instrumento en tabla HTML
+- https://www.tesoro.es/deuda-publica/subastas/calendario :: Calendario anual de subastas en HTML y PDF
+! Con el User-Agent por defecto de curl responde 403 en todo el sitio; enviar un User-Agent de navegador.
+! Certificado FNMT sin cadena intermedia; añadir AC Componentes Informáticos al bundle o falla la verificación TLS (ver guía).
+! Los cuadros mensuales se sobreescriben cada mes en la misma URL (01.xlsx); no hay histórico por fecha, guardar copia si hace falta.
+! No hay API ni CSV; las subastas recientes solo en HTML y el histórico en xlsx.
+! La URL de estadísticas mensuales lleva la tilde codificada (estad%C3%ADsticas-mensuales); /deuda-publica/estadisticas es solo el índice.
 related: bde-estadisticas, igae-ejecucion-presupuestaria
 
 # SECTOR hacienda-presupuestos: Hacienda, tributos y presupuestos

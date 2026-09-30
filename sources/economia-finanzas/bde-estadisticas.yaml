@@ -1,33 +1,54 @@
 id: bde-estadisticas
-name: Banco de España – Portal de estadísticas y descarga de series
+name: Banco de España – API de estadísticas y CSV de series
 org: Banco de España
-ministry: Organismo independiente adscrito a efectos administrativos a Economía, Comercio y Empresa
+ministry: Institución independiente; se relaciona con el Gobierno a través de Economía, Comercio y Empresa
 level: age
 sector: economia-finanzas
-tags: [banco-de-espana, series-temporales, tipos-de-interes, tipos-de-cambio, credito, deuda, balanza-pagos]
+tags: [banco-de-espana, series-temporales, tipos-de-interes, tipos-de-cambio, euribor, credito, deuda, balanza-pagos]
 summary: >-
-  Miles de series estadísticas: tipos de interés y de cambio, crédito y depósitos, deuda pública, balanza de pagos,
-  cuentas financieras, Central de Balances. Descarga completa por capítulos en CSV y consulta de series individuales.
-access: [download, portal]
+  Más de 14000 series (tipos de interés y de cambio, euríbor, crédito, deuda pública, balanza de pagos, cuentas
+  financieras) por API JSON, por CSV de cada cuadro del Boletín Estadístico y por ZIP de capítulo. Los códigos
+  de serie se localizan en catálogos CSV.
+access: [api-rest, download]
 auth: none
-formats: [csv, xlsx, pdf]
-update: monthly
+formats: [json, csv, xlsx, zip]
+update: daily
 coverage: "Series desde 1962 según indicador"
 license: Reutilización libre con cita de la fuente
-base_url: https://www.bde.es/webbe/es/estadisticas/
-docs_url: https://www.bde.es/webbe/es/estadisticas/recursos/descargas-completas.html
+base_url: https://app.bde.es/bierest/resources/srdatosapp
+docs_url: https://www.bde.es/webbe/es/estadisticas/recursos/api-estadisticas-bde.html
 endpoints:
-  - path: https://www.bde.es/webbe/es/estadisticas/recursos/descargas-completas.html
-    desc: Ficheros CSV completos por capítulo del Boletín Estadístico y otras publicaciones
-  - path: https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/{fichero}.csv
-    desc: Patrón de descarga directa de los CSV de series
-  - path: https://app.bde.es/bie_www/faces/bie_wwwias/jsp/op/Home/pHome.jsp
-    desc: Buscador de series BIEST con exportación
+  - path: /favoritas?idioma={es|en}&series={cod1,cod2}
+    desc: Último dato de una o varias series, con frecuencia, tendencia y fecha
+    example: curl -s --compressed "https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472"
+  - path: /listaSeries?idioma={es|en}&series={cod1,cod2}&rango={rango}
+    desc: Serie completa con metadatos, fechas y valores
+    example: curl -s --compressed "https://app.bde.es/bierest/resources/srdatosapp/listaSeries?idioma=es&series=DTNPDE2010_P0000P_PS_APU&rango=MAX"
+    params: "rango según frecuencia. Diaria 3M, 12M, 36M; mensual y trimestral 30M, 60M, MAX; anual 60M, MAX; o un año concreto (rango=2024)"
+  - path: https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_{be|tc|ti|si|pb}.csv
+    desc: Catálogos de series (código, alias, fichero del cuadro, descripción, frecuencia, primera y última observación)
+    example: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_tc.csv"
+  - path: https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/{cuadro}.csv
+    desc: CSV de un cuadro completo con sus series en columnas; también en /datos/xlsx/{cuadro}.xlsx
+    example: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/tc_1_1.csv"
+  - path: https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_{capitulo}.zip
+    desc: ZIP con los CSV de un capítulo del Boletín Estadístico; lista de capítulos en descargas-completas.html
+    example: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_DEUAAPP.zip"
+rate_limit: No documentado
 gotchas:
-  - Los CSV usan codificación Latin-1 y separador coma con decimales con punto; primeras filas son cabeceras de metadatos.
-  - Cada serie tiene un código alfanumérico estable (p. ej. D_1NBAF...) que es la clave para automatizar; el nombre descriptivo cambia.
-  - Los tipos de cambio oficiales del euro provienen del BCE; el BdE los redistribuye con retardo.
-  - No hay API REST pública; para SDMX usar el BCE (Statistical Data Warehouse) que republica muchas series españolas.
-related: [tesoro-estadisticas, cnmv-registros]
+  - La API comprime siempre en gzip; sin Accept-Encoding el cuerpo llega comprimido y sin cabecera Content-Encoding. Con curl usar --compressed; requests lo descomprime solo.
+  - idioma es obligatorio y rango debe ser compatible con la frecuencia de la serie; si no, 412 con JSON de campos errNum, errMsgUsr y errMsgDebug. Serie inexistente también da 412.
+  - fechas y valores vienen en orden descendente (el más reciente primero). La fecha lleva la hora de publicación; en mensuales es el día 1 del mes.
+  - Sin rango devuelve el tramo mínimo (30M en mensuales); para toda la serie pedir rango=MAX.
+  - "No hay endpoint de búsqueda; los códigos salen de los catálogos CSV o del alias del cuadro. Los caracteres # y % del código se envían como %23 y %25."
+  - Los catálogos escriben el fichero del cuadro en mayúsculas (BE0101.csv) pero la URL real va en minúsculas (be0101.csv); en mayúsculas responde 404.
+  - CSV y catálogos en ISO-8859-1, separador coma, decimal punto; seis filas de cabecera (código, secuencial, alias, descripción, unidades, frecuencia), dato ausente como _, y filas FUENTE y NOTAS al final.
+  - Las fechas de los CSV van en español (04 ENE 1999, DIC 1995); parsear con un mapa de meses, no con locale.
+  - El buscador BIEST (app.bde.es/bie_www) rechaza clientes que no son navegador con Request Rejected.
+tips:
+  - Flujo típico. Buscar el código en catalogo_*.csv por la columna de descripción y pedir listaSeries con rango=MAX.
+  - Códigos verificados. D_1NBAF472 euríbor a un año mensual, DTCCBCEUSDEUR.B USD/EUR diario, DTNPDE2010_P0000P_PS_APU deuda PDE sobre PIB trimestral.
+  - El BdE publica ejemplos oficiales en Python y R (notebook enlazado desde docs_url).
+related: [tesoro-estadisticas, cnmv-registros, igae-ejecucion-presupuestaria]
 status: active
-verified: null
+verified: "2026-09-30"

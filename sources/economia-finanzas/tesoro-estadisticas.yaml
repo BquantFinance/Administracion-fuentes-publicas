@@ -1,32 +1,38 @@
 id: tesoro-estadisticas
-name: Tesoro Público – Subastas, emisiones y estadísticas de deuda
+name: Tesoro Público – Subastas, deuda en circulación y estadísticas mensuales
 org: Secretaría General del Tesoro y Financiación Internacional
 ministry: Economía, Comercio y Empresa
 level: age
 sector: economia-finanzas
-tags: [tesoro, deuda-publica, subastas, letras, bonos, obligaciones]
+tags: [tesoro, deuda-publica, subastas, letras, bonos, obligaciones, tipos-marginales]
 summary: >-
-  Resultados de subastas de Letras, Bonos y Obligaciones, calendario de emisiones, saldo vivo y composición
-  de la deuda del Estado, tenedores, estadísticas mensuales en Excel.
+  Resultados de subastas de Letras, Bonos y Obligaciones (tablas HTML por instrumento e histórico en xlsx),
+  boletín mensual en 19 cuadros xlsx (nominal en circulación, vida media, tenedores, vencimientos, negociación)
+  e históricos de tipos marginales, medios y efectivos.
 access: [download, portal]
 auth: none
 formats: [xlsx, pdf, html]
 update: monthly
-coverage: "1990-"
 license: Reutilización libre con cita de la fuente
-base_url: https://www.tesoro.es/
+base_url: https://www.tesoro.es/deuda-publica/estadisticas
 docs_url: https://www.tesoro.es/deuda-publica/estadisticas
 endpoints:
-  - path: https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas
-    desc: Resultado de las últimas subastas
-  - path: https://www.tesoro.es/deuda-publica/estadisticas
-    desc: Boletín mensual y series históricas en Excel
+  - path: https://www.tesoro.es/deuda-publica/estad%C3%ADsticas-mensuales
+    desc: Boletín mensual; cuadros 01 a 19 en /sites/default/files/estadisticas/{NN}.xlsx (01 nominal en circulación, 12 tipos marginales, 14 vencimientos)
+    example: curl -sO -A "Mozilla/5.0" "https://www.tesoro.es/sites/default/files/estadisticas/01.xlsx"
+  - path: https://www.tesoro.es/sites/default/files/estadisticas/historico/historico_subastas.xlsx
+    desc: Histórico de subastas; en la misma carpeta historico_t.marg, historico_t.int.medio, historico_t.int.nuevas_em y historico_distribucion_tenedores (.xlsx)
+    example: curl -sO -A "Mozilla/5.0" "https://www.tesoro.es/sites/default/files/estadisticas/historico/historico_subastas.xlsx"
+  - path: https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/{letras-del-tesoro|bonos-del-estado|obligaciones-del-estado}
+    desc: Última subasta por instrumento en tabla HTML
   - path: https://www.tesoro.es/deuda-publica/subastas/calendario
-    desc: Calendario anual de subastas
+    desc: Calendario anual de subastas en HTML y PDF
 gotchas:
-  - No hay API; los Excel cambian de estructura entre años.
-  - Los resultados de cada subasta se publican en PDF y HTML el mismo día; el Excel mensual llega con retardo.
-  - Series largas de deuda y coste medio también en el Banco de España con códigos estables.
+  - Con el User-Agent por defecto de curl responde 403 en todo el sitio; enviar un User-Agent de navegador.
+  - Certificado FNMT sin cadena intermedia; añadir AC Componentes Informáticos al bundle o falla la verificación TLS (ver guía).
+  - Los cuadros mensuales se sobreescriben cada mes en la misma URL (01.xlsx); no hay histórico por fecha, guardar copia si hace falta.
+  - No hay API ni CSV; las subastas recientes solo en HTML y el histórico en xlsx.
+  - La URL de estadísticas mensuales lleva la tilde codificada (estad%C3%ADsticas-mensuales); /deuda-publica/estadisticas es solo el índice.
 related: [bde-estadisticas, igae-ejecucion-presupuestaria]
 status: active
-verified: null
+verified: "2026-09-30"

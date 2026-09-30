@@ -1,35 +1,45 @@
 id: cnmv-registros
-name: CNMV – Registros oficiales y hechos relevantes
+name: CNMV – Registros oficiales, información regulada y estadísticas
 org: Comisión Nacional del Mercado de Valores (CNMV)
 ministry: Organismo independiente adscrito a Economía, Comercio y Empresa
 level: age
 sector: economia-finanzas
-tags: [cnmv, mercados, cotizadas, hechos-relevantes, fondos, participaciones-significativas, emisiones]
+tags: [cnmv, mercados, cotizadas, informacion-privilegiada, oir, fondos, iic, participaciones-significativas]
 summary: >-
-  Registros oficiales de entidades supervisadas, información privilegiada y otra información relevante (OIR),
-  participaciones significativas, informes financieros anuales y semestrales, folletos, fondos de inversión.
+  Registros oficiales de entidades supervisadas, información privilegiada (IPP) y otra información relevante (OIR),
+  informes financieros de cotizadas, información pública de IIC en XML mensual, series estadísticas y feeds RSS.
+  Portal ASP.NET sin API pública.
 access: [portal, feed, download]
 auth: none
-formats: [html, xml, pdf, xlsx, xbrl]
+formats: [html, xml, pdf, xlsx, rss]
 update: realtime
 coverage: "Registros históricos desde 1989 según tipo"
 license: Reutilización libre con cita de la fuente
-base_url: https://www.cnmv.es/portal/
-docs_url: https://www.cnmv.es/portal/Consultas/Busqueda.aspx
+base_url: https://www.cnmv.es/portal/home
+docs_url: https://www.cnmv.es/portal/gpage.aspx?id=RSS
 endpoints:
   - path: https://www.cnmv.es/portal/Consultas/BusquedaPorEntidad.aspx
     desc: Buscador de entidades y su documentación registrada
-  - path: https://www.cnmv.es/portal/HR/ResultadoBusquedaHR.aspx
-    desc: Consulta de información privilegiada y relevante por entidad y fechas
+  - path: https://www.cnmv.es/portal/hr/busquedahr.aspx?division={2|3}
+    desc: Búsqueda de información privilegiada (2) y otra información relevante (3) por entidad, tipo y fechas
   - path: https://www.cnmv.es/portal/Consultas/IFI/ListaIFI.aspx
-    desc: Informes financieros anuales y semestrales de cotizadas (XBRL/PDF)
-  - path: https://www.cnmv.es/portal/RSS/
-    desc: Canales RSS de comunicaciones y registros
+    desc: Informes financieros anuales y semestrales de cotizadas
+  - path: https://www.cnmv.es/portal/publicaciones/Descarga-Informacion-Individual.aspx?ejercicio={AAAA}
+    desc: Ficheros XML mensuales con la información pública individual de IIC, con esquemas XSD
+  - path: https://www.cnmv.es/portal/publicaciones/seriesweb/inicio.aspx?codrama={1295|153|3|707}
+    desc: Series estadísticas (indicadores de estrés, inversión colectiva, servicios de inversión, emisores)
+  - path: https://www.cnmv.es/portal/RSS/RSS.asmx/GetDatos?iID={1|3|4}
+    desc: RSS de notas de prensa (1), discursos (3) e información al sector (4)
+    example: curl -s "https://www.cnmv.es/portal/RSS/RSS.asmx/GetDatos?iID=1"
+  - path: https://www.cnmv.es/portal/informacion-privilegiada/RSS.asmx/GetNoticiasCNMV
+    desc: RSS de información privilegiada del día, desde el cierre de la sesión anterior
 gotchas:
-  - No hay API REST documentada; las consultas son formularios ASP.NET con ViewState, difíciles de automatizar.
-  - Los informes financieros están en XBRL con la taxonomía propia de la CNMV, no ESEF puro.
-  - Las "IPP" y "OIR" sustituyeron a los "hechos relevantes" en 2020; los históricos siguen bajo esa etiqueta.
-  - Fondos de inversión, la información periódica es trimestral y va en PDF y XML por fondo.
+  - La raíz /portal/ y /portal/RSS/ devuelven 403; la portada es /portal/home. Las rutas funcionan con y sin extensión .aspx.
+  - Consultas/Busqueda.aspx y HR/ResultadoBusquedaHR.aspx ya no existen (400); las búsquedas de IPP y OIR están en hr/busquedahr.aspx con division 2 y 3.
+  - Formularios ASP.NET con __VIEWSTATE; para automatizar hay que hacer GET del formulario y reenviar los campos ocultos en el POST.
+  - El feed de IPP solo contiene el día en curso y puede venir vacío; el de OIR (Otra-Informacion-Relevante/RSS.asmx/GetNoticiasCNMV) devolvía 500 en la verificación.
+  - Los documentos se sirven por webservices/verdocumento/ver?e={token} con tokens opacos que no se pueden construir; la descarga no se pudo verificar desde este entorno.
+  - IPP y OIR sustituyeron a los hechos relevantes en 2020; los anteriores siguen archivados bajo esa etiqueta.
 related: [bde-estadisticas, borme-api-sumario]
 status: active
-verified: null
+verified: "2026-09-30"

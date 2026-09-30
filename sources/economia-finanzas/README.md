@@ -4,14 +4,14 @@ Sector `economia-finanzas` · 5 fuentes · índice generado por `scripts/build.p
 
 | id | fuente | acceso | auth | formatos | actualización | verificada |
 |---|---|---|---|---|---|---|
-| [airef-datos](airef-datos.yaml) | AIReF – Previsiones, informes y datos fiscales | download, portal | none | xlsx, pdf, csv | quarterly | — |
-| [bde-estadisticas](bde-estadisticas.yaml) | Banco de España – Portal de estadísticas y descarga de series | download, portal | none | csv, xlsx, pdf | monthly | — |
-| [cnmv-registros](cnmv-registros.yaml) | CNMV – Registros oficiales y hechos relevantes | portal, feed, download | none | html, xml, pdf, xlsx, xbrl | realtime | — |
-| [ico-datos](ico-datos.yaml) | ICO – Líneas de financiación y estadísticas | portal, download | none | xlsx, pdf, html | monthly | — |
-| [tesoro-estadisticas](tesoro-estadisticas.yaml) | Tesoro Público – Subastas, emisiones y estadísticas de deuda | download, portal | none | xlsx, pdf, html | monthly | — |
+| [airef-datos](airef-datos.yaml) | AIReF – Datalab, observatorio de deuda y previsiones | download, portal | none | xlsx, pdf | quarterly | 2026-09-30 |
+| [bde-estadisticas](bde-estadisticas.yaml) | Banco de España – API de estadísticas y CSV de series | api-rest, download | none | json, csv, xlsx, zip | daily | 2026-09-30 |
+| [cnmv-registros](cnmv-registros.yaml) | CNMV – Registros oficiales, información regulada y estadísticas | portal, feed, download | none | html, xml, pdf, xlsx, rss | realtime | 2026-09-30 |
+| [ico-datos](ico-datos.yaml) | ICO – Informe anual y cuentas | portal | none | pdf, html | annual | 2026-09-30 |
+| [tesoro-estadisticas](tesoro-estadisticas.yaml) | Tesoro Público – Subastas, deuda en circulación y estadísticas mensuales | download, portal | none | xlsx, pdf, html | monthly | 2026-09-30 |
 
-- **airef-datos**: Previsiones macroeconómicas y fiscales, observatorio de deuda por Administración, evaluaciones de gasto (spending reviews) y datos de ejecución de reglas fiscales por CCAA y ayuntamientos, con descargas Excel.
-- **bde-estadisticas**: Miles de series estadísticas: tipos de interés y de cambio, crédito y depósitos, deuda pública, balanza de pagos, cuentas financieras, Central de Balances. Descarga completa por capítulos en CSV y consulta de series individuales.
-- **cnmv-registros**: Registros oficiales de entidades supervisadas, información privilegiada y otra información relevante (OIR), participaciones significativas, informes financieros anuales y semestrales, folletos, fondos de inversión.
-- **ico-datos**: Estadísticas de operaciones formalizadas en las Líneas ICO y avales públicos (COVID, Ucrania) por sector, provincia y tamaño de empresa, más informes anuales y datos de transparencia.
-- **tesoro-estadisticas**: Resultados de subastas de Letras, Bonos y Obligaciones, calendario de emisiones, saldo vivo y composición de la deuda del Estado, tenedores, estadísticas mensuales en Excel.
+- **airef-datos**: Ficheros xlsx de la AIReF: histórico de deuda por Administración, cuadro macro de previsiones, estimación en tiempo real del PIB trimestral (MIPred) y por CCAA, y seguimiento del objetivo de estabilidad. Sin API; los Excel se enlazan desde páginas WordPress.
+- **bde-estadisticas**: Más de 14000 series (tipos de interés y de cambio, euríbor, crédito, deuda pública, balanza de pagos, cuentas financieras) por API JSON, por CSV de cada cuadro del Boletín Estadístico y por ZIP de capítulo. Los códigos de serie se localizan en catálogos CSV.
+- **cnmv-registros**: Registros oficiales de entidades supervisadas, información privilegiada (IPP) y otra información relevante (OIR), informes financieros de cotizadas, información pública de IIC en XML mensual, series estadísticas y feeds RSS. Portal ASP.NET sin API pública.
+- **ico-datos**: Solo documentos PDF: memoria anual, cuentas anuales consolidadas e información con relevancia prudencial. No publica estadísticas descargables de las Líneas ICO ni de los avales por beneficiario.
+- **tesoro-estadisticas**: Resultados de subastas de Letras, Bonos y Obligaciones (tablas HTML por instrumento e histórico en xlsx), boletín mensual en 19 cuadros xlsx (nominal en circulación, vida media, tenedores, vencimientos, negociación) e históricos de tipos marginales, medios y efectivos.
