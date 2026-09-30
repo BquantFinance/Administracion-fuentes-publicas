@@ -82,6 +82,12 @@ descarga pedida directamente, incluso con cookies y Referer, porque la sesión s
 menú; automatizar con navegador (Playwright). REGCON (convenios colectivos) es más simple: GET del formulario,
 conservar cookies y reenviar el token consulta_token_value_id en el POST.
 
+## captcha-required
+
+El Centro de Descargas del CNIG pide un token de reCAPTCHA v3 (preAutorizarDescarga con recaptchaToken) antes de
+autorizar cada descarga; sin él, descargaDir responde 403. No hay arreglo lícito desde un script: usar la vía
+alternativa que indica la ficha (servicios WFS, WMS o ATOM del mismo organismo) o descargar una vez a mano.
+
 ## js-rendered
 
 Contenido generado en el navegador. Antes de lanzar un navegador sin cabeza, mirar en las herramientas de red

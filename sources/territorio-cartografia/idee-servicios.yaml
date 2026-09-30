@@ -1,28 +1,36 @@
 id: idee-servicios
-name: IDEE – Infraestructura de Datos Espaciales de España
-org: Consejo Superior Geográfico / CNIG
+name: IDEE – Catálogos CSW y directorio de servicios geográficos
+org: Consejo Superior Geográfico y CNIG
 ministry: Transportes y Movilidad Sostenible
 level: age
 sector: territorio-cartografia
-tags: [idee, inspire, wms, wfs, catalogo-metadatos, csw, geoportal]
+tags: [idee, inspire, wms, wfs, catalogo-metadatos, csw, codsi, geoportal]
 summary: >-
-  Catálogo de servicios geográficos interoperables de todas las Administraciones (más de 3.000 WMS, WFS, WMTS,
-  CSW) y directorio de nodos IDE. Punto de partida para localizar cualquier capa geográfica oficial.
-access: [ogc, api-rest, portal]
+  Punto de entrada a los servicios geográficos oficiales de todas las Administraciones: catálogo CSW INSPIRE
+  con más de 13000 registros, catálogo oficial CODSI, directorio de servicios OGC por tipo y organismo y
+  monitorización de disponibilidad. Metadatos ISO 19139 consultables por CQL.
+access: [ogc, portal]
 auth: none
-formats: [xml, gml, geojson, json]
+formats: [xml, json]
 update: daily
-license: Metadatos libres; cada servicio con su licencia
+license: Metadatos libres; cada servicio y dataset con su licencia
 base_url: https://www.idee.es/
-docs_url: https://www.idee.es/web/idee/directorio-de-servicios
+docs_url: https://www.idee.es/web/idee/servicios
 endpoints:
-  - path: https://www.idee.es/csw-inspire-idee/srv/spa/csw?SERVICE=CSW&REQUEST=GetCapabilities
-    desc: Catálogo CSW de metadatos INSPIRE
+  - path: https://www.idee.es/csw-inspire-idee/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecords&resultType=results&typeNames=csw:Record&ElementSetName=brief&maxRecords={n}&constraintLanguage=CQL_TEXT&constraint_language_version=1.1.0&constraint=AnyText%20like%20%27%25{texto}%25%27
+    desc: Búsqueda de datasets y servicios por texto libre en el catálogo INSPIRE; numberOfRecordsMatched en la respuesta
+    example: curl -s "https://www.idee.es/csw-inspire-idee/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecords&resultType=results&typeNames=csw:Record&ElementSetName=brief&maxRecords=10&constraintLanguage=CQL_TEXT&constraint_language_version=1.1.0&constraint=AnyText%20like%20%27%25catastro%25%27"
+  - path: https://www.idee.es/csw-inspire-idee/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecordById&outputSchema=http://www.isotc211.org/2005/gmd&ElementSetName=full&ID={id}
+    desc: Metadato completo ISO 19139 de un registro (ES_SDGC_AD son las direcciones del Catastro)
+  - path: https://www.idee.es/csw-codsi-idee/srv/spa/csw?SERVICE=CSW&REQUEST=GetCapabilities
+    desc: Catálogo Oficial de Datos y Servicios INSPIRE (CODSI), mismo protocolo
   - path: https://www.idee.es/web/idee/directorio-de-servicios
-    desc: Directorio navegable de servicios OGC por tema y organismo
+    desc: Directorio navegable de servicios por tipo (WMS, WFS, WMTS, CSW, ATOM) y organismo; redirige a segun-tipo-de-servicio
+quirks: [static-html]
 gotchas:
-  - Muchos servicios listados son autonómicos o locales y tienen disponibilidad irregular; comprobar GetCapabilities antes de depender de ellos.
-  - El CSW usa perfil INSPIRE con esquemas ISO 19139; las búsquedas por texto libre van en el filtro AnyText.
+  - El portal es Liferay y el directorio es HTML pesado (200 KB) sin API; para buscar servicios de forma programática usar el CSW con CQL.
+  - Muchos servicios listados son autonómicos o locales con disponibilidad irregular; comprobar GetCapabilities antes de depender de ellos (monitorización en /web/idee/monitorizacion-de-servicios).
+  - Los metadatos usan el perfil INSPIRE sobre ISO 19139; los identificadores de registro siguen el patrón del organismo (ES_SDGC_AD, ES_SDGC_AD_ATOM para el Catastro).
 related: [cnig-centro-descargas, catastro-ovc]
 status: active
-verified: null
+verified: "2026-09-30"

@@ -4,10 +4,10 @@ Sector `territorio-cartografia` · 3 fuentes · índice generado por `scripts/bu
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
-| [catastro-ovc](catastro-ovc.yaml) | Catastro – Servicios web de la Oficina Virtual (OVC) e INSPIRE | api-rest, api-soap, ogc, download | none | json, xml, gml, shp, dxf, png | daily | — | — |
-| [cnig-centro-descargas](cnig-centro-descargas.yaml) | IGN/CNIG – Centro de Descargas de cartografía y geodatos | download, ogc, api-rest | none | shp, gpkg, geotiff, laz, ecw, pdf, jpg, kml | irregular | — | — |
-| [idee-servicios](idee-servicios.yaml) | IDEE – Infraestructura de Datos Espaciales de España | ogc, api-rest, portal | none | xml, gml, geojson, json | daily | — | — |
+| [catastro-ovc](catastro-ovc.yaml) | Catastro – Servicios web de la Oficina Virtual (OVC) e INSPIRE | api-rest, ogc, download | none | json, xml, gml, zip, png | daily | latin1 | 2026-09-30 |
+| [cnig-centro-descargas](cnig-centro-descargas.yaml) | IGN/CNIG – Centro de Descargas, servicios OGC y geocoder CartoCiudad | ogc, api-rest, download, portal | none | shp, gpkg, geotiff, laz, gml, geojson, json, png | irregular | captcha-required, js-rendered, static-html | 2026-09-30 |
+| [idee-servicios](idee-servicios.yaml) | IDEE – Catálogos CSW y directorio de servicios geográficos | ogc, portal | none | xml, json | daily | static-html | 2026-09-30 |
 
-- **catastro-ovc**: Consulta de referencias catastrales por dirección, coordenadas o RC; datos no protegidos de inmuebles (superficie, uso, año); cartografía parcelaria vectorial vía INSPIRE (WFS/ATOM) y WMS. Sin autenticación para datos no protegidos; titularidad y valor requieren certificado.
-- **cnig-centro-descargas**: Descarga gratuita de toda la producción del IGN: ortofotos PNOA, modelos digitales del terreno, LiDAR, mapas topográficos, límites municipales oficiales, redes de transporte, SIOSE, nomenclátor geográfico. Servicios WMS/WMTS.
-- **idee-servicios**: Catálogo de servicios geográficos interoperables de todas las Administraciones (más de 3.000 WMS, WFS, WMTS, CSW) y directorio de nodos IDE. Punto de partida para localizar cualquier capa geográfica oficial.
+- **catastro-ovc**: Datos no protegidos de inmuebles por referencia catastral o dirección (JSON), referencia catastral por coordenadas (XML), equivalencia de códigos de municipio Catastro e INE, parcelario vectorial por WFS INSPIRE, descargas ATOM municipales (parcelas, edificios, direcciones) y WMS. Sin autenticación.
+- **cnig-centro-descargas**: Producción del IGN (ortofotos PNOA, modelos del terreno, LiDAR, mapas, límites municipales oficiales, SIOSE) en un Centro de Descargas protegido por reCAPTCHA, más servicios WMS, WMTS y WFS INSPIRE sin restricción y el geocoder CartoCiudad, que devuelve el código INE.
+- **idee-servicios**: Punto de entrada a los servicios geográficos oficiales de todas las Administraciones: catálogo CSW INSPIRE con más de 13000 registros, catálogo oficial CODSI, directorio de servicios OGC por tipo y organismo y monitorización de disponibilidad. Metadatos ISO 19139 consultables por CQL.

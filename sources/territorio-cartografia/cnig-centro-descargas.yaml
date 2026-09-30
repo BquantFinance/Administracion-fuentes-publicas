@@ -1,40 +1,51 @@
 id: cnig-centro-descargas
-name: IGN/CNIG – Centro de Descargas de cartografía y geodatos
-org: Instituto Geográfico Nacional / Centro Nacional de Información Geográfica
+name: IGN/CNIG – Centro de Descargas, servicios OGC y geocoder CartoCiudad
+org: Instituto Geográfico Nacional y Centro Nacional de Información Geográfica
 ministry: Transportes y Movilidad Sostenible
 level: age
 sector: territorio-cartografia
-tags: [ign, cnig, cartografia, mdt, lidar, pnoa, ortofotos, limites-administrativos, nomenclator, siose]
+tags: [ign, cnig, cartografia, mdt, lidar, pnoa, ortofotos, limites-administrativos, cartociudad, geocoder]
 summary: >-
-  Descarga gratuita de toda la producción del IGN: ortofotos PNOA, modelos digitales del terreno, LiDAR, mapas
-  topográficos, límites municipales oficiales, redes de transporte, SIOSE, nomenclátor geográfico. Servicios WMS/WMTS.
-access: [download, ogc, api-rest]
+  Producción del IGN (ortofotos PNOA, modelos del terreno, LiDAR, mapas, límites municipales oficiales, SIOSE)
+  en un Centro de Descargas protegido por reCAPTCHA, más servicios WMS, WMTS y WFS INSPIRE sin restricción y
+  el geocoder CartoCiudad, que devuelve el código INE.
+access: [ogc, api-rest, download, portal]
 auth: none
-formats: [shp, gpkg, geotiff, laz, ecw, pdf, jpg, kml]
+formats: [shp, gpkg, geotiff, laz, gml, geojson, json, png]
 update: irregular
-coverage: "Cartografía histórica desde 1875; PNOA desde 2004"
-license: CC BY 4.0 (licencia IGN compatible)
+coverage: "PNOA desde 2004; cartografía histórica desde el siglo XIX; límites vigentes e histórico 2023"
+license: CC BY 4.0 (licencia de uso IGN, con cita)
 base_url: https://centrodedescargas.cnig.es/CentroDescargas/
 docs_url: https://www.ign.es/web/ign/portal/ide-area-nodo-ide-ign
 endpoints:
-  - path: https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie=LILIM
-    desc: Líneas límite municipales, provinciales y autonómicas oficiales
-  - path: https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie=MDT05
-    desc: Modelo digital del terreno de 5 m
+  - path: https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie={codigo_serie}
+    desc: Ficha de una serie del catálogo (LILIM límites, MDT05 modelo de 5 m, PNOA...) con la lista de ficheros cargada por XHR
+    example: curl -s "https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie=LILIM"
+  - path: https://centrodedescargas.cnig.es/CentroDescargas/archivosSerie
+    desc: Lista de ficheros de una serie en HTML, con el id de cada fichero en data-sec; POST con codSerie y numPagina
+    example: curl -s -X POST -d "codSerie=LILIM&numPagina=1" "https://centrodedescargas.cnig.es/CentroDescargas/archivosSerie"
+  - path: https://www.ign.es/wfs-inspire/unidades-administrativas?service=WFS&version=2.0.0&request=GetFeature&typeNames=au:AdministrativeUnit
+    desc: Límites administrativos INSPIRE por WFS; outputFormat=application/geo+json y count para limitar
+    example: curl -s "https://www.ign.es/wfs-inspire/unidades-administrativas?service=WFS&version=2.0.0&request=GetFeature&typeNames=au:AdministrativeUnit&count=10&outputFormat=application/geo%2Bjson"
   - path: https://www.ign.es/wms-inspire/pnoa-ma?SERVICE=WMS&REQUEST=GetCapabilities
-    desc: WMS de ortofotos PNOA máxima actualidad
-  - path: https://www.ign.es/wmts/pnoa-ma?SERVICE=WMTS&REQUEST=GetCapabilities
-    desc: WMTS teselado de PNOA
+    desc: WMS de ortofotos PNOA de máxima actualidad; WMTS teselado en https://www.ign.es/wmts/pnoa-ma
   - path: https://www.ign.es/wms-inspire/ign-base?SERVICE=WMS&REQUEST=GetCapabilities
-    desc: WMS del mapa base IGN
-  - path: https://www.cartociudad.es/geocoder/api/geocoder/findJsonp?q={direccion}
-    desc: Geocodificador CartoCiudad (direcciones, topónimos, referencias catastrales)
-    example: curl -s "https://www.cartociudad.es/geocoder/api/geocoder/findJsonp?q=Calle%20Alcala%2050%20Madrid"
+    desc: WMS del mapa base del IGN
+  - path: https://www.cartociudad.es/geocoder/api/geocoder/find?q={direccion}
+    desc: Geocodificador; JSON con provinceCode, muniCode (INE), postalCode y geom en WKT WGS84; candidatesJsonp devuelve varios candidatos
+    example: curl -s "https://www.cartociudad.es/geocoder/api/geocoder/find?q=Calle%20Alcala%2050%20Madrid"
+quirks: [captcha-required, js-rendered, static-html]
+ids: [ine-municipio, ine-provincia, ccaa]
 gotchas:
-  - Las descargas masivas del Centro de Descargas exigen aceptar la licencia por sesión; para automatizar usar los servicios ATOM/WFS del IGN o pedir acceso a la API de descargas.
-  - Los límites municipales del IGN son la geometría oficial; los del Catastro difieren en zonas.
-  - El geocoder devuelve JSONP aunque el nombre del endpoint lo indique; hay que quitar el callback o usar el endpoint find.
-  - Sistema de referencia oficial ETRS89 (EPSG:4258 geográficas, 258xx UTM); Canarias REGCAN95.
-related: [idee-servicios, catastro-ovc]
+  - Cada descarga del Centro de Descargas pasa por reCAPTCHA v3 (preAutorizarDescarga con recaptchaToken) antes de descargaDir; sin token responde 403. No es automatizable sin navegador.
+  - La lista de ficheros de una serie no está en catalogo.do; se obtiene por POST a archivosSerie, donde cada fichero lleva su id en data-sec y en detalleArchivo?sec=.
+  - Las rutas apidescargas y descargaDir?secDescDirLA= no son públicas (404 y 403); no hay API de descargas abierta.
+  - El WFS de unidades administrativas devuelve 403 si el filtro XML va en la URL (el WAF bloquea las etiquetas); descargar por count y filtrar en local. outputFormat=application/json no existe, es geo+json.
+  - En el WFS, nationalCode es 34 seguido de los códigos INE de comunidad, provincia y municipio (34090800000 es la provincia de Barcelona); cada feature pesa cientos de KB por la geometría.
+  - El geocoder devuelve JSONP (envuelto en callback) en findJsonp y candidatesJsonp y JSON limpio en find.
+  - Sistema de referencia oficial ETRS89 (EPSG:4258 geográficas, 25829 a 25831 UTM); Canarias REGCAN95 (32628).
+tips:
+  - Para límites municipales sin pasar por el Centro de Descargas, el WFS INSPIRE de unidades administrativas; para los oficiales en fichero, la serie LILIM (shapefile 157 MB, GML 63 MB, histórico 2023 en GeoPackage).
+related: [idee-servicios, catastro-ovc, ine-codigos-territoriales]
 status: active
-verified: null
+verified: "2026-09-30"

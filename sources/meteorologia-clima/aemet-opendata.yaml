@@ -4,10 +4,11 @@ org: Agencia Estatal de Meteorología (AEMET)
 ministry: Para la Transición Ecológica y el Reto Demográfico
 level: age
 sector: meteorologia-clima
-tags: [aemet, meteorologia, prediccion, observacion, climatologia, estaciones, avisos, radar]
+tags: [aemet, meteorologia, prediccion, observacion, climatologia, estaciones, avisos, radar, rayos]
 summary: >-
-  Predicciones por municipio, observación horaria de estaciones, valores climatológicos diarios y normales,
-  avisos, radar, satélite, índice UV, predicción marítima y de montaña. API REST con clave gratuita.
+  API REST con clave gratuita (JWT): predicciones por municipio, provincia y comunidad, observación de estaciones,
+  climatología diaria, mensual, normales y extremos, avisos CAP, radar, rayos, radiación, ozono, satélite y
+  maestro de municipios. 64 rutas en la especificación OpenAPI 3.0.1.
 access: [api-rest]
 auth: api-key
 formats: [json, xml, csv, png]
@@ -18,32 +19,44 @@ base_url: https://opendata.aemet.es/opendata/api
 docs_url: https://opendata.aemet.es/dist/index.html
 endpoints:
   - path: /prediccion/especifica/municipio/diaria/{cod_municipio_ine}
-    desc: Predicción diaria a 7 días para un municipio
-    example: curl -s "https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/28079?api_key=$AEMET_KEY"
+    desc: Predicción diaria a 7 días para un municipio; /todos devuelve todos los municipios
+    example: 'curl -s -H "api_key: $AEMET_KEY" "https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/28079"'
   - path: /prediccion/especifica/municipio/horaria/{cod_municipio_ine}
-    desc: Predicción horaria a 48 h
+    desc: Predicción horaria a 48 horas; /todos para todos los municipios
+  - path: /maestro/municipios
+    desc: Maestro de municipios con el código que aceptan las predicciones; /maestro/municipio/{id} para uno
   - path: /observacion/convencional/todas
-    desc: Últimas 24 h de observación de todas las estaciones
+    desc: Últimas 24 horas de observación de todas las estaciones
   - path: /observacion/convencional/datos/estacion/{idema}
     desc: Observación de una estación
   - path: /valores/climatologicos/inventarioestaciones/todasestaciones
     desc: Inventario de estaciones con idema y coordenadas
-  - path: /valores/climatologicos/diarios/datos/fechaini/{AAAA-MM-DDTHH:MM:SSUTC}/fechafin/{...}/estacion/{idema}
-    desc: Climatología diaria de una estación en un rango
-    example: curl -s "https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2024-01-01T00:00:00UTC/fechafin/2024-01-31T23:59:59UTC/estacion/3195?api_key=$AEMET_KEY"
+  - path: /valores/climatologicos/diarios/datos/fechaini/{AAAA-MM-DDTHH:MM:SSUTC}/fechafin/{AAAA-MM-DDTHH:MM:SSUTC}/estacion/{idema}
+    desc: Climatología diaria de una o varias estaciones (idema separados por coma) en un rango; /todasestaciones para todas
+    example: 'curl -s -H "api_key: $AEMET_KEY" "https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2024-01-01T00:00:00UTC/fechafin/2024-01-31T23:59:59UTC/estacion/3195"'
+  - path: /valores/climatologicos/mensualesanuales/datos/anioini/{AAAA}/aniofin/{AAAA}/estacion/{idema}
+    desc: Climatología mensual y anual; normales en /valores/climatologicos/normales/estacion/{idema} y extremos en /valoresextremos/parametro/{p}/estacion/{idema}
   - path: /avisos_cap/ultimoelaborado/area/{area}
-    desc: Avisos meteorológicos en formato CAP
-rate_limit: Aprox. 50 peticiones por minuto por clave; la clave caduca si no se usa en 3 meses
+    desc: Avisos meteorológicos en formato CAP; archivo por fechas en /avisos_cap/archivo/fechaini/{f}/fechafin/{f}
+  - path: /red/radar/nacional
+    desc: Radar nacional; regional en /red/radar/regional/{radar}, rayos en /red/rayos/mapa, radiación y ozono bajo /red/especial/
+  - path: https://opendata.aemet.es/AEMET_OpenData_specification.json
+    desc: Especificación OpenAPI 3.0.1 completa con las 64 rutas y sus parámetros
+    example: curl -s "https://opendata.aemet.es/AEMET_OpenData_specification.json"
+rate_limit: No documentado en la especificación; la clave es un JWT gratuito
+quirks: [latin1]
+ids: [ine-municipio, idema]
 gotchas:
-  - Toda llamada responde con un JSON intermedio que contiene la URL real en el campo datos; hay que hacer una segunda petición a esa URL.
-  - La clave se pasa como parámetro api_key o cabecera api_key; se solicita en opendata.aemet.es/centrodedescargas/altaUsuario y llega por correo.
-  - El código de municipio es el INE de 5 dígitos sin dígito de control (Madrid 28079).
-  - Rango máximo de climatología diaria por petición de 6 meses (5 años en versiones recientes); dividir rangos largos.
-  - Los ficheros de datos devuelven codificación Latin-1 en algunos endpoints; el JSON declara ISO-8859-15.
-  - Los decimales usan coma como separador en climatología (campo tmed "12,3").
+  - Sin clave la API responde 200 con cuerpo vacío, no 401; con clave inválida, 401 y JSON con descripcion y estado. Tratar el cuerpo vacío como fallo de autenticación.
+  - La clave va en la cabecera api_key (así la define la especificación) o como parámetro api_key; se solicita en opendata.aemet.es/centrodedescargas/altaUsuario y llega por correo.
+  - Toda llamada responde con un JSON intermedio (estado, datos, metadatos); los datos reales se descargan con una segunda petición a la URL del campo datos.
+  - El código de municipio de las predicciones es el INE de 5 dígitos sin dígito de control (Madrid 28079); el maestro de municipios lo confirma.
+  - Las fechas de climatología van como AAAA-MM-DDTHH:MM:SSUTC, con el sufijo UTC literal.
+  - Los ficheros de datos usan coma decimal (tmed 12,3) y algunos endpoints codifican en ISO-8859-15.
+  - Verificación del 30/09/2026 sin clave. Probados la autenticación, los errores, la especificación y la existencia de todas las rutas; no se han probado las respuestas de datos, por eso verified sigue en null.
 tips:
-  - Envolver siempre las dos peticiones (metadatos y datos) en una función; el JSON intermedio trae estado 200 aunque falle la segunda.
-  - Cachear el inventario de estaciones; cambia raramente y evita gastar cuota.
+  - Envolver las dos peticiones (metadatos y datos) en una función y comprobar que el cuerpo no está vacío.
+  - Cachear el inventario de estaciones y el maestro de municipios; cambian raramente.
 related: [ine-codigos-territoriales, miteco-saih-boletin-hidrologico]
 status: active
 verified: null

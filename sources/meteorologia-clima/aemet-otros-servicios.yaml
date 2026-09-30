@@ -1,28 +1,33 @@
 id: aemet-otros-servicios
-name: AEMET – Datos de radiación, ozono, polen y modelos numéricos
+name: AEMET – Portal de servicios climáticos y proyecciones de cambio climático
 org: Agencia Estatal de Meteorología (AEMET)
 ministry: Para la Transición Ecológica y el Reto Demográfico
 level: age
 sector: meteorologia-clima
-tags: [aemet, radiacion, ozono, modelo-harmonie, ftp, datos-abiertos, series-homogeneizadas]
+tags: [aemet, series-centenarias, efemerides, cambio-climatico, proyecciones, pnacc]
 summary: >-
-  Complementos fuera de la API principal: descargas de salidas de modelos numéricos, series climáticas homogeneizadas,
-  radiación solar, ozono y datos históricos en ficheros. Acceso vía portal y FTP anónimo.
-access: [download, portal]
+  Páginas del portal de AEMET fuera de la API: series centenarias, efemérides, proyecciones de cambio climático
+  (AR6 y AR5) y catálogo del plan RISP. Sin descargas directas verificadas y sin FTP; radiación, ozono, normales
+  y extremos están en la API (aemet-opendata).
+access: [portal]
 auth: none
-formats: [csv, grib, netcdf, pdf, txt]
-update: daily
+formats: [html, pdf]
+update: irregular
 license: Reutilización libre con cita de la fuente (aviso legal AEMET)
 base_url: https://www.aemet.es/es/datos_abiertos
-docs_url: https://www.aemet.es/es/datos_abiertos/AEMET_OpenData
+docs_url: https://www.aemet.es/es/datos_abiertos/catalogo
 endpoints:
-  - path: https://www.aemet.es/es/serviciosclimaticos/datosclimatologicos
-    desc: Servicios climáticos, valores normales, efemérides y series homogeneizadas
-  - path: https://www.aemet.es/es/serviciosclimaticos/cambio_climat/result_graficos
-    desc: Proyecciones regionalizadas de cambio climático (escenarios PNACC)
+  - path: https://www.aemet.es/es/serviciosclimaticos/datosclimatologicos/series-centenarias
+    desc: Series centenarias, con Izaña en subpágina propia
+  - path: https://www.aemet.es/es/serviciosclimaticos/cambio_climat/proyecciones-AR6
+    desc: Proyecciones climáticas AR6 (escenarios PNACC); AR5 en proyecciones-AR5-y-anteriores y visor en visor-AdapteCCa
+  - path: https://www.aemet.es/es/datos_abiertos/catalogo
+    desc: Catálogo del plan RISP con los conjuntos de datos abiertos de AEMET
+quirks: [latin1, static-html]
 gotchas:
-  - Las salidas de modelos (HARMONIE-AROME) se distribuyen en GRIB2 y requieren eccodes o cfgrib para leerlas.
-  - Las proyecciones climáticas se descargan por variable y escenario en ficheros grandes, sin API.
+  - El host ftpdatos.aemet.es de la ficha anterior no resuelve en DNS; no hay FTP anónimo.
+  - Las páginas van en ISO-8859-15 y no enlazan ficheros de datos en el HTML; los datos climatológicos descargables están en la API OpenData.
+  - La ruta cambio_climat/result_graficos de la ficha anterior devuelve la portada genérica; las proyecciones cuelgan de proyecciones-AR6 y proyecciones-AR5-y-anteriores.
 related: [aemet-opendata]
-status: active
-verified: null
+status: degraded
+verified: "2026-09-30"

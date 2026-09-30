@@ -728,102 +728,140 @@ related: datos-gob-es-api, dir3-directorio, bdns-api, placsp-datos-abiertos
 
 ## catastro-ovc
 Catastro – Servicios web de la Oficina Virtual (OVC) e INSPIRE | Dirección General del Catastro
-summary: Consulta de referencias catastrales por dirección, coordenadas o RC; datos no protegidos de inmuebles (superficie, uso, año); cartografía parcelaria vectorial vía INSPIRE (WFS/ATOM) y WMS. Sin autenticación para datos no protegidos; titularidad y valor requieren certificado.
-access: api-rest, api-soap, ogc, download | auth: none | formats: json, xml, gml, shp, dxf, png | update: daily | status: active | verified: pending
-coverage: Territorio de régimen común (excluye País Vasco y Navarra, con catastros forales propios)
-license: Reutilización libre con cita de la fuente (licencia Catastro)
-base_url: https://ovc.catastro.meh.es/
-docs_url: https://www.catastro.hacienda.gob.es/esp/ws_serviciosweb.asp
-- https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPRC?RefCat={RC} :: Datos no protegidos de un inmueble por referencia catastral (JSON)
+summary: Datos no protegidos de inmuebles por referencia catastral o dirección (JSON), referencia catastral por coordenadas (XML), equivalencia de códigos de municipio Catastro e INE, parcelario vectorial por WFS INSPIRE, descargas ATOM municipales (parcelas, edificios, direcciones) y WMS. Sin autenticación.
+access: api-rest, ogc, download | auth: none | formats: json, xml, gml, zip, png | update: daily | status: active | verified: 2026-09-30
+coverage: Territorio de régimen común (sin País Vasco ni Navarra, con catastros forales propios)
+license: Reutilización libre con cita de la fuente (licencia de la DG del Catastro)
+base_url: https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero
+docs_url: https://www.catastro.hacienda.gob.es/webinspire/index.html
+- /COVCCallejero.svc/json/Consulta_DNPRC?RefCat={RC} :: Datos no protegidos de un inmueble por referencia catastral de 14 o 20 caracteres (uso, superficie, año, dirección, municipio con códigos INE)
   ej: curl -s "https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPRC?RefCat=9872023VH5797S0001WX"
-- https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPLOC?Provincia={p}&Municipio={m}&TipoVia={tv}&NombreVia={nv}&Numero={n} :: Inmuebles por dirección postal
-- https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS=EPSG:4326&Coordenada_X={lon}&Coordenada_Y={lat} :: Referencia catastral a partir de coordenadas
-- https://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx?service=wfs&request=getfeature&STOREDQUERIE_ID=GetParcel&refcat={RC}&srsname=EPSG::25830 :: Geometría de una parcela (GML INSPIRE Cadastral Parcels)
-- https://ovc.catastro.meh.es/Cartografia/WMS/ServidorWMS.aspx :: WMS de cartografía catastral
-- https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/ES.SDGC.CP.atom.xml :: Descarga masiva INSPIRE por municipio (parcelas, edificios, direcciones) vía ATOM
-! Los códigos de provincia y municipio del Catastro no son los del INE; la API expone Consulta_Municipio para obtenerlos.
+- /COVCCallejero.svc/json/Consulta_DNPLOC?Provincia={p}&Municipio={m}&TipoVia={tv}&NombreVia={nv}&Numero={n} :: Inmuebles de una dirección postal; provincia y municipio en mayúsculas tal como los devuelve ObtenerMunicipios
+- /COVCCallejero.svc/json/ObtenerProvincias :: Provincias con código INE (cpine) y nombre catastral
+  ej: curl -s "https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/ObtenerProvincias"
+- /COVCCallejero.svc/json/ObtenerMunicipios?Provincia={p}&Municipio={m} :: Municipios de una provincia con código catastral (locat) y código INE (loine); Municipio filtra por texto
+  ej: curl -s "https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/ObtenerMunicipios?Provincia=MADRID&Municipio="
+- https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS=EPSG:4326&Coordenada_X={lon}&Coordenada_Y={lat} :: Referencia catastral de la parcela en unas coordenadas (XML)
+  ej: curl -s "https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS=EPSG:4326&Coordenada_X=-3.6960&Coordenada_Y=40.4185"
+- https://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx?service=wfs&request=getfeature&STOREDQUERIE_ID=GetParcel&refcat={RC14}&srsname=EPSG::25830 :: Geometría GML de una parcela (INSPIRE Cadastral Parcels) por referencia de 14 caracteres
+  ej: curl -s "https://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx?service=wfs&request=getfeature&STOREDQUERIE_ID=GetParcel&refcat=9872023VH5797S&srsname=EPSG::25830"
+- https://www.catastro.hacienda.gob.es/INSPIRE/{CadastralParcels|buildings|Addresses}/ES.SDGC.{CP|BU|AD}.atom.xml :: Descarga masiva INSPIRE en ZIP GML por municipio, organizada en feeds ATOM
+  ej: curl -s "https://www.catastro.hacienda.gob.es/INSPIRE/CadastralParcels/ES.SDGC.CP.atom.xml"
+- https://ovc.catastro.meh.es/Cartografia/WMS/ServidorWMS.aspx?SERVICE=WMS&REQUEST=GetCapabilities :: WMS 1.1.1 de cartografía catastral
+rate_limit: No documentado; tras unas 15 peticiones seguidas el servidor corta la conexión y sigue cortándola unos 10 minutos
+quirks: latin1
+ids: referencia-catastral, ine-municipio, ine-provincia
+! Las ráfagas bloquean por IP. Tras unas 15 llamadas en un minuto el servidor cierra la conexión sin respuesta (curl 000) durante unos 10 minutos; espaciar a una por segundo y reintentar con espera larga.
+! Los errores llegan con HTTP 200 y un bloque lerr (cod, des) dentro del resultado; comprobar control.cuerr antes de leer datos.
+! La variante JSON de coordenadas (COVCCoordenadas.svc/json/Consulta_RCCOOR) devolvió error 76 con los mismos parámetros que acepta el asmx; usar el asmx en XML.
+! El JSON anida con claves abreviadas (consulta_dnprcResult, bico, bi, dt, loine, locat); loine trae el código INE (cp, cm) y locat el catastral (cd, cmc), que no coinciden.
+! Cartografía en EPSG:25829, 25830 y 25831 según huso y 32628 en Canarias; el WFS y el WMS responden en ISO-8859-1.
 ! Titulares, valor catastral y planos detallados solo por Sede Electrónica con certificado o Cl@ve.
-! El servicio JSON devuelve estructuras anidadas con claves abreviadas (consulta_dnprcResult, bico, bi, dt); mirar el XML equivalente para entender campos.
-! Cartografía en EPSG:25829/25830/25831 según huso; Canarias en 32628. El WFS INSPIRE acepta EPSG:4326 pero devuelve en UTM.
-! Límite práctico de peticiones por IP no documentado; descargas masivas mejor por los ficheros ATOM municipales.
-+ Para geocodificar direcciones es más robusto CartoCiudad (cnig-centro-descargas) y luego pedir la RC por coordenadas al Catastro.
+! La ruta de documentación de la ficha anterior (esp/ws_serviciosweb.asp) devuelve una página de error con 200; la documentación pública es la de INSPIRE (docs_url).
++ Flujo típico. ObtenerMunicipios para traducir INE a códigos catastrales, Consulta_DNPLOC o Consulta_RCCOOR para llegar a la referencia, Consulta_DNPRC para el detalle.
++ Para geocodificar direcciones antes de pedir la referencia, el geocoder de CartoCiudad (cnig-centro-descargas) devuelve coordenadas y código INE.
 related: ine-codigos-territoriales, cnig-centro-descargas, idee-servicios
 
 ## cnig-centro-descargas
-IGN/CNIG – Centro de Descargas de cartografía y geodatos | Instituto Geográfico Nacional / Centro Nacional de Información Geográfica
-summary: Descarga gratuita de toda la producción del IGN: ortofotos PNOA, modelos digitales del terreno, LiDAR, mapas topográficos, límites municipales oficiales, redes de transporte, SIOSE, nomenclátor geográfico. Servicios WMS/WMTS.
-access: download, ogc, api-rest | auth: none | formats: shp, gpkg, geotiff, laz, ecw, pdf, jpg, kml | update: irregular | status: active | verified: pending
-coverage: Cartografía histórica desde 1875; PNOA desde 2004
-license: CC BY 4.0 (licencia IGN compatible)
+IGN/CNIG – Centro de Descargas, servicios OGC y geocoder CartoCiudad | Instituto Geográfico Nacional y Centro Nacional de Información Geográfica
+summary: Producción del IGN (ortofotos PNOA, modelos del terreno, LiDAR, mapas, límites municipales oficiales, SIOSE) en un Centro de Descargas protegido por reCAPTCHA, más servicios WMS, WMTS y WFS INSPIRE sin restricción y el geocoder CartoCiudad, que devuelve el código INE.
+access: ogc, api-rest, download, portal | auth: none | formats: shp, gpkg, geotiff, laz, gml, geojson, json, png | update: irregular | status: active | verified: 2026-09-30
+coverage: PNOA desde 2004; cartografía histórica desde el siglo XIX; límites vigentes e histórico 2023
+license: CC BY 4.0 (licencia de uso IGN, con cita)
 base_url: https://centrodedescargas.cnig.es/CentroDescargas/
 docs_url: https://www.ign.es/web/ign/portal/ide-area-nodo-ide-ign
-- https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie=LILIM :: Líneas límite municipales, provinciales y autonómicas oficiales
-- https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie=MDT05 :: Modelo digital del terreno de 5 m
-- https://www.ign.es/wms-inspire/pnoa-ma?SERVICE=WMS&REQUEST=GetCapabilities :: WMS de ortofotos PNOA máxima actualidad
-- https://www.ign.es/wmts/pnoa-ma?SERVICE=WMTS&REQUEST=GetCapabilities :: WMTS teselado de PNOA
-- https://www.ign.es/wms-inspire/ign-base?SERVICE=WMS&REQUEST=GetCapabilities :: WMS del mapa base IGN
-- https://www.cartociudad.es/geocoder/api/geocoder/findJsonp?q={direccion} :: Geocodificador CartoCiudad (direcciones, topónimos, referencias catastrales)
-  ej: curl -s "https://www.cartociudad.es/geocoder/api/geocoder/findJsonp?q=Calle%20Alcala%2050%20Madrid"
-! Las descargas masivas del Centro de Descargas exigen aceptar la licencia por sesión; para automatizar usar los servicios ATOM/WFS del IGN o pedir acceso a la API de descargas.
-! Los límites municipales del IGN son la geometría oficial; los del Catastro difieren en zonas.
-! El geocoder devuelve JSONP aunque el nombre del endpoint lo indique; hay que quitar el callback o usar el endpoint find.
-! Sistema de referencia oficial ETRS89 (EPSG:4258 geográficas, 258xx UTM); Canarias REGCAN95.
-related: idee-servicios, catastro-ovc
+- https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie={codigo_serie} :: Ficha de una serie del catálogo (LILIM límites, MDT05 modelo de 5 m, PNOA...) con la lista de ficheros cargada por XHR
+  ej: curl -s "https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie=LILIM"
+- https://centrodedescargas.cnig.es/CentroDescargas/archivosSerie :: Lista de ficheros de una serie en HTML, con el id de cada fichero en data-sec; POST con codSerie y numPagina
+  ej: curl -s -X POST -d "codSerie=LILIM&numPagina=1" "https://centrodedescargas.cnig.es/CentroDescargas/archivosSerie"
+- https://www.ign.es/wfs-inspire/unidades-administrativas?service=WFS&version=2.0.0&request=GetFeature&typeNames=au:AdministrativeUnit :: Límites administrativos INSPIRE por WFS; outputFormat=application/geo+json y count para limitar
+  ej: curl -s "https://www.ign.es/wfs-inspire/unidades-administrativas?service=WFS&version=2.0.0&request=GetFeature&typeNames=au:AdministrativeUnit&count=10&outputFormat=application/geo%2Bjson"
+- https://www.ign.es/wms-inspire/pnoa-ma?SERVICE=WMS&REQUEST=GetCapabilities :: WMS de ortofotos PNOA de máxima actualidad; WMTS teselado en https://www.ign.es/wmts/pnoa-ma
+- https://www.ign.es/wms-inspire/ign-base?SERVICE=WMS&REQUEST=GetCapabilities :: WMS del mapa base del IGN
+- https://www.cartociudad.es/geocoder/api/geocoder/find?q={direccion} :: Geocodificador; JSON con provinceCode, muniCode (INE), postalCode y geom en WKT WGS84; candidatesJsonp devuelve varios candidatos
+  ej: curl -s "https://www.cartociudad.es/geocoder/api/geocoder/find?q=Calle%20Alcala%2050%20Madrid"
+quirks: captcha-required, js-rendered, static-html
+ids: ine-municipio, ine-provincia, ccaa
+! Cada descarga del Centro de Descargas pasa por reCAPTCHA v3 (preAutorizarDescarga con recaptchaToken) antes de descargaDir; sin token responde 403. No es automatizable sin navegador.
+! La lista de ficheros de una serie no está en catalogo.do; se obtiene por POST a archivosSerie, donde cada fichero lleva su id en data-sec y en detalleArchivo?sec=.
+! Las rutas apidescargas y descargaDir?secDescDirLA= no son públicas (404 y 403); no hay API de descargas abierta.
+! El WFS de unidades administrativas devuelve 403 si el filtro XML va en la URL (el WAF bloquea las etiquetas); descargar por count y filtrar en local. outputFormat=application/json no existe, es geo+json.
+! En el WFS, nationalCode es 34 seguido de los códigos INE de comunidad, provincia y municipio (34090800000 es la provincia de Barcelona); cada feature pesa cientos de KB por la geometría.
+! El geocoder devuelve JSONP (envuelto en callback) en findJsonp y candidatesJsonp y JSON limpio en find.
+! Sistema de referencia oficial ETRS89 (EPSG:4258 geográficas, 25829 a 25831 UTM); Canarias REGCAN95 (32628).
++ Para límites municipales sin pasar por el Centro de Descargas, el WFS INSPIRE de unidades administrativas; para los oficiales en fichero, la serie LILIM (shapefile 157 MB, GML 63 MB, histórico 2023 en GeoPackage).
+related: idee-servicios, catastro-ovc, ine-codigos-territoriales
 
 ## idee-servicios
-IDEE – Infraestructura de Datos Espaciales de España | Consejo Superior Geográfico / CNIG
-summary: Catálogo de servicios geográficos interoperables de todas las Administraciones (más de 3.000 WMS, WFS, WMTS, CSW) y directorio de nodos IDE. Punto de partida para localizar cualquier capa geográfica oficial.
-access: ogc, api-rest, portal | auth: none | formats: xml, gml, geojson, json | update: daily | status: active | verified: pending
-license: Metadatos libres; cada servicio con su licencia
+IDEE – Catálogos CSW y directorio de servicios geográficos | Consejo Superior Geográfico y CNIG
+summary: Punto de entrada a los servicios geográficos oficiales de todas las Administraciones: catálogo CSW INSPIRE con más de 13000 registros, catálogo oficial CODSI, directorio de servicios OGC por tipo y organismo y monitorización de disponibilidad. Metadatos ISO 19139 consultables por CQL.
+access: ogc, portal | auth: none | formats: xml, json | update: daily | status: active | verified: 2026-09-30
+license: Metadatos libres; cada servicio y dataset con su licencia
 base_url: https://www.idee.es/
-docs_url: https://www.idee.es/web/idee/directorio-de-servicios
-- https://www.idee.es/csw-inspire-idee/srv/spa/csw?SERVICE=CSW&REQUEST=GetCapabilities :: Catálogo CSW de metadatos INSPIRE
-- https://www.idee.es/web/idee/directorio-de-servicios :: Directorio navegable de servicios OGC por tema y organismo
-! Muchos servicios listados son autonómicos o locales y tienen disponibilidad irregular; comprobar GetCapabilities antes de depender de ellos.
-! El CSW usa perfil INSPIRE con esquemas ISO 19139; las búsquedas por texto libre van en el filtro AnyText.
+docs_url: https://www.idee.es/web/idee/servicios
+- https://www.idee.es/csw-inspire-idee/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecords&resultType=results&typeNames=csw:Record&ElementSetName=brief&maxRecords={n}&constraintLanguage=CQL_TEXT&constraint_language_version=1.1.0&constraint=AnyText%20like%20%27%25{texto}%25%27 :: Búsqueda de datasets y servicios por texto libre en el catálogo INSPIRE; numberOfRecordsMatched en la respuesta
+  ej: curl -s "https://www.idee.es/csw-inspire-idee/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecords&resultType=results&typeNames=csw:Record&ElementSetName=brief&maxRecords=10&constraintLanguage=CQL_TEXT&constraint_language_version=1.1.0&constraint=AnyText%20like%20%27%25catastro%25%27"
+- https://www.idee.es/csw-inspire-idee/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecordById&outputSchema=http://www.isotc211.org/2005/gmd&ElementSetName=full&ID={id} :: Metadato completo ISO 19139 de un registro (ES_SDGC_AD son las direcciones del Catastro)
+- https://www.idee.es/csw-codsi-idee/srv/spa/csw?SERVICE=CSW&REQUEST=GetCapabilities :: Catálogo Oficial de Datos y Servicios INSPIRE (CODSI), mismo protocolo
+- https://www.idee.es/web/idee/directorio-de-servicios :: Directorio navegable de servicios por tipo (WMS, WFS, WMTS, CSW, ATOM) y organismo; redirige a segun-tipo-de-servicio
+quirks: static-html
+! El portal es Liferay y el directorio es HTML pesado (200 KB) sin API; para buscar servicios de forma programática usar el CSW con CQL.
+! Muchos servicios listados son autonómicos o locales con disponibilidad irregular; comprobar GetCapabilities antes de depender de ellos (monitorización en /web/idee/monitorizacion-de-servicios).
+! Los metadatos usan el perfil INSPIRE sobre ISO 19139; los identificadores de registro siguen el patrón del organismo (ES_SDGC_AD, ES_SDGC_AD_ATOM para el Catastro).
 related: cnig-centro-descargas, catastro-ovc
 
 # SECTOR meteorologia-clima: Meteorología y clima
 
 ## aemet-opendata
 AEMET OpenData – API meteorológica y climatológica | Agencia Estatal de Meteorología (AEMET)
-summary: Predicciones por municipio, observación horaria de estaciones, valores climatológicos diarios y normales, avisos, radar, satélite, índice UV, predicción marítima y de montaña. API REST con clave gratuita.
+summary: API REST con clave gratuita (JWT): predicciones por municipio, provincia y comunidad, observación de estaciones, climatología diaria, mensual, normales y extremos, avisos CAP, radar, rayos, radiación, ozono, satélite y maestro de municipios. 64 rutas en la especificación OpenAPI 3.0.1.
 access: api-rest | auth: api-key | formats: json, xml, csv, png | update: hourly | status: active | verified: pending
 coverage: Climatología diaria desde 1920 según estación
 license: Reutilización libre con cita de la fuente (aviso legal AEMET)
 base_url: https://opendata.aemet.es/opendata/api
 docs_url: https://opendata.aemet.es/dist/index.html
-- /prediccion/especifica/municipio/diaria/{cod_municipio_ine} :: Predicción diaria a 7 días para un municipio
-  ej: curl -s "https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/28079?api_key=$AEMET_KEY"
-- /prediccion/especifica/municipio/horaria/{cod_municipio_ine} :: Predicción horaria a 48 h
-- /observacion/convencional/todas :: Últimas 24 h de observación de todas las estaciones
+- /prediccion/especifica/municipio/diaria/{cod_municipio_ine} :: Predicción diaria a 7 días para un municipio; /todos devuelve todos los municipios
+  ej: curl -s -H "api_key: $AEMET_KEY" "https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/28079"
+- /prediccion/especifica/municipio/horaria/{cod_municipio_ine} :: Predicción horaria a 48 horas; /todos para todos los municipios
+- /maestro/municipios :: Maestro de municipios con el código que aceptan las predicciones; /maestro/municipio/{id} para uno
+- /observacion/convencional/todas :: Últimas 24 horas de observación de todas las estaciones
 - /observacion/convencional/datos/estacion/{idema} :: Observación de una estación
 - /valores/climatologicos/inventarioestaciones/todasestaciones :: Inventario de estaciones con idema y coordenadas
-- /valores/climatologicos/diarios/datos/fechaini/{AAAA-MM-DDTHH:MM:SSUTC}/fechafin/{...}/estacion/{idema} :: Climatología diaria de una estación en un rango
-  ej: curl -s "https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2024-01-01T00:00:00UTC/fechafin/2024-01-31T23:59:59UTC/estacion/3195?api_key=$AEMET_KEY"
-- /avisos_cap/ultimoelaborado/area/{area} :: Avisos meteorológicos en formato CAP
-rate_limit: Aprox. 50 peticiones por minuto por clave; la clave caduca si no se usa en 3 meses
-! Toda llamada responde con un JSON intermedio que contiene la URL real en el campo datos; hay que hacer una segunda petición a esa URL.
-! La clave se pasa como parámetro api_key o cabecera api_key; se solicita en opendata.aemet.es/centrodedescargas/altaUsuario y llega por correo.
-! El código de municipio es el INE de 5 dígitos sin dígito de control (Madrid 28079).
-! Rango máximo de climatología diaria por petición de 6 meses (5 años en versiones recientes); dividir rangos largos.
-! Los ficheros de datos devuelven codificación Latin-1 en algunos endpoints; el JSON declara ISO-8859-15.
-! Los decimales usan coma como separador en climatología (campo tmed "12,3").
-+ Envolver siempre las dos peticiones (metadatos y datos) en una función; el JSON intermedio trae estado 200 aunque falle la segunda.
-+ Cachear el inventario de estaciones; cambia raramente y evita gastar cuota.
+- /valores/climatologicos/diarios/datos/fechaini/{AAAA-MM-DDTHH:MM:SSUTC}/fechafin/{AAAA-MM-DDTHH:MM:SSUTC}/estacion/{idema} :: Climatología diaria de una o varias estaciones (idema separados por coma) en un rango; /todasestaciones para todas
+  ej: curl -s -H "api_key: $AEMET_KEY" "https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2024-01-01T00:00:00UTC/fechafin/2024-01-31T23:59:59UTC/estacion/3195"
+- /valores/climatologicos/mensualesanuales/datos/anioini/{AAAA}/aniofin/{AAAA}/estacion/{idema} :: Climatología mensual y anual; normales en /valores/climatologicos/normales/estacion/{idema} y extremos en /valoresextremos/parametro/{p}/estacion/{idema}
+- /avisos_cap/ultimoelaborado/area/{area} :: Avisos meteorológicos en formato CAP; archivo por fechas en /avisos_cap/archivo/fechaini/{f}/fechafin/{f}
+- /red/radar/nacional :: Radar nacional; regional en /red/radar/regional/{radar}, rayos en /red/rayos/mapa, radiación y ozono bajo /red/especial/
+- https://opendata.aemet.es/AEMET_OpenData_specification.json :: Especificación OpenAPI 3.0.1 completa con las 64 rutas y sus parámetros
+  ej: curl -s "https://opendata.aemet.es/AEMET_OpenData_specification.json"
+rate_limit: No documentado en la especificación; la clave es un JWT gratuito
+quirks: latin1
+ids: ine-municipio, idema
+! Sin clave la API responde 200 con cuerpo vacío, no 401; con clave inválida, 401 y JSON con descripcion y estado. Tratar el cuerpo vacío como fallo de autenticación.
+! La clave va en la cabecera api_key (así la define la especificación) o como parámetro api_key; se solicita en opendata.aemet.es/centrodedescargas/altaUsuario y llega por correo.
+! Toda llamada responde con un JSON intermedio (estado, datos, metadatos); los datos reales se descargan con una segunda petición a la URL del campo datos.
+! El código de municipio de las predicciones es el INE de 5 dígitos sin dígito de control (Madrid 28079); el maestro de municipios lo confirma.
+! Las fechas de climatología van como AAAA-MM-DDTHH:MM:SSUTC, con el sufijo UTC literal.
+! Los ficheros de datos usan coma decimal (tmed 12,3) y algunos endpoints codifican en ISO-8859-15.
+! Verificación del 30/09/2026 sin clave. Probados la autenticación, los errores, la especificación y la existencia de todas las rutas; no se han probado las respuestas de datos, por eso verified sigue en null.
++ Envolver las dos peticiones (metadatos y datos) en una función y comprobar que el cuerpo no está vacío.
++ Cachear el inventario de estaciones y el maestro de municipios; cambian raramente.
 related: ine-codigos-territoriales, miteco-saih-boletin-hidrologico
 
 ## aemet-otros-servicios
-AEMET – Datos de radiación, ozono, polen y modelos numéricos | Agencia Estatal de Meteorología (AEMET)
-summary: Complementos fuera de la API principal: descargas de salidas de modelos numéricos, series climáticas homogeneizadas, radiación solar, ozono y datos históricos en ficheros. Acceso vía portal y FTP anónimo.
-access: download, portal | auth: none | formats: csv, grib, netcdf, pdf, txt | update: daily | status: active | verified: pending
+AEMET – Portal de servicios climáticos y proyecciones de cambio climático | Agencia Estatal de Meteorología (AEMET)
+summary: Páginas del portal de AEMET fuera de la API: series centenarias, efemérides, proyecciones de cambio climático (AR6 y AR5) y catálogo del plan RISP. Sin descargas directas verificadas y sin FTP; radiación, ozono, normales y extremos están en la API (aemet-opendata).
+access: portal | auth: none | formats: html, pdf | update: irregular | status: degraded | verified: 2026-09-30
 license: Reutilización libre con cita de la fuente (aviso legal AEMET)
 base_url: https://www.aemet.es/es/datos_abiertos
-docs_url: https://www.aemet.es/es/datos_abiertos/AEMET_OpenData
-- https://www.aemet.es/es/serviciosclimaticos/datosclimatologicos :: Servicios climáticos, valores normales, efemérides y series homogeneizadas
-- https://www.aemet.es/es/serviciosclimaticos/cambio_climat/result_graficos :: Proyecciones regionalizadas de cambio climático (escenarios PNACC)
-! Las salidas de modelos (HARMONIE-AROME) se distribuyen en GRIB2 y requieren eccodes o cfgrib para leerlas.
-! Las proyecciones climáticas se descargan por variable y escenario en ficheros grandes, sin API.
+docs_url: https://www.aemet.es/es/datos_abiertos/catalogo
+- https://www.aemet.es/es/serviciosclimaticos/datosclimatologicos/series-centenarias :: Series centenarias, con Izaña en subpágina propia
+- https://www.aemet.es/es/serviciosclimaticos/cambio_climat/proyecciones-AR6 :: Proyecciones climáticas AR6 (escenarios PNACC); AR5 en proyecciones-AR5-y-anteriores y visor en visor-AdapteCCa
+- https://www.aemet.es/es/datos_abiertos/catalogo :: Catálogo del plan RISP con los conjuntos de datos abiertos de AEMET
+quirks: latin1, static-html
+! El host ftpdatos.aemet.es de la ficha anterior no resuelve en DNS; no hay FTP anónimo.
+! Las páginas van en ISO-8859-15 y no enlazan ficheros de datos en el HTML; los datos climatológicos descargables están en la API OpenData.
+! La ruta cambio_climat/result_graficos de la ficha anterior devuelve la portada genérica; las proyecciones cuelgan de proyecciones-AR6 y proyecciones-AR5-y-anteriores.
 related: aemet-opendata
 
 # SECTOR medio-ambiente-agua-biodiversidad: Medio ambiente, agua y biodiversidad

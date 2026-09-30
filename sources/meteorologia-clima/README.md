@@ -4,8 +4,8 @@ Sector `meteorologia-clima` · 2 fuentes · índice generado por `scripts/build.
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
-| [aemet-opendata](aemet-opendata.yaml) | AEMET OpenData – API meteorológica y climatológica | api-rest | api-key | json, xml, csv, png | hourly | — | — |
-| [aemet-otros-servicios](aemet-otros-servicios.yaml) | AEMET – Datos de radiación, ozono, polen y modelos numéricos | download, portal | none | csv, grib, netcdf, pdf, txt | daily | — | — |
+| [aemet-opendata](aemet-opendata.yaml) | AEMET OpenData – API meteorológica y climatológica | api-rest | api-key | json, xml, csv, png | hourly | latin1 | — |
+| [aemet-otros-servicios](aemet-otros-servicios.yaml) | AEMET – Portal de servicios climáticos y proyecciones de cambio climático | portal | none | html, pdf | irregular | latin1, static-html | 2026-09-30 |
 
-- **aemet-opendata**: Predicciones por municipio, observación horaria de estaciones, valores climatológicos diarios y normales, avisos, radar, satélite, índice UV, predicción marítima y de montaña. API REST con clave gratuita.
-- **aemet-otros-servicios**: Complementos fuera de la API principal: descargas de salidas de modelos numéricos, series climáticas homogeneizadas, radiación solar, ozono y datos históricos en ficheros. Acceso vía portal y FTP anónimo.
+- **aemet-opendata**: API REST con clave gratuita (JWT): predicciones por municipio, provincia y comunidad, observación de estaciones, climatología diaria, mensual, normales y extremos, avisos CAP, radar, rayos, radiación, ozono, satélite y maestro de municipios. 64 rutas en la especificación OpenAPI 3.0.1.
+- **aemet-otros-servicios**: Páginas del portal de AEMET fuera de la API: series centenarias, efemérides, proyecciones de cambio climático (AR6 y AR5) y catálogo del plan RISP. Sin descargas directas verificadas y sin FTP; radiación, ozono, normales y extremos están en la API (aemet-opendata).

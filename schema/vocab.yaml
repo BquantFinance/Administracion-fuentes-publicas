@@ -80,6 +80,7 @@ quirks:
   waf-blocks-bots: Un WAF rechaza clientes automatizados aunque lleven User-Agent de navegador; no hay arreglo, buscar otra vía
   waf-intermittent-403: Un WAF devuelve 403 de forma intermitente a peticiones legítimas; reintentar la misma petición tras 2 a 5 segundos
   session-required: Exige sesión, token o navegación previa por menú; las URL directas devuelven error o sesión expirada
+  captcha-required: La descarga o consulta exige resolver un reCAPTCHA; no es automatizable sin navegador ni persona
   viewstate-forms: Formularios ASP.NET con __VIEWSTATE; hay que reenviar los campos ocultos en cada POST
   js-rendered: Contenido o enlaces generados por JavaScript; hace falta navegador sin cabeza o replicar las llamadas XHR
   static-html: Los enlaces a ficheros están en el HTML servido; basta un GET y una expresión regular o lxml
