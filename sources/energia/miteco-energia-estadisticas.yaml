@@ -1,31 +1,52 @@
 id: miteco-energia-estadisticas
-name: MITECO – Balances energéticos, hidrocarburos y registro de instalaciones
-org: Secretaría de Estado de Energía
+name: MITECO y CORES – Balances energéticos y estadísticas de petróleo y gas
+org: Secretaría de Estado de Energía y Corporación de Reservas Estratégicas de Productos Petrolíferos (CORES)
 ministry: Para la Transición Ecológica y el Reto Demográfico
 level: age
 sector: energia
-tags: [energia, balance-energetico, hidrocarburos, renovables, registro-instalaciones, autoconsumo, cores]
+tags: [energia, balance-energetico, hidrocarburos, petroleo, gas-natural, consumo-provincial, refino, cores]
 summary: >-
-  Balances energéticos anuales, estadísticas de hidrocarburos (consumo de productos petrolíferos y gas por provincia,
-  vía CORES), registro administrativo de instalaciones de producción eléctrica, autoconsumo y planes energéticos.
-access: [portal, download]
+  Series de CORES en xlsx: consumo mensual de productos petrolíferos por provincia desde 1997, por grupo y
+  total, consumo y existencias de gas, balances anuales y capacidad de refino. Del ministerio, balances y libros
+  de la energía en PDF, coyuntura trimestral y refino mensual en xlsx y ods.
+access: [download, portal]
 auth: none
-formats: [xlsx, pdf, csv]
+formats: [xlsx, xls, ods, pdf]
 update: monthly
-coverage: "1990-"
+coverage: "CORES 1997- (mensual); libros de la energía 2001-2015; balance energético 2024"
 license: Reutilización libre con cita de la fuente
-base_url: https://energia.gob.es/
-docs_url: https://energia.gob.es/balances/Publicaciones/Paginas/Publicaciones.aspx
+base_url: https://www.cores.es/es/estadisticas
+docs_url: https://www.miteco.gob.es/es/energia/estrategia-normativa/balances.html
 endpoints:
-  - path: https://energia.gob.es/balances/Balances/Paginas/Balances.aspx
-    desc: Balances energéticos y libros de la energía
-  - path: https://www.cores.es/es/estadisticas
-    desc: CORES, estadísticas mensuales de consumo de productos petrolíferos y gas
-  - path: https://sede.serviciosmin.gob.es/es-es/datosabiertos/Paginas/Index.aspx
-    desc: Datos abiertos de la sede del ministerio (registro de instalaciones, etc.)
+  - path: https://www.cores.es/sites/default/files/archivos/estadisticas/consumos-pp-ccaa-provincias.xlsx
+    desc: Consumo mensual de productos petrolíferos por CCAA y provincia desde enero de 1997 (hoja Consumos, cabecera en la fila 3, 25.000 filas)
+    example: curl -sSL -o consumos-pp-ccaa-provincias.xlsx "https://www.cores.es/sites/default/files/archivos/estadisticas/consumos-pp-ccaa-provincias.xlsx"
+  - path: https://www.cores.es/sites/default/files/archivos/estadisticas/{fichero}.xlsx
+    desc: Series completas con nombre fijo, sobrescritas cada mes
+    params: fichero = consumos-pp, consumos-pp-por-grupo, consumos-gas, existencias-gas, balance-pp-anual, balance-gas-anual, capacidad-refineria
+  - path: https://www.cores.es/sites/default/files/archivos/estadisticas/est-{petroliferos|gas}-{consumo|balance|importaciones|exportaciones|clientes}-{AAAA}.xls
+    desc: Cuadros mensuales del año en curso (también en PDF con el mismo nombre)
+  - path: https://www.miteco.gob.es/es/energia/estrategia-normativa/balances/balances.html
+    desc: Balance energético anual (PDF simplificado 2024) y libros de la energía 2001-2015 (PDF)
+  - path: https://www.miteco.gob.es/es/energia/estrategia-normativa/balances/publicaciones/estadisticas-petroleo.html
+    desc: Estadística mensual de refinerías de petróleo en xlsx y ods, un fichero por mes con ruta y nombre irregulares
+  - path: https://www.miteco.gob.es/es/energia/estrategia-normativa/balances/coyuntura-trimestral.html
+    desc: Boletín de coyuntura energética trimestral en PDF desde 2003
+  - path: https://www.miteco.gob.es/es/energia/estadisticas-informes.html
+    desc: Índice de estadísticas del ministerio (petróleo, carbón, biocarburantes, minería)
+quirks: [overwritten-in-place, url-drift]
+ids: [ine-provincia]
 gotchas:
-  - La web de energía cambió de dominio varias veces (minetur, mincotur, miteco, energia.gob.es); enlaces antiguos rotos.
-  - CORES es una corporación de derecho público con datos propios; los consumos provinciales son su fuente primaria.
+  - Todas las rutas energia.gob.es redirigen a www.miteco.gob.es/es/energia; Balances.aspx pasa a estrategia-normativa/balances.html y las páginas SharePoint (Paginas/*.aspx) ya no existen.
+  - El ministerio no publica los balances en formato tabular; balance 2024 y libros de la energía son PDF. Lo tabular mensual es de CORES.
+  - Los xlsx de CORES tienen una hoja Inicio con notas y la hoja de datos con la cabecera en la fila 3 (Año, Mes, CCAA, Provincia, un producto por columna); el mes viene en texto (enero) y los valores en toneladas.
+  - Los ficheros de CORES se sobrescriben con el mismo nombre; guardar copia fechada si se quiere reproducir un cálculo.
+  - Los ficheros de refino mensual del ministerio cambian de carpeta y nombre cada mes (tildes, espacios, mayúsculas); leer los href de la página.
+  - El registro de instalaciones de producción eléctrica y el de autoconsumo no tienen descarga abierta localizable; sedeaplicaciones.minetur.gob.es/PRETOR devuelve 404.
+  - El portal de datos abiertos de la sede de Industria (sede.serviciosmin.gob.es) solo sirve un catalogo.csv (cp1252) cuyas URL vienen sin puntos (https://sedemineturgobes/) y cuyas fichas dan 404.
+tips:
+  - "pandas.read_excel(f, sheet_name='Consumos', header=2) carga la serie provincial; convertir Mes con un diccionario enero..diciembre y Provincia a código INE por nombre."
+  - Las estadísticas eléctricas oficiales (demanda, generación, precios) están en Red Eléctrica y en CNMC Data; los precios al por menor de carburantes, en la API de precios de carburantes.
 related: [cnmc-data, minetur-precios-carburantes]
 status: active
-verified: null
+verified: "2026-09-30"

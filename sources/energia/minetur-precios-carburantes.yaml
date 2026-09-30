@@ -1,39 +1,56 @@
 id: minetur-precios-carburantes
-name: Geoportal de gasolineras – API de precios de carburantes
+name: Geoportal de gasolineras – API REST de precios de carburantes
 org: Secretaría de Estado de Energía
 ministry: Para la Transición Ecológica y el Reto Demográfico
 level: age
 sector: energia
-tags: [carburantes, gasolineras, precios, gasolina, gasoleo, glp, estaciones-servicio]
+tags: [carburantes, gasolineras, precios, gasolina, gasoleo, glp, hidrogeno, estaciones-servicio, postes-maritimos]
 summary: >-
-  Precios diarios de todos los carburantes en todas las estaciones de servicio de España con coordenadas,
-  dirección, horario y rótulo. API REST JSON sin autenticación, también histórico por fecha.
+  Precios vigentes de todos los carburantes en 11.491 estaciones terrestres y 148 postes marítimos, con
+  coordenadas, dirección, horario, rótulo y margen, actualizados cada media hora, e histórico diario por fecha.
+  JSON o XML sin autenticación, filtros por CCAA, provincia, municipio y producto.
 access: [api-rest]
 auth: none
 formats: [json, xml]
-update: daily
-coverage: "2007- (histórico por fecha)"
+update: hourly
+coverage: "Vigente e histórico diario por fecha (comprobado desde 01-06-2010)"
 license: Reutilización libre con cita de la fuente
 base_url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes
 docs_url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/help
 endpoints:
   - path: /EstacionesTerrestres/
-    desc: Todas las estaciones terrestres con precios del día
+    desc: Todas las estaciones con todos los precios (12 MB, unos 17 s); claves con espacios y tildes (Precio Gasoleo A, Longitud (WGS84), Rótulo)
     example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/"
-  - path: /EstacionesTerrestres/FiltroProvincia/{id_provincia}
-    desc: Estaciones de una provincia (código INE de 2 dígitos)
+  - path: /EstacionesTerrestres/FiltroProvincia/{IDPROVINCIA}
+    desc: Estaciones de una provincia (código INE de dos dígitos; Madrid son 894 estaciones y 940 KB)
     example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroProvincia/28"
-  - path: /EstacionesTerrestres/FiltroMunicipio/{id_municipio}
-    desc: Estaciones de un municipio (id propio, ver Listados/Municipios)
-  - path: /EstacionesTerrestresHist/{DD-MM-AAAA}
-    desc: Histórico de un día concreto
-  - path: /Listados/Municipios/ y /Listados/Provincias/ y /Listados/ProductosPetroliferos/
-    desc: Tablas de códigos usadas por los filtros
+  - path: /EstacionesTerrestres/FiltroMunicipio/{IDMUNICIPIO} y /EstacionesTerrestres/FiltroCCAA/{IDCCAA}
+    desc: Filtros por municipio (id propio de la aplicación) y comunidad autónoma
+  - path: /EstacionesTerrestres/FiltroProducto/{IDPRODUCTO} y /EstacionesTerrestres/FiltroProvinciaProducto/{IDPROVINCIA}/{IDPRODUCTO}
+    desc: Un solo producto; la respuesta lleva PrecioProducto en vez de una clave por carburante
+    example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroProvinciaProducto/28/1"
+  - path: /EstacionesTerrestresHist/{DD-MM-AAAA} y /EstacionesTerrestresHist/FiltroProvincia/{DD-MM-AAAA}/{IDPROVINCIA}
+    desc: Precios de un día; mismos filtros que el vigente (CCAA, municipio, producto) tras la fecha
+    example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestresHist/FiltroProvincia/01-06-2024/28"
+  - path: /PostesMaritimos/
+    desc: Postes marítimos, claves propias (Precio Gasoleo A habitual, Precio Gasóleo para uso marítimo); filtros PostesMaritimosFiltroProvincia y similares
+  - path: /Listados/{Provincias|Municipios|ComunidadesAutonomas|ProductosPetroliferos}/
+    desc: Tablas de códigos (8112 municipios con IDMunicipio propio; productos con IDProducto y abreviatura, Gasolina 95 E5 es 1)
+    example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/Listados/ProductosPetroliferos/"
+quirks: []
+ids: [ine-provincia]
 gotchas:
-  - Los precios y coordenadas vienen como texto con coma decimal ("1,459"); convertir antes de operar.
-  - El id de municipio es propio de la aplicación, no el INE; obtenerlo de /Listados/Municipios/.
-  - Precio vacío significa que la estación no vende ese producto.
-  - La respuesta completa pesa más de 10 MB; filtrar por provincia si no se necesita todo.
+  - Precios, latitud y longitud son cadenas con coma decimal (1,879 o 40,528778); precio vacío es que la estación no vende ese producto (211 sin gasóleo A).
+  - IDMunicipio es propio de la aplicación (8112 valores), no el INE; IDProvincia sí es el INE de dos dígitos. En Listados/Provincias la clave está mal escrita, IDPovincia.
+  - Fecha del histórico en la URL como dd-mm-aaaa; con otro formato responde 400 y ResultadoConsulta explica el error. La Fecha de la respuesta viene como dd/mm/aaaa hh:mm:ss con barras escapadas.
+  - Todas las respuestas llevan el mismo sobre (Fecha, ListaEESSPrecio, Nota, ResultadoConsulta con OK) y el histórico repite las claves del vigente.
+  - Margen es el lado de la vía (D, I, N); Remisión toma dm u OM y Tipo Venta era P en las 11.491 estaciones; la ayuda no documenta su significado.
+  - XML pidiendo Accept application/xml (ArrayOfProvincia con namespace datacontract); por defecto JSON.
+  - IDEESS es único y estable en el tiempo (522 de las 557 estaciones de Madrid de 2010 conservan el id hoy), útil para series por gasolinera.
+  - Sin límite documentado ni 429 observado; la descarga nacional pesa 12 MB, así que para series diarias conviene el histórico por provincia (600 KB).
+tips:
+  - "pandas.json_normalize(r.json()['ListaEESSPrecio']) y luego str.replace(',', '.').astype(float) sobre las columnas Precio*, Latitud y Longitud (WGS84)."
+  - Series históricas iterando EstacionesTerrestresHist/FiltroProvincia/{fecha}/{prov} día a día; un rango largo son muchas peticiones, espaciarlas un segundo.
 related: [cnmc-data, ine-codigos-territoriales]
 status: active
-verified: null
+verified: "2026-09-30"

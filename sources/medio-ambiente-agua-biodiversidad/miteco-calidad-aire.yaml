@@ -1,30 +1,53 @@
 id: miteco-calidad-aire
-name: MITECO – Calidad del aire (datos oficiales de estaciones)
+name: MITECO – Calidad del aire (datos oficiales validados de estaciones)
 org: Dirección General de Calidad y Evaluación Ambiental
 ministry: Para la Transición Ecológica y el Reto Demográfico
 level: age
 sector: medio-ambiente-agua-biodiversidad
-tags: [calidad-aire, contaminacion, no2, pm10, pm25, ozono, estaciones, emisiones]
+tags: [calidad-aire, contaminacion, no2, pm10, pm25, ozono, so2, estaciones, series-horarias]
 summary: >-
-  Datos horarios validados de contaminantes (NO2, PM10, PM2.5, O3, SO2, CO) de todas las estaciones de las redes
-  autonómicas y locales, por año, e inventario de estaciones. Ficheros anuales por contaminante.
+  Datos validados de todas las estaciones de las redes autonómicas y locales, un ZIP por año con un CSV por
+  contaminante: horarios (SO2, NO, NO2, NOx, O3, CO, PM10, PM2.5, C6H6), diarios (PM, metales, B(a)P) e
+  irregulares, más metainformación de estaciones con coordenadas y código europeo.
 access: [download, portal]
 auth: none
-formats: [csv, xlsx, xml]
+formats: [csv, zip, xlsx, xls, pdf]
 update: annual
-coverage: "2001-"
+coverage: "2001-2024"
 license: Reutilización libre con cita de la fuente
-base_url: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/calidad-del-aire/evaluacion-datos/datos.html
-docs_url: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/calidad-del-aire/evaluacion-datos/datos.html
+base_url: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/evaluacion-y-datos-de-calidad-del-aire/datos.html
+docs_url: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/formatodatoscsvmiteco_web_tcm30-501420.pdf
 endpoints:
-  - path: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/calidad-del-aire/evaluacion-datos/datos.html
-    desc: Datos oficiales validados por año y contaminante, e inventario de estaciones
-  - path: https://sig.mapama.gob.es/calidad-aire/
-    desc: Visor SIG de calidad del aire con datos en tiempo casi real
+  - path: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/evaluacion-y-datos-de-calidad-del-aire/datos/datos-oficiales-2024.html
+    desc: Página del último año con los ZIP horario (27 MB), diario e irregulares y la metainformación xlsx
+  - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_HH_2024.zip
+    desc: Horarios 2024, 9 CSV (PM10, PM25, SO2, C6H6, CO, NO, NO2, NOx, O3) con columnas H01..H24 por estación y día
+    example: curl -sSL -o Datos_HH_2024.zip "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_HH_2024.zip"
+  - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_DD_2024.zip
+    desc: Diarios 2024, 8 CSV (PM10, PM2.5, Pb, As, Cd, Ni, B(a)P, C6H6) con columnas D01..D31 por estación y mes
+  - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Datos_2024_Irreg.zip
+    desc: Muestreos irregulares 2024 (B(a)P y benceno) con FECHA_INICIAL, FECHA_FINAL y VALOR
+  - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/sgalsi/atm%c3%b3sfera-y-calidad-del-aire/evaluaci%c3%b3n-2024/Metainformacion_2024.xlsx
+    desc: Hojas Magnitudes (código, unidad), Técnicas y Estaciones_2024 (COD_LOCAL, código europeo, red, lat/lon, altitud, tipo de estación y de área)
+  - path: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/evaluacion-y-datos-de-calidad-del-aire/datos/datos-historicos.html
+    desc: ZIP anuales 2001-2015 y enlaces a las páginas 2016-2023 (datos_oficiales_{AAAA}.html hasta 2021, datos-oficiales-{AAAA}.html desde 2022)
+  - path: https://www.miteco.gob.es/es/calidad-y-evaluacion-ambiental/temas/atmosfera-y-calidad-del-aire/evaluacion-y-datos-de-calidad-del-aire/datos/historico_calidad_aire.html
+    desc: Informes de evaluación anual en xlsx (superaciones por zona, ozono estival) y tabla de evolución 2001-2024
+quirks: [url-drift, static-html]
+ids: [ine-provincia, ine-municipio]
 gotchas:
-  - Los datos validados llegan con más de un año de retraso; para tiempo real hay que ir a cada red autonómica o al visor.
-  - Los ficheros usan un código de estación de 8 dígitos (provincia, municipio, número) y el contaminante por código numérico europeo.
-  - Formato de ancho fijo en años antiguos y CSV en recientes; los valores -9999 o V/N marcan validez.
+  - CSV con separador ; y punto decimal; una celda vacía es dato ausente. En los ficheros de 2024 no hay códigos -9999 ni marcas de validez.
+  - Una fila por estación, contaminante y día en los horarios (PROVINCIA;MUNICIPIO;ESTACION;MAGNITUD;PUNTO_MUESTREO;ANNO;MES;DIA;H01..H24) y por mes en los diarios (...;ANNO;MES;D01..D31).
+  - PROVINCIA y MUNICIPIO son códigos INE sin ceros a la izquierda (1;22 es Elciego, 01022) y ESTACION un número local; PUNTO_MUESTREO concatena estación de 8 dígitos, magnitud y técnica.
+  - MAGNITUD es un código numérico (1 SO2, 6 CO, 19 Pb) que resuelve la hoja Magnitudes; el código europeo de estación (ES1672A) solo está en la hoja Estaciones (COD_ESTACION_DEM).
+  - Los nombres de fichero cambian cada año (Datos_HH_2024.zip, Datos%20horarios%202023.zip, datos_horarios_tcm30-545543.zip en 2021); leer los href de la página del año en vez de construir la URL.
+  - Los datos validados del año N llegan en el segundo semestre de N+1 (2024 se publicó el 30/09/2025); para tiempo real hay que ir a cada red autonómica.
+  - Los ZIP de 2015 y anteriores llevan xlsx en carpetas Diarios y Horarios en vez de CSV, con otra estructura.
+  - Las rutas antiguas (calidad-del-aire/evaluacion-datos/datos.html) y el visor sig.mapama.gob.es/calidad-aire redirigen a páginas genéricas; el WMS de estaciones en wms.mapama.gob.es responde NullReferenceException.
+  - El servidor admite Range (accept-ranges bytes) y no limita la velocidad; el ZIP horario de 27 MB se puede reanudar.
+tips:
+  - "Abrir el ZIP con zipfile y leer cada CSV con pandas.read_csv(f, sep=';', dtype={'PUNTO_MUESTREO': str}); melt de H01..H24 para una serie horaria y merge con Estaciones por COD_LOCAL para coordenadas."
+  - "El catálogo CKAN de MITECO lista 369 datasets de calidad del aire (package_search?q=calidad del aire), pero sus recursos ZIP apuntan a descargafichero.aspx, que devuelve 404; usar las páginas de datos."
 related: [miteco-prtr, aemet-opendata]
 status: active
-verified: null
+verified: "2026-09-30"

@@ -88,6 +88,23 @@ El Centro de Descargas del CNIG pide un token de reCAPTCHA v3 (preAutorizarDesca
 autorizar cada descarga; sin él, descargaDir responde 403. No hay arreglo lícito desde un script: usar la vía
 alternativa que indica la ficha (servicios WFS, WMS o ATOM del mismo organismo) o descargar una vez a mano.
 
+Caso distinto: las descargas GIS de MITECO (`gis.miteco.gob.es/descargas/app/DescargaFichero?f=capa.zip`) usan
+ALTCHA, una prueba de trabajo pensada para resolverse en el cliente sin interacción. Se resuelve en código:
+
+```python
+import base64, hashlib, json, re, requests
+s = requests.Session(); s.headers["User-Agent"] = "Mozilla/5.0"
+base = "https://gis.miteco.gob.es/descargas/app/DescargaFichero"
+tok = re.search(r'name="__RequestVerificationToken"[^>]*value="([^"]+)"', s.get(base, params={"f": "rn2000.zip"}).text).group(1)
+ch = s.get(base, params={"handler": "Altcha"}).json()
+n = next(i for i in range(ch["maxnumber"] + 1) if hashlib.sha256((ch["salt"] + str(i)).encode()).hexdigest() == ch["challenge"])
+altcha = base64.b64encode(json.dumps({k: ch[k] for k in ("algorithm", "challenge", "salt", "signature")} | {"number": n}).encode()).decode()
+r = s.post(base, params={"handler": "Download"}, data={"__RequestVerificationToken": tok, "f": "rn2000.zip", "altcha": altcha}, stream=True)
+```
+
+El desafío caduca (`expires` en `salt`), así que pedirlo justo antes del POST. Verificado el 2026-09-30 con
+rn2000.zip (133 MB, 0,05 s de cálculo).
+
 ## js-rendered
 
 Contenido generado en el navegador. Antes de lanzar un navegador sin cabeza, mirar en las herramientas de red

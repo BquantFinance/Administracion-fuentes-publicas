@@ -1,34 +1,52 @@
 id: cnmc-data
-name: CNMC Data – Estadísticas de energía, telecomunicaciones y audiovisual
+name: CNMC Data – Estadísticas de energía, telecomunicaciones, audiovisual y postal
 org: Comisión Nacional de los Mercados y la Competencia (CNMC)
 ministry: Organismo independiente adscrito a Economía, Comercio y Empresa
 level: age
 sector: energia
-tags: [cnmc, electricidad, gas, telecomunicaciones, audiovisual, comercializadoras, cuotas-mercado, precios]
+tags: [cnmc, electricidad, gas, telecomunicaciones, audiovisual, postal, comercio-electronico, comercializadoras, cuotas-mercado, precios, ckan]
 summary: >-
-  Portal de datos abiertos de la CNMC: mercado eléctrico y gasista (comercializadoras, cambios de suministrador,
-  precios, autoconsumo), telecomunicaciones (líneas, ingresos, cuotas por operador), audiovisual y postal.
-  Descarga por indicador con API CKAN.
-access: [portal, download, api-rest]
+  210 datasets de la CNMC en un CKAN con datastore: electricidad y gas (cuotas de comercializadoras, cambios
+  de suministrador, precios, garantías de origen, bono social), precios provinciales de carburantes,
+  telecomunicaciones y audiovisual, transporte y postal, comercio electrónico y panel de hogares.
+access: [api-rest, download, portal]
 auth: none
-formats: [csv, xlsx, json]
+formats: [csv, json, xml]
 update: quarterly
-coverage: "2010- según indicador"
-license: CC BY 4.0
-base_url: https://data.cnmc.es/
-docs_url: https://data.cnmc.es/
+coverage: "Según dataset (extras periodo y frecuenciaActualizacion); series anuales, trimestrales y mensuales"
+license: CC BY-SA 4.0 (license_title de los datasets; condiciones en data.cnmc.es/condiciones-de-uso)
+base_url: https://catalogodatos.cnmc.es/api/3/action
+docs_url: https://data.cnmc.es/reutilizadores
 endpoints:
-  - path: https://data.cnmc.es/energia
-    desc: Datasets de electricidad y gas
-  - path: https://data.cnmc.es/telecomunicaciones
-    desc: Datasets de telecomunicaciones (trimestrales y anuales)
-  - path: https://data.cnmc.es/api/3/action/package_search?q={texto}
-    desc: API CKAN de búsqueda de datasets
-    example: curl -s "https://data.cnmc.es/api/3/action/package_search?q=comercializadoras"
+  - path: /package_search?q={texto}&rows={n}&fq=organization:{org}
+    desc: Búsqueda de datasets (name ds_{id}_{v}, title, extras periodo, frecuenciaActualizacion, esInforme); rows=1000 devuelve los 210
+    example: curl -s "https://catalogodatos.cnmc.es/api/3/action/package_search?q=comercializadoras&rows=5"
+  - path: /organization_list?all_fields=true
+    desc: Cinco organizaciones temáticas con recuento (org_energia 181, org_telco_visual 12, org_transporte_postal 12, org_comercio_electronico 4, org_panel_hogares 1)
+  - path: /package_show?id={name}
+    desc: Ficha de un dataset con sus recursos; el CSV con datastore_active true admite datastore_search
+  - path: /datastore_search?resource_id={id}&limit={n}
+    desc: Registros en JSON con fields tipados y etiqueta original en info.label; limit por defecto 100, limit alto devuelve la tabla entera
+    example: curl -s "https://catalogodatos.cnmc.es/api/3/action/datastore_search?resource_id=522dcc75-b5c4-4c8d-9ec3-c8d8cf66d6b2&limit=5"
+  - path: https://catalogodatos.cnmc.es/datastore/dump/{resource_id}?format={csv|json|xml}
+    desc: Volcado completo de un recurso del datastore
+    example: curl -s "https://catalogodatos.cnmc.es/datastore/dump/522dcc75-b5c4-4c8d-9ec3-c8d8cf66d6b2?format=csv"
+  - path: https://catalogodatos.cnmc.es/dataset/{uuid}/resource/{id}/download/ds_{n}_{v}.{csv|json|xml}
+    desc: Ficheros estáticos de cada dataset (URL en resources[].url de package_show)
+  - path: https://data.cnmc.es/{energia|telecomunicaciones-y-sector-audiovisual|transporte-y-postal|panel-de-hogares}
+    desc: Portal de navegación (Drupal) con fichas por dataset; las descargas y la API están en catalogodatos.cnmc.es
+quirks: []
+ids: []
 gotchas:
-  - El portal es CKAN; la API estándar package_show y datastore_search funcionan para la mayoría de datasets.
-  - Los datos de precios de electricidad para consumidores se publican con desfase de dos trimestres.
-  - Los datos de operación del sistema eléctrico (demanda, generación en tiempo real) no están aquí sino en Red Eléctrica (empresa participada, fase posterior).
-related: [minetur-precios-carburantes]
+  - La API no está en data.cnmc.es (su /api/3 devuelve 404) sino en catalogodatos.cnmc.es; el portal solo enlaza a ella por JavaScript.
+  - Cada dataset publica un CSV con datastore (dump y datastore_search) y CSV, JSON y XML estáticos; uno de los resource_id que cita la documentación (8afd824c) ya no existe, comprobar con package_show.
+  - Nombres de campo normalizados sin tildes ni ñ (compannia_comercializadora_de_gas); la etiqueta original está en fields[].info.label del datastore.
+  - CSV con coma como separador, UTF-8 y cinco decimales fijos en los numéricos (2496967.00000); la primera columna siempre es _id, índice del datastore.
+  - Un dataset es una tabla de una publicación (Tabla 10, Tabla 17), no una serie; buscar por texto del título y comprobar periodo y frecuenciaActualizacion en extras.
+  - Datos de operación del sistema eléctrico (demanda, generación en tiempo real) no están aquí sino en Red Eléctrica (empresa participada, fase posterior).
+tips:
+  - "pandas.read_csv('https://catalogodatos.cnmc.es/datastore/dump/{id}') carga la tabla directamente; para el catálogo completo, package_search?rows=1000 y fq=organization:org_energia."
+  - Ejemplos oficiales de uso de la API en gitlab.cnmc.es/cnmcdata/cnmcdata-api-ejemplos.
+related: [minetur-precios-carburantes, miteco-energia-estadisticas]
 status: active
-verified: null
+verified: "2026-09-30"

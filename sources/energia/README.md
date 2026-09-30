@@ -4,10 +4,10 @@ Sector `energia` · 3 fuentes · índice generado por `scripts/build.py`, no edi
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
-| [cnmc-data](cnmc-data.yaml) | CNMC Data – Estadísticas de energía, telecomunicaciones y audiovisual | portal, download, api-rest | none | csv, xlsx, json | quarterly | — | — |
-| [minetur-precios-carburantes](minetur-precios-carburantes.yaml) | Geoportal de gasolineras – API de precios de carburantes | api-rest | none | json, xml | daily | — | — |
-| [miteco-energia-estadisticas](miteco-energia-estadisticas.yaml) | MITECO – Balances energéticos, hidrocarburos y registro de instalaciones | portal, download | none | xlsx, pdf, csv | monthly | — | — |
+| [cnmc-data](cnmc-data.yaml) | CNMC Data – Estadísticas de energía, telecomunicaciones, audiovisual y postal | api-rest, download, portal | none | csv, json, xml | quarterly | — | 2026-09-30 |
+| [minetur-precios-carburantes](minetur-precios-carburantes.yaml) | Geoportal de gasolineras – API REST de precios de carburantes | api-rest | none | json, xml | hourly | — | 2026-09-30 |
+| [miteco-energia-estadisticas](miteco-energia-estadisticas.yaml) | MITECO y CORES – Balances energéticos y estadísticas de petróleo y gas | download, portal | none | xlsx, xls, ods, pdf | monthly | overwritten-in-place, url-drift | 2026-09-30 |
 
-- **cnmc-data**: Portal de datos abiertos de la CNMC: mercado eléctrico y gasista (comercializadoras, cambios de suministrador, precios, autoconsumo), telecomunicaciones (líneas, ingresos, cuotas por operador), audiovisual y postal. Descarga por indicador con API CKAN.
-- **minetur-precios-carburantes**: Precios diarios de todos los carburantes en todas las estaciones de servicio de España con coordenadas, dirección, horario y rótulo. API REST JSON sin autenticación, también histórico por fecha.
-- **miteco-energia-estadisticas**: Balances energéticos anuales, estadísticas de hidrocarburos (consumo de productos petrolíferos y gas por provincia, vía CORES), registro administrativo de instalaciones de producción eléctrica, autoconsumo y planes energéticos.
+- **cnmc-data**: 210 datasets de la CNMC en un CKAN con datastore: electricidad y gas (cuotas de comercializadoras, cambios de suministrador, precios, garantías de origen, bono social), precios provinciales de carburantes, telecomunicaciones y audiovisual, transporte y postal, comercio electrónico y panel de hogares.
+- **minetur-precios-carburantes**: Precios vigentes de todos los carburantes en 11.491 estaciones terrestres y 148 postes marítimos, con coordenadas, dirección, horario, rótulo y margen, actualizados cada media hora, e histórico diario por fecha. JSON o XML sin autenticación, filtros por CCAA, provincia, municipio y producto.
+- **miteco-energia-estadisticas**: Series de CORES en xlsx: consumo mensual de productos petrolíferos por provincia desde 1997, por grupo y total, consumo y existencias de gas, balances anuales y capacidad de refino. Del ministerio, balances y libros de la energía en PDF, coyuntura trimestral y refino mensual en xlsx y ods.

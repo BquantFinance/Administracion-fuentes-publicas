@@ -1,33 +1,51 @@
 id: miteco-banco-datos-naturaleza
-name: MITECO – Banco de Datos de la Naturaleza e Inventario del Patrimonio Natural
+name: MITECO – Banco de Datos de la Naturaleza e Inventario del Patrimonio Natural (IEPNB)
 org: Dirección General de Biodiversidad, Bosques y Desertificación
 ministry: Para la Transición Ecológica y el Reto Demográfico
 level: age
 sector: medio-ambiente-agua-biodiversidad
-tags: [biodiversidad, especies, habitats, red-natura-2000, espacios-protegidos, inventario-forestal, wms]
+tags: [biodiversidad, red-natura-2000, espacios-protegidos, habitats, humedales, inventario-forestal, mapa-forestal, sig]
 summary: >-
-  Cartografía y datos de biodiversidad: Red Natura 2000, espacios naturales protegidos, hábitats, distribución
-  de especies (cuadrículas 10x10 km), Inventario Forestal Nacional, Mapa Forestal, humedales, vías pecuarias.
-  Descarga de capas y servicios WMS/WFS.
-access: [download, ogc, portal]
+  Capas oficiales de biodiversidad: Red Natura 2000, espacios protegidos, hábitats y especies del artículo 17,
+  humedales Ramsar e IEZH, reservas de la biosfera, Mapa Forestal e Inventario Forestal Nacional. Shapefile y
+  GML en gis.miteco.gob.es (desafío ALTCHA) y GDB, shp y GeoJSON directos del IEPNB.
+access: [download, portal]
 auth: none
-formats: [shp, gpkg, geojson, xlsx, pdf, xml]
+formats: [shp, gml, gdb, geojson, kml, xlsx, zip, xml]
 update: irregular
-coverage: "Inventario Forestal desde 1966; especies según atlas"
+coverage: "Red Natura 2000 edición 2025; IFN2 a IFN4; IEZH 2025; hábitats CNH21"
 license: Reutilización libre con cita de la fuente
-base_url: https://www.miteco.gob.es/es/biodiversidad/servicios/banco-datos-naturaleza.html
+base_url: https://www.miteco.gob.es/es/cartografia-y-sig/ide/descargas/biodiversidad.html
 docs_url: https://www.miteco.gob.es/es/biodiversidad/servicios/banco-datos-naturaleza/informacion-disponible.html
 endpoints:
-  - path: https://www.miteco.gob.es/es/biodiversidad/servicios/banco-datos-naturaleza/informacion-disponible.html
-    desc: Catálogo de capas descargables por tema
-  - path: https://wms.mapama.gob.es/sig/Biodiversidad/RedNatura/wms.aspx?SERVICE=WMS&REQUEST=GetCapabilities
-    desc: WMS de Red Natura 2000
-  - path: https://iepnb.gob.es/
-    desc: Inventario Español del Patrimonio Natural y de la Biodiversidad, con catálogo y visor
+  - path: https://www.miteco.gob.es/es/cartografia-y-sig/ide/descargas/biodiversidad/{tema}.html
+    desc: Páginas de descarga por tema con los enlaces a gis.miteco.gob.es
+    params: tema = rn2000, enp, mfe, iezh, humedales-ramsar, humedales-turberas, mab, iba, ieet, ospar, rampe, zepim, regiones-biogeograficas, vias_pecuarias, habitat-art17-2013_2018, especies-art17-2013_2018
+  - path: https://gis.miteco.gob.es/descargas/app/DescargaFichero?f={fichero}
+    desc: Formulario de descarga de una capa; el fichero llega con POST a ?handler=Download tras resolver el desafío ALTCHA
+    params: f = rn2000.zip (133 MB, shapefile PS_Natura2000_2025), gml_natura2000.zip, enp.zip, gml_enp.zip, estacionesaforos.zip, capassaih.zip
+  - path: https://gis.miteco.gob.es/descargas/app/DescargaFichero?handler=Altcha
+    desc: Desafío ALTCHA en JSON (algorithm SHA-256, challenge, salt, signature, maxnumber 100000)
+    example: curl -s "https://gis.miteco.gob.es/descargas/app/DescargaFichero?handler=Altcha"
+  - path: https://iepnb.gob.es/nuestros-datos/descargas
+    desc: 28 ficheros directos en storage.googleapis.com (IFN2 a IFN4, MFE400, hábitats CNH21 en gdb.zip, IEZH en shp, GeoJSON y kmz, diccionarios xlsx)
+    example: curl -sSL -o IEZH_shp_2025.zip "https://storage.googleapis.com/gestor-doc-portal-iepnb/Ecosistemas/inventario_esp_zonas_humedas/zonas_humedas/IEZH_shp_2025.zip"
+  - path: https://catalogo.datosabiertos.miteco.gob.es/api/3/action/package_search?q={texto}
+    desc: Catálogo CKAN del ministerio (1037 datasets DCAT-AP con inspire_id y hvd); sirve para localizar y documentar, sus recursos ZIP y WMS están rotos
+    example: curl -s "https://catalogo.datosabiertos.miteco.gob.es/api/3/action/package_search?q=natura&rows=5"
+quirks: [captcha-required, url-drift]
+ids: []
 gotchas:
-  - Las capas se sirven en ETRS89 UTM por husos o en geográficas según capa; unificar antes de cruzar.
-  - Los datos de especies protegidas sensibles se publican con resolución degradada.
-  - Ocurrencias puntuales de especies están en GBIF a través del nodo español (ficha gbif-es).
-related: [gbif-es, cnig-centro-descargas]
+  - Las descargas de gis.miteco.gob.es no son URL directas. El GET devuelve un formulario con __RequestVerificationToken y un widget ALTCHA; hay que hacer POST a ?handler=Download con f, altcha y el token, con cookies.
+  - ALTCHA es una prueba de trabajo pensada para resolverse en cliente, no un captcha visual. Hallar n tal que sha256(salt + n) sea igual a challenge (0,05 s en Python) y enviar el JSON en base64. Verificado con rn2000.zip.
+  - Todos los WMS de wms.mapama.gob.es (RedNatura, ENP, Embalses, CalidadAire) responden ServiceExceptionReport con NullReferenceException en 1.1.1 y 1.3.0; los de geoserver.iepnb.es dan 403 desde este entorno.
+  - Los recursos ZIP del catálogo CKAN (mapama.gob.es/app/descargas/descargafichero.aspx) redirigen a mapa.gob.es y dan 404; el ATOM INSPIRE de mapama tiene cero entradas y el de gis.miteco da 404.
+  - El CKAN de iepnb.gob.es/catalogo responde pero está vacío (package_list vacío, count 0); los ficheros del IEPNB están en la página de descargas.
+  - El CKAN de MITECO devuelve 502 de forma intermitente (2 de 6 peticiones) y la ruta /catalogo/api/3 falla siempre; usar /api/3 y reintentar.
+  - Capas en ETRS89 (geográficas o UTM por huso según capa); comprobar el .prj de cada shapefile antes de cruzar.
+tips:
+  - "Receta en guides/cliente-http.md (captcha-required). GET ?f=capa para el token, GET ?handler=Altcha, buscar n con sha256(salt+n) == challenge y POST ?handler=Download con token, f y altcha en base64."
+  - Las ocurrencias de especies (registros puntuales) están en GBIF a través del nodo español (ficha gbif-es); aquí solo hay distribución en cuadrículas y capas de espacios y hábitats.
+related: [gbif-es, cnig-centro-descargas, miteco-saih-boletin-hidrologico]
 status: active
-verified: null
+verified: "2026-09-30"

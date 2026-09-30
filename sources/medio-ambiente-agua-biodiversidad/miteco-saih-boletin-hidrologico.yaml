@@ -1,32 +1,50 @@
 id: miteco-saih-boletin-hidrologico
-name: MITECO – Boletín hidrológico, embalses y redes SAIH
+name: MITECO – Boletín hidrológico, histórico de embalses y anuario de aforos
 org: Dirección General del Agua
 ministry: Para la Transición Ecológica y el Reto Demográfico
 level: age
 sector: medio-ambiente-agua-biodiversidad
-tags: [agua, embalses, reservas, saih, caudales, sequia, cuencas, confederaciones]
+tags: [agua, embalses, reservas, saih, caudales, aforos, cuencas, confederaciones]
 summary: >-
-  Reserva hídrica semanal por embalse y cuenca, boletín hidrológico, redes SAIH de las confederaciones
-  (caudales, niveles, pluviometría en tiempo real) e indicadores de sequía. Datos históricos desde 1988.
+  Reserva semanal de cada embalse peninsular de más de 5 hm3 desde 1988 (base Access), boletín hidrológico
+  semanal en PDF, anuario de aforos con series diarias de caudal y nivel por estación desde 1912 (CSV por
+  cuenca) y listado de estaciones. Los SAIH en tiempo real son de cada confederación.
 access: [download, portal]
 auth: none
-formats: [xlsx, csv, pdf, html]
+formats: [csv, zip, pdf, html]
 update: weekly
-coverage: "1988-"
+coverage: "Embalses 1988-; aforos 1912-2022 (anuario 2021-2022)"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico.html
-docs_url: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico.html
+docs_url: https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/modelo-de-datos-bd-embalses-1988-2022_tcm30-538818.pdf
 endpoints:
-  - path: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico.html
-    desc: Boletín hidrológico semanal con datos por embalse
-  - path: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/historico-de-boletines.html
-    desc: Histórico de boletines y ficheros de reserva por embalse
-  - path: https://sig.mapama.gob.es/redes-seguimiento/
-    desc: Visor de redes de seguimiento del estado de las aguas
+  - path: https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/Historico-de-embalses/BD-Embalses.zip
+    desc: Access .mdb (10 MB comprimido, 222 MB) con la tabla T_Datos Embalses (AMBITO_NOMBRE, EMBALSE_NOMBRE, FECHA, AGUA_TOTAL, AGUA_ACTUAL, ELECTRICO_FLAG) desde 1988
+    example: curl -sSL -o BD-Embalses.zip "https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/Historico-de-embalses/BD-Embalses.zip"
+  - path: https://sede.miteco.gob.es/BoleHWeb/
+    desc: Boletín hidrológico semanal en PDF (aplicación con calendario JS, sin URL estable por fecha)
+  - path: https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/Anuario-21-22-csv.zip
+    desc: Anuario completo en CSV (136 MB), una carpeta por cuenca con afliq.csv (indroea;fecha;altura;caudal diarios), estaf.csv, embalse.csv y anual_a.csv
+    example: curl -sSL -o Anuario-21-22-csv.zip "https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/Anuario-21-22-csv.zip"
+  - path: https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/listado-estaciones-aforo.zip
+    desc: Cuatro CSV de estaciones (río, embalse, canal, evaporimétrica) con COD_HIDRO, COD_SAIH, COD_SAICA, UTM huso 30 ETRS89, masa de agua, municipio y provincia
+  - path: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos.html
+    desc: Página del anuario con la variante mdb, la memoria y la descripción de tablas en PDF
+  - path: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/saih.html
+    desc: Enlaces a los SAIH de cada confederación (Ebro, Tajo, Duero, Guadalquivir, Júcar, Segura, Miño-Sil, Sur), cada uno con su web y formato
+quirks: [url-drift, js-rendered]
+ids: []
 gotchas:
-  - Cada confederación hidrográfica (Ebro, Tajo, Duero, Guadalquivir...) tiene su propio SAIH con web y formatos distintos; el ministerio solo agrega el semanal.
-  - El histórico por embalse se publica como base de datos Access/Excel con códigos de embalse propios.
-  - Los datos semanales se refieren al martes de cada semana.
-related: [aemet-opendata, miteco-calidad-aire]
+  - No hay CSV ni xlsx del boletín semanal; el dato semanal por embalse solo está en el .mdb (fichero actualizado el 29/09/2026) y en los PDF de BoleHWeb.
+  - Leer el .mdb requiere mdbtools (mdb-export) o un driver Access; no hay lector puro Python fiable. El PDF del modelo de datos describe los campos.
+  - Los datos del boletín son provisionales y sin validar; los validados de embalses están en el anuario de aforos (embalse.csv), que llega con dos o tres años de retraso.
+  - CSV del anuario con separador ; y punto decimal, fechas dd/mm/aaaa y huecos como campo vacío; afliq.csv del Cantábrico pesa 25 MB. Once carpetas de cuenca, incluida SIN DEFINIR.
+  - Cada estación tiene varios códigos (indroea o ref_ceh en las series, COD_HIDRO, COD_SAIH y COD_SAICA en el listado); estaf.csv trae coordenadas UTM, ETRS89 y WGS84 y cod_saih.
+  - La ruta historico-de-boletines.html da 404 y el visor sig.mapama.gob.es/redes-seguimiento redirige al índice de visores de mapa.gob.es.
+  - Las capas GIS (embalses, estaciones de aforo, SAIH) se descargan en gis.miteco.gob.es tras resolver un desafío ALTCHA (ver miteco-banco-datos-naturaleza); los ZIP del catálogo CKAN dan 404.
+tips:
+  - "Con mdbtools, mdb-export BD-Embalses.mdb 'T_Datos Embalses' > embalses.csv saca toda la serie; AGUA_ACTUAL y AGUA_TOTAL están en hm3 y ELECTRICO_FLAG distingue uso consuntivo (0) e hidroeléctrico (1)."
+  - "Series diarias de caudal listas para pandas: read_csv de afliq.csv con sep=';' y parse_dates de fecha (dayfirst=True), y merge con estaf.csv por indroea para nombre y coordenadas."
+related: [aemet-opendata, miteco-banco-datos-naturaleza]
 status: active
-verified: null
+verified: "2026-09-30"

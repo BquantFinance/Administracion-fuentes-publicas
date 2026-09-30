@@ -4,27 +4,45 @@ org: Dirección General de Calidad y Evaluación Ambiental
 ministry: Para la Transición Ecológica y el Reto Demográfico
 level: age
 sector: medio-ambiente-agua-biodiversidad
-tags: [prtr, emisiones, contaminantes, industria, residuos, complejos-industriales, quimica]
+tags: [prtr, emisiones, contaminantes, industria, residuos, complejos-industriales, cnae, ippc]
 summary: >-
-  Emisiones anuales a aire, agua y suelo y transferencias de residuos de cada complejo industrial afectado
-  (más de 6.000 instalaciones), por sustancia química y actividad. Consulta y descarga por complejo, sustancia y año.
-access: [portal, download]
+  Emisiones anuales a aire, agua y suelo y transferencias de residuos de cada complejo industrial afectado,
+  por sustancia y método, más el inventario de complejos con CNAE, actividad PRTR e IPPC y municipio.
+  Descarga masiva en XML por año (emisiones 2001-2024, residuos 2007-2024) y consultas web.
+access: [download, portal]
 auth: none
-formats: [xlsx, csv, html]
+formats: [xml, zip, html]
 update: annual
-coverage: "2001-"
+coverage: "2001-2024"
 license: Reutilización libre con cita de la fuente
-base_url: https://prtr-es.es/
-docs_url: https://prtr-es.es/informes/descargas.aspx
+base_url: https://prtr-es.miteco.gob.es/
+docs_url: https://prtr-es.miteco.gob.es/INFORMACION-METADATOS-PRTREspana-1468112022.html
 endpoints:
-  - path: https://prtr-es.es/informes/descargas.aspx
-    desc: Descarga de datos completos por año
-  - path: https://prtr-es.es/Informes/InventarioInstalacionesIPPC.aspx
-    desc: Inventario de instalaciones con coordenadas y actividad
+  - path: /informes/descargas/PRTR_Espana_MITECO_Complejos.zip
+    desc: Inventario de complejos (XML ArrayOfComplejo con CodigoPRTR, nombre, empresa matriz, CNAE-2009, CodPRTRDEI, CodIPPC, dirección, municipio, provincia y CCAA)
+    example: curl -sSL -o complejos.zip "https://prtr-es.miteco.gob.es/informes/descargas/PRTR_Espana_MITECO_Complejos.zip"
+  - path: /informes/descargas/PRTR_Espana_MITECO_emisiones{AAAA}.zip
+    desc: Emisiones de un año (XML ArrayOfEmisiones con CodigoPRTR, AnyoReferencia, Contaminante, CantidadTotalkgporaño, MedioReceptor, Metodo y detalle Metodo_MCE)
+    example: curl -sSL -o emisiones2024.zip "https://prtr-es.miteco.gob.es/informes/descargas/PRTR_Espana_MITECO_emisiones2024.zip"
+  - path: /informes/descargas/PRTR_Espana_MITECO_residuos{AAAA}.zip
+    desc: Transferencias de residuos de un año (2007-2024)
+  - path: /informes/descargasEmisiones.aspx
+    desc: Índice de ZIP de emisiones por año; descargasResiduos.aspx para residuos y descargas.aspx para el inventario
+  - path: /Informes/InventarioInstalacionesIPPC.aspx
+    desc: Buscador web de complejos (formulario ASP.NET con __VIEWSTATE); el inventario completo está en el ZIP de complejos
+quirks: [viewstate-forms, url-drift]
+ids: [cnae]
 gotchas:
-  - Solo se publican emisiones que superan umbrales por sustancia; ausencia no significa emisión cero.
-  - Los datos del año N se publican en el segundo semestre de N+1 tras validación.
-  - Sustancias identificadas por código PRTR europeo, no CAS; existe tabla de equivalencia en el portal.
+  - El dominio prtr-es.es devuelve 404 en todas las rutas; www.prtr-es.es sirve un certificado sin ese nombre y en.prtr-es.es uno caducado. El portal vive en prtr-es.miteco.gob.es.
+  - Cada ZIP contiene un solo XML grande (Emisiones2023 son 28 MB) más un [Content_Types].xml; no hay CSV. Parsear en streaming (iterparse) por elemento Emision o Complejo.
+  - Emisiones y complejos se enlazan por CodigoPRTR; el fichero de emisiones repite NombreDelComplejo pero no lleva municipio ni CNAE.
+  - Solo se declaran emisiones que superan el umbral de cada sustancia; ausencia no significa emisión cero. Contaminante viene por nombre en castellano con fórmula (Metano (CH4)), no por código CAS.
+  - CantidadTotalkgporaño es texto con 14 decimales (215.00000000000000) y Metodo toma M (medido), C (calculado) o E (estimado), con el detalle en Metodo_MCE.
+  - Las páginas de informes (facilitylevel, seriesPlanta, pollutant) son formularios ASP.NET con __VIEWSTATE y __EVENTVALIDATION; usar los ZIP en vez de scrapearlas.
+  - El dataset PRTR del catálogo CKAN de MITECO (Emisiones contaminantes de los complejos industriales) apunta a un WMS roto y a ZIP en descargafichero.aspx que dan 404.
+tips:
+  - Cruce típico. Complejos por CNAE-2009 y CodIPPC con las emisiones por CodigoPRTR; CodPRTRDEI identifica el epígrafe del anexo I del Reglamento E-PRTR.
+  - Para comparar con otros países, el mismo dato agregado está en el Industrial Emissions Portal de la EEA; para España la fuente primaria es este registro.
 related: [miteco-calidad-aire]
 status: active
-verified: null
+verified: "2026-09-30"
