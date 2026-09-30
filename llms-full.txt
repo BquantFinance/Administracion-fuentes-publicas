@@ -361,65 +361,86 @@ related: hacienda-ovef, airef-datos, tesoro-estadisticas, bde-estadisticas
 
 ## ine-api-tempus
 INE – API JSON (Tempus3) | Instituto Nacional de Estadística (INE)
-summary: Acceso programático a todas las operaciones estadísticas del INE: metadatos (operaciones, tablas, variables, valores) y datos de tablas y series (IPC, EPA, PIB, padrón, natalidad, empresas). JSON y CSV, sin autenticación.
-access: api-rest | auth: none | formats: json, csv, px | update: daily | status: active | verified: pending
-coverage: Según operación; IPC desde 2002 en base actual, series históricas enlazadas
+summary: Acceso programático a las 112 operaciones estadísticas del INE: metadatos (operaciones, tablas, variables, valores) y datos de tablas y series (IPC, EPA, PIB, padrón, natalidad, empresas). JSON y CSV, sin autenticación.
+access: api-rest | auth: none | formats: json, csv | update: daily | status: active | verified: 2026-09-30
+coverage: Según operación; el IPC general enlaza desde 1961 en la tabla 24077
 license: Reutilización libre con cita de la fuente (licencia INE compatible CC BY 4.0)
 base_url: https://servicios.ine.es/wstempus/js/ES
 docs_url: https://www.ine.es/dyngs/DAB/index.htm?cid=1099
-- /OPERACIONES_DISPONIBLES :: Lista de operaciones estadísticas con sus códigos
+- /OPERACIONES_DISPONIBLES :: Las 112 operaciones con Id numérico y Codigo (IPC es 25, EPA 293, ECP 450)
   ej: curl -s "https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES"
-- /TABLAS_OPERACION/{id_operacion} :: Tablas publicadas de una operación (p. ej. IPC = 25)
+- /TABLAS_OPERACION/{id_o_codigo} :: Tablas vigentes de una operación con periodo inicial y última modificación; acepta IPC o 25
   ej: curl -s "https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/IPC"
-- /DATOS_TABLA/{id_tabla}?nult={n} :: Datos de una tabla, últimos n periodos
-  ej: curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/50902?nult=3"
-- /DATOS_SERIE/{cod_serie}?nult={n} :: Datos de una serie por su código
-  ej: curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/IPC251856?nult=12"
-- /SERIES_TABLA/{id_tabla} :: Series que componen una tabla, con sus metadatos
-- /VARIABLES_OPERACION/{id_operacion} y /VALORES_VARIABLEOPERACION/{id_var}/{id_op} :: Variables y valores para filtrar
-- https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/{id_tabla} :: Misma API con salida CSV cambiando js por csv
-  ej: curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/50902?nult=1"
-rate_limit: No documentado; respuestas grandes se truncan, usar nult, date o filtros tv
-! Los ids de tabla del portal INEbase (t=NNNNN en la URL) son los mismos que acepta DATOS_TABLA.
-! Filtrar por variable con el parámetro tv=id_variable:id_valor; puede repetirse.
-! Fechas con date=AAAAMMDD:AAAAMMDD; sin nult ni date devuelve toda la serie, que puede ser enorme.
-! Cambiar ES por EN en la ruta devuelve metadatos en inglés.
-! Existe /wstempus/jsCache/ES/... con caché agresiva; usar /js/ para datos recién publicados.
-! Los valores llevan campo Secreto=true cuando están protegidos por secreto estadístico; el dato viene vacío.
-+ Flujo típico, OPERACIONES_DISPONIBLES para el id, TABLAS_OPERACION para la tabla, SERIES_TABLA para elegir series, DATOS_SERIE con nult para bajar.
-+ En Python, pandas.json_normalize sobre el campo Data de cada serie; la fecha viene en Fecha (epoch ms) y Anyo/FK_Periodo.
+- /DATOS_TABLA/{id_tabla}?nult={n} :: Todas las series de una tabla con sus últimos n periodos [nult o date=AAAAMMDD:AAAAMMDD (uno obligatorio); tv=id_variable:id_valor filtra, repetible; tip=A nombres legibles y fechas ISO, tip=M metadatos, tip=AM ambos; det=2 desglosa unidad y escala]
+  ej: curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/24077?nult=3"
+- /DATOS_SERIE/{cod_serie}?nult={n} :: Una serie por su código
+  ej: curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/IPC290751?nult=12&tip=A"
+- /SERIES_TABLA/{id_tabla} :: Series que componen una tabla con código, decimales, periodicidad y unidad
+  ej: curl -sL "https://servicios.ine.es/wstempus/js/ES/SERIES_TABLA/24077"
+- /SERIE/{cod_serie} :: Metadatos de una serie
+- /VARIABLES_OPERACION/{id_operacion} :: Variables de una operación; sus valores en /VALORES_VARIABLEOPERACION/{id_variable}/{id_operacion}
+  ej: curl -s "https://servicios.ine.es/wstempus/js/ES/VALORES_VARIABLEOPERACION/3/IPC"
+- https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/{id_tabla}?nult={n} :: Misma API con salida CSV cambiando js por csv
+  ej: curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=12"
+rate_limit: No documentado; una tabla grande con nult=1 devuelve 600 KB (4248 series en la 25333)
+quirks: latin1
+! Los códigos de serie y los ids de tabla cambian con cada cambio de base. El IPC general fue IPC206446 (hasta 2021), IPC251852 (hasta 2025M12) y es IPC290751 (base 2025).
+! Una tabla retirada (50902) sigue respondiendo con datos viejos aunque ya no aparezca en TABLAS_OPERACION; validar siempre la tabla contra ese listado.
+! DATOS_SERIE y DATOS_TABLA sin nult ni date devuelven 404 con HTML, no la serie completa. Para toda la serie usar date con un rango amplio.
+! Un código de serie inexistente devuelve 200 con cuerpo vacío; un tv con un par variable:valor que no existe en la tabla devuelve 500 con HTML.
+! nult cuenta periodos de la tabla, no observaciones. En tablas con avance (IPC) las series sin dato en el último periodo llegan con Data vacío.
+! Fecha es epoch en milisegundos con zona Europe/Madrid; usar Anyo y FK_Periodo para el periodo. FK_TipoDato 3 marca dato provisional o avance; Secreto true marca secreto estadístico con Valor ausente.
+! El CSV llega con BOM UTF-8, separador tabulador y coma decimal aunque la cabecera diga ISO-8859-15.
+! SERIES_TABLA redirige con 301 a /jsCache/; seguir redirecciones. El parámetro page no pagina (devuelve lo mismo).
+! Cambiar ES por EN en la ruta traduce los nombres; jsCache sirve copias cacheadas, para datos recién publicados usar js.
++ Flujo típico. TABLAS_OPERACION para localizar la tabla vigente, DATOS_TABLA con nult=1 y tip=A para ver códigos y nombres, DATOS_SERIE con date para el histórico.
++ Los ids de tabla del portal INEbase (parámetro t=NNNNN en la URL) son los mismos que acepta DATOS_TABLA.
++ En Python, pandas.json_normalize sobre Data de cada serie; con tip=A la fecha ya viene en ISO 8601.
 related: ine-codigos-territoriales, ine-microdatos
 
 ## ine-codigos-territoriales
-INE – Códigos de municipios, provincias y unidades territoriales | Instituto Nacional de Estadística (INE)
-summary: Relación oficial de municipios con código INE (5 dígitos, provincia + municipio + dígito de control), provincias, comunidades autónomas, NUTS, islas y variaciones anuales (altas, bajas, cambios de nombre). Es la clave para cruzar cualquier dataset territorial español.
-access: download | auth: none | formats: xlsx, csv | update: annual | status: active | verified: pending
-coverage: Relación anual desde 1996; variaciones desde 1842 en Alteraciones de municipios
+INE – Códigos de municipios, provincias, comunidades e islas | Instituto Nacional de Estadística (INE)
+summary: Relación oficial anual de los 8132 municipios con código INE (provincia, municipio y dígito de control), comunidades autónomas, provincias e islas. Es la clave para cruzar cualquier dataset territorial español.
+access: download | auth: none | formats: xlsx, html | update: annual | status: active | verified: 2026-09-30
+coverage: Relación a 1 de enero de cada año; ficheros anuales desde los años 90
 license: Reutilización libre con cita de la fuente
 base_url: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=ultiDatos&idp=1254734710990
-docs_url: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=metodologia&idp=1254734710990
-- https://www.ine.es/daco/daco42/codmun/diccionario{AA}.xlsx :: Diccionario de municipios del año AA (dos dígitos)
-  ej: curl -sO "https://www.ine.es/daco/daco42/codmun/diccionario24.xlsx"
-- https://www.ine.es/daco/daco42/codmun/cod_ccaa_provincia.htm :: Códigos de comunidades autónomas y provincias
-- https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=resultados&idp=1254734710990 :: Relación de municipios y variaciones por año
-! El código INE de municipio completo tiene 5 dígitos (CPRO 2 + CMUN 3) y el dígito de control es un sexto dígito aparte; muchos datasets omiten el DC y otros lo incluyen.
-! Algunos municipios cambian de código al fusionarse; hay que aplicar la tabla de variaciones para series largas.
-! Los códigos del Catastro y de la DGT no coinciden con los del INE; existen tablas de equivalencia en el propio Catastro.
-related: ine-api-tempus, hacienda-ovef, catastro-ovc
+docs_url: https://www.ine.es/daco/daco42/codmun/cod_num_muni_provincia_ccaa.htm
+- https://www.ine.es/daco/daco42/codmun/diccionario{AA}.xlsx :: Diccionario de municipios a 1 de enero del año AA en una sola hoja (CODAUTO, CPRO, CMUN, DC, NOMBRE)
+  ej: curl -sO "https://www.ine.es/daco/daco42/codmun/diccionario26.xlsx"
+- https://www.ine.es/daco/daco42/codmun/{AA}codmun.xlsx :: Misma relación con una hoja por provincia (01 a 52)
+- https://www.ine.es/daco/daco42/codmun/{AA}codislas.xlsx :: Municipios de Baleares, Las Palmas y Santa Cruz de Tenerife con código de isla (CISLA)
+- https://www.ine.es/daco/daco42/codmun/cod_ccaa_provincia.htm :: Códigos de comunidades autónomas y provincias en HTML; también cod_ccaa.htm, cod_provincia.htm y cod_islas.htm
+- https://www.ine.es/daco/daco42/codmun/codmun_anual.htm :: Índice de las relaciones anuales anteriores
+! El código completo son 5 dígitos, CPRO (2) más CMUN (3); el dígito de control DC es una columna aparte. Muchos datasets omiten el DC y otros lo pegan como sexto dígito.
+! Los códigos vienen como texto con ceros a la izquierda; al leer con pandas forzar dtype str o se pierden (01 pasa a 1).
+! El diccionario tiene una fila de título antes de la cabecera (leer con header=1); la hoja se llama con el año anterior (dic25 en diccionario26.xlsx) y el título de codislas también va con retraso.
+! La página menu=resultados de la ficha anterior devuelve 404; la relación cuelga de menu=ultiDatos.
+! Los municipios cambian de código al fusionarse o segregarse; para series largas aplicar las variaciones anuales (codmun{AA}/{AA}codmunmod.htm).
++ Cruce típico. La deuda viva y liquidaciones de Hacienda (hacienda-ovef) y las estadísticas municipales de la AEAT (aeat-estadisticas) se casan por CPRO+CMUN.
+related: ine-api-tempus, hacienda-ovef, catastro-ovc, aeat-estadisticas
 
 ## ine-microdatos
 INE – Microdatos anonimizados | Instituto Nacional de Estadística (INE)
-summary: Ficheros de microdatos anonimizados de encuestas (EPA, Encuesta de Condiciones de Vida, Presupuestos Familiares, Estructura Salarial, Censo, Movimiento Natural de la Población) con diseño de registro y programas de lectura.
-access: download | auth: none | formats: csv, txt, zip, sql | update: quarterly | status: active | verified: pending
-coverage: EPA desde 2005 en formato actual; otras según encuesta
+summary: Ficheros de microdatos anonimizados de encuestas (EPA, Condiciones de Vida, Presupuestos Familiares, Estructura Salarial, Censo, Movimiento Natural de la Población). Cada ZIP trae el fichero en ancho fijo, CSV tabulado, parquet, RData, SAS, SPSS y Stata, más el diseño de registro en xlsx y JSON.
+access: download | auth: none | formats: csv, txt, parquet, zip, xlsx, json | update: quarterly | status: active | verified: 2026-09-30
+coverage: EPA trimestral desde 2000 (datos_1t00.zip); ECV desde 2004; otras según encuesta
 license: Reutilización libre con cita de la fuente
-base_url: https://www.ine.es/prodyser/microdatos.htm
-docs_url: https://www.ine.es/prodyser/microdatos.htm
-- https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176918&menu=resultados&idp=1254735976595 :: Microdatos de la EPA por trimestre
-- https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176807&menu=resultados&idp=1254735976608 :: Microdatos de la Encuesta de Condiciones de Vida
-! Los ficheros son de ancho fijo o CSV con separador tabulador; el diseño de registro va en Excel aparte y cambia entre años.
-! Los ZIP incluyen programas de lectura para SAS, SPSS, R y Stata, pero no siempre para Python.
-! Los factores de elevación son obligatorios para cualquier estimación; no contar registros.
+base_url: https://www.ine.es/dyngs/SER/index.htm?cid=1388
+docs_url: https://www.ine.es/dyngs/SER/index.htm?cid=1388
+- https://www.ine.es/ftp/microdatos/epa/datos_{T}t{AA}.zip :: EPA del trimestre T del año AA (dos dígitos), 21 MB con todos los formatos
+  ej: curl -sO "https://www.ine.es/ftp/microdatos/epa/datos_2t26.zip"
+- https://www.ine.es/ftp/microdatos/epa/dr_EPA_{AAAA}.xlsx :: Diseño de registro anual de la EPA en Excel
+- https://www.ine.es/ftp/microdatos/ecv/ecv_b{AAAA}/ecvb{AA}_{AAAA}.zip :: Encuesta de Condiciones de Vida por base y año
+- https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176918&menu=resultados&idp=1254735976595 :: Página de la EPA con los enlaces a todos los ZIP de microdatos
+! La ruta /prodyser/microdatos.htm de la ficha anterior es una redirección; el índice es /dyngs/SER/index.htm?cid=1388.
+! Dentro del ZIP, CSV/{op}_{periodo}.tab va con tabulador y cabecera entrecomillada; md_{op}_{periodo}.txt es ancho fijo sin cabecera y md_{op}_{periodo}.parquet es lo mismo en parquet.
+! Los códigos (CCAA, PROV, CICLO) llevan ceros a la izquierda; leer como texto o se corrompen.
+! dr_{op}_{AAAA}.json tiene claves layout (name, position, length, type, codelist_ref), metadata y codelists; sirve para parsear el ancho fijo sin abrir el Excel.
+! El diseño de registro cambia entre años; no reutilizar el de un año para otro.
+! Los factores de elevación (FACTOREL en la EPA) son obligatorios para cualquier estimación; no contar registros.
+! Leeme.txt va en ISO-8859-1.
++ Para Python, leer directamente el parquet del ZIP; evita el diseño de registro y pesa 3 MB frente a 18 del tab.
 related: ine-api-tempus
 
 # SECTOR contratacion-subvenciones: Contratación pública y subvenciones

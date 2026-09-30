@@ -44,7 +44,8 @@ endpoints:
 rate_limit: No documentado; una tabla grande con nult=1 devuelve 600 KB (4248 series en la 25333)
 quirks: [latin1]
 gotchas:
-  - Los códigos de serie y los ids de tabla cambian con cada cambio de base. El IPC general fue IPC206446 (hasta 2021), IPC251852 (hasta 2025M12) y es IPC290751 (base 2025); la tabla 50902 ya no aparece en TABLAS_OPERACION aunque siga respondiendo con datos viejos.
+  - Los códigos de serie y los ids de tabla cambian con cada cambio de base. El IPC general fue IPC206446 (hasta 2021), IPC251852 (hasta 2025M12) y es IPC290751 (base 2025).
+  - Una tabla retirada (50902) sigue respondiendo con datos viejos aunque ya no aparezca en TABLAS_OPERACION; validar siempre la tabla contra ese listado.
   - DATOS_SERIE y DATOS_TABLA sin nult ni date devuelven 404 con HTML, no la serie completa. Para toda la serie usar date con un rango amplio.
   - Un código de serie inexistente devuelve 200 con cuerpo vacío; un tv con un par variable:valor que no existe en la tabla devuelve 500 con HTML.
   - nult cuenta periodos de la tabla, no observaciones. En tablas con avance (IPC) las series sin dato en el último periodo llegan con Data vacío.

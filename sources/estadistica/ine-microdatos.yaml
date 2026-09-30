@@ -29,7 +29,8 @@ endpoints:
     desc: Página de la EPA con los enlaces a todos los ZIP de microdatos
 gotchas:
   - La ruta /prodyser/microdatos.htm de la ficha anterior es una redirección; el índice es /dyngs/SER/index.htm?cid=1388.
-  - Dentro del ZIP, CSV/{op}_{periodo}.tab va con tabulador y cabecera entrecomillada; md_{op}_{periodo}.txt es ancho fijo sin cabecera y md_{op}_{periodo}.parquet lo mismo en parquet. Los códigos llevan ceros a la izquierda, leer como texto.
+  - Dentro del ZIP, CSV/{op}_{periodo}.tab va con tabulador y cabecera entrecomillada; md_{op}_{periodo}.txt es ancho fijo sin cabecera y md_{op}_{periodo}.parquet es lo mismo en parquet.
+  - Los códigos (CCAA, PROV, CICLO) llevan ceros a la izquierda; leer como texto o se corrompen.
   - dr_{op}_{AAAA}.json tiene claves layout (name, position, length, type, codelist_ref), metadata y codelists; sirve para parsear el ancho fijo sin abrir el Excel.
   - El diseño de registro cambia entre años; no reutilizar el de un año para otro.
   - Los factores de elevación (FACTOREL en la EPA) son obligatorios para cualquier estimación; no contar registros.
