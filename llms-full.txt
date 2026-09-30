@@ -985,7 +985,7 @@ related: aemet-opendata, miteco-banco-datos-naturaleza
 
 ## cnmc-data
 CNMC Data – Estadísticas de energía, telecomunicaciones, audiovisual y postal | Comisión Nacional de los Mercados y la Competencia (CNMC)
-summary: 210 datasets de la CNMC en un CKAN con datastore: electricidad y gas (cuotas de comercializadoras, cambios de suministrador, precios, garantías de origen, bono social), precios provinciales de carburantes, telecomunicaciones y audiovisual, transporte y postal, comercio electrónico y panel de hogares.
+summary: 210 datasets de la CNMC en un CKAN con datastore: electricidad y gas (cuotas de comercializadoras, cambios de suministrador, precios, garantías de origen, bono social), precios provinciales de carburantes, telecomunicaciones, audiovisual, transporte, postal y comercio electrónico.
 access: api-rest, download, portal | auth: none | formats: csv, json, xml | update: quarterly | status: active | verified: 2026-09-30
 coverage: Según dataset (extras periodo y frecuenciaActualizacion); series anuales, trimestrales y mensuales
 license: CC BY-SA 4.0 (license_title de los datasets; condiciones en data.cnmc.es/condiciones-de-uso)

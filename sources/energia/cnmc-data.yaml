@@ -8,7 +8,7 @@ tags: [cnmc, electricidad, gas, telecomunicaciones, audiovisual, postal, comerci
 summary: >-
   210 datasets de la CNMC en un CKAN con datastore: electricidad y gas (cuotas de comercializadoras, cambios
   de suministrador, precios, garantías de origen, bono social), precios provinciales de carburantes,
-  telecomunicaciones y audiovisual, transporte y postal, comercio electrónico y panel de hogares.
+  telecomunicaciones, audiovisual, transporte, postal y comercio electrónico.
 access: [api-rest, download, portal]
 auth: none
 formats: [csv, json, xml]
