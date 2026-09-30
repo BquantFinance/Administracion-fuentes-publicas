@@ -1,5 +1,7 @@
 # Administración fuentes públicas
 
+*Spanish public-sector data sources, catalogued for AI agents and developers: verified endpoints, response shapes, pitfalls, and recipes. Start at `llms.txt`.*
+
 Catálogo de fuentes de datos de la Administración pública española, pensado para desarrolladores y agentes de IA que construyen sobre datos públicos: APIs, descargas, feeds, servicios geográficos y registros.
 
 **Para agentes:** empieza por [`llms.txt`](llms.txt). Todo el catálogo cabe en [`catalog.json`](catalog.json) o en [`llms-full.txt`](llms-full.txt).
