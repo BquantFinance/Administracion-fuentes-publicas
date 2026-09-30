@@ -52,6 +52,8 @@ def render_source_compact(s: dict) -> str:
             lines.append(f"  ej: {e['example']}")
     if s.get("rate_limit"):
         lines.append(f"rate_limit: {s['rate_limit']}")
+    if s.get("quirks"):
+        lines.append(f"quirks: {fmt_list(s['quirks'])}")
     for g in s.get("gotchas", []) or []:
         lines.append(f"! {g}")
     for tip in s.get("tips", []) or []:
@@ -67,13 +69,13 @@ def render_sector_index(sector: str, title: str, items: list[dict]) -> str:
         "",
         f"Sector `{sector}` · {len(items)} fuentes · índice generado por `scripts/build.py`, no editar.",
         "",
-        "| id | fuente | acceso | auth | formatos | actualización | verificada |",
-        "|---|---|---|---|---|---|---|",
+        "| id | fuente | acceso | auth | formatos | actualización | quirks | verificada |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     for s in items:
         lines.append(
             f"| [{s['id']}]({s['id']}.yaml) | {s['name']} | {fmt_list(s['access'])} | {s['auth']} "
-            f"| {fmt_list(s['formats'])} | {s['update']} | {s.get('verified') or '—'} |"
+            f"| {fmt_list(s['formats'])} | {s['update']} | {fmt_list(s.get('quirks') or []) or '—'} | {s.get('verified') or '—'} |"
         )
     lines.append("")
     for s in items:
@@ -153,6 +155,15 @@ def main() -> None:
         f"- Esquema de ficha: {REPO_RAW}/schema/source.schema.json",
         f"- Vocabulario (sectores, acceso, auth, formatos): {REPO_RAW}/schema/vocab.yaml",
         "- `verified: null` significa que la ficha se redactó a partir de documentación oficial pero aún no se ha probado el endpoint.",
+        "",
+        "## Reglas rápidas antes de programar contra una fuente",
+        "",
+        "- Lee `quirks` y `gotchas` de la ficha: son hechos verificados con llamadas reales, no documentación oficial.",
+        "- Muchos servidores .gob.es sirven certificados FNMT sin la cadena intermedia; curl y requests fallan hasta añadirla al bundle. Arreglo copiable en la guía Cliente HTTP.",
+        "- Envía siempre un User-Agent de navegador; varios sitios (tesoro.es) devuelven 403 al User-Agent de curl.",
+        "- Las APIs del BOE exigen Accept explícito (application/json o application/xml) y devuelven los errores siempre en XML.",
+        "- Espera ISO-8859-1 en feeds del BOE y CSV del Banco de España; convierte antes de parsear.",
+        "- Ninguna fuente verificada documenta límites ni devolvió 429; para descargas masivas, peticiones secuenciales y reintento con espera ante 5xx.",
         "",
         "## Sectores",
         "",

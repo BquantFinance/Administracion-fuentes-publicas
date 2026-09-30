@@ -2,14 +2,14 @@
 
 Sector `ciencia-investigacion` · 6 fuentes · índice generado por `scripts/build.py`, no editar.
 
-| id | fuente | acceso | auth | formatos | actualización | verificada |
-|---|---|---|---|---|---|---|
-| [aei-convocatorias](aei-convocatorias.yaml) | AEI – Convocatorias y proyectos financiados de I+D+i | portal, download | none | pdf, xlsx, html | irregular | — |
-| [csic-digital](csic-digital.yaml) | Digital.CSIC – Repositorio institucional del CSIC (OAI-PMH) | oai-pmh, api-rest, portal | none | xml, json, pdf | daily | — |
-| [fecyt-recolecta](fecyt-recolecta.yaml) | FECYT – RECOLECTA y recursos de ciencia abierta | oai-pmh, portal, download | none | xml, xlsx, pdf, csv | weekly | — |
-| [gbif-es](gbif-es.yaml) | GBIF España – Ocurrencias de biodiversidad (nodo nacional, CSIC) | api-rest, download, portal | none | json, csv, zip | daily | — |
-| [igme-geologia](igme-geologia.yaml) | IGME-CSIC – Información geológica, hidrogeológica y minera | download, ogc, portal | none | shp, geotiff, pdf, xlsx, gml | irregular | — |
-| [ign-sismologia](ign-sismologia.yaml) | IGN – Catálogo sísmico y red de vigilancia volcánica | portal, download, feed | none | csv, txt, xml, kml, pdf | realtime | — |
+| id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
+|---|---|---|---|---|---|---|---|
+| [aei-convocatorias](aei-convocatorias.yaml) | AEI – Convocatorias y proyectos financiados de I+D+i | portal, download | none | pdf, xlsx, html | irregular | — | — |
+| [csic-digital](csic-digital.yaml) | Digital.CSIC – Repositorio institucional del CSIC (OAI-PMH) | oai-pmh, api-rest, portal | none | xml, json, pdf | daily | — | — |
+| [fecyt-recolecta](fecyt-recolecta.yaml) | FECYT – RECOLECTA y recursos de ciencia abierta | oai-pmh, portal, download | none | xml, xlsx, pdf, csv | weekly | — | — |
+| [gbif-es](gbif-es.yaml) | GBIF España – Ocurrencias de biodiversidad (nodo nacional, CSIC) | api-rest, download, portal | none | json, csv, zip | daily | — | — |
+| [igme-geologia](igme-geologia.yaml) | IGME-CSIC – Información geológica, hidrogeológica y minera | download, ogc, portal | none | shp, geotiff, pdf, xlsx, gml | irregular | — | — |
+| [ign-sismologia](ign-sismologia.yaml) | IGN – Catálogo sísmico y red de vigilancia volcánica | portal, download, feed | none | csv, txt, xml, kml, pdf | realtime | — | — |
 
 - **aei-convocatorias**: Convocatorias del Plan Estatal de I+D+i, resoluciones de concesión con proyectos financiados (referencia, IP, entidad, importe), y datos de ayudas concedidas. Publicadas como PDF y Excel por convocatoria.
 - **csic-digital**: Más de 300.000 publicaciones, datasets y documentos científicos del CSIC en acceso abierto (biología, química, física, ciencias sociales). Cosechable por OAI-PMH y consultable por API REST DSpace.

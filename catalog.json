@@ -1122,6 +1122,9 @@
      "desc": "Estimación del PIB trimestral por comunidad autónoma"
     }
    ],
+   "quirks": [
+    "tls-chain-incomplete"
+   ],
    "gotchas": [
     "El servidor envía el certificado sin la cadena intermedia FNMT; curl y requests fallan la verificación TLS salvo que se añada AC Componentes Informáticos al bundle (ver guía).",
     "Los xlsx cuelgan de wp-content/uploads con rutas que cambian en cada actualización; rascar la página para localizar el enlace vigente.",
@@ -1200,6 +1203,11 @@
     }
    ],
    "rate_limit": "No documentado",
+   "quirks": [
+    "gzip-unannounced",
+    "latin1",
+    "waf-blocks-bots"
+   ],
    "gotchas": [
     "La API comprime siempre en gzip; sin Accept-Encoding el cuerpo llega comprimido y sin cabecera Content-Encoding. Con curl usar --compressed; requests lo descomprime solo.",
     "idioma es obligatorio y rango debe ser compatible con la frecuencia de la serie; si no, 412 con JSON de campos errNum, errMsgUsr y errMsgDebug. Serie inexistente también da 412.",
@@ -1290,6 +1298,9 @@
      "path": "https://www.cnmv.es/portal/informacion-privilegiada/RSS.asmx/GetNoticiasCNMV",
      "desc": "RSS de información privilegiada del día, desde el cierre de la sesión anterior"
     }
+   ],
+   "quirks": [
+    "viewstate-forms"
    ],
    "gotchas": [
     "La raíz /portal/ y /portal/RSS/ devuelven 403; la portada es /portal/home. Las rutas funcionan con y sin extensión .aspx.",
@@ -1400,6 +1411,10 @@
      "path": "https://www.tesoro.es/deuda-publica/subastas/calendario",
      "desc": "Calendario anual de subastas en HTML y PDF"
     }
+   ],
+   "quirks": [
+    "user-agent-browser",
+    "tls-chain-incomplete"
    ],
    "gotchas": [
     "Con el User-Agent por defecto de curl responde 403 en todo el sitio; enviar un User-Agent de navegador.",
@@ -2705,6 +2720,9 @@
     }
    ],
    "rate_limit": "No documentado",
+   "quirks": [
+    "accept-header-required"
+   ],
    "gotchas": [
     "Cabecera Accept obligatoria; sin ella o con */* responde 400. Los errores llegan siempre en XML aunque se pida JSON.",
     "Norma completa, texto, bloque y metadata-eli solo se sirven en XML; con Accept application/json devuelven 400. Metadatos, análisis, índice, listado y tablas auxiliares sí van en JSON.",
@@ -2781,6 +2799,11 @@
     }
    ],
    "rate_limit": "No documentado",
+   "quirks": [
+    "accept-header-required",
+    "json-object-or-list",
+    "no-weekend-data"
+   ],
    "gotchas": [
     "Cabecera Accept obligatoria con application/json o application/xml; sin ella, o con */*, responde 400.",
     "Los errores (400, 404, 500) llegan siempre con cuerpo XML aunque se pida JSON; comprobar el código HTTP antes de parsear.",
@@ -2917,6 +2940,9 @@
      "example": "curl -s \"https://www.boe.es/rss/canal_cpv.php?l=a&c=720\""
     }
    ],
+   "quirks": [
+    "latin1"
+   ],
    "gotchas": [
     "Los feeds van en ISO-8859-1, no en UTF-8; convertir antes de parsear o los acentos se corrompen.",
     "Los feeds de sumario solo contienen el día en curso; los canales temáticos guardan unas ocho semanas. Para histórico usar la API de sumarios.",
@@ -2986,6 +3012,11 @@
     }
    ],
    "rate_limit": "No documentado",
+   "quirks": [
+    "accept-header-required",
+    "json-object-or-list",
+    "no-weekend-data"
+   ],
    "gotchas": [
     "Cabecera Accept obligatoria (application/json o application/xml); sin ella 400. Los errores llegan siempre en XML.",
     "En JSON, item y apartado son objeto si hay un elemento y lista si hay varios; normalizar antes de iterar.",

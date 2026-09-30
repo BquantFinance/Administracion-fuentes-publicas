@@ -30,6 +30,7 @@ endpoints:
     desc: PDF de cualquier documento del sumario
     example: curl -sO "https://www.boe.es/borme/dias/2024/01/02/pdfs/BORME-A-2024-1-01.pdf"
 rate_limit: No documentado
+quirks: [accept-header-required, json-object-or-list, no-weekend-data]
 gotchas:
   - Cabecera Accept obligatoria (application/json o application/xml); sin ella 400. Los errores llegan siempre en XML.
   - En JSON, item y apartado son objeto si hay un elemento y lista si hay varios; normalizar antes de iterar.

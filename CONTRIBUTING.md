@@ -19,6 +19,7 @@ Las fichas las leen agentes con presupuesto de tokens. Por eso:
 
 - `summary`: qué datos hay y para qué sirven, en una o dos frases. Sin adjetivos, sin historia del organismo.
 - `endpoints`: solo los que un desarrollador usa de verdad. Cada uno con un `example` que funcione al copiarlo.
+- `quirks`: peculiaridades técnicas del vocabulario cerrado (certificado sin cadena, User-Agent obligatorio, gzip sin cabecera...). Permiten a un agente configurar el cliente HTTP filtrando `catalog.json`. Detalle en `guides/cliente-http.md`.
 - `gotchas`: una frase por trampa. Cabeceras obligatorias, codificaciones, límites, cambios de URL, campos engañosos. Es el campo más valioso del repo.
 - Nada que ya esté en otra ficha: usa `related`.
 - Castellano en los valores, inglés en las claves. Sin mayúsculas gratuitas, sin markdown dentro de los valores.

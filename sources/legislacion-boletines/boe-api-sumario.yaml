@@ -29,6 +29,7 @@ endpoints:
     desc: PDF de la disposición; la fecha del path es la de publicación
     example: curl -sO "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-A-2024-87.pdf"
 rate_limit: No documentado
+quirks: [accept-header-required, json-object-or-list, no-weekend-data]
 gotchas:
   - Cabecera Accept obligatoria con application/json o application/xml; sin ella, o con */*, responde 400.
   - Los errores (400, 404, 500) llegan siempre con cuerpo XML aunque se pida JSON; comprobar el código HTTP antes de parsear.

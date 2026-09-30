@@ -30,6 +30,7 @@ endpoints:
     desc: Seguimiento del objetivo de estabilidad por subsector
   - path: https://www.airef.es/es/datalab/datos-economicos/estimacion-pib-trimestral-por-ccaa/
     desc: Estimación del PIB trimestral por comunidad autónoma
+quirks: [tls-chain-incomplete]
 gotchas:
   - El servidor envía el certificado sin la cadena intermedia FNMT; curl y requests fallan la verificación TLS salvo que se añada AC Componentes Informáticos al bundle (ver guía).
   - Los xlsx cuelgan de wp-content/uploads con rutas que cambian en cada actualización; rascar la página para localizar el enlace vigente.

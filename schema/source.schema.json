@@ -126,6 +126,15 @@
     "rate_limit": {
       "type": "string"
     },
+    "quirks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 8,
+      "uniqueItems": true,
+      "description": "Peculiaridades técnicas verificadas, del vocabulario quirks. Cambian cómo se configura el cliente HTTP."
+    },
     "gotchas": {
       "type": "array",
       "items": {

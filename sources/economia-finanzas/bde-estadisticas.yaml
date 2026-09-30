@@ -35,6 +35,7 @@ endpoints:
     desc: ZIP con los CSV de un capítulo del Boletín Estadístico; lista de capítulos en descargas-completas.html
     example: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_DEUAAPP.zip"
 rate_limit: No documentado
+quirks: [gzip-unannounced, latin1, waf-blocks-bots]
 gotchas:
   - La API comprime siempre en gzip; sin Accept-Encoding el cuerpo llega comprimido y sin cabecera Content-Encoding. Con curl usar --compressed; requests lo descomprime solo.
   - idioma es obligatorio y rango debe ser compatible con la frecuencia de la serie; si no, 412 con JSON de campos errNum, errMsgUsr y errMsgDebug. Serie inexistente también da 412.

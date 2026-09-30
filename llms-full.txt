@@ -32,6 +32,7 @@ docs_url: https://www.boe.es/datosabiertos/api/api.php
 - https://www.boe.es/datosabiertos/api/datos-auxiliares/{tabla} :: Tablas de códigos (materias, rangos, departamentos, ambitos, estados-consolidacion, relaciones-anteriores, relaciones-posteriores)
   ej: curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/datos-auxiliares/rangos"
 rate_limit: No documentado
+quirks: accept-header-required
 ! Cabecera Accept obligatoria; sin ella o con */* responde 400. Los errores llegan siempre en XML aunque se pida JSON.
 ! Norma completa, texto, bloque y metadata-eli solo se sirven en XML; con Accept application/json devuelven 400. Metadatos, análisis, índice, listado y tablas auxiliares sí van en JSON.
 ! El listado es la propia base_url sin sufijo; limit por defecto 50, limit=-1 se corta en 10000, paginar con offset (offset=10000 funciona).
@@ -62,6 +63,7 @@ docs_url: https://www.boe.es/datosabiertos/api/api.php
 - https://www.boe.es/boe/dias/{AAAA}/{MM}/{DD}/pdfs/{id}.pdf :: PDF de la disposición; la fecha del path es la de publicación
   ej: curl -sO "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-A-2024-87.pdf"
 rate_limit: No documentado
+quirks: accept-header-required, json-object-or-list, no-weekend-data
 ! Cabecera Accept obligatoria con application/json o application/xml; sin ella, o con */*, responde 400.
 ! Los errores (400, 404, 500) llegan siempre con cuerpo XML aunque se pida JSON; comprobar el código HTTP antes de parsear.
 ! En JSON, item, departamento y epigrafe son objeto si hay un elemento y lista si hay varios; normalizar a lista antes de iterar.
@@ -112,6 +114,7 @@ docs_url: https://www.boe.es/rss/
   ej: curl -s "https://www.boe.es/rss/canal.php?c=ayudas"
 - canal_cpv.php?l=a&c={division_cpv} :: Anuncios de licitación y formalización por división CPV de tres dígitos (720 servicios TI, 450 obras, 850 salud)
   ej: curl -s "https://www.boe.es/rss/canal_cpv.php?l=a&c=720"
+quirks: latin1
 ! Los feeds van en ISO-8859-1, no en UTF-8; convertir antes de parsear o los acentos se corrompen.
 ! Los feeds de sumario solo contienen el día en curso; los canales temáticos guardan unas ocho semanas. Para histórico usar la API de sumarios.
 ! canal.php sin c válido responde 200 con cuerpo vacío, no un error.
@@ -136,6 +139,7 @@ docs_url: https://www.boe.es/datosabiertos/api/api.php
 - https://www.boe.es/borme/dias/{AAAA}/{MM}/{DD}/pdfs/{id}.pdf :: PDF de cualquier documento del sumario
   ej: curl -sO "https://www.boe.es/borme/dias/2024/01/02/pdfs/BORME-A-2024-1-01.pdf"
 rate_limit: No documentado
+quirks: accept-header-required, json-object-or-list, no-weekend-data
 ! Cabecera Accept obligatoria (application/json o application/xml); sin ella 400. Los errores llegan siempre en XML.
 ! En JSON, item y apartado son objeto si hay un elemento y lista si hay varios; normalizar antes de iterar.
 ! El XML de la sección A no tiene campos por acto. Cada empresa es un p class articulo (número - denominación) seguido de un p class parrafo con los actos separados por punto y los Datos registrales al final.
@@ -162,6 +166,7 @@ docs_url: https://www.airef.es/es/acceso-a-datos/
 - https://www.airef.es/es/datalab-previsiones-macroeconomicas-historicas/ :: Cuadro macro de previsiones de la AIReF en xlsx (Cuadro_macro_web)
 - https://www.airef.es/es/datalab/datos-economicos/seguimiento-del-objetivo-de-estabilidad/ :: Seguimiento del objetivo de estabilidad por subsector
 - https://www.airef.es/es/datalab/datos-economicos/estimacion-pib-trimestral-por-ccaa/ :: Estimación del PIB trimestral por comunidad autónoma
+quirks: tls-chain-incomplete
 ! El servidor envía el certificado sin la cadena intermedia FNMT; curl y requests fallan la verificación TLS salvo que se añada AC Componentes Informáticos al bundle (ver guía).
 ! Los xlsx cuelgan de wp-content/uploads con rutas que cambian en cada actualización; rascar la página para localizar el enlace vigente.
 ! Algunas URLs /es/ redirigen con 301 a la versión /ca/ con el mismo contenido; no descartar por el idioma de la URL final.
@@ -189,6 +194,7 @@ docs_url: https://www.bde.es/webbe/es/estadisticas/recursos/api-estadisticas-bde
 - https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_{capitulo}.zip :: ZIP con los CSV de un capítulo del Boletín Estadístico; lista de capítulos en descargas-completas.html
   ej: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_DEUAAPP.zip"
 rate_limit: No documentado
+quirks: gzip-unannounced, latin1, waf-blocks-bots
 ! La API comprime siempre en gzip; sin Accept-Encoding el cuerpo llega comprimido y sin cabecera Content-Encoding. Con curl usar --compressed; requests lo descomprime solo.
 ! idioma es obligatorio y rango debe ser compatible con la frecuencia de la serie; si no, 412 con JSON de campos errNum, errMsgUsr y errMsgDebug. Serie inexistente también da 412.
 ! fechas y valores vienen en orden descendente (el más reciente primero). La fecha lleva la hora de publicación; en mensuales es el día 1 del mes.
@@ -219,6 +225,7 @@ docs_url: https://www.cnmv.es/portal/gpage.aspx?id=RSS
 - https://www.cnmv.es/portal/RSS/RSS.asmx/GetDatos?iID={1|3|4} :: RSS de notas de prensa (1), discursos (3) e información al sector (4)
   ej: curl -s "https://www.cnmv.es/portal/RSS/RSS.asmx/GetDatos?iID=1"
 - https://www.cnmv.es/portal/informacion-privilegiada/RSS.asmx/GetNoticiasCNMV :: RSS de información privilegiada del día, desde el cierre de la sesión anterior
+quirks: viewstate-forms
 ! La raíz /portal/ y /portal/RSS/ devuelven 403; la portada es /portal/home. Las rutas funcionan con y sin extensión .aspx.
 ! Consultas/Busqueda.aspx y HR/ResultadoBusquedaHR.aspx ya no existen (400); las búsquedas de IPP y OIR están en hr/busquedahr.aspx con division 2 y 3.
 ! Formularios ASP.NET con __VIEWSTATE; para automatizar hay que hacer GET del formulario y reenviar los campos ocultos en el POST.
@@ -253,6 +260,7 @@ docs_url: https://www.tesoro.es/deuda-publica/estadisticas
   ej: curl -sO -A "Mozilla/5.0" "https://www.tesoro.es/sites/default/files/estadisticas/historico/historico_subastas.xlsx"
 - https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/{letras-del-tesoro|bonos-del-estado|obligaciones-del-estado} :: Última subasta por instrumento en tabla HTML
 - https://www.tesoro.es/deuda-publica/subastas/calendario :: Calendario anual de subastas en HTML y PDF
+quirks: user-agent-browser, tls-chain-incomplete
 ! Con el User-Agent por defecto de curl responde 403 en todo el sitio; enviar un User-Agent de navegador.
 ! Certificado FNMT sin cadena intermedia; añadir AC Componentes Informáticos al bundle o falla la verificación TLS (ver guía).
 ! Los cuadros mensuales se sobreescriben cada mes en la misma URL (01.xlsx); no hay histórico por fecha, guardar copia si hace falta.

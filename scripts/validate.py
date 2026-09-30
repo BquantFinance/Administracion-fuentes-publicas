@@ -42,6 +42,9 @@ def main() -> int:
         for fmt in s.get("formats", []):
             if fmt not in vocab["formats"]:
                 errors.append(f"{path}: formato '{fmt}' no está en el vocabulario")
+        for q in s.get("quirks", []) or []:
+            if q not in vocab["quirks"]:
+                errors.append(f"{path}: quirk '{q}' no está en el vocabulario")
         summary = s.get("summary", "")
         if summary and summary.strip().endswith(":"):
             errors.append(f"{path}: summary termina en ':'")

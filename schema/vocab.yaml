@@ -71,4 +71,16 @@ status:
   deprecated: Anunciada su retirada o sustituida
   unknown: Sin confirmar
 
+# Peculiaridades técnicas verificadas que cambian cómo se configura el cliente HTTP. Detalle y arreglos en guides/cliente-http.md
+quirks:
+  tls-chain-incomplete: El servidor no envía el certificado intermedio (FNMT); completar el bundle de CA o falla la verificación TLS
+  user-agent-browser: Responde 403 o bloquea sin un User-Agent de navegador
+  accept-header-required: Exige cabecera Accept explícita (application/json o application/xml); sin ella o con */* devuelve 400
+  gzip-unannounced: Devuelve el cuerpo comprimido en gzip sin cabecera Content-Encoding si el cliente no envía Accept-Encoding
+  latin1: Respuestas o ficheros en ISO-8859-1, no UTF-8
+  viewstate-forms: Formularios ASP.NET con __VIEWSTATE; hay que reenviar los campos ocultos en cada POST
+  waf-blocks-bots: Un WAF rechaza clientes automatizados aunque lleven User-Agent de navegador
+  json-object-or-list: Campos JSON que son objeto con un elemento y lista con varios; normalizar antes de iterar
+  no-weekend-data: Sin datos (404) en fines de semana y festivos; no es un error
+
 formats: [json, xml, csv, tsv, xlsx, xls, pdf, html, rdf, ttl, jsonld, xbrl, geojson, shp, gml, gpkg, kml, dxf, dgn, ecw, tiff, geotiff, laz, sdmx, px, zip, txt, atom, rss, parquet, sql, netcdf, grib, jpg, png, marc]

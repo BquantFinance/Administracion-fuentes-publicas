@@ -13,6 +13,15 @@ Fuentes: 67 · Alcance actual: Administración General del Estado · Generado: 2
 - Vocabulario (sectores, acceso, auth, formatos): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml
 - `verified: null` significa que la ficha se redactó a partir de documentación oficial pero aún no se ha probado el endpoint.
 
+## Reglas rápidas antes de programar contra una fuente
+
+- Lee `quirks` y `gotchas` de la ficha: son hechos verificados con llamadas reales, no documentación oficial.
+- Muchos servidores .gob.es sirven certificados FNMT sin la cadena intermedia; curl y requests fallan hasta añadirla al bundle. Arreglo copiable en la guía Cliente HTTP.
+- Envía siempre un User-Agent de navegador; varios sitios (tesoro.es) devuelven 403 al User-Agent de curl.
+- Las APIs del BOE exigen Accept explícito (application/json o application/xml) y devuelven los errores siempre en XML.
+- Espera ISO-8859-1 en feeds del BOE y CSV del Banco de España; convierte antes de parsear.
+- Ninguna fuente verificada documenta límites ni devolvió 429; para descargas masivas, peticiones secuenciales y reintento con espera ante 5xx.
+
 ## Sectores
 
 - [Legislación y boletines oficiales](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/legislacion-boletines/README.md): boe-api-legislacion-consolidada, boe-api-sumario, boe-eli, boe-feeds, borme-api-sumario
@@ -38,6 +47,7 @@ Fuentes: 67 · Alcance actual: Administración General del Estado · Generado: 2
 
 ## Guías transversales
 
+- [Cliente HTTP para fuentes de la Administración española](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/cliente-http.md)
 - [Identificadores clave para cruzar datos públicos españoles](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/identificadores-clave.md)
 
 ## Optional

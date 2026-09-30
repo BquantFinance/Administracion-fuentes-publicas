@@ -23,6 +23,7 @@ endpoints:
     desc: Qué devuelve
     example: curl -s "https://ejemplo.gob.es/api/recurso/123"
 rate_limit: No documentado
+quirks: []   # solo valores de schema/vocab.yaml, verificados con una llamada real
 gotchas:
   - Detalle no obvio que hace perder tiempo.
 related: []

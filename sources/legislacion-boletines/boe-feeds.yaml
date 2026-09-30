@@ -32,6 +32,7 @@ endpoints:
   - path: canal_cpv.php?l=a&c={division_cpv}
     desc: Anuncios de licitación y formalización por división CPV de tres dígitos (720 servicios TI, 450 obras, 850 salud)
     example: curl -s "https://www.boe.es/rss/canal_cpv.php?l=a&c=720"
+quirks: [latin1]
 gotchas:
   - Los feeds van en ISO-8859-1, no en UTF-8; convertir antes de parsear o los acentos se corrompen.
   - Los feeds de sumario solo contienen el día en curso; los canales temáticos guardan unas ocho semanas. Para histórico usar la API de sumarios.

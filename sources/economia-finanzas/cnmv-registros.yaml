@@ -33,6 +33,7 @@ endpoints:
     example: curl -s "https://www.cnmv.es/portal/RSS/RSS.asmx/GetDatos?iID=1"
   - path: https://www.cnmv.es/portal/informacion-privilegiada/RSS.asmx/GetNoticiasCNMV
     desc: RSS de información privilegiada del día, desde el cierre de la sesión anterior
+quirks: [viewstate-forms]
 gotchas:
   - La raíz /portal/ y /portal/RSS/ devuelven 403; la portada es /portal/home. Las rutas funcionan con y sin extensión .aspx.
   - Consultas/Busqueda.aspx y HR/ResultadoBusquedaHR.aspx ya no existen (400); las búsquedas de IPP y OIR están en hr/busquedahr.aspx con division 2 y 3.
