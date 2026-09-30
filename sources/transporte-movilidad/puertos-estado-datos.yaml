@@ -1,29 +1,41 @@
 id: puertos-estado-datos
-name: Puertos del Estado – Estadísticas portuarias y datos oceanográficos
+name: Puertos del Estado – Estadística mensual de tráfico portuario y Portus (oceanografía)
 org: Organismo Público Puertos del Estado
 ministry: Transportes y Movilidad Sostenible
 level: age
 sector: transporte-movilidad
 tags: [puertos, trafico-portuario, contenedores, mercancias, oceanografia, boyas, oleaje, mareas, portus]
 summary: >-
-  Tráfico mensual de mercancías, contenedores, pasajeros y buques por autoridad portuaria; red de boyas y
-  mareógrafos con datos de oleaje, viento y nivel del mar en tiempo real e histórico (Portus); predicciones de oleaje.
-access: [portal, download, api-rest]
+  Cuadros resumen mensuales de tráfico por autoridad portuaria en xlsx (mercancías por naturaleza, líquidos,
+  sólidos, mercancía general, contenedores, pesca), memorias anuales en PDF y Portus, aplicación de datos
+  oceanográficos en tiempo real, históricos y predicciones con API interna.
+access: [download, portal]
 auth: none
-formats: [xlsx, csv, json, pdf]
-update: hourly
-coverage: "Estadísticas desde 1962; oceanografía desde 1990"
+formats: [xlsx, pdf, html, json]
+update: monthly
+coverage: "Cuadros mensuales del año en curso y anteriores según selector; oceanografía en tiempo real"
 license: Reutilización libre con cita de la fuente
-base_url: https://www.puertos.es/
-docs_url: https://www.puertos.es/es-es/estadisticas
+base_url: https://www.puertos.es/datos/estadisticas/mensuales
+docs_url: https://bancodatos.puertos.es/BD/peticiones/Manual_Usuario_Descargaportus.pdf
 endpoints:
-  - path: https://www.puertos.es/es-es/estadisticas/Paginas/estadistica_mensual.aspx
-    desc: Estadística mensual de tráfico por puerto
+  - path: https://www.puertos.es/datos/estadisticas/mensuales
+    desc: Selector por año con enlaces "Descargar XLS" y PDF de cada mes (title del enlace con el nombre CuadrosResumen_{AAAA}_{MM}.xlsx)
+  - path: https://www.puertos.es/file-download/download/private/{id}
+    desc: Descarga directa del xlsx mensual (1,2 MB; 12 hojas, id opaco por fichero, por ejemplo 6200 para agosto de 2026)
+    example: curl -sSL -o CuadrosResumen_2026_08.xlsx "https://www.puertos.es/file-download/download/private/6200"
+  - path: https://www.puertos.es/datos/estadisticas/anuales
+    desc: Memorias anuales por autoridad portuaria en PDF (system/files/{AAAA-MM}/Memoria Anual {AAAA} AP {puerto}.pdf)
   - path: https://portus.puertos.es/
-    desc: Portus, datos oceanográficos en tiempo real e históricos por estación
+    desc: Portus, visor Vue con estaciones (boyas, mareógrafos, radar HF, puntos de modelo) sobre la API interna https://portus.puertos.es/portussvr/api
+quirks: [js-rendered, url-drift]
+ids: []
 gotchas:
-  - Portus es una aplicación web con API interna JSON no documentada; los históricos se piden por formulario y llegan por correo.
-  - Las estadísticas mensuales están en Excel por puerto y año con estructura fija desde 2010.
+  - Las rutas SharePoint antiguas (es-es/estadisticas/Paginas/*.aspx) redirigen a /datos/estadisticas/...; /es-es/estadisticas responde 403 (estadisticas-bk).
+  - Los xlsx no tienen URL por fecha; el id numérico de file-download hay que leerlo del HTML de la página del año (atributo title con el nombre del fichero).
+  - El cuadro mensual tiene hojas Portada, Cálculo y Resumen general antes de las tablas, con cabeceras en varias filas; localizar la fila de cabecera por hoja.
+  - No hay serie histórica en xlsx en la web nueva; hay que descargar los cuadros mes a mes y apilarlos.
+  - La API de Portus (portussvr/api) no está documentada y sus rutas se construyen en el código; las probadas a mano responden 404. Los históricos oceanográficos se piden por formulario según el manual de descarga.
+tips: []
 related: [mapa-pesca, aemet-opendata]
 status: active
-verified: null
+verified: "2026-09-30"

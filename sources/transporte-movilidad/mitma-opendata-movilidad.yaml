@@ -1,31 +1,40 @@
 id: mitma-opendata-movilidad
 name: Ministerio de Transportes – Estudio de movilidad con big data (Open Data)
-org: Secretaría General de Transportes y Movilidad
+org: Secretaría General de Transportes y Movilidad Sostenible
 ministry: Transportes y Movilidad Sostenible
 level: age
 sector: transporte-movilidad
 tags: [movilidad, matrices-origen-destino, telefonia-movil, viajes, distritos, big-data]
 summary: >-
-  Matrices diarias de viajes origen-destino entre distritos, municipios y grandes áreas, por hora, distancia y
-  motivo, estimadas a partir de telefonía móvil desde 2020. Ficheros CSV comprimidos diarios y zonificaciones.
+  Matrices diarias de viajes origen-destino entre distritos, municipios y grandes áreas urbanas, por hora,
+  distancia y motivo, estimadas con telefonía móvil desde 2020, en CSV comprimidos diarios más zonificaciones.
+  El servidor de datos respondió 403 desde este entorno; las páginas del ministerio sí.
 access: [download]
 auth: none
 formats: [csv, zip, shp, geojson]
 update: daily
-coverage: "2020-02 -"
+coverage: "2020-02- (estudio básico diario desde 2022 con la metodología vigente)"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/opendata-movilidad
-docs_url: https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/opendata-movilidad
+docs_url: https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/metodologia-del-estudio-de-movilidad-con-bigdata
 endpoints:
   - path: https://movilidad-opendata.mitma.es/
-    desc: Índice de ficheros diarios por versión de estudio, nivel de zonificación y tipo
-  - path: https://movilidad-opendata.mitma.es/zonificacion/
-    desc: Capas de zonificación (distritos, municipios, GAU) y relación con códigos INE
+    desc: Índice de ficheros diarios por estudio, zonificación y tipo (no verificado, responde 403 desde este entorno)
+  - path: https://movilidad-opendata.mitma.es/estudios_basicos/por-distritos/viajes/ficheros-diarios/{AAAA-MM}/{AAAAMMDD}_Viajes_distritos.csv.gz
+    desc: Ruta habitual de los ficheros diarios de viajes por distrito (no verificada, 403)
+  - path: https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/estudio-basico-diario
+    desc: Descripción del estudio básico diario y enlaces a los ficheros especiales (DANA de Valencia en cdnfomento.blob.core.windows.net/hermes/bigdata/)
+  - path: https://cbim.mitma.es/
+    desc: Visor del estudio (Centro de Big data e Inteligencia de Movilidad)
+quirks: [waf-blocks-bots]
+ids: [ine-municipio]
 gotchas:
+  - movilidad-opendata.mitma.es devolvió 403 con cuerpo Internal Server Error (HTML de 3,3 KB) para la raíz, /zonificacion/ y un fichero concreto, con y sin User-Agent de navegador (30/09/2026); posible bloqueo por red.
   - Hay dos estudios con metodologías distintas, 2020-2021 (versión 1) y 2022 en adelante (versión 2); no mezclar series.
-  - Cada día son cientos de MB comprimidos en gzip; hay ficheros por distrito, municipio y gran área urbana.
-  - Los ids de zona son códigos INE (municipio) o INE + distrito censal; algunos municipios pequeños están agrupados.
-  - Existe también un paquete R y Python (spanishoddata) de terceros que facilita la descarga.
+  - Cada día son cientos de MB comprimidos en gzip, con ficheros por distrito, municipio y gran área urbana; los ids de zona son códigos INE de municipio o INE más distrito censal y algunos municipios pequeños van agrupados.
+  - El contenedor público de Azure del ministerio (cdnfomento.blob.core.windows.net/hermes, listable con restype=container&comp=list) solo tiene los ficheros de la DANA de Valencia, no las matrices diarias.
+  - Existe un paquete R y Python de terceros (spanishoddata) que descarga y normaliza estos ficheros; útil como referencia de rutas y esquemas.
+tips: []
 related: [ine-codigos-territoriales, dgt-estadisticas]
 status: active
 verified: null

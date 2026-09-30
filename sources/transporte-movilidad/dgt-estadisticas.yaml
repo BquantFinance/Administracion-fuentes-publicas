@@ -1,30 +1,50 @@
 id: dgt-estadisticas
-name: DGT – Estadísticas de parque, matriculaciones, conductores y siniestralidad
+name: DGT en cifras – Parque, matriculaciones, bajas, conductores, siniestralidad y microdatos
 org: Dirección General de Tráfico (DGT)
 ministry: Interior
 level: age
 sector: transporte-movilidad
-tags: [dgt, matriculaciones, parque-vehiculos, conductores, accidentes, siniestralidad, microdatos, transferencias]
+tags: [dgt, matriculaciones, parque-vehiculos, bajas, conductores, accidentes, siniestralidad, microdatos, matraba]
 summary: >-
-  Parque de vehículos, matriculaciones y transferencias mensuales (con microdatos diarios por vehículo anonimizado),
-  censo de conductores, accidentes con víctimas (microdatos anuales), sanciones. Portal estadístico y descargas.
-access: [portal, download]
+  Portal DGT en cifras con 226 productos por tema (tablas y series en xlsx, anuarios en PDF) y microdatos
+  descargables sin registro: matriculaciones y bajas diarias y mensuales (MATRABA, ancho fijo, desde 2014),
+  parque de vehículos anual y mensual por vehículo, censo de conductores y sanciones.
+access: [download, portal]
 auth: none
-formats: [xlsx, csv, txt, pdf]
-update: monthly
-coverage: "1990- agregados; microdatos matriculaciones desde 2014"
+formats: [xlsx, txt, zip, pdf, html]
+update: daily
+coverage: "Series y tablas hasta 2025; microdatos de matriculaciones desde 2014-12; parque desde 2015"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.dgt.es/menusecundario/dgt-en-cifras/
-docs_url: https://www.dgt.es/menusecundario/dgt-en-cifras/
+docs_url: https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/matraba/MATRICULACIONES_MATRABA.pdf
 endpoints:
-  - path: https://www.dgt.es/menusecundario/dgt-en-cifras/dgt-en-cifras-resultados/
-    desc: Tablas por tema (vehículos, conductores, accidentes) con descarga
-  - path: https://sedeapl.dgt.gob.es/WEB_IEST_CONSULTA/
-    desc: Portal estadístico IEST con consultas y microdatos de matriculaciones, bajas y transferencias
+  - path: https://www.dgt.es/menusecundario/dgt-en-cifras/dgt-en-cifras-resultados/?categorias=/Tema/{Vehiculos|Conductores|Siniestros-de-trafico|Informacion-municipal|Denuncias-e-ingresos|Motoristas}/&page={n}
+    desc: Listado paginado de productos por tema; cada uno tiene ficha en /dgt-en-cifras-detalle/{slug}/ con los ficheros
+  - path: https://www.dgt.es/menusecundario/dgt-en-cifras/dgt-en-cifras-resultados/dgt-en-cifras-detalle/{slug}/
+    desc: Ficha con enlaces xlsx bajo /export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/ (series y tablas de matriculaciones, parque, bajas, conductores)
+    example: curl -sSL -o parque.xlsx "https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/publicaciones/Parque-vehiculos-Tablas-Estadisticas/Parque-de-vehiculos-Tablas-estadisticas-2025.xlsx"
+  - path: https://www.dgt.es/menusecundario/dgt-en-cifras/matraba-listados/{matriculaciones|bajas}-automoviles-{diario|mensual}.html
+    desc: Listados de ficheros de microdatos con los enlaces ZIP (24 diarios del mes en curso; 141 mensuales desde 2014-12)
+  - path: https://www.dgt.es/microdatos/salida/{AAAA}/{M}/vehiculos/{matriculaciones|bajas}/export_{mat|bajas}_{AAAAMMDD}.zip
+    desc: Microdatos diarios (un txt de ancho fijo por día, 10 MB para 29/09/2026); mensuales en export_mensual_{mat|bajas}_{AAAAMM}.zip
+    example: curl -sSL -o mat.zip "https://www.dgt.es/microdatos/salida/2026/9/vehiculos/matriculaciones/export_mat_20260929.zip"
+  - path: https://www.dgt.es/microdatos/Parque/{AAAA}/parque_consolidado_{AAAA}.zip
+    desc: Parque anual por vehículo (2015-2025; el de 2025 pesa 1,6 GB; variante _PROVINCIA.zip); mensual en Parque/parque_vehiculos_{AAAAMM}.zip desde 2025-03
+  - path: https://www.dgt.es/menusecundario/dgt-en-cifras/dgt-en-cifras-resultados/dgt-en-cifras-detalle/Datos-municipales-informacion-general-2025/
+    desc: Datos municipales (parque, conductores, censo) en un xlsx por año con ficha de contenidos en PDF
+quirks: [latin1, url-drift, tls-chain-incomplete]
+ids: [ine-municipio, ine-provincia]
 gotchas:
-  - Los microdatos de matriculaciones son ficheros de texto de ancho fijo con diseño de registro en PDF aparte; incluyen marca, modelo, combustible, código INE de municipio.
-  - Los microdatos de accidentes se distribuyen anonimizados con retardo de más de un año.
-  - Los códigos de municipio de la DGT son INE sin dígito de control.
+  - Los microdatos son txt de ancho fijo en Latin-1 con una línea de cabecera de texto libre (letras de la última matrícula asignada); el diseño de registro está en el PDF MATRICULACIONES_MATRABA y no dentro del ZIP.
+  - El bastidor viene enmascarado (UA8D72FZ5T***********) salvo acreditación de interés legítimo; el registro incluye marca, modelo, fecha, código INE de municipio (39020 Castro Urdiales), potencia, emisiones y distintivo.
+  - El portal IEST (sedeapl.dgt.gob.es/WEB_IEST_CONSULTA) redirige a dgt-en-cifras; el listado de transferencias mensuales (transferencias-automoviles-mensual.html) da 404 aunque exista la ficha.
+  - No hay microdatos de accidentes en el portal (solo anuarios y estudios de siniestralidad en PDF y tablas xlsx); los microdatos disponibles son de vehículos, conductores, exámenes y sanciones.
+  - Las fichas de resultados no filtran por texto (buscar= se ignora); para localizar un producto recorrer las categorías con page=n hasta que no aparezcan slugs nuevos.
+  - Los cuadros de mando (paneldatos.dgt.es, MicroStrategy) sirven el certificado sin la cadena FNMT; añadir los intermedios FNMT para verificar TLS.
+  - Los ficheros anuales del parque son muy grandes (1,6 GB comprimidos en 2025); descargar con reanudación y procesar por trozos.
+tips:
+  - "pandas.read_fwf con los anchos del PDF y encoding='latin-1', saltando la primera línea; el municipio es INE de cinco dígitos sin dígito de control, listo para cruzar con ine-codigos-territoriales."
+  - Para series mensuales de matriculaciones por marca o combustible, los ZIP mensuales (export_mensual_mat) evitan descargar 30 diarios.
 related: [dgt-datex-trafico, ine-codigos-territoriales]
 status: active
-verified: null
+verified: "2026-09-30"

@@ -1,33 +1,52 @@
 id: mapa-estadisticas-agrarias
-name: MAPA – Estadísticas agrarias, precios y encuestas
+name: MAPA – Anuario de estadística, precios, avances de cultivos, ganadería y consumo
 org: Subdirección General de Análisis, Coordinación y Estadística
 ministry: Agricultura, Pesca y Alimentación
 level: age
 sector: agricultura-pesca-alimentacion
-tags: [agricultura, ganaderia, precios-agrarios, superficies, producciones, anuario, esyrce, censo-agrario]
+tags: [agricultura, ganaderia, precios-agrarios, superficies, producciones, anuario, consumo-alimentario, encuestas-ganaderas]
 summary: >-
-  Superficies y producciones por cultivo y provincia, precios percibidos y pagados, precios semanales de mercados
-  (origen y destino), encuesta ESYRCE, efectivos ganaderos, sacrificio, leche, anuario de estadística. Excel y consultas.
-access: [portal, download]
+  Anuario de Estadística con todas las tablas en xlsx por capítulo (1999-2024), índices y precios percibidos y
+  pagados, precios medios nacionales semanales, avances mensuales de superficies y producciones, encuestas
+  ganaderas por especie y series anuales del panel de consumo alimentario en hogares.
+access: [download, portal]
 auth: none
-formats: [xlsx, pdf, csv, html]
+formats: [xlsx, xls, pdf, html]
 update: monthly
-coverage: "1990-"
+coverage: "Anuario 1999-2024; consumo 1999-; precios percibidos 2005-"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.mapa.gob.es/es/estadistica/temas/
-docs_url: https://www.mapa.gob.es/es/estadistica/temas/default.aspx
+docs_url: https://www.mapa.gob.es/es/estadistica/temas/publicaciones/anuario-de-estadistica/
 endpoints:
-  - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/agricultura/superficies-producciones-anuales-cultivos/
-    desc: Superficies y producciones anuales por cultivo
-  - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/economia/precios-percibidos-pagados-salarios/
-    desc: Precios percibidos y pagados por los agricultores
-  - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-alimentacion/consumo-alimentario/
-    desc: Panel de consumo alimentario en hogares por producto y CCAA
-  - path: https://www.mapa.gob.es/es/estadistica/temas/publicaciones/anuario-de-estadistica/
-    desc: Anuario de Estadística con todas las tablas
+  - path: https://www.mapa.gob.es/es/estadistica/temas/publicaciones/anuario-de-estadistica/{AAAA}?parte={p}&capitulo={c}
+    desc: Índice de un capítulo del anuario con enlaces a xlsx por tabla y por capítulo completo (verificado 2023)
+    example: curl -s "https://www.mapa.gob.es/es/estadistica/temas/publicaciones/anuario-de-estadistica/2023?parte=1&capitulo=1"
+  - path: https://www.mapa.gob.es/estadistica/pags/anuario/{AAAA}/FORMATO EXCEL/AE{AA}-C{CC}/AE{AA}-C{CC}.xlsx
+    desc: Capítulo completo del anuario en xlsx (tablas sueltas en {n}.{m}.xlsx; PDF en FORMATO PDF y anuario entero en global {AAAA}/ANUARIO_{AAAA}.pdf)
+    example: curl -sSL -o AE23-C01.xlsx "https://www.mapa.gob.es/estadistica/pags/anuario/2023/FORMATO%20EXCEL/AE23-C01/AE23-C01.xlsx"
+  - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/economia/precios-percibidos-pagados/precios-percibidos-por-los-agricultores-y-ganaderos
+    desc: Índices y precios percibidos mensuales en xlsx por periodo (2005-2014, 2015-2023, 2023-2025) y subpágina serie_historica
+  - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/economia/precios-medios-nacionales
+    desc: Precios medios nacionales semanales, un xlsx por año (precios_medios_nacionales_{AAAA}.xlsx, 2019-2024)
+  - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/agricultura/avances-superficies-producciones-agricolas
+    desc: Avances mensuales de superficies y producciones (cuaderno_{mes}{AAAA}.xls desde 2018; años anteriores en subpáginas 2007-2011 y 2012-2017)
+  - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/ganaderia/encuestas-ganaderas
+    desc: Encuestas ganaderas por año y especie ({AAAA}_bovino.xls, ovino, caprino, porcino), 118 ficheros
+  - path: https://www.mapa.gob.es/es/alimentacion/temas/consumo-tendencias/panel-de-consumo-alimentario/series-anuales
+    desc: Panel de consumo alimentario en hogares, un xlsx por año desde 1999 ({AAAA}datosanualesdelpaneldeconsumoalimentarioenhogares.xlsx)
+  - path: https://www.mapa.gob.es/es/estadistica/temas/estadistica-digital
+    desc: Cuadros de mando Power BI (cultivos, ESYRCE, ganadería, pesca), solo interactivos
+quirks: [url-drift, static-html]
+ids: []
 gotchas:
-  - Los ficheros del anuario están por capítulo y año con nombres no sistemáticos; no automatizable sin scraping del índice.
-  - Los precios semanales de mercados se publican también en el Observatorio de Precios con series descargables.
-related: [fega-beneficiarios-pac, mapa-sigpac]
+  - El portal es Magnolia con rutas nuevas; las antiguas .aspx (default.aspx, precios-percibidos-pagados-salarios) dan 404. Las páginas de tema no llevan ficheros, hay que bajar a la subpágina concreta.
+  - Los ficheros cuelgan de /dam/mapa/contenido/ con carpetas con puntos y guiones (2.agricultura/3.-superficies-y-producciones-anuales) y nombres con sufijos (-0, v2, s52); leer los href en vez de construir URL.
+  - Hasta 2019 el anuario usa dam/.../anuario-de-estadistica/{AAAA}/ae_{AAAA}_{cc}_{ss}.xls; desde 2020, estadistica/pags/anuario/{AAAA}/FORMATO EXCEL/AE{AA}-C{CC}/ con espacios en la ruta (codificar %20).
+  - Las tablas del anuario llevan varias filas de cabecera y notas al pie; localizar la fila de cabecera antes de leer con pandas.
+  - Los últimos datos del panel de consumo (mensuales) solo se muestran en páginas y Power BI; en xlsx están las series anuales.
+  - CCAA y provincias aparecen por nombre, sin código INE; añadirlo con la ficha ine-codigos-territoriales.
+tips:
+  - Para una serie larga de un cultivo, el capítulo de superficies y producciones del anuario (un xlsx por año) es más estable que los avances mensuales, que son provisionales.
+related: [fega-beneficiarios-pac, mapa-sigpac, mapa-pesca, ine-codigos-territoriales]
 status: active
-verified: null
+verified: "2026-09-30"

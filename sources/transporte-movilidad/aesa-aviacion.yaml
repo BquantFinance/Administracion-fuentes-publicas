@@ -1,29 +1,37 @@
 id: aesa-aviacion
-name: AESA y Aena – Registro de aeronaves, operadores y tráfico aéreo
-org: Agencia Estatal de Seguridad Aérea (AESA) / Aena SME
+name: AESA y Aena – Registro de aeronaves, operadores UAS y estadísticas de tráfico aéreo
+org: Agencia Estatal de Seguridad Aérea (AESA) y Aena SME
 ministry: Transportes y Movilidad Sostenible
 level: age
 sector: transporte-movilidad
 tags: [aviacion, aeronaves, matriculas, operadores, drones, aeropuertos, pasajeros, trafico-aereo]
 summary: >-
-  Registro de Matrícula de Aeronaves, operadores y escuelas certificadas, registro de operadores de drones (UAS),
-  estadísticas de tráfico de pasajeros, operaciones y carga por aeropuerto de Aena.
-access: [portal, download]
-auth: none
-formats: [xlsx, pdf, html, csv]
+  Registro de Matrícula de Aeronaves Civiles y registro de operadores de UAS (trámites en sede con certificado,
+  sin listado abierto) y estadísticas de tráfico de Aena (informes por aeropuerto en una web con sesión y
+  enlaces generados por JavaScript). Sin ficheros descargables verificados.
+access: [portal]
+auth: registration
+formats: [html, pdf]
 update: monthly
-coverage: "Tráfico Aena desde 2004"
-license: Reutilización libre con cita de la fuente
-base_url: https://www.seguridadaerea.gob.es/
-docs_url: https://www.seguridadaerea.gob.es/es/ambitos/aeronaves-y-aeronavegabilidad/matriculacion-de-aeronaves
+coverage: "Informes de Aena por año desde 2004 según el selector de la web"
+license: Reutilización libre con cita de la fuente (AESA); condiciones propias de Aena
+base_url: https://www.seguridadaerea.gob.es/es/ambitos/aeronaves/registro-de-matriculas-de-aeronaves-civiles
+docs_url: https://www.aena.es/es/estadisticas/inicio.html
 endpoints:
-  - path: https://www.seguridadaerea.gob.es/es/ambitos/aeronaves-y-aeronavegabilidad/matriculacion-de-aeronaves
-    desc: Registro de Matrícula de Aeronaves (consulta y listado)
-  - path: https://www.aena.es/es/estadisticas/inicio.html
-    desc: Estadísticas de tráfico aéreo de Aena por aeropuerto y mes
+  - path: https://www.seguridadaerea.gob.es/es/ambitos/aeronaves/registro-de-matriculas-de-aeronaves-civiles/registro-de-matriculas
+    desc: Información del registro con cuadros estadísticos anuales en PDF (registro general, AFI, ULM) y formularios; sin listado de aeronaves
+  - path: https://www.seguridadaerea.gob.es/es/ambitos/drones/registro-de-operador-de-drones-uas
+    desc: Registro de operadores de UAS; el alta y la consulta se hacen en sede.seguridadaerea.gob.es con identificación electrónica
+  - path: https://www.aena.es/es/estadisticas/informes-mensuales.html?anio={AAAA}
+    desc: Informes mensuales de tráfico por año (informes-anuales.html e informes-detallados.html análogos); consultas-personalizadas.html requiere usuario
+quirks: [js-rendered, session-required]
+ids: []
 gotchas:
-  - Aena es una sociedad mercantil estatal (51 % público) que publica datos por cuenta propia; se incluye por su relevancia.
-  - El listado de aeronaves se publica en Excel con fecha; no hay API ni histórico.
-related: [dgt-estadisticas]
-status: active
-verified: null
+  - La ruta matriculacion-de-aeronaves de la ficha anterior responde 200 con cuerpo vacío; la información está en registro-de-matriculas-de-aeronaves-civiles y no incluye ningún Excel con el censo de aeronaves.
+  - En Aena los enlaces de descarga se generan con JavaScript y la aplicación gestiona un token de sesión (cookie JWT); con curl no aparece ningún href a PDF o Excel, así que no se pudo verificar ningún fichero.
+  - Aena es una sociedad mercantil estatal (51 por ciento público) que publica datos por cuenta propia; sus condiciones de reutilización no son las de la AGE.
+  - Los datos estructurados de tráfico aéreo en abierto están fuera de estas webs (Eurostat y las estadísticas del INE de transporte aéreo); para el registro de aeronaves no hay descarga pública.
+tips: []
+related: [dgt-estadisticas, ine-api-tempus]
+status: degraded
+verified: "2026-09-30"

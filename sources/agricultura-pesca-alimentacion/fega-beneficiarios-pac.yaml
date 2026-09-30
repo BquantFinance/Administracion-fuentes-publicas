@@ -6,25 +6,31 @@ level: age
 sector: agricultura-pesca-alimentacion
 tags: [pac, feaga, feader, ayudas-agrarias, beneficiarios, pagos-directos, subvenciones]
 summary: >-
-  Consulta pública y descarga de beneficiarios de la PAC (FEAGA y FEADER) por ejercicio con importe y medida,
-  informes de pagos por CCAA y línea de ayuda, datos abiertos del organismo.
+  Consulta pública de beneficiarios de la PAC (FEAGA y FEADER) por ejercicio con importe y medida, informes de
+  pagos y datos abiertos del organismo. No verificable en esta sesión porque el servidor cierra la conexión;
+  las mismas ayudas están en la BDNS y el SIGPAC del FEGA vive en sigpac-hubcloud.es.
 access: [portal, download]
 auth: none
 formats: [csv, xlsx, pdf]
 update: annual
-coverage: "Ejercicios financieros desde 2014 (publicación 2 años)"
+coverage: "Ejercicios financieros recientes (publicación limitada a dos años por la normativa europea)"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.fega.gob.es/
 docs_url: https://www.fega.gob.es/es/datos-abiertos
 endpoints:
   - path: https://www.fega.gob.es/es/datos-abiertos/consulta-de-beneficiarios-pac
-    desc: Consulta y descarga de beneficiarios por ejercicio
+    desc: Consulta y descarga de beneficiarios por ejercicio (no verificada, ver gotchas)
   - path: https://www.fega.gob.es/es/datos-abiertos
-    desc: Conjuntos de datos abiertos del FEGA
+    desc: Conjuntos de datos abiertos del FEGA (no verificada, ver gotchas)
+quirks: [waf-blocks-bots]
+ids: [nif]
 gotchas:
+  - www.fega.gob.es, fega.gob.es y www.fega.es cierran la conexión (connection reset) tras el TLS con cualquier User-Agent, HTTP/1.1 o HTTP/2 desde este entorno (30/09/2026); ninguna ruta pudo comprobarse.
+  - La web es una aplicación Next.js; si desde otra red responde, comprobar primero que las rutas de esta ficha siguen existiendo.
   - Por normativa europea los beneficiarios solo se publican durante dos años; los ejercicios antiguos desaparecen del portal.
-  - Personas físicas con ayudas por debajo del umbral (1.250 euros) aparecen anonimizadas.
-  - Las mismas ayudas están en la BDNS con estructura homogénea (bdns-api).
-related: [bdns-api, mapa-estadisticas-agrarias]
-status: active
+  - Las concesiones de la PAC aparecen también en la BDNS (ficha bdns-api) con estructura homogénea y sin límite de dos años.
+  - Los servicios SIGPAC del FEGA (WMS, OGC API, consultas REST y GeoPackages) están en sigpac-hubcloud.es y sí responden (ficha mapa-sigpac).
+tips: []
+related: [bdns-api, mapa-sigpac, mapa-estadisticas-agrarias]
+status: unknown
 verified: null
