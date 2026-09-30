@@ -28,7 +28,7 @@ endpoints:
     desc: Metadatos y clasificaciones del portal
   - path: https://datacomex_v6.comercio.es/
     desc: Versión anterior del portal, todavía en línea
-quirks: [session-required]
+quirks: [session-required, js-rendered]
 ids: [ine-provincia]
 gotchas:
   - Sin token, ObtenerDatos responde 401 con JSON (Se ha denegado la autorización). El registro de usuario es gratuito y se hace en el portal (/User).

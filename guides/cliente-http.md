@@ -61,12 +61,29 @@ Feeds RSS del BOE y CSV del Banco de España van en ISO-8859-1. `curl ... | icon
 
 Portal de la CNMV (ASP.NET Web Forms). Para automatizar una búsqueda: GET de la página del formulario, extraer
 los campos ocultos `__VIEWSTATE`, `__VIEWSTATEGENERATOR` y `__EVENTVALIDATION`, y reenviarlos en el POST junto
-con los campos del formulario (nombres `ctl00$...`). Mantener la sesión de cookies entre GET y POST.
+con los campos del formulario (nombres `ctl00$...`). Mantener la sesión de cookies entre GET y POST. Mismo
+patrón en DataInvex, BADASE, el Portal Estadístico del SNS y los informes de PRTR-España; en todos ellos la
+ficha indica si existe un fichero o API que evite el formulario.
 
 ## waf-blocks-bots
 
 El buscador BIEST del Banco de España (app.bde.es/bie_www) rechaza clientes automatizados con "Request
 Rejected" aunque lleven User-Agent de navegador. No hay arreglo; usar la API y los catálogos CSV de la ficha.
+
+Otras formas del mismo bloqueo, verificadas el 2026-09-30 y sin arreglo lícito desde un script:
+
+- Anubis (Digital.CSIC): la web, las páginas handle y la API REST devuelven 200 con una página "Making sure
+  you're not a bot" que exige una prueba de trabajo en JavaScript; el endpoint OAI-PMH queda fuera del filtro.
+- F5 con "The requested URL was rejected" y un support ID (OEPM, consultas2.oepm.es): 403 a cualquier cliente,
+  con cookies o sin ellas.
+- Comprobación de navegador "Voight-Kampff Browser Test" (buscador.recolecta.fecyt.es) y "Checking you are
+  not a bot" con código 418 (registros.gbif.es).
+- Página de bloqueo de 1,3 MB con 403 (datos.bne.es y las páginas de datos enlazados de bne.es).
+- Conexión cerrada tras el TLS, sin respuesta HTTP (www.fega.gob.es) y 403 "Internal Server Error" a todo
+  (movilidad-opendata.mitma.es); probablemente bloqueos por origen de red.
+
+En todos los casos la ficha indica la vía alternativa (OAI-PMH, otro organismo, API global) o marca la fuente
+como no verificada.
 
 ## waf-intermittent-403
 
@@ -108,14 +125,29 @@ rn2000.zip (133 MB, 0,05 s de cálculo).
 ## js-rendered
 
 Contenido generado en el navegador. Antes de lanzar un navegador sin cabeza, mirar en las herramientas de red
-qué llamadas XHR hace la página: casi siempre devuelven JSON y se pueden replicar con requests. Ninguna fuente
-verificada hasta ahora lo exige.
+qué llamadas XHR hace la página: casi siempre devuelven JSON y se pueden replicar con requests. Casos
+verificados: los buscadores del REEC (AEMPS), Portus (Puertos del Estado), las estadísticas de Aena, el
+catálogo sísmico del IGN y SERPAVI no exponen URL de datos reutilizable, así que la ficha lo dice y remite a
+la alternativa.
+
+Caso aparte y muy rentable: los portales PC-Axis clonados del INE (INEbase, EDUCAbase de Educación y el
+portal de criminalidad de Interior) se navegan con JavaScript pero sirven cada tabla en tres formatos con una
+URL fija que se deduce del enlace `Tabla.htm?path=...&file=X.px`:
+
+```
+https://{host}/{app}/files/_px/es/csv_bdsc{path}{file}?nocab=1   CSV con ; e ISO-8859-15
+https://{host}/{app}/files/_px/es/px{path}{file}                  PC-Axis
+https://{host}/{app}/files/_px/es/xlsx{path}{file}?nocab=1        Excel
+```
+
+`{app}` es `EducaJaxiPx` en estadisticas.educacion.gob.es y `sec/jaxiPx` en estadisticasdecriminalidad.ses.mir.es.
 
 ## static-html
 
 Lo contrario: el HTML servido ya contiene los enlaces a los ficheros. Un GET más una expresión regular sobre
-href, o lxml, bastan. Es el caso de AIReF, Tesoro, AEAT, IGAE, Hacienda local, INE, MITES, SEPE y Seguridad
-Social. Rascar la página en cada ejecución cuando además tenga url-drift.
+href, o lxml, bastan. Es el caso de AIReF, Tesoro, AEAT, IGAE, Hacienda local, INE, MITES, SEPE, Seguridad
+Social, MAPA, MITECO (calidad del aire, boletín hidrológico), ISCIII, DGT (listados de microdatos) e Interior.
+Rascar la página en cada ejecución cuando además tenga url-drift.
 
 ## errors-html-or-xml
 
@@ -124,10 +156,12 @@ formato pedido. Comprobar el código HTTP antes de parsear y no confiar en Conte
 
 ## url-drift y overwritten-in-place
 
-Dos estrategias de caché opuestas. Con url-drift (AIReF, ICO, CNMV, Hacienda local, Seguridad Social) la URL del
-fichero cambia en cada publicación: no fijar enlaces, localizarlos en la página cada vez. Con overwritten-in-place
-(Tesoro, AEAT, SEPE) la URL es fija pero el contenido se sustituye: guardar copia fechada si se necesita el
-histórico de publicaciones o de revisiones.
+Dos estrategias de caché opuestas. Con url-drift (AIReF, ICO, CNMV, Hacienda local, Seguridad Social, MAPA,
+MITECO, ISCIII, SIIU, Puertos del Estado) la URL del fichero cambia en cada publicación, a veces con una marca de
+tiempo o un uuid en el nombre: no fijar enlaces, localizarlos en la página cada vez. Con overwritten-in-place
+(Tesoro, AEAT, SEPE, CORES) la URL es fija pero el contenido se sustituye: guardar copia fechada si se necesita el
+histórico de publicaciones o de revisiones. url-drift también marca las fichas cuyas rutas antiguas (.aspx,
+dominios anteriores) han muerto: energia.gob.es, prtr-es.es, mincotur, fomento, universidades.gob.es.
 
 ## json-object-or-list
 

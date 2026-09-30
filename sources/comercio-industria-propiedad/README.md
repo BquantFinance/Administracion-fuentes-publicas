@@ -4,7 +4,7 @@ Sector `comercio-industria-propiedad` · 4 fuentes · índice generado por `scri
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
-| [datacomex](datacomex.yaml) | DataComex – Estadísticas de comercio exterior de España (portal y API con token) | api-rest, portal, download | registration | json, csv, xlsx, html | monthly | session-required | 2026-09-30 |
+| [datacomex](datacomex.yaml) | DataComex – Estadísticas de comercio exterior de España (portal y API con token) | api-rest, portal, download | registration | json, csv, xlsx, html | monthly | session-required, js-rendered | 2026-09-30 |
 | [datainvex](datainvex.yaml) | DataInvex – Inversiones exteriores directas | portal | none | html, xlsx | quarterly | viewstate-forms, js-rendered | 2026-09-30 |
 | [mincotur-industria-turismo](mincotur-industria-turismo.yaml) | Ministerio de Industria y Turismo – Estadísticas industriales, BADASE y DATAESTUR (API) | api-rest, portal, download | api-key | json, xlsx, csv, html | monthly | viewstate-forms, url-drift | 2026-09-30 |
 | [oepm-invenes](oepm-invenes.yaml) | OEPM – Patentes, marcas y diseños (INVENES, Localizador, BOPI) | portal, download | none | html, pdf, xml | daily | waf-blocks-bots, waf-intermittent-403, url-drift | — |

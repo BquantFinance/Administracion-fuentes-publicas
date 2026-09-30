@@ -8,7 +8,7 @@ Sector `ciencia-investigacion` · 6 fuentes · índice generado por `scripts/bui
 | [csic-digital](csic-digital.yaml) | Digital.CSIC – Repositorio institucional del CSIC (OAI-PMH) | oai-pmh, portal | none | xml, pdf | daily | waf-blocks-bots, js-rendered | 2026-09-30 |
 | [fecyt-recolecta](fecyt-recolecta.yaml) | FECYT – RECOLECTA (agregador de repositorios) e ICONO | portal | none | html | irregular | waf-blocks-bots, url-drift | 2026-09-30 |
 | [gbif-es](gbif-es.yaml) | GBIF España – Ocurrencias de biodiversidad (API global filtrada por España) | api-rest, download, portal | none | json, csv, zip | daily | waf-blocks-bots | 2026-09-30 |
-| [igme-geologia](igme-geologia.yaml) | IGME-CSIC – Cartografía geológica, bases de datos geocientíficas y servicios ArcGIS | api-rest, ogc, download, portal | none | json, xml, shp, pdf, jpg, zip | irregular | js-rendered | 2026-09-30 |
+| [igme-geologia](igme-geologia.yaml) | IGME-CSIC – Cartografía geológica, bases de datos geocientíficas y servicios ArcGIS | api-rest, ogc, download, portal | none | json, xml, shp, pdf, jpg, zip | irregular | js-rendered, url-drift | 2026-09-30 |
 | [ign-sismologia](ign-sismologia.yaml) | IGN – Catálogo sísmico y últimos terremotos | portal, scraping | none | html, csv, txt, kml, geojson | realtime | js-rendered, session-required, url-drift | 2026-09-30 |
 
 - **aei-convocatorias**: Todas las ayudas concedidas por la AEI desde 2008 (130.000 filas) en un CSV descargable con año, convocatoria, referencia, género del IP, área, título, CIF y entidad beneficiaria, CCAA, provincia e importe, más el buscador de convocatorias con sus páginas de detalle y estadísticas en PDF.

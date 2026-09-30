@@ -59,8 +59,12 @@ solo cuando el propietario lo indique: Cortes y Poder Judicial, comunidades aut�
 
 ## Estado de verificación
 
-Las 67 fichas iniciales se redactaron sin acceso de red y están todas en `verified: null`. La primera tarea
-de cualquier sesión con red es verificarlas endpoint a endpoint y corregir, antes de añadir fuentes nuevas.
+Las 67 fichas iniciales se verificaron endpoint a endpoint el 2026-09-30: 63 llevan fecha en `verified` y 4
+siguen en `null` (aemet-opendata exige clave de API; fega-beneficiarios-pac, oepm-invenes y el host de datos de
+mitma-opendata-movilidad no respondieron desde el entorno de verificación). Al empezar una sesión con red,
+re-verificar primero esas cuatro y las fichas en `degraded` o `unknown`; después añadir fuentes nuevas por
+impacto. Las verificaciones se hacen con el bundle FNMT y el User-Agent de navegador que describe
+`guides/cliente-http.md`.
 
 ## Lo que no se hace
 

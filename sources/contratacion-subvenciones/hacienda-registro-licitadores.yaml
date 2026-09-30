@@ -21,7 +21,7 @@ endpoints:
     desc: Visor que transforma a HTML o PDF un XML de certificado ROLECE o de DEUC subido por el usuario
   - path: https://visor.registrodelicitadores.gob.es/espd-web/filter?lang=es
     desc: Generador del Documento Europeo Único de Contratación (DEUC 1.02)
-quirks: [tls-chain-incomplete]
+quirks: [tls-chain-incomplete, url-drift]
 gotchas:
   - La ruta /consulta_publica de la ficha anterior devuelve 404; la raíz redirige por meta refresh a /rolece y de ahí a public/inicio.action.
   - El servidor no envía el intermedio FNMT AC Servidores Seguros Tipo2; añadirlo al bundle o falla la verificación TLS (ver guía).

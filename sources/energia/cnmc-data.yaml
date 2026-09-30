@@ -35,7 +35,7 @@ endpoints:
     desc: Ficheros estáticos de cada dataset (URL en resources[].url de package_show)
   - path: https://data.cnmc.es/{energia|telecomunicaciones-y-sector-audiovisual|transporte-y-postal|panel-de-hogares}
     desc: Portal de navegación (Drupal) con fichas por dataset; las descargas y la API están en catalogodatos.cnmc.es
-quirks: []
+quirks: [url-drift, js-rendered]
 ids: []
 gotchas:
   - La API no está en data.cnmc.es (su /api/3 devuelve 404) sino en catalogodatos.cnmc.es; el portal solo enlaza a ella por JavaScript.

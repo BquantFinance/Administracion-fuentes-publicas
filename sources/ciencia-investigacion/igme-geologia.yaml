@@ -36,7 +36,7 @@ endpoints:
     example: curl -sSL -o hoja1.zip "https://info.igme.es/cartografiadigital/datos/magna50/jpgs/d0_G50/VRF_MAGNA50_1.zip"
   - path: https://info.igme.es/BDAguas/
     desc: Consulta web de puntos de agua (aplicación con mapa y exportación en cliente); la vía programática es el servicio ArcGIS
-quirks: [js-rendered]
+quirks: [js-rendered, url-drift]
 ids: []
 gotchas:
   - Los servicios ArcGIS responden en Web Mercator (wkid 102100) por defecto; pedir outSR=4326 o pasar inSR=4326 en consultas por punto. maxRecordCount es 1000, paginar con resultOffset.

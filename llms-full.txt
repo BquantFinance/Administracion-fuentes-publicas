@@ -498,7 +498,7 @@ base_url: https://registrodelicitadores.gob.es/rolece/public/inicio.action
 docs_url: https://registrodelicitadores.gob.es/rolece/public/manuales.action?accion=caratulas
 - https://visor.registrodelicitadores.gob.es/ :: Visor que transforma a HTML o PDF un XML de certificado ROLECE o de DEUC subido por el usuario
 - https://visor.registrodelicitadores.gob.es/espd-web/filter?lang=es :: Generador del Documento Europeo Único de Contratación (DEUC 1.02)
-quirks: tls-chain-incomplete
+quirks: tls-chain-incomplete, url-drift
 ! La ruta /consulta_publica de la ficha anterior devuelve 404; la raíz redirige por meta refresh a /rolece y de ahí a public/inicio.action.
 ! El servidor no envía el intermedio FNMT AC Servidores Seguros Tipo2; añadirlo al bundle o falla la verificación TLS (ver guía).
 ! No hay API, descarga ni búsqueda por NIF sin certificado; la inscripción de un licitador se acredita con el certificado XML que él mismo aporta.
@@ -1001,6 +1001,7 @@ docs_url: https://data.cnmc.es/reutilizadores
   ej: curl -s "https://catalogodatos.cnmc.es/datastore/dump/522dcc75-b5c4-4c8d-9ec3-c8d8cf66d6b2?format=csv"
 - https://catalogodatos.cnmc.es/dataset/{uuid}/resource/{id}/download/ds_{n}_{v}.{csv|json|xml} :: Ficheros estáticos de cada dataset (URL en resources[].url de package_show)
 - https://data.cnmc.es/{energia|telecomunicaciones-y-sector-audiovisual|transporte-y-postal|panel-de-hogares} :: Portal de navegación (Drupal) con fichas por dataset; las descargas y la API están en catalogodatos.cnmc.es
+quirks: url-drift, js-rendered
 ! La API no está en data.cnmc.es (su /api/3 devuelve 404) sino en catalogodatos.cnmc.es; el portal solo enlaza a ella por JavaScript.
 ! Cada dataset publica un CSV con datastore (dump y datastore_search) y CSV, JSON y XML estáticos; uno de los resource_id que cita la documentación (8afd824c) ya no existe, comprobar con package_show.
 ! Nombres de campo normalizados sin tildes ni ñ (compannia_comercializadora_de_gas); la etiqueta original está en fields[].info.label del datastore.
@@ -1309,7 +1310,7 @@ docs_url: https://info.igme.es/catalogo/
 - https://info.igme.es/cartografiadigital/geologica/Magna50Hoja.aspx?Id={hoja} :: Hoja MAGNA 50 con enlaces a datos/magna50/jpgs/d0_G50/VRF_MAGNA50_{hoja}.zip (vectorial), pdfs/d0_G50/Magna50_{hoja}.pdf y memorias/MMagna{hoja 4 cifras}.pdf
   ej: curl -sSL -o hoja1.zip "https://info.igme.es/cartografiadigital/datos/magna50/jpgs/d0_G50/VRF_MAGNA50_1.zip"
 - https://info.igme.es/BDAguas/ :: Consulta web de puntos de agua (aplicación con mapa y exportación en cliente); la vía programática es el servicio ArcGIS
-quirks: js-rendered
+quirks: js-rendered, url-drift
 ! Los servicios ArcGIS responden en Web Mercator (wkid 102100) por defecto; pedir outSR=4326 o pasar inSR=4326 en consultas por punto. maxRecordCount es 1000, paginar con resultOffset.
 ! GEODE 50 tiene 10 capas; las unidades están en la 8 (Recintos geología) y el Cuaternario en la 6; la consulta por punto en la 6 devuelve vacío fuera de recintos cuaternarios.
 ! info.igme.es y /cartografiadigital/ redirigen por JavaScript (window.location), no por HTTP; seguir a /catalogo/default.aspx y /cartografiadigital/portada/default.aspx.
@@ -1584,7 +1585,7 @@ docs_url: https://datacomex.comercio.es/Data/AyudaApi
   ej: curl -s -H "Authorization: Bearer $DATACOMEX_TOKEN" "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=ALL&ta=1001&pr=28"
 - https://datacomex.comercio.es/Metadata/Index :: Metadatos y clasificaciones del portal
 - https://datacomex_v6.comercio.es/ :: Versión anterior del portal, todavía en línea
-quirks: session-required
+quirks: session-required, js-rendered
 ids: ine-provincia
 ! Sin token, ObtenerDatos responde 401 con JSON (Se ha denegado la autorización). El registro de usuario es gratuito y se hace en el portal (/User).
 ! La consulta interactiva pequeña funciona sin cuenta, pero DESCARGA MASIVA y la API exigen sesión; los cuadros de mando de la portada son Power BI incrustado, sin descarga programática.
