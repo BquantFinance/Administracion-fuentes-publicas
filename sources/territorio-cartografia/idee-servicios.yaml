@@ -6,14 +6,14 @@ level: age
 sector: territorio-cartografia
 tags: [idee, inspire, wms, wfs, wmts, wcs, csw, codsi, hidrografia, transportes, ocupacion-suelo, ngbe]
 summary: >-
-  Catálogo CSW INSPIRE y CODSI, directorio de servicios OGC y los servicios INSPIRE del Sistema Cartográfico
-  Nacional en servicios.idee.es (WFS de hidrografía, transportes y ocupación del suelo en GML, WMS temáticos, WMTS
-  y WCS del MDT), más el WFS del Nomenclátor NGBE en www.ign.es con GeoJSON.
-access: [ogc, portal]
+  Catálogo CSW INSPIRE y CODSI y servicios del Sistema Cartográfico Nacional: WFS en GML y API Features en GeoJSON
+  de hidrografía, transportes, ocupación del suelo y direcciones, WMS, WMTS y WCS del MDT, y límites, NGBE y
+  núcleos de población del IGN en www.ign.es y api-features.ign.es.
+access: [ogc, api-rest, portal]
 auth: none
 formats: [xml, json, gml, geojson, png, jpg, geotiff]
 update: irregular
-coverage: "Servicios vigentes; ocupación del suelo procede de SIOSE AR 2017; NGBE con fechas de versión 2018-2023"
+coverage: "Servicios vigentes; ocupación del suelo procede de SIOSE AR 2017; NGBE con fechas de versión 2018-2025"
 license: Metadatos libres; datos del IGN CC BY 4.0 con cita; cada servicio ajeno con su licencia
 base_url: https://www.idee.es/
 docs_url: https://www.idee.es/web/idee/servicios
@@ -21,6 +21,7 @@ endpoints:
   - path: https://www.idee.es/csw-inspire-idee/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecords&resultType=results&typeNames=csw:Record&ElementSetName=brief&maxRecords={n}&constraintLanguage=CQL_TEXT&constraint_language_version=1.1.0&constraint=AnyText%20like%20%27%25{texto}%25%27
     desc: Búsqueda de datasets y servicios por texto libre en el catálogo INSPIRE; numberOfRecordsMatched en la respuesta
     example: curl -s "https://www.idee.es/csw-inspire-idee/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecords&resultType=results&typeNames=csw:Record&ElementSetName=brief&maxRecords=10&constraintLanguage=CQL_TEXT&constraint_language_version=1.1.0&constraint=AnyText%20like%20%27%25catastro%25%27"
+    returns: "XML csw:GetRecordsResponse; SearchResults con numberOfRecordsMatched (13316 para catastro), numberOfRecordsReturned y nextRecord, que se pasa como startPosition; registros brief con dc:identifier, dc:title, dc:type (dataset o service) y ows:BoundingBox"
   - path: https://www.idee.es/csw-inspire-idee/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecordById&outputSchema=http://www.isotc211.org/2005/gmd&ElementSetName=full&ID={id}
     desc: Metadato completo ISO 19139 de un registro (ES_SDGC_AD son las direcciones del Catastro)
   - path: https://www.idee.es/csw-codsi-idee/srv/spa/csw?SERVICE=CSW&REQUEST=GetCapabilities
@@ -34,6 +35,7 @@ endpoints:
     desc: 51 tipos en ETRS89 (tn-ro:RoadLink 9,9 millones, tn-ro:RoadNode, tn-ra:RailwayLink, tn-ra:RailwayStationNode, tn-a:AerodromeArea, tn-w:PortArea)
     params: "bbox=lat_min,lon_min,lat_max,lon_max,urn:ogc:def:crs:EPSG::4326 (orden lat lon); resultType=hits para contar; STOREDQUERY_ID=urn:ogc:def:query:OGC-WFS::GetFeatureById&ID={gml_id}; FILTER fes 2.0"
     example: curl -s "https://servicios.idee.es/wfs-inspire/transportes?service=WFS&version=2.0.0&request=GetFeature&typeNames=tn-ro:RoadLink&count=5&bbox=40.40,-3.72,40.42,-3.70,urn:ogc:def:crs:EPSG::4326"
+    returns: "wfs:FeatureCollection GML 3.2 en EPSG:4258 con posList en orden lat lon; numberMatched repite numberReturned si quedan páginas (5 en el ejemplo, 1381 con hits) y next lleva STARTINDEX solo mientras quedan; GetFeatureById devuelve el feature suelto"
   - path: https://servicios.idee.es/wfs-inspire/hidrografia?service=WFS&version=2.0.0&request=GetFeature&typeNames={typeName}&count={n}
     desc: 15 tipos (hy-p:Watercourse con 950183 tramos, hy-p:StandingWater, hy-p:DamOrWeir, hy-p:RiverBasin, hy-p:Wetland, hy-n:WatercourseLink, hy-n:HydroNode)
     example: curl -s "https://servicios.idee.es/wfs-inspire/hidrografia?service=WFS&version=2.0.0&request=GetFeature&typeNames=hy-p:Watercourse&count=5"
@@ -44,9 +46,20 @@ endpoints:
     desc: Nomenclátor Geográfico Básico (1166593 topónimos como punto con name, localType y type INSPIRE); admite GeoJSON, bbox y FILTER
     params: "FILTER=<fes:Filter> con PropertyIsEqualTo o PropertyIsLike sobre gn:name/gn:GeographicalName/gn:spelling/gn:SpellingOfName/gn:text, con xmlns:gn del esquema gn/4.0 declarado dentro del Filter"
     example: curl -s "https://www.ign.es/wfs-inspire/ngbe?service=WFS&version=2.0.0&request=GetFeature&typeNames=gn:NamedPlace&count=5&outputFormat=application/geo%2Bjson&FILTER=%3Cfes:Filter%20xmlns:fes=%22http://www.opengis.net/fes/2.0%22%20xmlns:gn=%22http://inspire.ec.europa.eu/schemas/gn/4.0%22%3E%3Cfes:PropertyIsEqualTo%3E%3Cfes:ValueReference%3Egn:name/gn:GeographicalName/gn:spelling/gn:SpellingOfName/gn:text%3C/fes:ValueReference%3E%3Cfes:Literal%3EAlbacete%3C/fes:Literal%3E%3C/fes:PropertyIsEqualTo%3E%3C/fes:Filter%3E"
+    returns: "GeoJSON FeatureCollection sin numberMatched; id ES.IGN.NGBE.{localId}; name anidado, localType.LocalisedCharacterString.value (Provincia, Municipio, Entidad singular...) y type como URL INSPIRE; Point en lon,lat"
   - path: https://www.ign.es/wfs-inspire/unidades-administrativas?service=WFS&version=2.0.0&request=GetFeature&typeNames={au:AdministrativeUnit|au:AdministrativeBoundary}&count={n}&outputFormat=application/geo%2Bjson
     desc: Límites de comunidades, provincias y municipios (8294 unidades, id AU_ADMINISTRATIVEUNIT_{nationalCode}); FILTER por nationalCode verificado
     example: curl -s "https://www.ign.es/wfs-inspire/unidades-administrativas?service=WFS&version=2.0.0&request=GetFeature&typeNames=au:AdministrativeUnit&count=2&outputFormat=application/geo%2Bjson&FILTER=%3Cfes:Filter%20xmlns:fes=%22http://www.opengis.net/fes/2.0%22%20xmlns:au=%22http://inspire.ec.europa.eu/schemas/au/4.0%22%3E%3Cfes:PropertyIsEqualTo%3E%3Cfes:ValueReference%3Eau:nationalCode%3C/fes:ValueReference%3E%3Cfes:Literal%3E34090800000%3C/fes:Literal%3E%3C/fes:PropertyIsEqualTo%3E%3C/fes:Filter%3E"
+  - path: https://api-features.idee.es/collections/{coleccion}/items?f=json&bbox={lon_min},{lat_min},{lon_max},{lat_max}&limit={n}
+    desc: OGC API Features (pygeoapi) del SCN; 38 colecciones (roadlink, railwaylink, watercourse, landcoverunit, address de CartoCiudad...) en GeoJSON
+    params: "bbox en orden lon,lat (CRS84); limit (10 por defecto) y offset; filtro por propiedad como parámetro (component_AdminUnitName_4 o component_PostalDescriptor en address); skipGeometry=true"
+    example: curl -s "https://api-features.idee.es/collections/roadlink/items?f=json&bbox=-3.72,40.40,-3.70,40.42&limit=5"
+    returns: "GeoJSON FeatureCollection con numberMatched (1387 en el ejemplo; una consulta filtrada dio 0 y 988 al repetirla), numberReturned y link next con offset; coordenadas lon,lat con la altitud como tercer valor; propiedades planas (id_tramo, fictitious como texto)"
+  - path: https://api-features.ign.es/collections/{administrativeunit|namedplace|nuc}/items?f=json&{propiedad}={valor}
+    desc: OGC API Features del IGN; unidades administrativas (8294), NGBE (namedplace) y núcleos de población (nuc, 37497) en GeoJSON con propiedades planas
+    params: "administrativeunit con nationalcode, nameunit o nationallevelname; namedplace con etiqueta o tipo; nuc con codine, nombre o cpro; limit (10 por defecto) y offset; skipGeometry=true"
+    example: curl -s "https://api-features.ign.es/collections/administrativeunit/items?f=json&nationalcode=34132828079"
+    returns: "GeoJSON con numberMatched, numberReturned y next; administrativeunit trae nationalcode, nameunit, nationallevelname y codnut1 a codnut3 (Madrid, MultiPolygon lon,lat de 746 KB); nuc trae codine de 11 dígitos, habitantes y cpro como entero"
   - path: https://servicios.idee.es/wms-inspire/{hidrografia|transportes|ocupacion-suelo|mdt}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS={capa}&STYLES=&CRS=EPSG:4258&BBOX={lat_min},{lon_min},{lat_max},{lon_max}&WIDTH={w}&HEIGHT={h}&FORMAT=image/png
     desc: WMS 1.3 (GeoServer) con capas HY.Network, HY.PhysicalWaters.Waterbodies, TN.RoadTransportNetwork.RoadLink, LC.LandCoverSurfaces y EL.ElevationGridCoverage
     example: curl -s -o carreteras.png "https://servicios.idee.es/wms-inspire/transportes?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=TN.RoadTransportNetwork.RoadLink&STYLES=&CRS=EPSG:4258&BBOX=40.40,-3.75,40.45,-3.65&WIDTH=400&HEIGHT=300&FORMAT=image/png"
@@ -56,23 +69,25 @@ endpoints:
   - path: https://servicios.idee.es/wcs-inspire/mdt?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID={coverage}&SUBSET=Lat({min},{max})&SUBSET=Long({min},{max})&FORMAT=image/tiff
     desc: MDT como GeoTIFF int16 recortado; 17 coberturas Elevacion{4258|4326|25830|4083}_{5|25|200|500|1000} (resolución en metros); DescribeCoverage da ejes y extensión
     example: curl -s -o mdt25.tif "https://servicios.idee.es/wcs-inspire/mdt?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=Elevacion4258_25&SUBSET=Lat(40.40,40.42)&SUBSET=Long(-3.72,-3.70)&FORMAT=image/tiff"
+    returns: "GeoTIFF int16 sin comprimir, una banda; 89x89 píxeles y 16 KB en el ejemplo"
 quirks: [static-html, errors-html-or-xml]
-ids: [ine-municipio, ine-provincia, ccaa]
+ids: [ine-municipio, ine-provincia, ccaa, ine-entidad-singular, nuts]
 gotchas:
   - El portal es Liferay y el directorio es HTML pesado (200 KB) sin API localizada; para buscar servicios de forma programática usar el CSW con CQL.
-  - Muchos servicios listados son autonómicos o locales con disponibilidad irregular; comprobar GetCapabilities antes de depender de ellos (monitorización en /web/idee/monitorizacion-de-servicios).
-  - Los metadatos usan el perfil INSPIRE sobre ISO 19139; los identificadores de registro siguen el patrón del organismo (ES_SDGC_AD, ES_SDGC_AD_ATOM para el Catastro).
-  - GetCapabilities de wfs-inspire/hidrografia responde 500 NoApplicableCode "Builder is already complete" en la mitad de los intentos (8 de 16 el 30/09/2026) con cualquier parámetro; repetir; GetFeature no falla.
-  - Los WFS de servicios.idee.es (deegree) solo sirven GML 3.2, 3.1 y 2.1; outputFormat=application/geo+json o json responde 400 InvalidParameterValue. GeoJSON solo en los WFS de www.ign.es (ngbe y unidades-administrativas).
-  - Sin count, hidrografia devuelve 10000 features (CountDefault) y ocupacion-suelo y ngbe no respondieron en 45 s; paginar siempre con count y startIndex (la respuesta trae next y previous) y contar con resultType=hits.
-  - Filtrar con bbox (lat,lon y urn:ogc:def:crs:EPSG::4326) o con FILTER fes en la URL, que pasa en servicios.idee.es y www.ign.es; un filtro con tipo incorrecto da 500 con el error SQL (net:fictitious es texto).
-  - En el NGBE el filtro exige declarar xmlns:gn dentro de fes:Filter; solo con el parámetro namespaces= responde 500 "Cannot resolve namespace prefix gn".
+  - GetCapabilities de wfs-inspire/hidrografia dio 500 NoApplicableCode «Builder is already complete» en 8 de 16 intentos el 30/09/2026 y en 0 de 10 el 01/10; reintentar. GetFeature no falló.
+  - Los WFS de servicios.idee.es (deegree) solo sirven GML; outputFormat=application/geo+json o json responde 400 InvalidParameterValue. Las mismas capas salen en GeoJSON por api-features.idee.es.
+  - Sin count, hidrografia (CountDefault 10000) no envió ni un byte en 60 s y ngbe no respondió en 45 s (01/10/2026); paginar siempre con count y startIndex y contar con resultType=hits.
+  - En los WFS de servicios.idee.es, numberMatched repite numberReturned mientras quedan páginas (count=5 da 5; hits da 1381 en el mismo bbox); el total solo sale con resultType=hits y el final, cuando falta next.
+  - FILTER fes en la URL funciona en servicios.idee.es sobre campos de texto (net:inspireId/base:Identifier/base:localId); sobre net:fictitious da 500 con error SQL (probados true y 1) porque la columna es texto.
+  - En el NGBE el filtro exige declarar xmlns:gn dentro de fes:Filter; solo con el parámetro namespaces= responde 500 «Cannot resolve namespace prefix gn».
   - Un topónimo repite entradas por localType (Albacete es provincia, municipio, capital de provincia, capital de municipio y entidad singular); NamedPlace no lleva código INE, solo inspireId ES.IGN.NGBE.{localId}.
-  - www.ign.es/wfs-inspire solo tiene ngbe y unidades-administrativas (hidrografia, transportes, mdt e ign-base dan 404); servicios.idee.es no tiene ngbe, ign-base, pnoa-ma ni mapa-raster (404 o conexión cerrada).
+  - www.ign.es/wfs-inspire solo tiene ngbe y unidades-administrativas (hidrografia, transportes, ocupacion-suelo y mdt dan 404); servicios.idee.es no tiene ngbe, ign-base, pnoa-ma ni mapa-raster (conexión cerrada).
+  - En WMS 1.3.0 con CRS=EPSG:4258 el BBOX va en orden lat,lon; en orden lon,lat responde 200 con una imagen en blanco de 2 KB, sin error.
 tips:
-  - Los WFS devuelven wfs:FeatureCollection con numberMatched, numberReturned y next; para volcados grandes iterar startIndex de 10000 en 10000 con count=10000 y convertir cada GML con ogr2ogr a GeoPackage.
+  - Para volcados grandes, iterar startIndex de 10000 en 10000 con count=10000 hasta que falte next y convertir cada GML con ogr2ogr a GeoPackage; las API Features paginan con limit y offset.
   - Para mapa base y ortofoto usar los WMTS de www.ign.es con TILEMATRIXSET=GoogleMapsCompatible en cualquier cliente XYZ; los WMS de servicios.idee.es sirven las capas temáticas (hidrografía, transporte, suelo, relieve).
   - Para altitudes de una zona, el WCS del MDT con SUBSET de unas centésimas de grado devuelve un GeoTIFF de pocos KB (89x89 píxeles para 0,02 grados en Elevacion4258_25).
+  - Para JSON sin GML ni FES, las API Features con filtros por parámetro; nuc de api-features.ign.es da el código INE de entidad singular (codine) y la población del núcleo, como el Nomenclátor de ine-codigos-territoriales.
 related: [cnig-centro-descargas, catastro-ovc, ine-codigos-territoriales, miteco-saih-boletin-hidrologico]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

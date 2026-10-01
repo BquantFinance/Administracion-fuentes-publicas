@@ -13,40 +13,53 @@ access: [ogc, api-rest, download, portal]
 auth: none
 formats: [shp, gpkg, geotiff, laz, gml, geojson, json, png]
 update: irregular
-coverage: "PNOA desde 2004; cartografía histórica desde el siglo XIX; límites vigentes e histórico 2023"
+coverage: "PNOA desde 2004; cartografía histórica desde el siglo XIX; límites vigentes e históricos 2023 y 2024"
 license: CC BY 4.0 (licencia de uso IGN, con cita)
 base_url: https://centrodedescargas.cnig.es/CentroDescargas/
 docs_url: https://www.ign.es/web/ign/portal/ide-area-nodo-ide-ign
 endpoints:
   - path: https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie={codigo_serie}
-    desc: Ficha de una serie del catálogo (LILIM límites, MDT05 modelo de 5 m, PNOA...) con la lista de ficheros cargada por XHR
+    desc: Ficha HTML de una serie (LILIM límites, MDT05 modelo de 5 m, PNOA...) con los 20 primeros ficheros y el total en el campo oculto totalArchivos
     example: curl -s "https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie=LILIM"
+    returns: "HTML de 150 KB; una fila por fichero con nombre, formato, fecha, MB e id en data-sec, linkDescDir_{id} y detalleArchivo?sec={id}; totalArchivos vale 4 en LILIM y 1525 en MDT05"
   - path: https://centrodedescargas.cnig.es/CentroDescargas/archivosSerie
-    desc: Lista de ficheros de una serie en HTML, con el id de cada fichero en data-sec; POST con codSerie y numPagina
+    desc: Página n de la lista de ficheros de una serie en HTML, 20 por página; POST con codSerie y numPagina
     example: curl -s -X POST -d "codSerie=LILIM&numPagina=1" "https://centrodedescargas.cnig.es/CentroDescargas/archivosSerie"
+    returns: "Fragmento HTML con hasta 20 filas (nombre, formato, fecha, MB) e id en data-sec; una página fuera de rango o una serie inexistente dan 200 sin filas y totalArchivos vacío"
   - path: https://www.ign.es/wfs-inspire/unidades-administrativas?service=WFS&version=2.0.0&request=GetFeature&typeNames=au:AdministrativeUnit
     desc: Límites administrativos INSPIRE por WFS; outputFormat=application/geo+json y count para limitar
     example: curl -s "https://www.ign.es/wfs-inspire/unidades-administrativas?service=WFS&version=2.0.0&request=GetFeature&typeNames=au:AdministrativeUnit&count=10&outputFormat=application/geo%2Bjson"
+    returns: "GeoJSON sin numberMatched ni next; id AU_ADMINISTRATIVEUNIT_{nationalCode}; nombre en properties.name.GeographicalName.spelling.SpellingOfName.text y nivel en nationalLevelName; MultiPolygon en lon,lat; el ejemplo pesa 34 MB"
   - path: https://www.ign.es/wms-inspire/pnoa-ma?SERVICE=WMS&REQUEST=GetCapabilities
-    desc: WMS de ortofotos PNOA de máxima actualidad; WMTS teselado en https://www.ign.es/wmts/pnoa-ma
+    desc: WMS 1.3.0 de la ortofoto PNOA de máxima actualidad (capa OI.OrthoimageCoverage); WMTS en https://www.ign.es/wmts/pnoa-ma con GoogleMapsCompatible
   - path: https://www.ign.es/wms-inspire/ign-base?SERVICE=WMS&REQUEST=GetCapabilities
-    desc: WMS del mapa base del IGN
+    desc: WMS 1.3.0 del mapa base del IGN (capas IGNBaseTodo, IGNBaseTodo-gris e IGNBaseOrto)
   - path: https://www.cartociudad.es/geocoder/api/geocoder/find?q={direccion}
-    desc: Geocodificador; JSON con provinceCode, muniCode (INE), postalCode y geom en WKT WGS84; candidatesJsonp devuelve varios candidatos
+    desc: Geocodificador; devuelve el primer candidato con muniCode (INE), refCatastral y geom WKT; reverseGeocode?lon={lon}&lat={lat} hace el inverso con la misma forma
     example: curl -s "https://www.cartociudad.es/geocoder/api/geocoder/find?q=Calle%20Alcala%2050%20Madrid"
-    returns: "{id, province, provinceCode, comunidadAutonoma, comunidadAutonomaCode, muni, muniCode (INE 5 dígitos), type, address, tip_via, portalNumber, postalCode, poblacion, geom (WKT POINT lon lat), lat, lng, refCatastral, state, stateMsg}"
-quirks: [captcha-required, js-rendered, static-html]
-ids: [ine-municipio, ine-provincia, ccaa]
+    returns: "Objeto JSON {id, type (portal, poblacion...), address, tip_via, portalNumber (entero), muniCode y provinceCode (texto INE), comunidadAutonomaCode, postalCode, refCatastral, geom (WKT POINT lon lat; MULTIPOLYGON de 268 KB si es un municipio), lat, lng, state 0}; sin resultado, 204 vacío"
+  - path: https://www.cartociudad.es/geocoder/api/geocoder/candidates?q={texto}&limit={n}
+    desc: Lista de candidatos para elegir antes de find; admite municipio_filter, provincia_filter, cod_postal_filter y no_process para excluir tipos
+    example: curl -s "https://www.cartociudad.es/geocoder/api/geocoder/candidates?q=Calle%20Alcala%2050&municipio_filter=Madrid&limit=5"
+    returns: "Lista JSON con los campos de find, geom null y address completa (CALLE ALCALA 50, Madrid); lat y lng valen 0.0 en poblaciones y municipios; sin filtro mezcla municipios y tipos (portal, toponimo, expendeduria)"
+quirks: [captcha-required, js-rendered, static-html, errors-html-or-xml, soft-errors-200]
+ids: [ine-municipio, ine-provincia, ccaa, referencia-catastral]
 gotchas:
-  - Cada descarga del Centro de Descargas pasa por reCAPTCHA v3 (preAutorizarDescarga con recaptchaToken) antes de descargaDir; sin token responde 403. No automatizable de forma lícita sin navegador.
-  - La lista de ficheros de una serie no está en catalogo.do; se obtiene por POST a archivosSerie, donde cada fichero lleva su id en data-sec y en detalleArchivo?sec=.
-  - Las rutas apidescargas y descargaDir?secDescDirLA= no son públicas (404 y 403); no localicé API de descargas abierta.
-  - El WFS de unidades administrativas dio 403 con FILTER fes en la URL por la mañana y 200 por la noche (WAF intermitente); si falla, descargar por count y filtrar en local. El JSON es outputFormat=application/geo+json.
-  - En el WFS, nationalCode es 34 seguido de los códigos INE de comunidad, provincia y municipio (34090800000 es la provincia de Barcelona); cada feature pesa cientos de KB por la geometría.
-  - El geocoder devuelve JSONP (envuelto en callback) en findJsonp y candidatesJsonp y JSON limpio en find.
+  - Cada descarga exige reCAPTCHA v3 (preAutorizarDescarga con recaptchaToken, después initDescargaDir y descargaDir); sin token esos pasos dan 403 o la página de error. No automatizable de forma lícita sin navegador.
+  - catalogo.do solo trae los 20 primeros ficheros; el resto sale por POST a archivosSerie con numPagina (20 por página; MDT05 son 1525 ficheros en 77 páginas), con el id de cada fichero en data-sec.
+  - Cualquier ruta inexistente (apidescargas incluida) responde 200 con la página «Pagina no encontrada»; comprobar el contenido, no el código. No localicé API de descargas abierta (01/10/2026).
+  - El GeoJSON del WFS va indentado y sin gzip, numberMatched ni next (10 provincias, 34 MB); contar con resultType=hits (8294 unidades) y paginar con startIndex. El 30/09 dio 403 intermitente con FILTER.
+  - nationalCode es 34 + comunidad (2) + provincia (2) + municipio INE de 5 dígitos o 00000 (34090800000 provincia de Barcelona, 3,4 MB en GeoJSON; 34132828079 municipio de Madrid, 465 KB).
+  - findJsonp y candidatesJsonp envuelven la respuesta en callback(...); find, candidates y reverseGeocode dan JSON limpio, y find sin resultado responde 204 con cuerpo vacío.
   - Sistema de referencia oficial ETRS89 (EPSG:4258 geográficas, 25829 a 25831 UTM); Canarias REGCAN95 (32628).
+  - state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido.
+  - find ignora municipio_filter y toma el primer candidato (Calle Alcala 50 con municipio_filter=Madrid devolvió un portal de Ceuta); poner el municipio en q o filtrar con candidates.
+  - Con outputformat=geojson, find redondea la geometría a 4 decimales (unos 10 m) y renombra countryCode a countrycode; usar lat y lng de properties.
 tips:
-  - Para límites municipales sin pasar por el Centro de Descargas, el WFS INSPIRE de unidades administrativas; para los oficiales en fichero, la serie LILIM (shapefile 157 MB, GML 63 MB, histórico 2023 en GeoPackage).
+  - Límites sin reCAPTCHA en api-features.ign.es/collections/administrativeunit/items?nationalcode= (GeoJSON con nameunit y NUTS, en idee-servicios); en fichero, LILIM (shapefile 157 MB, GML 63 MB, GeoPackage 2023 y 2024).
+  - Parámetros del geocoder (limit, no_process, municipio_filter, provincia_filter, cod_postal_filter, outputformat) en https://www.idee.es/resources/documentos/Cartociudad/CartoCiudad_ServiciosWeb.pdf.
+  - Las direcciones de CartoCiudad se descargan también en GeoJSON por API Features (api-features.idee.es/collections/address, en idee-servicios).
+  - Para solo el código INE de un municipio, candidates?q={nombre}&limit=1 (464 bytes) en vez de find, que trae el polígono (268 KB para Alcalá de Henares).
 related: [idee-servicios, catastro-ovc, ine-codigos-territoriales]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

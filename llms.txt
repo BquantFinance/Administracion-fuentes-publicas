@@ -2,7 +2,7 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 85 · Recetas: 43 · Alcance actual: Administración General del Estado · Generado: 2026-10-01
+Fuentes: 95 · Recetas: 43 · Alcance actual: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Generado: 2026-10-01
 
 ## Cómo usar este repo
 
@@ -35,9 +35,9 @@ Fuentes: 85 · Recetas: 43 · Alcance actual: Administración General del Estado
 - URI estable de una norma para citar o enlazar → boe-eli
 - Vigilar novedades del BOE, BORME, ayudas o licitaciones sin programar contra la API → boe-feeds (RSS en ISO-8859-1)
 - Actos societarios inscritos en el Registro Mercantil → borme-api-sumario (sin búsqueda por empresa; recorrer días y provincias)
-- Euríbor, tipos de interés y de cambio, crédito, balanza de pagos → bde-estadisticas
+- Euríbor, tipos de interés y de cambio, crédito, balanza de pagos → bde-estadisticas (listaSeries con rango=MAX corta en las 1000 observaciones más recientes sin aviso; completar con rango=AAAA)
 - Deuda pública por Administración (Protocolo de Déficit Excesivo) → bde-estadisticas (capítulo SB_DEUAAPP; histórico también en airef-datos)
-- Subastas del Tesoro y deuda del Estado por instrumento y tenedor → tesoro-estadisticas
+- Subastas del Tesoro y deuda del Estado por instrumento y tenedor → tesoro-estadisticas (año en curso en 11.xlsx e históricos anuales; el HTML de subastas mezcla decimales con coma y con punto)
 - Previsiones macroeconómicas y estimación del PIB en tiempo real → airef-datos
 - Entidades supervisadas, hechos relevantes e informes financieros de cotizadas → cnmv-registros (sin API; formularios ASP.NET, XML mensual de IIC y RSS)
 - Líneas ICO y avales por beneficiario → ico-datos (no hay datos descargables, solo memoria y cuentas en PDF)
@@ -152,6 +152,25 @@ Fuentes: 85 · Recetas: 43 · Alcance actual: Administración General del Estado
 - Superficie por cultivo y comunidad autónoma (ESYRCE) → mapa-estadisticas-agrarias (xlsx anual desde 2022; microdatos solo previa solicitud en sede electrónica)
 - Indicadores de igualdad por sexo (empleo, salarios, poder, salud) → inmujeres-mujeres-cifras (un xls por indicador en inmujeres.gob.es aunque el HTML enlace al host antiguo inmujer.es)
 - Microdatos de PISA, TIMSS o PIAAC de España → inee-bases-datos (muestra española en rar o zip con SPSS y Stata; HEAD responde 403, usar GET con Range)
+- Datos abiertos de la Comunidad de Madrid (calidad del aire, padrón, centros, registros) por API → comunidad-madrid-datos-abiertos (CKAN; el datastore puede tener menos filas que el CSV (5000 de 18718 en el padrón); descargar el recurso)
+- PIB municipal, contabilidad trimestral y defunciones por barrio de la Comunidad de Madrid → comunidad-madrid-estadistica-api (no está en el INE; municipios con código INE de 5 dígitos)
+- Padrón de la ciudad de Madrid por distrito, barrio, sección censal y edad → ayuntamiento-madrid-datos-abiertos (CSV mensual del conjunto 200076-0-padron; la API dinámica se quedó en 2023)
+- Calidad del aire y tráfico en tiempo real de la ciudad de Madrid → ayuntamiento-madrid-datos-abiertos (calair_tiemporeal e informo pm.xml; las horas aún no medidas llegan como 0 con validación N)
+- Accidentes de tráfico de la ciudad de Madrid → ayuntamiento-madrid-datos-abiertos (un CSV por año en 300228-0; una fila por persona, agrupar por num_expediente)
+- GTFS del Consorcio de Transportes de Madrid → comunidad-madrid-datos-abiertos (el conjunto enlaza a ArcGIS; el ZIP sale de /sharing/rest/content/items/{id}/data)
+- Estadística oficial de Cataluña por municipio, comarca o sección censal (padrón, renta, PIB, afiliación) → idescat-api (municipios con 6 dígitos (INE más dígito de control); el INE de 5 se ignora y devuelve todos sin error)
+- Ficha resumen de un municipio catalán (población, renta, paro, vivienda) en una llamada → idescat-api (EMEX; la población es la del Censo anual, no la del padrón)
+- Registro de entidades, contratación o subvenciones (RAISC) de la Generalitat de Catalunya → gencat-dades-obertes (Socrata; sin $limit corta a 1000 filas; buscar en catalán; el RAISC trae codi_bdns)
+- Población de Barcelona por barrio o sección censal del último año → ayuntamiento-barcelona-datos-abiertos (padrón municipal, no cifra oficial; el Idescat por sección acaba en 2022; solo el datastore es automatizable)
+- Disposiciones del BOJA por fecha con sumario y PDF → junta-andalucia-datos-abiertos (API v0 aparte del CKAN; ordenar por dateUTC y trocear por día)
+- Datos abiertos de la Junta de Andalucía y filas de sus CSV por API → junta-andalucia-datos-abiertos (cambiar el host interno de los recursos subidos por www.juntadeandalucia.es)
+- Población por municipio andaluz desde 1996 y estadística propia del IECA → ieca-api-badea (los filtros usan ids internos de miembro, no años ni códigos INE)
+- Indicadores coyunturales por provincia andaluza (IPC, EPA, paro, PIB) → ieca-api-badea (INDEA; cada código fija tipo de dato y base)
+- Datos abiertos de la Generalitat Valenciana (contratos, ERTE, turismo, cultura) por API → gva-dadesobertes-api (CKAN con datastore; el órgano real va en origen_datos, no en organization)
+- Contratos adjudicados por la Generalitat Valenciana, incluidos los menores → gva-dadesobertes-api (un conjunto por año (eco-gvo-contratos-AAAA); importes con coma decimal; URL_LICITACION enlaza con PLACSP)
+- Estadísticas por comarca valenciana (pobreza, empresas, industria, cultivos) → ive-pegv-bancos-datos (el INE no publica comarcas; comarcas solo por nombre y agrupación nueva desde 2023)
+- Población empadronada por código postal en la Comunitat Valenciana → ninguna (el IVE la muestra solo en Tableau Public; sin descarga estructurada localizada el 2026-10-01)
+- Prohibiciones de contratar vigentes → hacienda-registro-licitadores (XML público del visor del ROLECE; el NIF va oculto, cruzar por nombre)
 
 ## Recetas por intención
 
@@ -206,10 +225,10 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 - [Legislación y boletines oficiales](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/legislacion-boletines/README.md): boe-api-legislacion-consolidada, boe-api-sumario, boe-eli, boe-feeds, borme-api-sumario
 - [Economía, finanzas y mercados](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/economia-finanzas/README.md): airef-datos, bde-estadisticas, cnmv-registros, ico-datos, tesoro-estadisticas
 - [Hacienda, tributos y presupuestos](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/hacienda-presupuestos/README.md): aeat-estadisticas, aeat-servicios-web, hacienda-central-informacion, hacienda-ovef, igae-ejecucion-presupuestaria, sepg-presupuestos-generales-estado
-- [Estadística oficial](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/estadistica/README.md): ine-api-tempus, ine-codigos-territoriales, ine-microdatos
+- [Estadística oficial](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/estadistica/README.md): comunidad-madrid-estadistica-api, idescat-api, ieca-api-badea, ine-api-tempus, ine-codigos-territoriales, ine-microdatos, ive-pegv-bancos-datos
 - [Contratación pública y subvenciones](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/contratacion-subvenciones/README.md): bdns-api, hacienda-registro-licitadores, placsp-datos-abiertos
 - [Empleo y Seguridad Social](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/empleo-seguridad-social/README.md): mites-estadisticas, segsocial-estadisticas, sepe-estadisticas
-- [Gobierno abierto, transparencia y organización administrativa](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/gobierno-abierto-administracion/README.md): datos-gob-es-api, dir3-directorio, face-facturas, pag-administracion-gob-es, transparencia-portal
+- [Gobierno abierto, transparencia y organización administrativa](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/gobierno-abierto-administracion/README.md): ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, comunidad-madrid-datos-abiertos, datos-gob-es-api, dir3-directorio, face-facturas, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, pag-administracion-gob-es, transparencia-portal
 - [Territorio, catastro y cartografía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/territorio-cartografia/README.md): catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal
 - [Meteorología y clima](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/meteorologia-clima/README.md): aemet-opendata, aemet-otros-servicios
 - [Medio ambiente, agua y biodiversidad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/medio-ambiente-agua-biodiversidad/README.md): miteco-banco-datos-naturaleza, miteco-calidad-aire, miteco-inventario-emisiones, miteco-prtr, miteco-saih-boletin-hidrologico

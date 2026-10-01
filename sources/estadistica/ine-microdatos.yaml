@@ -7,13 +7,13 @@ sector: estadistica
 tags: [ine, microdatos, epa, ecv, encuestas, censo, registros-individuales, parquet]
 summary: >-
   Ficheros de microdatos anonimizados de encuestas (EPA, Condiciones de Vida, Presupuestos Familiares, Estructura
-  Salarial, Censo, Movimiento Natural de la Población). Cada ZIP trae el fichero en ancho fijo, CSV tabulado,
-  parquet, RData, SAS, SPSS y Stata, más el diseño de registro en xlsx y JSON.
+  Salarial, Censo, Movimiento Natural de la Población). Los ZIP recientes traen ancho fijo, CSV, parquet, RData,
+  SAS, SPSS y Stata con el diseño en JSON; el diseño en xlsx va aparte.
 access: [download]
 auth: none
-formats: [csv, txt, parquet, zip, xlsx, json]
+formats: [csv, txt, parquet, zip, xlsx, json, sav, dta]
 update: quarterly
-coverage: "EPA trimestral desde 2000 (datos_1t00.zip); ECV desde 2004; otras según encuesta"
+coverage: "EPA trimestral desde 1999 (datos_1t99.zip); ECV anual desde 2004; otras según encuesta"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.ine.es/dyngs/SER/index.htm?cid=1388
 docs_url: https://www.ine.es/dyngs/SER/index.htm?cid=1388
@@ -21,25 +21,31 @@ endpoints:
   - path: https://www.ine.es/ftp/microdatos/epa/datos_{T}t{AA}.zip
     desc: EPA del trimestre T del año AA (dos dígitos), 21 MB con todos los formatos
     example: curl -sO "https://www.ine.es/ftp/microdatos/epa/datos_2t26.zip"
-    returns: "Zip (20 MB) con carpetas CSV (EPA_2026T2.tab, tabulado), R (EPA_2026T2.RData) y SAS (epa_2026t2.sas7bdat); los campos son códigos que se decodifican con el diseño de registro dr_EPA_{AAAA}.xlsx"
+    returns: "ZIP con md_EPA_2026T2.txt (ancho fijo de 179, sin cabecera), md_EPA_2026T2.parquet, dr_EPA_2026.json, Leeme.txt y carpetas CSV (EPA_2026T2.tab), R (.RData), SAS, SPSS (.sav) y STATA (.dta); 114.021 registros con códigos que se decodifican con el diseño"
   - path: https://www.ine.es/ftp/microdatos/epa/dr_EPA_{AAAA}.xlsx
-    desc: Diseño de registro anual de la EPA en Excel
-  - path: https://www.ine.es/ftp/microdatos/ecv/ecv_b{AAAA}/ecvb{AA}_{AAAA}.zip
-    desc: Encuesta de Condiciones de Vida por base y año
+    desc: Diseño de registro y valores válidos de la EPA; AAAA es el primer año de vigencia (2005, 2021, 2026) y 1999-2004 va en disereg_epa9904.zip
+    returns: "xlsx con hoja Diseño (título y cabecera Variable, Diccionario de la variable, Longitud, Tipo, FormatoR, Decimales, Posición, Orden) y hojas Tablas1 a Tablas5 con los valores de cada diccionario"
+  - path: https://www.ine.es/ftp/microdatos/ecv/ecv_b2013/datos_{AAAA}.zip
+    desc: ECV transversal base 2013 (2008 a 2025); base 2004 en ecv_b2004/ecvb04_{AAAA}.zip (2004 a 2012) y longitudinales en periodo_{AAAA}-{AAAA}.zip
+    example: curl -sO "https://www.ine.es/ftp/microdatos/ecv/ecv_b2013/datos_2025.zip"
+    returns: "ZIP de 76 MB (2025) con un ZIP por fichero (ECV_Td, Tr, Th y Tp; hogar y persona, básicos y detallados), disreg_ecv25.zip con los diseños en xlsx y LeemeECV_2025.txt; cada ZIP interior trae tab, CSV con comas (esudb25d.csv), RData, SAS, SPSS, Stata, parquet, txt y JSON"
   - path: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176918&menu=resultados&idp=1254735976595
-    desc: Página de la EPA con los enlaces a todos los ZIP de microdatos
+    desc: Página de la EPA con los enlaces a todos los ZIP de microdatos, en option value de desplegables y no en href; los diseños xlsx sí van en href
 quirks: [static-html]
 ids: [ine-provincia, ccaa]
 gotchas:
-  - La ruta /prodyser/microdatos.htm de la ficha anterior es una redirección; el índice es /dyngs/SER/index.htm?cid=1388.
-  - Dentro del ZIP, CSV/{op}_{periodo}.tab va con tabulador y cabecera entrecomillada; md_{op}_{periodo}.txt es ancho fijo sin cabecera y md_{op}_{periodo}.parquet es lo mismo en parquet.
+  - La ruta /prodyser/microdatos.htm de la ficha anterior responde 200 con una redirección meta refresh, que requests no sigue; el índice es /dyngs/SER/index.htm?cid=1388.
+  - Desde 2023T2 la EPA trae CSV/EPA_{periodo}.tab (tabulador, cabecera entrecomillada), md_*.txt de ancho fijo sin cabecera y md_*.parquet; hasta 2023T1, CSV/*.csv con todo entrecomillado y NA, sin parquet ni JSON.
   - Los códigos (CCAA, PROV, CICLO) llevan ceros a la izquierda; leer como texto o se corrompen.
-  - dr_{op}_{AAAA}.json tiene claves layout (name, position, length, type, codelist_ref), metadata y codelists; sirve para parsear el ancho fijo sin abrir el Excel.
-  - El diseño de registro cambia entre años; no reutilizar el de un año para otro.
+  - dr_{op}_{AAAA}.json tiene layout (name, position, length, type, decimals, codelist_ref), metadata y codelists; en el .txt los decimales van implícitos (FACTOREL 0028950 es 289,50).
+  - El diseño cambia por periodos de vigencia, no cada año; dr_EPA_2005 sirve de 2005 a 2020, dr_EPA_2021 de 2021 a 2025 y dr_EPA_2026 desde 2026 (con CNAE 2009 y 2025), y dr_EPA_2025.xlsx da 404.
   - Los factores de elevación (FACTOREL en la EPA) son obligatorios para cualquier estimación; no contar registros.
+  - De 2021 a 2023 FACTOREL está en base poblacional 2011; para la base 2021 cruzar con el anexo datos_{T}t{AA}_a.zip por NVIVI y NPERS y usar FACB2021.
+  - La ECV llega como ZIP de ZIP (un ZIP interior por fichero D, R, H y P más el de diseños) y el de 2025 pesa 76 MB; hay que descomprimir dos niveles.
   - Leeme.txt va en ISO-8859-1.
 tips:
-  - Para Python, leer directamente el parquet del ZIP; evita el diseño de registro y pesa 3 MB frente a 18 del tab.
+  - Para Python, leer el parquet del ZIP (EPA desde 2023T2); pesa 3 MB frente a 18 del tab, deja los códigos como texto y con pyarrow trae el diseño entero en schema.metadata['record_layout'].
+  - El servidor admite peticiones Range (206); leyendo el directorio central del ZIP se extrae un solo fichero de la ECV de 76 MB sin descargarla entera.
 related: [ine-api-tempus]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

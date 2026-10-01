@@ -6,14 +6,14 @@ level: age
 sector: territorio-cartografia
 tags: [secciones-censales, cartografia, shapefile, distritos, callejero, censo-electoral, ine]
 summary: >-
-  Shapefile anual a 1 de enero de las 36.669 secciones censales (ETRS89 UTM 30) con códigos de sección,
-  distrito, municipio, provincia, comunidad y NUTS, desde 2011, más las variaciones semestrales del callejero
-  del Censo Electoral. La geometría para cualquier dato por sección.
-access: [download]
+  Shapefile anual a 1 de enero de las secciones censales (36.669 en 2026, ETRS89 UTM 30) con códigos de sección,
+  distrito, municipio, provincia, comunidad y NUTS desde 2001, las mismas geometrías en GeoJSON por API OGC y el
+  callejero del Censo Electoral con sus variaciones semestrales.
+access: [download, ogc, api-rest]
 auth: none
-formats: [shp, zip, pdf]
+formats: [shp, zip, pdf, txt, geojson, gml]
 update: annual
-coverage: "Seccionado 2011-2026, un ZIP por año; variaciones del callejero desde 2011"
+coverage: "Seccionado 2001 y 2003-2026 (2002 da 404); en la API, 2007-2026 y censos 2001 y 2011; callejero nacional de julio desde 2001 y de enero desde 2011; variaciones desde 2011"
 license: Reutilización libre con cita de la fuente (licencia INE compatible CC BY 4.0)
 base_url: https://www.ine.es/ss/Satellite?L=es_ES&c=Page&cid=1259952026632&p=1259952026632&pagename=ProductosYServicios%2FPYSLayout
 docs_url: https://www.ine.es/prodyser/callejero/dis_registro.pdf
@@ -21,20 +21,36 @@ endpoints:
   - path: https://www.ine.es/prodyser/cartografia/seccionado_{AAAA}.zip
     desc: Seccionado a 1 de enero (65 MB); 36.669 polígonos en 2026 con CUSEC, CUMUN, CSEC, CDIS, CMUN, CPRO, CCA, CUDIS, CLAU2, NPRO, NCA, CNUT0 a CNUT3 y NMUN
     example: curl -sO "https://www.ine.es/prodyser/cartografia/seccionado_2026.zip"
+    returns: "ZIP con un shapefile en ETRS89 UTM 30N (EPSG 25830); en 2026, carpeta España_Seccionado2026_ETRS89H30 con SECC_CE_20260101.shp de 111 MB sin comprimir; códigos como texto con ceros a la izquierda; .CPG con la codificación del DBF"
+  - path: https://www.ine.es/geoserver/ogc/features/v1/collections/WMS_INE_SECCIONES_G01:Secciones_{AAAA}/items?f=application/json&filter-lang=cql-text&filter={cql}
+    desc: OGC API Features (GeoServer) con secciones y distritos de 2007 a 2025 en GeoJSON y filtro CQL; 2026 está en la colección SU.VectorStatisticalUnit
+    params: "filter en CQL de texto (CUSEC='2807901001' o CUMUN='28079' AND TIPO='SECCIONADO'); limit y startIndex; /collections lista los años y los censos de 2001 y 2011"
+    example: curl -s "https://www.ine.es/geoserver/ogc/features/v1/collections/WMS_INE_SECCIONES_G01:Secciones_2025/items?f=application/json&filter-lang=cql-text&filter=CUSEC%3D%272807901001%27"
+    returns: "GeoJSON FeatureCollection con totalFeatures, numberMatched y next con startIndex; properties CUSEC, CUMUN, CDIS, CSEC, CUDIS, CPRO, CCA, NMUN, NPRO, NCA, CNUT0 a CNUT3 y TIPO (SECCIONADO o DISTRITO); MultiPolygon en lon,lat aunque crs diga EPSG::4326"
+  - path: https://www.ine.es/prodyser/callejero/caj_esp/caj_esp_{MMAAAA}.zip
+    desc: Callejero nacional completo del Censo Electoral a julio (07, desde 2001) o enero (01, desde 2011), de 34 a 50 MB; ficheros VIAS, TRAM, PSEU, UP y SECC
+    example: curl -sO "https://www.ine.es/prodyser/callejero/caj_esp/caj_esp_012026.zip"
+    returns: "ZIP con la carpeta caj_esp_{MMAAAA} y ficheros {TIPO}.D{fecha de datos}.G{fecha de generación} en texto de ancho fijo ISO-8859-1 con CRLF; VIAS empieza por CPRO (2), CMUN (3) y CVIA (5); TRAM ocupa 418 MB sin comprimir"
   - path: https://www.ine.es/prodyser/callejero/Var_Callejero_{MMAA}_{MMAA}.zip
     desc: Variaciones del callejero del Censo Electoral entre dos fechas (enero y julio); diseño de registro en dis_registro.pdf y tipos de vía en TipoVias.pdf
-    example: curl -sO "https://www.ine.es/prodyser/callejero/Var_Callejero_0125_0725.zip"
-quirks: [static-html]
+    example: curl -sO "https://www.ine.es/prodyser/callejero/Var_Callejero_0725_0126.zip"
+quirks: [static-html, latin1]
 ids: [seccion-censal, ine-municipio, ine-provincia, ccaa, nuts]
 gotchas:
   - CUSEC es el código de sección de 10 dígitos (CPRO+CMUN+CDIS+CSEC) y CUMUN el municipio de 5; todos los códigos son texto con ceros a la izquierda.
-  - El .prj declara ETRS_1989_UTM_Zone_30N (EPSG 25830) para todo el fichero, Canarias incluida; reproyectar a 4326 antes de cruzar con coordenadas WGS84.
-  - El nombre interno cambia por año; en 2026 la carpeta España_Seccionado2026_ETRS89H30 contiene SECC_CE_20260101.shp y en 2011 los ficheros SECC_CE_20110101_03_R_INE.* van sin carpeta.
+  - Desde 2011 el .prj declara ETRS_1989_UTM_Zone_30N (EPSG 25830) para todo el fichero, Canarias incluida; reproyectar a 4326 antes de cruzar con coordenadas WGS84.
+  - De 2001 a 2010 cada ZIP trae, en carpetas de nombre variable, dos capas, Península y Baleares en ED50 UTM 30N y Canarias en WGS84 UTM 28N, con PROVMUN, DISTRITO y SECCION en lugar de CUSEC.
+  - Desde 2011 el nombre interno cambia por año; carpeta España_Seccionado{AAAA}_ETRS89H30 en 2018, 2022, 2023, 2025 y 2026, Seccionado_2021 en 2021 y ninguna en el resto (SECC_CE_20110101_03_R_INE.shp en 2011).
+  - La codificación del DBF cambia por año (2026 en UTF-8 y 2025 en windows-1252 según su .CPG; la Á es C3 81 o C1; de 2012 a 2015 no hay .CPG); GDAL respeta el .cpg, un lector que lo ignore no.
   - Las secciones se redibujan cada año; cruzar cada dato con el seccionado de su mismo año.
-  - No localicé en la página el callejero completo (vías y tramos); solo las variaciones semestrales, su diseño de registro y los tipos de vía (30/09/2026).
+  - Cada colección anual de la API mezcla secciones (TIPO SECCIONADO, 36554 en 2025) y distritos (TIPO DISTRITO, CSEC 000, 10457); filtrar TIPO='SECCIONADO', porque TIPO='SECCION' devuelve 0 sin error.
+  - En la API, 2026 no es Secciones_2026 (404) sino SU.VectorStatisticalUnit; sin filtro cada petición tarda más de 20 s por el recuento total, con filtro CQL por CUSEC unos 2 s.
+  - La página no enlaza seccionado_2026.zip, caj_esp_012026.zip ni Var_Callejero_0725_0126.zip, que existen desde marzo de 2026; construir la URL por patrón y comprobarla con HEAD.
+  - La página remite a dis_registro.pdf (diseño de 2009) desde julio de 2025 y a la Orden de 11 de julio de 1997 antes; dis_registro.pdf solo describe VIAS y PSEUDOVÍAS.
 tips:
-  - geopandas.read_file('seccionado_2026.zip') lee el shapefile sin descomprimir; to_crs(4326) para WGS84.
+  - GDAL, y con él geopandas y ogr2ogr, no abre seccionado_2026.zip sin la ruta interna; geopandas.read_file('zip://seccionado_2026.zip!España_Seccionado2026_ETRS89H30/SECC_CE_20260101.shp').to_crs(4326).
+  - Para un municipio o una sección, la API con filter=CUMUN='28079' AND TIPO='SECCIONADO' evita bajar 65 MB (2462 secciones de Madrid en 2025).
   - Cruzar con la renta por sección del Atlas de distribución de renta de los hogares (ine-api-tempus) y con los datos de padrón por el código de sección de 10 dígitos.
 related: [ine-codigos-territoriales, ine-api-tempus, cnig-centro-descargas, catastro-ovc]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

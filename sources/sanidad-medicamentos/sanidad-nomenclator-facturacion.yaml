@@ -6,41 +6,50 @@ level: age
 sector: sanidad-medicamentos
 tags: [medicamentos, precios, financiacion, nomenclator, precio-referencia, aportacion, agrupacion-homogenea, farmacia]
 summary: >-
-  Los 20.571 productos financiados por el SNS con código nacional, laboratorio, principio activo, estado,
-  fechas de alta y baja, aportación, PVP con IVA, precio de referencia y agrupación homogénea. Descarga
-  completa en Excel y RDF con URL fija, más buscador web.
+  Los 20.571 productos del nomenclátor de facturación del SNS (17.209 en alta, el resto de baja o suspendidos):
+  código nacional, laboratorio, principio activo, estado, alta y baja, aportación, PVP con IVA, precio de referencia
+  y agrupación homogénea. CSV, Excel y RDF completos y buscador web.
 access: [download, portal]
 auth: none
-formats: [xls, rdf, html]
+formats: [csv, xls, rdf, html]
 update: monthly
 coverage: "Nomenclátor vigente en cada descarga, con fechas de alta y baja de cada producto"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.sanidad.gob.es/profesionales/nomenclator.do
 docs_url: https://sede.mscbs.gob.es/datosabiertos/nomenclator_schema.htm
 endpoints:
+  - path: ?metodo=buscarProductos&especialidad=%25%25%25&d-4015021-e=1&6578706f7274=1
+    desc: Nomenclátor completo en CSV (4,5 MB, unos 9 s); es la exportación del buscador con comodín, el enlace Formato CSV de la página
+    example: curl -s -o nomenclator.csv "https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=buscarProductos&especialidad=%25%25%25&d-4015021-e=1&6578706f7274=1"
+    returns: "CSV UTF-8 sin BOM, coma y comillas, decimal punto, fechas dd/mm/aaaa; 20 columnas y 20.571 filas con los mismos códigos que el Excel, cabeceras algo distintas (Precio venta al público con IVA); Content-Disposition {AAAAMMDD}_Nomenclator_de_Facturacion.csv"
   - path: ?metodo=nomenclatorExcel
     desc: Nomenclátor completo en xls (7,3 MB; hoja PRODUCTOS con 20 columnas, de Código Nacional a Medicamento huérfano); el nombre lleva la fecha de descarga
     example: curl -s -o nomenclator.xls "https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorExcel"
-    returns: "xls (7 MB, Content-Type text/html) con hoja PRODUCTOS de 20 columnas: Código Nacional, Nombre del producto, Tipo de fármaco, Nombre genérico, laboratorio, Estado, Fecha de alta y de baja, Aportación del beneficiario, Principio activo, Precio de venta al público, Precio de referencia, Menor precio de la agrupación"
+    returns: "xls (Content-Type text/html) con hoja PRODUCTOS: cabecera y 20.571 filas de 20 columnas, todas celdas de texto (precios '17.48', fechas '01/12/2012'); Código Nacional de 6 dígitos, laboratorio, Estado, Aportación, Principio activo, PVP con IVA, Precio de referencia, agrupación homogénea y cuatro SI/NO"
   - path: ?metodo=nomenclatorRDF
     desc: Mismo contenido en RDF/XML (schema.org/Drug y esquema propio con CodigoNacional, PrecioReferencia, FechaAltaNomenclator, MedicamentoHuerfano)
     example: curl -s "https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorRDF" | head -c 3000
+    returns: "RDF/XML de 27 MB (Content-Type application/rdf-xml) con 20.571 rdf:Description; rdf:about termina en nomenclatorRDF.do?id={código nacional}; propiedades j.2:CodigoNacional, PrecioVentaIVA, PrecioReferencia, Estado...; vacías como elemento sin texto; decimal punto"
   - path: ?metodo=buscarProductos&codnacional={cn}
     desc: Buscador en HTML; campos codnacional, especialidad, nomlab, priact_uno a priact_cuatro, estado, generico, fechaaltadesde y hasta, fechabajadesde y hasta
-quirks: [static-html]
+    example: curl -s "https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=buscarProductos&codnacional=677471"
+    returns: "HTML con tabla (código, nombre, laboratorio, PVP, precio de referencia) y enlaces verDetalle y de exportación CSV y Excel; sin resultados, 200 con el texto No se han obtenido datos"
+quirks: [static-html, overwritten-in-place]
 ids: [cn-medicamento]
 gotchas:
   - El Excel llega con Content-Type text/html y Content-Disposition {AAAAMMDD}_Nomenclator_de_Facturacion.xls fechado el día de la descarga, no el de publicación; guardar como .xls y leer con xlrd o calamine.
-  - "Columnas: Código Nacional, Nombre, Tipo de fármaco, Nombre genérico, Código y Nombre del laboratorio, Estado, Fechas de alta y baja, Aportación, Principio activo, PVP con IVA, Precio de referencia y Menor precio."
-  - Las cuatro últimas columnas son indicadores SI/NO (Diagnóstico hospitalario, Tratamiento de larga duración, Especial control médico, Medicamento huérfano).
-  - El enlace "Formato CSV" de la página no tiene ruta propia (metodo=nomenclatorCSV devuelve la página HTML); usar Excel o RDF.
-  - El RDF se genera al vuelo y en una prueba tardó más de 45 segundos en empezar a responder; usar un timeout largo o preferir el Excel (8 segundos).
-  - El RDF identifica cada producto con rdf:about nomenclatorRDF.do?id={n} y usa nombres de propiedad con tildes (CódigoNombreAgrupaciónHomogeneaMedicamento).
-  - Solo incluye productos financiados; para un código nacional no financiado (708201) el buscador no devolvió ficha.
-  - Muchas celdas de precio van vacías (efectos y accesorios, productos dados de baja); no interpretar vacío como cero.
+  - En el xls todas las celdas son texto (precios '17.48', fechas dd/mm/aaaa); pd.read_excel infiere números, así que el Código Nacional sale como entero si no se fija dtype str.
+  - Diagnóstico hospitalario, Tratamiento de larga duración y Especial control médico son SI/NO y van vacíos en los 4.776 efectos y accesorios, que tampoco tienen Tipo de fármaco.
+  - metodo=nomenclatorCSV no existe (devuelve la página HTML con 200); el CSV es la exportación del buscador (d-4015021-e=1&6578706f7274=1), que también sirve filtrada por codnacional.
+  - El RDF (27 MB) se genera al vuelo e ignora Range; el 2026-10-01 tardó 7 s en empezar y 17 s en total, y el 2026-09-30 más de 45 s en empezar; usar timeout largo.
+  - En el RDF hay propiedades con tildes (CódigoNombreAgrupaciónHomogeneaMedicamento) y prefijos j.0 a j.3 generados por la herramienta; seleccionar por URI de espacio de nombres.
+  - Incluye productos dados de baja (3.079 con fecha de baja) pero no los nunca financiados; el CN 708201 (sin receta) no está en el buscador ni en las descargas.
+  - El PVP solo falta en 99 filas (94 preparados con código 14xxxx sin estado ni fechas y 5 conceptos 5000xx), pero el precio de referencia falta en un tercio; vacío no es cero.
+  - Las cabeceras del Excel tienen erratas (homogéna, homegénea del productor sanitario) que el CSV no tiene; no seleccionar columnas por nombre exacto entre formatos.
 tips:
   - Cruzar con aemps-cima-api por código nacional (presentaciones[].cn) para composición, ficha técnica y estado de autorización; CIMA no trae precios.
-  - "pd.read_excel('nomenclator.xls', dtype={'Código Nacional': str}) conserva los ceros del código nacional."
+  - "pd.read_csv('nomenclator.csv', dtype={'Código Nacional': str}) deja el código como texto, igual que el cn de CIMA; sin dtype sale entero y el cruce falla."
+  - Para un solo producto, la exportación filtrada (metodo=buscarProductos&codnacional={cn}&d-4015021-e=1&6578706f7274=1) responde en menos de un segundo con una fila CSV; sin coincidencia, 200 con cuerpo vacío.
 related: [aemps-cima-api, sanidad-portal-estadistico]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

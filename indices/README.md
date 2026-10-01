@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 122 necesidades, 20 identificadores, 11 grupos de códigos, 73 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 141 necesidades, 20 identificadores, 21 grupos de códigos, 82 rutas muertas.
 
 ## Recetas por intención
 
@@ -68,16 +68,16 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
    curl -s "https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/EPA"
    ```
 2. `ine-api-tempus`: DATOS_TABLA/{Id}?nult=4&tip=A devuelve todas las series de la tabla; para filtrar, VARIABLES_OPERACION y VALORES_VARIABLEOPERACION dan los pares tv=id_variable:id_valor
-3. `ine-api-tempus`: Cambiar js por csv en la URL para obtener CSV (tabulador, ISO-8859-15 con BOM)
+3. `ine-api-tempus`: Cambiar js por csv en la URL da la tabla entera en CSV (tabulador, UTF-8 con BOM aunque la cabecera diga ISO-8859-15): ignora nult, y un tv o date con dos puntos da 400
    ```
    curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=1"
    ```
 - salida: JSON con una entrada por serie (COD, Nombre, Data) o CSV de la tabla
 
 **municipio-a-codigo-ine** · Código INE de un municipio a partir de su nombre, o la relación completa de municipios
-1. `cnig-centro-descargas`: GET del geocoder CartoCiudad find?q={nombre}; devuelve muniCode (INE de 5 dígitos), provinceCode, comunidadAutonomaCode y la geometría; acepta tildes
+1. `cnig-centro-descargas`: GET del geocoder CartoCiudad candidates?q={nombre}&limit=1 (464 B) devuelve muniCode (INE de 5 dígitos), provinceCode y comunidadAutonomaCode; find?q= añade la geometría (268 KB) e ignora municipio_filter; acepta tildes
    ```
-   curl -s "https://www.cartociudad.es/geocoder/api/geocoder/find?q=Alcal%C3%A1%20de%20Henares"
+   curl -s "https://www.cartociudad.es/geocoder/api/geocoder/candidates?q=Alcal%C3%A1%20de%20Henares&limit=1"
    ```
 2. `ine-codigos-territoriales`: Relación completa en diccionario{AA}.xlsx con CPRO, CMUN y DC; el código es CPRO+CMUN (5 dígitos, conservar ceros) y DC es el dígito de control que algunos ficheros añaden
    ```
@@ -163,11 +163,11 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **licitaciones-nuevas** · Licitaciones y adjudicaciones publicadas hoy en toda la contratación pública
 - entrada: dir3, cpv
-1. `placsp-datos-abiertos`: GET del feed ATOM vigente (unas 235 entradas, 6 MB); cada entry lleva un documento CODICE con el órgano (cbc:ID schemeName DIR3), CPV, importes (TotalAmount con IVA, TaxExclusiveAmount sin) y estado; link rel=next enlaza la instantánea anterior
+1. `placsp-datos-abiertos`: GET del feed ATOM vigente, que solo trae lo último (127 entradas y 3,8 MB el 2026-10-01; se regenera una vez al día hacia las 20:15); link rel=next enlaza instantáneas anteriores de 500 entradas y 14 a 17 MB; cada entry lleva el CODICE con órgano (DIR3), CPV, importes y estado, y las anulaciones llegan como at:deleted-entry
    ```
    curl -s "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom"
    ```
-2. `placsp-datos-abiertos`: Histórico en ZIP mensual por feed (12 a 19 MB) con el mismo XML; PlataformasAgregadasSinMenores.atom para CCAA y EELL y contratosMenoresPerfilesContratantes.atom para menores
+2. `placsp-datos-abiertos`: Histórico en ZIP anuales desde 2012 y mensuales en 2025-2026 (el 643 pesa de 150 a 300 MB al mes; un ZIP inexistente responde 200 con HTML); PlataformasAgregadasSinMenores.atom para CCAA y EELL y contratosMenoresPerfilesContratantes.atom para menores
    ```
    curl -sO "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_202508.zip"
    ```
@@ -205,7 +205,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **irpf-por-municipio** · Renta y declarantes de IRPF por municipio y tramo, todos los ejercicios
 - entrada: ine-municipio
-1. `aeat-estadisticas`: IRPFmunicipios.csv (31 MB, separador ;, decimal coma) con una fila por ejercicio (EJER), tramo (TRAMO) y municipio (MUNI_DEF) y una columna MUNI_n por variable; MUNI_DEF es un código propio, comprobar en la documentación de la estadística la equivalencia con el INE antes de cruzar
+1. `aeat-estadisticas`: IRPFmunicipios.csv (31 MB, separador ;, decimal coma, 2013-2023) con una fila por ejercicio (EJER), tramo (TRAMO) y municipio (MUNI_DEF) y una columna MUNI_n por variable; MUNI_DEF no es el código INE (4 es Albacete, 02003) y la equivalencia está en AyudaCSV_AnuarioMunicipal.pdf; celdas vacías como NULL literal; sin País Vasco ni Navarra
    ```
    curl -sO "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Anuario_estadistico/Exportacion/IRPFmunicipios.csv"
    ```
@@ -326,8 +326,8 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
    ```
    curl -s "https://cima.aemps.es/cima/rest/medicamento?cn=708201"
    ```
-2. `aemps-cima-api`: docSegmentado/contenido/1?nregistro={nreg}&seccion=4.1 devuelve una sección de la ficha técnica en HTML; PDF estable en /cima/pdfs/ft/{nreg}/FT_{nreg}.pdf
-3. `aemps-cima-api`: psuministro lista los problemas de suministro activos por cn; registroCambios?fecha=dd/mm/aaaa permite sincronizar sin rebajar todo; nomenclátor completo en prescripcion.zip, regenerado a diario
+2. `aemps-cima-api`: docSegmentado/contenido/1?nregistro={nreg}&seccion=4.1 devuelve la sección de la ficha técnica en JSON [{seccion, titulo, contenido, orden}] (HTML solo con Accept text/html); PDF estable en /cima/pdfs/ft/{nreg}/FT_{nreg}.pdf
+3. `aemps-cima-api`: psuministro lista los problemas de suministro activos por cn; registroCambios?fecha=dd/mm/aaaa sincroniza sin rebajar todo (sin orden por fecha); nomenclátor completo en prescripcion.zip, regenerado a diario y que exige User-Agent de navegador (403 sin él)
    ```
    curl -s "https://cima.aemps.es/cima/rest/psuministro"
    ```
@@ -355,7 +355,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - salida: XML OAI-PMH paginado con resumptionToken
 
 **tabla-pcaxis-a-csv** · Descargar como CSV una tabla de cualquier portal PC-Axis (INE, EDUCAbase, criminalidad, CULTURAbase) sin navegador
-1. `ine-api-tempus`: INE, cambiar js por csv en la API (csv/ES/DATOS_TABLA/{id}?nult=n): tabulador, ISO-8859-15 con BOM
+1. `ine-api-tempus`: INE, cambiar js por csv en la API (csv/ES/DATOS_TABLA/{id}): tabla entera, ignora nult; tabulador, UTF-8 con BOM
    ```
    curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=12"
    ```
@@ -412,7 +412,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
    ```
    curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_tc.csv"
    ```
-2. `bde-estadisticas`: favoritas?idioma=es&series={cod} da el último valor; listaSeries?idioma=es&series={cod}&rango=MAX la serie completa (rangos por frecuencia); la respuesta va siempre en gzip, usar --compressed
+2. `bde-estadisticas`: favoritas?idioma=es&series={cod} da el último valor; listaSeries?idioma=es&series={cod}&rango=MAX la serie, pero MAX devuelve como mucho las 1000 observaciones más recientes sin aviso y en diarias da 412: completar con rango=AAAA; la respuesta va siempre en gzip, usar --compressed
    ```
    curl -s --compressed "https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472"
    ```
@@ -480,9 +480,9 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - salida: HTML con la lista de convenios (sin API ni exportación localizada)
 
 **deficit-y-ejecucion-presupuestaria** · Déficit mensual de las Administraciones Públicas y ejecución del presupuesto del Estado
-1. `igae-ejecucion-presupuestaria`: Operaciones no financieras mensuales por subsector en M_AACC_{AAAA}.xlsx (URL predecible por año) y serie anual en CAP_Serie.xlsx
+1. `igae-ejecucion-presupuestaria`: Operaciones no financieras mensuales de la Administración Central, acumuladas desde enero, en M_AACC_{AAAA}.xlsx (URL predecible por año; exige User-Agent de navegador) y serie anual en CAP_Serie.xlsx
    ```
-   curl -sO "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AACC-M/M_AACC_2026.xlsx"
+   curl -sO -A "Mozilla/5.0" "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AACC-M/M_AACC_2026.xlsx"
    ```
 2. `igae-ejecucion-presupuestaria`: Ejecución mensual del presupuesto del Estado desde la página imejecucionpresupuesto.aspx (enlaces a xlsx por mes)
 3. `hacienda-ovef`: Ejecución trimestral de las entidades locales en un xls por trimestre desde 2017
@@ -513,7 +513,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **geometria-seccion-censal** · Geometría de las secciones censales, distritos o municipios de un año para mapear datos del INE
 - entrada: seccion-censal, ine-municipio
-1. `ine-cartografia-censal`: seccionado_{AAAA}.zip del mismo año que el dato (65 MB, shapefile ETRS89 UTM 30); CUSEC es la sección de 10 dígitos, CUDIS el distrito y CUMUN el municipio; disolver por CUMUN para municipios
+1. `ine-cartografia-censal`: seccionado_{AAAA}.zip del mismo año que el dato (65 MB, shapefile ETRS89 UTM 30; en geopandas con la ruta interna zip://seccionado_2026.zip!carpeta/SECC_CE_20260101.shp); CUSEC es la sección de 10 dígitos, CUDIS el distrito y CUMUN el municipio; también por la API OGC del INE (TIPO SECCIONADO)
    ```
    curl -sO "https://www.ine.es/prodyser/cartografia/seccionado_2026.zip"
    ```
@@ -541,7 +541,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
    ```
    curl -s -H "Authorization: Bearer $DATACOMEX_TOKEN" "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=ALLM&pa=001&ta=2204&pr=ALL"
    ```
-3. `aeat-estadisticas`: Para agregados de comercio exterior sin registro, las estadísticas de la AEAT (Aduanas) en el anuario; la fuente primaria de DataComex
+3. `aeat-estadisticas`: Para comercio exterior sin registro, la AEAT publica el detalle en MAXIMA_DESAGREGACION_{AAAA}.csv (572 MB, sin cabecera, punto decimal; ficha aeat-estadisticas), la fuente primaria de DataComex
 - salida: JSON con Resultados (flujo, periodo, país, provincia, taric, euros y kilos como texto con coma decimal)
 
 **poblacion-renta-alquiler-por-municipio** · Población, renta media y precio del alquiler de un municipio con las tablas concretas del INE
@@ -576,9 +576,9 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Actos societarios inscritos en el Registro Mercantil → `borme-api-sumario` (sin búsqueda por empresa; recorrer días y provincias)
 
 **Economía, finanzas y mercados**
-- Euríbor, tipos de interés y de cambio, crédito, balanza de pagos → `bde-estadisticas`
+- Euríbor, tipos de interés y de cambio, crédito, balanza de pagos → `bde-estadisticas` (listaSeries con rango=MAX corta en las 1000 observaciones más recientes sin aviso; completar con rango=AAAA)
 - Deuda pública por Administración (Protocolo de Déficit Excesivo) → `bde-estadisticas` (capítulo SB_DEUAAPP; histórico también en airef-datos)
-- Subastas del Tesoro y deuda del Estado por instrumento y tenedor → `tesoro-estadisticas`
+- Subastas del Tesoro y deuda del Estado por instrumento y tenedor → `tesoro-estadisticas` (año en curso en 11.xlsx e históricos anuales; el HTML de subastas mezcla decimales con coma y con punto)
 - Previsiones macroeconómicas y estimación del PIB en tiempo real → `airef-datos`
 - Entidades supervisadas, hechos relevantes e informes financieros de cotizadas → `cnmv-registros` (sin API; formularios ASP.NET, XML mensual de IIC y RSS)
 - Líneas ICO y avales por beneficiario → `ico-datos` (no hay datos descargables, solo memoria y cuentas en PDF)
@@ -608,11 +608,18 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Padrón, nacimientos, defunciones y migraciones → `ine-api-tempus`
 - Índice de precios de vivienda y de alquiler → `ine-api-tempus`
 - Población de una entidad singular, núcleo o diseminado (Nomenclátor) → `ine-codigos-territoriales` (POST a nomen2/DescargaTabla por nombre de población (xls o csv), sin clave; la API Tempus no baja del municipio)
+- PIB municipal, contabilidad trimestral y defunciones por barrio de la Comunidad de Madrid → `comunidad-madrid-estadistica-api` (no está en el INE; municipios con código INE de 5 dígitos)
+- Estadística oficial de Cataluña por municipio, comarca o sección censal (padrón, renta, PIB, afiliación) → `idescat-api` (municipios con 6 dígitos (INE más dígito de control); el INE de 5 se ignora y devuelve todos sin error)
+- Ficha resumen de un municipio catalán (población, renta, paro, vivienda) en una llamada → `idescat-api` (EMEX; la población es la del Censo anual, no la del padrón)
+- Población por municipio andaluz desde 1996 y estadística propia del IECA → `ieca-api-badea` (los filtros usan ids internos de miembro, no años ni códigos INE)
+- Indicadores coyunturales por provincia andaluza (IPC, EPA, paro, PIB) → `ieca-api-badea` (INDEA; cada código fija tipo de dato y base)
+- Estadísticas por comarca valenciana (pobreza, empresas, industria, cultivos) → `ive-pegv-bancos-datos` (el INE no publica comarcas; comarcas solo por nombre y agrupación nueva desde 2023)
 
 **Contratación pública y subvenciones**
 - Licitaciones, adjudicaciones y contratos menores de todas las Administraciones → `placsp-datos-abiertos`
 - Convocatorias y concesiones de subvenciones, ayudas de Estado, minimis, grandes beneficiarios → `bdns-api`
 - Empresas clasificadas para contratar (ROLECE) → `hacienda-registro-licitadores` (solo con certificado electrónico)
+- Prohibiciones de contratar vigentes → `hacienda-registro-licitadores` (XML público del visor del ROLECE; el NIF va oculto, cruzar por nombre)
 
 **Empleo y Seguridad Social**
 - Paro registrado, demandantes y contratos por municipio → `sepe-estadisticas`
@@ -628,6 +635,17 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - NIF y relaciones de facturación de un organismo público → `face-facturas`
 - Boletín de empleo público y códigos SIA de procedimientos → `pag-administracion-gob-es`
 - Altos cargos, retribuciones, agendas y estadísticas de derecho de acceso → `transparencia-portal` (pocas descargas; contratos y subvenciones sin ficheros)
+- Datos abiertos de la Comunidad de Madrid (calidad del aire, padrón, centros, registros) por API → `comunidad-madrid-datos-abiertos` (CKAN; el datastore puede tener menos filas que el CSV (5000 de 18718 en el padrón); descargar el recurso)
+- Padrón de la ciudad de Madrid por distrito, barrio, sección censal y edad → `ayuntamiento-madrid-datos-abiertos` (CSV mensual del conjunto 200076-0-padron; la API dinámica se quedó en 2023)
+- Calidad del aire y tráfico en tiempo real de la ciudad de Madrid → `ayuntamiento-madrid-datos-abiertos` (calair_tiemporeal e informo pm.xml; las horas aún no medidas llegan como 0 con validación N)
+- Accidentes de tráfico de la ciudad de Madrid → `ayuntamiento-madrid-datos-abiertos` (un CSV por año en 300228-0; una fila por persona, agrupar por num_expediente)
+- GTFS del Consorcio de Transportes de Madrid → `comunidad-madrid-datos-abiertos` (el conjunto enlaza a ArcGIS; el ZIP sale de /sharing/rest/content/items/{id}/data)
+- Registro de entidades, contratación o subvenciones (RAISC) de la Generalitat de Catalunya → `gencat-dades-obertes` (Socrata; sin $limit corta a 1000 filas; buscar en catalán; el RAISC trae codi_bdns)
+- Población de Barcelona por barrio o sección censal del último año → `ayuntamiento-barcelona-datos-abiertos` (padrón municipal, no cifra oficial; el Idescat por sección acaba en 2022; solo el datastore es automatizable)
+- Disposiciones del BOJA por fecha con sumario y PDF → `junta-andalucia-datos-abiertos` (API v0 aparte del CKAN; ordenar por dateUTC y trocear por día)
+- Datos abiertos de la Junta de Andalucía y filas de sus CSV por API → `junta-andalucia-datos-abiertos` (cambiar el host interno de los recursos subidos por www.juntadeandalucia.es)
+- Datos abiertos de la Generalitat Valenciana (contratos, ERTE, turismo, cultura) por API → `gva-dadesobertes-api` (CKAN con datastore; el órgano real va en origen_datos, no en organization)
+- Contratos adjudicados por la Generalitat Valenciana, incluidos los menores → `gva-dadesobertes-api` (un conjunto por año (eco-gvo-contratos-AAAA); importes con coma decimal; URL_LICITACION enlaza con PLACSP)
 
 **Territorio, catastro y cartografía**
 - Datos de un inmueble o parcela por referencia catastral, dirección o coordenadas → `catastro-ovc` (bloqueo por IP tras ráfagas de unas 15 peticiones)
@@ -737,31 +755,32 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Estadística judicial y sentencias → ninguna (Poder Judicial (CGPJ, CENDOJ) fuera del alcance actual)
 - Ayuda oficial al desarrollo y acción exterior → ninguna (sin fuente en el catálogo todavía)
 - Extranjeros con certificado de registro o tarjeta de residencia, autorizaciones y protección internacional → ninguna (Observatorio Permanente de la Inmigración en inclusion.gob.es; el host respondió 403 (Akamai) a IP de centro de datos el 2026-09-30; verificar desde otra red)
+- Población empadronada por código postal en la Comunitat Valenciana → ninguna (el IVE la muestra solo en Tableau Public; sin descarga estructurada localizada el 2026-10-01)
 
 ## Identificadores para cruzar datos
 
 | id | formato | regex | ejemplo | emisor | lo usan |
 |---|---|---|---|---|---|
-| ine-municipio | 5 dígitos, provincia (2) + municipio (3); algunos ficheros añaden un sexto dígito de control | `^\d{5}$` | 28079 | ine-codigos-territoriales | mapa-sigpac, cis-estudios, ine-codigos-territoriales, miteco-calidad-aire, aemet-opendata, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas, mitma-opendata-movilidad |
-| ine-provincia | 2 dígitos, 01 a 52 | `^(0[1-9]|[1-4]\d|5[0-2])$` | 28 | ine-codigos-territoriales | mapa-sigpac, datacomex, cis-estudios, minetur-precios-carburantes, miteco-energia-estadisticas, ine-codigos-territoriales, ine-microdatos, dir3-directorio, miteco-calidad-aire, sanidad-portal-estadistico, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas |
-| ine-entidad-singular | 11 dígitos, municipio INE (5) + entidad colectiva (2) + entidad singular (2) + núcleo o diseminado (2) | `^\d{11}$` | 01001000100 | ine-codigos-territoriales | ine-codigos-territoriales, mtdfp-cobertura-banda-ancha |
-| ccaa | 2 dígitos, 01 Andalucía a 19 Melilla, en el orden del INE | `^(0[1-9]|1\d)$` | 13 | ine-codigos-territoriales | ine-codigos-territoriales, ine-microdatos, isciii-cne, sanidad-portal-estadistico, cnig-centro-descargas, idee-servicios, ine-cartografia-censal |
-| nuts | ES más 1 a 3 caracteres (ES1, ES11, ES111) | `^ES[1-7]\d{0,2}$` | ES300 | — | ine-cartografia-censal |
-| seccion-censal | 10 dígitos, municipio (5) + distrito (2) + sección (3) | `^\d{10}$` | 2807901001 | ine-cartografia-censal | ine-cartografia-censal |
-| referencia-catastral | 14 caracteres alfanuméricos (parcela) o 20 (inmueble, con 4 dígitos y 2 letras de control) | `^[0-9A-Z]{14}(\d{4}[A-Z]{2})?$` | 9872023VH5797S0001WX | catastro-ovc | mapa-sigpac, catastro-ovc |
+| ine-municipio | 5 dígitos, provincia (2) + municipio (3); algunos ficheros añaden un sexto dígito de control | `^\d{5}$` | 28079 | ine-codigos-territoriales | mapa-sigpac, cis-estudios, comunidad-madrid-estadistica-api, idescat-api, ieca-api-badea, ine-codigos-territoriales, ive-pegv-bancos-datos, ayuntamiento-madrid-datos-abiertos, comunidad-madrid-datos-abiertos, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, miteco-calidad-aire, aemet-opendata, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas, mitma-opendata-movilidad |
+| ine-provincia | 2 dígitos, 01 a 52 | `^(0[1-9]|[1-4]\d|5[0-2])$` | 28 | ine-codigos-territoriales | mapa-sigpac, datacomex, cis-estudios, minetur-precios-carburantes, miteco-energia-estadisticas, idescat-api, ieca-api-badea, ine-codigos-territoriales, ine-microdatos, dir3-directorio, gva-dadesobertes-api, aeat-estadisticas, miteco-calidad-aire, sanidad-portal-estadistico, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas |
+| ine-entidad-singular | 11 dígitos, municipio INE (5) + entidad colectiva (2) + entidad singular (2) + núcleo o diseminado (2) | `^\d{11}$` | 01001000100 | ine-codigos-territoriales | ine-codigos-territoriales, mtdfp-cobertura-banda-ancha, idee-servicios |
+| ccaa | 2 dígitos, 01 Andalucía a 19 Melilla, en el orden del INE | `^(0[1-9]|1\d)$` | 13 | ine-codigos-territoriales | ine-codigos-territoriales, ine-microdatos, aeat-estadisticas, isciii-cne, sanidad-portal-estadistico, cnig-centro-descargas, idee-servicios, ine-cartografia-censal |
+| nuts | ES más 1 a 3 caracteres (ES1, ES11, ES111) | `^ES[1-7]\d{0,2}$` | ES300 | — | placsp-datos-abiertos, comunidad-madrid-estadistica-api, idee-servicios, ine-cartografia-censal |
+| seccion-censal | 10 dígitos, municipio (5) + distrito (2) + sección (3) | `^\d{10}$` | 2807901001 | ine-cartografia-censal | idescat-api, ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, ine-cartografia-censal |
+| referencia-catastral | 14 caracteres alfanuméricos (parcela) o 20 (inmueble, con 4 dígitos y 2 letras de control) | `^[0-9A-Z]{14}(\d{4}[A-Z]{2})?$` | 9872023VH5797S0001WX | catastro-ovc | mapa-sigpac, gva-dadesobertes-api, catastro-ovc, cnig-centro-descargas |
 | referencia-sigpac | provincia:municipio:agregado:zona:polígono:parcela:recinto, números separados por dos puntos | `^\d{1,2}:\d{1,3}:\d+:\d+:\d+:\d+:\d+$` | 28:15:0:0:3:9000:6 | mapa-sigpac | mapa-sigpac |
 | idema | 4 o 5 caracteres alfanuméricos | `^[0-9A-Z]{4,5}$` | 3195 | aemet-opendata | aemet-opendata |
-| nif | DNI (8 dígitos y letra), NIE (X, Y o Z, 7 dígitos y letra) o NIF de persona jurídica (letra, 7 dígitos y control) | `^(\d{8}[A-Z]|[XYZ]\d{7}[A-Z]|[A-HJ-NP-SUVW]\d{7}[0-9A-J])$` | Q1132001G | — | fega-beneficiarios-pac, aei-convocatorias, bdns-api, dir3-directorio, face-facturas |
-| dir3 | letra (E, L, A, U, I) y 8 dígitos, o dos letras (LA, EA) y 7 dígitos | `^([A-Z]\d{8}|[A-Z]{2}\d{7})$` | E00003901 | dir3-directorio | placsp-datos-abiertos, datos-gob-es-api, dir3-directorio, face-facturas |
+| nif | DNI (8 dígitos y letra), NIE (X, Y o Z, 7 dígitos y letra) o NIF de persona jurídica (letra, 7 dígitos y control) | `^(\d{8}[A-Z]|[XYZ]\d{7}[A-Z]|[A-HJ-NP-SUVW]\d{7}[0-9A-J])$` | Q1132001G | — | fega-beneficiarios-pac, aei-convocatorias, bdns-api, placsp-datos-abiertos, ayuntamiento-barcelona-datos-abiertos, dir3-directorio, face-facturas, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, igae-ejecucion-presupuestaria |
+| dir3 | letra (E, L, A, U, I) y 8 dígitos, o dos letras (LA, EA) y 7 dígitos | `^([A-Z]\d{8}|[A-Z]{2}\d{7})$` | E00003901 | dir3-directorio | placsp-datos-abiertos, ayuntamiento-madrid-datos-abiertos, datos-gob-es-api, dir3-directorio, face-facturas, gencat-dades-obertes, igae-ejecucion-presupuestaria |
 | sia | 6 o 7 dígitos | `^\d{6,7}$` | 200125 | pag-administracion-gob-es | — |
-| invente | código numérico del Inventario de Entes del Sector Público | — | — | igae-ejecucion-presupuestaria | bdns-api |
-| bdns | 6 dígitos | `^\d{6}$` | 800000 | bdns-api | bdns-api |
-| cpv | 8 dígitos, opcionalmente guion y dígito de control | `^\d{8}(-\d)?$` | 45000000-7 | — | placsp-datos-abiertos |
+| invente | INV y 8 dígitos, código del Inventario de Entes del Sector Público | `^INV\d{8}$` | INV00000102 | igae-ejecucion-presupuestaria | bdns-api, igae-ejecucion-presupuestaria |
+| bdns | 6 dígitos | `^\d{6}$` | 800000 | bdns-api | bdns-api, gencat-dades-obertes |
+| cpv | 8 dígitos, opcionalmente guion y dígito de control | `^\d{8}(-\d)?$` | 45000000-7 | — | placsp-datos-abiertos, gva-dadesobertes-api |
 | cnae | sección (letra A a U) o 2 a 4 dígitos (división, grupo, clase) | `^([A-U]|\d{2,4})$` | 4711 | — | mites-estadisticas, segsocial-estadisticas, miteco-prtr |
 | codigo-convenio | 14 dígitos | `^\d{14}$` | — | mites-estadisticas | mites-estadisticas |
 | cn-medicamento | 6 dígitos | `^\d{6}$` | 708201 | aemps-cima-api | aemps-cima-api, sanidad-nomenclator-facturacion |
 | boe-id | BOE-A-AAAA-NNNNN (disposición), BOE-B-AAAA-NNNNN (anuncio), BORME-A-AAAA-NNN-PP (PP código de provincia) | `^(BOE-[ABC]-\d{4}-\d{1,6}|BORME-[ABC]-\d{4}-\d{1,5}(-\d{2})?)$` | BOE-A-1978-31229 | boe-api-sumario | boe-api-legislacion-consolidada, boe-api-sumario, boe-eli, borme-api-sumario |
-| eli | URI https://www.boe.es/eli/es/{tipo}/{AAAA}/{MM}/{DD}/{num} con sufijo /con (consolidado) o /dof (publicado) | `^https://www\.boe\.es/eli/es(-[a-z]{2})?/[a-z]+/\d{4}/\d{2}/\d{2}/[^/]+(/(con|dof))?$` | https://www.boe.es/eli/es/lo/2018/12/05/3/con | boe-eli | boe-api-legislacion-consolidada, boe-eli |
+| eli | URI https://www.boe.es/eli/es/{tipo}/{AAAA}/{MM}/{DD}/{num} con sufijo /con (consolidado) o /dof (publicado) | `^https://www\.boe\.es/eli/es(-[a-z]{2})?/[a-z]+/\d{4}/\d{2}/\d{2}/[^/]+(/(con|dof))?$` | https://www.boe.es/eli/es/lo/2018/12/05/3/con | boe-eli | gencat-dades-obertes, boe-api-legislacion-consolidada, boe-eli |
 
 **ine-municipio**
 - trampa: cargar siempre como texto; como entero pierde el cero inicial de Álava a Barcelona (01 a 08)
@@ -779,15 +798,20 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **ine-entidad-singular**
 - trampa: los cinco primeros dígitos son el código INE de municipio; el Nomenclátor del INE lo muestra en tres pares (colectiva, singular, núcleo) tras provincia y municipio
-- vía `ine-codigos-territoriales`: búsqueda por nombre en nomen2/tabla.do (POST) con población por sexo, edad o nacionalidad desde 2003
+- vía `ine-codigos-territoriales`: búsqueda por nombre en nomen2/tabla.do (POST) con población por sexo, edad o nacionalidad desde 2000; completo en Nacional_{AAAA}.zip
 - vía `mtdfp-cobertura-banda-ancha`: columna Código ESP de la hoja ES del fichero de cobertura 2013-2020 (61.819 entidades)
+- vía `idee-servicios`: codine en api-features.ign.es/collections/nuc, con polígono y habitantes
 
 **ccaa**
 - trampa: el orden no es alfabético ni el de Eurostat (NUTS2 ES11...)
 - vía `isciii-cne`: MoMo usa cod_ine_ambito con este código para ambito ccaa
+- vía `minetur-precios-carburantes`: IDCCAA propio, con 07 y 08 intercambiados respecto al INE; el resto coincide
+- vía `ieca-api-badea`: C01 a C18 en BADEA, con C07 Castilla-La Mancha y C08 Castilla y León como en MINETUR
 
 **nuts**
 - trampa: NUTS3 coincide con la provincia salvo islas, Ceuta y Melilla; lo emite Eurostat, no hay fuente en el catálogo
+- vía `placsp-datos-abiertos`: CountrySubentityCode (NUTS-2021) en RealizedLocation de cada licitación
+- vía `idee-servicios`: codnut1 a codnut3 en api-features.ign.es/collections/administrativeunit
 
 **seccion-censal**
 - trampa: las secciones se redibujan cada año; usar la geometría del mismo año que el dato
@@ -799,6 +823,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - trampa: los códigos de municipio del Catastro son propios, no INE
 - vía `catastro-ovc`: coordenadas a referencia con Consulta_RCCOOR; datos del inmueble con Consulta_DNPRC
 - vía `mapa-sigpac`: parcela SIGPAC a referencia catastral de 14 caracteres con refcatparcela
+- vía `cnig-centro-descargas`: refCatastral de 14 caracteres en los portales del geocoder de CartoCiudad
 
 **referencia-sigpac**
 - trampa: los códigos de provincia y municipio son los del INE; polígono y parcela coinciden con Catastro en rústica, el resto no
@@ -824,7 +849,9 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - trampa: identifica el procedimiento, no el organismo; sin descarga abierta del catálogo SIA
 
 **invente**
-- trampa: formato no verificado; consultar en BasesDatos/Invente
+- trampa: el listado da fechaAlta en dd/mm/aaaa y la ficha en ISO; 2.057 de 4.801 entes no tienen DIR3
+- vía `igae-ejecucion-presupuestaria`: EntidadesSPI_ConFiltros?nif= o ?codDir3= de la API de INVENTE devuelve CodigoInvente
+- vía `bdns-api`: codigoInvente en las convocatorias y concesiones (INV00000095 es la AECID)
 
 **bdns**
 - trampa: es la clave estable de la convocatoria; el título varía y los extractos en el BOE lo citan
@@ -898,6 +925,37 @@ Valores que una API exige y no se adivinan (ids internos, códigos numéricos, i
 - nota: Los geo_ids de comunidades autónomas probados el 2026-09-30 no devolvieron datos; no localizada la lista oficial
 - 8741=Península · 8742=Canarias · 8743=Baleares
 
+**bde-series** · `bde-estadisticas` · series={code} en favoritas y listaSeries; nombre y frecuencia comprobados en favoritas; lista completa en catalogo_{be|tc|ti|si}.csv (verificado 2026-10-01)
+- D_1NBAF472=Euríbor a un año (mensual) · DTCCBCEUSDEUR.B=Dólares estadounidenses por euro (diaria) · DTNPDE2010_P0000P_PS_APU=Deuda PDE del total de AAPP en % del PIB (trimestral) · D_1JA0D000=Paro registrado (mensual desde 1933; MAX solo da las 1000 últimas)
+
+**madrid-distritos** · `ayuntamiento-madrid-datos-abiertos` · COD_DISTRITO como texto en filters del datastore y cod_distrito en la API dinámica; en eDatos del Instituto, 28079_D{2 dígitos} (verificado 2026-10-01)
+- nota: lista con datastore_search?resource_id=200076-2-padron-csv&fields=COD_DISTRITO,DESC_DISTRITO&distinct=true
+- 1=Centro · 2=Arganzuela · 3=Retiro · 4=Salamanca · 5=Chamartín · 6=Tetuán · 7=Chamberí · 8=Fuencarral-El Pardo · 9=Moncloa-Aravaca · 10=Latina · 11=Carabanchel · 12=Usera · 13=Puente de Vallecas · 14=Moratalaz · 15=Ciudad Lineal · 16=Hortaleza · 17=Villaverde · 18=Villa de Vallecas · 19=Vicálvaro · 20=San Blas-Canillejas · 21=Barajas
+
+**iecm-datasets** · `comunidad-madrid-estadistica-api` · {code} en /statistical-resources/v1.0/datasets/IECM/{code}/~latest.json; el prefijo es la operación; lista completa con datasets.json?limit=1000 y offset (verificado 2026-10-01)
+- 054_000001=PIB total y per cápita por rama y municipio · 050_000001=Contabilidad trimestral de la Comunidad de Madrid (oferta) · 012_000032=Nacidos vivos por distrito y barrio de Madrid · 017_000024=Defunciones por distrito y barrio de Madrid · 130_000016=Afiliaciones a la Seguridad Social (mensual)
+
+**idescat-taules** · `idescat-api` · {estadistica}/{nodo}/{tabla} en /taules/v2/{code}/{geo}/data; lista completa navegando desde /taules/v2 (verificado 2026-10-01)
+- pmh/446/477=Población por sexo (1998-2025; geo cat, prov, at, com, mun, ac, dis, sec) · pmh/1180/8078=Población por sexo y edad año a año (desde 2014; 2000-2013 en la tabla 1063) · rfdbc/21181/25017=Renta familiar disponible bruta y por habitante (geo cat, at, com, mun) · irpf/4070/3893=IRPF, base imponible y cuota por declarante · afi/8604/8704=Afiliados a la Seguridad Social por residencia y sexo · pibt/21130/24940=PIB trimestral en volumen, oferta, corregido (solo Cataluña)
+
+**idescat-emex** · `idescat-api` · i={code} en /emex/v1/dades.json; todos los ids salen de dades.json?id={municipio de 6 dígitos} (verificado 2026-10-01)
+- f171=Población (Censo anual del INE) · f7=Renta familiar disponible bruta por habitante · f242=Paro registrado
+
+**gencat-datasets** · `gencat-dades-obertes` · /resource/{code}.json; lista completa con /api/catalog/v1?domains=analisi.transparenciacatalunya.cat&only=dataset&limit=2000 (verificado 2026-10-01)
+- y6fz-g3ff=Registro de entidades jurídicas · ybgg-dgi6=Contratación pública (publicaciones) · s9xt-n979=Concesiones del RAISC · t2h3-cgys=Alojamientos turísticos · n6hn-rmy7=Normativa del DOGC
+
+**ieca-badea-miembros** · `ieca-api-badea` · {alias}={code} en /consulta/{consultaId}; lista completa con /jerarquia/{jerarquiaId}?consultaId={id}&alias={alias} (verificado 2026-10-01)
+- 180251=2025 (jerarquía 2 Anual) · 180232=2024 (jerarquía 2 Anual) · 3689=Hombres (jerarquía 22 Sexo) · 3690=Mujeres (jerarquía 22 Sexo)
+
+**indea-indicadores** · `ieca-api-badea` · codIndicador={code} en datosSerie; lista completa con indicadoresList (36 MB) (verificado 2026-10-01)
+- IPC2025_COICOP2018n20042=IPC índice general (mensual) · EPAbp2021m2005CNAE2025n22935=EPA tasa de paro (trimestral) · ECPn15972=Población total (trimestral) · CT2024n17646=PIB índice de volumen (trimestral)
+
+**ive-bdt-consultas** · `ive-pegv-bancos-datos` · cons={code} en https://bdt.gva.es/bdt/res_optimo_static.php?cons={code}&idioma=cas&form=csvpunto; lista navegando menuV.php y sel_optimo.php (verificado 2026-10-01)
+- C2D3883=Tasa de riesgo de pobreza por comarca (2012-2024) · C1D3402=Indicadores demográficos municipales (2002-2025) · C2V9662=Superficies de cultivo y riego por municipio (2002-2024, 36 MB) · C0D3442=Renta familiar disponible per cápita municipal (2010-2013, miles de euros) · C0D3783=Personal ocupado en la industria por comarca (2008-2024) · C1D4583=Hogares según tamaño por comarca (2014-2020)
+
+**ive-bdo-consultas** · `ive-pegv-bancos-datos` · cons={code} en https://bdo.gva.es/bdo/res_optimo_static.php?cons={code}&idioma=cas&form=csvcoma; se obtiene desde menuV.php?tema={operacion} (verificado 2026-10-01)
+- V0308_C1D0355=Empresas activas según tipo por municipio (2017-2025) · V0292_C2D0339=Empresas activas por condición jurídica y tamaño, Comunitat y provincias
+
 ## Rutas muertas
 
 URLs de documentación antigua que ya no sirven y su sustituta verificada.
@@ -918,7 +976,7 @@ URLs de documentación antigua que ya no sirven y su sustituta verificada.
 | https://transparencia.gob.es/transparencia/transparencia_Home/index.html | redirect | https://transparencia.gob.es/ | `transparencia-portal` | portal rediseñado; contenidos bajo /publicidad-activa/por-materias/ y /derecho-acceso/ | 2026-09-30 |
 | https://www.hacienda.gob.es/es-ES/CDI/Paginas/OVEELL/OVEntidadesLocales.aspx | 404 | https://www.hacienda.gob.es/es-ES/Areas%20Tematicas/Administracion%20Electronica/OVEELL/Paginas/OVEntidadesLocales.aspx | `hacienda-ovef` | — | 2026-09-30 |
 | https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadPublica/CPE/EjecucionPresupuestaria/Paginas/imMensualEstado.aspx | 404 | https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadPublica/CPE/EjecucionPresupuestaria/Paginas/imejecucionpresupuesto.aspx | `igae-ejecucion-presupuestaria` | — | 2026-09-30 |
-| https://pap.hacienda.gob.es/invente2/ | blocked | https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/BasesDatos/Invente/Paginas/inicio.aspx | `igae-ejecucion-presupuestaria` | rechazado por el WAF en la verificación; el 30/09/2026 ni siquiera se estableció la conexión | 2026-09-30 |
+| https://pap.hacienda.gob.es/invente2/ | blocked | https://www.pap.hacienda.gob.es/invente2/pagMenuPrincipalV2.aspx | `igae-ejecucion-presupuestaria` | sin www el proxy recibió 502; con www la raíz /invente2/ da 200 con Acceso Denegado y la API pública está en /Invente2/api | 2026-10-01 |
 | https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=resultados&idp=1254734710990 | 404 | https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=ultiDatos&idp=1254734710990 | `ine-codigos-territoriales` | la relación de municipios cuelga de menu=ultiDatos; los xlsx tienen URL fija en daco/daco42/codmun/ | 2026-09-30 |
 | https://www.mapama.gob.es/app/descargas/descargafichero.aspx | 404 | https://gis.miteco.gob.es/descargas/app/DescargaFichero | `miteco-banco-datos-naturaleza` | es la URL de los recursos ZIP del catálogo CKAN de MITECO; redirige a descargas-gis-miteco/descargafichero, que da 404 | 2026-09-30 |
 | https://www.mapama.gob.es/ | redirect | https://www.miteco.gob.es/ | `miteco-banco-datos-naturaleza` | el dominio antiguo redirige a mapa.gob.es (agricultura); lo ambiental está en miteco.gob.es | 2026-09-30 |
@@ -959,7 +1017,7 @@ URLs de documentación antigua que ya no sirven y su sustituta verificada.
 | https://www.mivau.gob.es/vivienda/estadisticas | 404 | https://www.mivau.gob.es/el-ministerio/observatorios-y-estadisticas | `mivau-precios-vivienda-alquiler` | los datos siguen en apps.fomento.gob.es, dominio antiguo sin redirección al nuevo | 2026-09-30 |
 | https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios/2020/enero-2020.html | 404 | https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios-20-45/2020/enero.html | `sepe-estadisticas` | la ruta municipios/{AAAA}/{mes}-{AAAA}.html solo existe hasta 2019 | 2026-09-30 |
 | https://ftpdatos.aemet.es/ | dns | https://opendata.aemet.es/opendata/api | `aemet-otros-servicios` | el FTP histórico de AEMET no resuelve | 2026-09-30 |
-| https://app.bde.es/bie_www/ | blocked | https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472 | `bde-estadisticas` | el buscador BIEST responde Request Rejected a las consultas automatizadas; la API bierest y los CSV no tienen ese bloqueo | 2026-09-30 |
+| https://app.bde.es/bie_www/ | blocked | https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472 | `bde-estadisticas` | el BIEST respondió Request Rejected a clientes automatizados el 2026-09-30 y 200 el 2026-10-01; la vía estable es la API bierest y los CSV | 2026-10-01 |
 | https://datos.gob.es/virtuoso/sparql | blocked | https://datos.gob.es/apidata/catalog/dataset.json?_pageSize=100&_page=0 | `datos-gob-es-api` | 403 del WAF en todos los intentos; la API REST pasa con reintentos | 2026-09-30 |
 | https://registrodelicitadores.gob.es/rolece/public/consulta_publica | 404 | https://visor.registrodelicitadores.gob.es/ | `hacienda-registro-licitadores` | ya no hay consulta pública sin certificado; solo el visor de certificados y el DEUC | 2026-09-30 |
 | https://extranjeros.inclusion.gob.es/es/ObservatorioPermanenteInmigracion/ | redirect | https://www.inclusion.gob.es/web/migraciones/homees/ObservatorioPermanenteInmigracion/ | `interior-criminalidad` | redirige al portal de migraciones, que respondió 403 (Akamai) desde centro de datos; no hay ficha del OPI hasta verificarlo desde otra red | 2026-09-30 |
@@ -969,11 +1027,20 @@ URLs de documentación antigua que ya no sirven y su sustituta verificada.
 | https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/publicaciones/Parque-vehiculos-Tablas-Estadisticas/Parque-de-vehiculos-Tablas-estadisticas-2025.xlsx | 404 | https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/dgt-en-cifras/publicaciones/Parque-de-vehiculos-Tablas-Estadisticas/Parque-de-vehiculos-Tablas-estadisticas-2025.xlsx | `dgt-estadisticas` | la carpeta pasó de Parque-vehiculos-Tablas-Estadisticas a Parque-de-vehiculos-Tablas-Estadisticas (con de); el nombre del fichero no cambió; las URL de los xlsx salen de la página dgt-en-cifras-detalle/{slug}/ | 2026-09-30 |
 | https://www.ign.es/wfs-inspire/hidrografia | 404 | https://servicios.idee.es/wfs-inspire/hidrografia | `idee-servicios` | los WFS temáticos INSPIRE (hidrografía, transportes, ocupación del suelo) viven en servicios.idee.es; www.ign.es solo mantiene ngbe y unidades-administrativas | 2026-09-30 |
 | https://www.ign.es/wfs-inspire/transportes | 404 | https://servicios.idee.es/wfs-inspire/transportes | `idee-servicios` | mismo caso que hidrografia | 2026-09-30 |
-| https://www.ign.es/wfs-inspire/ocupacion-suelo | error | https://servicios.idee.es/wfs-inspire/ocupacion-suelo | `idee-servicios` | responde 502 | 2026-09-30 |
+| https://www.ign.es/wfs-inspire/ocupacion-suelo | 404 | https://servicios.idee.es/wfs-inspire/ocupacion-suelo | `idee-servicios` | respondía 502 el 2026-09-30; en GeoJSON, api-features.idee.es/collections/landcoverunit | 2026-10-01 |
 | https://www.ign.es/wms-inspire/hidrografia | 404 | https://servicios.idee.es/wms-inspire/hidrografia | `idee-servicios` | también transportes, ocupacion-suelo y mdt; en www.ign.es quedan ign-base, pnoa-ma y unidades-administrativas | 2026-09-30 |
-| https://servicios.idee.es/wmts/mapa-raster | 404 | https://www.ign.es/wmts/mapa-raster | `idee-servicios` | el MTN ráster y la ortofoto (pnoa-ma) siguen en www.ign.es; servicios.idee.es solo tiene wmts/mdt | 2026-09-30 |
+| https://servicios.idee.es/wmts/mapa-raster | error | https://www.ign.es/wmts/mapa-raster | `idee-servicios` | el 2026-10-01 cerró la conexión sin respuesta; el MTN ráster y la ortofoto (pnoa-ma) siguen en www.ign.es | 2026-10-01 |
 | https://www.cis.es/detalle-ficha-estudio?idEstudio=14893 | redirect | https://www.cis.es/es/estudios/barometro-de-septiembre-2026 | `cis-estudios` | redirige al catálogo sin el estudio; la página de cada estudio es /es/estudios/{slug}, enumerable por sitemap.xml | 2026-09-30 |
 | https://www.cis.es/catalogo-estudios/resultados-definidos | 404 | https://www.cis.es/es/estudios/catalogo | `cis-estudios` | el catálogo nuevo se renderiza por JavaScript y sus consultas con q= o start= disparan el anti-bot | 2026-09-30 |
 | https://www.cis.es/cis/opencms/ES/index.html | redirect | https://www.cis.es/ | `cis-estudios` | portal OpenCms antiguo; las rutas 2_bancodedatos/estudios/ver.jsp responden 404 | 2026-09-30 |
 | https://www.inmujeres.gob.es/MujerCifras/ | 403 | https://www.inmujeres.gob.es/MujerCifras/Home.htm | `inmujeres-mujeres-cifras` | la raíz responde Your client is not allowed; las páginas de tema y los xls de /estadisticasweb/ sí | 2026-09-30 |
 | https://www.educacionyfp.gob.es/inee/ | redirect | https://www.educacionfpydeportes.gob.es/inee/portada.html | `inee-bases-datos` | también educacion.gob.es/inee; los ficheros llevan /inee/dam/jcr:{uuid}/ y HEAD responde 403 | 2026-09-30 |
+| https://www.cartociudad.es/geocoder/api/geocoder/find?q=Calle%20Iglesia%205,%20Madrid&type=portal&id=280790529087&portal=5 | 500 | https://www.cartociudad.es/geocoder/api/geocoder/candidates?q=calle%20iglesia%205,%20madrid&limit=4 | `cnig-centro-descargas` | ejemplo del PDF oficial del geocoder; los id actuales (13.PV.MUN_...) salen de candidates | 2026-10-01 |
+| https://datos.madrid.es/egob/catalogo.json | 404 | https://datos.madrid.es/api/3/action/package_search | `ayuntamiento-madrid-datos-abiertos` | la API del portal antiguo murió con la migración a CKAN; los nombres de conjunto conservan el número antiguo | 2026-10-01 |
+| https://datos.madrid.es/egob/catalogo/212531-10515086-calidad-aire-tiempo-real.txt | 404 | https://ciudadesabiertas.madrid.es/dynamicAPI/API/query/calair_tiemporeal.json | `ayuntamiento-madrid-datos-abiertos` | también en CSV cambiando la extensión de la consulta | 2026-10-01 |
+| https://www.madrid.org/desvan/ | 404 | https://iestadis.edatos.io | `comunidad-madrid-estadistica-api` | las tablas de los bancos Almudena, Baco y Desvan siguen en datos.comunidad.madrid (comunidad-madrid-datos-abiertos) | 2026-10-01 |
+| https://www.ine.es/prodyser/microdatos.htm | redirect | https://www.ine.es/dyngs/SER/index.htm?cid=1388 | `ine-microdatos` | meta refresh con 200 | 2026-10-01 |
+| https://www.ine.es/daco/daco42/codmun/diccionario20.xlsx | 404 | https://www.ine.es/daco/daco42/codmun/codmun20/20codmun.xlsx | `ine-codigos-territoriales` | la raíz solo sirve 2021-2026; los años anteriores están en codmun{AA}/ | 2026-10-01 |
+| https://www.ine.es/ftp/microdatos/epa/dr_EPA_2025.xlsx | 404 | https://www.ine.es/ftp/microdatos/epa/dr_EPA_2021.xlsx | `ine-microdatos` | el diseño de registro va por vigencia (2005, 2021 y 2026), no por año | 2026-10-01 |
+| https://registrodelicitadores.gob.es/rolece/static/manuales/Manuales%20de%20Usuario.zip | 404 | https://registrodelicitadores.gob.es/rolece/static/manuales/EsquemasXSD.zip | `hacienda-registro-licitadores` | — | 2026-10-01 |
+| https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorCSV | moved | https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=buscarProductos&especialidad=%25%25%25&d-4015021-e=1&6578706f7274=1 | `sanidad-nomenclator-facturacion` | devuelve la página HTML con 200; el CSV es la exportación del buscador | 2026-10-01 |

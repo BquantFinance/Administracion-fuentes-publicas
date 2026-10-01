@@ -7,7 +7,7 @@ antes de la primera petición.
 ## tls-chain-incomplete: certificados FNMT sin intermedio
 
 Muchos servidores públicos (airef.es, tesoro.es, registrodelicitadores.gob.es, energia.gob.es, mites.gob.es,
-universidades.gob.es, wms.mapama.gob.es, pestadistico.inteligenciadegestion.sanidad.gob.es) presentan solo el
+universidades.gob.es, wms.mapama.gob.es, pestadistico.inteligenciadegestion.sanidad.gob.es, buscadorcdi.gob.es) presentan solo el
 certificado final, emitido por una CA intermedia de FNMT-RCM (AC Componentes Informáticos, AC Servidores Seguros
 Tipo2...), y no envían el intermedio. Los navegadores lo recuperan por AIA; curl, requests, urllib y Node no. Las
 raíces FNMT sí están en certifi y en los sistemas, así que basta añadir los intermedios. Nunca desactivar la
@@ -59,11 +59,15 @@ Las APIs del BOE (sumarios, legislación consolidada, BORME) exigen `Accept: app
 `Accept: application/xml`. Sin cabecera, o con `*/*`, responden 400. Los errores llegan siempre en XML aunque se
 haya pedido JSON; comprobar el código HTTP antes de parsear.
 
+Variante verificada el 2026-10-01: www.agenciatributaria.es envía una intermedia FNMT firmada con SHA-1 y OpenSSL 3
+responde «CA signature digest algorithm too weak»; con el bundle de `fnmt_bundle.py` la cadena se completa con la
+intermedia vigente y responde 200.
+
 ## gzip-unannounced
 
-La API del Banco de España comprime siempre en gzip. Si el cliente no envía `Accept-Encoding`, el cuerpo llega
-comprimido sin `Content-Encoding`. `curl --compressed` lo resuelve; requests envía la cabecera por defecto y
-descomprime solo; con urllib usar `gzip.decompress(resp.read())` si los dos primeros bytes son `1f 8b`.
+La API del Banco de España comprime siempre en gzip, aunque el cliente no lo pida o envíe `Accept-Encoding: identity`.
+El 2026-09-30 llegaba sin `Content-Encoding`; el 2026-10-01, con `Content-Encoding: gzip`. `curl --compressed` y
+requests lo resuelven; con urllib usar `gzip.decompress(resp.read())` si los dos primeros bytes son `1f 8b`.
 
 ## latin1
 
@@ -80,10 +84,11 @@ ficha indica si existe un fichero o API que evite el formulario.
 
 ## waf-blocks-bots
 
-El buscador BIEST del Banco de España (app.bde.es/bie_www) rechaza clientes automatizados con "Request
-Rejected" aunque lleven User-Agent de navegador. No hay arreglo; usar la API y los catálogos CSV de la ficha.
+Un WAF o una prueba anti-bots rechaza clientes automatizados aunque lleven User-Agent de navegador. El buscador BIEST
+del Banco de España (app.bde.es/bie_www) lo hacía el 2026-09-30 con "Request Rejected" y el 2026-10-01 respondió 200
+a curl y requests; la vía estable sigue siendo la API y los catálogos CSV de la ficha.
 
-Otras formas del mismo bloqueo, verificadas el 2026-09-30 y sin arreglo lícito desde un script:
+Formas del bloqueo verificadas el 2026-09-30 y sin arreglo lícito desde un script:
 
 - Anubis (Digital.CSIC): la web, las páginas handle y la API REST devuelven 200 con una página "Making sure
   you're not a bot" que exige una prueba de trabajo en JavaScript; el endpoint OAI-PMH queda fuera del filtro.
@@ -187,6 +192,36 @@ El BOE no se publica los domingos (sí los festivos nacionales, con menos seccio
 ni los festivos; la API devuelve 404 esos días (verificado el 2026-10-01). Al iterar fechas, tratar 404 como día sin
 publicación, no como error. Algún día antiguo devuelve 500; reintentar
 una vez y saltar.
+
+## soft-errors-200
+
+Errores o consultas sin datos que responden HTTP 200: comprobar el contenido, no solo el código. Casos verificados
+el 2026-10-01: AEMET (cuerpo vacío sin clave y estado 404 o 429 dentro del JSON), BOE xml.php con un id inexistente
+(raíz `error`), ELI (página de error con title «Error 404»), INE Tempus (`{"status": ...}` en tablas grandes sin filtro),
+Idescat y eDatos de Madrid (un código de filtro inexistente se ignora o devuelve vacío), CNIG («Pagina no encontrada»),
+MINETUR (id inexistente con lista vacía), Banco de España (`errNum` 404 dentro de la lista en `favoritas`), IVE, IGAE
+y Central de Información de Hacienda (HTML con 200) y PLACSP (un ZIP inexistente es un HTML de 521 bytes). Patrón:
+validar Content-Type, tamaño mínimo y la clave esperada antes de guardar o parsear.
+
+## datastore-incomplete
+
+En los portales CKAN autonómicos y municipales el datastore (la API de filas) puede no coincidir con el fichero: en la
+Comunidad de Madrid el padrón tenía 5.000 de 18.718 filas, en la Junta de Andalucía una tabla 1.000 de 36.260 y en
+Barcelona un recurso 1.250 filas para un CSV de 539 MB; en la Generalitat Valenciana las copias del IVE van atrasadas.
+Comparar `total` de `datastore_search` con el fichero y, para tablas completas, descargar el recurso original
+(`/dataset/{name}/resource/{id}/download`).
+
+## waf-temporary-ban
+
+El WAF bloquea la IP para todo el host durante minutos. datos.madrid.es (Akamai) lo hace tras consultas a
+`datastore_search_sql`, cerca de un minuto; el Catastro, tras ráfagas de unas 15 peticiones. Espaciar las peticiones,
+cachear y no reintentar en bucle: cada intento alarga el bloqueo.
+
+## connection-reset-intermittent
+
+El servidor corta conexiones a ratos (reset o cierre en el saludo TLS) y la misma petición funciona al repetirla:
+los hosts de la Generalitat Valenciana (dadesobertes, pegv, bdo, bdt) y MINETUR (carburantes) el 2026-10-01.
+Reintentar con espera; en requests, `HTTPAdapter(max_retries=Retry(total=4, backoff_factor=2, allowed_methods=None))`.
 
 ## Ritmo de peticiones
 

@@ -13,8 +13,8 @@ Sector `legislacion-boletines` · 5 fuentes · índice generado por `scripts/bui
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [boe-api-legislacion-consolidada](boe-api-legislacion-consolidada.yaml) | BOE – API de legislación consolidada | api-rest | none | json, xml | daily | accept-header-required, errors-html-or-xml | 2026-10-01 |
-| [boe-api-sumario](boe-api-sumario.yaml) | BOE – API de sumarios | api-rest | none | json, xml, pdf, html | daily | accept-header-required, json-object-or-list, errors-html-or-xml, no-weekend-data | 2026-10-01 |
-| [boe-eli](boe-eli.yaml) | ELI – Identificador Europeo de Legislación en el BOE | download | none | html, rdf | daily | — | 2026-10-01 |
+| [boe-api-sumario](boe-api-sumario.yaml) | BOE – API de sumarios | api-rest | none | json, xml, pdf, html | daily | accept-header-required, json-object-or-list, errors-html-or-xml, no-weekend-data, soft-errors-200 | 2026-10-01 |
+| [boe-eli](boe-eli.yaml) | ELI – Identificador Europeo de Legislación en el BOE | download | none | html, rdf | daily | soft-errors-200 | 2026-10-01 |
 | [boe-feeds](boe-feeds.yaml) | BOE y BORME – Feeds RSS | feed | none | rss, xml | daily | latin1 | 2026-10-01 |
 | [borme-api-sumario](borme-api-sumario.yaml) | BORME – API de sumarios y actos mercantiles | api-rest, download | none | json, xml, pdf, html | daily | accept-header-required, json-object-or-list, errors-html-or-xml, no-weekend-data | 2026-10-01 |
 

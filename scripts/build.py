@@ -289,7 +289,7 @@ def main() -> None:
         "APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, "
         "endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.",
         "",
-        f"Fuentes: {len(sources)} · Recetas: {len(idx['recetas'])} · Alcance actual: Administración General del Estado · Generado: {date.today().isoformat()}",
+        f"Fuentes: {len(sources)} · Recetas: {len(idx['recetas'])} · Alcance actual: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Generado: {date.today().isoformat()}",
         "",
         "## Cómo usar este repo",
         "",

@@ -346,3 +346,124 @@ ree-geo-ids:
     - {code: "8741", name: "Península"}
     - {code: "8742", name: "Canarias"}
     - {code: "8743", name: "Baleares"}
+
+bde-series:
+  source: bde-estadisticas
+  use: "series={code} en favoritas y listaSeries; nombre y frecuencia comprobados en favoritas; lista completa en catalogo_{be|tc|ti|si}.csv"
+  verified: "2026-10-01"
+  entries:
+    - {code: "D_1NBAF472", name: "Euríbor a un año", note: "mensual"}
+    - {code: "DTCCBCEUSDEUR.B", name: "Dólares estadounidenses por euro", note: "diaria"}
+    - {code: "DTNPDE2010_P0000P_PS_APU", name: "Deuda PDE del total de AAPP en % del PIB", note: "trimestral"}
+    - {code: "D_1JA0D000", name: "Paro registrado", note: "mensual desde 1933; MAX solo da las 1000 últimas"}
+
+madrid-distritos:
+  source: ayuntamiento-madrid-datos-abiertos
+  use: "COD_DISTRITO como texto en filters del datastore y cod_distrito en la API dinámica; en eDatos del Instituto, 28079_D{2 dígitos}"
+  note: "lista con datastore_search?resource_id=200076-2-padron-csv&fields=COD_DISTRITO,DESC_DISTRITO&distinct=true"
+  verified: "2026-10-01"
+  entries:
+    - {code: "1", name: "Centro"}
+    - {code: "2", name: "Arganzuela"}
+    - {code: "3", name: "Retiro"}
+    - {code: "4", name: "Salamanca"}
+    - {code: "5", name: "Chamartín"}
+    - {code: "6", name: "Tetuán"}
+    - {code: "7", name: "Chamberí"}
+    - {code: "8", name: "Fuencarral-El Pardo"}
+    - {code: "9", name: "Moncloa-Aravaca"}
+    - {code: "10", name: "Latina"}
+    - {code: "11", name: "Carabanchel"}
+    - {code: "12", name: "Usera"}
+    - {code: "13", name: "Puente de Vallecas"}
+    - {code: "14", name: "Moratalaz"}
+    - {code: "15", name: "Ciudad Lineal"}
+    - {code: "16", name: "Hortaleza"}
+    - {code: "17", name: "Villaverde"}
+    - {code: "18", name: "Villa de Vallecas"}
+    - {code: "19", name: "Vicálvaro"}
+    - {code: "20", name: "San Blas-Canillejas"}
+    - {code: "21", name: "Barajas"}
+
+iecm-datasets:
+  source: comunidad-madrid-estadistica-api
+  use: "{code} en /statistical-resources/v1.0/datasets/IECM/{code}/~latest.json; el prefijo es la operación; lista completa con datasets.json?limit=1000 y offset"
+  verified: "2026-10-01"
+  entries:
+    - {code: "054_000001", name: "PIB total y per cápita por rama y municipio"}
+    - {code: "050_000001", name: "Contabilidad trimestral de la Comunidad de Madrid (oferta)"}
+    - {code: "012_000032", name: "Nacidos vivos por distrito y barrio de Madrid"}
+    - {code: "017_000024", name: "Defunciones por distrito y barrio de Madrid"}
+    - {code: "130_000016", name: "Afiliaciones a la Seguridad Social", note: "mensual"}
+
+idescat-taules:
+  source: idescat-api
+  use: "{estadistica}/{nodo}/{tabla} en /taules/v2/{code}/{geo}/data; lista completa navegando desde /taules/v2"
+  verified: "2026-10-01"
+  entries:
+    - {code: "pmh/446/477", name: "Población por sexo", note: "1998-2025; geo cat, prov, at, com, mun, ac, dis, sec"}
+    - {code: "pmh/1180/8078", name: "Población por sexo y edad año a año", note: "desde 2014; 2000-2013 en la tabla 1063"}
+    - {code: "rfdbc/21181/25017", name: "Renta familiar disponible bruta y por habitante", note: "geo cat, at, com, mun"}
+    - {code: "irpf/4070/3893", name: "IRPF, base imponible y cuota por declarante"}
+    - {code: "afi/8604/8704", name: "Afiliados a la Seguridad Social por residencia y sexo"}
+    - {code: "pibt/21130/24940", name: "PIB trimestral en volumen, oferta, corregido", note: "solo Cataluña"}
+
+idescat-emex:
+  source: idescat-api
+  use: "i={code} en /emex/v1/dades.json; todos los ids salen de dades.json?id={municipio de 6 dígitos}"
+  verified: "2026-10-01"
+  entries:
+    - {code: "f171", name: "Población (Censo anual del INE)"}
+    - {code: "f7", name: "Renta familiar disponible bruta por habitante"}
+    - {code: "f242", name: "Paro registrado"}
+
+gencat-datasets:
+  source: gencat-dades-obertes
+  use: "/resource/{code}.json; lista completa con /api/catalog/v1?domains=analisi.transparenciacatalunya.cat&only=dataset&limit=2000"
+  verified: "2026-10-01"
+  entries:
+    - {code: "y6fz-g3ff", name: "Registro de entidades jurídicas"}
+    - {code: "ybgg-dgi6", name: "Contratación pública (publicaciones)"}
+    - {code: "s9xt-n979", name: "Concesiones del RAISC"}
+    - {code: "t2h3-cgys", name: "Alojamientos turísticos"}
+    - {code: "n6hn-rmy7", name: "Normativa del DOGC"}
+
+ieca-badea-miembros:
+  source: ieca-api-badea
+  use: "{alias}={code} en /consulta/{consultaId}; lista completa con /jerarquia/{jerarquiaId}?consultaId={id}&alias={alias}"
+  verified: "2026-10-01"
+  entries:
+    - {code: "180251", name: "2025", note: "jerarquía 2 Anual"}
+    - {code: "180232", name: "2024", note: "jerarquía 2 Anual"}
+    - {code: "3689", name: "Hombres", note: "jerarquía 22 Sexo"}
+    - {code: "3690", name: "Mujeres", note: "jerarquía 22 Sexo"}
+
+indea-indicadores:
+  source: ieca-api-badea
+  use: "codIndicador={code} en datosSerie; lista completa con indicadoresList (36 MB)"
+  verified: "2026-10-01"
+  entries:
+    - {code: "IPC2025_COICOP2018n20042", name: "IPC índice general", note: "mensual"}
+    - {code: "EPAbp2021m2005CNAE2025n22935", name: "EPA tasa de paro", note: "trimestral"}
+    - {code: "ECPn15972", name: "Población total", note: "trimestral"}
+    - {code: "CT2024n17646", name: "PIB índice de volumen", note: "trimestral"}
+
+ive-bdt-consultas:
+  source: ive-pegv-bancos-datos
+  use: "cons={code} en https://bdt.gva.es/bdt/res_optimo_static.php?cons={code}&idioma=cas&form=csvpunto; lista navegando menuV.php y sel_optimo.php"
+  verified: "2026-10-01"
+  entries:
+    - {code: "C2D3883", name: "Tasa de riesgo de pobreza por comarca", note: "2012-2024"}
+    - {code: "C1D3402", name: "Indicadores demográficos municipales", note: "2002-2025"}
+    - {code: "C2V9662", name: "Superficies de cultivo y riego por municipio", note: "2002-2024, 36 MB"}
+    - {code: "C0D3442", name: "Renta familiar disponible per cápita municipal", note: "2010-2013, miles de euros"}
+    - {code: "C0D3783", name: "Personal ocupado en la industria por comarca", note: "2008-2024"}
+    - {code: "C1D4583", name: "Hogares según tamaño por comarca", note: "2014-2020"}
+
+ive-bdo-consultas:
+  source: ive-pegv-bancos-datos
+  use: "cons={code} en https://bdo.gva.es/bdo/res_optimo_static.php?cons={code}&idioma=cas&form=csvcoma; se obtiene desde menuV.php?tema={operacion}"
+  verified: "2026-10-01"
+  entries:
+    - {code: "V0308_C1D0355", name: "Empresas activas según tipo por municipio", note: "2017-2025"}
+    - {code: "V0292_C2D0339", name: "Empresas activas por condición jurídica y tamaño, Comunitat y provincias"}

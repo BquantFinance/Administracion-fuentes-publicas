@@ -13,7 +13,7 @@ from common import INDEX_FILES, SCHEMA, load_indices, load_sources, load_vocab
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 URL_RE = re.compile(r"^https?://\S+$")
-DEAD_STATUS = {"404", "400", "403", "503", "redirect", "moved", "reset", "blocked", "dns", "error", "empty"}
+DEAD_STATUS = {"404", "400", "403", "500", "503", "redirect", "moved", "reset", "blocked", "dns", "error", "empty"}
 CHECK_KEYS = {"url", "method", "headers", "status", "contains", "min_bytes", "read_bytes", "retries", "fnmt"}
 
 

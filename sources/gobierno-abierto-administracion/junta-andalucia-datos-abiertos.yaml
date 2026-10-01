@@ -1,0 +1,71 @@
+id: junta-andalucia-datos-abiertos
+name: Junta de Andalucía – Portal de datos abiertos (API CKAN y API v0 con BOJA)
+org: Junta de Andalucía
+level: ccaa
+sector: gobierno-abierto-administracion
+tags: [datos-abiertos, ckan, datastore, catalogo, andalucia, boja, openapi, presupuestos, educacion]
+summary: >-
+  Catálogo CKAN 2.10 de la Junta de Andalucía (832 conjuntos de 72 organismos, 260 del IECA): presupuestos,
+  tesorería, educación, medio ambiente, cultura. API JSON con datastore en 173 recursos y una API v0 aparte con
+  OpenAPI (BOJA desde 1979, RPT, agenda, subvenciones), sin autenticación.
+access: [api-rest, download]
+auth: none
+formats: [json, csv, xls, xlsx, ods, kml, rdf, txt]
+update: daily
+coverage: "Catálogo desde 2017; BOJA desde 1979 en la API v0"
+license: CC BY 4.0 en 786 de 832 conjuntos; 19 en CC BY-NC 4.0 y unos pocos «Consultar a la Consejería»
+base_url: https://www.juntadeandalucia.es/datosabiertos/portal/api/3/action
+docs_url: https://www.juntadeandalucia.es/datosabiertos/portal/aplicaciones/buscador-apis
+endpoints:
+  - path: /package_search?q={texto}&fq={filtro}&rows={n}&start={n}
+    desc: Búsqueda de conjuntos con filtros Solr (organization, res_format, vocab_field_activity_sector), orden y facetas
+    example: curl -s "https://www.juntadeandalucia.es/datosabiertos/portal/api/3/action/package_search?fq=organization:ieca&rows=100&start=0&sort=metadata_modified%20desc"
+    params: 'rows 10 por defecto; rows=1000&fl=name,metadata_modified da los 832 en 100 KB; fq=organization:{slug}; fq=vocab_field_activity_sector:"Economía"; facet.field=["res_format"]'
+    returns: "{success, result:{count, results:[{name, title, notes, organization{name, title}, license_id, metadata_modified ISO sin zona, field_update_date aaaa/mm/dd, tags[], groups [] siempre vacío, resources[{id, format, url, url_type, datastore_active, size}]}], facets}}"
+  - path: /package_show?id={name}
+    desc: Conjunto completo; añade field_activity_sector, field_update_frecuency, field_geographic_coverage y field_hvd_category, que package_search no trae
+    example: curl -s "https://www.juntadeandalucia.es/datosabiertos/portal/api/3/action/package_show?id=censo-de-instalaciones-deportivas"
+    returns: "{success, result:{campos de package_search más field_activity_sector[], field_update_frecuency[], field_geographic_coverage[], extras[] (solo en los recolectados, con harvest_source_title)}}; fechas field_* sin dato como 1700/01/01"
+  - path: /datastore_search?resource_id={id}&limit={n}&offset={n}
+    desc: Filas de un recurso con datastore_active true, con filtro por igualdad, selección de campos y orden
+    example: curl -s "https://www.juntadeandalucia.es/datosabiertos/portal/api/3/action/datastore_search?resource_id=8e8e1b8f-6626-4a0b-93f8-9c99c4340797&limit=100&offset=0"
+    params: 'limit 100 por defecto y tope 32000 sin aviso; filters={"Provincia":"Almería"}; fields=_id; sort; records_format=csv devuelve las filas como un texto CSV sin cabecera'
+    returns: "{result:{fields:[{id, type int|numeric|text|timestamp}], records:[{_id, ...}], total, limit, total_was_estimated, _links:{start, next}}}; columnas con espacios y tildes (Código postal), timestamp ISO sin zona"
+  - path: /organization_list
+    desc: Slugs de las 103 organizaciones (ieca, educacion, junta-de-andalucia...), que son el valor de fq=organization
+    example: curl -s "https://www.juntadeandalucia.es/datosabiertos/portal/api/3/action/organization_list"
+    returns: "Lista de 103 slugs, de los que 72 tienen conjuntos; group_list devuelve [] porque los temas van en vocab_field_activity_sector (22 valores)"
+  - path: https://datos.juntadeandalucia.es/api/v0/{servicio}/openapi.json
+    desc: API v0, aparte del CKAN, con 51 servicios (boja, rpt, subventions, municipalities, rael, dir3...); cada uno con count, search, option-values y all
+    example: curl -s "https://datos.juntadeandalucia.es/api/v0/boja/openapi.json"
+    returns: "OpenAPI 3.0.2 de FastAPI; rutas /{servicio}/all?format=json|csv|txt, /count ({count:{result}}), /search (order_by y mode obligatorios), /option-values/{campo} y /{id}; la raíz /api/v0/ responde 400"
+  - path: https://datos.juntadeandalucia.es/api/v0/boja/get/search_pagination?order_by=dateUTC&mode={ASC|DESC}&size={n}&page={n}&date_from={aaaa-mm-dd}&date_to={aaaa-mm-dd}
+    desc: Disposiciones del BOJA por fecha de publicación con sección, organismo y sumario; el detalle está en /api/v0/boja/{id}
+    example: curl -s "https://datos.juntadeandalucia.es/api/v0/boja/get/search_pagination?order_by=dateUTC&mode=DESC&size=100&page=0&date_from=2026-09-29&date_to=2026-09-30"
+    returns: "{hits, total_hits, results:[{id disposition.2026.190.2, number, date dd/mm/aaaa, titleSec, organisation, summary con HTML}]}; page desde 0, size máximo 100; /boja/{id} añade bodyNoHtml, sectionN2, dateUTC y pdf[{publicUrl}]"
+  - path: https://datos.juntadeandalucia.es/api/v0/{servicio}/all?format={json|csv|txt}
+    desc: Descarga completa de un servicio v0; redirige con 302 a un fichero pregenerado en /ssdigitales/festa/download-pro/
+    example: curl -sL "https://datos.juntadeandalucia.es/api/v0/work-calendar/all?format=csv"
+    returns: "Fichero dataset-{servicio}.csv en UTF-8 separado por barra vertical (date|dateformat|description|...), igual con format=txt; el BOJA va por año con year=AAAA (dataset-boja_2026.csv, cuerpo con HTML)"
+rate_limit: No documentado; sin 429 en unas 250 peticiones secuenciales el 2026-10-01
+quirks: [latin1, datastore-incomplete]
+ids: [ine-municipio, nif]
+gotchas:
+  - Los 525 recursos subidos (url_type upload) apuntan a gdc-pdpopendata-ckan.paas.junta-andalucia.es, host interno sin DNS público; la misma ruta en www.juntadeandalucia.es sí descarga el fichero.
+  - datastore_active true no garantiza la tabla; 6 de 173 recursos dieron 404 Resource not found y las plantillas orgánicas tienen 1000 filas en el datastore frente a 36260 en el CSV. Contrastar total con el fichero.
+  - _links.next llega como //api/3/action/datastore_search?... (sin host ni /datosabiertos/portal); calcular la página siguiente con offset hasta total.
+  - datastore_search_sql responde 400 Action name not known, y /datastore/dump/{id} y /catalog.rdf dan 404 HTML del front Drupal; usar datastore_search y /dataset/{name}.rdf por conjunto.
+  - Se pierden ceros a la izquierda; el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine de la API v0 llega como entero (44001) o texto ('04001') según el registro.
+  - Cada publicador sube su CSV; Educación usa ; y coma decimal en ISO-8859-1, Hacienda ; en UTF-8 y Transparencia , en UTF-8. Detectar separador y codificación por fichero.
+  - Los 156 recursos del IECA con formato CSV son la página HTML del visor BADEA; los datos están en su recurso JSON INTEROPERABLE, que es la API de la ficha ieca-api-badea.
+  - 'Los filtros de tema y formato son texto exacto; fq=vocab_field_activity_sector:"Sector público " lleva espacio final (sin él, 0 resultados), seguridad va en minúscula y format mezcla XML/Atom y xml/atom.'
+  - API v0; search y get/search_pagination exigen order_by y mode (422 si faltan) y search sin size devuelve 1000; en BOJA size se recorta a 100 y pasar de 10000 resultados da 503.
+  - BOJA; order_by=date ordena el texto dd/mm/aaaa (1982 antes que 1979), usar dateUTC. total_hits se queda en 10000 sin filtros (count da 677620) y dentro de un mismo día el orden cambia entre páginas.
+tips:
+  - Inventario completo en una llamada con package_search?rows=1000&fl=name,metadata_modified; pedir package_show solo de los conjuntos cuyo metadata_modified cambió.
+  - fq=organization:ieca devuelve los 260 conjuntos del IECA; su recurso JSON INTEROPERABLE termina en el id de consulta que usa ieca-api-badea.
+  - Para el BOJA de un año entero, /api/v0/boja/all?year=AAAA&format=csv con -L; para seguir lo publicado, get/search_pagination por día con date_from y date_to iguales.
+  - cod_municipio de Educación y municipality_ine de la API v0 son códigos INE de 5 dígitos; leerlos como texto y cruzarlos con ine-codigos-territoriales.
+related: [ieca-api-badea, datos-gob-es-api, ine-codigos-territoriales, boe-api-sumario, bdns-api]
+status: active
+verified: "2026-10-01"

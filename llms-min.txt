@@ -2,7 +2,7 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 85 · Recetas: 43 · Alcance actual: Administración General del Estado · Entrada ligera; la completa es llms.txt · Generado: 2026-10-01
+Fuentes: 95 · Recetas: 43 · Alcance actual: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Entrada ligera; la completa es llms.txt · Generado: 2026-10-01
 
 ## Cómo usar este repo
 
@@ -35,10 +35,10 @@ Cada id es sources/<sector>/<id>.yaml; léela entera antes de llamar (endpoints 
 - Legislación y boletines oficiales: boe-api-legislacion-consolidada, boe-api-sumario, boe-eli, boe-feeds, borme-api-sumario
 - Economía, finanzas y mercados: airef-datos, bde-estadisticas, cnmv-registros, ico-datos, tesoro-estadisticas
 - Hacienda, tributos y presupuestos: aeat-estadisticas, aeat-servicios-web, hacienda-central-informacion, hacienda-ovef, igae-ejecucion-presupuestaria, sepg-presupuestos-generales-estado
-- Estadística oficial: ine-api-tempus, ine-codigos-territoriales, ine-microdatos
+- Estadística oficial: comunidad-madrid-estadistica-api, idescat-api, ieca-api-badea, ine-api-tempus, ine-codigos-territoriales, ine-microdatos, ive-pegv-bancos-datos
 - Contratación pública y subvenciones: bdns-api, hacienda-registro-licitadores, placsp-datos-abiertos
 - Empleo y Seguridad Social: mites-estadisticas, segsocial-estadisticas, sepe-estadisticas
-- Gobierno abierto, transparencia y organización administrativa: datos-gob-es-api, dir3-directorio, face-facturas, pag-administracion-gob-es, transparencia-portal
+- Gobierno abierto, transparencia y organización administrativa: ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, comunidad-madrid-datos-abiertos, datos-gob-es-api, dir3-directorio, face-facturas, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, pag-administracion-gob-es, transparencia-portal
 - Territorio, catastro y cartografía: catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal
 - Meteorología y clima: aemet-opendata, aemet-otros-servicios
 - Medio ambiente, agua y biodiversidad: miteco-banco-datos-naturaleza, miteco-calidad-aire, miteco-inventario-emisiones, miteco-prtr, miteco-saih-boletin-hidrologico

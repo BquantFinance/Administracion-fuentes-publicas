@@ -49,7 +49,7 @@ endpoints:
     desc: Especificación OpenAPI 3.0.1 completa con las 64 rutas y sus parámetros
     example: curl -s "https://opendata.aemet.es/AEMET_OpenData_specification.json"
 rate_limit: No documentado en la especificación; la clave es un JWT gratuito
-quirks: [latin1]
+quirks: [latin1, soft-errors-200]
 ids: [ine-municipio, idema]
 gotchas:
   - Sin clave la API responde 200 con cuerpo vacío, no 401; con clave inválida, 401 y JSON con descripcion (JWT strings must contain exactly 2 period characters). Tratar el cuerpo vacío como fallo de autenticación.

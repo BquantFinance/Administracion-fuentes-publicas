@@ -16,11 +16,13 @@
   note: sin búsqueda por empresa; recorrer días y provincias
 - need: Euríbor, tipos de interés y de cambio, crédito, balanza de pagos
   source: bde-estadisticas
+  note: listaSeries con rango=MAX corta en las 1000 observaciones más recientes sin aviso; completar con rango=AAAA
 - need: Deuda pública por Administración (Protocolo de Déficit Excesivo)
   source: bde-estadisticas
   note: capítulo SB_DEUAAPP; histórico también en airef-datos
 - need: Subastas del Tesoro y deuda del Estado por instrumento y tenedor
   source: tesoro-estadisticas
+  note: año en curso en 11.xlsx e históricos anuales; el HTML de subastas mezcla decimales con coma y con punto
 - need: Previsiones macroeconómicas y estimación del PIB en tiempo real
   source: airef-datos
 - need: Entidades supervisadas, hechos relevantes e informes financieros de cotizadas
@@ -321,3 +323,62 @@
 - need: "Microdatos de PISA, TIMSS o PIAAC de España"
   source: inee-bases-datos
   note: "muestra española en rar o zip con SPSS y Stata; HEAD responde 403, usar GET con Range"
+
+# Comunidades autónomas y ayuntamientos (2026-10-01)
+- need: Datos abiertos de la Comunidad de Madrid (calidad del aire, padrón, centros, registros) por API
+  source: comunidad-madrid-datos-abiertos
+  note: "CKAN; el datastore puede tener menos filas que el CSV (5000 de 18718 en el padrón); descargar el recurso"
+- need: PIB municipal, contabilidad trimestral y defunciones por barrio de la Comunidad de Madrid
+  source: comunidad-madrid-estadistica-api
+  note: no está en el INE; municipios con código INE de 5 dígitos
+- need: Padrón de la ciudad de Madrid por distrito, barrio, sección censal y edad
+  source: ayuntamiento-madrid-datos-abiertos
+  note: CSV mensual del conjunto 200076-0-padron; la API dinámica se quedó en 2023
+- need: Calidad del aire y tráfico en tiempo real de la ciudad de Madrid
+  source: ayuntamiento-madrid-datos-abiertos
+  note: calair_tiemporeal e informo pm.xml; las horas aún no medidas llegan como 0 con validación N
+- need: Accidentes de tráfico de la ciudad de Madrid
+  source: ayuntamiento-madrid-datos-abiertos
+  note: un CSV por año en 300228-0; una fila por persona, agrupar por num_expediente
+- need: GTFS del Consorcio de Transportes de Madrid
+  source: comunidad-madrid-datos-abiertos
+  note: el conjunto enlaza a ArcGIS; el ZIP sale de /sharing/rest/content/items/{id}/data
+- need: Estadística oficial de Cataluña por municipio, comarca o sección censal (padrón, renta, PIB, afiliación)
+  source: idescat-api
+  note: municipios con 6 dígitos (INE más dígito de control); el INE de 5 se ignora y devuelve todos sin error
+- need: Ficha resumen de un municipio catalán (población, renta, paro, vivienda) en una llamada
+  source: idescat-api
+  note: EMEX; la población es la del Censo anual, no la del padrón
+- need: Registro de entidades, contratación o subvenciones (RAISC) de la Generalitat de Catalunya
+  source: gencat-dades-obertes
+  note: Socrata; sin $limit corta a 1000 filas; buscar en catalán; el RAISC trae codi_bdns
+- need: Población de Barcelona por barrio o sección censal del último año
+  source: ayuntamiento-barcelona-datos-abiertos
+  note: padrón municipal, no cifra oficial; el Idescat por sección acaba en 2022; solo el datastore es automatizable
+- need: Disposiciones del BOJA por fecha con sumario y PDF
+  source: junta-andalucia-datos-abiertos
+  note: API v0 aparte del CKAN; ordenar por dateUTC y trocear por día
+- need: Datos abiertos de la Junta de Andalucía y filas de sus CSV por API
+  source: junta-andalucia-datos-abiertos
+  note: cambiar el host interno de los recursos subidos por www.juntadeandalucia.es
+- need: Población por municipio andaluz desde 1996 y estadística propia del IECA
+  source: ieca-api-badea
+  note: los filtros usan ids internos de miembro, no años ni códigos INE
+- need: Indicadores coyunturales por provincia andaluza (IPC, EPA, paro, PIB)
+  source: ieca-api-badea
+  note: INDEA; cada código fija tipo de dato y base
+- need: Datos abiertos de la Generalitat Valenciana (contratos, ERTE, turismo, cultura) por API
+  source: gva-dadesobertes-api
+  note: CKAN con datastore; el órgano real va en origen_datos, no en organization
+- need: Contratos adjudicados por la Generalitat Valenciana, incluidos los menores
+  source: gva-dadesobertes-api
+  note: un conjunto por año (eco-gvo-contratos-AAAA); importes con coma decimal; URL_LICITACION enlaza con PLACSP
+- need: Estadísticas por comarca valenciana (pobreza, empresas, industria, cultivos)
+  source: ive-pegv-bancos-datos
+  note: el INE no publica comarcas; comarcas solo por nombre y agrupación nueva desde 2023
+- need: Población empadronada por código postal en la Comunitat Valenciana
+  source: null
+  note: el IVE la muestra solo en Tableau Public; sin descarga estructurada localizada el 2026-10-01
+- need: Prohibiciones de contratar vigentes
+  source: hacienda-registro-licitadores
+  note: XML público del visor del ROLECE; el NIF va oculto, cruzar por nombre

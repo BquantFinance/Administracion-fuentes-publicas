@@ -30,11 +30,17 @@ from common import load_sources
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 BLOQUEO = (b"Petici\xc3\xb3n HTTP bloqueada", b"Petici&#243;n HTTP bloqueada", b"Request Rejected", b"The requested URL was rejected", b"Incapsula",
            b"Making sure you", b"Voight-Kampff", b"Checking you are not a bot", b"Acceso denegado")
-CON_VALOR = {"-H", "--header", "-A", "--user-agent", "-d", "--data", "--data-urlencode", "--data-raw", "--data-binary",
-             "-X", "--request", "-e", "--referer", "-b", "--cookie", "-u", "--user", "--connect-timeout", "-m", "--max-time"}
+LARGAS_CON_VALOR = {"--header", "--user-agent", "--data", "--data-urlencode", "--data-raw", "--data-binary", "--request",
+                    "--referer", "--cookie", "--user", "--connect-timeout", "--max-time", "--range", "--form", "--retry",
+                    "--retry-delay", "--limit-rate", "--max-filesize", "--resolve", "--connect-to", "--continue-at",
+                    "--time-cond", "--url"}
+CORTAS_CON_VALOR = set("HAdXebuFrmxEToKwcDCz")
+# opciones que tocan ficheros, el proxy o la verificación TLS: se quitan con su valor (el bundle va con --ca)
 PROHIBIDAS = {"-o", "--output", "-K", "--config", "-T", "--upload-file", "-w", "--write-out", "-c", "--cookie-jar",
-              "-D", "--dump-header", "--output-dir"}
-SIN_VALOR_FUERA = {"-s", "-S", "-sS", "-Ss", "--silent", "--show-error", "-O", "--remote-name", "-sO", "-Os", "-v", "-i"}
+              "-D", "--dump-header", "--output-dir", "--cacert", "--capath", "-x", "--proxy", "-E", "--cert", "--key"}
+CORTAS_PROHIBIDAS = set("oKTwcDxE")
+CORTAS_FUERA = set("sSOvikJ")  # silencio, nombre remoto, verbosidad, inseguro: las fija el comprobador
+LARGAS_FUERA = {"--silent", "--show-error", "--remote-name", "--insecure", "--verbose", "--include", "--remote-header-name"}
 VAR = re.compile(r"\$(\{([A-Za-z_][A-Za-z0-9_]*)\}|([A-Za-z_][A-Za-z0-9_]*))")
 
 
@@ -82,19 +88,38 @@ def argumentos(ejemplo: str) -> list[str] | None:
     args, i = [], 1
     while i < len(tokens):
         t = tokens[i]
+        siguiente = tokens[i + 1] if i + 1 < len(tokens) else None
         if t in PROHIBIDAS:
             i += 2
-            continue
-        if t in SIN_VALOR_FUERA or t.startswith("--output="):
+        elif t.startswith("--"):
+            if t in LARGAS_FUERA or t.split("=", 1)[0] in PROHIBIDAS:
+                i += 1
+            elif "=" not in t and t in LARGAS_CON_VALOR and siguiente is not None:
+                args += [t, siguiente]
+                i += 2
+            else:
+                args.append(t)
+                i += 1
+        elif t.startswith("-") and len(t) > 1:
+            letras = t[1:]
+            ultima = letras[-1]
+            toma_valor = ultima in CORTAS_CON_VALOR and siguiente is not None
+            quedan = "".join(c for c in letras[:-1] if c not in CORTAS_FUERA)
+            if toma_valor:
+                if ultima not in CORTAS_PROHIBIDAS:
+                    args += (["-" + quedan] if quedan else []) + ["-" + ultima, siguiente]
+                elif quedan:
+                    args.append("-" + quedan)
+                i += 2
+            else:
+                quedan = "".join(c for c in letras if c not in CORTAS_FUERA)
+                if quedan:
+                    args.append("-" + quedan)
+                i += 1
+        else:
+            if t.startswith("http"):
+                args.append(t)
             i += 1
-            continue
-        if t in CON_VALOR and i + 1 < len(tokens):
-            args += [t, tokens[i + 1]]
-            i += 2
-            continue
-        if t.startswith("-") or t.startswith("http"):
-            args.append(t)
-        i += 1
     return args if any(a.startswith("http") for a in args) else None
 
 

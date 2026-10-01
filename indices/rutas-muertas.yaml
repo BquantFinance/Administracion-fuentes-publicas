@@ -84,10 +84,10 @@
   checked: "2026-09-30"
 - old: https://pap.hacienda.gob.es/invente2/
   status: blocked
-  new: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/BasesDatos/Invente/Paginas/inicio.aspx
+  new: https://www.pap.hacienda.gob.es/invente2/pagMenuPrincipalV2.aspx
   source: igae-ejecucion-presupuestaria
-  note: rechazado por el WAF en la verificación; el 30/09/2026 ni siquiera se estableció la conexión
-  checked: "2026-09-30"
+  note: "sin www el proxy recibió 502; con www la raíz /invente2/ da 200 con Acceso Denegado y la API pública está en /Invente2/api"
+  checked: "2026-10-01"
 - old: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=resultados&idp=1254734710990
   status: 404
   new: https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177031&menu=ultiDatos&idp=1254734710990
@@ -321,8 +321,8 @@
   status: blocked
   new: https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472
   source: bde-estadisticas
-  note: el buscador BIEST responde Request Rejected a las consultas automatizadas; la API bierest y los CSV no tienen ese bloqueo
-  checked: "2026-09-30"
+  note: "el BIEST respondió Request Rejected a clientes automatizados el 2026-09-30 y 200 el 2026-10-01; la vía estable es la API bierest y los CSV"
+  checked: "2026-10-01"
 - old: https://datos.gob.es/virtuoso/sparql
   status: blocked
   new: https://datos.gob.es/apidata/catalog/dataset.json?_pageSize=100&_page=0
@@ -378,11 +378,11 @@
   note: "mismo caso que hidrografia"
   checked: "2026-09-30"
 - old: https://www.ign.es/wfs-inspire/ocupacion-suelo
-  status: error
+  status: "404"
   new: https://servicios.idee.es/wfs-inspire/ocupacion-suelo
   source: idee-servicios
-  note: "responde 502"
-  checked: "2026-09-30"
+  note: "respondía 502 el 2026-09-30; en GeoJSON, api-features.idee.es/collections/landcoverunit"
+  checked: "2026-10-01"
 - old: https://www.ign.es/wms-inspire/hidrografia
   status: "404"
   new: https://servicios.idee.es/wms-inspire/hidrografia
@@ -390,11 +390,11 @@
   note: "también transportes, ocupacion-suelo y mdt; en www.ign.es quedan ign-base, pnoa-ma y unidades-administrativas"
   checked: "2026-09-30"
 - old: https://servicios.idee.es/wmts/mapa-raster
-  status: "404"
+  status: error
   new: https://www.ign.es/wmts/mapa-raster
   source: idee-servicios
-  note: "el MTN ráster y la ortofoto (pnoa-ma) siguen en www.ign.es; servicios.idee.es solo tiene wmts/mdt"
-  checked: "2026-09-30"
+  note: "el 2026-10-01 cerró la conexión sin respuesta; el MTN ráster y la ortofoto (pnoa-ma) siguen en www.ign.es"
+  checked: "2026-10-01"
 - old: https://www.cis.es/detalle-ficha-estudio?idEstudio=14893
   status: redirect
   new: https://www.cis.es/es/estudios/barometro-de-septiembre-2026
@@ -425,3 +425,57 @@
   source: inee-bases-datos
   note: "también educacion.gob.es/inee; los ficheros llevan /inee/dam/jcr:{uuid}/ y HEAD responde 403"
   checked: "2026-09-30"
+
+- old: https://www.cartociudad.es/geocoder/api/geocoder/find?q=Calle%20Iglesia%205,%20Madrid&type=portal&id=280790529087&portal=5
+  status: "500"
+  new: https://www.cartociudad.es/geocoder/api/geocoder/candidates?q=calle%20iglesia%205,%20madrid&limit=4
+  source: cnig-centro-descargas
+  note: "ejemplo del PDF oficial del geocoder; los id actuales (13.PV.MUN_...) salen de candidates"
+  checked: "2026-10-01"
+- old: https://datos.madrid.es/egob/catalogo.json
+  status: "404"
+  new: https://datos.madrid.es/api/3/action/package_search
+  source: ayuntamiento-madrid-datos-abiertos
+  note: "la API del portal antiguo murió con la migración a CKAN; los nombres de conjunto conservan el número antiguo"
+  checked: "2026-10-01"
+- old: https://datos.madrid.es/egob/catalogo/212531-10515086-calidad-aire-tiempo-real.txt
+  status: "404"
+  new: https://ciudadesabiertas.madrid.es/dynamicAPI/API/query/calair_tiemporeal.json
+  source: ayuntamiento-madrid-datos-abiertos
+  note: "también en CSV cambiando la extensión de la consulta"
+  checked: "2026-10-01"
+- old: https://www.madrid.org/desvan/
+  status: "404"
+  new: https://iestadis.edatos.io
+  source: comunidad-madrid-estadistica-api
+  note: "las tablas de los bancos Almudena, Baco y Desvan siguen en datos.comunidad.madrid (comunidad-madrid-datos-abiertos)"
+  checked: "2026-10-01"
+- old: https://www.ine.es/prodyser/microdatos.htm
+  status: redirect
+  new: https://www.ine.es/dyngs/SER/index.htm?cid=1388
+  source: ine-microdatos
+  note: "meta refresh con 200"
+  checked: "2026-10-01"
+- old: https://www.ine.es/daco/daco42/codmun/diccionario20.xlsx
+  status: "404"
+  new: https://www.ine.es/daco/daco42/codmun/codmun20/20codmun.xlsx
+  source: ine-codigos-territoriales
+  note: "la raíz solo sirve 2021-2026; los años anteriores están en codmun{AA}/"
+  checked: "2026-10-01"
+- old: https://www.ine.es/ftp/microdatos/epa/dr_EPA_2025.xlsx
+  status: "404"
+  new: https://www.ine.es/ftp/microdatos/epa/dr_EPA_2021.xlsx
+  source: ine-microdatos
+  note: "el diseño de registro va por vigencia (2005, 2021 y 2026), no por año"
+  checked: "2026-10-01"
+- old: https://registrodelicitadores.gob.es/rolece/static/manuales/Manuales%20de%20Usuario.zip
+  status: "404"
+  new: https://registrodelicitadores.gob.es/rolece/static/manuales/EsquemasXSD.zip
+  source: hacienda-registro-licitadores
+  checked: "2026-10-01"
+- old: https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=nomenclatorCSV
+  status: moved
+  new: https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=buscarProductos&especialidad=%25%25%25&d-4015021-e=1&6578706f7274=1
+  source: sanidad-nomenclator-facturacion
+  note: "devuelve la página HTML con 200; el CSV es la exportación del buscador"
+  checked: "2026-10-01"

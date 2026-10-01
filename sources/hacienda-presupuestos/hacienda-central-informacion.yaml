@@ -6,40 +6,60 @@ level: age
 sector: hacienda-presupuestos
 tags: [central-de-informacion, calendario, periodo-medio-pago, pmp, financiacion-autonomica, fla, ccaa, liquidez]
 summary: >-
-  Portal que reúne las publicaciones económico-financieras de Hacienda e IGAE, con catálogo de informes y tres
-  ficheros de URL estable: calendario de publicaciones (xlsx), periodo medio de pago a proveedores de todas
-  las AAPP (xlsx mensual) y financiación extraordinaria de las CCAA (xlsx desde 2019).
+  Portal de publicaciones económico-financieras de Hacienda e IGAE con catálogo de informes y ficheros de URL
+  estable: calendario de publicaciones, periodo medio de pago a proveedores de las AAPP (mensual desde 2014, series
+  e informes de CCAA y EELL) y mecanismos de financiación de CCAA desde 2012.
 access: [download, portal]
 auth: none
-formats: [xlsx, html, pdf]
+formats: [xlsx, xls, html, pdf]
 update: monthly
-coverage: "PMP mensual (publicación 2026-07 verificada); mecanismos de financiación 2019-2026; calendario con la próxima fecha de cada publicación"
+coverage: "PMP mensual desde 2014-09 (el último, agosto de 2026, aún sin CCAA ni EELL el 2026-10-01); mecanismos de financiación 2012-2026; calendario con la próxima fecha de cada publicación"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.hacienda.gob.es/es-ES/CDI/Paginas/centraldeinformacion.aspx
 docs_url: https://www.hacienda.gob.es/es-ES/CDI/Paginas/centraldeinformacion.aspx
 endpoints:
   - path: https://www.hacienda.gob.es/cdi/calendario%20cdi/calendario.xlsx
-    desc: Calendario de todas las publicaciones (AUTOR, NOMBRE, ÚLTIMOS DATOS, PERIODICIDAD, PRÓXIMA FECHA, PERIODO DE REFERENCIA); una hoja, cabecera en la fila 3
+    desc: Calendario de publicaciones de Hacienda, IGAE, AEAT y otros autores con la próxima fecha de cada una
     example: curl -sO "https://www.hacienda.gob.es/cdi/calendario%20cdi/calendario.xlsx"
+    returns: "xlsx de una hoja (Publicaciones) con cabecera en la fila 3 (AUTOR, NOMBRE DE LA PUBLICACIÓN, ÚLTIMOS DATOS PUBLICADOS, PERIODICIDAD, PRÓXIMA FECHA DE PUBLICACIÓN, PERIODO DE REFERENCIA); 113 filas con fecha y hora como datetime (109 a las 13:00) y, al final, 27 filas de glosario de siglas sin fecha"
   - path: https://www.hacienda.gob.es/cdi/pmp/publicacion-pmp-{AAAA}-{MM}.xlsx
-    desc: Periodo medio de pago a proveedores de todas las AAPP (hojas Indice, Tabla 1 a 5.2 y Notas); el enlace del mes vigente está en la página del PMP
+    desc: Periodo medio de pago a proveedores de todas las AAPP del mes de datos {AAAA}-{MM} (hojas Indice, Tabla 1 a 5.2 y Notas)
+    params: "patrón desde 2020-01; de 2014-09 a 2019-12 publicaci%C3%B3n%20pmp%20{AAAA}_{MM}.xlsx, en .xls hasta 2016-01"
     example: curl -sO "https://www.hacienda.gob.es/cdi/pmp/publicacion-pmp-2026-07.xlsx"
+    returns: "xlsx; Tabla 1 por subsector, 2 y 3 por entidad de AC y SS, 4.1 y 4.2 por CCAA y entidad dependiente, 5.1 y 5.2 por corporación local; cabecera en la fila 5; ratios en días con decimales e importes en euros con céntimos aunque el título diga miles de €"
+  - path: https://www.hacienda.gob.es/cdi/pmp/pmp-series-rd-1040-2017.xlsx
+    desc: Series mensuales del PMP desde 2018-04 (RD 1040/2017) por subsector, entidad, CCAA y corporación local; 2014-09 a 2018-03 en pmp%20series%20rd%20635_2014.xlsx
+    example: curl -sO "https://www.hacienda.gob.es/cdi/pmp/pmp-series-rd-1040-2017.xlsx"
+    returns: "xlsx de 9 MB y 26 hojas en formato ancho, un mes por columna con etiqueta de texto «2018 - 04» hasta 2018-12 y «2019-01» después; filas con Código (S.1311, S.1312-01-00-000-B-B-000); CCAA y local llegan un mes por detrás de AC y SS"
+  - path: https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PMP_NET/aspx/consulta/descarga.aspx
+    desc: Informes mensuales de PMP y deuda comercial de las CCAA (tipoPublicacion=1) y de las EELL (2) en descarga directa, sin sesión ni cookies
+    params: "ejercicio AAAA, periodo nombre del mes sin distinguir mayúsculas (Julio), tipoPublicacion 1 o 2, fichero fichero1 o fichero2 según el enlace de consulta.aspx?tipoPublicacion=1"
+    example: curl -s -o serie-pmp-ccaa.xlsx "https://serviciostelematicosext.hacienda.gob.es/SGCIEF/PMP_NET/aspx/consulta/descarga.aspx?ejercicio=2026&periodo=Julio&tipoPublicacion=1&fichero=fichero2"
+    returns: "Binario con Content-Disposition (Serie PMP CCAA julio 2026.xlsx, informe de CCAA en PDF, Informe_Ejecutivo_PMP_Completo_2026_6.xlsx de EELL); si el mes no está publicado, 200 con HTML «Error: No se han publicado datos...»"
   - path: https://www.hacienda.gob.es/cdi/mecanismos%20financiaci%C3%B3n/mecanismos-financiacion-ccaa.xlsx
-    desc: Mecanismos extraordinarios de financiación de las CCAA (FLA, liquidez); hojas Resumen, Detalle y FFCCAA{AAAA} desde 2019; URL fija, contenido sobrescrito
+    desc: Mecanismos de financiación de las CCAA 2012-2026 (FLA, FFCCAA, anticipos, línea ICO) en millones de euros; URL fija, contenido sobrescrito
     example: curl -sO "https://www.hacienda.gob.es/cdi/mecanismos%20financiaci%C3%B3n/mecanismos-financiacion-ccaa.xlsx"
-  - path: https://www.hacienda.gob.es/es-es/cdi/paginas/estabilidadpresupuestaria/estabilidadpresupuestaria.aspx?report{n}
-    desc: Catálogo de informes (autor, periodicidad, últimos datos, soporte) con enlaces al banco de datos y a la visualización; los datos están en las aplicaciones
+    returns: "xlsx de 15 hojas (Indice, Resumen Total liquidez, Detalle Otras Medidas Liquidez, Detalle Mec Extraordinarios, FFCCAA2026 a FFCCAA2018, Descripción Medidas, Normativa); CCAA por nombre sin código y años como grupos de columnas (AÑO 2012...)"
+  - path: https://www.hacienda.gob.es/es-es/cdi/paginas/{seccion}/{seccion}.aspx
+    desc: Catálogo de informes de cada sección (autor, periodicidad, últimos datos, próxima actualización, soporte) con enlaces a ficheros y aplicaciones
+    params: "seccion en contabilidadnacional, informacionpresupuestaria, impuestos, sistemasfinanciaciondeuda, estabilidadpresupuestaria, periodomediopago, inventario...; el ?report{n} de los enlaces no filtra"
   - path: https://www.hacienda.gob.es/es-es/cdi/paginas/periodomediopago/informacionaapps/pmpdelasaapp.aspx
-    desc: Página del PMP con el enlace al xlsx del mes y a las comunicaciones de las CCAA
-quirks: [static-html, overwritten-in-place]
+    desc: Página del PMP con los xlsx de cada mes desde 2014-09, las series y los enlaces a PMP_NET; la portada de la Central puede enlazar aún el mes anterior
+quirks: [static-html, overwritten-in-place, soft-errors-200]
 ids: []
 gotchas:
-  - Las rutas con espacios y tildes (calendario cdi, mecanismos financiación) van codificadas en la URL (%20, %C3%B3); sin codificar dan 404.
-  - Los xlsx abren con filas de título y una hoja Indice; leer con header=None y localizar la cabecera (en el calendario está en la fila 3).
-  - La ruta antigua es-ES/CDI/Paginas/OVEELL/OVEntidadesLocales.aspx y las de InformacionCCAAs dan 404; la Central de Información enlaza a las aplicaciones (SGCIEF, PMP_NET) que exigen sesión.
-  - La ejecución mensual de las CCAA y las cuentas anuales están en igae-ejecucion-presupuestaria; el catálogo solo enlaza.
+  - "Las rutas llevan espacio y tilde (calendario cdi, mecanismos financiación): %20 y %C3%B3 (o %F3) funcionan; + en lugar de espacio o quitar la tilde dan 404. requests codifica solo; curl no."
+  - "El xlsx del PMP del último mes sale solo con Administración Central y Seguridad Social (filas regional y local vacías) y se sobrescribe después: el de julio de 2026 se completó el 30/09 con CCAA y EELL."
+  - En el PMP los importes van en euros con céntimos aunque el título diga «en días y miles de €» (Administración Central, julio de 2026, 2.394.709.859,72 euros de pagos en un mes).
+  - En los meses de fin de trimestre la Tabla 5.1 del PMP lista 12.966 entidades locales pero solo 159 códigos, que no corresponden a su fila (12-28-079-A-A-000 junto a Cádiz); cruzar por nombre y provincia.
+  - En el Código de entidad del PMP, provincia y municipio forman el código INE (12-28-079 da 28079), pero el primer par es la CCAA de Hacienda, no la del INE (Madrid 12, Comunitat Valenciana 17).
+  - "Mecanismos de financiación: 2012-2025 son cantidades dispuestas y 2026 asignadas por ACDGAE; las CCAA van por nombre, sin tilde en Resumen (ARAGON) y con tilde en Detalle (ARAGÓN)."
+  - La ruta antigua es-ES/CDI/Paginas/OVEELL/OVEntidadesLocales.aspx y las de InformacionCCAAs dan 404.
+  - La ejecución presupuestaria mensual de las CCAA la publica la SGFAL en la aplicación Cimcanet; la IGAE (igae-ejecucion-presupuestaria) da las CCAA en contabilidad nacional, no en términos presupuestarios.
+  - El banco de datos (buscadorcdi.gob.es/AresPortal) es una SPA con cadena FNMT incompleta; su API JSON en serviciostelematicos.hacienda.gob.es/AresPortal.Api.Service responde a GET de catálogo; los datos no se han probado.
 tips:
   - El calendario sirve para saber cuándo se actualiza cada estadística de Hacienda, IGAE y AEAT antes de programar descargas.
+  - Para series del PMP, pmp-series-rd-1040-2017.xlsx da todos los meses desde 2018-04 en un fichero; los xlsx mensuales añaden el detalle por entidad dependiente (tablas 4.2 y 5.2).
 related: [igae-ejecucion-presupuestaria, hacienda-ovef, sepg-presupuestos-generales-estado, bde-estadisticas]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

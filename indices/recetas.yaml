@@ -17,7 +17,7 @@
   checks:
     - url: https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/IPC290750?nult=1&tip=A
       contains: '"COD":"IPC290750"'
-    - url: https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/24077?nult=1&tip=A
+    - url: https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/24077?nult=2&tip=A
       contains: IPC290751
   verified: "2026-09-30"
 
@@ -31,7 +31,7 @@
     - source: ine-api-tempus
       do: "DATOS_TABLA/{Id}?nult=4&tip=A devuelve todas las series de la tabla; para filtrar, VARIABLES_OPERACION y VALORES_VARIABLEOPERACION dan los pares tv=id_variable:id_valor"
     - source: ine-api-tempus
-      do: "Cambiar js por csv en la URL para obtener CSV (tabulador, ISO-8859-15 con BOM)"
+      do: "Cambiar js por csv en la URL da la tabla entera en CSV (tabulador, UTF-8 con BOM aunque la cabecera diga ISO-8859-15): ignora nult, y un tv o date con dos puntos da 400"
       example: curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=1"
   output: JSON con una entrada por serie (COD, Nombre, Data) o CSV de la tabla
   checks:
@@ -48,8 +48,8 @@
   inputs: []
   steps:
     - source: cnig-centro-descargas
-      do: "GET del geocoder CartoCiudad find?q={nombre}; devuelve muniCode (INE de 5 dígitos), provinceCode, comunidadAutonomaCode y la geometría; acepta tildes"
-      example: curl -s "https://www.cartociudad.es/geocoder/api/geocoder/find?q=Alcal%C3%A1%20de%20Henares"
+      do: "GET del geocoder CartoCiudad candidates?q={nombre}&limit=1 (464 B) devuelve muniCode (INE de 5 dígitos), provinceCode y comunidadAutonomaCode; find?q= añade la geometría (268 KB) e ignora municipio_filter; acepta tildes"
+      example: curl -s "https://www.cartociudad.es/geocoder/api/geocoder/candidates?q=Alcal%C3%A1%20de%20Henares&limit=1"
     - source: ine-codigos-territoriales
       do: "Relación completa en diccionario{AA}.xlsx con CPRO, CMUN y DC; el código es CPRO+CMUN (5 dígitos, conservar ceros) y DC es el dígito de control que algunos ficheros añaden"
       example: curl -sO "https://www.ine.es/daco/daco42/codmun/diccionario26.xlsx"
@@ -210,10 +210,10 @@
   inputs: [dir3, cpv]
   steps:
     - source: placsp-datos-abiertos
-      do: "GET del feed ATOM vigente (unas 235 entradas, 6 MB); cada entry lleva un documento CODICE con el órgano (cbc:ID schemeName DIR3), CPV, importes (TotalAmount con IVA, TaxExclusiveAmount sin) y estado; link rel=next enlaza la instantánea anterior"
+      do: "GET del feed ATOM vigente, que solo trae lo último (127 entradas y 3,8 MB el 2026-10-01; se regenera una vez al día hacia las 20:15); link rel=next enlaza instantáneas anteriores de 500 entradas y 14 a 17 MB; cada entry lleva el CODICE con órgano (DIR3), CPV, importes y estado, y las anulaciones llegan como at:deleted-entry"
       example: curl -s "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom"
     - source: placsp-datos-abiertos
-      do: "Histórico en ZIP mensual por feed (12 a 19 MB) con el mismo XML; PlataformasAgregadasSinMenores.atom para CCAA y EELL y contratosMenoresPerfilesContratantes.atom para menores"
+      do: "Histórico en ZIP anuales desde 2012 y mensuales en 2025-2026 (el 643 pesa de 150 a 300 MB al mes; un ZIP inexistente responde 200 con HTML); PlataformasAgregadasSinMenores.atom para CCAA y EELL y contratosMenoresPerfilesContratantes.atom para menores"
       example: curl -sO "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_202508.zip"
     - source: boe-feeds
       do: "Anuncios de licitación publicados en el BOE por división CPV en RSS (canal_cpv.php)"
@@ -223,6 +223,7 @@
       contains: <entry>
       read_bytes: 300000
     - url: https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_202508.zip
+      contains: licitacionesPerfilesContratanteCompleto3.atom
       read_bytes: 1024
   verified: "2026-09-30"
 
@@ -280,7 +281,7 @@
   inputs: [ine-municipio]
   steps:
     - source: aeat-estadisticas
-      do: "IRPFmunicipios.csv (31 MB, separador ;, decimal coma) con una fila por ejercicio (EJER), tramo (TRAMO) y municipio (MUNI_DEF) y una columna MUNI_n por variable; MUNI_DEF es un código propio, comprobar en la documentación de la estadística la equivalencia con el INE antes de cruzar"
+      do: "IRPFmunicipios.csv (31 MB, separador ;, decimal coma, 2013-2023) con una fila por ejercicio (EJER), tramo (TRAMO) y municipio (MUNI_DEF) y una columna MUNI_n por variable; MUNI_DEF no es el código INE (4 es Albacete, 02003) y la equivalencia está en AyudaCSV_AnuarioMunicipal.pdf; celdas vacías como NULL literal; sin País Vasco ni Navarra"
       example: curl -sO "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Anuario_estadistico/Exportacion/IRPFmunicipios.csv"
     - source: aeat-estadisticas
       do: "Recaudación mensual por figura tributaria en Cuadros_estadisticos_series_es_es.xlsx (URL fija, contenido sobrescrito en cada publicación)"
@@ -362,10 +363,12 @@
       headers: {Accept: application/json}
       contains: IDMunicipio
       read_bytes: 4096
+      retries: 2
     - url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroMunicipio/4354
       headers: {Accept: application/json}
       contains: ListaEESSPrecio
       read_bytes: 4096
+      retries: 2
   verified: "2026-09-30"
 
 - id: incidencias-trafico-tiempo-real
@@ -508,9 +511,9 @@
       do: "medicamento?cn={cn} o ?nregistro={nreg} devuelve nregistro, pactivos, atcs, presentaciones (cn, estado), docs (PDF y HTML) y estado; medicamentos?nombre= o ?practiv1= busca (páginas de 200; un cn inexistente responde 204 sin cuerpo)"
       example: curl -s "https://cima.aemps.es/cima/rest/medicamento?cn=708201"
     - source: aemps-cima-api
-      do: "docSegmentado/contenido/1?nregistro={nreg}&seccion=4.1 devuelve una sección de la ficha técnica en HTML; PDF estable en /cima/pdfs/ft/{nreg}/FT_{nreg}.pdf"
+      do: "docSegmentado/contenido/1?nregistro={nreg}&seccion=4.1 devuelve la sección de la ficha técnica en JSON [{seccion, titulo, contenido, orden}] (HTML solo con Accept text/html); PDF estable en /cima/pdfs/ft/{nreg}/FT_{nreg}.pdf"
     - source: aemps-cima-api
-      do: "psuministro lista los problemas de suministro activos por cn; registroCambios?fecha=dd/mm/aaaa permite sincronizar sin rebajar todo; nomenclátor completo en prescripcion.zip, regenerado a diario"
+      do: "psuministro lista los problemas de suministro activos por cn; registroCambios?fecha=dd/mm/aaaa sincroniza sin rebajar todo (sin orden por fecha); nomenclátor completo en prescripcion.zip, regenerado a diario y que exige User-Agent de navegador (403 sin él)"
       example: curl -s "https://cima.aemps.es/cima/rest/psuministro"
   output: JSON del medicamento (solo JSON; Accept XML responde 406)
   checks:
@@ -561,7 +564,7 @@
   inputs: []
   steps:
     - source: ine-api-tempus
-      do: "INE, cambiar js por csv en la API (csv/ES/DATOS_TABLA/{id}?nult=n): tabulador, ISO-8859-15 con BOM"
+      do: "INE, cambiar js por csv en la API (csv/ES/DATOS_TABLA/{id}): tabla entera, ignora nult; tabulador, UTF-8 con BOM"
       example: curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=12"
     - source: educacion-estadisticas-ruct
       do: "EDUCAbase, del enlace Tabla.htm?path=...&file=X.px deducir EducaJaxiPx/files/_px/es/csv_bdsc{path}{file}?nocab=1 (separador ;, ISO-8859-15, miles con punto)"
@@ -652,7 +655,7 @@
       do: "Código de serie en los catálogos catalogo_{be|tc|ti|si|pb}.csv (ISO-8859-1; nombre, alias, fichero del cuadro, descripción, frecuencia, primera y última observación)"
       example: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_tc.csv"
     - source: bde-estadisticas
-      do: "favoritas?idioma=es&series={cod} da el último valor; listaSeries?idioma=es&series={cod}&rango=MAX la serie completa (rangos por frecuencia); la respuesta va siempre en gzip, usar --compressed"
+      do: "favoritas?idioma=es&series={cod} da el último valor; listaSeries?idioma=es&series={cod}&rango=MAX la serie, pero MAX devuelve como mucho las 1000 observaciones más recientes sin aviso y en diarias da 412: completar con rango=AAAA; la respuesta va siempre en gzip, usar --compressed"
       example: curl -s --compressed "https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472"
     - source: bde-estadisticas
       do: "CSV del cuadro entero en csv/{cuadro}.csv (nombre en minúsculas, 6 filas de cabecera, fechas en español) o ZIP por capítulo del Boletín"
@@ -776,8 +779,8 @@
   inputs: []
   steps:
     - source: igae-ejecucion-presupuestaria
-      do: "Operaciones no financieras mensuales por subsector en M_AACC_{AAAA}.xlsx (URL predecible por año) y serie anual en CAP_Serie.xlsx"
-      example: curl -sO "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AACC-M/M_AACC_2026.xlsx"
+      do: "Operaciones no financieras mensuales de la Administración Central, acumuladas desde enero, en M_AACC_{AAAA}.xlsx (URL predecible por año; exige User-Agent de navegador) y serie anual en CAP_Serie.xlsx"
+      example: curl -sO -A "Mozilla/5.0" "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AACC-M/M_AACC_2026.xlsx"
     - source: igae-ejecucion-presupuestaria
       do: "Ejecución mensual del presupuesto del Estado desde la página imejecucionpresupuesto.aspx (enlaces a xlsx por mes)"
     - source: hacienda-ovef
@@ -828,6 +831,8 @@
     - url: https://www.sanidad.gob.es/profesionales/nomenclator.do
       contains: codnacional
       read_bytes: 200000
+    - url: https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=buscarProductos&codnacional=677471&d-4015021-e=1&6578706f7274=1
+      contains: "677471,"
   verified: "2026-09-30"
 
 - id: geometria-seccion-censal
@@ -835,7 +840,7 @@
   inputs: [seccion-censal, ine-municipio]
   steps:
     - source: ine-cartografia-censal
-      do: "seccionado_{AAAA}.zip del mismo año que el dato (65 MB, shapefile ETRS89 UTM 30); CUSEC es la sección de 10 dígitos, CUDIS el distrito y CUMUN el municipio; disolver por CUMUN para municipios"
+      do: "seccionado_{AAAA}.zip del mismo año que el dato (65 MB, shapefile ETRS89 UTM 30; en geopandas con la ruta interna zip://seccionado_2026.zip!carpeta/SECC_CE_20260101.shp); CUSEC es la sección de 10 dígitos, CUDIS el distrito y CUMUN el municipio; también por la API OGC del INE (TIPO SECCIONADO)"
       example: curl -sO "https://www.ine.es/prodyser/cartografia/seccionado_2026.zip"
     - source: ine-api-tempus
       do: "Los datos por sección (Atlas de distribución de renta) o por municipio se cruzan por esos códigos, cargados como texto con ceros a la izquierda"
@@ -845,6 +850,8 @@
       read_bytes: 1024
     - url: https://www.ine.es/prodyser/cartografia/seccionado_2019.zip
       read_bytes: 1024
+    - url: https://www.ine.es/geoserver/ogc/features/v1/collections/WMS_INE_SECCIONES_G01:Secciones_2025/items?f=application/json&filter-lang=cql-text&filter=CUSEC%3D%272807901001%27
+      contains: SECCIONADO
   verified: "2026-09-30"
 
 - id: horarios-tren-gtfs
@@ -881,7 +888,7 @@
       do: "GET ObtenerDatos con los cinco parámetros (f, pe, pa, ta, pr); pe=ALLM da la serie mensual completa y pe=ALL la anual; pa es el código numérico de país (001 Francia) o ALL; comprobar mensaje en cada fila (provisional, definitivo, error de sintaxis)"
       example: 'curl -s -H "Authorization: Bearer $DATACOMEX_TOKEN" "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=ALLM&pa=001&ta=2204&pr=ALL"'
     - source: aeat-estadisticas
-      do: "Para agregados de comercio exterior sin registro, las estadísticas de la AEAT (Aduanas) en el anuario; la fuente primaria de DataComex"
+      do: "Para comercio exterior sin registro, la AEAT publica el detalle en MAXIMA_DESAGREGACION_{AAAA}.csv (572 MB, sin cabecera, punto decimal; ficha aeat-estadisticas), la fuente primaria de DataComex"
   output: JSON con Resultados (flujo, periodo, país, provincia, taric, euros y kilos como texto con coma decimal)
   checks:
     - url: https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=ALL&ta=1001&pr=28

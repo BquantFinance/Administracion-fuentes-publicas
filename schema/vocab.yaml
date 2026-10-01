@@ -74,20 +74,24 @@ status:
 # Peculiaridades técnicas verificadas que cambian cómo se configura el cliente. Arreglos en guides/cliente-http.md.
 # Grupos: transporte y cabeceras, anti-bot y sesión, forma de la respuesta, estabilidad de URL y datos.
 quirks:
-  tls-chain-incomplete: El servidor no envía el certificado intermedio (FNMT); completar el bundle de CA o falla la verificación TLS
+  tls-chain-incomplete: El servidor no envía el certificado intermedio (FNMT) o envía uno firmado con SHA-1 que OpenSSL 3 rechaza; completar el bundle de CA o falla la verificación TLS
+  connection-reset-intermittent: El servidor corta conexiones de forma intermitente (reset o cierre en el saludo TLS); reintentar con espera
   user-agent-browser: Responde 403 o bloquea sin un User-Agent de navegador
   accept-header-required: Exige cabecera Accept explícita (application/json o application/xml); sin ella o con */* devuelve 400
   waf-blocks-bots: Un WAF rechaza clientes automatizados aunque lleven User-Agent de navegador; no hay arreglo, buscar otra vía
   waf-intermittent-403: Un WAF devuelve 403 de forma intermitente a peticiones legítimas; reintentar la misma petición tras 2 a 5 segundos
+  waf-temporary-ban: Un WAF bloquea la IP para todo el host durante minutos tras ráfagas o ciertas consultas; espaciar las peticiones y cachear
   session-required: Exige sesión, token o navegación previa por menú; las URL directas devuelven error o sesión expirada
-  captcha-required: La descarga o consulta exige resolver un reCAPTCHA; no es automatizable sin navegador ni persona
+  captcha-required: La descarga o consulta exige resolver un reCAPTCHA o hCaptcha; no es automatizable sin navegador ni persona
   viewstate-forms: Formularios ASP.NET con __VIEWSTATE; hay que reenviar los campos ocultos en cada POST
   js-rendered: Contenido o enlaces generados por JavaScript; hace falta navegador sin cabeza o replicar las llamadas XHR
   static-html: Los enlaces a ficheros están en el HTML servido; basta un GET y una expresión regular o lxml
-  gzip-unannounced: Devuelve el cuerpo comprimido en gzip sin cabecera Content-Encoding si el cliente no envía Accept-Encoding
+  gzip-unannounced: Devuelve gzip aunque el cliente no lo pida, con o sin cabecera Content-Encoding; descomprimir si los dos primeros bytes son 1f 8b
   latin1: Respuestas o ficheros en ISO-8859-1 o windows-1252, no UTF-8
   json-object-or-list: Campos JSON que son objeto con un elemento y lista con varios; normalizar antes de iterar
   errors-html-or-xml: Los errores llegan en HTML o XML aunque se pida JSON; comprobar el código HTTP antes de parsear
+  soft-errors-200: Errores o consultas sin datos responden HTTP 200 (cuerpo vacío, página de error, JSON con estado, lista vacía o filtro ignorado); comprobar el contenido, no solo el código
+  datastore-incomplete: El datastore de CKAN tiene menos filas que el fichero publicado o va desfasado; contrastar total con el fichero y descargar el original
   no-weekend-data: Sin datos (404) en fines de semana y festivos; no es un error
   url-drift: Las URL de los ficheros cambian en cada publicación (uuid, fecha o ruta); rascar la página en cada ejecución
   overwritten-in-place: El fichero se sobreescribe en la misma URL en cada actualización; guardar copia si se necesita el histórico

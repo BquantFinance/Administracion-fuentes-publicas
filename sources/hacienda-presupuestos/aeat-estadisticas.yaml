@@ -4,42 +4,58 @@ org: Agencia Estatal de Administración Tributaria (AEAT)
 ministry: Hacienda
 level: age
 sector: hacienda-presupuestos
-tags: [aeat, irpf, iva, sociedades, patrimonio, recaudacion, estadisticas-tributarias, municipios]
+tags: [aeat, irpf, iva, sociedades, patrimonio, recaudacion, estadisticas-tributarias, municipios, comercio-exterior]
 summary: >-
   Estadísticas de declarantes de IRPF (nacional, por municipio y por código postal), IVA, Sociedades y Patrimonio,
-  informes mensuales y anuales de recaudación, ventas, empleo y salarios en fuentes tributarias, comercio exterior.
-  CSV masivos del anuario y series de recaudación en xlsx con URL estable.
+  recaudación mensual y anual, ventas, empleo y salarios en fuentes tributarias y comercio exterior. CSV masivos del
+  anuario, series de recaudación en xlsx y CSV de comercio exterior.
 access: [download, portal]
 auth: none
 formats: [csv, xlsx, html, pdf]
 update: monthly
-coverage: "1992- según estadística"
+coverage: "1992- según estadística; recaudación mensual desde 1995; CSV del anuario desde 2009 (IRPF municipal 2013-2023)"
 license: Reutilización libre con cita de la fuente
 base_url: https://sede.agenciatributaria.gob.es/Sede/estadisticas.html
 docs_url: https://sede.agenciatributaria.gob.es/Sede/estadisticas/anuario-estadistico/acceso-descarga-masiva-datos.html
 endpoints:
   - path: https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Anuario_estadistico/Exportacion/{fichero}.csv
-    desc: CSV masivos del anuario, todos los ejercicios en un fichero
+    desc: CSV masivos del anuario, todos los ejercicios en un fichero (IRPFmunicipios 2013-2023; modelo100, 190 y 390 2009-2024; 200 2009-2023; 714 2011-2024)
     params: "fichero en IRPFmunicipios, modelo100 (IRPF), modelo190_salarios, modelo190_pensiones, modelo200 (Sociedades), modelo390 (IVA), modelo714 (Patrimonio)"
     example: curl -sO "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Anuario_estadistico/Exportacion/IRPFmunicipios.csv"
+    returns: "CSV ASCII sin comillas, separador ; y CRLF; cabecera de códigos (EJER;TRAMO;MUNI_DEF;MUNI_1... o EJER;CCAA;PROV;SEXO;...;M100_1...); coma decimal con 6 o 7 decimales y sin separador de miles (53968385,670000); literal NULL donde no hay dato; una fila por ejercicio y combinación de dimensiones"
   - path: https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Recaudacion_Tributaria/Informes_mensuales/Cuadros_estadisticos_series_es_es.xlsx
-    desc: Series mensuales de recaudación por figura tributaria; en la misma carpeta Ingresos_por_Delegaciones.xlsx
+    desc: Series mensuales de recaudación por figura tributaria; en la misma carpeta Ingresos_por_Delegaciones.xlsx (por delegación y provincia desde 2007)
     example: curl -sO "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Estadisticas/Recaudacion_Tributaria/Informes_mensuales/Cuadros_estadisticos_series_es_es.xlsx"
+    returns: "xlsx de 15 hojas: Indice, Cuadro 1.1 a 3.2 (último mes, millones de euros, cabecera en varias filas) e Ingresos tributarios con la serie mensual desde 1995-01 en miles de euros (año, número de mes y nombre del mes en las tres primeras columnas)"
   - path: https://sede.agenciatributaria.gob.es/static_files/AEAT/Estudios/Estadisticas/Informes_Estadisticos/Informes_mensuales_recaudacion_tributaria/{AAAA}/IMR_{AA}_{MM}_es_es.pdf
-    desc: Informe mensual de recaudación en PDF
+    desc: Informe mensual de recaudación en PDF; el mes aún no publicado da 404
+    params: "patrón válido desde 2014; en 2011-2013 IMR_{AA}_{MM}.pdf sin _es_es y en 2008-2010 {mes}{AAAA}.pdf con el mes en letras (enero2010.pdf)"
   - path: https://sede.agenciatributaria.gob.es/Sede/datosabiertos/catalogo/hacienda/{Estadistica}.shtml
     desc: Ficha de cada estadística con enlaces a las tablas HTML por ejercicio y a su documentación
   - path: https://sede.agenciatributaria.gob.es/Sede/estadisticas/estadisticas-impuesto.html
     desc: Índice de estadísticas por impuesto con enlace a la ficha de cada una
-quirks: [static-html, overwritten-in-place]
+  - path: https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Aduanas/Comercio_exterior/Nuevo_formato_2026_max_des/{mes}/MAXIMA_DESAGREGACION_2026.csv
+    desc: Comercio exterior de bienes 2026 a máxima desagregación (mes de referencia y revisados del año); enlace vigente en estadisticas-comercio-exterior/2026.html
+    params: "mes en minúsculas, el último publicado (julio el 2026-10-01; la carpeta junio/ sigue accesible)"
+    example: curl -s -r 0-2999 "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Aduanas/Comercio_exterior/Nuevo_formato_2026_max_des/julio/MAXIMA_DESAGREGACION_2026.csv"
+    returns: "CSV sin cabecera, ; y CRLF, punto decimal (162979.63); 14 campos: flujo E/I, año, mes, posición estadística (NC de 8 dígitos), país ISO alfa-2, provincia, peso, unidades, valor, divisa (vacía en UE), modo de transporte, zona UE/TE, naturaleza de la transacción y provincia del domicilio fiscal"
+quirks: [static-html, overwritten-in-place, url-drift]
+ids: [ine-provincia, ccaa]
 gotchas:
-  - Los CSV usan punto y coma como separador, coma decimal y CRLF; las columnas son códigos (MUNI_1, M714_3) descritos en AyudaCSV_AnuarioTotal.pdf y AyudaCSV_AnuarioMunicipal.pdf de la misma carpeta.
-  - IRPFmunicipios.csv pesa 30 MB y trae todos los ejercicios en una sola tabla (columnas EJER y TRAMO).
-  - Las rutas estadisticas-irpf.html, informes-mensuales-recaudacion-tributaria.html y datos-abiertos.html no existen; el índice es estadisticas-impuesto.html y las fichas cuelgan de datosabiertos/catalogo/hacienda/.
-  - Las tablas de cada estadística son sitios HTML estáticos por ejercicio bajo /AEAT/Contenidos_Comunes/.../Publicaciones/sites/{impuesto}/{AAAA}/; exportación a Excel tabla a tabla.
-  - Los xlsx de series se sobreescriben cada mes en la misma URL; guardar copia si se necesita el histórico de revisiones.
+  - Los CSV del anuario usan ; como separador, coma decimal sin separador de miles y CRLF; las columnas son códigos (MUNI_1, M714_3) descritos en AyudaCSV_AnuarioTotal.pdf y AyudaCSV_AnuarioMunicipal.pdf.
+  - "Las celdas sin dato llevan el literal NULL (52.345 en IRPFmunicipios.csv; también en modelo190_salarios, 200, 390 y 714); leer con na_values=['NULL'] o la columna se carga como texto."
+  - "IRPFmunicipios.csv (31,5 MB) cubre 2013-2023 y va por detrás de la web: el ejercicio 2024 salió en HTML el 30/09/2026 y el CSV seguía en 2023 el 01/10/2026 (en 2025 tardó seis días)."
+  - MUNI_DEF es un código interno de la AEAT (4 = Albacete), no el INE; la equivalencia solo está en la tabla de AyudaCSV_AnuarioMunicipal.pdf como Nombre-NNNNN, que hay que extraer con pdftotext.
+  - Los CSV del anuario no traen País Vasco ni Navarra; CCAA y PROV son códigos INE sin cero inicial, con 77 y 99 para Resto; los municipios de menos de 1.000 habitantes van agregados por provincia (TRAMO 10).
+  - Las rutas estadisticas-irpf.html, informes-mensuales-recaudacion-tributaria.html y datos-abiertos.html dan 404; el índice es estadisticas-impuesto.html y las fichas cuelgan de datosabiertos/catalogo/hacienda/.
+  - Las tablas por ejercicio son HTML estático en .../Publicaciones/sites/{estadistica}/{AAAA}/home.html, con páginas jrubik{hash}.html no deducibles y miles con punto; no exportan a fichero, solo copian.
+  - En la hoja Ingresos tributarios los meses van en miles de euros y el bloque anual de debajo en millones; el año es texto hasta 2019 y entero desde 2020, y los meses futuros traen cadena vacía.
+  - Los xlsx de recaudación se sobrescriben cada mes en la misma URL (Last-Modified 30/09/2026 con los datos de agosto); guardar copia si se necesita el histórico de revisiones.
+  - MAXIMA_DESAGREGACION_2026.csv pesa 572 MB, no tiene cabecera y usa punto decimal, al revés que el anuario; la carpeta cambia cada mes y sus cifras no cuadran con los zip tradicionales.
 tips:
-  - El CSV masivo del anuario evita rascar las tablas HTML; para series de recaudación usar el xlsx de cuadros.
-related: [aeat-servicios-web, igae-ejecucion-presupuestaria, ine-codigos-territoriales]
+  - Para series de recaudación, la hoja Ingresos tributarios da la serie mensual desde 1995 e Ingresos_por_Delegaciones.xlsx (hoja datos_delegaciones) la da por delegación y provincia desde 2007 en formato largo.
+  - Para cruzar con el INE, construir una vez la tabla MUNI_DEF a código INE con pdftotext -layout sobre AyudaCSV_AnuarioMunicipal.pdf (líneas «código CCAA provincia Nombre-NNNNN»).
+  - Para comercio exterior sin registro, el CSV de máxima desagregación evita la cuenta de DataComex; leerlo por streaming y filtrar por posición estadística en lugar de cargarlo entero.
+related: [aeat-servicios-web, igae-ejecucion-presupuestaria, ine-codigos-territoriales, datacomex]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

@@ -1,0 +1,61 @@
+id: ayuntamiento-barcelona-datos-abiertos
+name: Ayuntamiento de Barcelona – Open Data BCN (API CKAN y DataStore)
+org: Ayuntamiento de Barcelona
+level: local
+sector: gobierno-abierto-administracion
+tags: [datos-abiertos, ckan, datastore, sql, barcelona, padron, barrios, secciones-censales, accidentes, presupuesto, bicing]
+summary: >-
+  555 datasets del Ayuntamiento de Barcelona (padrón por sección censal desde 1997, accidentes de la Guardia Urbana,
+  movilidad, vivienda, IBI, subvenciones, presupuesto) sobre CKAN 2.6. La API de acciones y el DataStore (búsqueda
+  y SQL) responden sin clave; las descargas pasan por un reto anti-bot.
+access: [api-rest, download]
+auth: none
+formats: [json, csv, xml, geojson, gpkg, shp, zip]
+update: daily
+coverage: "Según dataset; padrón por sección censal 1997-2026 con un recurso por año, accidentes de la Guardia Urbana desde 2010"
+license: CC BY 4.0 en los 555 datasets (license_id CC-BY-4.0)
+base_url: https://opendata-ajuntament.barcelona.cat/data/api/3/action
+docs_url: https://docs.ckan.org/en/2.6/api/index.html
+endpoints:
+  - path: /package_search?q={texto}&rows={n}
+    desc: Búsqueda en el catálogo con q, fq (token_required:Yes), facet.field, rows y start; rows=1000 devuelve los 555 datasets (13 MB)
+    example: curl -s "https://opendata-ajuntament.barcelona.cat/data/api/3/action/package_search?q=accidents&rows=5"
+    returns: "{success, result:{count, sort fecha_publicacion desc, results:[{name, title_translated {ca, es, en}, frequency ANUAL, SETMANAL..., license_id, token_required Yes o No, resources:[...]}]}}"
+  - path: /package_show?id={name}
+    desc: Dataset con todos sus recursos; suele haber uno por año y formato (pad_mdbas_sexe tiene 60, CSV y JSON de 1997 a 2026)
+    example: curl -s "https://opendata-ajuntament.barcelona.cat/data/api/3/action/package_show?id=pad_mdbas_sexe"
+    returns: "{success, result:{id, name, frequency, fecha_publicacion, resources:[{id uuid, name 2026_pad_mdbas_sexe.csv, format, datastore_active bool, size en bytes como texto, last_modified ISO sin zona, url .../download}]}}"
+  - path: /datastore_search?resource_id={uuid}
+    desc: Filas de un recurso con datastore_active true; filters, q, sort, fields, limit y offset
+    example: 'curl -sG "https://opendata-ajuntament.barcelona.cat/data/api/3/action/datastore_search" --data-urlencode "resource_id=3057b89d-9713-4001-8f07-a6fb122a152b" --data-urlencode ''filters={"Codi_Districte":"10"}'' --data-urlencode "limit=5"'
+    params: "limit 100 por defecto, sin tope observado hasta 150000; offset; filters JSON campo y valor; q texto libre; sort=campo desc; fields=a,b"
+    returns: "{success, result:{total, fields:[{id, type int4, numeric, text o timestamp}], records:[{_id, Codi_Districte '10', Seccio_Censal '10089', Valor '4823', Data_Referencia 2026-01-01T00:00:00}], _links{start, next}}}; numeric llega como texto"
+  - path: /datastore_search_sql?sql={consulta}
+    desc: SELECT de PostgreSQL sobre uno o varios recursos; la tabla es el resource_id y las columnas con mayúsculas van entre comillas dobles
+    example: 'curl -sG "https://opendata-ajuntament.barcelona.cat/data/api/3/action/datastore_search_sql" --data-urlencode ''sql=SELECT "Codi_Districte", SUM("Valor"::numeric) AS pob FROM "3057b89d-9713-4001-8f07-a6fb122a152b" GROUP BY 1 ORDER BY 1'''
+    returns: "{success, result:{records:[{Codi_Districte '1', pob '115829'}], fields, sql}}; LIMIT 150000 respondió sin recorte; un error devuelve 409 con success false y error.orig con el mensaje de PostgreSQL"
+  - path: https://opendata-ajuntament.barcelona.cat/data/dataset/{package_id}/resource/{resource_id}/download
+    desc: Fichero original del recurso; única vía para JSON, ZIP, GPKG y los CSV sin datastore; también /data/datastore/dump/{resource_id}
+    returns: "No conseguido el 2026-10-01; 302 a /challenge, página Bot Detection con hCaptcha (BunkerWeb), igual que la web del portal y catalog.rdf, con cualquier User-Agent"
+rate_limit: No documentado; sin 429 en la verificación
+quirks: [captcha-required, datastore-incomplete]
+ids: [seccion-censal, nif]
+gotchas:
+  - Desde este entorno todo lo que no es /data/api/ (web, /download, /datastore/dump, catalog.rdf) redirige a un reto hCaptcha y la API sí responde; probar las descargas desde una IP residencial.
+  - Solo los recursos con datastore_active true tienen API (3.264 CSV de 6.791 recursos); JSON, ZIP, GPKG y algunos años de CSV (accidents-causes-gu-bcn 2024) solo se descargan.
+  - Un recurso por año; una serie exige recorrer resources de package_show, y el tipo de una columna cambia entre años (Valor es numeric en 2026 y text en 2022); en SQL convertir con ::numeric.
+  - datastore_search devuelve 100 filas por defecto y _links.next omite el prefijo /data (/api/3/action/...), que pedido tal cual cae en el reto anti-bot; anteponer /data o paginar con offset.
+  - limit=0 no devuelve total en esta versión (CKAN 2.6.9); contar con datastore_search_sql y SELECT COUNT(*).
+  - Seccio_Censal es distrito más sección sin ceros (1001, 10089); el código INE de 10 dígitos es 08019 más Seccio_Censal rellenada con ceros hasta 5 cifras (0801901001).
+  - El padrón municipal que publica el Ayuntamiento no es la cifra oficial; Barcelona a 1-1-2025 suma 1.732.066 frente a 1.731.649 del padrón oficial (idescat-api) y 1.713.247 del Censo anual del INE.
+  - El datastore puede no coincidir con el fichero; esm-bcn-evo 2024 tiene 1.250 filas en el datastore para un CSV declarado de 539 MB. Comparar COUNT(*) con size antes de fiarse.
+  - Columnas en catalán con mayúsculas, acentos, espacios o símbolos (Número_expedient, Causa conductor, Total_Quota_Ajuntament_€); hay fechas como texto dd.mm.aaaa (Data_Convocatoria) junto a timestamps.
+  - Bicing en tiempo real y aparcamientos B:SM exigen token (token_required Yes, recursos securitzat); el portal Barcelona Dades tiene API aparte que responde 401 sin X-IBM-Client-Id personal.
+tips:
+  - Flujo típico. package_show para localizar el resource_id de cada año y datastore_search_sql para filtrar y agregar en servidor.
+  - Para cruzar por sección con INE o Idescat, construir '08019' + Seccio_Censal.zfill(5); por barrio, Codi_Barri va de 1 a 73 y Codi_Districte de 1 a 10, ambos sin ceros.
+  - Recursos enormes (bicing 2018_11, 3.961.609 filas) se recorren con SQL por clave, WHERE "_id" > último ORDER BY "_id" LIMIT 50000, en 1 a 3 s por página.
+  - Las subvenciones municipales (subvencions-atorgades-ajuntament-i-instituts) traen NIF_CIF completo de personas jurídicas (B08911083) y enmascarado de físicas (***1959**); Beneficiari llega con un espacio inicial.
+related: [idescat-api, gencat-dades-obertes, ine-cartografia-censal, datos-gob-es-api]
+status: active
+verified: "2026-10-01"

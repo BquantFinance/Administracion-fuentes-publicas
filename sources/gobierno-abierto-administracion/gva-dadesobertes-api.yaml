@@ -1,0 +1,74 @@
+id: gva-dadesobertes-api
+name: GVA – Portal de datos abiertos de la Generalitat Valenciana (API CKAN)
+org: Generalitat Valenciana
+ministry: Conselleria de Justicia, Transparencia y Participación
+level: ccaa
+sector: gobierno-abierto-administracion
+tags: [datos-abiertos, ckan, datastore, dcat, catalogo, comunitat-valenciana, contratos, erte, icv]
+summary: >-
+  Catálogo CKAN de la Generalitat Valenciana (1310 conjuntos de la GVA, el Institut Cartogràfic Valencià y la
+  Universidad de Alicante): contratos, ERTE, turismo, cultura, cartografía. API JSON con datastore para consultar
+  filas de los CSV, volcado CSV y DCAT-AP, sin autenticación.
+access: [api-rest, download]
+auth: none
+formats: [json, csv, rdf, ttl, jsonld]
+update: daily
+coverage: "Catálogo desde 2019; contratos de la Generalitat desde 2013"
+license: Creative Commons Attribution (license_id cc-by) en los 1310 conjuntos
+base_url: https://dadesobertes.gva.es/api/3/action
+docs_url: https://docs.ckan.org/en/latest/api/index.html
+endpoints:
+  - path: /package_search?q={texto}&fq={filtro}&rows={n}&start={n}
+    desc: Búsqueda de conjuntos con filtros Solr (organization, groups, res_format, origen_datos), orden y facetas
+    example: curl -s "https://dadesobertes.gva.es/api/3/action/package_search?q=contratos&fq=organization:generalitat-valenciana&rows=100&start=0&sort=metadata_modified%20desc"
+    params: 'rows 10 por defecto y tope 1000; sort=metadata_modified desc; fl=name,title,metadata_modified aligera; facet.field=["origen_datos"] cuenta conjuntos por órgano'
+    returns: "{success, result:{count, results:[{name, title, notes, metadata_modified ISO sin zona, organization{name}, groups[], tags[], origen_datos, frequency, resources[{id, format, url, datastore_active}], extras[]}], facets}}"
+  - path: /package_show?id={name}
+    desc: Conjunto completo con sus recursos (el id de recurso es el que pide el datastore) y extras
+    example: curl -s "https://dadesobertes.gva.es/api/3/action/package_show?id=eco-gvo-contratos-2026"
+    returns: "{success, result:{name, title, origen_datos, frequency, metadata_modified, resources:[{id, format, url, datastore_active, last_modified}], extras:[{key, value}]}}; un id inexistente da 404 con success false y error.message No encontrado"
+  - path: /datastore_search?resource_id={id}&limit={n}&offset={n}
+    desc: Filas de un recurso cargado en el datastore (datastore_active true) con filtro por igualdad, orden y selección de campos
+    example: curl -s "https://dadesobertes.gva.es/api/3/action/datastore_search?resource_id=6b244ece-3ced-459f-a2a6-5cc4bfccd577&limit=1000&offset=0"
+    params: 'limit 100 por defecto y tope 32000; filters={"TIPO":"Suministros"} (igualdad exacta); q={"OBJETO":"ambulancia"} por campo; fields; sort=_id desc; records_format=csv'
+    returns: "{result:{fields:[{id, type text|numeric|timestamp|int}], records:[{_id, ...}], total, limit, _links:{start, next}}}; numeric llega como número JSON y el resto como cadena (en contratos, importes 262,5 y fechas 2026/03/18 00:00:00.000000000)"
+  - path: /datastore_info?id={resource_id}
+    desc: Diccionario de un recurso del datastore con tipo y descripción de cada columna
+    example: curl -s "https://dadesobertes.gva.es/api/3/action/datastore_info?id=6b244ece-3ced-459f-a2a6-5cc4bfccd577"
+    returns: "{result:{meta:{count, size}, fields:[{id, type, info:{notes, type_override}, schema:{native_type}}]}}; notes en valenciano y castellano separados por / (Exercici pressupostari / Ejercicio presupuestario)"
+  - path: https://dadesobertes.gva.es/datastore/dump/{resource_id}?format=csv
+    desc: Volcado completo de un recurso del datastore en un solo CSV, sin paginar
+    example: curl -s -o mapets.csv "https://dadesobertes.gva.es/datastore/dump/29864181-c7b1-470c-a4e6-e5958ead7c4a?format=csv"
+    returns: "CSV UTF-8 separado por coma, con _id como primera columna y cabeceras normalizadas (xarxa_governança_cv pasa a xarxa_governanca_cv); el CSV original del conjunto usaba punto y coma"
+  - path: /organization_list?all_fields=true
+    desc: Organizaciones publicadoras con su número de conjuntos; group_list?all_fields=true da los 22 temas
+    example: curl -s "https://dadesobertes.gva.es/api/3/action/organization_list?all_fields=true"
+    returns: "Lista de {name, title, package_count}; el 2026-10-01 generalitat-valenciana 679, icv 515 y universidad-de-alicante 116. group_list devuelve 22 grupos (medio-ambiente 424, empleo 237, educacion 198...)"
+  - path: https://dadesobertes.gva.es/catalog.rdf?page={n}
+    desc: Catálogo DCAT-AP completo; también catalog.ttl, catalog.jsonld y /dataset/{name}.rdf o .jsonld para un conjunto
+    example: curl -s "https://dadesobertes.gva.es/catalog.rdf?page=1"
+    returns: "RDF/XML con 100 dcat:Dataset por página, hydra:totalItems 1310, hydra:nextPage y hydra:lastPage (page=14); títulos sin xml:lang"
+rate_limit: No documentado; sin 429 en unas 50 peticiones secuenciales el 2026-10-01
+quirks: [overwritten-in-place, datastore-incomplete, connection-reset-intermittent]
+ids: [ine-municipio, ine-provincia, nif, cpv, referencia-catastral]
+gotchas:
+  - rows se recorta en silencio a 1000 (10 por defecto) en package_search y limit a 32000 (100 por defecto) en datastore_search; paginar con start u offset hasta count o total.
+  - _links.next es una ruta relativa sin host y sigue apareciendo después de la última página, con records vacío; parar cuando offset alcance total.
+  - datastore_search_sql cerró la conexión sin respuesta HTTP en GET y en POST (2026-10-01); usar datastore_search con filters y sort, o el volcado /datastore/dump/{id}.
+  - 'q en texto plano devolvió total 0 en el recurso de contratos 2026 con palabras que están en los datos; q como objeto por campo, q={"OBJETO":"ambulancia"}, sí filtró.'
+  - El datastore infiere tipos por conjunto; en contratos los importes quedan como texto con coma decimal (262,5) y las fechas como texto, y los códigos INE pasan a numeric sin ceros (3001 por 03001).
+  - organization solo distingue generalitat-valenciana, icv y universidad-de-alicante; el órgano va en origen_datos, texto libre con variantes (IVE en castellano y valenciano, 308 vacíos), filtrable con fq.
+  - Las series se publican como un conjunto por periodo (eco-gvo-contratos-2013 a eco-gvo-contratos-2026, tra-erte-sol-2026-09); localizarlas con q=name:eco-gvo-contratos* y no fijar el nombre.
+  - Los recursos que enlazan a bdo.gva.es (IVE) tienen copia en el datastore atrasada y con columnas fantasma (Anos, 2017, 14); para esos datos descargar la url original (ive-pegv-bancos-datos).
+  - Los CSV alojados vistos van en UTF-8 sin BOM y con punto y coma (GTFS con coma), pero fecha y decimal cambian por conjunto (12/01/2025 o 2024/11/22 13:35:03; 262,5 o 222.00) y hay cabeceras con espacios.
+  - El servidor resetea a veces la conexión en el saludo TLS, igual que pegv, bdo y bdt; reintentar tras 5 s. portaldadesobertes.gva.es, el portal informativo, no completó TLS desde este entorno el 2026-10-01.
+tips:
+  - datastore_info es el diccionario de columnas; en algunos conjuntos (contratos) los extras del dataset repiten la definición de los 72 campos.
+  - Para unir con el INE, rellenar ceros; str(codigo_ine).zfill(5) o str(cod_provincia).zfill(2) + str(cod_municipio).zfill(3), y cruzar con ine-codigos-territoriales.
+  - En los contratos de la Generalitat, URL_LICITACION trae en parte de los registros el deeplink de PLACSP (idEvl), el mismo que el link de cada entry del ATOM de placsp-datos-abiertos.
+  - Los 515 conjuntos del ICV (fq=organization:icv) apuntan a WMS y WFS de terramapas.icv.gva.es; GetFeature con outputformat=gpkg devuelve GeoPackage.
+  - Los conjuntos del IVE (fq=origen_datos:*Estad*) enlazan URLs estáticas de bdo.gva.es; atajo para obtener el código cons de ive-pegv-bancos-datos sin recorrer el formulario.
+  - /datastore/dump/{id}?format=csv baja de una vez un recurso entero; para tablas medianas evita paginar datastore_search.
+related: [datos-gob-es-api, placsp-datos-abiertos, ine-codigos-territoriales, ive-pegv-bancos-datos]
+status: active
+verified: "2026-10-01"

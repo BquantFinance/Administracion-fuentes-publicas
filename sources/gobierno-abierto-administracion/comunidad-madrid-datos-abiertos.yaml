@@ -1,0 +1,63 @@
+id: comunidad-madrid-datos-abiertos
+name: Comunidad de Madrid – Catálogo de datos abiertos (API CKAN)
+org: Comunidad de Madrid
+level: ccaa
+sector: gobierno-abierto-administracion
+tags: [datos-abiertos, ckan, catalogo, datastore, dcat, calidad-del-aire, padron, municipios, gtfs, registros]
+summary: >-
+  CKAN 2.9 con 177 conjuntos de las consejerías (calidad del aire diaria, polen, centros educativos, farmacias,
+  registros, GTFS del Consorcio, elecciones autonómicas) y 2086 tablas del Instituto de Estadística (bancos Almudena
+  municipal, Baco y Desvan). API JSON, datastore y DCAT sin clave.
+access: [api-rest, download]
+auth: none
+formats: [json, csv, zip, ttl, rdf]
+update: daily
+coverage: "Según conjunto; padrón municipal por sexo desde 1985, calidad del aire del día y del mes en curso"
+license: CC BY 4.0 en cada conjunto (license_id cc-by)
+base_url: https://datos.comunidad.madrid/api/3/action
+docs_url: https://www.comunidad.madrid/datos-abiertos/reutiliza-datos-abiertos-comunidad-madrid
+endpoints:
+  - path: /package_search?q={texto}&fq={filtro}&rows={n}&start={n}
+    desc: Búsqueda de conjuntos con organización, extras y recursos
+    example: curl -s "https://datos.comunidad.madrid/api/3/action/package_search?q=padron&fq=organization:estadistica&rows=5"
+    params: "q en sintaxis Solr (title:paro), fq=organization:estadistica o organization:comunidad-de-madrid, groups:salud; rows y start; fl=name,title aligera (rows=5000 con fl dio los 2263)"
+    returns: "Objeto {success, result:{count, results:[{id uuid, name, title, notes, organization.name, groups[], tags[], extras[{key,value}], resources[{id, format CSV o JSON, url, datastore_active, last_modified ISO sin zona, size}]}]}}; rows=1000 sin fl pesa 17 MB"
+  - path: /package_show?id={name}
+    desc: Conjunto completo por name (padron_por_sexo) o por uuid
+    example: curl -s "https://datos.comunidad.madrid/api/3/action/package_show?id=padron_por_sexo"
+    returns: "Objeto result con resources[] y, en las tablas del Instituto, extras Fecha Actualización (dd-mm-aaaa), Fuente, Origen (Almudena, Baco o Desvan), Unidad y Ámbito; en consejerías Consejería, Frecuencia y Cobertura"
+  - path: /datastore_search?resource_id={id}&filters={json}&limit={n}&offset={n}
+    desc: Filas de un CSV cargado en el datastore (datastore_active true), con filtros, orden y búsqueda
+    example: curl -sg 'https://datos.comunidad.madrid/api/3/action/datastore_search?resource_id=532735ad-4ce6-4a29-ad11-bb86916c0cf4&filters={"Periodo":"M04"}&limit=5'
+    params: "filters JSON (con curl -g), q, sort=Año desc, fields, offset; limit=100000 devolvió 41230 filas en una llamada; datastore_search_sql responde a SELECT count(*)"
+    returns: "Objeto result {fields[{id,type}], records[], total, limit, _links.next}; columnas numéricas tipadas (Valor numeric con punto, Código territorio numeric que pierde el cero inicial)"
+  - path: https://datos.comunidad.madrid/dataset/{name}/resource/{resource_id}/download
+    desc: Fichero vigente de un recurso sin conocer su nombre; admite el name o el uuid del conjunto
+    example: curl -s "https://datos.comunidad.madrid/dataset/padron_por_sexo/resource/bc69f395-1f96-4fc2-a115-025c55b905ad/download"
+    returns: "CSV del Instituto en ISO-8859-1, CRLF, separador ; y decimal punto: Año;Tipo territorio;Código territorio;Territorio;Sexo;Valor;Unidad;Estado dato. CSV de consejerías en UTF-8 con BOM y decimal coma"
+  - path: https://datos.comunidad.madrid/catalog.ttl?page={n}
+    desc: Catálogo DCAT-AP completo en Turtle (también catalog.rdf), paginado con hydra
+    example: curl -s "https://datos.comunidad.madrid/catalog.ttl?page=1"
+    returns: "Turtle con hydra:PagedCollection (itemsPerPage 500, totalItems 2263, lastPage 5) y dcat:Dataset con sus distribuciones; 4,6 MB y unos 9 s por página"
+rate_limit: No documentado; ningún 429 ni bloqueo en las peticiones secuenciales de la verificación del 2026-10-01
+quirks: [latin1, overwritten-in-place, datastore-incomplete]
+ids: [ine-municipio]
+gotchas:
+  - "El datastore no siempre refleja el CSV: padron_por_sexo tenía 5000 de 18718 filas (hasta 2022), el mensual de calidad del aire 1000 de 5880 y el diario 0 de 180; comparar total con el fichero."
+  - Las tablas del Instituto (organización estadistica) van en CSV ISO-8859-1 con decimal punto y las de consejerías en UTF-8 con BOM y decimal coma; todas con separador punto y coma.
+  - En las tablas Almudena el Código territorio municipal son 4 caracteres, municipio (3) más dígito de control y sin provincia (0796 es Madrid, 28079); los 2 dígitos 01 a 11 son zonas estadísticas.
+  - En calidad del aire provincia y municipio van separados y sin ceros (28;102 es 28102); cada hora hNN lleva su validación vNN y las horas sin dato llegan vacías con N.
+  - "Dos formatos del mismo conjunto pueden ir desfasados: en calidad_aire_datos_meteo_mes el JSON seguía en abril de 2026 y el CSV en septiembre; mirar last_modified de cada recurso."
+  - "El JSON de las tablas del Instituto es {data:[...]} con todos los valores como texto (Valor 63.909 entre comillas) y null en los vacíos."
+  - Las tablas de Origen Desvan tienen Ámbito Toda España y muchas vienen del INE o de ministerios (IPC, Encuesta Europea de Salud); mirar Fuente antes de tomarlas como dato propio de Madrid.
+  - Las URL antiguas /catalogo/dataset/... y /catalogo/api/3/action/... redirigen con 307 a /dataset/... y /api/action/...; sin seguir redirecciones se recibe HTML.
+  - El buscador web /catalogos es una aplicación JavaScript que llama a un API WSO2 con token en apiscm.comunidad.madrid, que cortó la conexión desde este entorno; para automatizar, la API CKAN.
+  - Los GTFS del Consorcio de Transportes (red_de_metro_oferta_planificada_horarios_topologia y similares) enlazan a una página de ArcGIS, no a un ZIP.
+tips:
+  - "GTFS del Consorcio: el ZIP se baja con https://crtm.maps.arcgis.com/sharing/rest/content/items/{id}/data (id del enlace item.html) y su fecha está en modified, epoch ms, de ?f=json."
+  - fq=organization:estadistica separa las 2086 tablas del Instituto de los 177 conjuntos de consejerías; el extra Origen indica de qué banco de datos sale cada tabla.
+  - Para casar un municipio de Almudena con el INE basta 28 más los tres primeros dígitos del Código territorio (ine-codigos-territoriales).
+  - Para series propias del Instituto con código INE de 5 dígitos y filtros por dimensión, comunidad-madrid-estadistica-api; para la ciudad de Madrid, ayuntamiento-madrid-datos-abiertos.
+related: [comunidad-madrid-estadistica-api, ayuntamiento-madrid-datos-abiertos, datos-gob-es-api, ine-codigos-territoriales, miteco-calidad-aire]
+status: active
+verified: "2026-10-01"

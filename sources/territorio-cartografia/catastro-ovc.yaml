@@ -21,6 +21,7 @@ endpoints:
   - path: /COVCCallejero.svc/json/Consulta_DNPRC?RefCat={RC}
     desc: Datos no protegidos de un inmueble por referencia catastral de 14 o 20 caracteres (uso, superficie, año, dirección, municipio con códigos INE)
     example: curl -s "https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPRC?RefCat=9872023VH5797S0001WX"
+    returns: "{consulta_dnprcResult: {control: {cudnp, cucons}, bico: {bi: {idbi: {cn, rc: {pc1, pc2, car, cc1, cc2}}, dt: {loine: {cp, cm}, cmc, np, nm, locs}, ldt, debi: {luso, sfc, cpt, ant}}, finca: {ldt, ltp, dff}, lcons: [{lcd, dfcons: {stl}, dvcons: {dtip}}]}}}; todo texto y cpt con coma decimal"
   - path: /COVCCallejero.svc/json/Consulta_DNPLOC?Provincia={p}&Municipio={m}&TipoVia={tv}&NombreVia={nv}&Numero={n}
     desc: Inmuebles de una dirección postal; provincia y municipio en mayúsculas tal como los devuelve ObtenerMunicipios
   - path: /COVCCallejero.svc/json/ObtenerProvincias
@@ -29,9 +30,11 @@ endpoints:
   - path: /COVCCallejero.svc/json/ObtenerMunicipios?Provincia={p}&Municipio={m}
     desc: Municipios de una provincia con código catastral (locat) y código INE (loine); Municipio filtra por texto
     example: curl -s "https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/ObtenerMunicipios?Provincia=MADRID&Municipio="
+    returns: "{consulta_municipieroResult: {control: {cumun}, municipiero: {muni: [{locat: {cd, cmc}, loine: {cp, cm}, nm}]}}}; 179 municipios en MADRID; códigos como texto sin ceros a la izquierda y nombres en mayúsculas sin tildes pero con Ñ (GRIÑON)"
   - path: https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS=EPSG:4326&Coordenada_X={lon}&Coordenada_Y={lat}
     desc: Referencia catastral de la parcela en unas coordenadas (XML)
     example: curl -s "https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS=EPSG:4326&Coordenada_X=-3.6960&Coordenada_Y=40.4185"
+    returns: "XML consulta_coordenadas (UTF-8) con control (cucoor, cuerr) y coordenadas/coord con pc (pc1 + pc2 forman la referencia de 14 caracteres), geo (xcen, ycen, srs) y ldt con la dirección (CL ALCALA 44 MADRID (MADRID))"
   - path: https://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx?service=wfs&request=getfeature&STOREDQUERIE_ID=GetParcel&refcat={RC14}&srsname=EPSG::25830
     desc: Geometría GML de una parcela (INSPIRE Cadastral Parcels) por referencia de 14 caracteres
     example: curl -s "https://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx?service=wfs&request=getfeature&STOREDQUERIE_ID=GetParcel&refcat=9872023VH5797S&srsname=EPSG::25830"
@@ -41,20 +44,22 @@ endpoints:
   - path: https://ovc.catastro.meh.es/Cartografia/WMS/ServidorWMS.aspx?SERVICE=WMS&REQUEST=GetCapabilities
     desc: WMS 1.1.1 de cartografía catastral
 rate_limit: No documentado; tras unas 15 peticiones seguidas el servidor corta la conexión y sigue cortándola unos 10 minutos
-quirks: [latin1]
+quirks: [latin1, waf-temporary-ban]
 ids: [referencia-catastral, ine-municipio, ine-provincia]
 gotchas:
   - Las ráfagas bloquean por IP. Tras unas 15 llamadas en un minuto el servidor cierra la conexión sin respuesta (curl 000) durante unos 10 minutos; espaciar a una por segundo y reintentar con espera larga.
   - Los errores llegan con HTTP 200 y un bloque lerr (cod, des) dentro del resultado; comprobar control.cuerr antes de leer datos.
   - La variante JSON de coordenadas (COVCCoordenadas.svc/json/Consulta_RCCOOR) devolvió error 76 con los mismos parámetros que acepta el asmx; usar el asmx en XML.
-  - El JSON anida con claves abreviadas (consulta_dnprcResult, bico, bi, dt, loine, locat); loine trae el código INE (cp, cm) y locat el catastral (cd, cmc), que no coinciden.
+  - El JSON anida claves abreviadas (bico, bi, dt, loine, locat); loine es el INE (cp, cm) y locat o cmc el catastral, iguales en 173 de 179 municipios de Madrid pero no en la capital (cm 79, cmc 900), y sin ceros.
   - Cartografía en EPSG:25829, 25830 y 25831 según huso y 32628 en Canarias; el WFS y el WMS responden en ISO-8859-1.
   - Titulares, valor catastral y planos detallados solo por Sede Electrónica con certificado o Cl@ve.
   - La ruta de documentación de la ficha anterior (esp/ws_serviciosweb.asp) devuelve una página de error con 200; la documentación pública es la de INSPIRE (docs_url).
-  - "Bloquea rangos de centros de datos: desde GitHub Actions cerró la conexión en la primera llamada y desde el entorno de verificación devolvió 403 Petición HTTP bloqueada (2026-09-30); verificar desde IP residencial."
+  - Bloquea rangos de centros de datos de forma variable; el 30/09/2026 cerró la conexión desde GitHub Actions y dio 403 Petición HTTP bloqueada desde el entorno, y el 01/10 respondió 200 a tres peticiones espaciadas.
+  - Superficie y año llegan como texto (sfc 308, ant 1980) y el coeficiente de participación cpt con coma decimal (100,000000); convertir antes de operar.
+  - Consulta_RCCOOR usa el espacio de nombres por defecto http://www.catastro.meh.es/ (un XPath sin él no encuentra pc1) y xcen, ycen repiten las coordenadas pedidas, no el centroide de la parcela.
 tips:
   - Flujo típico. ObtenerMunicipios para traducir INE a códigos catastrales, Consulta_DNPLOC o Consulta_RCCOOR para llegar a la referencia, Consulta_DNPRC para el detalle.
-  - Para geocodificar direcciones antes de pedir la referencia, el geocoder de CartoCiudad (cnig-centro-descargas) devuelve coordenadas y código INE.
+  - Para geocodificar direcciones antes de pedir la referencia, el geocoder de CartoCiudad (cnig-centro-descargas) devuelve coordenadas, código INE y, en portales, refCatastral de 14 caracteres.
 related: [ine-codigos-territoriales, cnig-centro-descargas, idee-servicios]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

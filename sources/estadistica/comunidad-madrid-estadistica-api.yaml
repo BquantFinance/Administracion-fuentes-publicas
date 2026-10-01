@@ -1,0 +1,64 @@
+id: comunidad-madrid-estadistica-api
+name: Instituto de Estadística de la Comunidad de Madrid – API eDatos
+org: Instituto de Estadística de la Comunidad de Madrid
+level: ccaa
+sector: estadistica
+tags: [estadistica, edatos, api, municipios, pib-municipal, contabilidad-regional, nacimientos, defunciones, afiliacion, barrios]
+summary: >-
+  API REST de la plataforma eDatos del Instituto (agencia IECM): 278 operaciones y 858 datasets con datos propios de
+  Madrid (PIB municipal, contabilidad trimestral, nacimientos y defunciones por municipio, barrio o zona de salud,
+  afiliación). JSON o XML, exportación a CSV, sin clave.
+access: [api-rest]
+auth: none
+formats: [json, xml, csv, zip]
+update: monthly
+coverage: "Según operación; contabilidad trimestral desde 2010, PIB municipal desde 2021"
+license: CC BY 4.0 (metadata.license de cada dataset)
+base_url: https://iestadis.edatos.io
+docs_url: https://iestadis.edatos.io/apps/api
+endpoints:
+  - path: /statistical-resources/v1.0/datasets.json?limit={n}&offset={n}
+    desc: Lista de datasets, una entrada por versión (2590 entradas, 858 ids); query filtra por ID o NAME
+    example: curl -s "https://iestadis.edatos.io/statistical-resources/v1.0/datasets.json?limit=1000"
+    params: "limit hasta 1000, offset; query=ID LIKE '054_' o NAME LIKE 'PIB' (TITLE responde 500 Parameter TITLE is unexpected)"
+    returns: "Objeto {total, limit, offset, nextLink, lastLink, dataset:[{id 054_000001, selfLink.href con la versión al final, name.text[{value,lang}], urn, visualizerHtmlLink}]}"
+  - path: /statistical-resources/v1.0/datasets/IECM/{id}/~latest.json?dim={filtro}&fields=-metadata
+    desc: Datos de la última versión de un dataset, con filtro opcional por dimensión
+    example: curl -s "https://iestadis.edatos.io/statistical-resources/v1.0/datasets/IECM/054_000001/~latest.json?dim=TERRITORIO:28079|28006&fields=-metadata"
+    params: "dim=DIM:cod1|cod2:DIM2:cod; fields=-metadata solo datos y fields=-data solo metadatos con las etiquetas de cada código; sin .json responde XML"
+    returns: "Objeto {urn con la versión, data:{dimensions.dimension[{dimensionId, representations.representation[{code,index}]}], observations texto 'v1 | v2 | ...' con punto decimal y vacío si falta, attributes.attribute[{id,value}]}}"
+  - path: /export/v1.0/csv_comma/datasets/IECM/{id}/{version}
+    desc: Exportación de un dataset entero por POST; el Swagger lista también csv_semicolon, tsv, excel y px
+    example: 'curl -s -X POST -H "Content-Type: application/json" -d ''{}'' -o 002_000001.zip "https://iestadis.edatos.io/export/v1.0/csv_comma/datasets/IECM/002_000001/~latest"'
+    params: "cuerpo {} para todo o datasetSelection para filtrar; decimalSeparator (. o ,), lang, fields=-attributes; version admite ~latest"
+    returns: "ZIP (application/octet-stream) con dataset-IECM-{id}-{version}-observations.csv en UTF-8 y comas: etiqueta y _CODE por dimensión, OBS_VALUE, ESTADO_OBSERVACION, CONFIDENCIALIDAD_OBSERVACION, NOTAS_OBSERVACION; y un -attributes.csv"
+  - path: /operations/v1.0/operations.json?limit={n}
+    desc: Inventario de las 278 operaciones; su id es el prefijo de los datasets (054 es PIB municipal)
+    example: curl -s "https://iestadis.edatos.io/operations/v1.0/operations.json?limit=1000"
+    returns: "Objeto {total, limit, offset, operation:[{id '004', urn, selfLink.href, name.text[{value,lang}]}]}"
+  - path: /indicators/v1.0/indicators/{codigo}/data.json
+    desc: Datos de uno de los 210 indicadores de síntesis; códigos en /indicators/v1.0/indicators.json?limit=1000
+    example: curl -s "https://iestadis.edatos.io/indicators/v1.0/indicators/POBLACION_TOTAL/data.json"
+    returns: "Objeto {format [GEOGRAPHICAL, TIME, MEASURE], dimension{GEOGRAPHICAL:{representation:{size, index:{ES30:0}}}, TIME...}, observation[texto], attribute[]}; POBLACION_TOTAL solo trae ES30 por año"
+rate_limit: No documentado; ningún 429 ni bloqueo en las peticiones secuenciales de la verificación del 2026-10-01
+quirks: [soft-errors-200]
+ids: [ine-municipio, nuts]
+gotchas:
+  - Las observaciones llegan en una sola cadena separada por ' | ', en el orden del index de cada dimensión; con dim el orden de los códigos es el pedido (2025 antes que 2026), no el cronológico.
+  - Un código inexistente en dim no da error, responde 200 con observaciones vacías; comprobar que cada código pedido vuelve en representations.
+  - Sin la extensión .json la API responde XML; el dataset inexistente da 404 con JSON code exception.statistical_resources.dataset.not_found.
+  - La lista de datasets repite cada id una vez por versión (1.0, 1.1, 1.2); pedir ~latest en la ruta de datos y de exportación para la vigente.
+  - limit por encima de 1000 se recorta a 1000 sin aviso; paginar con offset hasta total.
+  - La exportación csv_comma no devuelve un CSV sino un ZIP con observaciones y atributos, aunque la ruta diga csv.
+  - "Territorio: ES30 es la Comunidad (NUTS 2) y los municipios llevan el código INE de 5 dígitos; distritos de Madrid como 28079_D17 y barrios como BARRIO_20010101_28079_B044 (distrito 04, barrio 4)."
+  - El estado de cada dato (P provisional) va en attributes como otra cadena separada por ' | ', paralela a observations.
+  - Solo 37 de las 278 operaciones tenían datasets en eDatos el 2026-10-01; las tablas de los bancos Almudena, Baco y Desvan se publican en comunidad-madrid-datos-abiertos.
+  - Las rutas antiguas de los bancos de datos en www.madrid.org/desvan/ devuelven 404 el 2026-10-01; la web del Instituto sigue en www.madrid.org/iestadis/.
+tips:
+  - Datasets de uso frecuente con datos únicos son 054_000001 (PIB total y per cápita por rama y municipio) y 050_000001 (contabilidad trimestral de la Comunidad).
+  - Pedir una vez fields=-data para tener las etiquetas de cada código en metadata.dimensions y cachearlas; después bajar datos con fields=-metadata.
+  - Los municipios con código INE de 5 dígitos casan directamente con ine-api-tempus e ine-codigos-territoriales.
+  - El barrio BARRIO_20010101_28079_B044 equivale a COD_DIST_BARRIO 404 de ayuntamiento-madrid-datos-abiertos (Guindalera); el distrito 28079_D04 a COD_DISTRITO 4.
+related: [ine-api-tempus, ine-codigos-territoriales, comunidad-madrid-datos-abiertos, ayuntamiento-madrid-datos-abiertos]
+status: active
+verified: "2026-10-01"

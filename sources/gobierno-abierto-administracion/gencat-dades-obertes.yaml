@@ -1,0 +1,67 @@
+id: gencat-dades-obertes
+name: Generalitat de Catalunya – Dades obertes (API Socrata SODA)
+org: Generalitat de Catalunya
+level: ccaa
+sector: gobierno-abierto-administracion
+tags: [datos-abiertos, socrata, soda, soql, cataluna, contratacion, subvenciones, registros, catalogo]
+summary: >-
+  Unos 1.100 datasets de la Generalitat en Socrata (registro de entidades, contratación pública,
+  subvenciones RAISC, alojamientos turísticos, meteorología XEMA, embalses, normativa del DOGC). API SODA con
+  consultas SoQL en servidor, salida JSON, CSV y GeoJSON y exportación completa, sin clave.
+access: [api-rest, download]
+auth: none
+formats: [json, csv, geojson]
+update: daily
+coverage: "Según dataset; el 2026-10-01 el RAISC tenía 22,8 M de concesiones, contratación 1,98 M de publicaciones y el registro de entidades 90.751"
+license: Cada dataset declara See Terms of Use (condiciones de uso del portal); citar la fuente
+base_url: https://analisi.transparenciacatalunya.cat
+docs_url: https://dev.socrata.com/docs/endpoints.html
+endpoints:
+  - path: /resource/{id}.json
+    desc: Filas de un dataset (id de 4+4 caracteres) consultadas con SoQL; .csv y .geojson aceptan la misma consulta
+    example: "curl -s 'https://analisi.transparenciacatalunya.cat/resource/gn9e-3qhr.json?$limit=3&$order=:id'"
+    params: "$select, $where, $order, $group, $having, $q, $limit (1000 por defecto), $offset; filtro simple campo=valor; :id, :created_at y :updated_at como columnas de sistema"
+    returns: "Lista JSON de objetos con fieldName como clave; números y recuentos como texto ('98.33'), floating_timestamp sin zona (2026-09-29T00:00:00.000), nulos omitidos, puntos como {type Point, coordinates}; 1000 filas sin $limit, sin tope observado hasta 100000"
+  - path: /resource/{id}.json?$select=count(*)
+    desc: Recuento y agregación en servidor con $select, $where y $group antes de descargar
+    example: "curl -sG 'https://analisi.transparenciacatalunya.cat/resource/y6fz-g3ff.json' --data-urlencode '$select=tipus_entitat,count(*) as n' --data-urlencode '$group=tipus_entitat' --data-urlencode '$order=n DESC'"
+    returns: "Lista [{tipus_entitat Associació, n '84438'}]; count(*) sin agrupar da [{count '90751'}]; los agregados también llegan como texto"
+  - path: /resource/{id}.csv
+    desc: La misma consulta en CSV, con el mismo límite de 1000 filas si no se pasa $limit
+    example: "curl -s 'https://analisi.transparenciacatalunya.cat/resource/gn9e-3qhr.csv?$limit=5000'"
+    returns: "text/csv UTF-8 sin BOM, separador coma y todos los campos entre comillas; cabecera con fieldName, fechas ISO (2026-09-29T00:00:00.000) y punto decimal"
+  - path: /api/views/{id}/rows.csv?accessType=DOWNLOAD
+    desc: Exportación completa del dataset sin paginar (87.921 filas y 6 MB en gn9e-3qhr)
+    example: curl -s -o embassaments.csv "https://analisi.transparenciacatalunya.cat/api/views/gn9e-3qhr/rows.csv?accessType=DOWNLOAD"
+    returns: "CSV UTF-8 sin BOM, separador coma, comillas solo cuando hacen falta; cabecera con los nombres visibles en catalán (Estació, Nivell absolut (msnm)), fechas dd/mm/aaaa, punto decimal y filas sin orden"
+  - path: /api/views/{id}.json
+    desc: Metadatos del dataset; columnas con fieldName, nombre visible, tipo y descripción, categoría, licencia y frecuencia
+    example: curl -s "https://analisi.transparenciacatalunya.cat/api/views/gn9e-3qhr.json"
+    returns: "Objeto {id, name, category, rowsUpdatedAt (epoch en segundos), license, columns:[{fieldName, name, dataTypeName calendar_date, text o number, description}], metadata.custom_fields con la frecuencia y el nombre en castellano e inglés}"
+  - path: /api/catalog/v1?domains=analisi.transparenciacatalunya.cat&only=dataset
+    desc: Buscador del catálogo con q, categories, limit y offset; 1.106 datasets y 1.568 activos en total el 2026-10-01
+    example: curl -s "https://analisi.transparenciacatalunya.cat/api/catalog/v1?domains=analisi.transparenciacatalunya.cat&only=dataset&q=pressupost&limit=100"
+    returns: "{results:[{resource:{id, name, description, updatedAt, data_updated_at, columns_field_name, columns_datatype}, classification:{domain_category, domain_tags, domain_metadata}, permalink, link}], resultSetSize}; limit=2000 devolvió los 1.106 de una vez"
+rate_limit: Sin clave, cuota compartida por IP según la documentación de Socrata (429 al superarla); con cabecera X-App-Token, cuota propia. Sin 429 en la verificación.
+quirks: []
+ids: [ine-municipio, nif, dir3, bdns, eli]
+gotchas:
+  - Sin $limit devuelve 1000 filas (JSON y CSV) sin avisar; paginar con $limit, $offset y $order=:id, porque el orden por defecto lo fija la vista (dia DESC en gn9e-3qhr) y no es único.
+  - El JSON trae todo como texto, también números y recuentos ('98.33', '90751'); convertir con columns[].dataTypeName de /api/views/{id}.json o con la cabecera x-soda2-types.
+  - Los fieldName se derivan del nombre catalán quitando lo no ASCII (Estació pasa a estaci, Georeferència a georefer_ncia, Títol a t_tol); copiarlos de la metadata, no deducirlos.
+  - rows.csv usa nombres visibles en catalán y fechas dd/mm/aaaa, mientras /resource/{id}.csv usa fieldName y fechas ISO; no mezclar los dos formatos en un mismo cargador.
+  - codi_municipi puede ser INE de 5 dígitos (17038), de 6 con dígito de control (080193, como Idescat) o texto (No aplica) según el dataset; normalizar a los 5 primeros antes de cruzar.
+  - Campos que parecen numéricos son text (any_de_la_convocat_ria del RAISC); compararlos sin comillas en $where da 400 type-mismatch. $order=campo DESC pone los nulos primero.
+  - La API de catálogo sin domains= mezcla datasets de toda la red Socrata (salió uno de RDW, Países Bajos); filtrar siempre por domains=analisi.transparenciacatalunya.cat.
+  - Metadatos, campos y valores en catalán; buscar en castellano devuelve menos (q=municipio da 41 datasets frente a 488 con municipi).
+  - Errores en JSON con su código (400 query.soql.no-such-column, 404 dataset.missing); un X-App-Token inválido da 403 permission_denied, peor que no enviarlo. Un 500 aislado se resolvió reintentando.
+  - count(*) sin filtro sobre XEMA (nzvn-apee) acabó en respuesta vacía tras más de 10 minutos y una agregación sobre los 22,8 M de filas del RAISC tardó 68 s; filtrar antes y esperar más.
+tips:
+  - Para un dataset entero, rows.csv?accessType=DOWNLOAD evita paginar; para filtrar o agregar, SoQL en servidor con $where, $group y $select.
+  - "Ids muy consultados; t2h3-cgys alojamientos turísticos, y6fz-g3ff entidades, ybgg-dgi6 contratación, s9xt-n979 RAISC, nzvn-apee XEMA, n6hn-rmy7 DOGC, 9aju-tpwc municipios con comarca y coordenadas."
+  - RAISC (s9xt-n979) trae codi_bdns, que casa con numConv de bdns-api (807475 comprobado), aunque algunos valen No enviat; contratación (ybgg-dgi6) trae codi_dir3 del órgano.
+  - Los fieldName y tipos exactos llegan en las cabeceras x-soda2-fields y x-soda2-types de /resource, lo que ahorra la llamada a /api/views (la API v3 las marca como obsoletas).
+  - El nombre del dataset en castellano está en classification.domain_metadata de la API de catálogo (clave Idioma_Nombre-del-conjunto-de-datos-(ES)).
+related: [idescat-api, ayuntamiento-barcelona-datos-abiertos, datos-gob-es-api, bdns-api, placsp-datos-abiertos, dir3-directorio, ine-codigos-territoriales]
+status: active
+verified: "2026-10-01"

@@ -6,14 +6,14 @@ level: age
 sector: economia-finanzas
 tags: [banco-de-espana, series-temporales, tipos-de-interes, tipos-de-cambio, euribor, credito, deuda, balanza-pagos]
 summary: >-
-  Más de 14000 series (tipos de interés y de cambio, euríbor, crédito, deuda pública, balanza de pagos, cuentas
+  Unas 12.800 series (tipos de interés y de cambio, euríbor, crédito, deuda pública, balanza de pagos, cuentas
   financieras) por API JSON, por CSV de cada cuadro del Boletín Estadístico y por ZIP de capítulo. Los códigos
   de serie se localizan en catálogos CSV.
 access: [api-rest, download]
 auth: none
 formats: [json, csv, xlsx, zip]
 update: daily
-coverage: "Series desde 1962 según indicador"
+coverage: "Desde 1933 en la serie más antigua (paro registrado); cada serie trae su primera observación en el catálogo"
 license: Reutilización libre con cita de la fuente
 base_url: https://app.bde.es/bierest/resources/srdatosapp
 docs_url: https://www.bde.es/webbe/es/estadisticas/recursos/api-estadisticas-bde.html
@@ -21,40 +21,42 @@ endpoints:
   - path: /favoritas?idioma={es|en}&series={cod1,cod2}
     desc: Último dato de una o varias series, con frecuencia, tendencia y fecha
     example: curl -s --compressed "https://app.bde.es/bierest/resources/srdatosapp/favoritas?idioma=es&series=D_1NBAF472"
-    returns: "Lista [{serie, descripcionCorta, codFrecuencia (D, M, Q), decimales, simbolo, tendencia, fechaValor ISO, valor}] con el último dato de cada serie"
+    returns: "Lista [{serie, descripcionCorta, codFrecuencia (D, M, Q, A o S), decimales, simbolo, tendencia (+, - o =), fechaValor ISO UTC, valor número}], una por serie; una serie inexistente llega como {codigo, errNum 404} dentro de la lista con HTTP 200"
   - path: /listaSeries?idioma={es|en}&series={cod1,cod2}&rango={rango}
     desc: Serie completa con metadatos, fechas y valores
     example: curl -s --compressed "https://app.bde.es/bierest/resources/srdatosapp/listaSeries?idioma=es&series=DTNPDE2010_P0000P_PS_APU&rango=MAX"
-    params: "rango según frecuencia. Diaria 3M, 12M, 36M; mensual y trimestral 30M, 60M, MAX; anual 60M, MAX; o un año concreto (rango=2024)"
-    returns: "Lista [{serie, descripcion, descripcionCorta, codFrecuencia, decimales, simbolo, informacion[{titulo, descripcion}], fechaInicio, fechaFin, fechas[], valores[]}]; fechas y valores alineados y en orden descendente (el más reciente primero)"
+    params: "rango según frecuencia. Diaria 3M, 12M, 36M; mensual y trimestral 30M, 60M, MAX; anual 60M, MAX; semestral solo un año; o un año concreto (rango=2024)"
+    returns: "Lista [{serie, descripcion, descripcionCorta, codFrecuencia, decimales, simbolo, informacion[{titulo, descripcion}], fechaInicio, fechaFin, fechas[], valores[]}]; fechas ISO UTC y valores alineados en orden descendente; en diarias valores trae null en festivos"
   - path: https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_{be|tc|ti|si|pb}.csv
     desc: Catálogos de series (código, alias, fichero del cuadro, descripción, frecuencia, primera y última observación)
     example: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/catalogo_tc.csv"
-    returns: "CSV con una fila por serie: Nombre de la serie (código), Número secuencial, Alias (TC_1_1.1), Nombre del archivo con los valores (TC_1_1.csv), Descripción, Tipo de variable, Código de unidades, Exponente, Número de decimales, Descripción de unidades, Frecuencia, primera y última fecha y número de observaciones"
+    returns: "CSV ISO-8859-1 de 17 columnas, una fila por serie y cuadro: Nombre de la serie (código; la cabecera lleva un espacio final), Alias (TC_1_1.1), Nombre del archivo (TC_1_1.csv), Descripción, unidades, decimales, Frecuencia (LABORABLE, DIARIA, MENSUAL...), primera y última fecha, observaciones, Fuente, Notas"
   - path: https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/{cuadro}.csv
     desc: CSV de un cuadro completo con sus series en columnas; también en /datos/xlsx/{cuadro}.xlsx
     example: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/csv/tc_1_1.csv"
-    returns: "CSV latin1 con seis filas de cabecera (código de serie, número secuencial, alias, descripción, unidades, frecuencia) y después una fila por fecha (04 ENE 1999); '_' marca dato ausente; decimal con punto"
+    returns: "CSV ISO-8859-1 con seis filas de cabecera (código de serie, número secuencial, alias, descripción, unidades, frecuencia), una fila por fecha en español (04 ENE 1999, ENE 1981, MAR 1995, 1995) y filas FUENTE y NOTAS al final; '_' es dato ausente; decimal con punto"
   - path: https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_{capitulo}.zip
     desc: ZIP con los CSV de un capítulo del Boletín Estadístico; lista de capítulos en descargas-completas.html
     example: curl -sO "https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_DEUAAPP.zip"
     returns: "Zip con un CSV por cuadro del capítulo (be0106.csv, be0107.csv, be1101.csv...) con el mismo formato de seis filas de cabecera que los CSV sueltos"
 rate_limit: No documentado
-quirks: [gzip-unannounced, latin1, waf-blocks-bots]
+quirks: [gzip-unannounced, latin1, soft-errors-200]
 gotchas:
-  - La API comprime siempre en gzip; sin Accept-Encoding el cuerpo llega comprimido y sin cabecera Content-Encoding. Con curl usar --compressed; requests lo descomprime solo.
-  - idioma es obligatorio y rango debe ser compatible con la frecuencia de la serie; si no, 412 con JSON de campos errNum, errMsgUsr y errMsgDebug. Serie inexistente también da 412.
-  - fechas y valores vienen en orden descendente (el más reciente primero). La fecha lleva la hora de publicación; en mensuales es el día 1 del mes.
-  - Sin rango devuelve el tramo mínimo (30M en mensuales); para toda la serie pedir rango=MAX.
-  - "No hay endpoint de búsqueda; los códigos salen de los catálogos CSV o del alias del cuadro. Los caracteres # y % del código se envían como %23 y %25."
-  - Los catálogos escriben el fichero del cuadro en mayúsculas (BE0101.csv) pero la URL real va en minúsculas (be0101.csv); en mayúsculas responde 404.
-  - CSV y catálogos en ISO-8859-1, separador coma, decimal punto; seis filas de cabecera (código, secuencial, alias, descripción, unidades, frecuencia), dato ausente como _, y filas FUENTE y NOTAS al final.
-  - Las fechas de los CSV van en español (04 ENE 1999, DIC 1995); parsear con un mapa de meses, no con locale.
-  - El buscador BIEST (app.bde.es/bie_www) rechaza clientes que no son navegador con Request Rejected.
+  - La API devuelve siempre gzip, aunque el cliente no lo pida o envíe Accept-Encoding identity (el 2026-10-01, con Content-Encoding gzip); curl sin --compressed y urllib reciben los bytes comprimidos.
+  - idioma es obligatorio y rango debe casar con la frecuencia; si no, 412 con JSON errNum, errMsgUsr y errMsgDebug. Una serie inexistente da 412 en listaSeries y 200 con errNum 404 en favoritas.
+  - listaSeries con rango=MAX devuelve como mucho las 1000 observaciones más recientes, sin aviso; el paro registrado (1118 desde 1933) llega desde 1943 aunque fechaInicio diga 1933. Completar con rango=AAAA.
+  - Sin rango devuelve el tramo mínimo (3M en diarias, 30M en mensuales). MAX da 412 en diarias (pedir año a año) y en semestrales (codFrecuencia S, sin documentar), que solo aceptan rango=AAAA.
+  - Cada fecha de la API es ISO UTC con hora fija (08:15Z en verano, 09:15Z en invierno); mensuales el día 1 y trimestrales el día 1 del primer mes (2026-04-01 es el segundo trimestre).
+  - Los CSV fechan el trimestre por su último mes (JUN 2026 es el dato que la API fecha 2026-04-01) y en español (04 ENE 1999, ENE 1981); convertir con un mapa de meses antes de cruzar con la API.
+  - "No hay endpoint de búsqueda; los códigos salen de los catálogos CSV. Algunos llevan # o %, que van como %23 y %25; sin escapar, # trunca el código (errNum 404) y % da un 404 en HTML."
+  - Los catálogos escriben el fichero del cuadro en mayúsculas (BE0101.csv) pero la URL real va en minúsculas (be0101.csv); en mayúsculas responde 302 a app.bde.es/pmk/id y acaba en 404 HTML.
+  - catalogo_be.csv tiene filas con comillas sin escapar en Notas (18 a 23 campos) y pd.read_csv falla en la línea 13682; leer con csv.reader y cortar a 17 campos, porque on_bad_lines pierde filas.
+  - catalogo_pb.csv (encuesta de préstamos bancarios) está congelado, con Last-Modified 2023-03-01, datos hasta DIC 2021 y códigos que la API no reconoce (errNum 404).
 tips:
-  - Flujo típico. Buscar el código en catalogo_*.csv por la columna de descripción y pedir listaSeries con rango=MAX.
+  - Flujo típico. Buscar el código en catalogo_*.csv por la descripción (un código se repite en varios cuadros, 15.693 filas para 12.833 códigos) y pedir listaSeries con rango=MAX o año a año.
   - Códigos verificados. D_1NBAF472 euríbor a un año mensual, DTCCBCEUSDEUR.B USD/EUR diario, DTNPDE2010_P0000P_PS_APU deuda PDE sobre PIB trimestral.
-  - El BdE publica ejemplos oficiales en Python y R (notebook enlazado desde docs_url).
+  - Una serie diaria completa sale en una sola petición del CSV de su cuadro (tc_1_1.csv, 1,9 MB, desde 1999) en lugar de una llamada a la API por año.
+  - El BdE publica ejemplos oficiales en Python y R; el notebook está en /webbe/es/estadisticas/compartido/datos/ipynb/api_bde_ejemplo_python.ipynb.
 related: [tesoro-estadisticas, cnmv-registros, igae-ejecucion-presupuestaria]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

@@ -6,14 +6,14 @@ level: age
 sector: energia
 tags: [carburantes, gasolineras, precios, gasolina, gasoleo, glp, hidrogeno, estaciones-servicio, postes-maritimos]
 summary: >-
-  Precios vigentes de todos los carburantes en 11.491 estaciones terrestres y 148 postes marítimos, con
-  coordenadas, dirección, horario, rótulo y margen, actualizados cada media hora, e histórico diario por fecha.
+  Precios vigentes de todos los carburantes en 11.484 estaciones terrestres y 149 postes marítimos, con
+  coordenadas, dirección, horario, rótulo y margen, actualizados cada media hora, e histórico diario desde 2007.
   JSON o XML sin autenticación, filtros por CCAA, provincia, municipio y producto.
 access: [api-rest]
 auth: none
 formats: [json, xml]
-update: hourly
-coverage: "Vigente e histórico diario por fecha (comprobado desde 01-06-2010)"
+update: realtime
+coverage: "Histórico diario desde 01-01-2007 (límite que da el servidor) hasta ayer; vigente cada media hora"
 license: Reutilización libre con cita de la fuente
 base_url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes
 docs_url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/help
@@ -21,39 +21,44 @@ endpoints:
   - path: /EstacionesTerrestres/
     desc: Todas las estaciones con todos los precios (12 MB, unos 17 s); claves con espacios y tildes (Precio Gasoleo A, Longitud (WGS84), Rótulo)
     example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/"
-    returns: "{Fecha (dd/mm/aaaa hh:mm:ss), ListaEESSPrecio:[{C.P., Dirección, Horario, Latitud, Longitud (WGS84), Localidad, Municipio, Provincia, Rótulo, Margen, Tipo Venta, Precio Gasolina 95 E5, Precio Gasoleo A y una clave por producto, IDEESS, IDMunicipio, IDProvincia, IDCCAA}], ResultadoConsulta}; números como texto con coma"
+    returns: "{Fecha (dd/mm/aaaa hh:mm:ss de la consulta), ListaEESSPrecio:[41 claves texto, entre ellas C.P., Dirección, Localidad, Latitud, Longitud (WGS84), Rótulo, Margen, Tipo Venta, 23 Precio {producto}, % BioEtanol, IDEESS, IDMunicipio, IDProvincia, IDCCAA}], Nota, ResultadoConsulta}; números con coma"
   - path: /EstacionesTerrestres/FiltroProvincia/{IDPROVINCIA}
     desc: Estaciones de una provincia (código INE de dos dígitos; Madrid son 894 estaciones y 940 KB)
     example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroProvincia/28"
   - path: /EstacionesTerrestres/FiltroMunicipio/{IDMUNICIPIO} y /EstacionesTerrestres/FiltroCCAA/{IDCCAA}
-    desc: Filtros por municipio (id propio de la aplicación) y comunidad autónoma
+    desc: Filtros por municipio (id propio de la aplicación) y comunidad autónoma (IDCCAA propio, ver gotchas)
   - path: /EstacionesTerrestres/FiltroProducto/{IDPRODUCTO} y /EstacionesTerrestres/FiltroProvinciaProducto/{IDPROVINCIA}/{IDPRODUCTO}
-    desc: Un solo producto; la respuesta lleva PrecioProducto en vez de una clave por carburante
+    desc: Un solo producto; solo salen las estaciones que lo venden; también FiltroCCAAProducto y FiltroMunicipioProducto
     example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroProvinciaProducto/28/1"
-    returns: "Como EstacionesTerrestres pero con una única clave PrecioProducto (texto con coma) en vez de una clave por producto; Fecha, ListaEESSPrecio, ResultadoConsulta"
+    returns: "Como EstacionesTerrestres pero con 17 claves: PrecioProducto (texto con coma) en lugar de las 23 claves Precio, sin % BioEtanol ni % Éster metílico; Fecha, ListaEESSPrecio, Nota, ResultadoConsulta"
   - path: /EstacionesTerrestresHist/{DD-MM-AAAA} y /EstacionesTerrestresHist/FiltroProvincia/{DD-MM-AAAA}/{IDPROVINCIA}
-    desc: Precios de un día; mismos filtros que el vigente (CCAA, municipio, producto) tras la fecha
+    desc: Precios de un día entre 01-01-2007 y ayer (el nacional, 12 MB y 20 s); mismos filtros que el vigente (CCAA, municipio, producto y combinados) tras la fecha
     example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestresHist/FiltroProvincia/01-06-2024/28"
-  - path: /PostesMaritimos/
-    desc: Postes marítimos, claves propias (Precio Gasoleo A habitual, Precio Gasóleo para uso marítimo); filtros PostesMaritimosFiltroProvincia y similares
+    returns: Mismo sobre y las mismas 41 claves que el vigente, también en 2010; Fecha es el día pedido a las 0:00:00
+  - path: /PostesMaritimos/ y /PostesMaritimos/FiltroProvincia/{IDPROVINCIA}
+    desc: Postes marítimos (149), sin histórico; claves propias (IDPosteMaritimo, Puerto, Precio Gasóleo para uso marítimo) y los mismos filtros que las estaciones
+    example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/PostesMaritimos/"
   - path: /Listados/{Provincias|Municipios|ComunidadesAutonomas|ProductosPetroliferos}/
-    desc: Tablas de códigos (8112 municipios con IDMunicipio propio; productos con IDProducto y abreviatura, Gasolina 95 E5 es 1)
+    desc: Tablas de códigos (8112 municipios con IDMunicipio propio; 30 productos, Gasolina 95 E5 es 1); también MunicipiosPorProvincia/{id} y ProvinciasPorComunidad/{id}
     example: curl -s "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/Listados/ProductosPetroliferos/"
-    returns: "ProductosPetroliferos [{IDProducto, NombreProducto, NombreProductoAbreviatura}]; Provincias [{IDPovincia (sic), IDCCAA, Provincia, CCAA}]; Municipios [{IDMunicipio, IDProvincia, IDCCAA, Municipio, Provincia, CCAA}] (8.112)"
-quirks: []
+    returns: "Lista JSON sin sobre. ProductosPetroliferos [{IDProducto, NombreProducto, NombreProductoAbreviatura}] (30); Provincias [{IDPovincia (sic), IDCCAA, Provincia, CCAA}]; Municipios [{IDMunicipio, IDProvincia, IDCCAA, Municipio, Provincia, CCAA}] (8.112)"
+quirks: [soft-errors-200, connection-reset-intermittent]
 ids: [ine-provincia]
 gotchas:
   - Precios, latitud y longitud son cadenas con coma decimal (1,879 o 40,528778); precio vacío es que la estación no vende ese producto (211 sin gasóleo A).
   - IDMunicipio es propio de la aplicación (8112 valores), no el INE; IDProvincia sí es el INE de dos dígitos. En Listados/Provincias la clave está mal escrita, IDPovincia.
-  - Fecha del histórico en la URL como dd-mm-aaaa; con otro formato responde 400 y ResultadoConsulta explica el error. La Fecha de la respuesta viene como dd/mm/aaaa hh:mm:ss con barras escapadas.
-  - Todas las respuestas llevan el mismo sobre (Fecha, ListaEESSPrecio, Nota, ResultadoConsulta con OK) y el histórico repite las claves del vigente.
-  - Margen es el lado de la vía (D, I, N); Remisión toma dm u OM y Tipo Venta era P en las 11.491 estaciones; la ayuda no documenta su significado.
-  - XML pidiendo Accept application/xml (ArrayOfProvincia con namespace datacontract); por defecto JSON.
-  - IDEESS es único y estable en el tiempo (522 de las 557 estaciones de Madrid de 2010 conservan el id hoy), útil para series por gasolinera.
-  - Sin límite documentado ni 429 observado; la descarga nacional pesa 12 MB, así que para series diarias conviene el histórico por provincia (600 KB).
+  - "IDCCAA es propio: 07 es Castilla-La Mancha y 08 Castilla y León, al revés que en el INE; el resto (01 a 19) coincide."
+  - Fecha del histórico en la URL como dd-mm-aaaa, de 01-01-2007 a ayer; fuera de rango o con otro formato, 400 con el motivo en ResultadoConsulta. La Fecha de la respuesta vigente es la hora de la consulta.
+  - Las consultas de estaciones llevan el sobre Fecha, ListaEESSPrecio, Nota y ResultadoConsulta, y un id inexistente da 200 con lista vacía (OK o «no generó resultados»); los Listados son una lista sin sobre.
+  - Margen es el lado de la vía (D, I, N); Remisión toma dm u OM y Tipo Venta es P en las 11.484 estaciones terrestres (en los postes es texto); la ayuda no documenta su significado.
+  - "Negocia por Accept: JSON sin cabecera o con */* (curl, requests), XML con application/xml, y con el Accept de un navegador devuelve XML etiquetado text/html."
+  - Corta conexiones a ratos; el 2026-10-01 dio ConnectionResetError desde GitHub Actions y SSLEOFError en 3 de 8 peticiones con Python desde otro entorno; reintentar con espera.
+  - El listado completo no trae Gasóleo C (sin clave Precio Gasoleo C), que solo sale con FiltroProducto/7 (11 estaciones); las claves Precio no repiten NombreProducto (Precio Gasoleo A es Gasóleo A habitual).
+  - Cuatro estaciones traen coordenadas 0,000000 o latitud y longitud intercambiadas (IDEESS 16268, en Tui); filtrar por el recuadro de España antes de mapear.
 tips:
-  - "pandas.json_normalize(r.json()['ListaEESSPrecio']) y luego str.replace(',', '.').astype(float) sobre las columnas Precio*, Latitud y Longitud (WGS84)."
-  - Series históricas iterando EstacionesTerrestresHist/FiltroProvincia/{fecha}/{prov} día a día; un rango largo son muchas peticiones, espaciarlas un segundo.
+  - "pandas.json_normalize(r.json()['ListaEESSPrecio']) y luego pd.to_numeric(s.str.replace(',', '.'), errors='coerce') sobre Precio*, Latitud y Longitud (WGS84); astype(float) falla con los precios vacíos."
+  - IDEESS es único y estable en el tiempo (522 de las 557 estaciones de Madrid de 2010 conservan el id hoy), útil para series por gasolinera.
+  - Series históricas iterando EstacionesTerrestresHist/FiltroProvincia/{fecha}/{prov} día a día (600 a 940 KB en Madrid frente a 12 MB el nacional); sin límite documentado ni 429 observado, espaciarlas un segundo.
 related: [cnmc-data, ine-codigos-territoriales]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

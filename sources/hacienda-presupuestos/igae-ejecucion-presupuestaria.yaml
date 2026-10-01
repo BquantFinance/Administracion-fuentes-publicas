@@ -4,40 +4,68 @@ org: Intervención General de la Administración del Estado (IGAE)
 ministry: Hacienda
 level: age
 sector: hacienda-presupuestos
-tags: [igae, presupuestos, ejecucion, deficit, contabilidad-nacional, sector-publico, invente, pmp]
+tags: [igae, presupuestos, ejecucion, deficit, contabilidad-nacional, sector-publico, invente, sec-2010]
 summary: >-
-  Déficit y operaciones no financieras de las AAPP en contabilidad nacional (mensual por subsector, trimestral y
-  anual), ejecución mensual del presupuesto del Estado en caja, cuentas anuales de las AAPP e inventario de entes
-  públicos (INVENTE). Ficheros xlsx anuales con URL predecible.
-access: [download, portal]
+  Déficit y operaciones no financieras de las AAPP en contabilidad nacional (mensual por subsector y CCAA, series
+  trimestrales y anuales desde 1995), ejecución mensual del presupuesto del Estado en caja, cuentas anuales de las
+  AAPP e inventario de entes públicos (INVENTE) con API REST en JSON.
+access: [download, api-rest, portal]
 auth: none
-formats: [xlsx, pdf, html]
+formats: [xlsx, xls, pdf, html, json]
 update: monthly
+coverage: "1995- en contabilidad nacional anual y trimestral; mensual desde 2013; ejecución en caja desde 2003"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/Publicaciones.aspx
 docs_url: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Paginas/Calendario.aspx
 endpoints:
   - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AACC-M/M_AACC_{AAAA}.xlsx
-    desc: Operaciones no financieras mensuales de la Administración Central en contabilidad nacional, un xlsx por año desde 2013
-    example: curl -sO "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AACC-M/M_AACC_2026.xlsx"
-  - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/{im|it|ia}nofinancieras{AC|CA|CL|SS|Total|AAPP}.aspx
-    desc: Páginas de operaciones no financieras mensuales (im), trimestrales (it) y anuales (ia) por subsector
+    desc: Operaciones no financieras mensuales de la Administración Central (SEC 2010), un xlsx por año desde 2013; Seguridad Social en AASS-M/M_AASS_{AAAA}.xlsx
+    example: curl -sO -A "Mozilla/5.0" "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AACC-M/M_AACC_2026.xlsx"
+    returns: "xlsx con Tabla1a en millones de euros y Tabla1b en % del PIB; cabecera en la fila 7 (CÓDIGO, CONCEPTOS, Enero a Diciembre); valores acumulados desde enero y meses sin publicar vacíos; códigos SEC con formato irregular (D.211 junto a D212)"
+  - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Paginas/{pagina}.aspx
+    desc: Páginas con los ficheros de operaciones no financieras por periodicidad y subsector
+    params: "pagina en imnofinancieras{AC|CA|SS}, itnofinancieras{Total|AC|CA|CL|SS}, ianofinancieras{Total|AC|CA|CL} e innofinancierasSS (anual de SS); la mensual de CL o Total da 404"
   - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/CCAA-M/M_CCAA_Sub_Det_{AAAA}.xlsx
-    desc: Ejecución presupuestaria mensual de las comunidades autónomas por subsector con detalle (xlsx anual acumulado, URL predecible)
-    example: curl -sO "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/CCAA-M/M_CCAA_Sub_Det_2026.xlsx"
+    desc: Operaciones no financieras mensuales de la Administración regional y de cada CCAA (SEC 2010, acumuladas), un xlsx por año desde 2013
+    example: curl -sO -A "Mozilla/5.0" "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/CCAA-M/M_CCAA_Sub_Det_2026.xlsx"
+    returns: "xlsx de 37 hojas: Indice, Tabla1a a Tabla18a en millones de euros (1 el total, 2 a 18 cada CCAA por nombre, sin código) y Tabla1b a Tabla18b en % del PIB aunque su título diga Millones de euros; cabecera en la fila 7 como M_AACC"
+  - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/{carpeta}/{T|A}_{subsector}.xlsx
+    desc: Series trimestrales (T_) y anuales (A_) de operaciones no financieras desde 1995, un fichero por subsector; URL fija, contenido sobrescrito
+    params: "subsector AAPP, AACC, CCAA, CCLL o AASS; carpeta trimestral AAPP_Trimestral, AACC-T, CCAA-Trimestral, CCLL-Trimestral o AASS-Trimestral; anual AAPP_A, AACC-A, CCAA-A, CCLL-A o AASS-A"
+    example: curl -sO -A "Mozilla/5.0" "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AAPP_Trimestral/T_AAPP.xlsx"
+    returns: "xlsx con Tabla1a en millones de euros y Tabla1b en % del PIB; T_ con el año en la fila 5 y T1 a T4 en la 6 (1995T1 a 2026T2, acumulados en el año); A_ con los años 1995 a 2025(P) en la fila 6 como texto, con sufijo (P) en el provisional"
   - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/CAAP/CAP_Serie.xlsx
-    desc: Cuentas anuales de las AAPP, serie completa; liquidaciones y subvenciones por año en la misma carpeta
+    desc: Cuentas de las AAPP 1995-2024 (P), Tabla{n}a AAPP y Tabla{n}b AACC por año; en CAAP/ liquidaciones y subvenciones 2014-2023 por año (sin año, 2013)
+    example: curl -sO -A "Mozilla/5.0" "https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/CAAP/CAP_Serie.xlsx"
   - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadPublica/CPE/EjecucionPresupuestaria/Paginas/imejecucionpresupuesto.aspx
-    desc: Ejecución mensual del presupuesto del Estado en caja; PDF por mes y xlsx con anexos
+    desc: Ejecución mensual del presupuesto del Estado en caja del año en curso (PDF, cuadros xlsx y anexos I y II); desde 2003 en imejecucionpresupuesto{AAAA}.aspx
+    returns: "Cuadros MENSUAL {MES} {AAAA}.xlsx con 104 hojas de código (TES 015, ING 012, GTOS 012...), miles de euros, año actual frente al anterior con tasa; «-» como texto para vacío y conceptos sangrados con tabuladores"
   - path: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/BasesDatos/Invente/Paginas/inicio.aspx
-    desc: INVENTE, inventario de entes del sector público estatal, autonómico y local
-quirks: [static-html]
+    desc: INVENTE; la aplicación (www.pap.hacienda.gob.es/invente2/pagMenuPrincipalV2.aspx) documenta en Datos abiertos la API REST y un SOAP con altas y bajas
+  - path: https://www.pap.hacienda.gob.es/Invente2/api/EntidadesSPI
+    desc: Inventario completo de entes vivos del sector público institucional, sin paginar ni autenticación
+    example: curl -s "https://www.pap.hacienda.gob.es/Invente2/api/EntidadesSPI"
+    returns: "JSON {EntidadesSPI:[{codigoInvente INV00000002, nombre, nif, codigoDir3 (cadena vacía si no hay), tipoEnte entero, fechaAlta dd/mm/aaaa}]}; 4.801 entes y 800 KB el 2026-10-01; siempre JSON aunque se pida XML"
+  - path: https://www.pap.hacienda.gob.es/Invente2/api/EntidadesSPI_ConFiltros
+    desc: Entes filtrados por NIF, nombre, DIR3, CCAA o provincia; EntidadesSPI/{codigoInvente} da la ficha y FormasJuridicas y CausasAlta, los catálogos
+    params: "nif, nombreEntidad, codDir3, CodComunidad, CodProvincia (2 = Albacete); Swagger 2.0 en el YAML del menú Datos abiertos de la aplicación"
+    example: curl -s "https://www.pap.hacienda.gob.es/Invente2/api/EntidadesSPI_ConFiltros?nif=Q2826000H"
+    returns: "JSON {Total, Fecha ISO, EntidadesSPI:[{CodigoInvente, DenominacionSocial, FormaJuridica_Codigo, FormaJuridica_Descripcion, NIF, codigoDir3, codigoOrigen}]}; la ficha usa otros nombres (codigoInvente, nombre, fechaAlta ISO, DatosPostales) y un código inexistente da 204 sin cuerpo"
+quirks: [static-html, user-agent-browser, overwritten-in-place, soft-errors-200]
+ids: [invente, nif, dir3]
 gotchas:
-  - Las rutas imMensualEstado.aspx y pap.hacienda.gob.es/invente2/ de la ficha anterior no existen (404 y rechazo del WAF); INVENTE cuelga de BasesDatos/Invente.
-  - Sitio SharePoint. Los xlsx de contabilidad nacional siguen patrón por año (M_AACC_{AAAA}.xlsx); los de ejecución en caja llevan el mes en mayúsculas y espacios (MENSUAL ABRIL 2026.xlsx), codificar %20.
-  - Los trimestrales del total de AAPP (itnofinancierasAAPP) solo se publican en PDF.
+  - El servidor de la IGAE cierra la conexión sin respuesta (curl error 52) con los User-Agent de curl y python-requests; con uno de navegador responde 200. La API de INVENTE no filtra el User-Agent.
+  - imMensualEstado.aspx da 404 y la raíz www.pap.hacienda.gob.es/invente2/ devuelve 200 con una página «Acceso Denegado» del WAF; la aplicación vive en invente2/pagMenuPrincipalV2.aspx.
+  - Los xlsx mensuales (M_) y trimestrales (T_) traen valores acumulados desde enero; el dato del mes o del trimestre es la diferencia con el periodo anterior.
+  - Los xlsx de ejecución en caja cambian de nombre según el año (MENSUAL JULIO 2026.xlsx, MENSUAL DICIEMBRE 2024 (EXCEL).xlsx, .xls con PROVISIONAL en 2015); rascar la página del año y codificar %20.
+  - En M_CCAA_Sub_Det las hojas Tabla{n}b dicen «Millones de euros» en el título pero contienen % del PIB; fiarse del sufijo a o b o del Indice.
+  - itnofinancierasAAPP solo trae el informe trimestral en PDF; los datos trimestrales y anuales de cada subsector están en los xlsx T_ y A_ de URL fija, con carpetas de nombre irregular.
   - Contabilidad nacional (SEC 2010, devengo) y ejecución presupuestaria (caja) dan cifras distintas para el mismo periodo.
-  - Los datos por CCAA y por ayuntamiento están en Hacienda (hacienda-ovef), no en la IGAE.
-related: [hacienda-ovef, airef-datos, tesoro-estadisticas, bde-estadisticas]
+  - La ejecución presupuestaria de CCAA (SGFAL) y de entidades locales (hacienda-ovef) es de Hacienda; la IGAE da CCAA y local en contabilidad nacional, y la local solo trimestral y anual.
+  - INVENTE /EntidadesSPI?ambito= devuelve la página «Página Rechazada» del WAF con HTTP 200 (probado con 0, 1 y 3); pedir el listado completo y filtrar en local o usar EntidadesSPI_ConFiltros.
+tips:
+  - Para un panel de déficit, T_AAPP.xlsx y A_AAPP.xlsx dan toda la serie desde 1995 en un fichero; los M_*_{AAAA}.xlsx solo hacen falta para el año en curso.
+  - INVENTE cruza por codigoDir3 con dir3-directorio y por nif con cualquier fuente que lo traiga; 2.057 de los 4.801 entes no tienen DIR3 y 167 no tienen NIF.
+related: [hacienda-ovef, hacienda-central-informacion, airef-datos, tesoro-estadisticas, bde-estadisticas, dir3-directorio]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

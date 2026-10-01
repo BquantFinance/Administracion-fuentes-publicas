@@ -19,24 +19,41 @@ docs_url: https://www.agenciatributaria.es/AEAT.desarrolladores/Desarrolladores/
 endpoints:
   - path: https://www1.agenciatributaria.gob.es/wlpl/SSII-FACT/ws/fe/SiiFactFEV1SOAP
     desc: SII, suministro de facturas emitidas en producción; el resto de libros en las rutas que declara cada WSDL
+    returns: "Sin certificado (lo único comprobable sin credenciales) responde 302 a https://sede.agenciatributaria.gob.es/Sede/errores/erro4033.html, también al POST SOAP; la respuesta con certificado no se ha probado"
   - path: https://sede.agenciatributaria.gob.es/static_files/Sede/Procedimiento_ayuda/G417/FicherosSuministros/V_1_1/WSDL/{servicio}.wsdl
-    desc: WSDL del SII v1.1 (SuministroFactEmitidas, SuministroFactRecibidas, ConsultaLLAA...) con los XSD al lado
+    desc: WSDL del SII v1.1 (SuministroFactEmitidas, SuministroFactRecibidas, ConsultaLLAA y siete más, listados en informacion-tecnica/wsdl-servicios-web.html)
     example: curl -sO "https://sede.agenciatributaria.gob.es/static_files/Sede/Procedimiento_ayuda/G417/FicherosSuministros/V_1_1/WSDL/SuministroFactEmitidas.wsdl"
+    returns: "WSDL 1.1 en UTF-8 con CRLF; cuatro puertos por servicio (SuministroFactEmitidas en www1, ...Sello en www10, ...Pruebas en prewww1 y ...PruebasSello en prewww10) y XSD importados por ruta relativa que no existe en WSDL/"
+  - path: https://sede.agenciatributaria.gob.es/static_files/Sede/Procedimiento_ayuda/G417/FicherosSuministros/V_1_1/{esquema}
+    desc: XSD del SII v1.1, un nivel por encima de la carpeta WSDL/
+    params: "esquema en SuministroInformacion.xsd, ConsultaLR.xsd, RespuestaConsultaLR.xsd, SuministroLR.xml y RespuestaSuministro.xml (estos dos son XSD con extensión .xml)"
+    example: curl -sO "https://sede.agenciatributaria.gob.es/static_files/Sede/Procedimiento_ayuda/G417/FicherosSuministros/V_1_1/SuministroInformacion.xsd"
   - path: https://www1.agenciatributaria.gob.es/wlpl/TIKE-CONT/ws/SistemaFacturacion/VerifactuSOAP
-    desc: VERI*FACTU, remisión de registros de facturación en producción
+    desc: VERI*FACTU, remisión de registros en producción; RequerimientoSOAP, junto a él, es para sistemas no verificables (remisión bajo requerimiento)
   - path: https://prewww2.aeat.es/static_files/common/internet/dep/aplicaciones/es/aeat/tikeV1.0/cont/ws/SistemaFacturacion.wsdl
-    desc: WSDL de VERI*FACTU con los endpoints de producción y de pruebas
+    desc: WSDL de VERI*FACTU con los endpoints de producción y de pruebas; sus XSD están en la misma carpeta
     example: curl -s "https://prewww2.aeat.es/static_files/common/internet/dep/aplicaciones/es/aeat/tikeV1.0/cont/ws/SistemaFacturacion.wsdl" | grep location
+    returns: "WSDL sin Content-Type; servicios sfVerifactu y sfRequerimiento con cuatro puertos cada uno (www1, www10 con sello, prewww1 y prewww10 de pruebas) y operaciones RegFactuSistemaFacturacion y ConsultaFactuSistemaFacturacion"
+  - path: https://www.agenciatributaria.es/AEAT.desarrolladores/Desarrolladores/Novedades/Novedades.xml
+    desc: RSS del tablón de anuncios del portal de desarrolladores (cambios de WSDL, especificaciones y entornos de pruebas)
+    example: curl -s --cacert ca-age.pem "https://www.agenciatributaria.es/AEAT.desarrolladores/Desarrolladores/Novedades/Novedades.xml"
+    returns: "RSS 2.0 en UTF-8 con 10 item (title, link, guid y pubDate RFC 822 como Thu, 1 Oct 2026 00:00:00 +0200) y description con HTML en CDATA"
   - path: https://sede.agenciatributaria.gob.es/Sede/iva/suministro-inmediato-informacion/informacion-tecnica.html
     desc: Documentación técnica del SII (diseños de registro, validaciones, errores)
   - path: https://sede.agenciatributaria.gob.es/Sede/iva/sistemas-informaticos-facturacion-verifactu/informacion-tecnica.html
     desc: Documentación técnica de VERI*FACTU
+quirks: [tls-chain-incomplete]
 gotchas:
-  - Todo requiere certificado electrónico (persona física, jurídica o sello) en TLS mutuo; no hay API key ni OAuth. Sin certificado, www1 redirige a una página de error de la sede.
-  - Cada WSDL declara dos endpoints de producción (www1 y www10.agenciatributaria.gob.es) y dos de pruebas (prewww1 y prewww10.aeat.es) con la misma ruta; la documentación indica cuál usar según el certificado.
-  - Los WSDL, XSD y diseños de registro viven en el portal de desarrolladores (agenciatributaria.es/AEAT.desarrolladores) y en static_files de la sede; la ruta antigua de manuales técnicos da 404.
+  - Todo requiere certificado electrónico (persona física, jurídica o sello) en TLS mutuo; sin él, GET y POST reciben 302 a /Sede/errores/erro4033.html (HTML con 200 si se sigue), nunca un SOAP Fault.
+  - "Cada WSDL declara cuatro puertos con la misma ruta: www1 y, para certificado de sello, www10 (puertos *Sello) en producción; prewww1 y prewww10.aeat.es en pruebas."
+  - "Los schemaLocation del WSDL del SII son relativos y dan 404 en WSDL/: los XSD v1.1 están en V_1_1/ y dos se publican como .xml; la URI del namespace en www2 sirve la v1.0 (IDVersionSii 1.0)."
+  - zeep.Client con la URL del WSDL del SII falla por ese 404; bajar WSDL y XSD a una carpeta y renombrar los .xml a .xsd. El de VERI*FACTU carga desde su URL con Settings(forbid_entities=False).
+  - www.agenciatributaria.es (portal de desarrolladores y RSS) envía una intermedia FNMT firmada con SHA-1 y OpenSSL 3 falla con «CA signature digest algorithm too weak»; el bundle FNMT de la guía lo resuelve.
+  - El portal de desarrolladores solo existe en www.agenciatributaria.es; la misma ruta en www.agenciatributaria.gob.es redirige a nuevasede.html y en la sede da 404.
   - VIES (/Sede/procedimientoini/ZZ09.shtml) es la validación de NIF-IVA intracomunitario, no una consulta censal de NIF.
-  - Los WSDL cambian de versión con la normativa (SII v1.1 vigente); fijar versión y vigilar Novedades del portal de desarrolladores.
+  - Los WSDL cambian de versión con la normativa (SII v1.1 vigente el 2026-10-01); fijar versión y vigilar el RSS Novedades.xml del portal de desarrolladores.
+tips:
+  - Probar primero contra los puertos de pruebas (prewww1 y prewww10.aeat.es) que declara el propio WSDL; el portal de pruebas externas es preportal.aeat.es.
 related: [aeat-estadisticas]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

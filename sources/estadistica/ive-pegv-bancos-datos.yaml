@@ -1,0 +1,65 @@
+id: ive-pegv-bancos-datos
+name: IVE – Bancos de datos del Portal Estadístico de la GV (BDT y BDO)
+org: Institut Valencià d'Estadística (IVE)
+ministry: Conselleria de Economía, Hacienda y Administración Pública
+level: ccaa
+sector: estadistica
+tags: [ive, pegv, comunitat-valenciana, municipios, comarcas, pobreza, renta, empresas, superficies-cultivo, indicadores-demograficos, pc-axis]
+summary: >-
+  Tablas del IVE por municipio, comarca y provincia (pobreza comarcal, renta per cápita, directorio de empresas,
+  superficies de cultivo, indicadores demográficos, industria) con descarga estática por código de consulta en
+  CSV, xlsx y PC-Axis. El INE no da la escala comarcal.
+access: [download, portal]
+auth: none
+formats: [csv, xlsx, xls, px]
+update: annual
+coverage: "Según tabla; series municipales desde 2002 (indicadores demográficos hasta 2025, superficies de cultivo hasta 2024)"
+license: Aviso legal del PEGV sin licencia abierta explícita (prohíbe comercializar el acceso); las tablas replicadas en dadesobertes.gva.es figuran como CC BY
+base_url: https://bdt.gva.es/bdt/
+docs_url: https://bdt.gva.es/bdt/ajuda.php
+endpoints:
+  - path: res_optimo_static.php?cons={consulta}&idioma={cas|val}&form={formato}
+    desc: Tabla completa del Banco de Datos Territorial por código de consulta (C2D3883 riesgo de pobreza por comarca, C1D3402 indicadores demográficos municipales)
+    example: curl -s "https://bdt.gva.es/bdt/res_optimo_static.php?cons=C2D3883&idioma=cas&form=csvpunto" | iconv -f ISO-8859-1 -t UTF-8
+    params: "form=csvpunto (;), csvcoma (,), csvtab, xlsx, xls o pcaxis; idioma=cas o val; sin form o con un cons erróneo responde HTML"
+    returns: "CSV largo ISO-8859-1, textos entre comillas y Valor sin ellas; cabecera Años;Territorio;Grupos;Estimación y coeficiente de variación;Valor; periodo AAAA, municipio como 03001 - Atzúbia, l', coma decimal (20,3) y - sin dato; adjunto V0139_C2D3883.csv"
+  - path: https://bdo.gva.es/bdo/res_optimo_static.php?cons={variable}_{consulta}&idioma={cas|val}&form={formato}
+    desc: Lo mismo para el banco de datos de cada operación (BDO); aquí cons lleva variable y consulta (V0308_C1D0355 empresas activas por municipio)
+    example: curl -s "https://bdo.gva.es/bdo/res_optimo_static.php?cons=V0308_C1D0355&idioma=cas&form=csvcoma" | iconv -f ISO-8859-1 -t UTF-8
+    params: "los mismos form del BDT más xlsxestados y xlsestados (xlsx o xls con notas y la marca c de dato confidencial)"
+    returns: "CSV con coma; cabecera Años,Municipios,Tipo de empresa,Valor; 15093 filas de 2017 a 2025 con municipios (código INE y nombre), comarcas sin código, provincias y Comunitat en la misma columna; valores enteros o -"
+  - path: menuV.php
+    desc: Menú del BDT con unos 60 temas; POST tema lista sus consultas y POST a sel_optimo.php devuelve la página con la URL estática (botón Copiar URL)
+    example: curl -s -X POST --data-urlencode "tema=VtaXkIc17Rgch6aIIGkQiA==" --data-urlencode "submit=Seleccionar" "https://bdt.gva.es/bdt/menuV.php" | iconv -f ISO-8859-1 -t UTF-8
+    returns: "HTML ISO-8859-1 con select name=consulta (OPTION VALUE cifrado y nombre) y ocultos titulo, tema, idioma y literalTema; reenviarlos con consulta a sel_optimo.php, cuya respuesta contiene res_optimo_static.php?cons=C2D3883"
+  - path: https://bdo.gva.es/bdo/menuV.php?tema={codigo_operacion}
+    desc: Banco de datos de una operación (EEDE directorio de empresas); el código está en los enlaces de la página de cada operación en pegv.gva.es
+    example: curl -s "https://bdo.gva.es/bdo/menuV.php?tema=EEDE" | iconv -f ISO-8859-1 -t UTF-8
+    returns: "HTML con select temaElegido (CV y provincias, comarcas, municipios) y select variable; POST a menu2.php?tema=EEDEP con variable y los ocultos devuelve la URL estática con cons=V0292_C2D0339"
+  - path: https://pegv.gva.es/va/muncom
+    desc: Municipios por comarca (Ley 2/2020, datos desde 2023, y la relación anterior) en xlsx con uuid y fecha en la URL; tomar el enlace de la página cada año
+    example: curl -sL -o muncom.xlsx "https://pegv.gva.es/documents/163706934/379210449/Municipis+i+comarques+a+1+de+gener+de+2026.xlsx/c9009b19-3aab-4b3f-9445-2000b70383a3"
+    returns: "xlsx con hojas mun com y mun com ordenat; 7 filas de título antes de la cabecera província, comarca, codi INE (texto de 5 dígitos), municipi; 542 municipios en 33 comarcas, sin código numérico de comarca"
+rate_limit: No documentado; sin 429. Tablas municipales grandes lentas (36 MB en 70 s) y resets TLS esporádicos; reintentar con espera
+quirks: [latin1, errors-html-or-xml, overwritten-in-place, soft-errors-200, connection-reset-intermittent]
+ids: [ine-municipio]
+gotchas:
+  - cons cambia de forma según el host; en bdt es solo la consulta (C2D3883) y en bdo variable y consulta (V0308_C1D0355). Usar el de un host en el otro devuelve la página de error.
+  - Un cons erróneo o una URL sin form responden 200 con HTML (En este momento no podemos mostrarle resultados); comprobar Content-Type application/octet-stream antes de parsear.
+  - El decimal depende del formato; csvpunto y csvtab usan coma (11,282) y csvcoma punto (11.282), que se confunde con miles. Unidades (miles de euros) y notas solo van en el xlsx.
+  - El CSV omite las celdas confidenciales desde 2023 (la fila desaparece) y xlsxestados las marca c; antes de 2023 el guion era secreto estadístico y desde 2023 significa no aplicable.
+  - Las tablas de una sola medida traen una columna vacía de más en la cabecera (Años;Territorio;;Valor) y filas de tres campos; con pandas el valor cae en la columna sin nombre.
+  - La columna territorial mezcla municipios (03001 - Atzúbia, l'), comarcas solo por nombre, provincias y Comunitat; quedarse con las filas que empiezan por cinco dígitos o se cuenta doble.
+  - Las comarcas siguen la Ley 2/2020 desde los datos de 2023 y la demarcación de 1988 antes; L'Horta Oest sale vacía desde 2023 y la comarca de la capital figura como València. (con punto) en el BDT.
+  - idioma=val cambia cabeceras y etiquetas (Anys, Territori, Homes, Província d'Alacant) y el orden de las filas; no mezclar descargas de distinto idioma en un mismo cruce.
+  - El fichero estático es siempre la tabla completa, sin filtro por URL; las municipales grandes pesan decenas de MB (superficies de cultivo C2V9662, 36 MB y 70 s).
+  - Los valores del formulario (tema, consulta, ocultos) son base64 opaco, iguales entre sesiones el 2026-10-01 pero no derivables del cons; guardar cada cons una vez obtenido.
+tips:
+  - El código INE de municipio son los cinco primeros caracteres del territorio; las comarcas se asignan con el xlsx de pegv.gva.es/va/muncom y se cruzan con ine-codigos-territoriales.
+  - 'Con pandas y csvpunto; pd.read_csv(url, sep=";", decimal=",", encoding="latin-1", na_values=["-"], dtype={"Años": str}) y territorio.str.extract(r"^(\d{5}) - ") para el código.'
+  - Muchos temas del BDT republican fuentes estatales (padrón del INE, afiliación, Catastro, IRPF de aeat-estadisticas); lo propio del IVE es la escala comarcal, pobreza, renta, cultivos, industria y empresas.
+  - Los conjuntos del IVE en gva-dadesobertes-api (fq=origen_datos:*Estad*) ya enlazan URLs estáticas de bdo.gva.es; atajo para encontrar cons sin recorrer el formulario.
+  - Códigos verificados en el BDT; C2D3883 pobreza comarcal 2012-2024, C1D3402 indicadores demográficos municipales 2002-2025, C2V9662 cultivos 2002-2024, C0D3783 empleo industrial comarcal 2008-2024.
+related: [ine-api-tempus, ine-codigos-territoriales, gva-dadesobertes-api, aeat-estadisticas]
+status: active
+verified: "2026-10-01"

@@ -6,34 +6,48 @@ level: age
 sector: economia-finanzas
 tags: [tesoro, deuda-publica, subastas, letras, bonos, obligaciones, tipos-marginales]
 summary: >-
-  Resultados de subastas de Letras, Bonos y Obligaciones (tablas HTML por instrumento e histórico en xlsx),
-  boletín mensual en 19 cuadros xlsx (nominal en circulación, vida media, tenedores, vencimientos, negociación)
-  e históricos de tipos marginales, medios y efectivos.
+  Subastas de Letras, Bonos y Obligaciones (última por plazo en HTML; año en curso y anterior en 11.xlsx; 2001-2025 en
+  histórico), boletín mensual en 19 cuadros xlsx (circulación, vida media, tenedores, tipos, financiación neta,
+  negociación) e históricos de tipos marginales, medios y efectivos.
 access: [download, portal]
 auth: none
 formats: [xlsx, pdf, html]
 update: monthly
+coverage: "Subastas desde 2001 y tipos marginales de Letras desde 1987; tenedores desde 2002; cuadros mensuales con el año en curso"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.tesoro.es/deuda-publica/estadisticas
 docs_url: https://www.tesoro.es/deuda-publica/estadisticas
 endpoints:
-  - path: https://www.tesoro.es/deuda-publica/estad%C3%ADsticas-mensuales
-    desc: Boletín mensual; cuadros 01 a 19 en /sites/default/files/estadisticas/{NN}.xlsx (01 nominal en circulación, 12 tipos marginales, 14 vencimientos)
-    example: curl -sO -A "Mozilla/5.0" "https://www.tesoro.es/sites/default/files/estadisticas/01.xlsx"
+  - path: https://www.tesoro.es/deuda-publica/estadisticas-mensuales
+    desc: "Boletín mensual en 19 ficheros /sites/default/files/estadisticas/{NN}.xlsx y .pdf: 01 nominal en circulación, 11 subastas del año, 12 tipos marginales"
+    example: curl -sO --cacert ca-age.pem -A "Mozilla/5.0" "https://www.tesoro.es/sites/default/files/estadisticas/01.xlsx"
+    returns: "xlsx con hojas nombradas por el cuadro del boletín, no por el fichero ('1'; 03.xlsx es '3 y 4'; 12.xlsx trae '21' a '24'); título y cabecera en varias filas, meses en texto bajo una fila con el año y notas al pie; importes en millones como números"
   - path: https://www.tesoro.es/sites/default/files/estadisticas/historico/historico_subastas.xlsx
     desc: Histórico de subastas; en la misma carpeta historico_t.marg, historico_t.int.medio, historico_t.int.nuevas_em y historico_distribucion_tenedores (.xlsx)
-    example: curl -sO -A "Mozilla/5.0" "https://www.tesoro.es/sites/default/files/estadisticas/historico/historico_subastas.xlsx"
+    example: curl -sO --cacert ca-age.pem -A "Mozilla/5.0" "https://www.tesoro.es/sites/default/files/estadisticas/historico/historico_subastas.xlsx"
+    returns: "xlsx con una hoja por año de 2001 a 2025; cabecera en cuatro filas, FECHA solo en la primera fila de cada subasta, activo y plazo como L-6m, B-5a u O€i-10a, nominal solicitado y adjudicado en millones y rendimientos en %, como números"
   - path: https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/{letras-del-tesoro|bonos-del-estado|obligaciones-del-estado}
-    desc: Última subasta por instrumento en tabla HTML
+    desc: Última subasta de cada plazo en una tabla HTML transpuesta, una columna por plazo
+    example: curl -s --cacert ca-age.pem -A "Mozilla/5.0" "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/letras-del-tesoro"
+    returns: "HTML con una tabla; filas Plazo, Fecha subasta (dd/mm/aaaa), Fecha vencimiento, Fecha de liquidación, Nominal solicitado y adjudicado, Precio mínimo aceptado, Tipo de interés marginal y medio, Adjudicado al marginal...; importes en millones con formato español (2.916,08)"
   - path: https://www.tesoro.es/deuda-publica/subastas/calendario
     desc: Calendario anual de subastas en HTML y PDF
+    example: curl -s --cacert ca-age.pem -A "Mozilla/5.0" "https://www.tesoro.es/deuda-publica/subastas/calendario"
+    returns: "HTML con tablas por mes; producto (Letras a 6 meses...), fecha de subasta, amortización, límites de peticiones, pago y emisión en dd.mm.aaaa; enlaza el PDF del año, cuyo nombre lleva sufijo de versión (Espan%CC%83ol-12.pdf)"
 quirks: [user-agent-browser, tls-chain-incomplete, static-html, overwritten-in-place]
 gotchas:
   - Con el User-Agent por defecto de curl responde 403 en todo el sitio; enviar un User-Agent de navegador.
-  - Certificado FNMT sin cadena intermedia; añadir AC Componentes Informáticos al bundle o falla la verificación TLS (ver guía).
-  - Los cuadros mensuales se sobreescriben cada mes en la misma URL (01.xlsx); no hay histórico por fecha, guardar copia si hace falta.
-  - No localicé API ni CSV; las subastas recientes solo en HTML y el histórico en xlsx.
-  - La URL de estadísticas mensuales lleva la tilde codificada (estad%C3%ADsticas-mensuales); /deuda-publica/estadisticas es solo el índice.
+  - Certificado FNMT sin cadena intermedia (AC Componentes Informáticos); sin el bundle de la guía curl falla con el error 60 de verificación.
+  - Los cuadros mensuales se sobreescriben cada mes en la misma URL (los 19 con Last-Modified 2026-09-07 el 2026-10-01); no hay histórico por fecha, guardar copia si hace falta.
+  - Sin API ni CSV. Las subastas del año en curso y del anterior están en 11.xlsx (el 2026-10-01 llegaba a la del 11/08/2026); las posteriores solo en el HTML de últimas subastas.
+  - Los historico_*.xlsx se actualizan una vez al año (enero a marzo de 2026, con datos hasta diciembre de 2025); el año en curso solo está en los cuadros mensuales.
+  - En el HTML de últimas subastas cada columna es un plazo con su propia fecha (letras a 3 y 9 meses del 08/09/2026, a 6 y 12 del 01/09/2026); no asumir una fecha por página.
+  - Esas tablas mezclan 2.916,08 con 433.87 (punto decimal) en la misma tabla; si hay coma, el punto es de miles; si no, un punto seguido de una o dos cifras es decimal.
+  - 08.xlsx (deuda en divisas) y 14.xlsx (perfil de vencimientos 2026-2071) solo contienen una imagen PNG, sin celdas; no localicé esos datos en formato tabular.
+  - En las filas de mes de los tipos marginales solo la columna Último trae valor; Medio, Más alto y Más bajo van a 0 en años antiguos y vacíos en los recientes, así que 0 no es tipo cero.
+  - Los meses van como texto, a veces con espacios ('   Enero '), y la hoja 2015 de historico_subastas se llama '2015 ' con espacio final; normalizar con strip.
+tips:
+  - Serie de subastas completa. Unir historico_subastas.xlsx (2001-2025) con la hoja del año de 11.xlsx, rellenar FECHA hacia abajo y saltar las filas de título y cabecera que se repiten a mitad de hoja.
 related: [bde-estadisticas, igae-ejecucion-presupuestaria]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

@@ -1,0 +1,73 @@
+id: ayuntamiento-madrid-datos-abiertos
+name: Ayuntamiento de Madrid – Portal de datos abiertos (API CKAN y API dinámica)
+org: Ayuntamiento de Madrid
+level: local
+sector: gobierno-abierto-administracion
+tags: [datos-abiertos, ckan, datastore, padron, secciones-censales, barrios, calidad-del-aire, trafico, tiempo-real, accidentes, dcat]
+summary: >-
+  673 conjuntos del Ayuntamiento en CKAN 2.9.11: padrón mensual por sección y edad, accidentes, censo de locales,
+  presupuestos, calidad del aire y tráfico en tiempo real. API JSON, datastore con filtros, DCAT, feed Atom y una API
+  dinámica con filtros por campo en ciudadesabiertas.madrid.es.
+access: [api-rest, download, feed]
+auth: none
+formats: [json, csv, xml, xlsx, xls, zip, txt, kml, shp, ttl, atom]
+update: realtime
+coverage: "Según conjunto; calidad del aire desde 2001, accidentes desde 2010, padrón del mes en curso"
+license: CC BY 4.0 en cada conjunto (license_id cc-by) y condiciones de uso del portal
+base_url: https://datos.madrid.es/api/3/action
+docs_url: https://datos.madrid.es/swagger/openapi
+endpoints:
+  - path: /package_search?q={texto}&rows={n}&start={n}
+    desc: Búsqueda de conjuntos; rows=1000 devuelve los 673 en una llamada (20 MB)
+    example: curl -s "https://datos.madrid.es/api/3/action/package_search?q=padron&rows=5"
+    returns: "Objeto {success, result:{count, results:[{name 300228-0-accidentes-trafico-detalle, title, frequency (URI EU DAILY, MONTHLY, UPDATE_CONT), dataset_type, creator[{identifier DIR3 L01280796}], resources[{id, description con el año, format, url, datastore_active, size}]}]}}"
+  - path: /package_show?id={name}
+    desc: Conjunto con todos sus recursos; el año de cada fichero va en description, no en el número del recurso
+    example: curl -s "https://datos.madrid.es/api/3/action/package_show?id=300228-0-accidentes-trafico-detalle"
+    returns: "Objeto result con 36 resources en accidentes, cada uno {id 300228-3-accidentes-trafico-detalle-csv, description Accidentes de tráfico 2023, format, url, datastore_active, datastore_contains_all_records_of_source_file}"
+  - path: /datastore_search?resource_id={id}&filters={json}&limit={n}&offset={n}
+    desc: Filas de un CSV cargado (3786 recursos con datastore_active) con filters, q, distinct y sort
+    example: curl -sg 'https://datos.madrid.es/api/3/action/datastore_search?resource_id=200076-2-padron-csv&filters={"COD_DISTRITO":"21"}&limit=5'
+    params: "filters JSON con valores de texto, fields y distinct=true para listas de códigos, limit hasta 32000 (más se recorta), offset o _links.next"
+    returns: "Objeto result {fields[{id, type text}], records[], total (241163 en el padrón), limit, _links.next}; todos los campos son text, también los numéricos"
+  - path: https://datos.madrid.es/dataset/{name}/resource/{resource_id}/download
+    desc: Fichero vigente de un recurso sin el nombre con marca de tiempo que publica package_show (200076_20260928_151412.csv)
+    example: curl -s "https://datos.madrid.es/dataset/212629-0-estaciones-control-aire/resource/212629-0-estaciones-control-aire-csv/download"
+    returns: "CSV en UTF-8 con BOM, CRLF y separador ;, fechas dd/mm/aaaa; en estaciones conviven COORDENADA_X_ETRS89 con coma decimal y LONGITUD con punto; el padrón trae textos entre comillas rellenos con espacios"
+  - path: https://ciudadesabiertas.madrid.es/dynamicAPI/API/query/{consulta}.{formato}?page={n}&pageSize={n}
+    desc: API dinámica con 73 consultas (calidad del aire en tiempo real, terrazas, locales, contratos, subvenciones) en json, csv o xml
+    example: curl -s "https://ciudadesabiertas.madrid.es/dynamicAPI/API/query/calair_tiemporeal.json?pageSize=5000"
+    params: "page, pageSize (100 por defecto, tope 4500 sin aviso), sort=-campo, csvSeparator, un parámetro por campo (cod_distrito=21); consultas y campos en /dynamicAPI/API/api.json"
+    returns: "Objeto {page, pageSize, totalRecords, pageRecords, first, last, next, records[]}; sin resultados falta la clave records. calair_tiemporeal da PROVINCIA 28, MUNICIPIO 079, ESTACION, MAGNITUD, ANO, MES, DIA y H01 a H24 con V01 a V24 como texto"
+  - path: https://informo.madrid.es/informo/tmadrid/pm.xml
+    desc: Tráfico en tiempo real de unos 4900 puntos de medida, sobrescrito en la misma URL
+    example: curl -s "https://informo.madrid.es/informo/tmadrid/pm.xml"
+    returns: "XML UTF-8 con BOM de 2,2 MB: <pms><fecha_hora>dd/mm/aaaa hh:mm:ss</fecha_hora> en hora local y múltiplos de 5 minutos, y <pm> con idelem, descripcion, intensidad, ocupacion, carga, nivelServicio, error, subarea, st_x y st_y en UTM con coma decimal"
+  - path: https://datos.madrid.es/catalog.ttl?page={n}
+    desc: Catálogo DCAT-AP en Turtle, 100 conjuntos por página (7 páginas); cambios en el feed /feeds/dataset.atom
+    example: curl -s "https://datos.madrid.es/catalog.ttl?page=1"
+    returns: "Turtle con hydra:PagedCollection (itemsPerPage 100, lastPage 7) y dcat:Dataset con distribuciones; 2,2 MB y unos 12 s por página"
+rate_limit: No documentado; Akamai devolvió 403 a 1 de cada 12 peticiones espaciadas 3 s y cortó todo el host cerca de un minuto tras consultas SQL
+quirks: [waf-intermittent-403, url-drift, overwritten-in-place, waf-temporary-ban]
+ids: [dir3, seccion-censal, ine-municipio]
+gotchas:
+  - La API del portal antiguo murió con la migración a CKAN; /egob/catalogo.json y /egob/catalogo/{id}.json dan 404 y algunos ficheros /egob/catalogo/{id}.csv redirigen 302 a un recurso con otro número.
+  - datastore_search_sql está tras Akamai; un SELECT en la URL o en POST JSON recibió 403 en HTML y, tras varios, todo datos.madrid.es respondió 403 cerca de un minuto. Usar datastore_search.
+  - Akamai responde 403 Access Denied en HTML a peticiones sueltas, también a la API; reintentar tras unos segundos antes de dar un recurso por caído.
+  - "En el datastore todos los campos son text: sort da 1, 10, 11... 2 y filters exige el valor como texto ({\"COD_DISTRITO\":\"21\"}); convertir tipos en local."
+  - Con curl las llaves de filters se interpretan como patrón glob y el JSON llega roto (409 Cannot parse JSON); usar -g o --data-urlencode.
+  - El número del recurso no indica el año ni el orden; en accidentes 300228-3 es 2023 y 300228-1 es 2025. Leer description en package_show.
+  - "En el padrón COD_DIST_SECCION 2062 es distrito 2 y sección 062: la sección censal INE es 28079 + 02 + 062; COD_DIST_BARRIO 205 es distrito 2, barrio 5. Los textos llegan rellenos con espacios."
+  - En calidad del aire en tiempo real las horas aún no medidas llegan como 0 con validación N; filtrar por Vnn igual a V. Los filtros por campo de calair_tiemporeal devolvieron 0 registros.
+  - La consulta padron_estadistica de la API dinámica termina en 2023 (fecha_dato); el padrón vigente es el CSV mensual del conjunto 200076-0-padron.
+  - "SPARQL no conseguido el 2026-10-01: GET a /sparql devuelve la página HTML con 200 y POST respondió 400 Invalid or unsupported SPARQL query y después 403."
+tips:
+  - Enlazar /dataset/{name}/resource/{id}/download, que sirve el fichero vigente aunque cambie el nombre con fecha que publica package_show.
+  - distinct=true con fields=COD_DISTRITO,DESC_DISTRITO sobre 200076-2-padron-csv da los 21 distritos con su código en una llamada.
+  - Los nombres de conjunto conservan el número del portal antiguo (300228 en accidentes); si una URL /egob/ da 404, buscar ese número con package_search.
+  - La calidad del aire del Ayuntamiento y la de la Comunidad (comunidad-madrid-datos-abiertos) comparten formato, con hNN y vNN por hora; 28079 en el punto de muestreo es la ciudad.
+  - Nacimientos y defunciones por barrio están en comunidad-madrid-estadistica-api; su barrio B044 es COD_DIST_BARRIO 404.
+  - Para la sección censal, componer el código de 10 dígitos y casar con ine-cartografia-censal o con el Atlas de renta de ine-api-tempus.
+related: [comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, datos-gob-es-api, ine-codigos-territoriales, ine-cartografia-censal, miteco-calidad-aire, dir3-directorio]
+status: active
+verified: "2026-10-01"

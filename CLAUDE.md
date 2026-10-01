@@ -85,8 +85,11 @@ subvenciones, catastro, meteorología, medicamentos), después las de descarga e
 sin API. Dentro de cada sector, la misma lógica.
 
 Alcance actual: Administración General del Estado, incluidos organismos independientes adscritos (BdE, CNMV,
-CNMC, AIReF) y empresas públicas cuando publican datos únicos (Aena, Puertos del Estado). Fases siguientes,
-solo cuando el propietario lo indique: Cortes y Poder Judicial, comunidades autónomas, entidades locales, UE.
+CNMC, AIReF) y empresas públicas cuando publican datos únicos (Aena, Puertos del Estado). Desde el 2026-10-01, por
+indicación del propietario, también Madrid, Cataluña, Andalucía y Comunitat Valenciana (portal de datos abiertos e
+instituto de estadística, level ccaa) y los portales de datos de los ayuntamientos de Madrid y Barcelona (level local).
+Fases siguientes, solo cuando el propietario lo indique: resto de comunidades y entidades locales, Cortes y Poder
+Judicial, UE.
 
 ## Estado de verificación
 

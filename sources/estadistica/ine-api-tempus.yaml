@@ -12,7 +12,7 @@ access: [api-rest]
 auth: none
 formats: [json, csv]
 update: daily
-coverage: "Según operación; el IPC general enlaza desde 1961 en la tabla 24077"
+coverage: "Según operación; IPC general: índice desde 2002M01 (tabla 24077), variación mensual desde 1961M02 y anual desde 1962M01 (76134)"
 license: Reutilización libre con cita de la fuente (licencia INE compatible CC BY 4.0)
 base_url: https://servicios.ine.es/wstempus/js/ES
 docs_url: https://www.ine.es/dyngs/DAB/index.htm?cid=1099
@@ -20,58 +20,64 @@ endpoints:
   - path: /OPERACIONES_DISPONIBLES
     desc: Las 112 operaciones con Id numérico y Codigo (IPC es 25, EPA 293, ECP 450)
     example: curl -s "https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES"
-    returns: "Lista de {Id, Cod_IOE, Nombre, Codigo}; Id (25) y Codigo (IPC) valen ambos como id_o_codigo en el resto de rutas"
+    returns: "Lista de {Id, Cod_IOE, Nombre, Codigo, Url opcional}; Id (25), Codigo (IPC, sensible a mayúsculas) e IOE más Cod_IOE (IOE30138) valen como id_o_codigo en el resto de rutas"
   - path: /TABLAS_OPERACION/{id_o_codigo}
-    desc: Tablas vigentes de una operación con periodo inicial y última modificación; acepta IPC o 25
+    desc: Tablas de una operación, también las cerradas, con periodo inicial y última modificación; acepta IPC o 25
     example: curl -s "https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/IPC"
-    returns: "Lista de {Id, Nombre, Codigo, FK_Periodicidad, FK_Publicacion, FK_Periodo_ini, Anyo_Periodo_ini, FechaRef_fin, Ultima_Modificacion (epoch ms)}; Id es el id_tabla de DATOS_TABLA"
+    returns: "Lista de {Id, Nombre, Codigo, FK_Periodicidad, FK_Publicacion, FK_Periodo_ini, Anyo_Periodo_ini (texto), FechaRef_fin (texto, 'null' o epoch ms), Ultima_Modificacion (epoch ms)}; las cerradas traen FK_Periodo_fin y Anyo_Periodo_fin; Id es el id_tabla de DATOS_TABLA"
   - path: /DATOS_TABLA/{id_tabla}?nult={n}
     desc: Todas las series de una tabla con sus últimos n periodos
     example: curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/24077?nult=3"
-    params: "nult o date=AAAAMMDD:AAAAMMDD (uno obligatorio); tv=id_variable:id_valor filtra, repetible; tip=A nombres legibles y fechas ISO, tip=M metadatos, tip=AM ambos; det=2 desglosa unidad y escala"
-    returns: "Lista de series {COD, Nombre, FK_Unidad, FK_Escala, Data:[{Fecha epoch ms, FK_TipoDato, FK_Periodo, Anyo, Valor float, Secreto bool}]}; con tip=AM Fecha es ISO, aparecen T3_Periodo (M08), T3_TipoDato y MetaData:[{T3_Variable, Nombre, Codigo}] por dimensión"
+    params: "nult=n o date=AAAAMMDD:AAAAMMDD (fin opcional); tv=id_variable:id_valor repetible, O dentro de una variable e Y entre variables; tip=A legible, M metadatos, AM ambos; det=2 desglosa en objetos"
+    returns: "Lista de series {COD, Nombre, FK_Unidad, FK_Escala, Data:[{Fecha epoch ms, FK_TipoDato, FK_Periodo, Anyo, Valor float o null, Secreto bool}]}, Data del periodo más reciente al más antiguo; con tip=AM Fecha ISO, T3_Periodo (M08), T3_TipoDato, MetaData:[{Id, T3_Variable, Nombre, Codigo}] y sin Secreto"
   - path: /DATOS_SERIE/{cod_serie}?nult={n}
     desc: Una serie por su código
     example: curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/IPC290751?nult=12&tip=A"
-    returns: "Un objeto {COD, Nombre, FK_Unidad, FK_Escala, Data:[{Fecha, FK_TipoDato, FK_Periodo, Anyo, Valor, Secreto}]}; con tip=A llegan T3_Unidad, T3_TipoDato y T3_Periodo en texto y Fecha en ISO"
+    returns: "Un objeto {COD, Nombre, FK_Unidad, FK_Escala, Data:[{Fecha, FK_TipoDato, FK_Periodo, Anyo, Valor, Secreto}]}, Data del más antiguo al más reciente; con tip=A llegan T3_Unidad, T3_Escala, T3_TipoDato (Definitivo, Avance) y T3_Periodo en texto, Fecha ISO (2026-08-01T00:00:00.000+02:00) y sin Secreto"
   - path: /SERIES_TABLA/{id_tabla}
     desc: Series que componen una tabla con código, decimales, periodicidad y unidad
     example: curl -sL "https://servicios.ine.es/wstempus/js/ES/SERIES_TABLA/24077"
-    returns: "Lista de {Id, COD, FK_Operacion, Nombre, Decimales, FK_Periodicidad, FK_Publicacion, FK_Clasificacion, FK_Escala, FK_Unidad}; COD es el cod_serie de DATOS_SERIE"
+    returns: "Lista de {Id, COD, FK_Operacion, Nombre, Decimales, FK_Periodicidad, FK_Publicacion, FK_Clasificacion, FK_Escala, FK_Unidad} con todas las series sin paginar (24.414 y 5,5 MB en la 29005); COD es el cod_serie de DATOS_SERIE"
   - path: /SERIE/{cod_serie}
     desc: Metadatos de una serie
+    example: curl -s "https://servicios.ine.es/wstempus/js/ES/SERIE/IPC290751?tip=M"
+    returns: "Objeto {Id, COD, FK_Operacion, Nombre, Decimales, FK_Periodicidad, FK_Publicacion, FK_Clasificacion, FK_Escala, FK_Unidad}; con tip=M añade MetaData:[{Id, FK_Variable, Nombre, Codigo}], los pares tv que definen la serie"
   - path: /VARIABLES_OPERACION/{id_operacion}
     desc: Variables de una operación; sus valores en /VALORES_VARIABLEOPERACION/{id_variable}/{id_operacion}
     example: curl -s "https://servicios.ine.es/wstempus/js/ES/VALORES_VARIABLEOPERACION/3/IPC"
-    returns: "VARIABLES_OPERACION devuelve [{Id, Nombre, Codigo}] (3 Tipo de dato, 19 Municipios, 70 CCAA, 115 Provincias); VALORES_VARIABLEOPERACION/{var}/{op} devuelve [{Id, FK_Variable, Nombre, Codigo}] y ese Id, no Codigo, es el que usa tv"
-  - path: https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/{id_tabla}?nult={n}
-    desc: Misma API con salida CSV cambiando js por csv
-    example: curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=12"
-    returns: "Texto tabulado en ISO-8859-15 con BOM; una columna por variable, Periodo (2026M08) y Total; decimal con coma y cadena vacía en los periodos aún sin dato"
-  - path: https://www.ine.es/jaxiT3/files/t/es/{csv_bdsc|px|xlsx}/{id_tabla}.{csv|px|xlsx}?nocab=1
-    desc: Descarga directa de cualquier tabla de INEbase con la misma id_tabla que DATOS_TABLA (2854, 24077); csv_bdsc separado por ;, px y xlsx
+    returns: "VARIABLES_OPERACION devuelve [{Id, Nombre, Codigo}] (3 Tipo de dato, 19 Municipios, 70 CCAA, 115 Provincias); VALORES_VARIABLEOPERACION devuelve [{Id, FK_Variable, Nombre, Codigo, FK_JerarquiaPadres}]; tv usa Id, no Codigo (a menudo vacío), y hay nombres repetidos (Variación anual 74 y 86)"
+  - path: /GRUPOS_TABLA/{id_tabla}
+    desc: Dimensiones de una tabla; /VALORES_GRUPOSTABLA/{id_tabla}/{id_grupo} da solo los valores presentes en ella, los que tv acepta sin 500
+    example: curl -s "https://servicios.ine.es/wstempus/js/ES/VALORES_GRUPOSTABLA/76134/155608"
+    returns: "GRUPOS_TABLA devuelve [{Id, Nombre}] con un Id de grupo propio de la tabla, no de variable; VALORES_GRUPOSTABLA devuelve [{Id, FK_Variable, Nombre, Codigo}] y el filtro es tv=FK_Variable:Id (en 76134 Variación anual es 3:74; 3:86 da 500)"
+  - path: https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/{id_tabla}
+    desc: La tabla entera en CSV tabulado cambiando js por csv; no admite filtros
+    example: curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077"
+    returns: "El mismo fichero que jaxiT3 csv_bd; UTF-8 con BOM aunque la cabecera diga ISO-8859-15, tabulador y CRLF; una columna por variable, Periodo (2026M09) del más reciente al más antiguo y Total con coma decimal y punto de miles; \"\" sin dato (24077 vacía de 1961M01 a 2001M12)"
+  - path: https://www.ine.es/jaxiT3/files/t/es/{csv_bdsc|csv_bd|px|xlsx}/{id_tabla}.{csv|px|xlsx}?nocab=1
+    desc: Descarga directa de cualquier tabla de INEbase con la misma id_tabla que DATOS_TABLA (2854, 24077); csv_bdsc separado por ;, csv_bd por tabulador, px y xlsx
     example: curl -s "https://www.ine.es/jaxiT3/files/t/es/csv_bdsc/24077.csv?nocab=1"
-    returns: "CSV en ISO-8859-15 con BOM y separador ; (una columna por variable, Periodo como 2026M08 o 2025, Total con coma decimal y punto de miles; \"\" en el periodo sin dato); px en application/pc-axis y xlsx con la misma tabla"
-rate_limit: No documentado; una tabla grande con nult=1 devuelve 600 KB (4248 series en la 25333)
-quirks: [errors-html-or-xml]
+    returns: "CSV en UTF-8 con BOM (la cabecera dice ISO-8859-15), una columna por variable, Periodo (2026M08 o 2025) y Total con coma decimal y punto de miles, \"\" sin dato; en tablas municipales código y nombre van juntos (01051 Agurain/Salvatierra); px en ISO-8859-15; xlsx en formato informe"
+rate_limit: No documentado; una tabla grande con nult=1 devuelve 600 KB (4248 series en la 25333) y la 29005 sin filtro 5,6 MB (14,6 MB con tip=AM)
+quirks: [errors-html-or-xml, soft-errors-200]
 gotchas:
-  - Los códigos de serie y los ids de tabla cambian con cada cambio de base. El IPC general fue IPC206446 (hasta 2021), IPC251852 (hasta 2025M12) y es IPC290751 (base 2025).
-  - Una tabla retirada (50902) sigue respondiendo con datos viejos aunque ya no aparezca en TABLAS_OPERACION; validar siempre la tabla contra ese listado.
-  - DATOS_SERIE y DATOS_TABLA sin nult ni date devuelven 404 con HTML, no la serie completa. Para toda la serie usar date con un rango amplio.
-  - Un código de serie inexistente devuelve 200 con cuerpo vacío; un tv con un par variable:valor que no existe en la tabla devuelve 500 con HTML.
-  - nult cuenta periodos de la tabla, no observaciones. En tablas con avance (IPC) las series sin dato en el último periodo llegan con Data vacío.
-  - Fecha es epoch en milisegundos con zona Europe/Madrid; usar Anyo y FK_Periodo para el periodo. FK_TipoDato 3 marca dato provisional o avance; Secreto true marca secreto estadístico con Valor ausente.
-  - El CSV llega con BOM UTF-8, separador tabulador y coma decimal aunque la cabecera diga ISO-8859-15.
-  - SERIES_TABLA redirige con 301 a /jsCache/; seguir redirecciones. El parámetro page no pagina (devuelve lo mismo).
-  - Cambiar ES por EN en la ruta traduce los nombres; jsCache sirve copias cacheadas, para datos recién publicados usar js.
-  - "nult=1 puede devolver Data vacío cuando el último periodo aún no está publicado (el CSV lo muestra con cadena vacía); pedir nult=2 y quedarse con el último valor no nulo."
+  - Los códigos de serie y los ids de tabla cambian con cada cambio de base; el IPC general fue IPC206446 (hasta 2021M12), IPC251852 (hasta 2025M12) y es IPC290751 (base 2025).
+  - "TABLAS_OPERACION incluye tablas cerradas (2852, padrón por provincias hasta 2021) con Anyo_Periodo_fin o FechaRef_fin en ms ('null' si sigue viva); la 50902, ya fuera del listado, responde con datos hasta 2025M12."
+  - DATOS_TABLA da Data del periodo más reciente al más antiguo y DATOS_SERIE al revés, con nult y con date (Abengibre en 29005, 2025 y 2024 frente a 2024 y 2025); ordenar por Anyo y FK_Periodo.
+  - En DATOS_TABLA nult cuenta periodos de la tabla; 24077 ya incluye 2026M09 (avance del IPC) sin dato del índice y nult=1 da Data vacío, mientras DATOS_SERIE cuenta datos y nult=1 da 2026M08.
+  - DATOS_SERIE sin nult ni date da 404 con HTML, pero DATOS_TABLA devuelve todo el histórico (sin tv, tras un 301 a /jsCache/); SERIES_TABLA también redirige, así que seguir redirecciones, y page no pagina.
+  - Serie u operación inexistente (también ipc en minúsculas) y date con guiones devuelven 200 con cuerpo vacío; un tv cuyo valor no está en la tabla da 500 con HTML.
+  - Fecha es el primer día del periodo a medianoche de Madrid en epoch ms (22:00 o 23:00 UTC del día anterior); el periodo es Anyo más FK_Periodo (1-12 meses, 19-22 trimestres, 28 anual).
+  - FK_TipoDato 1 es definitivo, 2 provisional y 3 avance; el secreto estadístico llega como Valor null con Secreto true, y con tip=A o AM desaparece Secreto y queda solo el null.
+  - La ruta csv/ES/DATOS_TABLA devuelve siempre la tabla entera e ignora nult, tip y det; cualquier dos puntos en la consulta (tv, date, también %3A) da 400 con HTML, así que para filtrar hay que usar js.
+  - DATOS_TABLA sale de una caché por nodo (Age de hasta 15.790 s y copias distintas entre nodos el 2026-10-01); el día de publicación, un parámetro que cambie en cada petición (&x=marca de tiempo) da respuesta nueva.
 tips:
-  - Flujo típico. TABLAS_OPERACION para localizar la tabla vigente, DATOS_TABLA con nult=1 y tip=A para ver códigos y nombres, DATOS_SERIE con date para el histórico.
-  - Los ids de tabla del portal INEbase (parámetro t=NNNNN en la URL) son los mismos que acepta DATOS_TABLA.
-  - En Python, pandas.json_normalize sobre Data de cada serie; con tip=A la fecha ya viene en ISO 8601.
+  - Flujo típico. TABLAS_OPERACION (o el t=NNNNN de la URL de INEbase) para el id de tabla, VALORES_GRUPOSTABLA para los pares tv, DATOS_TABLA con tv para los datos y DATOS_SERIE con date para el histórico.
+  - Especificación OpenAPI 3.1 con todas las rutas, parámetros y los servidores js/ES y js/EN (nombres en inglés) en https://www.ine.es/OpenAPI/includes/files/es/wstempus.yaml.
+  - En Python, pandas.json_normalize sobre Data; con tip=A Fecha mezcla +01:00 y +02:00 y pd.to_datetime falla en pandas 3 (Mixed timezones) o, con utc=True, cae en el día anterior, así que mejor Fecha[:10].
   - Ids verificados; 24077 IPC índice general, 76134 tasas IPC, 14506 tasas de paro EPA, 29005 padrón por municipio, 59060 alquiler (IPVA) por municipio, 49075 defunciones por causa, 30656 Atlas de renta (Albacete).
-  - VALORES_VARIABLEOPERACION/19/{operacion} da los 8.142 municipios con Codigo INE e Id; tv=19:{Id} filtra cualquier tabla municipal (el Atlas de renta tiene nueve tablas por provincia con nombres repetidos).
-  - "Las tablas nacionales grandes (30824, Atlas de renta por municipio, distrito y sección) responden 200 con status de restricciones de volumen sin filtro; con tv de municipio e indicador devuelven la serie completa."
+  - VALORES_VARIABLEOPERACION/19/22 da 8.142 municipios (10 ya fuera de la relación de 2026) con Codigo INE e Id, que vale en todas las operaciones (6124 Abengibre); FK_JerarquiaPadres[0] es su provincia para tv=115.
+  - Sin filtro, la 30824 (Atlas de renta nacional por municipio y sección) responde 200 con un objeto status «No puede mostrarse por restricciones de volumen»; con tv de municipio e indicador da la serie entera.
 related: [ine-codigos-territoriales, ine-microdatos]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

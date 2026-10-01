@@ -1,0 +1,77 @@
+id: ieca-api-badea
+name: IECA – API de BADEA e INDEA (Instituto de Estadística y Cartografía de Andalucía)
+org: Instituto de Estadística y Cartografía de Andalucía (IECA)
+level: ccaa
+sector: estadistica
+tags: [estadistica, andalucia, badea, indea, municipios, padron, contabilidad-regional, series-temporales, api]
+summary: >-
+  BADEA, banco de datos del IECA, por API REST JSON: cada consulta (padrón municipal desde 1996, Contabilidad
+  Regional Trimestral, condiciones de vida) con metadatos, jerarquías y datos, exportable a txt, px, xls y pdf; e
+  INDEA, indicadores por provincia. Sin autenticación.
+access: [api-rest, download]
+auth: none
+formats: [json, txt, px, xls, xlsx, pdf, csv, zip, html]
+update: irregular
+coverage: "Según operación; padrón municipal 1996-2025 (sin 1997), PIB trimestral de la CRTA hasta 2026-T2"
+license: CC BY 4.0 en 258 de los 260 conjuntos del IECA del catálogo de la Junta
+base_url: https://www.juntadeandalucia.es/institutodeestadisticaycartografia/intranet/admin/rest/v1.0
+docs_url: https://www.juntadeandalucia.es/institutodeestadisticaycartografia/badea/apidoc
+endpoints:
+  - path: /consulta/{consultaId}
+    desc: Metadatos, jerarquías y datos de una consulta de BADEA con su selección por defecto (a menudo solo el último periodo)
+    example: curl -s "https://www.juntadeandalucia.es/institutodeestadisticaycartografia/intranet/admin/rest/v1.0/consulta/103956"
+    returns: "{metainfo{id, title, activity, periodicity, type I|C, notes HTML}, hierarchies[{alias, des, position f|c|p, url}], measures[{id, des}], data:[[{cod:[ruta], des} por jerarquía, {val:'1268.0' texto con punto, format:'1.268'}]]}; sin paginación"
+  - path: /consulta/{consultaId}?{alias}={id},{id}&posord=f[{alias}],c[{alias}],c[Measures]
+    desc: La misma consulta filtrada por miembros (ids internos de la jerarquía, no códigos) y con los ejes reordenados
+    example: curl -sg "https://www.juntadeandalucia.es/institutodeestadisticaycartografia/intranet/admin/rest/v1.0/consulta/103956?D_TERRITORIO_0=2241,2242&D_TEMPORAL_0=180251&D_SEXO_0=3689,3690&posord=f[D_TERRITORIO_0],f[D_SEXO_0],c[D_TEMPORAL_0],c[Measures]"
+    params: "alias de hierarchies[].alias; ids separados por coma; una jerarquía en p (página) admite un solo miembro, moverla a f o c con posord listando todas las jerarquías y c[Measures]"
+    returns: "Misma forma; cada fila sigue el orden de hierarchies tras posord (aquí territorio, sexo, año y valor): [{cod:['04','04001'], des:'Abla'}, {cod:['00','01'], des:'Hombres'}, {cod:['2025']}, {val:'659.0'}]"
+  - path: /jerarquia/{jerarquiaId}?consultaId={id}&alias={alias}
+    desc: Árbol de miembros de una dimensión con el id interno que piden los filtros; la URL exacta viene en hierarchies[].url
+    example: curl -s "https://www.juntadeandalucia.es/institutodeestadisticaycartografia/intranet/admin/rest/v1.0/jerarquia/2?consultaId=103956&alias=D_TEMPORAL_0"
+    returns: "{metainfo{cod, des, alias, levels[]}, data:{id, cod TOTAL, children:[{id 180251, cod '2025', des, level, isLastLevel, children[]}]}}; el calendario anual va de 1900 a 2070 aunque no haya datos"
+  - path: /consulta/metainfo/{consultaId}
+    desc: Solo metadatos, jerarquías y medidas; responde en 0,5 s frente a los 6 a 15 s de la consulta con datos
+    example: curl -s "https://www.juntadeandalucia.es/institutodeestadisticaycartografia/intranet/admin/rest/v1.0/consulta/metainfo/103956"
+    returns: "{metainfo, hierarchies, measures} con la misma forma que la consulta completa y sin data"
+  - path: /consulta/export/{consultaId}?type={0|1|2|3|4}
+    desc: Exportación de la selección por defecto (0 xls, 1 pdf, 2 px, 3 txt; 4 promete ods y da HTML); redirige con 303 a badea/stpivot/stpivot/Print
+    example: curl -sL "https://www.juntadeandalucia.es/institutodeestadisticaycartografia/intranet/admin/rest/v1.0/consulta/export/92764?type=3"
+    returns: "txt UTF-8 con ; y coma decimal (España;2025;Indicador;30,849446848;), punto y coma final y etiquetas sin códigos; llega con Content-Type application/zip aunque es texto"
+  - path: https://www.juntadeandalucia.es/institutodeestadisticaycartografia/badea/informe/anual/json?node={idNode}
+    desc: Árbol de consultas de una operación con su id; idNode sale del enlace a BADEA de la página del producto en /dega/
+    example: curl -s "https://www.juntadeandalucia.es/institutodeestadisticaycartografia/badea/informe/anual/json?node=125172"
+    returns: "{actividad, nodos:{id, children:[{id, consulta 103966, consultaTitulo, label, orden, children[]}]}}; consulta null en las carpetas; sin node devuelve HTML con 200"
+  - path: https://ws089.juntadeandalucia.es/indea-gestion/restServices/v.2.0/datosSerie?codIndicador={codigo}&codTerritorio={codigo}&numPeriodos={n}
+    desc: INDEA, series de indicadores coyunturales (IPC, EPA, CRTA, paro registrado, afiliación) de Andalucía, sus provincias y España
+    example: curl -s "https://ws089.juntadeandalucia.es/indea-gestion/restServices/v.2.0/datosSerie?codIndicador=IPC2025_COICOP2018n20042&codTerritorio=C01&numPeriodos=12"
+    params: "codTerritorio C01 Andalucía, 04 a 41 provincias INE, 108 España; iniPeriodo y finPeriodo como 2005-M01; formato=CSV da un zip y formato=EXCEL un xlsx"
+    returns: "{indicadores:[{metaInformacion{codigo, tipoDato, unidad, fuente, territorio{codigo}}, datos:[{dat_anio_periodo 2026-M08, dat_anio_periodo_fecha dd/mm/aaaa, dat_dato float, dat_dato_fmt '104,18', dat_estado D|P|E}]}], mensajes}"
+  - path: https://ws089.juntadeandalucia.es/indea-gestion/restServices/indicadoresList
+    desc: Lista plana de los 12607 nodos de INDEA con codigo, descripcion, tipo y periodicidad; endpoint de la aplicación web, sin documentar
+    example: curl -s -o indea.json "https://ws089.juntadeandalucia.es/indea-gestion/restServices/indicadoresList"
+    returns: "Lista JSON de 36 MB en unos 200 s de [{id, parentId, codigo, descripcion, tipo, periodicidad{per_cod}, tasa{codigo}}]; tipo 2 es la serie en valor y tipo 4 sus tasas; codigo es el codIndicador"
+rate_limit: No documentado; sin 429 en unas 70 peticiones secuenciales el 2026-10-01; cada consulta con datos tarda de 6 a 15 s
+quirks: [errors-html-or-xml, soft-errors-200]
+ids: [ine-municipio, ine-provincia]
+gotchas:
+  - Los errores de BADEA llegan con HTTP 200 y un bloque messages (NO_EXIST, NO_DATA, SYSTEM_DATA con la excepción Java); comprobar messages antes de leer data.
+  - Sin filtros la consulta da su selección por defecto (93936 solo devuelve 2025); otros periodos se piden con {alias}={id interno}, que no es el año (2024 es 180232 en la jerarquía 2).
+  - Una jerarquía en posición p admite un solo miembro; con dos ids separados por coma responde NO_DATA, y con corchetes o punto y coma SYSTEM_DATA. Pasarla a f o c con posord.
+  - cod es la ruta jerárquica y su longitud cambia por consulta (['04','04001'] en 103956, ['C01','04','04001'] en 103964); el código INE es el último elemento.
+  - Fuera de Andalucía los territorios no son del INE; CCAA C01 a C18 en otro orden (C07 Castilla-La Mancha, C08 Castilla y León), España P1_108 en BADEA y 108 en INDEA. Provincias y municipios sí son INE.
+  - val es texto con punto decimal ('30.849446848') y format la cifra redondeada a la española ('30,85'); usar val. Las celdas sin dato llegan con val vacío, no null ni 0.
+  - export responde 303 a una ruta con el directorio duplicado que funciona; omite las jerarquías en página, type=4 (.ods) es una tabla HTML y el px declara CHARSET ANSI aunque está en UTF-8.
+  - El Swagger embebido en apidoc declara basePath /badea/ (404 HTML); la base real es /intranet/admin/rest/v1.0, y v.0.1, que aparece en algunos enlaces, también responde.
+  - En INDEA cada codIndicador fija tipo de dato y base; IPC2025_COICOP2018n20042 es el índice y n20012 la tasa interanual con el mismo nombre, e IPC2021n15192 responde pero acaba en 2025-M12.
+  - En INDEA sin codTerritorio responde 400 con HTML de Tomcat, y vacío (codTerritorio=) da los 10 territorios; un codIndicador inexistente devuelve 200 con mensajes.incidencias de tipo ERROR.
+tips:
+  - "Flujo para dar con una consulta: página del producto en /dega/, idNode de su enlace a BADEA, informe/anual/json para los ids, consulta/metainfo para los alias y jerarquia para los ids de miembro."
+  - Padrón municipal de Andalucía 1996-2025 en una llamada con consulta/103964 (3,5 MB, 15 s; 786 códigos, 785 con dato en 2025); el último elemento de cod cruza con ine-codigos-territoriales.
+  - Los conjuntos del IECA en junta-andalucia-datos-abiertos (fq=organization:ieca) llevan como recurso JSON INTEROPERABLE la URL de esta API con el id de consulta.
+  - Paquete R oficial IECA (leebadea, dimensiones) en https://www.juntadeandalucia.es/institutodeestadisticaycartografia/reutilizacion/entorno-programacion-r/IECA_0.4.1.tar.gz; la versión va en el nombre.
+  - INDEA reexpone series del INE, SEPE, BdE, AEAT o el propio IECA (metaInformacion.fuente); para España o el resto de CCAA ir a ine-api-tempus, y aquí por el desglose provincial andaluz.
+  - Descargar indicadoresList una vez y cachearlo; buscar por descripcion y ruta el nodo tipo 2 para el valor y sus hijos tipo 4 para tasas (TI interanual, T-1 sobre el periodo anterior).
+related: [junta-andalucia-datos-abiertos, ine-api-tempus, ine-codigos-territoriales]
+status: active
+verified: "2026-10-01"

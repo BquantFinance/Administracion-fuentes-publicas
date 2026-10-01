@@ -1,0 +1,75 @@
+id: idescat-api
+name: Idescat – API de tablas (JSON-stat), El municipio en cifras y búsqueda de población
+org: Institut d'Estadística de Catalunya (Idescat)
+level: ccaa
+sector: estadistica
+tags: [idescat, cataluna, json-stat, padron, municipios, comarcas, secciones-censales, pib, renta, afiliacion, series-temporales]
+summary: >-
+  APIs REST sin clave del Idescat. Tablas de 33 estadísticas (padrón, censo, PIB trimestral, renta, afiliación,
+  proyecciones) en JSON-stat por Cataluña, provincia, comarca, municipio, distrito y sección censal; ficha
+  municipal EMEX con unos 230 indicadores y población por entidad.
+access: [api-rest]
+auth: none
+formats: [json, xml]
+update: daily
+coverage: "Según estadística; padrón por municipio 1998-2025 (pmh 446/477) y por sección censal 2000-2022"
+license: Reutilización con cita y enlace al Idescat; las condiciones de uso prohíben alterar datos, metadatos o enlaces y enmarcar sus páginas
+base_url: https://api.idescat.cat
+docs_url: https://www.idescat.cat/dev/api/?lang=es
+endpoints:
+  - path: /taules/v2/{estadistica}/{nodo}/{tabla}
+    desc: Navegación jerárquica; /taules/v2 lista las 33 estadísticas y cada nivel lista nodos, tablas y niveles territoriales
+    example: curl -s "https://api.idescat.cat/taules/v2/pmh/446/477?lang=es"
+    returns: "Colección JSON-stat {version 2.0, class collection, label, link:{item:[{class, href, label}]}}; el código de cada nivel es el último segmento de href (pmh, 446, 477 y geo cat, prov, at, com, mun, ac, dis, sec)"
+  - path: /taules/v2/{estadistica}/{nodo}/{tabla}/{geo}
+    desc: Metadatos de la tabla en un nivel territorial; dimensiones, códigos de categoría y fecha de actualización, sin valores
+    example: curl -s "https://api.idescat.cat/taules/v2/pmh/446/477/mun?lang=es"
+    returns: "Dataset JSON-stat con value vacío; id [YEAR, MUN, SEX, CONCEPT], size [28, 948, 3, 1], role {geo, time, metric}, updated AAAA-MM-DD, note, dimension.{DIM}.category.index y label; link.describes da la URL de datos"
+  - path: /taules/v2/{estadistica}/{nodo}/{tabla}/{geo}/data
+    desc: Datos filtrados por categorías de cada dimensión y por últimos periodos; máximo 20.000 celdas por llamada
+    example: curl -s "https://api.idescat.cat/taules/v2/pmh/446/477/mun/data?lang=es&MUN=080193&SEX=TOTAL&_LAST_=3"
+    params: "lang (ca por defecto, es, en); {DIM}=cod1,cod2 con los códigos de los metadatos; _LAST_=n periodos; POST con el mismo cuerpo si la URL pasa de 2.000 caracteres"
+    returns: "Dataset JSON-stat; value es una lista plana en el orden de id y size ([1660122, 1702547, 1731649] para 2023-2025), status {índice: p} con extension.status.label Dato provisional; periodos como 2025 o 2026Q1"
+  - path: /emex/v1/dades.json?id={municipio_6}
+    desc: El municipio en cifras; unos 230 indicadores del municipio, su comarca y Cataluña (población, renta, paro, afiliación, vivienda, elecciones)
+    example: curl -s "https://api.idescat.cat/emex/v1/dades.json?id=080193&lang=es"
+    returns: "{fitxes:{gg:{g:[{c, tt:{t:[{id, c, r, ff:{f:[{id f171, c, calt, r, u, v}]}}]}}]}}}; t y f son objeto si hay uno solo; v es texto con municipio, comarca y Cataluña separados por comas ('1713247,2398280,8124126'), _ sin dato; r como 2025, 2024 (p) u 08/2026"
+  - path: /emex/v1/dades.json?i={f1,f2}&tipus={mun|com|cat}
+    desc: Unos pocos indicadores (5 según la documentación) para todos los municipios o comarcas en una sola llamada
+    example: curl -s "https://api.idescat.cat/emex/v1/dades.json?i=f171,f36,f42&tipus=mun&lang=es"
+    returns: "{fitxes:{cols:{col:[{scheme mun, id 250019, content}]}, indicadors:{i:[{c, r, s, t, u, v}]}}}; v trae los 947 valores separados por comas en el orden de cols; i es objeto con un indicador y lista con varios"
+  - path: /emex/v1/nodes.json
+    desc: Relación de Cataluña, comarcas y municipios con sus códigos oficiales; tipus=mun o tipus=com para una sola lista
+    example: curl -s "https://api.idescat.cat/emex/v1/nodes.json?tipus=mun&lang=es"
+    returns: "{fitxes:{p, v:[{scheme mun, id 080018, content Abrera}]}}; sin tipus devuelve el árbol con los municipios anidados por comarca"
+  - path: /pob/v1/cerca.json?q={nombre}
+    desc: Población a 1 de enero de municipios, entidades singulares y núcleos buscados por nombre
+    example: curl -s "https://api.idescat.cat/pob/v1/cerca.json?q=Tiana&lang=es"
+    returns: "Feed Atom en JSON {feed:{opensearch:totalResults, entry:[{title, category[{term MUN, ES o NP}], cross:DataSet:{cross:Section:{AREA, TIME_PERIOD 2025-01-01, cross:Obs:[{SEX M, F o T, OBS_VALUE texto}]}}}]}}; AREA de 6 dígitos (municipio) o 13 (entidad o núcleo)"
+  - path: /indicadors/v1/dades.json
+    desc: Último valor de los indicadores básicos de coyuntura de Cataluña (PIB, paro, inversión, servicios)
+    example: curl -s "https://api.idescat.cat/indicadors/v1/dades.json?lang=es"
+    returns: "{indicadors:{i:[{id m10260, c, d, v '73.7', u, r:{title T2/2026, content 2026-2}, ts últimos valores separados por comas, dc:date}]}}"
+rate_limit: No documentado; las condiciones de uso se reservan limitar peticiones repetidas desde un mismo origen. Sin 429 en la verificación.
+quirks: [json-object-or-list, soft-errors-200]
+ids: [ine-municipio, ine-provincia, seccion-censal]
+gotchas:
+  - Los municipios van con 6 dígitos (INE de 5 más dígito de control, 080193 Barcelona); en taules MUN=08019 se ignora en silencio y devuelve los 948 municipios, mientras EMEX sí acepta 08019.
+  - Un código de filtro inexistente (SEX=X) no da error; devuelve todas las categorías de esa dimensión con HTTP 200. Comprobar size antes de leer value.
+  - Las secciones censales llevan 11 dígitos (municipio de 6 + distrito 2 + sección 3, 08019301001); quitar el sexto dígito para el código INE de 10. El padrón por sección acaba en 2022.
+  - Pasar de 20.000 celdas devuelve 416 con JSON class error e id 05 (el padrón municipal completo son 79.632); trocear por YEAR o con _LAST_.
+  - Los enteros terminados en cero llegan en notación científica (2.78E+3) y el parser los convierte en float; redondear y pasar a int.
+  - lang=es traduce etiquetas, pero note y los mensajes de error siguen en catalán (Identificador de taula incorrecte. (es)).
+  - EMEX da la población del Censo anual del INE (Barcelona 2025, 1.713.247) y taules pmh la del padrón (1.731.649); no mezclarlas en un mismo cálculo.
+  - Un nodo agrupa tablas de distintos periodos (pmh/1180 tiene 8078 desde 2014 y 1063 para 2000-2013); listar el nodo antes de fijar el id de tabla.
+  - Las comarcas cambian (Moianès en 2015, Lluçanès en 2023); dimension.COM.extension.break lista las versiones y una serie comarcal mezcla límites.
+  - En EMEX v es una cadena con comas y punto decimal (63038.8) y _ como dato ausente; r puede llevar (p) de provisional y el mismo concepto aparece con varios ids f.
+tips:
+  - Flujo típico. Navegar /taules/v2/{estadistica} hasta el geo, leer los códigos en los metadatos y pedir /data con filtros y _LAST_.
+  - En Python, pyjstat.Dataset.read(r.text).write('dataframe', naming='id') da una fila por celda y conserva los códigos (080193); sin naming='id' deja solo etiquetas.
+  - "Códigos útiles; pmh/446/477 población por sexo desde 1998, pmh/1180/8078 por edad año a año, pibt/21130/24940 PIB trimestral en volumen; en EMEX f171 población, f7 RFDB por habitante, f242 paro registrado."
+  - Cruce con ine-api-tempus e ine-codigos-territoriales por los 5 primeros dígitos del municipio; Cataluña es la comunidad 09 (col con scheme ca en EMEX).
+  - Para Barcelona por barrio o sección después de 2022 usar ayuntamiento-barcelona-datos-abiertos; Idescat cubre el resto de municipios con la misma metodología.
+related: [ine-api-tempus, ine-codigos-territoriales, ine-cartografia-censal, gencat-dades-obertes, ayuntamiento-barcelona-datos-abiertos]
+status: active
+verified: "2026-10-01"
