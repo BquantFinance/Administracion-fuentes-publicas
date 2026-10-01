@@ -6,6 +6,7 @@ No está en CI: es una comprobación manual tras tocar mcp_catalogo.py o el cat�
 """
 import asyncio
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -14,7 +15,8 @@ from mcp.client.stdio import stdio_client
 
 ROOT = Path(__file__).resolve().parent.parent
 SERVER = ROOT / "scripts" / "mcp_catalogo.py"
-TOOLS = {"buscar_fuentes", "ficha", "buscar_recetas", "receta", "necesidad", "identificador", "ruta_muerta", "sectores", "codigos", "municipio"}
+TOOLS = {"buscar_fuentes", "ficha", "buscar_recetas", "receta", "necesidad", "identificador", "ruta_muerta", "sectores", "codigos", "municipio", "descargar", "tabla_pcaxis", "boe_sumario",
+         "subvenciones_nif", "ckan_buscar", "ckan_filas", "socrata_filas"}
 
 
 def payload(result):
@@ -31,7 +33,7 @@ def payload(result):
 async def main() -> None:
     catalog = json.loads((ROOT / "catalog.json").read_text(encoding="utf-8"))
     dead = catalog["indices"]["rutas_muertas"][0]
-    params = StdioServerParameters(command=sys.executable, args=[str(SERVER)], cwd=str(ROOT))
+    params = StdioServerParameters(command=sys.executable, args=[str(SERVER)], cwd=str(ROOT), env=dict(os.environ))
     async with stdio_client(params) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
@@ -90,6 +92,13 @@ async def main() -> None:
             alcala = payload(await session.call_tool("municipio", {"consulta": "Alcala de Henares"}))
             assert alcala[0]["ine"] == "28005" and alcala[0]["sigpac"] == "28:5", alcala
             print(f"municipio('28:900'): {mun[0]['nombre']} {mun[0]['ine']}; municipio('Alcala de Henares'): {alcala[0]['ine']}")
+            d = payload(await session.call_tool("descargar", {"url": "https://www.boe.es/datosabiertos/api/boe/sumario/20240102", "max_caracteres": 200}))
+            assert d["estado"] == 200 and d["formato"] == "json" and d["fichas"][0]["id"].startswith("boe"), d
+            px = payload(await session.call_tool("tabla_pcaxis", {"tabla": "24077", "max_filas": 2}))
+            assert px["columnas"][-1] == "Total" and px["filas"], px
+            bloq = payload(await session.call_tool("descargar", {"url": "http://localhost:8080/"}))
+            assert "error" in bloq, bloq
+            print(f"descargar: {d['formato']} con fichas {[f['id'] for f in d['fichas']][:2]}; tabla_pcaxis 24077: {px['filas'][0]}")
             secs = payload(await session.call_tool("sectores", {}))
             assert sum(s["sources"] for s in secs) == catalog["count"]
             print(f"sectores(): {len(secs)} sectores, {sum(s['sources'] for s in secs)} fichas")

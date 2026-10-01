@@ -12,6 +12,7 @@ Ejemplo: python evals/mcp_cli.py buscar_fuentes consulta="paro municipio" limite
 """
 import asyncio
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -31,7 +32,7 @@ def argumentos(pares: list[str]) -> dict:
 
 
 async def main(argv: list[str]) -> None:
-    params = StdioServerParameters(command=sys.executable, args=[str(SERVER)], cwd=str(ROOT))
+    params = StdioServerParameters(command=sys.executable, args=[str(SERVER)], cwd=str(ROOT), env=dict(os.environ))
     async with stdio_client(params) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()

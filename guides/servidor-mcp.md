@@ -68,6 +68,22 @@ Herramientas (respuestas JSON compactas; búsqueda por palabras sin acentos ni m
   acepta código INE, SIGPAC (28:900), DIR3, NIF o nombre.
 - `sectores()`: sectores con título y número de fichas.
 
+Herramientas que traen datos (con red; usan `scripts/clientes/consulta.py`). Detrás de un proxy que intercepta TLS,
+añadir a la configuración del cliente `"env": {"EXTRA_CA_BUNDLE": "/ruta/ca-del-proxy.pem"}`; el resto lo resuelve el servidor.
+
+
+- `descargar(url, max_caracteres=20000, desde=0)`: cualquier URL pública con las CA de FNMT, User-Agent de navegador,
+  reintentos, gzip sin anunciar y la codificación real; resume CSV (columnas, filas, primeras), JSON (claves), xlsx
+  (hojas y primeras filas) y ZIP (ficheros), detecta páginas de bloqueo y, si el host es de una ficha, añade su id y
+  sus alerts. Solo hosts públicos (rechaza localhost, redes privadas y metadatos de nube) y hasta 25 MB.
+- `tabla_pcaxis(tabla, filtro=None, max_filas=200)`: tablas del INE (id o Tabla.htm), Interior, Educación y Cultura en
+  filas con números convertidos; filtro por texto en cualquier campo (08019, un nombre, un periodo).
+- `boe_sumario(fecha, diario="boe", seccion=None, texto=None)`: disposiciones del día del BOE o del BORME.
+- `subvenciones_nif(nif)`: concesiones, ayudas de Estado, minimis y grandes beneficiarios de un NIF en la BDNS.
+- `ckan_buscar(portal, texto)` y `ckan_filas(portal, recurso, filtros=None, limite=100)`: portales CKAN (comunidad-madrid,
+  madrid, barcelona, gva, andalucia, cnmc, renfe o la URL de su API), paginando sin topes y con el total del datastore.
+- `socrata_filas(conjunto, where=None, select=None, order=None, limite=100)`: datos de la Generalitat de Catalunya.
+
 Recursos: `catalogo://llms.txt` (el fichero entero) y `catalogo://reglas` (solo las reglas rápidas antes de programar).
 
 Prueba real sin CI: `python scripts/test_mcp_catalogo.py` arranca el servidor por stdio y llama a todas las herramientas.

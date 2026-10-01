@@ -14,6 +14,7 @@ import os
 import unicodedata
 import urllib.request
 from pathlib import Path
+from urllib.parse import urlparse
 
 try:
     from .common import REPO_RAW, ROOT  # instalado como paquete (pip, uvx)
@@ -58,7 +59,8 @@ INSTRUCTIONS = (
     "para localizar la fuente, ficha para endpoints, quirks y gotchas verificados (alerts primero: trampas silenciosas "
     "que cambian la cifra sin dar error); buscar_recetas y receta para "
     "procedimientos que cruzan fuentes; identificador para cruzar datos; municipio para los códigos INE, SIGPAC o "
-    "Catastro, DIR3, NUTS3 y coordenadas de un municipio; ruta_muerta antes de dar por perdida "
+    "Catastro, DIR3, NUTS3 y coordenadas de un municipio; descargar, tabla_pcaxis, boe_sumario, subvenciones_nif, "
+    "ckan_buscar, ckan_filas y socrata_filas traen los datos ya resueltos (certificados, codificación, paginación); ruta_muerta antes de dar por perdida "
     "una URL. Lee el recurso catalogo://reglas antes de programar contra una fuente."
 )
 
@@ -153,6 +155,23 @@ SOURCE_FIELDS = {
     )
     for s in SOURCES
 }
+
+def _hosts(s: dict) -> set[str]:
+    urls = [s.get("base_url") or ""] + [e["path"] for e in s.get("endpoints") or [] if e["path"].startswith("http")]
+    hosts = set()
+    for u in urls:
+        try:
+            hosts.add(urlparse(u).hostname)
+        except ValueError:  # puerto o host con marcador {..}
+            pass
+    return {h for h in hosts if h and "{" not in h}
+
+
+FICHAS_POR_HOST: dict[str, list[str]] = {}
+for _s in SOURCES:
+    for _h in _hosts(_s):
+        FICHAS_POR_HOST.setdefault(_h, []).append(_s["id"])
+
 RECETA_FIELDS = {
     r["id"]: (
         norm([r["id"], r["intent"], [st["source"] for st in r["steps"]]]),
@@ -287,6 +306,92 @@ def municipio(consulta: str, limite: int = 5) -> list[dict]:
         return sorted(contienen, key=lambda f: len(f["nombre"]))[:limite]
     nombres = {norm(f["nombre"]): f for f in filas}
     return [nombres[n] for n in difflib.get_close_matches(nq, list(nombres), n=limite, cutoff=0.75)]
+
+
+def _consulta():
+    """Capa de datos (scripts/clientes/consulta.py), importada al primer uso para no frenar el arranque."""
+    try:
+        from .clientes import consulta  # instalado como paquete
+    except ImportError:
+        from clientes import consulta  # desde el repo
+    return consulta
+
+
+def _datos(fn, *args, **kwargs) -> dict:
+    """Ejecuta una consulta de datos y convierte los fallos en un error legible para el agente."""
+    try:
+        return fn(*args, **kwargs)
+    except Exception as exc:  # noqa: BLE001
+        tipo, texto = type(exc).__name__, str(exc)
+        if tipo == "Bloqueado":
+            pista = "el servidor bloquea esta red (WAF o IP de centro de datos); probar desde otra red"
+        elif "CERTIFICATE_VERIFY_FAILED" in texto:
+            pista = ("certificado no verificado: tras un proxy que intercepta TLS, pasar al servidor MCP la variable "
+                     "EXTRA_CA_BUNDLE o REQUESTS_CA_BUNDLE con la CA del proxy (en env de la configuración del cliente)")
+        elif tipo in ("ConnectionError", "ReadTimeout", "ConnectTimeout"):
+            pista = "sin respuesta del servidor tras varios reintentos; puede rechazar IP de centros de datos"
+        else:
+            pista = "revisar parámetros con ficha() de la fuente"
+        return {"error": f"{tipo}: {str(exc)[:400]}", "pista": pista}
+
+
+@mcp.tool()
+def descargar(url: str, max_caracteres: int = 20000, desde: int = 0) -> dict:
+    """Descarga una URL pública con las reglas del catálogo (CA de FNMT, User-Agent de navegador, reintentos, gzip sin
+    anunciar, UTF-8 o Latin-1 reales) y la resume: columnas y primeras filas de un CSV, claves de un JSON, hojas de un
+    xlsx, ficheros de un ZIP. Detecta páginas de bloqueo de WAF. Si el host es de una ficha, añade su id y sus alerts.
+    Úsala cuando el fetch propio falle con un .gob.es o para ver qué devuelve una URL antes de programar."""
+    r = _datos(_consulta().descargar, url, max_caracteres, desde)
+    host = urlparse(r.get("url") or url).hostname or ""
+    ids = FICHAS_POR_HOST.get(host, [])
+    if ids:
+        r["fichas"] = [{"id": i, **({"alerts": BY_ID[i]["alerts"]} if BY_ID[i].get("alerts") else {})} for i in ids]
+    return r
+
+
+@mcp.tool()
+def tabla_pcaxis(tabla: str, filtro: str | None = None, max_filas: int = 200) -> dict:
+    """Tabla PC-Axis en filas con números ya convertidos (None es dato no disponible o secreto, no cero): id de tabla
+    del INE (24077), URL Tabla.htm del INE, Interior, Educación o Cultura, o URL del fichero. filtro deja las filas con
+    ese texto en algún campo (código INE como 08019, nombre, periodo)."""
+    return _datos(_consulta().tabla_pcaxis, tabla, filtro, max_filas)
+
+
+@mcp.tool()
+def boe_sumario(fecha: str, diario: str = "boe", seccion: str | None = None, texto: str | None = None,
+                max_items: int = 200) -> dict:
+    """Disposiciones de un día del BOE (diario=boe) o del BORME (diario=borme); fecha AAAA-MM-DD. Filtra por código de
+    sección (1, 2A, 2B, 3, 4, 5A) y por texto en el título. Domingos y festivos no hay boletín."""
+    return _datos(_consulta().boe_sumario, fecha, diario, seccion, texto, max_items)
+
+
+@mcp.tool()
+def subvenciones_nif(nif: str, max_filas: int = 20) -> dict:
+    """Subvenciones, ayudas de Estado, minimis y grandes beneficiarios de un NIF en la BDNS, con totales y las más
+    recientes."""
+    return _datos(_consulta().subvenciones_nif, nif, max_filas)
+
+
+@mcp.tool()
+def ckan_buscar(portal: str, texto: str, limite: int = 10) -> dict:
+    """Conjuntos de un portal CKAN con sus recursos (id, formato, si tiene datastore, url de descarga). portal:
+    comunidad-madrid, madrid, barcelona, gva, andalucia, cnmc, renfe o la URL de su /api/3/action."""
+    return _datos(_consulta().ckan_buscar, portal, texto, limite)
+
+
+@mcp.tool()
+def ckan_filas(portal: str, recurso: str, filtros: dict | None = None, limite: int = 100) -> dict:
+    """Filas del datastore de un recurso CKAN con filtros por igualdad ({"Territorio": "Madrid"}), paginando sin el
+    tope silencioso del portal. Devuelve total_datastore: compáralo con el fichero antes de dar un total."""
+    return _datos(_consulta().ckan_filas, portal, recurso, filtros, limite)
+
+
+@mcp.tool()
+def socrata_filas(conjunto: str, where: str | None = None, select: str | None = None, order: str | None = None,
+                  limite: int = 100) -> dict:
+    """Filas de un conjunto de la Generalitat de Catalunya (analisi.transparenciacatalunya.cat, id como gn9e-3qhr) con
+    SoQL; números ya convertidos. Los nombres de campo van sin caracteres no ASCII (estaci por Estació)."""
+    return _datos(_consulta().socrata_filas, conjunto, where, select, order, limite)
 
 
 @mcp.tool()

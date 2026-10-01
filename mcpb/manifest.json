@@ -72,6 +72,34 @@
       "description": "Códigos de un municipio en cada sistema: INE, SIGPAC y Catastro, DIR3 y NIF del ayuntamiento, CCAA, NUTS3 y coordenadas"
     },
     {
+      "name": "descargar",
+      "description": "Descarga cualquier URL pública con certificados FNMT, codificación y bloqueos resueltos, y la resume"
+    },
+    {
+      "name": "tabla_pcaxis",
+      "description": "Tablas PC-Axis del INE, Interior, Educación y Cultura en filas con números convertidos"
+    },
+    {
+      "name": "boe_sumario",
+      "description": "Disposiciones de un día del BOE o del BORME, filtrables por sección y texto"
+    },
+    {
+      "name": "subvenciones_nif",
+      "description": "Subvenciones, ayudas de Estado y minimis de un NIF en la BDNS"
+    },
+    {
+      "name": "ckan_buscar",
+      "description": "Conjuntos y recursos de los portales CKAN autonómicos, municipales y de la CNMC y Renfe"
+    },
+    {
+      "name": "ckan_filas",
+      "description": "Filas de un datastore CKAN con filtros, sin topes silenciosos"
+    },
+    {
+      "name": "socrata_filas",
+      "description": "Filas de un conjunto de datos de la Generalitat de Catalunya con SoQL"
+    },
+    {
       "name": "sectores",
       "description": "Sectores del catálogo con número de fichas"
     }
