@@ -6,6 +6,7 @@ COPY datos/municipios.csv datos/
 COPY guides/servidor-mcp.md guides/
 COPY scripts/ scripts/
 RUN pip install --no-cache-dir . && rm -rf build
-ENV CATALOGO_DIR=/app
+# nobody no tiene HOME (/nonexistent): la caché de certificados FNMT, SEPE y municipios va a /tmp
+ENV CATALOGO_DIR=/app FUENTES_PUBLICAS_CACHE=/tmp/fuentes-publicas XDG_CACHE_HOME=/tmp/.cache
 USER nobody
 CMD ["mcp-catalogo"]

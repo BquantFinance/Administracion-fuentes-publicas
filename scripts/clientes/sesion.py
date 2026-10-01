@@ -23,6 +23,8 @@ import os
 import re
 import ssl
 import sys
+import tempfile
+import threading
 import time
 from pathlib import Path
 from urllib.parse import urlparse
@@ -33,7 +35,30 @@ from urllib3.util.retry import Retry
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 ACCEPT = "application/json, text/html;q=0.9, */*;q=0.8"
-CACHE = Path(os.environ.get("FUENTES_PUBLICAS_CACHE") or Path.home() / ".cache" / "fuentes-publicas")
+
+
+def _directorio_cache() -> Path:
+    """FUENTES_PUBLICAS_CACHE o ~/.cache/fuentes-publicas; si no se puede escribir ahí (contenedor con USER nobody y
+    HOME=/nonexistent), una carpeta en el temporal del sistema, para que la caché no tumbe cada petición."""
+    candidatas = []
+    if os.environ.get("FUENTES_PUBLICAS_CACHE"):
+        candidatas.append(Path(os.environ["FUENTES_PUBLICAS_CACHE"]))
+    try:
+        candidatas.append(Path.home() / ".cache" / "fuentes-publicas")
+    except RuntimeError:  # sin HOME ni entrada en passwd
+        pass
+    for d in candidatas:
+        try:
+            d.mkdir(parents=True, exist_ok=True)
+            if os.access(d, os.W_OK):
+                return d
+        except OSError:
+            pass
+    usuario = os.getuid() if hasattr(os, "getuid") else "x"
+    return Path(tempfile.gettempdir()) / f"fuentes-publicas-{usuario}"
+
+
+CACHE = _directorio_cache()
 
 FNMT = "https://www.sede.fnmt.gob.es/documents/10445900/10526749"
 CERTS_FNMT = [f"{FNMT}/{n}.cer" for n in (
@@ -102,24 +127,57 @@ def generar_bundle(destino: str | Path, timeout: float = 40) -> tuple[Path, int,
             print(f"fuentes_publicas: no descargado {url}: {exc}", file=sys.stderr)
     destino = Path(destino)
     destino.parent.mkdir(parents=True, exist_ok=True)
-    destino.write_text("".join(partes), encoding="ascii")
+    tmp = destino.with_name(f"{destino.name}.{os.getpid()}.{threading.get_ident()}.tmp")
+    tmp.write_text("".join(partes), encoding="ascii")
+    os.replace(tmp, destino)  # atómico: otro hilo o proceso nunca lee un bundle a medio escribir
     return destino, ok, len(urls)
+
+
+PARCIAL_TTL = 3600  # un bundle al que le faltan certificados de FNMT se vuelve a generar pasada una hora
+_BUNDLE_LOCK = threading.Lock()
+_SIN_BUNDLE: dict[str, float] = {}  # clave -> instante hasta el que no se reintenta tras no bajar ningún certificado
+_VALIDOS: set[Path] = set()  # bundles completos ya comprobados en este proceso
 
 
 def bundle(generar: bool = True) -> str | bool:
     """Ruta del bundle con FNMT: CA_BUNDLE, ca-age.pem en el directorio actual o en la raíz del repo, o el de la caché,
-    que se genera la primera vez (uno por combinación de bundles del entorno). Sin red ni caché, True (certifi)."""
+    que se genera la primera vez (uno por combinación de bundles del entorno). Solo se guarda para siempre si se bajaron
+    todos los certificados; uno incompleto se usa y se rehace al cabo de una hora, y sin ninguno no se escribe nada:
+    antes un primer arranque sin acceso a la sede de FNMT dejaba en caché un bundle solo con certifi y los hosts con
+    cadena incompleta fallaban para siempre. Sin red ni caché, True (certifi)."""
     for cand in (os.environ.get("CA_BUNDLE"), "ca-age.pem", Path(__file__).resolve().parents[2] / "ca-age.pem"):
         if cand and Path(cand).is_file():
             return str(cand)
     clave = hashlib.sha1("|".join(_bundles_entorno()).encode()).hexdigest()[:8]
-    cache = CACHE / f"ca-age-{clave}.pem"
-    if cache.is_file():
-        return str(cache)
-    if not generar:
+    completo, parcial = CACHE / f"ca-age-{clave}.pem", CACHE / f"ca-age-{clave}.parcial.pem"
+    with _BUNDLE_LOCK:  # los hilos de perfil_municipio y en_lote piden sesión a la vez: un solo hilo lo genera
+        if completo in _VALIDOS:
+            return str(completo)
+        if completo.is_file():
+            # versiones anteriores lo guardaban aunque faltaran certificados: ese se descarta y se rehace
+            if completo.read_text(encoding="ascii", errors="ignore").count("\n# FNMT ") >= len(CERTS_FNMT + CERTS_EXTRA):
+                _VALIDOS.add(completo)
+                return str(completo)
+            completo.unlink(missing_ok=True)
+        if parcial.is_file() and time.time() - parcial.stat().st_mtime < PARCIAL_TTL:
+            return str(parcial)
+        if not generar or time.monotonic() < _SIN_BUNDLE.get(clave, 0):
+            return True
+        tmp = CACHE / f"ca-age-{clave}.{os.getpid()}.nuevo"
+        _, ok, total = generar_bundle(tmp)
+        if ok == total:
+            os.replace(tmp, completo)
+            _VALIDOS.add(completo)
+            return str(completo)
+        if ok:
+            os.replace(tmp, parcial)
+            print(f"fuentes_publicas: bundle con {ok} de {total} certificados FNMT; se rehace en una hora", file=sys.stderr)
+            return str(parcial)
+        tmp.unlink(missing_ok=True)
+        _SIN_BUNDLE[clave] = time.monotonic() + 600
+        print("fuentes_publicas: no se bajó ningún certificado de FNMT; se usa certifi y se reintenta en 10 minutos",
+              file=sys.stderr)
         return True
-    _, ok, _ = generar_bundle(cache)
-    return str(cache) if ok else True
 
 
 def bloqueo(r: requests.Response) -> tuple[str, bool] | None:

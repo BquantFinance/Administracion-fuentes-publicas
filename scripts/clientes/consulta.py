@@ -22,7 +22,7 @@ import threading
 import time
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 try:
     from . import bdns, boe, ckan, pcaxis, socrata
@@ -59,8 +59,28 @@ def _publica(url: str) -> None:
         return  # sin DNS local (proxy): decide el proxy
     for d in direcciones:
         ip = ipaddress.ip_address(d.split("%")[0])
-        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
+        ip = getattr(ip, "ipv4_mapped", None) or ip  # ::ffff:127.0.0.1 es 127.0.0.1 (Python < 3.13 no lo ve)
+        if (ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast
+                or ip.is_unspecified or not ip.is_global):  # is_global deja fuera también 100.64.0.0/10 (CGNAT)
             raise ValueError(f"{host} resuelve a una dirección no pública ({ip})")
+
+
+MAX_REDIRECCIONES = 10
+
+
+def _get_publica(url: str):
+    """GET en streaming que sigue las redirecciones a mano y pasa cada salto por _publica: requests las sigue solo y
+    una URL pública que redirige a 127.0.0.1 o a 169.254.169.254 se saltaba la comprobación."""
+    s = _sesion()
+    for _ in range(MAX_REDIRECCIONES + 1):
+        _publica(url)
+        r = s.get(url, stream=True, allow_redirects=False)
+        destino = s.get_redirect_target(r)
+        if not destino:
+            return r
+        r.close()
+        url = urljoin(r.url, destino)
+    raise ValueError(f"más de {MAX_REDIRECCIONES} redirecciones")
 
 
 def _bloqueo(cuerpo: bytes, tipo: str, estado: int) -> str | None:
@@ -101,8 +121,7 @@ def resumen_json(o) -> dict:
 def descargar(url: str, max_caracteres: int = 20000, desde: int = 0) -> dict:
     """GET con las reglas del catálogo. Devuelve estado, tipo, bytes, resumen según formato y el texto desde el
     carácter `desde` hasta `max_caracteres` (truncado dice si queda más). Los binarios no traen texto."""
-    _publica(url)
-    r = _sesion().get(url, stream=True)
+    r = _get_publica(url)
     partes, total = [], 0
     for trozo in r.iter_content(1 << 16):
         partes.append(trozo)
@@ -262,7 +281,10 @@ def municipios() -> list[dict]:
     cpro, ccaa, provincia, nuts3, ine_tempus_id, sigpac, dir3, nif, lat, lon y nucleo (caché de 30 días)."""
     if not _MUNICIPIOS:
         from pathlib import Path
-        local = Path(__file__).resolve().parents[2] / "datos" / "municipios.csv"
+        locales = [Path(__file__).resolve().parents[2] / "datos" / "municipios.csv"]
+        if os.environ.get("CATALOGO_DIR"):  # como catalog.json en mcp_catalogo.locate (la imagen Docker lo copia ahí)
+            locales.insert(0, Path(os.environ["CATALOGO_DIR"]) / "datos" / "municipios.csv")
+        local = next((p for p in locales if p.is_file()), locales[-1])
         cache = CACHE / "municipios.csv"
         if local.is_file():
             t = local.read_text(encoding="utf-8")
