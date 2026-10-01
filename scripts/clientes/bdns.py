@@ -32,7 +32,8 @@ def fecha_bdns(f) -> str:
 
 
 def _params(filtros: dict) -> dict:
-    return {k: fecha_bdns(v) if k in ("fechaDesde", "fechaHasta") else v for k, v in filtros.items() if v is not None}
+    fechas = ("fechaDesde", "fechaHasta", "fechaRegInicio", "fechaRegFin")
+    return {k: fecha_bdns(v) if k in fechas else v for k, v in filtros.items() if v is not None}
 
 
 def _get(ruta: str, params: dict):
@@ -89,6 +90,17 @@ def leer_csv(contenido: bytes) -> list[dict]:
     return list(csv.DictReader(io.StringIO(contenido.decode("cp1252"))))
 
 
+def altas(desde, hasta=None, coleccion: str = "concesiones") -> Iterator[dict]:
+    """Lo dado de alta entre desde y hasta, ambos incluidos (por defecto un solo día), sea cual sea su fecha de
+    concesión: la vía para sincronizar. fechaRegInicio y fechaRegFin no están documentados y el fin es exclusivo
+    (29/09 a 29/09 da 0; 29/09 a 30/09, lo del 29). Vale en concesiones, minimis y ayudasestado; convocatorias lo ignora.
+    Filtrar por fechaDesde y fechaHasta pierde las tardías: las concesiones del 15/01/2025 se dieron de alta hasta agosto
+    de 2026."""
+    d = desde if isinstance(desde, date) else datetime.strptime(fecha_bdns(desde), "%d/%m/%Y").date()
+    h = d if hasta is None else hasta if isinstance(hasta, date) else datetime.strptime(fecha_bdns(hasta), "%d/%m/%Y").date()
+    yield from buscar(coleccion, fechaRegInicio=d, fechaRegFin=h + timedelta(days=1))
+
+
 def ventanas(desde, hasta, dias: int = 31) -> Iterator[tuple[str, str]]:
     """Ventanas de fechas (dd/mm/aaaa) para trocear descargas que superan las 10000 filas por petición."""
     d = desde if isinstance(desde, date) else datetime.strptime(fecha_bdns(desde), "%d/%m/%Y").date()
@@ -109,3 +121,5 @@ if __name__ == "__main__":
     total = pagina("convocatorias", 0, 1, fechaDesde=ayer, fechaHasta=ayer)["totalElements"]
     filas = exportar("concesiones", fechaDesde=ayer, fechaHasta=ayer)
     print(ayer, total, "convocatorias registradas;", len(filas), "concesiones exportadas en CSV")
+    nuevas = sum(1 for _ in altas(ayer, coleccion="minimis"))
+    print(ayer, nuevas, "minimis dadas de alta (cualquier fecha de concesión)")

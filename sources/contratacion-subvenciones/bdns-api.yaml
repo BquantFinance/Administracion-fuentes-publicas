@@ -17,6 +17,11 @@ auth: none
 formats: [json, csv, xlsx]
 update: daily
 coverage: "Convocatorias desde 2014; concesiones del año en curso y los cuatro anteriores (desde 2022 en 2026), las de personas físicas solo del año en curso y el anterior"
+sync:
+  since: "Convocatorias desde 2014; concesiones solo del año en curso y los cuatro anteriores (desde 2022 en 2026), por la retirada que ordena el RD 130/2019"
+  full: "Exportar concesiones en CSV con pageSize=10000, troceando por fechaDesde y fechaHasta (mensual; diario en 2025, que tiene 19,7 millones de filas)."
+  size: "30.019.465 concesiones el 2026-10-01; 10.000 filas son 3,8 MB de CSV (0,24 MB comprimido) y 5,4 s, así que todo son unos 11 GB y 4,5 horas."
+  new: "fechaRegInicio y fechaRegFin (fin exclusivo) filtran por alta; 29/09/2026 a 30/09/2026 da las 19.279 del día 29. Por fechaConcesion se pierden las tardías (las del 15/01/2025 se dieron de alta hasta agosto de 2026)."
 license: Reutilización con las restricciones del aviso legal, repetido en cada respuesta (campo advertencia)
 base_url: https://www.infosubvenciones.es/bdnstrans/api
 docs_url: https://www.infosubvenciones.es/bdnstrans/GE/es/api
@@ -33,7 +38,7 @@ endpoints:
   - path: /concesiones/busqueda?page={n}&pageSize={n}
     desc: Concesiones con beneficiario, importe, ayuda equivalente, instrumento y convocatoria
     example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=50&numeroConvocatoria=931918"
-    params: "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa, nifCif (NIF del beneficiario), beneficiario (idPersona interno, no el NIF)"
+    params: "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa (concesión), fechaRegInicio y fechaRegFin (alta, fin exclusivo; también en minimis y ayudasestado), nifCif (NIF del beneficiario), beneficiario (idPersona interno, no el NIF)"
     returns: "content:[{id, codConcesion, fechaConcesion (AAAA-MM-DD), beneficiario (NIF y nombre en la misma cadena), idPersona, instrumento, importe y ayudaEquivalente (números), urlBR, numeroConvocatoria, convocatoria, nivel1, nivel2, nivel3, fechaAlta}]"
   - path: /{coleccion}/busqueda?page={n}&pageSize={n}
     desc: Mismo patrón para ayudasestado, minimis, grandesbeneficiarios, sanciones, planesestrategicos y partidospoliticos
@@ -58,9 +63,8 @@ gotchas:
   - Por beneficiario se filtra con nifCif (verificado en concesiones, minimis, ayudasestado y grandesbeneficiarios) o con beneficiario=idPersona; beneficiario con un NIF da 400.
   - La documentación es un Swagger UI dentro de la aplicación Angular (docs_url); no hay URL estable del fichero OpenAPI. Un endpoint inexistente devuelve 404 con HTML de Tomcat.
 tips:
-  - Para descargar todo, paginar con pageSize=10000 y trocear por fechaDesde y fechaHasta mensuales; totalElements indica el volumen antes de empezar.
   - numeroConvocatoria (código BDNS) es el identificador estable y público; id es interno y significa cosas distintas en cada colección.
-  - scripts/clientes/bdns.py pagina hasta el final, convierte fechas a dd/mm/aaaa, separa NIF y nombre y exporta con pageSize.
+  - scripts/clientes/bdns.py pagina hasta el final, convierte fechas a dd/mm/aaaa, separa NIF y nombre, exporta con pageSize y trae lo dado de alta en un día (altas).
 related: [placsp-datos-abiertos, dir3-directorio, boe-api-sumario]
 status: active
 verified: "2026-10-01"

@@ -13,6 +13,11 @@ auth: none
 formats: [json, xml, pdf, html]
 update: daily
 coverage: "2009-"
+sync:
+  since: "2009-01-02, primer sumario estructurado (2008-12-31 y anteriores dan 404)"
+  full: "Recorrer /borme/sumario/{AAAAMMDD} de lunes a viernes desde 20090102, unos 4.400 sumarios, y el url_xml de cada item de la sección A (una provincia por item; el 99 es el índice del día)."
+  size: "2025 entero medido, 249 sumarios, 14,9 MB de JSON, 15.517 entradas y 3,57 GB de PDF; el XML de la sección A, unos 300 MB al año (32 provincias al día de media, 40 KB cada una)."
+  new: "Pedir el sumario de cada día laborable; sábados, domingos y festivos dan 404."
 license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
 base_url: https://www.boe.es/datosabiertos/api
 docs_url: https://www.boe.es/datosabiertos/api/api.php
@@ -39,7 +44,6 @@ gotchas:
   - En JSON, item y apartado son objeto si hay un elemento y lista si hay varios; normalizar antes de iterar.
   - El XML de la sección A no tiene campos por acto. Cada empresa es un p class articulo (número - denominación) seguido de un p class parrafo con los actos separados por punto y los Datos registrales al final.
   - El sufijo del id de las secciones A y B es el código de provincia (01 Álava ... 52 Melilla), no un correlativo; el 99 de la sección A es el índice alfabético de sociedades del día.
-  - No se publica sábados, domingos ni festivos; esos días 404. El sumario estructurado empieza en enero de 2009.
   - El BORME no incluye cuentas anuales ni socios; eso está en el Registro Mercantil (Colegio de Registradores, de pago).
 tips:
   - Los tipos de acto en el parrafo son un vocabulario fijo (Constitución, Nombramientos, Ceses/Dimisiones, Revocaciones, Ampliación de capital, Disolución...) y sirven de separador al parsear.

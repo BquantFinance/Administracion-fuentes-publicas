@@ -16,6 +16,11 @@ auth: none
 formats: [xls, pdf, html, rss]
 update: monthly
 coverage: "Todos los municipios desde mayo de 2005; por actividad, capitales y más de 45.000 habitantes desde 2009 y de 20.000 a 45.000 desde 2017; series nacionales desde enero de 2001"
+sync:
+  since: "Mayo de 2005 en el paro por municipio"
+  full: "Página municipios/{AAAA}/{mes}.html (hasta 2019, {mes}-{AAAA}.html) y su ESTADISTICA_MUNICIPIOS.xls, unos 257 meses."
+  size: "De 2,9 a 3,9 MB por mes en xls, unos 0,85 GB en total."
+  new: "La página del mes siguiente da 404 hasta que se publica (la de septiembre de 2026 daba 404 el 01/10); el RSS no trae fecha."
 license: Reutilización libre con cita de la fuente
 base_url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas.html
 docs_url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos.html

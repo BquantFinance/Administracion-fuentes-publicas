@@ -45,6 +45,9 @@ def render_source_compact(s: dict) -> str:
     )
     if s.get("coverage"):
         lines.append(f"coverage: {s['coverage']}")
+    for k in ("since", "full", "size", "new"):
+        if (s.get("sync") or {}).get(k):
+            lines.append(f"sync.{k}: {s['sync'][k]}")
     if s.get("license"):
         lines.append(f"license: {s['license']}")
     lines.append(f"base_url: {s['base_url']}")
@@ -304,6 +307,8 @@ def main() -> None:
         f"- Códigos que son parámetros (Id de municipio, provincia y CCAA del INE para tv, países de DataComex, estaciones de AEMET por capital, productos de carburantes, rangos y secciones del BOE): {REPO_RAW}/indices/codigos.yaml",
         f"- Servidor MCP (uvx --from git+https://github.com/BquantFinance/Administracion-fuentes-publicas mcp-catalogo) para cargar solo la ficha, receta o necesidad que haga falta y traer datos ya resueltos: descargar(url) con certificados FNMT, codificación y bloqueos, tabla_pcaxis, boe_sumario, subvenciones_nif, empresa_nif, ckan_filas, socrata_filas, municipio ({REPO_RAW}/guides/servidor-mcp.md)",
         "- Código Python que ya resuelve las trampas: sesión HTTP con CA de FNMT, reintentos y detección de WAF; clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC que paginan sin topes silenciosos; cargadores de BOE, BDNS, AEMET, INE, PLACSP. En scripts/clientes/ (pip install \"fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas\" y from fuentes_publicas.clientes import ckan); ejemplos que funcionan en ejemplos/; plugin de Claude Code con skill y MCP: /plugin marketplace add BquantFinance/Administracion-fuentes-publicas.",
+        "- Histórico y sincronización medidos (campo `sync` de la ficha: desde cuándo, cómo bajarlo todo, cuánto ocupa y cómo detectar lo nuevo): " + ", ".join(s["id"] for s in sources if s.get("sync")) + ".",
+        f"- Licencias, cita literal, datos personales y datos que caducan (BDNS, PAC, deudores de la AEAT): {REPO_RAW}/guides/reutilizacion.md",
         "- Cada endpoint principal lleva `returns` (forma de la respuesta vista en una llamada real: campos, tipos, fechas, decimales, paginación) y `example` (llamada copiable).",
         f"- Esquema de ficha: {REPO_RAW}/schema/source.schema.json",
         f"- Vocabulario (sectores, acceso, auth, formatos, quirks, ids): {REPO_RAW}/schema/vocab.yaml",

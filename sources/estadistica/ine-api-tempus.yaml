@@ -15,6 +15,11 @@ auth: none
 formats: [json, csv]
 update: daily
 coverage: "Según operación; IPC general: índice desde 2002M01 (tabla 24077), variación mensual desde 1961M02 y anual desde 1962M01 (76134)"
+sync:
+  since: "Según tabla (Anyo_Periodo_ini en TABLAS_OPERACION); en el IPC, variación mensual desde 1961"
+  full: "TABLAS_OPERACION/{op} de las 112 operaciones (5.267 tablas únicas, 100 s) y cada tabla entera en jaxiT3 csv_bdsc o en csv/ES/DATOS_TABLA."
+  size: "Del orden de 10 GB en csv_bdsc (muestra de 40 tablas, mediana 148 KB, media 2,4 MB, máxima 56 MB)."
+  new: "Comparar Ultima_Modificacion (epoch ms) de TABLAS_OPERACION con la guardada; entre el 24/09 y el 01/10/2026 cambiaron 380 tablas. El fichero de jaxiT3 trae Last-Modified pero ignora If-Modified-Since (200)."
 license: Reutilización libre con cita de la fuente (licencia INE compatible CC BY 4.0)
 base_url: https://servicios.ine.es/wstempus/js/ES
 docs_url: https://www.ine.es/dyngs/DAB/index.htm?cid=1099

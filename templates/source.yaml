@@ -16,6 +16,11 @@ auth: none
 formats: [json]
 update: daily
 coverage: "2010-"
+sync:          # opcional, solo con medidas reales; histórico y sincronización
+  since: ""    # primer dato disponible hoy
+  full: ""     # cómo bajarlo todo
+  size: ""     # tamaño y tiempo medidos
+  new: ""      # cómo detectar lo nuevo
 license: Reutilización libre con cita de la fuente
 base_url: https://ejemplo.gob.es/api
 docs_url: https://ejemplo.gob.es/docs

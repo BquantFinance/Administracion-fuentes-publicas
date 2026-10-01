@@ -91,6 +91,38 @@
       "type": "string",
       "description": "Cobertura temporal, p. ej. '1960-' o '2015-2023'."
     },
+    "sync": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "since",
+        "full",
+        "new"
+      ],
+      "description": "Histórico y sincronización medidos con llamadas reales: desde cuándo, cómo bajarlo todo, cuánto ocupa y cómo detectar lo nuevo.",
+      "properties": {
+        "since": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Primer dato disponible hoy y por qué no antes."
+        },
+        "full": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Cómo bajar todo el histórico (rutas, troceo, cliente)."
+        },
+        "size": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Tamaño y tiempo medidos, con la muestra si es estimado."
+        },
+        "new": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Cómo detectar lo nuevo sin bajarlo todo otra vez (filtro por fecha, ETag, campo de modificación, RSS)."
+        }
+      }
+    },
     "license": {
       "type": "string",
       "description": "Condiciones de reutilización, texto breve."

@@ -14,6 +14,11 @@ auth: none
 formats: [json, xml]
 update: daily
 coverage: "Normas vigentes y derogadas desde 1978, algunas anteriores"
+sync:
+  since: "Normas desde 1978 y algunas anteriores; 12.421 en el listado el 2026-10-01"
+  full: "Listado con limit=-1 y offset 0 y 10000 (dos páginas, 15 MB, 30 s) y después /id/{id}/texto de cada norma (0,19 s cada una, unos 40 minutos en serie)."
+  size: "El texto de las 12.421, unos 1,4 GB de XML (muestra de 25 normas, mediana 54 KB, máxima 772 KB)."
+  new: "Listado con from y to iguales a ayer (fecha_actualizacion; el 30/09/2026 dio 43 normas) y volver a pedir el texto de cada una, porque cada bloque trae todas sus versiones."
 license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
 base_url: https://www.boe.es/datosabiertos/api/legislacion-consolidada
 docs_url: https://www.boe.es/datosabiertos/api/api.php
@@ -64,7 +69,6 @@ gotchas:
   - Solo hay normas con texto consolidado; una disposición del BOE sin consolidar devuelve 404 aunque su id exista.
   - Cada bloque trae una o varias version con fecha_vigencia; para el texto vigente quedarse con la de fecha_vigencia más reciente que no sea posterior a hoy.
 tips:
-  - Flujo de actualización diaria. Listado con from=ayer, y después metadatos o texto de cada identificador devuelto.
   - Para un artículo concreto, indice para localizar el id de bloque y luego texto/bloque/{id}.
   - Los códigos numéricos de rango, materia y departamento se traducen con datos-auxiliares.
   - scripts/clientes/boe.py pagina el listado (normas), lee metadatos e índice y elige la versión vigente de un bloque (bloque y version_vigente).

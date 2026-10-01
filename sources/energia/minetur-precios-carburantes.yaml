@@ -14,6 +14,11 @@ auth: none
 formats: [json, xml]
 update: realtime
 coverage: "Histórico diario desde 01-01-2007 (límite que da el servidor) hasta ayer; vigente cada media hora"
+sync:
+  since: "2007-01-01 en el histórico diario (antes 400)"
+  full: "EstacionesTerrestresHist/{DD-MM-AAAA} día a día, unos 7.200 días, o la variante por provincia si se quieren respuestas pequeñas."
+  size: "El nacional pasa de 6,8 MB (6.301 estaciones, 2007) a 12,4 MB (11.502, 2026) y tarda de 11 a 19 s; todo el histórico, unos 72 GB de JSON (unos 4,6 GB comprimido) y unas 30 horas en serie."
+  new: "El día anterior ya está en el histórico; el vigente se regenera cada media hora."
 license: Reutilización libre con cita de la fuente
 base_url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes
 docs_url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/help

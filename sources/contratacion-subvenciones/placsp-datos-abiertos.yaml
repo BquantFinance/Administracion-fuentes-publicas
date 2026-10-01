@@ -14,6 +14,11 @@ auth: none
 formats: [atom, xml, zip, xlsx]
 update: daily
 coverage: "2012- (agregadas desde 2016, menores desde 2018)"
+sync:
+  since: "2012 en el 643; agregadas (1044) desde 2016 y menores (1143) desde 2018"
+  full: "ZIP anuales de los tres feeds y mensuales del año en curso, empezando cada ZIP por el .atom que se llama como el feed; deduplicar por id de entry con updated máximo."
+  size: "El 643 pesa 2,2 GB al año en ZIP (150 a 300 MB al mes) y descomprimido de 10 a 18 veces más; el 1044 y el 1143, de 12 a 37 MB al mes. Sin Content-Length; el tamaño asoma en el ETag, en hexadecimal."
+  new: "Seguir rel=next desde la página vigente hasta la primera instantánea ya descargada (los nombres se conservan); el 643 se regenera hacia las 20:15 y el 1044 y el 1143 hacia las 03:00."
 license: Reutilización libre con cita de la fuente
 base_url: https://contrataciondelestado.es/sindicacion/
 docs_url: https://www.hacienda.gob.es/es-ES/GobiernoAbierto/Datos%20Abiertos/Paginas/licitaciones_plataforma_contratacion.aspx
@@ -42,11 +47,10 @@ gotchas:
   - En el 1044 el órgano solo trae ID con schemeName ID_OC_PLAT (que contiene su NIF) y no hay TotalAmount; el link apunta a la plataforma de origen y el summary cambia de formato (coma decimal, sin Estado).
   - Ni ZIP ni atom responden a HEAD, Range se ignora y no hay Content-Length (el tamaño asoma en el ETag, en hexadecimal); un fichero inexistente da 200 con un HTML de 521 bytes, así que comprobar que empieza por PK.
   - "updated es la fecha del último cambio del expediente, no la de publicación; la fecha de cada anuncio va en ValidNoticeInfo/AdditionalPublicationStatus/AdditionalPublicationDocumentReference/IssueDate."
-  - "El 643 se regenera una vez al día hacia las 20:15 y el 1044 y el 1143 hacia las 03:00; lo de hoy solo está en el buscador JSF del portal (sin API localizada; el link de cada entry es un deeplink HTML)."
+  - Lo de hoy solo está en el buscador JSF del portal (sin API localizada; el link de cada entry es un deeplink HTML).
 tips:
   - Identificadores útiles en cada entry. cbc:ContractFolderID (expediente), cbc:ItemClassificationCode (CPV), cbc:ID del órgano con schemeName DIR3 (p. ej. L01120022), NIF o ID_PLATAFORMA y cbc:TypeCode (tipo de contrato).
-  - Para el histórico completo, cargar los ZIP anuales y los mensuales del año en curso de los tres feeds y deduplicar por id con updated máximo; OpenPLACSP, la herramienta oficial, pasa los feeds a hoja de cálculo.
-  - Para sincronizar a diario, seguir rel=next desde la página vigente hasta la primera instantánea ya descargada; los nombres se conservan (la _20260929_201515.atom seguía en la cadena el 2026-10-01).
+  - OpenPLACSP, la herramienta oficial, pasa los feeds a hoja de cálculo.
   - OrganosContratacion.xlsx y especificacion-sindicacion.pdf están en contrataciondelsectorpublico.gob.es/datosabiertos; el xlsx (23.453 órganos, cabecera en la fila 6) da por ID Plataforma el NIF, el DIR3 y la dependencia.
   - contrataciondelsectorpublico.gob.es, el dominio que enlaza Hacienda, sirve los mismos feeds y ZIP que contrataciondelestado.es; los id y link del feed siguen usando el antiguo.
 related: [bdns-api, hacienda-registro-licitadores, dir3-directorio]

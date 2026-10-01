@@ -28,7 +28,9 @@ Cada línea que no ahorre una búsqueda, una prueba fallida o una hora de depura
    mucho tres por ficha y sin repetirse en `gotchas`: la evaluación del 2026-10-01 mostró que entre las demás se pierden.
    Cada alerta dice la operación exacta (fichero, fila, parámetro o código) y un ejemplo con números comprobados: una
    alerta que solo describe la trampa no cambió el resultado de los agentes; la explícita, sí.
-4. **`tips` solo si acelera.** Patrón de uso, librería concreta, cruce típico con otra fuente. Máximo seis.
+4. **`tips` solo si acelera.** Patrón de uso, librería concreta, cruce típico con otra fuente. Máximo seis. Lo de
+   histórico y sincronización va en `sync` (since, full, size, new), solo con medidas propias y la muestra dicha si la
+   cifra es estimada.
 5. **Ejemplos copiables y respuesta descrita.** Cada endpoint principal lleva un `example` que funciona al
    pegarlo y un `returns` con la forma de la respuesta vista en esa llamada (campos clave, tipos, formato de fecha y
    decimal, paginación), nunca copiada de la documentación. Con claves, usar variable de entorno (`$AEMET_KEY`),
@@ -213,8 +215,10 @@ Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
   el TRLCI y el art. 95 bis LGT leídos en la API del BOE y el art. 98.4 del Reglamento (UE) 2021/2116; cita literal
   de BOE, AEMET e INE; licencias NC y SA medidas (GBIF, CNMC, Junta). Las concesiones de la BDNS caducan a los cuatro
   años y las de personas físicas al año siguiente (2021 da 0): cobertura y alerta corregidas en la ficha.
-- Siguiente trabajo, en este orden: (4) histórico y sincronización de las fuentes clave (desde cuándo, cómo bajarlo todo, cuánto
-  ocupa medido, cómo detectar lo nuevo); (5) almacén en Parquet o DuckDB con GitHub Actions listo para clonar. Del
+- Hecho el 2026-10-01 (segunda sesión): campo `sync` medido en nueve fichas (BOE, BORME, legislación consolidada,
+  BDNS, PLACSP, INE Tempus, carburantes, Banco de España, SEPE). La BDNS filtra por fecha de alta con fechaRegInicio y
+  fechaRegFin (fin exclusivo, sin documentar), lo único que no pierde las concesiones dadas de alta tarde.
+- Siguiente trabajo, en este orden: (5) almacén en Parquet o DuckDB con GitHub Actions listo para clonar. Del
   propietario: release v0.3.0, ronda desde una IP residencial, token de DataComex y más comunidades cuando lo decida.
 
 ## Lo que no se hace

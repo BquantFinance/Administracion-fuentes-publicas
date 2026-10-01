@@ -1572,6 +1572,12 @@
    ],
    "update": "daily",
    "coverage": "Convocatorias desde 2014; concesiones del año en curso y los cuatro anteriores (desde 2022 en 2026), las de personas físicas solo del año en curso y el anterior",
+   "sync": {
+    "since": "Convocatorias desde 2014; concesiones solo del año en curso y los cuatro anteriores (desde 2022 en 2026), por la retirada que ordena el RD 130/2019",
+    "full": "Exportar concesiones en CSV con pageSize=10000, troceando por fechaDesde y fechaHasta (mensual; diario en 2025, que tiene 19,7 millones de filas).",
+    "size": "30.019.465 concesiones el 2026-10-01; 10.000 filas son 3,8 MB de CSV (0,24 MB comprimido) y 5,4 s, así que todo son unos 11 GB y 4,5 horas.",
+    "new": "fechaRegInicio y fechaRegFin (fin exclusivo) filtran por alta; 29/09/2026 a 30/09/2026 da las 19.279 del día 29. Por fechaConcesion se pierden las tardías (las del 15/01/2025 se dieron de alta hasta agosto de 2026)."
+   },
    "license": "Reutilización con las restricciones del aviso legal, repetido en cada respuesta (campo advertencia)",
    "base_url": "https://www.infosubvenciones.es/bdnstrans/api",
    "docs_url": "https://www.infosubvenciones.es/bdnstrans/GE/es/api",
@@ -1593,7 +1599,7 @@
      "path": "/concesiones/busqueda?page={n}&pageSize={n}",
      "desc": "Concesiones con beneficiario, importe, ayuda equivalente, instrumento y convocatoria",
      "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=50&numeroConvocatoria=931918\"",
-     "params": "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa, nifCif (NIF del beneficiario), beneficiario (idPersona interno, no el NIF)",
+     "params": "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa (concesión), fechaRegInicio y fechaRegFin (alta, fin exclusivo; también en minimis y ayudasestado), nifCif (NIF del beneficiario), beneficiario (idPersona interno, no el NIF)",
      "returns": "content:[{id, codConcesion, fechaConcesion (AAAA-MM-DD), beneficiario (NIF y nombre en la misma cadena), idPersona, instrumento, importe y ayudaEquivalente (números), urlBR, numeroConvocatoria, convocatoria, nivel1, nivel2, nivel3, fechaAlta}]"
     },
     {
@@ -1634,9 +1640,8 @@
     "La documentación es un Swagger UI dentro de la aplicación Angular (docs_url); no hay URL estable del fichero OpenAPI. Un endpoint inexistente devuelve 404 con HTML de Tomcat."
    ],
    "tips": [
-    "Para descargar todo, paginar con pageSize=10000 y trocear por fechaDesde y fechaHasta mensuales; totalElements indica el volumen antes de empezar.",
     "numeroConvocatoria (código BDNS) es el identificador estable y público; id es interno y significa cosas distintas en cada colección.",
-    "scripts/clientes/bdns.py pagina hasta el final, convierte fechas a dd/mm/aaaa, separa NIF y nombre y exporta con pageSize."
+    "scripts/clientes/bdns.py pagina hasta el final, convierte fechas a dd/mm/aaaa, separa NIF y nombre, exporta con pageSize y trae lo dado de alta en un día (altas)."
    ],
    "related": [
     "placsp-datos-abiertos",
@@ -1748,6 +1753,12 @@
    ],
    "update": "daily",
    "coverage": "2012- (agregadas desde 2016, menores desde 2018)",
+   "sync": {
+    "since": "2012 en el 643; agregadas (1044) desde 2016 y menores (1143) desde 2018",
+    "full": "ZIP anuales de los tres feeds y mensuales del año en curso, empezando cada ZIP por el .atom que se llama como el feed; deduplicar por id de entry con updated máximo.",
+    "size": "El 643 pesa 2,2 GB al año en ZIP (150 a 300 MB al mes) y descomprimido de 10 a 18 veces más; el 1044 y el 1143, de 12 a 37 MB al mes. Sin Content-Length; el tamaño asoma en el ETag, en hexadecimal.",
+    "new": "Seguir rel=next desde la página vigente hasta la primera instantánea ya descargada (los nombres se conservan); el 643 se regenera hacia las 20:15 y el 1044 y el 1143 hacia las 03:00."
+   },
    "license": "Reutilización libre con cita de la fuente",
    "base_url": "https://contrataciondelestado.es/sindicacion/",
    "docs_url": "https://www.hacienda.gob.es/es-ES/GobiernoAbierto/Datos%20Abiertos/Paginas/licitaciones_plataforma_contratacion.aspx",
@@ -1792,12 +1803,11 @@
     "En el 1044 el órgano solo trae ID con schemeName ID_OC_PLAT (que contiene su NIF) y no hay TotalAmount; el link apunta a la plataforma de origen y el summary cambia de formato (coma decimal, sin Estado).",
     "Ni ZIP ni atom responden a HEAD, Range se ignora y no hay Content-Length (el tamaño asoma en el ETag, en hexadecimal); un fichero inexistente da 200 con un HTML de 521 bytes, así que comprobar que empieza por PK.",
     "updated es la fecha del último cambio del expediente, no la de publicación; la fecha de cada anuncio va en ValidNoticeInfo/AdditionalPublicationStatus/AdditionalPublicationDocumentReference/IssueDate.",
-    "El 643 se regenera una vez al día hacia las 20:15 y el 1044 y el 1143 hacia las 03:00; lo de hoy solo está en el buscador JSF del portal (sin API localizada; el link de cada entry es un deeplink HTML)."
+    "Lo de hoy solo está en el buscador JSF del portal (sin API localizada; el link de cada entry es un deeplink HTML)."
    ],
    "tips": [
     "Identificadores útiles en cada entry. cbc:ContractFolderID (expediente), cbc:ItemClassificationCode (CPV), cbc:ID del órgano con schemeName DIR3 (p. ej. L01120022), NIF o ID_PLATAFORMA y cbc:TypeCode (tipo de contrato).",
-    "Para el histórico completo, cargar los ZIP anuales y los mensuales del año en curso de los tres feeds y deduplicar por id con updated máximo; OpenPLACSP, la herramienta oficial, pasa los feeds a hoja de cálculo.",
-    "Para sincronizar a diario, seguir rel=next desde la página vigente hasta la primera instantánea ya descargada; los nombres se conservan (la _20260929_201515.atom seguía en la cadena el 2026-10-01).",
+    "OpenPLACSP, la herramienta oficial, pasa los feeds a hoja de cálculo.",
     "OrganosContratacion.xlsx y especificacion-sindicacion.pdf están en contrataciondelsectorpublico.gob.es/datosabiertos; el xlsx (23.453 órganos, cabecera en la fila 6) da por ID Plataforma el NIF, el DIR3 y la dependencia.",
     "contrataciondelsectorpublico.gob.es, el dominio que enlaza Hacienda, sirve los mismos feeds y ZIP que contrataciondelestado.es; los id y link del feed siguen usando el antiguo."
    ],
@@ -2515,6 +2525,12 @@
    ],
    "update": "daily",
    "coverage": "Desde 1933 en la serie más antigua (paro registrado); cada serie trae su primera observación en el catálogo",
+   "sync": {
+    "since": "1933 en la serie más antigua; la primera observación de cada serie está en el catálogo",
+    "full": "Los 90 ZIP enlazados en www.bde.es/webbe/es/estadisticas/recursos/descargas-completas.html (capítulos SB_ y TE_), con un CSV por cuadro.",
+    "size": "53 MB los 90 ZIP el 2026-10-01.",
+    "new": "Los ZIP traen ETag y Last-Modified y responden 304 a If-None-Match o If-Modified-Since; repetir a diario la descarga condicional."
+   },
    "license": "Reutilización libre con cita de la fuente",
    "base_url": "https://app.bde.es/bierest/resources/srdatosapp",
    "docs_url": "https://www.bde.es/webbe/es/estadisticas/recursos/api-estadisticas-bde.html",
@@ -2546,7 +2562,7 @@
     },
     {
      "path": "https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_{capitulo}.zip",
-     "desc": "ZIP con los CSV de un capítulo del Boletín Estadístico; lista de capítulos en descargas-completas.html",
+     "desc": "ZIP con los CSV de un capítulo del Boletín Estadístico; lista de capítulos en www.bde.es/webbe/es/estadisticas/recursos/descargas-completas.html",
      "example": "curl -sO \"https://www.bde.es/webbe/es/estadisticas/compartido/datos/zip/SB_DEUAAPP.zip\"",
      "returns": "Zip con un CSV por cuadro del capítulo (be0106.csv, be0107.csv, be1101.csv...) con el mismo formato de seis filas de cabecera que los CSV sueltos"
     }
@@ -3274,6 +3290,12 @@
    ],
    "update": "monthly",
    "coverage": "Todos los municipios desde mayo de 2005; por actividad, capitales y más de 45.000 habitantes desde 2009 y de 20.000 a 45.000 desde 2017; series nacionales desde enero de 2001",
+   "sync": {
+    "since": "Mayo de 2005 en el paro por municipio",
+    "full": "Página municipios/{AAAA}/{mes}.html (hasta 2019, {mes}-{AAAA}.html) y su ESTADISTICA_MUNICIPIOS.xls, unos 257 meses.",
+    "size": "De 2,9 a 3,9 MB por mes en xls, unos 0,85 GB en total.",
+    "new": "La página del mes siguiente da 404 hasta que se publica (la de septiembre de 2026 daba 404 el 01/10); el RSS no trae fecha."
+   },
    "license": "Reutilización libre con cita de la fuente",
    "base_url": "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas.html",
    "docs_url": "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos.html",
@@ -3472,6 +3494,12 @@
    ],
    "update": "realtime",
    "coverage": "Histórico diario desde 01-01-2007 (límite que da el servidor) hasta ayer; vigente cada media hora",
+   "sync": {
+    "since": "2007-01-01 en el histórico diario (antes 400)",
+    "full": "EstacionesTerrestresHist/{DD-MM-AAAA} día a día, unos 7.200 días, o la variante por provincia si se quieren respuestas pequeñas.",
+    "size": "El nacional pasa de 6,8 MB (6.301 estaciones, 2007) a 12,4 MB (11.502, 2026) y tarda de 11 a 19 s; todo el histórico, unos 72 GB de JSON (unos 4,6 GB comprimido) y unas 30 horas en serie.",
+    "new": "El día anterior ya está en el histórico; el vigente se regenera cada media hora."
+   },
    "license": "Reutilización libre con cita de la fuente",
    "base_url": "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes",
    "docs_url": "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/help",
@@ -4236,6 +4264,12 @@
    ],
    "update": "daily",
    "coverage": "Según operación; IPC general: índice desde 2002M01 (tabla 24077), variación mensual desde 1961M02 y anual desde 1962M01 (76134)",
+   "sync": {
+    "since": "Según tabla (Anyo_Periodo_ini en TABLAS_OPERACION); en el IPC, variación mensual desde 1961",
+    "full": "TABLAS_OPERACION/{op} de las 112 operaciones (5.267 tablas únicas, 100 s) y cada tabla entera en jaxiT3 csv_bdsc o en csv/ES/DATOS_TABLA.",
+    "size": "Del orden de 10 GB en csv_bdsc (muestra de 40 tablas, mediana 148 KB, media 2,4 MB, máxima 56 MB).",
+    "new": "Comparar Ultima_Modificacion (epoch ms) de TABLAS_OPERACION con la guardada; entre el 24/09 y el 01/10/2026 cambiaron 380 tablas. El fichero de jaxiT3 trae Last-Modified pero ignora If-Modified-Since (200)."
+   },
    "license": "Reutilización libre con cita de la fuente (licencia INE compatible CC BY 4.0)",
    "base_url": "https://servicios.ine.es/wstempus/js/ES",
    "docs_url": "https://www.ine.es/dyngs/DAB/index.htm?cid=1099",
@@ -6565,6 +6599,12 @@
    ],
    "update": "daily",
    "coverage": "Normas vigentes y derogadas desde 1978, algunas anteriores",
+   "sync": {
+    "since": "Normas desde 1978 y algunas anteriores; 12.421 en el listado el 2026-10-01",
+    "full": "Listado con limit=-1 y offset 0 y 10000 (dos páginas, 15 MB, 30 s) y después /id/{id}/texto de cada norma (0,19 s cada una, unos 40 minutos en serie).",
+    "size": "El texto de las 12.421, unos 1,4 GB de XML (muestra de 25 normas, mediana 54 KB, máxima 772 KB).",
+    "new": "Listado con from y to iguales a ayer (fecha_actualizacion; el 30/09/2026 dio 43 normas) y volver a pedir el texto de cada una, porque cada bloque trae todas sus versiones."
+   },
    "license": "Reutilización libre con cita de la fuente (aviso legal AEBOE)",
    "base_url": "https://www.boe.es/datosabiertos/api/legislacion-consolidada",
    "docs_url": "https://www.boe.es/datosabiertos/api/api.php",
@@ -6643,7 +6683,6 @@
     "Cada bloque trae una o varias version con fecha_vigencia; para el texto vigente quedarse con la de fecha_vigencia más reciente que no sea posterior a hoy."
    ],
    "tips": [
-    "Flujo de actualización diaria. Listado con from=ayer, y después metadatos o texto de cada identificador devuelto.",
     "Para un artículo concreto, indice para localizar el id de bloque y luego texto/bloque/{id}.",
     "Los códigos numéricos de rango, materia y departamento se traducen con datos-auxiliares.",
     "scripts/clientes/boe.py pagina el listado (normas), lee metadatos e índice y elige la versión vigente de un bloque (bloque y version_vigente).",
@@ -6684,6 +6723,12 @@
    ],
    "update": "daily",
    "coverage": "1960-09-",
+   "sync": {
+    "since": "1960-09-01, primer sumario de la API (1960-08-31 y anteriores dan 404)",
+    "full": "Recorrer /boe/sumario/{AAAAMMDD} de lunes a sábado desde 19600901, unos 20.000 sumarios, y el url_xml de cada item si hace falta el texto; scripts/clientes/boe.py sumarios() salta domingos y trata 404 como día sin boletín.",
+    "size": "2025 entero medido, 313 sumarios, 97 MB de JSON y 75.720 entradas, con 17,2 GB de PDF (szBytes) y unos 0,5 GB de XML (media de 7,4 KB en 40). Desde 1960, unos 4 GB de sumarios y 3 millones de entradas (un día por trimestre); 0,23 s por sumario.",
+    "new": "Pedir el sumario del día; 404 es día sin boletín (domingos). Para avisar sin descargar, los RSS de boe-feeds."
+   },
    "license": "Reutilización libre con cita de la fuente (aviso legal AEBOE)",
    "base_url": "https://www.boe.es/datosabiertos/api",
    "docs_url": "https://www.boe.es/datosabiertos/api/api.php",
@@ -6734,9 +6779,7 @@
     "xml.php con un id inexistente responde 200 con raíz error (descripcion No se encontró el documento original) y Content-Type text/html; comprobar la raíz."
    ],
    "tips": [
-    "Un sumario diario pesa entre 50 y 500 KB en JSON (85 KB en festivos, 450 KB un lunes); para histórico iterar por fecha y tratar 404 como día sin publicación.",
     "El OpenAPI 3.1 completo está embebido en api.php (variable openApiFile); el documento técnico es APIsumarioBOE.pdf en /datosabiertos/documentos/.",
-    "Para detectar publicaciones nuevas sin descargar el sumario entero, usar los feeds RSS (boe-feeds).",
     "scripts/clientes/boe.py aplana el sumario con todas sus variantes (items), lee el XML de cada disposición (documento) y recorre días saltando domingos (sumarios)."
    ],
    "related": [
@@ -6913,6 +6956,12 @@
    ],
    "update": "daily",
    "coverage": "2009-",
+   "sync": {
+    "since": "2009-01-02, primer sumario estructurado (2008-12-31 y anteriores dan 404)",
+    "full": "Recorrer /borme/sumario/{AAAAMMDD} de lunes a viernes desde 20090102, unos 4.400 sumarios, y el url_xml de cada item de la sección A (una provincia por item; el 99 es el índice del día).",
+    "size": "2025 entero medido, 249 sumarios, 14,9 MB de JSON, 15.517 entradas y 3,57 GB de PDF; el XML de la sección A, unos 300 MB al año (32 provincias al día de media, 40 KB cada una).",
+    "new": "Pedir el sumario de cada día laborable; sábados, domingos y festivos dan 404."
+   },
    "license": "Reutilización libre con cita de la fuente (aviso legal AEBOE)",
    "base_url": "https://www.boe.es/datosabiertos/api",
    "docs_url": "https://www.boe.es/datosabiertos/api/api.php",
@@ -6955,7 +7004,6 @@
     "En JSON, item y apartado son objeto si hay un elemento y lista si hay varios; normalizar antes de iterar.",
     "El XML de la sección A no tiene campos por acto. Cada empresa es un p class articulo (número - denominación) seguido de un p class parrafo con los actos separados por punto y los Datos registrales al final.",
     "El sufijo del id de las secciones A y B es el código de provincia (01 Álava ... 52 Melilla), no un correlativo; el 99 de la sección A es el índice alfabético de sociedades del día.",
-    "No se publica sábados, domingos ni festivos; esos días 404. El sumario estructurado empieza en enero de 2009.",
     "El BORME no incluye cuentas anuales ni socios; eso está en el Registro Mercantil (Colegio de Registradores, de pago)."
    ],
    "tips": [
