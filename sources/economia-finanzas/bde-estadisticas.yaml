@@ -9,6 +9,8 @@ summary: >-
   Unas 12.800 series (tipos de interés y de cambio, euríbor, crédito, deuda pública, balanza de pagos, cuentas
   financieras) por API JSON, por CSV de cada cuadro del Boletín Estadístico y por ZIP de capítulo. Los códigos
   de serie se localizan en catálogos CSV.
+alerts:
+  - listaSeries con rango=MAX devuelve como mucho las 1000 observaciones más recientes, sin aviso; el paro registrado (1118 desde 1933) llega desde 1943 aunque fechaInicio diga 1933. Completar con rango=AAAA.
 access: [api-rest, download]
 auth: none
 formats: [json, csv, xlsx, zip]
@@ -44,7 +46,6 @@ quirks: [gzip-unannounced, latin1, soft-errors-200]
 gotchas:
   - La API devuelve siempre gzip, aunque el cliente no lo pida o envíe Accept-Encoding identity (el 2026-10-01, con Content-Encoding gzip); curl sin --compressed y urllib reciben los bytes comprimidos.
   - idioma es obligatorio y rango debe casar con la frecuencia; si no, 412 con JSON errNum, errMsgUsr y errMsgDebug. Una serie inexistente da 412 en listaSeries y 200 con errNum 404 en favoritas.
-  - listaSeries con rango=MAX devuelve como mucho las 1000 observaciones más recientes, sin aviso; el paro registrado (1118 desde 1933) llega desde 1943 aunque fechaInicio diga 1933. Completar con rango=AAAA.
   - Sin rango devuelve el tramo mínimo (3M en diarias, 30M en mensuales). MAX da 412 en diarias (pedir año a año) y en semestrales (codFrecuencia S, sin documentar), que solo aceptan rango=AAAA.
   - Cada fecha de la API es ISO UTC con hora fija (08:15Z en verano, 09:15Z en invierno); mensuales el día 1 y trimestrales el día 1 del primer mes (2026-04-01 es el segundo trimestre).
   - Los CSV fechan el trimestre por su último mes (JUN 2026 es el dato que la API fecha 2026-04-01) y en español (04 ENE 1999, ENE 1981); convertir con un mapa de meses antes de cruzar con la API.

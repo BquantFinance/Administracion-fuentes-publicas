@@ -9,6 +9,8 @@ summary: >-
   Producción del IGN (ortofotos PNOA, modelos del terreno, LiDAR, mapas, límites municipales oficiales, SIOSE)
   en un Centro de Descargas protegido por reCAPTCHA, más servicios WMS, WMTS y WFS INSPIRE sin restricción y
   el geocoder CartoCiudad, que devuelve el código INE.
+alerts:
+  - state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido.
 access: [ogc, api-rest, download, portal]
 auth: none
 formats: [shp, gpkg, geotiff, laz, gml, geojson, json, png]
@@ -52,7 +54,6 @@ gotchas:
   - nationalCode es 34 + comunidad (2) + provincia (2) + municipio INE de 5 dígitos o 00000 (34090800000 provincia de Barcelona, 3,4 MB en GeoJSON; 34132828079 municipio de Madrid, 465 KB).
   - findJsonp y candidatesJsonp envuelven la respuesta en callback(...); find, candidates y reverseGeocode dan JSON limpio, y find sin resultado responde 204 con cuerpo vacío.
   - Sistema de referencia oficial ETRS89 (EPSG:4258 geográficas, 25829 a 25831 UTM); Canarias REGCAN95 (32628).
-  - state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido.
   - find ignora municipio_filter y toma el primer candidato (Calle Alcala 50 con municipio_filter=Madrid devolvió un portal de Ceuta); poner el municipio en q o filtrar con candidates.
   - Con outputformat=geojson, find redondea la geometría a 4 decimales (unos 10 m) y renombra countryCode a countrycode; usar lat y lng de properties.
 tips:

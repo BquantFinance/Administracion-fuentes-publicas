@@ -8,6 +8,9 @@ summary: >-
   555 datasets del Ayuntamiento de Barcelona (padrón por sección censal desde 1997, accidentes de la Guardia Urbana,
   movilidad, vivienda, IBI, subvenciones, presupuesto) sobre CKAN 2.6. La API de acciones y el DataStore (búsqueda
   y SQL) responden sin clave; las descargas pasan por un reto anti-bot.
+alerts:
+  - El padrón municipal que publica el Ayuntamiento no es la cifra oficial; Barcelona a 1-1-2025 suma 1.732.066 frente a 1.731.649 del padrón oficial (idescat-api) y 1.713.247 del Censo anual del INE.
+  - El datastore puede no coincidir con el fichero; esm-bcn-evo 2024 tiene 1.250 filas en el datastore para un CSV declarado de 539 MB. Comparar COUNT(*) con size antes de fiarse.
 access: [api-rest, download]
 auth: none
 formats: [json, csv, xml, geojson, gpkg, shp, zip]
@@ -47,8 +50,6 @@ gotchas:
   - datastore_search devuelve 100 filas por defecto y _links.next omite el prefijo /data (/api/3/action/...), que pedido tal cual cae en el reto anti-bot; anteponer /data o paginar con offset.
   - limit=0 no devuelve total en esta versión (CKAN 2.6.9); contar con datastore_search_sql y SELECT COUNT(*).
   - Seccio_Censal es distrito más sección sin ceros (1001, 10089); el código INE de 10 dígitos es 08019 más Seccio_Censal rellenada con ceros hasta 5 cifras (0801901001).
-  - El padrón municipal que publica el Ayuntamiento no es la cifra oficial; Barcelona a 1-1-2025 suma 1.732.066 frente a 1.731.649 del padrón oficial (idescat-api) y 1.713.247 del Censo anual del INE.
-  - El datastore puede no coincidir con el fichero; esm-bcn-evo 2024 tiene 1.250 filas en el datastore para un CSV declarado de 539 MB. Comparar COUNT(*) con size antes de fiarse.
   - Columnas en catalán con mayúsculas, acentos, espacios o símbolos (Número_expedient, Causa conductor, Total_Quota_Ajuntament_€); hay fechas como texto dd.mm.aaaa (Data_Convocatoria) junto a timestamps.
   - Bicing en tiempo real y aparcamientos B:SM exigen token (token_required Yes, recursos securitzat); el portal Barcelona Dades tiene API aparte que responde 401 sin X-IBM-Client-Id personal.
 tips:

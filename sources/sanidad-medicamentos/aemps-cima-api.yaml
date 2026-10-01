@@ -9,6 +9,8 @@ summary: >-
   Los 25.487 medicamentos registrados en España (20.464 autorizados): composición, principios activos, ATC,
   presentaciones con código nacional, estado, ficha técnica y prospecto en PDF, HTML y secciones,
   problemas de suministro y registro de cambios. JSON sin autenticación y nomenclátor XML diario.
+alerts:
+  - nombre y practiv1 buscan por subcadena; practiv1=ibuprofeno trae también DEXIBUPROFENO (260 frente a 253). Para un principio exacto, idpractiv1 con el id de maestras.
 access: [api-rest, download]
 auth: none
 formats: [json, xml, pdf, html, zip]
@@ -68,7 +70,6 @@ gotchas:
   - Solo JSON; Accept application/xml da 406 con cuerpo de texto Not Acceptable (docSegmentado/contenido admite además text/html). La raíz /cima/rest da 404 HTML.
   - Fechas en epoch ms; aut, fini y ffin son medianoche de Madrid (22:00 o 23:00 UTC del día anterior), así que convertir con Europe/Madrid o el día sale uno antes.
   - El listado medicamentos no trae pactivos, atcs ni principiosActivos (solo el detalle). Por defecto incluye suspendidos y revocados; autorizados=1 deja 20.464 de 25.487.
-  - nombre y practiv1 buscan por subcadena; practiv1=ibuprofeno trae también DEXIBUPROFENO (260 frente a 253). Para un principio exacto, idpractiv1 con el id de maestras.
   - registroCambios da unas 53.000 filas por semana sin orden por fecha y con una fecha antigua (01/01/2010) responde 500; el manual llama cambios al campo que llega como cambio.
   - listadomedicamentos.aemps.gob.es (prescripcion.zip) responde 403 de openresty al User-Agent de curl; con -A Mozilla/5.0 descarga. cima.aemps.es no lo exige.
   - El nomenclátor se regenera a diario en la misma URL (listprescriptiondate) con códigos SNOMED; cod_dcsa coincide con vtm.id del detalle de la API.

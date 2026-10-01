@@ -9,6 +9,8 @@ summary: >-
   Punto general de entrada de facturas electrónicas: API pública JSON y CSV con las 50000 relaciones oficina
   contable, órgano gestor y unidad tramitadora (DIR3 y NIF) de las Administraciones adheridas, y servicios SOAP
   con certificado para presentar y consultar facturas.
+alerts:
+  - fulltext distingue mayúsculas y tildes (ayuntamiento de madrid da 0) y busca subcadenas (Ayuntamiento de Madrid trae también Madridanos y Madridejos); filtrar después por administration.code.
 access: [api-rest, api-soap, download]
 auth: none
 formats: [json, csv, xml]
@@ -38,7 +40,6 @@ gotchas:
   - face.gob.es es desde el 27/02/2026 solo consulta histórica; el portal y la API viven en proveedores.face.gob.es. Las rutas /es/directorio/administraciones y /es/facturas/estadisticas de la ficha anterior ya no dan datos.
   - Solo relations es público; statistics responde 401 y administrations, administraciones y nifs dan 404.
   - page=0, limit=0 y limit mayor de 1000 devuelven 500 con cuerpo [] en vez de un objeto de error; relations.json da 404, el JSON se pide sin extensión.
-  - fulltext distingue mayúsculas y tildes (ayuntamiento de madrid da 0) y busca subcadenas (Ayuntamiento de Madrid trae también Madridanos y Madridejos); filtrar después por administration.code.
   - og.identifier (NIF) falta en 9790 de 50187 relaciones y no está normalizado (Q2268231d en minúscula); fulltext no encuentra por NIF.
   - El CSV llega en UTF-8 con BOM aunque Content-Type diga ISO-8859-1.
   - relations.csv omite 27 relaciones de entes con código I y campo edp que sí devuelve el JSON; para el inventario completo paginar el JSON (51 páginas de 1000).

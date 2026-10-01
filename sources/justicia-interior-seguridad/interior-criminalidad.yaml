@@ -9,6 +9,8 @@ summary: >-
   Balances trimestrales acumulados de infracciones penales por tipología (CCAA, provincia, isla y municipio)
   desde 2016, con comparación interanual, y series anuales 2010-2025 de hechos conocidos, esclarecidos,
   detenciones y victimizaciones por CCAA y provincia; PC-Axis con descarga CSV, px y xlsx.
+alerts:
+  - Los balances son acumulados desde enero (el del segundo trimestre es enero-junio) frente al mismo periodo del año anterior y su variación %; el trimestre suelto sale restando, y 2022 compara también con 2019.
 access: [download, portal]
 auth: none
 formats: [csv, px, xlsx, html]
@@ -42,7 +44,6 @@ ids: [ine-municipio]
 gotchas:
   - Todo el año en curso cuelga de /DatosBalanceAct/l0/ (09001 a 09003 el primer trimestre, 09004 a 09006 el segundo) y los años cerrados de /DatosBalanceAnt/l0/ con números irregulares (69001 en 2016-1, 1509012 en 2025-4).
   - El CSV llega en UTF-8 con BOM aunque Content-Type diga ISO-8859-15, así que resp.text o latin-1 dan «autÃ³nomas»; decodificar con utf-8-sig. El px sí va en ISO-8859-15.
-  - Los balances son acumulados desde enero (el del segundo trimestre es enero-junio) frente al mismo periodo del año anterior y su variación %; el trimestre suelto sale restando, y 2022 compara también con 2019.
   - Desde 2024 el municipio lleva delante su código INE (08019 Barcelona); antes era «- Municipio de Almería» (2016-2020) o «-Municipio de Almería» (2021-2023). Provincias e islas van solo por nombre.
   - La tabla municipal mezcla filas de CCAA en mayúsculas, «Provincia de X», islas, municipios, EXTRANJERA y NACIONAL; quedarse con las que empiezan por cinco dígitos antes de sumar o cruzar.
   - "El umbral municipal cambia: capitales y más de 50.000 habitantes en 2016, más de 30.000 en 2017-2020 y más de 20.000 desde 2021; la serie de un municipio mediano empieza más tarde."

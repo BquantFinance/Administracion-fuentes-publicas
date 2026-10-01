@@ -9,6 +9,8 @@ summary: >-
   Cuadros mensuales de tráfico por autoridad portuaria en xlsx desde 2012 (graneles, mercancía general,
   contenedores, pasajeros, pesca), anuario y memorias en PDF, y Portus, visor oceanográfico cuya API interna
   da sin clave mareas previstas y último dato de boyas y mareógrafos.
+alerts:
+  - date_value no es el año sino su posición en el selector (2 es 2025); date_value=2025 devuelve la página sin ficheros y sin error.
 access: [download, portal, api-rest]
 auth: none
 formats: [xlsx, pdf, html, json]
@@ -45,7 +47,6 @@ quirks: [js-rendered, url-drift]
 ids: []
 gotchas:
   - Las rutas SharePoint antiguas (es-es/estadisticas/Paginas/*.aspx) redirigen a /datos/estadisticas/...; /es-es/estadisticas redirige a estadisticas-bk, que responde 403.
-  - date_value no es el año sino su posición en el selector (2 es 2025); date_value=2025 devuelve la página sin ficheros y sin error.
   - Los xlsx no tienen URL por fecha y el title del enlace no sigue un patrón (CuadrosResumen_2022_12.xlsx, 01 Enero 2022.xlsx); emparejar cada id con el time datetime de su bloque y el tipo con el atributo type.
   - El cuadro mensual tiene 45 hojas con cabeceras en dos filas y ' ' como variación sin base; Resumen naturalezas3 está vacía y llena de #DIV/0!, la buena es Resumen naturalezas.
   - Las hojas Evolución Mensual e Interanual son plantillas internas con datos de 2019 a 2022; no sirven como serie. No localicé serie histórica en xlsx; hay que apilar los cuadros mes a mes.

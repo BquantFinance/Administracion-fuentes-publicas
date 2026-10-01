@@ -9,6 +9,9 @@ summary: >-
   Catálogo CSW INSPIRE y CODSI y servicios del Sistema Cartográfico Nacional: WFS en GML y API Features en GeoJSON
   de hidrografía, transportes, ocupación del suelo y direcciones, WMS, WMTS y WCS del MDT, y límites, NGBE y
   núcleos de población del IGN en www.ign.es y api-features.ign.es.
+alerts:
+  - En WMS 1.3.0 con CRS=EPSG:4258 el BBOX va en orden lat,lon; en orden lon,lat responde 200 con una imagen en blanco de 2 KB, sin error.
+  - En los WFS de servicios.idee.es, numberMatched repite numberReturned mientras quedan páginas (count=5 da 5; hits da 1381 en el mismo bbox); el total solo sale con resultType=hits y el final, cuando falta next.
 access: [ogc, api-rest, portal]
 auth: none
 formats: [xml, json, gml, geojson, png, jpg, geotiff]
@@ -77,12 +80,10 @@ gotchas:
   - GetCapabilities de wfs-inspire/hidrografia dio 500 NoApplicableCode «Builder is already complete» en 8 de 16 intentos el 30/09/2026 y en 0 de 10 el 01/10; reintentar. GetFeature no falló.
   - Los WFS de servicios.idee.es (deegree) solo sirven GML; outputFormat=application/geo+json o json responde 400 InvalidParameterValue. Las mismas capas salen en GeoJSON por api-features.idee.es.
   - Sin count, hidrografia (CountDefault 10000) no envió ni un byte en 60 s y ngbe no respondió en 45 s (01/10/2026); paginar siempre con count y startIndex y contar con resultType=hits.
-  - En los WFS de servicios.idee.es, numberMatched repite numberReturned mientras quedan páginas (count=5 da 5; hits da 1381 en el mismo bbox); el total solo sale con resultType=hits y el final, cuando falta next.
   - FILTER fes en la URL funciona en servicios.idee.es sobre campos de texto (net:inspireId/base:Identifier/base:localId); sobre net:fictitious da 500 con error SQL (probados true y 1) porque la columna es texto.
   - En el NGBE el filtro exige declarar xmlns:gn dentro de fes:Filter; solo con el parámetro namespaces= responde 500 «Cannot resolve namespace prefix gn».
   - Un topónimo repite entradas por localType (Albacete es provincia, municipio, capital de provincia, capital de municipio y entidad singular); NamedPlace no lleva código INE, solo inspireId ES.IGN.NGBE.{localId}.
   - www.ign.es/wfs-inspire solo tiene ngbe y unidades-administrativas (hidrografia, transportes, ocupacion-suelo y mdt dan 404); servicios.idee.es no tiene ngbe, ign-base, pnoa-ma ni mapa-raster (conexión cerrada).
-  - En WMS 1.3.0 con CRS=EPSG:4258 el BBOX va en orden lat,lon; en orden lon,lat responde 200 con una imagen en blanco de 2 KB, sin error.
 tips:
   - Para volcados grandes, iterar startIndex de 10000 en 10000 con count=10000 hasta que falte next y convertir cada GML con ogr2ogr a GeoPackage; las API Features paginan con limit y offset.
   - Para mapa base y ortofoto usar los WMTS de www.ign.es con TILEMATRIXSET=GoogleMapsCompatible en cualquier cliente XYZ; los WMS de servicios.idee.es sirven las capas temáticas (hidrografía, transporte, suelo, relieve).

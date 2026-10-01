@@ -9,6 +9,8 @@ summary: >-
   Exportaciones e importaciones de Aduanas por producto TARIC (2 a 8 dígitos), país y provincia, mensuales y
   anuales desde 1995, en JSON por API con token gratuito (usuario y contraseña) y en el portal de consulta con
   cuadros de mando. Definitivos hasta 2023 y provisionales después.
+alerts:
+  - pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error.
 access: [api-rest, portal, download]
 auth: registration
 formats: [json, csv, xlsx, html]
@@ -41,7 +43,6 @@ gotchas:
   - Sin token ObtenerDatos da 401 (Se ha denegado la autorización), en XML con Accept de navegador y en JSON con application/json o sin Accept; un token inválido da 500 sin cuerpo en Bearer y 401 en access_token.
   - El registro (nombre, correo y contraseña, sin captcha) envía un correo de activación; hasta activar la cuenta no hay token. La descarga masiva y la de metadatos del portal también exigen sesión.
   - Si falta cualquiera de los cinco parámetros la API responde 200 con un único registro cuyo mensaje es "Error de sintaxis. Faltan parámetros"; pe distingue mayúsculas (lastm da un Catch de conversión a date).
-  - pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error.
   - euros y kilos llegan como texto con coma decimal; periodo es texto ("Julio de 2026", "2025"); mensaje indica dato definitivo, provisional o provisional acumulado hasta el mes.
   - Los códigos de provincia son los del INE de dos dígitos (pr=28 Madrid), pero ObtenerProvincias añade 0 Total Nacional y 00 No determinado y no sigue el orden del código; la fuente primaria es la AEAT.
   - En ObtenerPaises el Id 0 es Total Mundo y la marca UE27 cubre 37 códigos, con España (011), Ceuta, Melilla, históricos (002 Bélgica y Luxemburgo) y especiales (951, 978); no sirve para filtrar los 27 Estados.

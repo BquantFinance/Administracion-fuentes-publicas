@@ -9,6 +9,9 @@ summary: >-
   95,8 millones de registros de especies en España (country=ES) y 666 datasets publicados desde España, en
   Darwin Core, por la API global de GBIF (JSON, sin clave), más la API del portal nacional (registros-ws.gbif.es,
   59,8 millones) y el IPT del nodo con los DwC-A de 603 recursos.
+alerts:
+  - La encina ibérica es sobre todo Quercus rotundifolia (2881550, aceptado aparte, 1.327.134 registros en España); Quercus ilex (2879098), lo que da species/match, solo 21.322.
+  - limit por encima de 300 se recorta a 300 sin aviso y offset + limit no puede pasar de 100.001 (400 en texto plano «Max offset of 100001 exceeded»); para más, descargas asíncronas o dividir por taxonKey o year.
 access: [api-rest, download, feed, portal]
 auth: none
 formats: [json, csv, zip, rss]
@@ -48,9 +51,7 @@ endpoints:
 quirks: [waf-blocks-bots]
 ids: []
 gotchas:
-  - limit por encima de 300 se recorta a 300 sin aviso y offset + limit no puede pasar de 100.001 (400 en texto plano «Max offset of 100001 exceeded»); para más, descargas asíncronas o dividir por taxonKey o year.
   - scientificName se resuelve contra el backbone igual que taxonKey (21.322 para Quercus ilex en ambos), pero una errata da count 0 sin error; species/match la corrige (matchType FUZZY).
-  - Quercus ilex (2879098) reúne 21.322 registros en España y Quercus rotundifolia (2881550), taxón aceptado aparte, 1.327.134; un nombre resuelto no garantiza el concepto buscado.
   - occurrence/count solo acepta algunos filtros (isGeoreferenced sí; gadmGid, hasCoordinate y hasGeospatialIssue dan 400); search con limit=0 da el count con cualquier filtro.
   - gadmGid acota por unidades GADM (ESP.8_1 Comunidad de Madrid, 5.069.352 registros; nivel 2 provincias, ESP.1.6_1 Jaén), sin equivalencia oficial con los códigos INE.
   - Cada registro trae issues (COORDINATE_ROUNDED, TAXON_ID_NOT_FOUND...); hasCoordinate=true y hasGeospatialIssue=false dejan 91,98 de los 95,8 millones.

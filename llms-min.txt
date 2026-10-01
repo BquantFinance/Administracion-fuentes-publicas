@@ -21,6 +21,7 @@ Fuentes: 95 · Recetas: 43 · Alcance actual: Administración General del Estado
 
 ## Reglas rápidas antes de programar contra una fuente
 
+- Lee primero `alerts` de la ficha: son trampas silenciosas (datos incompletos, distintos o cero sin error) y cambian la cifra que darías.
 - Lee `quirks`, `ids` y `gotchas` de la ficha: son hechos verificados con llamadas reales, no documentación oficial. `quirks` dice cómo configurar el cliente; `ids` con qué otras fuentes se cruza.
 - Muchos servidores .gob.es sirven certificados FNMT sin la cadena intermedia; curl y requests fallan hasta añadirla al bundle. Arreglo copiable en la guía Cliente HTTP (`python scripts/fnmt_bundle.py` genera ca-age.pem).
 - Envía siempre User-Agent y Accept de navegador; varios sitios (tesoro.es, seg-social.es) devuelven 403 a los valores por defecto de curl y requests.
@@ -29,9 +30,13 @@ Fuentes: 95 · Recetas: 43 · Alcance actual: Administración General del Estado
 - Ninguna fuente verificada documenta límites ni devolvió 429; para descargas masivas, peticiones secuenciales y reintento con espera ante 5xx. El Catastro bloquea la IP tras ráfagas de unas 15 peticiones y rechaza rangos de centros de datos (GitHub Actions incluido); Catastro, REData, datos.gob.es, BNE y FEGA se verifican mejor desde una IP residencial.
 - Si una URL que recuerdas falla, busca en la tabla de rutas muertas antes de dar la fuente por perdida.
 
+## Fichas con trampas silenciosas
+
+Antes de dar una cifra de estas fuentes, lee `alerts` en su ficha (datos incompletos, distintos o a cero sin error): aemps-cima-api, ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, bde-estadisticas, bdns-api, cnig-centro-descargas, cnmc-data, comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, datacomex, face-facturas, gbif-es, gencat-dades-obertes, gva-dadesobertes-api, idee-servicios, idescat-api, igae-ejecucion-presupuestaria, ign-sismologia, ine-api-tempus, ine-cartografia-censal, interior-criminalidad, ive-pegv-bancos-datos, junta-andalucia-datos-abiertos, mapa-sigpac, mites-estadisticas, puertos-estado-datos, segsocial-estadisticas, sepe-estadisticas.
+
 ## Fichas por sector
 
-Cada id es sources/<sector>/<id>.yaml; léela entera antes de llamar (endpoints con example y returns, quirks, gotchas).
+Cada id es sources/<sector>/<id>.yaml; léela entera antes de llamar (alerts, endpoints con example y returns, quirks, gotchas).
 
 - Legislación y boletines oficiales: boe-api-legislacion-consolidada, boe-api-sumario, boe-eli, boe-feeds, borme-api-sumario
 - Economía, finanzas y mercados: airef-datos, bde-estadisticas, cnmv-registros, ico-datos, tesoro-estadisticas

@@ -8,6 +8,8 @@ tags: [ine, api, series-temporales, ipc, epa, pib, padron, demografia, empresas]
 summary: >-
   Acceso programático a las 112 operaciones estadísticas del INE: metadatos (operaciones, tablas, variables,
   valores) y datos de tablas y series (IPC, EPA, PIB, padrón, natalidad, empresas). JSON y CSV, sin autenticación.
+alerts:
+  - En DATOS_TABLA nult cuenta periodos de la tabla; 24077 ya incluye 2026M09 (avance del IPC) sin dato del índice y nult=1 da Data vacío, mientras DATOS_SERIE cuenta datos y nult=1 da 2026M08.
 access: [api-rest]
 auth: none
 formats: [json, csv]
@@ -64,7 +66,6 @@ gotchas:
   - Los códigos de serie y los ids de tabla cambian con cada cambio de base; el IPC general fue IPC206446 (hasta 2021M12), IPC251852 (hasta 2025M12) y es IPC290751 (base 2025).
   - "TABLAS_OPERACION incluye tablas cerradas (2852, padrón por provincias hasta 2021) con Anyo_Periodo_fin o FechaRef_fin en ms ('null' si sigue viva); la 50902, ya fuera del listado, responde con datos hasta 2025M12."
   - DATOS_TABLA da Data del periodo más reciente al más antiguo y DATOS_SERIE al revés, con nult y con date (Abengibre en 29005, 2025 y 2024 frente a 2024 y 2025); ordenar por Anyo y FK_Periodo.
-  - En DATOS_TABLA nult cuenta periodos de la tabla; 24077 ya incluye 2026M09 (avance del IPC) sin dato del índice y nult=1 da Data vacío, mientras DATOS_SERIE cuenta datos y nult=1 da 2026M08.
   - DATOS_SERIE sin nult ni date da 404 con HTML, pero DATOS_TABLA devuelve todo el histórico (sin tv, tras un 301 a /jsCache/); SERIES_TABLA también redirige, así que seguir redirecciones, y page no pagina.
   - Serie u operación inexistente (también ipc en minúsculas) y date con guiones devuelven 200 con cuerpo vacío; un tv cuyo valor no está en la tabla da 500 con HTML.
   - Fecha es el primer día del periodo a medianoche de Madrid en epoch ms (22:00 o 23:00 UTC del día anterior); el periodo es Anyo más FK_Periodo (1-12 meses, 19-22 trimestres, 28 anual).

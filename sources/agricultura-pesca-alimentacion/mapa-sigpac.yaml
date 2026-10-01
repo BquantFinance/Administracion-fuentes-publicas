@@ -9,6 +9,8 @@ summary: >-
   Recintos SIGPAC de toda España (uso, superficie, pendiente, regadío, altitud) con OGC API Features,
   consultas REST por coordenadas o códigos (referencia catastral, Red Natura, nitratos), WMS, teselas
   vectoriales, listas de códigos y GeoPackage por provincia y campaña. Sin clave, licencia CC BY 4.0.
+alerts:
+  - El municipio es el código del Catastro, no el del INE; las capitales son 900 (Madrid 28:900, INE 28079; igual Toledo, Sevilla y Zaragoza) y 28:15 es Arroyomolinos. En los no capitales probados coincidió con el INE.
 access: [api-rest, ogc, download, portal]
 auth: none
 formats: [json, geojson, gpkg, zip, xml, protobuf, pdf]
@@ -55,7 +57,6 @@ endpoints:
 quirks: [url-drift]
 ids: [referencia-sigpac, referencia-catastral, ine-provincia]
 gotchas:
-  - El municipio es el código del Catastro, no el del INE; las capitales son 900 (Madrid 28:900, INE 28079; igual Toledo, Sevilla y Zaragoza) y 28:15 es Arroyomolinos. En los no capitales probados coincidió con el INE.
   - Las consultas de servicioconsultassigpac llegan siempre en gzip con Content-Encoding aunque no se pida; curl sin --compressed y urllib entregan bytes comprimidos, requests descomprime solo.
   - Un recinto, parcela o punto inexistente devuelve 200 con []; solo un código no numérico da 400 con el texto plano Bad Request.
   - refcatparcela repite la fila una vez por recinto (deduplicar) y referencia_cat suele tener 14 caracteres, pero en algunas parcelas trae 20 (41900A020090050000IQ en Sevilla); los 14 primeros identifican la parcela.

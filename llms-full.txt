@@ -2,7 +2,7 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 95 · Generado: 2026-10-01 · Formato: un bloque por fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
+Fuentes: 95 · Generado: 2026-10-01 · Formato: un bloque por fuente; '!!' marca trampas silenciosas (datos incompletos o distintos sin error); '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
 
 # SECTOR legislacion-boletines: Legislación y boletines oficiales
 
@@ -202,6 +202,7 @@ related: igae-ejecucion-presupuestaria, bde-estadisticas
 ## bde-estadisticas
 Banco de España – API de estadísticas y CSV de series | Banco de España
 summary: Unas 12.800 series (tipos de interés y de cambio, euríbor, crédito, deuda pública, balanza de pagos, cuentas financieras) por API JSON, por CSV de cada cuadro del Boletín Estadístico y por ZIP de capítulo. Los códigos de serie se localizan en catálogos CSV.
+!! listaSeries con rango=MAX devuelve como mucho las 1000 observaciones más recientes, sin aviso; el paro registrado (1118 desde 1933) llega desde 1943 aunque fechaInicio diga 1933. Completar con rango=AAAA.
 access: api-rest, download | auth: none | formats: json, csv, xlsx, zip | update: daily | status: active | verified: 2026-10-01
 coverage: Desde 1933 en la serie más antigua (paro registrado); cada serie trae su primera observación en el catálogo
 license: Reutilización libre con cita de la fuente
@@ -226,7 +227,6 @@ rate_limit: No documentado
 quirks: gzip-unannounced, latin1, soft-errors-200
 ! La API devuelve siempre gzip, aunque el cliente no lo pida o envíe Accept-Encoding identity (el 2026-10-01, con Content-Encoding gzip); curl sin --compressed y urllib reciben los bytes comprimidos.
 ! idioma es obligatorio y rango debe casar con la frecuencia; si no, 412 con JSON errNum, errMsgUsr y errMsgDebug. Una serie inexistente da 412 en listaSeries y 200 con errNum 404 en favoritas.
-! listaSeries con rango=MAX devuelve como mucho las 1000 observaciones más recientes, sin aviso; el paro registrado (1118 desde 1933) llega desde 1943 aunque fechaInicio diga 1933. Completar con rango=AAAA.
 ! Sin rango devuelve el tramo mínimo (3M en diarias, 30M en mensuales). MAX da 412 en diarias (pedir año a año) y en semestrales (codFrecuencia S, sin documentar), que solo aceptan rango=AAAA.
 ! Cada fecha de la API es ISO UTC con hora fija (08:15Z en verano, 09:15Z en invierno); mensuales el día 1 y trimestrales el día 1 del primer mes (2026-04-01 es el segundo trimestre).
 ! Los CSV fechan el trimestre por su último mes (JUN 2026 es el dato que la API fecha 2026-04-01) y en español (04 ENE 1999, ENE 1981); convertir con un mapa de meses antes de cruzar con la API.
@@ -481,6 +481,7 @@ related: igae-ejecucion-presupuestaria, hacienda-central-informacion, ine-codigo
 ## igae-ejecucion-presupuestaria
 IGAE – Ejecución presupuestaria y contabilidad nacional | Intervención General de la Administración del Estado (IGAE)
 summary: Déficit y operaciones no financieras de las AAPP en contabilidad nacional (mensual por subsector y CCAA, series trimestrales y anuales desde 1995), ejecución mensual del presupuesto del Estado en caja, cuentas anuales de las AAPP e inventario de entes públicos (INVENTE) con API REST en JSON.
+!! Los xlsx mensuales (M_) y trimestrales (T_) traen valores acumulados desde enero; el dato del mes o del trimestre es la diferencia con el periodo anterior.
 access: download, api-rest, portal | auth: none | formats: xlsx, xls, pdf, html, json | update: monthly | status: active | verified: 2026-10-01
 coverage: 1995- en contabilidad nacional anual y trimestral; mensual desde 2013; ejecución en caja desde 2003
 license: Reutilización libre con cita de la fuente
@@ -511,7 +512,6 @@ quirks: static-html, user-agent-browser, overwritten-in-place, soft-errors-200
 ids: invente, nif, dir3
 ! El servidor de la IGAE cierra la conexión sin respuesta (curl error 52) con los User-Agent de curl y python-requests; con uno de navegador responde 200. La API de INVENTE no filtra el User-Agent.
 ! imMensualEstado.aspx da 404 y la raíz www.pap.hacienda.gob.es/invente2/ devuelve 200 con una página «Acceso Denegado» del WAF; la aplicación vive en invente2/pagMenuPrincipalV2.aspx.
-! Los xlsx mensuales (M_) y trimestrales (T_) traen valores acumulados desde enero; el dato del mes o del trimestre es la diferencia con el periodo anterior.
 ! Los xlsx de ejecución en caja cambian de nombre según el año (MENSUAL JULIO 2026.xlsx, MENSUAL DICIEMBRE 2024 (EXCEL).xlsx, .xls con PROVISIONAL en 2015); rascar la página del año y codificar %20.
 ! En M_CCAA_Sub_Det las hojas Tabla{n}b dicen «Millones de euros» en el título pero contienen % del PIB; fiarse del sufijo a o b o del Indice.
 ! itnofinancierasAAPP solo trae el informe trimestral en PDF; los datos trimestrales y anuales de cada subsector están en los xlsx T_ y A_ de URL fija, con carpetas de nombre irregular.
@@ -551,6 +551,7 @@ related: igae-ejecucion-presupuestaria, hacienda-ovef, tesoro-estadisticas
 ## comunidad-madrid-estadistica-api
 Instituto de Estadística de la Comunidad de Madrid – API eDatos | Instituto de Estadística de la Comunidad de Madrid
 summary: API REST de la plataforma eDatos del Instituto (agencia IECM): 278 operaciones y 858 datasets con datos propios de Madrid (PIB municipal, contabilidad trimestral, nacimientos y defunciones por municipio, barrio o zona de salud, afiliación). JSON o XML, exportación a CSV, sin clave.
+!! limit por encima de 1000 se recorta a 1000 sin aviso; paginar con offset hasta total.
 access: api-rest | auth: none | formats: json, xml, csv, zip | update: monthly | status: active | verified: 2026-10-01
 coverage: Según operación; contabilidad trimestral desde 2010, PIB municipal desde 2021
 license: CC BY 4.0 (metadata.license de cada dataset)
@@ -578,7 +579,6 @@ ids: ine-municipio, nuts
 ! Un código inexistente en dim no da error, responde 200 con observaciones vacías; comprobar que cada código pedido vuelve en representations.
 ! Sin la extensión .json la API responde XML; el dataset inexistente da 404 con JSON code exception.statistical_resources.dataset.not_found.
 ! La lista de datasets repite cada id una vez por versión (1.0, 1.1, 1.2); pedir ~latest en la ruta de datos y de exportación para la vigente.
-! limit por encima de 1000 se recorta a 1000 sin aviso; paginar con offset hasta total.
 ! La exportación csv_comma no devuelve un CSV sino un ZIP con observaciones y atributos, aunque la ruta diga csv.
 ! Territorio: ES30 es la Comunidad (NUTS 2) y los municipios llevan el código INE de 5 dígitos; distritos de Madrid como 28079_D17 y barrios como BARRIO_20010101_28079_B044 (distrito 04, barrio 4).
 ! El estado de cada dato (P provisional) va en attributes como otra cadena separada por ' | ', paralela a observations.
@@ -593,6 +593,7 @@ related: ine-api-tempus, ine-codigos-territoriales, comunidad-madrid-datos-abier
 ## idescat-api
 Idescat – API de tablas (JSON-stat), El municipio en cifras y búsqueda de población | Institut d'Estadística de Catalunya (Idescat)
 summary: APIs REST sin clave del Idescat. Tablas de 33 estadísticas (padrón, censo, PIB trimestral, renta, afiliación, proyecciones) en JSON-stat por Cataluña, provincia, comarca, municipio, distrito y sección censal; ficha municipal EMEX con unos 230 indicadores y población por entidad.
+!! Los municipios van con 6 dígitos (INE de 5 más dígito de control, 080193 Barcelona); en taules MUN=08019 se ignora en silencio y devuelve los 948 municipios, mientras EMEX sí acepta 08019.
 access: api-rest | auth: none | formats: json, xml | update: daily | status: active | verified: 2026-10-01
 coverage: Según estadística; padrón por municipio 1998-2025 (pmh 446/477) y por sección censal 2000-2022
 license: Reutilización con cita y enlace al Idescat; las condiciones de uso prohíben alterar datos, metadatos o enlaces y enmarcar sus páginas
@@ -625,7 +626,6 @@ docs_url: https://www.idescat.cat/dev/api/?lang=es
 rate_limit: No documentado; las condiciones de uso se reservan limitar peticiones repetidas desde un mismo origen. Sin 429 en la verificación.
 quirks: json-object-or-list, soft-errors-200
 ids: ine-municipio, ine-provincia, seccion-censal
-! Los municipios van con 6 dígitos (INE de 5 más dígito de control, 080193 Barcelona); en taules MUN=08019 se ignora en silencio y devuelve los 948 municipios, mientras EMEX sí acepta 08019.
 ! Un código de filtro inexistente (SEX=X) no da error; devuelve todas las categorías de esa dimensión con HTTP 200. Comprobar size antes de leer value.
 ! Las secciones censales llevan 11 dígitos (municipio de 6 + distrito 2 + sección 3, 08019301001); quitar el sexto dígito para el código INE de 10. El padrón por sección acaba en 2022.
 ! Pasar de 20.000 celdas devuelve 416 con JSON class error e id 05 (el padrón municipal completo son 79.632); trocear por YEAR o con _LAST_.
@@ -698,6 +698,7 @@ related: junta-andalucia-datos-abiertos, ine-api-tempus, ine-codigos-territorial
 ## ine-api-tempus
 INE – API JSON (Tempus3) | Instituto Nacional de Estadística (INE)
 summary: Acceso programático a las 112 operaciones estadísticas del INE: metadatos (operaciones, tablas, variables, valores) y datos de tablas y series (IPC, EPA, PIB, padrón, natalidad, empresas). JSON y CSV, sin autenticación.
+!! En DATOS_TABLA nult cuenta periodos de la tabla; 24077 ya incluye 2026M09 (avance del IPC) sin dato del índice y nult=1 da Data vacío, mientras DATOS_SERIE cuenta datos y nult=1 da 2026M08.
 access: api-rest | auth: none | formats: json, csv | update: daily | status: active | verified: 2026-10-01
 coverage: Según operación; IPC general: índice desde 2002M01 (tabla 24077), variación mensual desde 1961M02 y anual desde 1962M01 (76134)
 license: Reutilización libre con cita de la fuente (licencia INE compatible CC BY 4.0)
@@ -738,7 +739,6 @@ quirks: errors-html-or-xml, soft-errors-200
 ! Los códigos de serie y los ids de tabla cambian con cada cambio de base; el IPC general fue IPC206446 (hasta 2021M12), IPC251852 (hasta 2025M12) y es IPC290751 (base 2025).
 ! TABLAS_OPERACION incluye tablas cerradas (2852, padrón por provincias hasta 2021) con Anyo_Periodo_fin o FechaRef_fin en ms ('null' si sigue viva); la 50902, ya fuera del listado, responde con datos hasta 2025M12.
 ! DATOS_TABLA da Data del periodo más reciente al más antiguo y DATOS_SERIE al revés, con nult y con date (Abengibre en 29005, 2025 y 2024 frente a 2024 y 2025); ordenar por Anyo y FK_Periodo.
-! En DATOS_TABLA nult cuenta periodos de la tabla; 24077 ya incluye 2026M09 (avance del IPC) sin dato del índice y nult=1 da Data vacío, mientras DATOS_SERIE cuenta datos y nult=1 da 2026M08.
 ! DATOS_SERIE sin nult ni date da 404 con HTML, pero DATOS_TABLA devuelve todo el histórico (sin tv, tras un 301 a /jsCache/); SERIES_TABLA también redirige, así que seguir redirecciones, y page no pagina.
 ! Serie u operación inexistente (también ipc en minúsculas) y date con guiones devuelven 200 con cuerpo vacío; un tv cuyo valor no está en la tabla da 500 con HTML.
 ! Fecha es el primer día del periodo a medianoche de Madrid en epoch ms (22:00 o 23:00 UTC del día anterior); el periodo es Anyo más FK_Periodo (1-12 meses, 19-22 trimestres, 28 anual).
@@ -837,6 +837,7 @@ related: ine-api-tempus
 ## ive-pegv-bancos-datos
 IVE – Bancos de datos del Portal Estadístico de la GV (BDT y BDO) | Institut Valencià d'Estadística (IVE)
 summary: Tablas del IVE por municipio, comarca y provincia (pobreza comarcal, renta per cápita, directorio de empresas, superficies de cultivo, indicadores demográficos, industria) con descarga estática por código de consulta en CSV, xlsx y PC-Axis. El INE no da la escala comarcal.
+!! El CSV omite las celdas confidenciales desde 2023 (la fila desaparece) y xlsxestados las marca c; antes de 2023 el guion era secreto estadístico y desde 2023 significa no aplicable.
 access: download, portal | auth: none | formats: csv, xlsx, xls, px | update: annual | status: active | verified: 2026-10-01
 coverage: Según tabla; series municipales desde 2002 (indicadores demográficos hasta 2025, superficies de cultivo hasta 2024)
 license: Aviso legal del PEGV sin licencia abierta explícita (prohíbe comercializar el acceso); las tablas replicadas en dadesobertes.gva.es figuran como CC BY
@@ -863,7 +864,6 @@ ids: ine-municipio
 ! cons cambia de forma según el host; en bdt es solo la consulta (C2D3883) y en bdo variable y consulta (V0308_C1D0355). Usar el de un host en el otro devuelve la página de error.
 ! Un cons erróneo o una URL sin form responden 200 con HTML (En este momento no podemos mostrarle resultados); comprobar Content-Type application/octet-stream antes de parsear.
 ! El decimal depende del formato; csvpunto y csvtab usan coma (11,282) y csvcoma punto (11.282), que se confunde con miles. Unidades (miles de euros) y notas solo van en el xlsx.
-! El CSV omite las celdas confidenciales desde 2023 (la fila desaparece) y xlsxestados las marca c; antes de 2023 el guion era secreto estadístico y desde 2023 significa no aplicable.
 ! Las tablas de una sola medida traen una columna vacía de más en la cabecera (Años;Territorio;;Valor) y filas de tres campos; con pandas el valor cae en la columna sin nombre.
 ! La columna territorial mezcla municipios (03001 - Atzúbia, l'), comarcas solo por nombre, provincias y Comunitat; quedarse con las filas que empiezan por cinco dígitos o se cuenta doble.
 ! Las comarcas siguen la Ley 2/2020 desde los datos de 2023 y la demarcación de 1988 antes; L'Horta Oest sale vacía desde 2023 y la comarca de la capital figura como València. (con punto) en el BDT.
@@ -882,6 +882,7 @@ related: ine-api-tempus, ine-codigos-territoriales, gva-dadesobertes-api, aeat-e
 ## bdns-api
 BDNS – Base de Datos Nacional de Subvenciones (API REST) | Intervención General de la Administración del Estado (IGAE)
 summary: Convocatorias (655000), concesiones, ayudas de Estado, minimis, grandes beneficiarios, sanciones, planes estratégicos y subvenciones a partidos políticos de todas las Administraciones (Estado, CCAA, EELL). API REST JSON paginada sin autenticación y exportación a CSV y xlsx.
+!! La exportación pagina como la búsqueda; sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso. Pasar page y pageSize (tope 10000).
 access: api-rest, download, portal | auth: none | formats: json, csv, xlsx | update: daily | status: active | verified: 2026-10-01
 coverage: Convocatorias desde 2014; concesiones desde 2016 según administración
 license: Reutilización con las restricciones del aviso legal, repetido en cada respuesta (campo advertencia)
@@ -910,7 +911,6 @@ ids: bdns, nif, invente
 ! Las fechas de filtro van en dd/mm/aaaa; en ISO (2026-09-01) responde 400 con JSON de campos codigo y errores.
 ! pageSize mayor de 10000 no da error, devuelve 10000. La respuesta es un Page de Spring (content, totalElements, totalPages, last) más el campo advertencia con el aviso legal.
 ! beneficiario junta NIF y nombre (en ayudasestado separados por guion); las personas físicas llevan el DNI enmascarado con formas distintas (***0456**, ****7918*, ***0647).
-! La exportación pagina como la búsqueda; sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso. Pasar page y pageSize (tope 10000).
 ! La exportación exige vpd (GE es el portal general) o responde 400 "No se ha informado el portal"; el CSV llega en windows-1252, no en UTF-8.
 ! Por beneficiario se filtra con nifCif (verificado en concesiones, minimis, ayudasestado y grandesbeneficiarios) o con beneficiario=idPersona; beneficiario con un NIF da 400.
 ! La documentación es un Swagger UI dentro de la aplicación Angular (docs_url); no hay URL estable del fichero OpenAPI. Un endpoint inexistente devuelve 404 con HTML de Tomcat.
@@ -981,6 +981,8 @@ related: bdns-api, hacienda-registro-licitadores, dir3-directorio
 ## mites-estadisticas
 Ministerio de Trabajo – Estadísticas laborales y REGCON | Subdirección General de Estadística y Análisis Sociolaboral
 summary: Estadísticas de convenios colectivos, accidentes de trabajo, huelgas, regulación de empleo, ETT, cooperativas y mediación, con avances mensuales y monográficas anuales en xlsx y xls, más REGCON, el registro de convenios, acuerdos y planes de igualdad con búsqueda pública y exportación a Excel.
+!! Los avances mensuales son acumulados desde enero (Avance enero - julio 2026) frente al mismo periodo del año anterior; restar meses para obtener el dato de un mes.
+!! REGCON no necesita consulta_token_value_id (lo rellena el JavaScript con la hora en ms), pero ?pagina=N sin la cookie de la búsqueda devuelve en silencio el registro entero (177.915).
 access: download, portal | auth: none | formats: xlsx, xls, pdf, html | update: monthly | status: active | verified: 2026-10-01
 coverage: Accidentes desde 1988 (PDF hasta 1998), monográficas 2014-2025 y avances mensuales desde diciembre de 2020; convenios desde 2006 y monográficas 2016-2024; REGCON con 177.915 registros
 license: Reutilización libre con cita de la fuente
@@ -1005,9 +1007,7 @@ ids: codigo-convenio, cnae
 ! Una página o fichero inexistente responde 302 a /error.htm, que da 200 en HTML («Página no encontrada»); con redirecciones automáticas comprobar Content-Type antes de parsear.
 ! Las rutas /estadisticas/cct/welcome.htm y /estadisticas/eat/welcome.htm responden 200 con un aviso sin datos que remite a /es/estadisticas/condiciones_trabajo_relac_laborales/.
 ! Las carpetas de avances no son uniformes (CCT09SepAv, CCT08AGOAV, cct26agoav) y las monográficas cuelgan de TABLAS ESTADISTICAS, con espacio; tomar los enlaces de la página y codificar %20.
-! Los avances mensuales son acumulados desde enero (Avance enero - julio 2026) frente al mismo periodo del año anterior; restar meses para obtener el dato de un mes.
 ! Desde 2026 la actividad va en CNAE 2025, también en la monografía CCT 2024 revisada (registrados hasta junio de 2026); no encadenar con tablas en CNAE 2009 sin recodificar.
-! REGCON no necesita consulta_token_value_id (lo rellena el JavaScript con la hora en ms), pero ?pagina=N sin la cookie de la búsqueda devuelve en silencio el registro entero (177.915).
 ! En REGCON, buscar por fechas sin los campos ocultos del formulario (_idEstadoVigencia=1, _idTipoTramiteConsPublica=1...) responde 200 con «Error en la aplicación» y un código; enviarlos siempre.
 ! idCnaesBusqueda lleva ids internos del desplegable (división 56 es 28 en CNAE 2009 y 1676 en CNAE 2025); el id fija la clasificación (5479 frente a 164 resultados) y la consulta tarda 1 a 3 minutos.
 ! REGCON separa consultas en /regcon/pub/ (consultaPublicaEstatal para el registro actual, consultaAntiguos y consultaPublicaRegconAntiguo para el histórico).
@@ -1017,6 +1017,7 @@ related: sepe-estadisticas, segsocial-estadisticas
 ## segsocial-estadisticas
 Seguridad Social – Afiliación, pensiones, IMV y MCVL | Secretaría de Estado de la Seguridad Social y Pensiones (TGSS, INSS)
 summary: Afiliación (media mensual y último día) por régimen, provincia, CNAE, sexo y municipio, la municipal en un xlsx largo con URL fija; pensiones contributivas por clase e importe; nómina del Ingreso Mínimo Vital; bases de cotización; Muestra Continua de Vidas Laborales bajo solicitud.
+!! En MUNCNAE los afiliados de 1 a 4 son el texto «<5» (56 % de las filas) y COD MUNICIPIO pierde el cero inicial; rellenar a cinco dígitos y no sumar «<5» como cero.
 access: download, portal | auth: none | formats: xlsx, pdf | update: monthly | status: active | verified: 2026-10-01
 coverage: Afiliación media en xlsx anuales desde 2021 y serie por regímenes; afiliación municipal mensual desde enero de 2023; pensiones del último mes; nóminas del IMV de 2024 a 2026
 license: Reutilización libre con cita de la fuente
@@ -1041,7 +1042,6 @@ ids: cnae, ine-municipio, ine-provincia
 ! Las secciones se anidan por códigos ESTnn (EST8/EST10/EST290) o por uuid (IMV, afiliación municipal) y cada fichero de wcm/connect lleva otro uuid que cambia en cada publicación.
 ! Afiliación media mensual (EST290) y afiliación a último día (EST305) son series distintas con cifras distintas.
 ! Los xlsx tienen varias hojas con fila de título y cabeceras combinadas; no leer como CSV ni con header=0.
-! En MUNCNAE los afiliados de 1 a 4 son el texto «<5» (56 % de las filas) y COD MUNICIPIO pierde el cero inicial; rellenar a cinco dígitos y no sumar «<5» como cero.
 ! Septiembre de 2025 tiene MUNCNAE0925.xlsx y la revisión MUNCNAE0925R.xlsx, que es la que enlaza la página; construir el nombre da la versión superada.
 ! La afiliación por actividad pasa a CNAE 2025 en 2026 (Afiliación 2026_CNAE25.xlsx, MUNCNAE desde 0126) frente a CNAE 2009 antes; no encadenar series sin recodificar.
 ! La MCVL no se descarga; se solicita y se entrega bajo convenio.
@@ -1053,6 +1053,7 @@ related: sepe-estadisticas, igae-ejecucion-presupuestaria, mites-estadisticas
 ## sepe-estadisticas
 SEPE – Paro registrado, contratos y prestaciones | Servicio Público de Empleo Estatal (SEPE)
 summary: Paro registrado, demandantes, contratos y prestaciones por desempleo, mensuales: avances en xls con URL fija y series desde 2001, paro y contratos de todos los municipios con código INE en un xls por mes, y desglose por división CNAE, sexo y edad de capitales y municipios de más de 20.000.
+!! Los valores de 1 a 4 llegan como texto «<5» (secreto estadístico) mezclados con enteros, ceros y celdas vacías; convertir antes de sumar y no tratar «<5» como cero.
 access: download, portal | auth: none | formats: xls, pdf, html, rss | update: monthly | status: active | verified: 2026-10-01
 coverage: Todos los municipios desde mayo de 2005; por actividad, capitales y más de 45.000 habitantes desde 2009 y de 20.000 a 45.000 desde 2017; series nacionales desde enero de 2001
 license: Reutilización libre con cita de la fuente
@@ -1077,7 +1078,6 @@ ids: ine-municipio, cnae
 ! HEAD devuelve 403 en los ficheros; usar GET, que admite Range.
 ! municipios.html (todos los municipios por provincia) llega hasta el último mes; municipios-20-45 y municipios-capitales son otras tablas con desglose por actividad, no su continuación.
 ! Los xls por actividad (Muniacteco_20-45, Municipios_acteco) identifican provincia y municipio solo por nombre en filas de título; el código INE está en ESTADISTICA_MUNICIPIOS.xls y MUNI_{PROVINCIA}.
-! Los valores de 1 a 4 llegan como texto «<5» (secreto estadístico) mezclados con enteros, ceros y celdas vacías; convertir antes de sumar y no tratar «<5» como cero.
 ! xlrd falla en parte de los xls (evolparoseries, MUNI_*, Muniacteco; Expected little-endian marker) y LibreOffice no convirtió ninguno de los probados; pandas con engine calamine los lee todos.
 ! En paroprovsector, parosexoedadprov y evolprovsectores la primera columna numera filas de 1 a 62 con provincias y totales de comunidad intercalados (9 ANDALUCIA), no es el código INE.
 ! En evolparo.xls la variación anual del año en curso llega como texto con coma decimal ('-6,17') y la del año anterior como número.
@@ -1092,6 +1092,8 @@ related: ine-api-tempus, segsocial-estadisticas, ine-codigos-territoriales, mite
 ## ayuntamiento-barcelona-datos-abiertos
 Ayuntamiento de Barcelona – Open Data BCN (API CKAN y DataStore) | Ayuntamiento de Barcelona
 summary: 555 datasets del Ayuntamiento de Barcelona (padrón por sección censal desde 1997, accidentes de la Guardia Urbana, movilidad, vivienda, IBI, subvenciones, presupuesto) sobre CKAN 2.6. La API de acciones y el DataStore (búsqueda y SQL) responden sin clave; las descargas pasan por un reto anti-bot.
+!! El padrón municipal que publica el Ayuntamiento no es la cifra oficial; Barcelona a 1-1-2025 suma 1.732.066 frente a 1.731.649 del padrón oficial (idescat-api) y 1.713.247 del Censo anual del INE.
+!! El datastore puede no coincidir con el fichero; esm-bcn-evo 2024 tiene 1.250 filas en el datastore para un CSV declarado de 539 MB. Comparar COUNT(*) con size antes de fiarse.
 access: api-rest, download | auth: none | formats: json, csv, xml, geojson, gpkg, shp, zip | update: daily | status: active | verified: 2026-10-01
 coverage: Según dataset; padrón por sección censal 1997-2026 con un recurso por año, accidentes de la Guardia Urbana desde 2010
 license: CC BY 4.0 en los 555 datasets (license_id CC-BY-4.0)
@@ -1120,8 +1122,6 @@ ids: seccion-censal, nif
 ! datastore_search devuelve 100 filas por defecto y _links.next omite el prefijo /data (/api/3/action/...), que pedido tal cual cae en el reto anti-bot; anteponer /data o paginar con offset.
 ! limit=0 no devuelve total en esta versión (CKAN 2.6.9); contar con datastore_search_sql y SELECT COUNT(*).
 ! Seccio_Censal es distrito más sección sin ceros (1001, 10089); el código INE de 10 dígitos es 08019 más Seccio_Censal rellenada con ceros hasta 5 cifras (0801901001).
-! El padrón municipal que publica el Ayuntamiento no es la cifra oficial; Barcelona a 1-1-2025 suma 1.732.066 frente a 1.731.649 del padrón oficial (idescat-api) y 1.713.247 del Censo anual del INE.
-! El datastore puede no coincidir con el fichero; esm-bcn-evo 2024 tiene 1.250 filas en el datastore para un CSV declarado de 539 MB. Comparar COUNT(*) con size antes de fiarse.
 ! Columnas en catalán con mayúsculas, acentos, espacios o símbolos (Número_expedient, Causa conductor, Total_Quota_Ajuntament_€); hay fechas como texto dd.mm.aaaa (Data_Convocatoria) junto a timestamps.
 ! Bicing en tiempo real y aparcamientos B:SM exigen token (token_required Yes, recursos securitzat); el portal Barcelona Dades tiene API aparte que responde 401 sin X-IBM-Client-Id personal.
 + Flujo típico. package_show para localizar el resource_id de cada año y datastore_search_sql para filtrar y agregar en servidor.
@@ -1133,6 +1133,8 @@ related: idescat-api, gencat-dades-obertes, ine-cartografia-censal, datos-gob-es
 ## ayuntamiento-madrid-datos-abiertos
 Ayuntamiento de Madrid – Portal de datos abiertos (API CKAN y API dinámica) | Ayuntamiento de Madrid
 summary: 673 conjuntos del Ayuntamiento en CKAN 2.9.11: padrón mensual por sección y edad, accidentes, censo de locales, presupuestos, calidad del aire y tráfico en tiempo real. API JSON, datastore con filtros, DCAT, feed Atom y una API dinámica con filtros por campo en ciudadesabiertas.madrid.es.
+!! En el datastore todos los campos son text: sort da 1, 10, 11... 2 y filters exige el valor como texto ({"COD_DISTRITO":"21"}); convertir tipos en local.
+!! En calidad del aire en tiempo real las horas aún no medidas llegan como 0 con validación N; filtrar por Vnn igual a V. Los filtros por campo de calair_tiemporeal devolvieron 0 registros.
 access: api-rest, download, feed | auth: none | formats: json, csv, xml, xlsx, xls, zip, txt, kml, shp, ttl, atom | update: realtime | status: active | verified: 2026-10-01
 coverage: Según conjunto; calidad del aire desde 2001, accidentes desde 2010, padrón del mes en curso
 license: CC BY 4.0 en cada conjunto (license_id cc-by) y condiciones de uso del portal
@@ -1165,11 +1167,9 @@ ids: dir3, seccion-censal, ine-municipio
 ! La API del portal antiguo murió con la migración a CKAN; /egob/catalogo.json y /egob/catalogo/{id}.json dan 404 y algunos ficheros /egob/catalogo/{id}.csv redirigen 302 a un recurso con otro número.
 ! datastore_search_sql está tras Akamai; un SELECT en la URL o en POST JSON recibió 403 en HTML y, tras varios, todo datos.madrid.es respondió 403 cerca de un minuto. Usar datastore_search.
 ! Akamai responde 403 Access Denied en HTML a peticiones sueltas, también a la API; reintentar tras unos segundos antes de dar un recurso por caído.
-! En el datastore todos los campos son text: sort da 1, 10, 11... 2 y filters exige el valor como texto ({"COD_DISTRITO":"21"}); convertir tipos en local.
 ! Con curl las llaves de filters se interpretan como patrón glob y el JSON llega roto (409 Cannot parse JSON); usar -g o --data-urlencode.
 ! El número del recurso no indica el año ni el orden; en accidentes 300228-3 es 2023 y 300228-1 es 2025. Leer description en package_show.
 ! En el padrón COD_DIST_SECCION 2062 es distrito 2 y sección 062: la sección censal INE es 28079 + 02 + 062; COD_DIST_BARRIO 205 es distrito 2, barrio 5. Los textos llegan rellenos con espacios.
-! En calidad del aire en tiempo real las horas aún no medidas llegan como 0 con validación N; filtrar por Vnn igual a V. Los filtros por campo de calair_tiemporeal devolvieron 0 registros.
 ! La consulta padron_estadistica de la API dinámica termina en 2023 (fecha_dato); el padrón vigente es el CSV mensual del conjunto 200076-0-padron.
 ! SPARQL no conseguido el 2026-10-01: GET a /sparql devuelve la página HTML con 200 y POST respondió 400 Invalid or unsupported SPARQL query y después 403.
 + Enlazar /dataset/{name}/resource/{id}/download, que sirve el fichero vigente aunque cambie el nombre con fecha que publica package_show.
@@ -1183,6 +1183,7 @@ related: comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, dato
 ## comunidad-madrid-datos-abiertos
 Comunidad de Madrid – Catálogo de datos abiertos (API CKAN) | Comunidad de Madrid
 summary: CKAN 2.9 con 177 conjuntos de las consejerías (calidad del aire diaria, polen, centros educativos, farmacias, registros, GTFS del Consorcio, elecciones autonómicas) y 2086 tablas del Instituto de Estadística (bancos Almudena municipal, Baco y Desvan). API JSON, datastore y DCAT sin clave.
+!! El datastore no siempre refleja el CSV: padron_por_sexo tenía 5000 de 18718 filas (hasta 2022), el mensual de calidad del aire 1000 de 5880 y el diario 0 de 180; comparar total con el fichero.
 access: api-rest, download | auth: none | formats: json, csv, zip, ttl, rdf | update: daily | status: active | verified: 2026-10-01
 coverage: Según conjunto; padrón municipal por sexo desde 1985, calidad del aire del día y del mes en curso
 license: CC BY 4.0 en cada conjunto (license_id cc-by)
@@ -1206,7 +1207,6 @@ docs_url: https://www.comunidad.madrid/datos-abiertos/reutiliza-datos-abiertos-c
 rate_limit: No documentado; ningún 429 ni bloqueo en las peticiones secuenciales de la verificación del 2026-10-01
 quirks: latin1, overwritten-in-place, datastore-incomplete
 ids: ine-municipio
-! El datastore no siempre refleja el CSV: padron_por_sexo tenía 5000 de 18718 filas (hasta 2022), el mensual de calidad del aire 1000 de 5880 y el diario 0 de 180; comparar total con el fichero.
 ! Las tablas del Instituto (organización estadistica) van en CSV ISO-8859-1 con decimal punto y las de consejerías en UTF-8 con BOM y decimal coma; todas con separador punto y coma.
 ! En las tablas Almudena el Código territorio municipal son 4 caracteres, municipio (3) más dígito de control y sin provincia (0796 es Madrid, 28079); los 2 dígitos 01 a 11 son zonas estadísticas.
 ! En calidad del aire provincia y municipio van separados y sin ceros (28;102 es 28102); cada hora hNN lleva su validación vNN y las horas sin dato llegan vacías con N.
@@ -1283,6 +1283,7 @@ related: datos-gob-es-api, bdns-api, placsp-datos-abiertos, face-facturas
 ## face-facturas
 FACe – Facturas electrónicas al sector público y directorio DIR3 | Secretaría General de Administración Digital
 summary: Punto general de entrada de facturas electrónicas: API pública JSON y CSV con las 50000 relaciones oficina contable, órgano gestor y unidad tramitadora (DIR3 y NIF) de las Administraciones adheridas, y servicios SOAP con certificado para presentar y consultar facturas.
+!! fulltext distingue mayúsculas y tildes (ayuntamiento de madrid da 0) y busca subcadenas (Ayuntamiento de Madrid trae también Madridanos y Madridejos); filtrar después por administration.code.
 access: api-rest, api-soap, download | auth: none | formats: json, csv, xml | update: realtime | status: active | verified: 2026-10-01
 coverage: Relaciones vigentes; facturas desde 2015, todas consultables en proveedores.face.gob.es (face.gob.es solo muestra las remitidas hasta el 27/02/2026)
 license: Directorio reutilizable; el envío y consulta de facturas exige certificado del proveedor
@@ -1302,7 +1303,6 @@ ids: dir3, nif
 ! face.gob.es es desde el 27/02/2026 solo consulta histórica; el portal y la API viven en proveedores.face.gob.es. Las rutas /es/directorio/administraciones y /es/facturas/estadisticas de la ficha anterior ya no dan datos.
 ! Solo relations es público; statistics responde 401 y administrations, administraciones y nifs dan 404.
 ! page=0, limit=0 y limit mayor de 1000 devuelven 500 con cuerpo [] en vez de un objeto de error; relations.json da 404, el JSON se pide sin extensión.
-! fulltext distingue mayúsculas y tildes (ayuntamiento de madrid da 0) y busca subcadenas (Ayuntamiento de Madrid trae también Madridanos y Madridejos); filtrar después por administration.code.
 ! og.identifier (NIF) falta en 9790 de 50187 relaciones y no está normalizado (Q2268231d en minúscula); fulltext no encuentra por NIF.
 ! El CSV llega en UTF-8 con BOM aunque Content-Type diga ISO-8859-1.
 ! relations.csv omite 27 relaciones de entes con código I y campo edp que sí devuelve el JSON; para el inventario completo paginar el JSON (51 páginas de 1000).
@@ -1314,6 +1314,7 @@ related: dir3-directorio, placsp-datos-abiertos
 ## gencat-dades-obertes
 Generalitat de Catalunya – Dades obertes (API Socrata SODA) | Generalitat de Catalunya
 summary: Unos 1.100 datasets de la Generalitat en Socrata (registro de entidades, contratación pública, subvenciones RAISC, alojamientos turísticos, meteorología XEMA, embalses, normativa del DOGC). API SODA con consultas SoQL en servidor, salida JSON, CSV y GeoJSON y exportación completa, sin clave.
+!! Sin $limit devuelve 1000 filas (JSON y CSV) sin avisar; paginar con $limit, $offset y $order=:id, porque el orden por defecto lo fija la vista (dia DESC en gn9e-3qhr) y no es único.
 access: api-rest, download | auth: none | formats: json, csv, geojson | update: daily | status: active | verified: 2026-10-01
 coverage: Según dataset; el 2026-10-01 el RAISC tenía 22,8 M de concesiones, contratación 1,98 M de publicaciones y el registro de entidades 90.751
 license: Cada dataset declara See Terms of Use (condiciones de uso del portal); citar la fuente
@@ -1339,7 +1340,6 @@ docs_url: https://dev.socrata.com/docs/endpoints.html
   devuelve: {results:[{resource:{id, name, description, updatedAt, data_updated_at, columns_field_name, columns_datatype}, classification:{domain_category, domain_tags, domain_metadata}, permalink, link}], resultSetSize}; limit=2000 devolvió los 1.106 de una vez
 rate_limit: Sin clave, cuota compartida por IP según la documentación de Socrata (429 al superarla); con cabecera X-App-Token, cuota propia. Sin 429 en la verificación.
 ids: ine-municipio, nif, dir3, bdns, eli
-! Sin $limit devuelve 1000 filas (JSON y CSV) sin avisar; paginar con $limit, $offset y $order=:id, porque el orden por defecto lo fija la vista (dia DESC en gn9e-3qhr) y no es único.
 ! El JSON trae todo como texto, también números y recuentos ('98.33', '90751'); convertir con columns[].dataTypeName de /api/views/{id}.json o con la cabecera x-soda2-types.
 ! Los fieldName se derivan del nombre catalán quitando lo no ASCII (Estació pasa a estaci, Georeferència a georefer_ncia, Títol a t_tol); copiarlos de la metadata, no deducirlos.
 ! rows.csv usa nombres visibles en catalán y fechas dd/mm/aaaa, mientras /resource/{id}.csv usa fieldName y fechas ISO; no mezclar los dos formatos en un mismo cargador.
@@ -1359,6 +1359,8 @@ related: idescat-api, ayuntamiento-barcelona-datos-abiertos, datos-gob-es-api, b
 ## gva-dadesobertes-api
 GVA – Portal de datos abiertos de la Generalitat Valenciana (API CKAN) | Generalitat Valenciana
 summary: Catálogo CKAN de la Generalitat Valenciana (1310 conjuntos de la GVA, el Institut Cartogràfic Valencià y la Universidad de Alicante): contratos, ERTE, turismo, cultura, cartografía. API JSON con datastore para consultar filas de los CSV, volcado CSV y DCAT-AP, sin autenticación.
+!! rows se recorta en silencio a 1000 (10 por defecto) en package_search y limit a 32000 (100 por defecto) en datastore_search; paginar con start u offset hasta count o total.
+!! Los recursos que enlazan a bdo.gva.es (IVE) tienen copia en el datastore atrasada y con columnas fantasma (Anos, 2017, 14); para esos datos descargar la url original (ive-pegv-bancos-datos).
 access: api-rest, download | auth: none | formats: json, csv, rdf, ttl, jsonld | update: daily | status: active | verified: 2026-10-01
 coverage: Catálogo desde 2019; contratos de la Generalitat desde 2013
 license: Creative Commons Attribution (license_id cc-by) en los 1310 conjuntos
@@ -1388,14 +1390,12 @@ docs_url: https://docs.ckan.org/en/latest/api/index.html
 rate_limit: No documentado; sin 429 en unas 50 peticiones secuenciales el 2026-10-01
 quirks: overwritten-in-place, datastore-incomplete, connection-reset-intermittent
 ids: ine-municipio, ine-provincia, nif, cpv, referencia-catastral
-! rows se recorta en silencio a 1000 (10 por defecto) en package_search y limit a 32000 (100 por defecto) en datastore_search; paginar con start u offset hasta count o total.
 ! _links.next es una ruta relativa sin host y sigue apareciendo después de la última página, con records vacío; parar cuando offset alcance total.
 ! datastore_search_sql cerró la conexión sin respuesta HTTP en GET y en POST (2026-10-01); usar datastore_search con filters y sort, o el volcado /datastore/dump/{id}.
 ! q en texto plano devolvió total 0 en el recurso de contratos 2026 con palabras que están en los datos; q como objeto por campo, q={"OBJETO":"ambulancia"}, sí filtró.
 ! El datastore infiere tipos por conjunto; en contratos los importes quedan como texto con coma decimal (262,5) y las fechas como texto, y los códigos INE pasan a numeric sin ceros (3001 por 03001).
 ! organization solo distingue generalitat-valenciana, icv y universidad-de-alicante; el órgano va en origen_datos, texto libre con variantes (IVE en castellano y valenciano, 308 vacíos), filtrable con fq.
 ! Las series se publican como un conjunto por periodo (eco-gvo-contratos-2013 a eco-gvo-contratos-2026, tra-erte-sol-2026-09); localizarlas con q=name:eco-gvo-contratos* y no fijar el nombre.
-! Los recursos que enlazan a bdo.gva.es (IVE) tienen copia en el datastore atrasada y con columnas fantasma (Anos, 2017, 14); para esos datos descargar la url original (ive-pegv-bancos-datos).
 ! Los CSV alojados vistos van en UTF-8 sin BOM y con punto y coma (GTFS con coma), pero fecha y decimal cambian por conjunto (12/01/2025 o 2024/11/22 13:35:03; 262,5 o 222.00) y hay cabeceras con espacios.
 ! El servidor resetea a veces la conexión en el saludo TLS, igual que pegv, bdo y bdt; reintentar tras 5 s. portaldadesobertes.gva.es, el portal informativo, no completó TLS desde este entorno el 2026-10-01.
 + datastore_info es el diccionario de columnas; en algunos conjuntos (contratos) los extras del dataset repiten la definición de los 72 campos.
@@ -1409,6 +1409,8 @@ related: datos-gob-es-api, placsp-datos-abiertos, ine-codigos-territoriales, ive
 ## junta-andalucia-datos-abiertos
 Junta de Andalucía – Portal de datos abiertos (API CKAN y API v0 con BOJA) | Junta de Andalucía
 summary: Catálogo CKAN 2.10 de la Junta de Andalucía (832 conjuntos de 72 organismos, 260 del IECA): presupuestos, tesorería, educación, medio ambiente, cultura. API JSON con datastore en 173 recursos y una API v0 aparte con OpenAPI (BOJA desde 1979, RPT, agenda, subvenciones), sin autenticación.
+!! datastore_active true no garantiza la tabla; 6 de 173 recursos dieron 404 Resource not found y las plantillas orgánicas tienen 1000 filas en el datastore frente a 36260 en el CSV. Contrastar total con el fichero.
+!! Se pierden ceros a la izquierda; el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine de la API v0 llega como entero (44001) o texto ('04001') según el registro.
 access: api-rest, download | auth: none | formats: json, csv, xls, xlsx, ods, kml, rdf, txt | update: daily | status: active | verified: 2026-10-01
 coverage: Catálogo desde 2017; BOJA desde 1979 en la API v0
 license: CC BY 4.0 en 786 de 832 conjuntos; 19 en CC BY-NC 4.0 y unos pocos «Consultar a la Consejería»
@@ -1439,10 +1441,8 @@ rate_limit: No documentado; sin 429 en unas 250 peticiones secuenciales el 2026-
 quirks: latin1, datastore-incomplete
 ids: ine-municipio, nif
 ! Los 525 recursos subidos (url_type upload) apuntan a gdc-pdpopendata-ckan.paas.junta-andalucia.es, host interno sin DNS público; la misma ruta en www.juntadeandalucia.es sí descarga el fichero.
-! datastore_active true no garantiza la tabla; 6 de 173 recursos dieron 404 Resource not found y las plantillas orgánicas tienen 1000 filas en el datastore frente a 36260 en el CSV. Contrastar total con el fichero.
 ! _links.next llega como //api/3/action/datastore_search?... (sin host ni /datosabiertos/portal); calcular la página siguiente con offset hasta total.
 ! datastore_search_sql responde 400 Action name not known, y /datastore/dump/{id} y /catalog.rdf dan 404 HTML del front Drupal; usar datastore_search y /dataset/{name}.rdf por conjunto.
-! Se pierden ceros a la izquierda; el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine de la API v0 llega como entero (44001) o texto ('04001') según el registro.
 ! Cada publicador sube su CSV; Educación usa ; y coma decimal en ISO-8859-1, Hacienda ; en UTF-8 y Transparencia , en UTF-8. Detectar separador y codificación por fichero.
 ! Los 156 recursos del IECA con formato CSV son la página HTML del visor BADEA; los datos están en su recurso JSON INTEROPERABLE, que es la API de la ficha ieca-api-badea.
 ! Los filtros de tema y formato son texto exacto; fq=vocab_field_activity_sector:"Sector público " lleva espacio final (sin él, 0 resultados), seguridad va en minúscula y format mezcla XML/Atom y xml/atom.
@@ -1559,6 +1559,7 @@ related: ine-codigos-territoriales, cnig-centro-descargas, idee-servicios
 ## cnig-centro-descargas
 IGN/CNIG – Centro de Descargas, servicios OGC y geocoder CartoCiudad | Instituto Geográfico Nacional y Centro Nacional de Información Geográfica
 summary: Producción del IGN (ortofotos PNOA, modelos del terreno, LiDAR, mapas, límites municipales oficiales, SIOSE) en un Centro de Descargas protegido por reCAPTCHA, más servicios WMS, WMTS y WFS INSPIRE sin restricción y el geocoder CartoCiudad, que devuelve el código INE.
+!! state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido.
 access: ogc, api-rest, download, portal | auth: none | formats: shp, gpkg, geotiff, laz, gml, geojson, json, png | update: irregular | status: active | verified: 2026-10-01
 coverage: PNOA desde 2004; cartografía histórica desde el siglo XIX; límites vigentes e históricos 2023 y 2024
 license: CC BY 4.0 (licencia de uso IGN, con cita)
@@ -1590,7 +1591,6 @@ ids: ine-municipio, ine-provincia, ccaa, referencia-catastral
 ! nationalCode es 34 + comunidad (2) + provincia (2) + municipio INE de 5 dígitos o 00000 (34090800000 provincia de Barcelona, 3,4 MB en GeoJSON; 34132828079 municipio de Madrid, 465 KB).
 ! findJsonp y candidatesJsonp envuelven la respuesta en callback(...); find, candidates y reverseGeocode dan JSON limpio, y find sin resultado responde 204 con cuerpo vacío.
 ! Sistema de referencia oficial ETRS89 (EPSG:4258 geográficas, 25829 a 25831 UTM); Canarias REGCAN95 (32628).
-! state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido.
 ! find ignora municipio_filter y toma el primer candidato (Calle Alcala 50 con municipio_filter=Madrid devolvió un portal de Ceuta); poner el municipio en q o filtrar con candidates.
 ! Con outputformat=geojson, find redondea la geometría a 4 decimales (unos 10 m) y renombra countryCode a countrycode; usar lat y lng de properties.
 + Límites sin reCAPTCHA en api-features.ign.es/collections/administrativeunit/items?nationalcode= (GeoJSON con nameunit y NUTS, en idee-servicios); en fichero, LILIM (shapefile 157 MB, GML 63 MB, GeoPackage 2023 y 2024).
@@ -1602,6 +1602,8 @@ related: idee-servicios, catastro-ovc, ine-codigos-territoriales
 ## idee-servicios
 IDEE – Catálogos CSW y servicios INSPIRE del IGN (WFS, WMS, WMTS, WCS) | Consejo Superior Geográfico, CNIG e IGN (Sistema Cartográfico Nacional)
 summary: Catálogo CSW INSPIRE y CODSI y servicios del Sistema Cartográfico Nacional: WFS en GML y API Features en GeoJSON de hidrografía, transportes, ocupación del suelo y direcciones, WMS, WMTS y WCS del MDT, y límites, NGBE y núcleos de población del IGN en www.ign.es y api-features.ign.es.
+!! En WMS 1.3.0 con CRS=EPSG:4258 el BBOX va en orden lat,lon; en orden lon,lat responde 200 con una imagen en blanco de 2 KB, sin error.
+!! En los WFS de servicios.idee.es, numberMatched repite numberReturned mientras quedan páginas (count=5 da 5; hits da 1381 en el mismo bbox); el total solo sale con resultType=hits y el final, cuando falta next.
 access: ogc, api-rest, portal | auth: none | formats: xml, json, gml, geojson, png, jpg, geotiff | update: irregular | status: active | verified: 2026-10-01
 coverage: Servicios vigentes; ocupación del suelo procede de SIOSE AR 2017; NGBE con fechas de versión 2018-2025
 license: Metadatos libres; datos del IGN CC BY 4.0 con cita; cada servicio ajeno con su licencia
@@ -1646,12 +1648,10 @@ ids: ine-municipio, ine-provincia, ccaa, ine-entidad-singular, nuts
 ! GetCapabilities de wfs-inspire/hidrografia dio 500 NoApplicableCode «Builder is already complete» en 8 de 16 intentos el 30/09/2026 y en 0 de 10 el 01/10; reintentar. GetFeature no falló.
 ! Los WFS de servicios.idee.es (deegree) solo sirven GML; outputFormat=application/geo+json o json responde 400 InvalidParameterValue. Las mismas capas salen en GeoJSON por api-features.idee.es.
 ! Sin count, hidrografia (CountDefault 10000) no envió ni un byte en 60 s y ngbe no respondió en 45 s (01/10/2026); paginar siempre con count y startIndex y contar con resultType=hits.
-! En los WFS de servicios.idee.es, numberMatched repite numberReturned mientras quedan páginas (count=5 da 5; hits da 1381 en el mismo bbox); el total solo sale con resultType=hits y el final, cuando falta next.
 ! FILTER fes en la URL funciona en servicios.idee.es sobre campos de texto (net:inspireId/base:Identifier/base:localId); sobre net:fictitious da 500 con error SQL (probados true y 1) porque la columna es texto.
 ! En el NGBE el filtro exige declarar xmlns:gn dentro de fes:Filter; solo con el parámetro namespaces= responde 500 «Cannot resolve namespace prefix gn».
 ! Un topónimo repite entradas por localType (Albacete es provincia, municipio, capital de provincia, capital de municipio y entidad singular); NamedPlace no lleva código INE, solo inspireId ES.IGN.NGBE.{localId}.
 ! www.ign.es/wfs-inspire solo tiene ngbe y unidades-administrativas (hidrografia, transportes, ocupacion-suelo y mdt dan 404); servicios.idee.es no tiene ngbe, ign-base, pnoa-ma ni mapa-raster (conexión cerrada).
-! En WMS 1.3.0 con CRS=EPSG:4258 el BBOX va en orden lat,lon; en orden lon,lat responde 200 con una imagen en blanco de 2 KB, sin error.
 + Para volcados grandes, iterar startIndex de 10000 en 10000 con count=10000 hasta que falte next y convertir cada GML con ogr2ogr a GeoPackage; las API Features paginan con limit y offset.
 + Para mapa base y ortofoto usar los WMTS de www.ign.es con TILEMATRIXSET=GoogleMapsCompatible en cualquier cliente XYZ; los WMS de servicios.idee.es sirven las capas temáticas (hidrografía, transporte, suelo, relieve).
 + Para altitudes de una zona, el WCS del MDT con SUBSET de unas centésimas de grado devuelve un GeoTIFF de pocos KB (89x89 píxeles para 0,02 grados en Elevacion4258_25).
@@ -1661,6 +1661,7 @@ related: cnig-centro-descargas, catastro-ovc, ine-codigos-territoriales, miteco-
 ## ine-cartografia-censal
 INE – Cartografía de secciones censales y callejero del Censo Electoral | Instituto Nacional de Estadística
 summary: Shapefile anual a 1 de enero de las secciones censales (36.669 en 2026, ETRS89 UTM 30) con códigos de sección, distrito, municipio, provincia, comunidad y NUTS desde 2001, las mismas geometrías en GeoJSON por API OGC y el callejero del Censo Electoral con sus variaciones semestrales.
+!! Cada colección anual de la API mezcla secciones (TIPO SECCIONADO, 36554 en 2025) y distritos (TIPO DISTRITO, CSEC 000, 10457); filtrar TIPO='SECCIONADO', porque TIPO='SECCION' devuelve 0 sin error.
 access: download, ogc, api-rest | auth: none | formats: shp, zip, pdf, txt, geojson, gml | update: annual | status: active | verified: 2026-10-01
 coverage: Seccionado 2001 y 2003-2026 (2002 da 404); en la API, 2007-2026 y censos 2001 y 2011; callejero nacional de julio desde 2001 y de enero desde 2011; variaciones desde 2011
 license: Reutilización libre con cita de la fuente (licencia INE compatible CC BY 4.0)
@@ -1685,7 +1686,6 @@ ids: seccion-censal, ine-municipio, ine-provincia, ccaa, nuts
 ! Desde 2011 el nombre interno cambia por año; carpeta España_Seccionado{AAAA}_ETRS89H30 en 2018, 2022, 2023, 2025 y 2026, Seccionado_2021 en 2021 y ninguna en el resto (SECC_CE_20110101_03_R_INE.shp en 2011).
 ! La codificación del DBF cambia por año (2026 en UTF-8 y 2025 en windows-1252 según su .CPG; la Á es C3 81 o C1; de 2012 a 2015 no hay .CPG); GDAL respeta el .cpg, un lector que lo ignore no.
 ! Las secciones se redibujan cada año; cruzar cada dato con el seccionado de su mismo año.
-! Cada colección anual de la API mezcla secciones (TIPO SECCIONADO, 36554 en 2025) y distritos (TIPO DISTRITO, CSEC 000, 10457); filtrar TIPO='SECCIONADO', porque TIPO='SECCION' devuelve 0 sin error.
 ! En la API, 2026 no es Secciones_2026 (404) sino SU.VectorStatisticalUnit; sin filtro cada petición tarda más de 20 s por el recuento total, con filtro CQL por CUSEC unos 2 s.
 ! La página no enlaza seccionado_2026.zip, caj_esp_012026.zip ni Var_Callejero_0725_0126.zip, que existen desde marzo de 2026; construir la URL por patrón y comprobarla con HEAD.
 ! La página remite a dis_registro.pdf (diseño de 2009) desde julio de 2025 y a la Orden de 11 de julio de 1997 antes; dis_registro.pdf solo describe VIAS y PSEUDOVÍAS.
@@ -1946,6 +1946,7 @@ related: aemet-opendata, miteco-banco-datos-naturaleza
 ## cnmc-data
 CNMC Data – Estadísticas de energía, telecomunicaciones, audiovisual y postal | Comisión Nacional de los Mercados y la Competencia (CNMC)
 summary: 210 datasets de la CNMC en un CKAN con datastore: electricidad y gas (cuotas de comercializadoras, cambios de suministrador, precios, garantías de origen, bono social), precios provinciales de carburantes, telecomunicaciones, audiovisual, transporte, postal y comercio electrónico.
+!! datastore_search recorta limit a 32000 sin error (result.limit dice el aplicado) y _links.next empieza por //api/3/, que urljoin toma como host; paginar con offset sobre el host o usar el dump.
 access: api-rest, download, portal | auth: none | formats: csv, json, xml | update: quarterly | status: active | verified: 2026-10-01
 coverage: Según dataset (extras periodo y frecuenciaActualizacion); series anuales, trimestrales y mensuales
 license: CC BY-SA 4.0 (license_title de los datasets; condiciones en data.cnmc.es/condiciones-de-uso)
@@ -1971,7 +1972,6 @@ quirks: url-drift, js-rendered
 ! Nombres de campo normalizados sin tildes ni ñ (compannia_comercializadora_de_gas); la etiqueta original está en fields[].info.label del datastore.
 ! El dump del datastore va con coma, punto decimal y cinco decimales fijos (2496967.00000) y _id primero; el CSV estático ds_*.csv va con punto y coma, coma decimal (0,732), CRLF y etiquetas originales.
 ! Un dataset es una tabla de una publicación o de un año (precios provinciales 2025 ds_13984_1, 2026 ds_24451_1), no una serie; 50 de los 88 trimestrales no se tocan desde 2024, mirar periodo y metadata_modified.
-! datastore_search recorta limit a 32000 sin error (result.limit dice el aplicado) y _links.next empieza por //api/3/, que urljoin toma como host; paginar con offset sobre el host o usar el dump.
 ! Demanda, generación y PVPC actuales no están aquí (solo precio final horario de 2019 a 2021) sino en ree-redata; el precio marginal del mercado, en omie-mercado.
 + pandas.read_csv('https://catalogodatos.cnmc.es/datastore/dump/{id}') carga la tabla directamente; para el catálogo completo, package_search?rows=1000 y fq=organization:org_energia.
 + package_search?q=title:"Precios diarios provinciales"&sort=metadata_modified desc&rows=1 devuelve el dataset del último año, que cambia de name cada año.
@@ -2128,6 +2128,7 @@ related: omie-mercado, cnmc-data, miteco-energia-estadisticas
 ## aemps-cima-api
 AEMPS CIMA – API REST de medicamentos autorizados y nomenclátor de prescripción | Agencia Española de Medicamentos y Productos Sanitarios (AEMPS)
 summary: Los 25.487 medicamentos registrados en España (20.464 autorizados): composición, principios activos, ATC, presentaciones con código nacional, estado, ficha técnica y prospecto en PDF, HTML y secciones, problemas de suministro y registro de cambios. JSON sin autenticación y nomenclátor XML diario.
+!! nombre y practiv1 buscan por subcadena; practiv1=ibuprofeno trae también DEXIBUPROFENO (260 frente a 253). Para un principio exacto, idpractiv1 con el id de maestras.
 access: api-rest, download | auth: none | formats: json, xml, pdf, html, zip | update: daily | status: active | verified: 2026-10-01
 coverage: Medicamentos autorizados, suspendidos y revocados; registro de cambios por fecha
 license: Reutilización libre con cita de la fuente
@@ -2171,7 +2172,6 @@ ids: cn-medicamento
 ! Solo JSON; Accept application/xml da 406 con cuerpo de texto Not Acceptable (docSegmentado/contenido admite además text/html). La raíz /cima/rest da 404 HTML.
 ! Fechas en epoch ms; aut, fini y ffin son medianoche de Madrid (22:00 o 23:00 UTC del día anterior), así que convertir con Europe/Madrid o el día sale uno antes.
 ! El listado medicamentos no trae pactivos, atcs ni principiosActivos (solo el detalle). Por defecto incluye suspendidos y revocados; autorizados=1 deja 20.464 de 25.487.
-! nombre y practiv1 buscan por subcadena; practiv1=ibuprofeno trae también DEXIBUPROFENO (260 frente a 253). Para un principio exacto, idpractiv1 con el id de maestras.
 ! registroCambios da unas 53.000 filas por semana sin orden por fecha y con una fecha antigua (01/01/2010) responde 500; el manual llama cambios al campo que llega como cambio.
 ! listadomedicamentos.aemps.gob.es (prescripcion.zip) responde 403 de openresty al User-Agent de curl; con -A Mozilla/5.0 descarga. cima.aemps.es no lo exige.
 ! El nomenclátor se regenera a diario en la misma URL (listprescriptiondate) con códigos SNOMED; cod_dcsa coincide con vtm.id del detalle de la API.
@@ -2435,6 +2435,8 @@ related: csic-digital, aei-convocatorias
 ## gbif-es
 GBIF España – Ocurrencias de biodiversidad (API global filtrada por España) | Nodo Nacional de GBIF en España (Unidad de Coordinación GBIF.ES, CSIC)
 summary: 95,8 millones de registros de especies en España (country=ES) y 666 datasets publicados desde España, en Darwin Core, por la API global de GBIF (JSON, sin clave), más la API del portal nacional (registros-ws.gbif.es, 59,8 millones) y el IPT del nodo con los DwC-A de 603 recursos.
+!! La encina ibérica es sobre todo Quercus rotundifolia (2881550, aceptado aparte, 1.327.134 registros en España); Quercus ilex (2879098), lo que da species/match, solo 21.322.
+!! limit por encima de 300 se recorta a 300 sin aviso y offset + limit no puede pasar de 100.001 (400 en texto plano «Max offset of 100001 exceeded»); para más, descargas asíncronas o dividir por taxonKey o year.
 access: api-rest, download, feed, portal | auth: none | formats: json, csv, zip, rss | update: daily | status: active | verified: 2026-10-01
 coverage: Registros con año desde el siglo XVI (7.033 de 1575-1599) hasta hoy
 license: CC0, CC BY o CC BY-NC según dataset (campo license de cada registro)
@@ -2460,9 +2462,7 @@ docs_url: https://techdocs.gbif.org/en/openapi/
   ej: curl -s "https://ipt.gbif.es/rss.do"
 - https://datos.gbif.es/ :: Portal nacional (Living Atlases) con visor y datasets del nodo; su buscador registros.gbif.es exige comprobación antibots
 quirks: waf-blocks-bots
-! limit por encima de 300 se recorta a 300 sin aviso y offset + limit no puede pasar de 100.001 (400 en texto plano «Max offset of 100001 exceeded»); para más, descargas asíncronas o dividir por taxonKey o year.
 ! scientificName se resuelve contra el backbone igual que taxonKey (21.322 para Quercus ilex en ambos), pero una errata da count 0 sin error; species/match la corrige (matchType FUZZY).
-! Quercus ilex (2879098) reúne 21.322 registros en España y Quercus rotundifolia (2881550), taxón aceptado aparte, 1.327.134; un nombre resuelto no garantiza el concepto buscado.
 ! occurrence/count solo acepta algunos filtros (isGeoreferenced sí; gadmGid, hasCoordinate y hasGeospatialIssue dan 400); search con limit=0 da el count con cualquier filtro.
 ! gadmGid acota por unidades GADM (ESP.8_1 Comunidad de Madrid, 5.069.352 registros; nivel 2 provincias, ESP.1.6_1 Jaén), sin equivalencia oficial con los códigos INE.
 ! Cada registro trae issues (COORDINATE_ROUNDED, TAXON_ID_NOT_FOUND...); hasCoordinate=true y hasGeospatialIssue=false dejan 91,98 de los 95,8 millones.
@@ -2550,6 +2550,7 @@ related: cnig-centro-descargas, ign-sismologia, miteco-saih-boletin-hidrologico
 ## ign-sismologia
 IGN – Catálogo sísmico y últimos terremotos | Instituto Geográfico Nacional (IGN)
 summary: Terremotos de la Red Sísmica Nacional en el GeoJSON del visor (30 últimos días, todas las magnitudes; Canarias, Antártida y mundiales aparte), tablas HTML de N días (magnitud 1,5 o más o sentidos) y catálogo desde 1370 con búsqueda y descarga en CSV, reproducibles por script imitando el navegador.
+!! El catálogo solo filtra si se replica el navegador; un POST con solo los campos con prefijo devolvió los valores por defecto (2008-2016, magnitud 0-8, 61.369 eventos) sin avisar.
 access: download, portal, scraping | auth: none | formats: geojson, html, csv, txt, kml, zip | update: realtime | status: active | verified: 2026-10-01
 coverage: Catálogo de 1370 a hoy (anteriores en PDF); GeoJSON de 30 días, 90 en Canarias
 license: Reutilización libre con cita de la fuente (DOI 10.7419/162.03.2022)
@@ -2573,7 +2574,6 @@ quirks: js-rendered, session-required, url-drift
 ! En el GeoJSON mag, depth e intensidad son texto; tmundiales usa fecha con barras (2026/09/24 07:40:59) y tproximos_canarias trajo justo 999 eventos el 01/10/2026, posible tope.
 ! get10dias sin parámetro muestra solo 5 días (90 eventos el 01/10/2026) aunque la página diga 10; get5dias responde 200 sin tabla.
 ! Las tablas incluyen eventos de Portugal, Francia y el norte de África (sufijos .POR, .FRA, .MAC, .ARG) y Hora Local usa la de Canarias en las islas (UTC+1 frente a UTC+2 en verano).
-! El catálogo solo filtra si se replica el navegador; un POST con solo los campos con prefijo devolvió los valores por defecto (2008-2016, magnitud 0-8, 61.369 eventos) sin avisar.
 ! El CSV descargado trae U+FFFD en lugar de la ó de Localización en la cabecera y el cuerpo en UTF-8; Tipo Mag. sale como código e Inten. en romanos, al revés que la tabla HTML.
 ! Los eventos históricos traen la magnitud como el texto null, ids numéricos (205) en lugar de es2026tfnqm y tipo de magnitud con código propio (13).
 ! Antes de 1370 el catálogo solo está en PDF (SIS-Catalogo-Anterior-1370.pdf); la caja de búsqueda admite latitud 26 a 45 y longitud -20 a 6.
@@ -2679,6 +2679,7 @@ related: mapa-estadisticas-agrarias, puertos-estado-datos
 ## mapa-sigpac
 SIGPAC – Recintos agrícolas por OGC API, consultas REST, WMS, teselas y GeoPackage (FEGA) | Fondo Español de Garantía Agraria (FEGA) y MAPA
 summary: Recintos SIGPAC de toda España (uso, superficie, pendiente, regadío, altitud) con OGC API Features, consultas REST por coordenadas o códigos (referencia catastral, Red Natura, nitratos), WMS, teselas vectoriales, listas de códigos y GeoPackage por provincia y campaña. Sin clave, licencia CC BY 4.0.
+!! El municipio es el código del Catastro, no el del INE; las capitales son 900 (Madrid 28:900, INE 28079; igual Toledo, Sevilla y Zaragoza) y 28:15 es Arroyomolinos. En los no capitales probados coincidió con el INE.
 access: api-rest, ogc, download, portal | auth: none | formats: json, geojson, gpkg, zip, xml, protobuf, pdf | update: annual | status: active | verified: 2026-10-01
 coverage: Campañas 2025 y 2026 en descarga; campaña en uso en los servicios
 license: CC BY 4.0
@@ -2710,7 +2711,6 @@ docs_url: https://sigpac-hubcloud.es/html/csp/descServicio.html
   devuelve: {nombre, descripcion, codigos:[{codigo, descripcion}]}; codigo entero salvo en cod_uso_sigpac (texto, AG, TA...); municipio28 tiene 179 municipios con Madrid en 900 y cod_producto 933 productos
 quirks: url-drift
 ids: referencia-sigpac, referencia-catastral, ine-provincia
-! El municipio es el código del Catastro, no el del INE; las capitales son 900 (Madrid 28:900, INE 28079; igual Toledo, Sevilla y Zaragoza) y 28:15 es Arroyomolinos. En los no capitales probados coincidió con el INE.
 ! Las consultas de servicioconsultassigpac llegan siempre en gzip con Content-Encoding aunque no se pida; curl sin --compressed y urllib entregan bytes comprimidos, requests descomprime solo.
 ! Un recinto, parcela o punto inexistente devuelve 200 con []; solo un código no numérico da 400 con el texto plano Bad Request.
 ! refcatparcela repite la fila una vez por recinto (deduplicar) y referencia_cat suele tener 14 caracteres, pero en algunas parcelas trae 20 (41900A020090050000IQ en Sevilla); los 14 primeros identifican la parcela.
@@ -2883,6 +2883,7 @@ related: ine-codigos-territoriales, dgt-estadisticas
 ## puertos-estado-datos
 Puertos del Estado – Estadística mensual de tráfico portuario y Portus (oceanografía) | Organismo Público Puertos del Estado
 summary: Cuadros mensuales de tráfico por autoridad portuaria en xlsx desde 2012 (graneles, mercancía general, contenedores, pasajeros, pesca), anuario y memorias en PDF, y Portus, visor oceanográfico cuya API interna da sin clave mareas previstas y último dato de boyas y mareógrafos.
+!! date_value no es el año sino su posición en el selector (2 es 2025); date_value=2025 devuelve la página sin ficheros y sin error.
 access: download, portal, api-rest | auth: none | formats: xlsx, pdf, html, json | update: monthly | status: active | verified: 2026-10-01
 coverage: Cuadros mensuales de enero de 2012 a agosto de 2026; anuario 2021-2025; oceanografía en tiempo real y mareas previstas a unos tres días
 license: Reutilización libre con cita de la fuente
@@ -2905,7 +2906,6 @@ docs_url: https://bancodatos.puertos.es/BD/peticiones/Manual_Usuario_Descargapor
 - https://portus.puertos.es/ :: Portus, visor Vue con estaciones (boyas, mareógrafos, radar HF, puntos de modelo) que consume la API https://portus.puertos.es/portussvr/api
 quirks: js-rendered, url-drift
 ! Las rutas SharePoint antiguas (es-es/estadisticas/Paginas/*.aspx) redirigen a /datos/estadisticas/...; /es-es/estadisticas redirige a estadisticas-bk, que responde 403.
-! date_value no es el año sino su posición en el selector (2 es 2025); date_value=2025 devuelve la página sin ficheros y sin error.
 ! Los xlsx no tienen URL por fecha y el title del enlace no sigue un patrón (CuadrosResumen_2022_12.xlsx, 01 Enero 2022.xlsx); emparejar cada id con el time datetime de su bloque y el tipo con el atributo type.
 ! El cuadro mensual tiene 45 hojas con cabeceras en dos filas y ' ' como variación sin base; Resumen naturalezas3 está vacía y llena de
 ! Las hojas Evolución Mensual e Interanual son plantillas internas con datos de 2019 a 2022; no sirven como serie. No localicé serie histórica en xlsx; hay que apilar los cuadros mes a mes.
@@ -2955,6 +2955,7 @@ related: dgt-datex-trafico, puertos-estado-datos, mitma-opendata-movilidad
 ## datacomex
 DataComex – Estadísticas de comercio exterior de España (portal y API con token) | Secretaría de Estado de Comercio
 summary: Exportaciones e importaciones de Aduanas por producto TARIC (2 a 8 dígitos), país y provincia, mensuales y anuales desde 1995, en JSON por API con token gratuito (usuario y contraseña) y en el portal de consulta con cuadros de mando. Definitivos hasta 2023 y provisionales después.
+!! pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error.
 access: api-rest, portal, download | auth: registration | formats: json, csv, xlsx, html | update: monthly | status: active | verified: 2026-09-30
 coverage: Anual y mensual desde 1995; definitivos hasta 2023, provisionales en adelante (julio de 2026 el 01/10/2026)
 license: Reutilización libre con cita de la fuente
@@ -2975,7 +2976,6 @@ ids: ine-provincia
 ! Sin token ObtenerDatos da 401 (Se ha denegado la autorización), en XML con Accept de navegador y en JSON con application/json o sin Accept; un token inválido da 500 sin cuerpo en Bearer y 401 en access_token.
 ! El registro (nombre, correo y contraseña, sin captcha) envía un correo de activación; hasta activar la cuenta no hay token. La descarga masiva y la de metadatos del portal también exigen sesión.
 ! Si falta cualquiera de los cinco parámetros la API responde 200 con un único registro cuyo mensaje es "Error de sintaxis. Faltan parámetros"; pe distingue mayúsculas (lastm da un Catch de conversión a date).
-! pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error.
 ! euros y kilos llegan como texto con coma decimal; periodo es texto ("Julio de 2026", "2025"); mensaje indica dato definitivo, provisional o provisional acumulado hasta el mes.
 ! Los códigos de provincia son los del INE de dos dígitos (pr=28 Madrid), pero ObtenerProvincias añade 0 Total Nacional y 00 No determinado y no sigue el orden del código; la fuente primaria es la AEAT.
 ! En ObtenerPaises el Id 0 es Total Mundo y la marca UE27 cubre 37 códigos, con España (011), Ceuta, Melilla, históricos (002 Bélgica y Luxemburgo) y especiales (951, 978); no sirve para filtrar los 27 Estados.
@@ -3136,6 +3136,7 @@ related: educacion-estadisticas-ruct, ine-microdatos
 ## interior-criminalidad
 Ministerio del Interior – Portal Estadístico de Criminalidad (balances y series anuales) | Secretaría de Estado de Seguridad
 summary: Balances trimestrales acumulados de infracciones penales por tipología (CCAA, provincia, isla y municipio) desde 2016, con comparación interanual, y series anuales 2010-2025 de hechos conocidos, esclarecidos, detenciones y victimizaciones por CCAA y provincia; PC-Axis con descarga CSV, px y xlsx.
+!! Los balances son acumulados desde enero (el del segundo trimestre es enero-junio) frente al mismo periodo del año anterior y su variación %; el trimestre suelto sale restando, y 2022 compara también con 2019.
 access: download, portal | auth: none | formats: csv, px, xlsx, html | update: quarterly | status: active | verified: 2026-10-01
 coverage: Balances 2016-1 a 2026-2 (acumulados desde enero); series anuales 2010-2025
 license: Reutilización libre con cita de la fuente
@@ -3158,7 +3159,6 @@ quirks: latin1, js-rendered, static-html, errors-html-or-xml, url-drift
 ids: ine-municipio
 ! Todo el año en curso cuelga de /DatosBalanceAct/l0/ (09001 a 09003 el primer trimestre, 09004 a 09006 el segundo) y los años cerrados de /DatosBalanceAnt/l0/ con números irregulares (69001 en 2016-1, 1509012 en 2025-4).
 ! El CSV llega en UTF-8 con BOM aunque Content-Type diga ISO-8859-15, así que resp.text o latin-1 dan «autÃ³nomas»; decodificar con utf-8-sig. El px sí va en ISO-8859-15.
-! Los balances son acumulados desde enero (el del segundo trimestre es enero-junio) frente al mismo periodo del año anterior y su variación %; el trimestre suelto sale restando, y 2022 compara también con 2019.
 ! Desde 2024 el municipio lleva delante su código INE (08019 Barcelona); antes era «- Municipio de Almería» (2016-2020) o «-Municipio de Almería» (2021-2023). Provincias e islas van solo por nombre.
 ! La tabla municipal mezcla filas de CCAA en mayúsculas, «Provincia de X», islas, municipios, EXTRANJERA y NACIONAL; quedarse con las que empiezan por cinco dígitos antes de sumar o cruzar.
 ! El umbral municipal cambia: capitales y más de 50.000 habitantes en 2016, más de 30.000 en 2017-2020 y más de 20.000 desde 2021; la serie de un municipio mediano empieza más tarde.

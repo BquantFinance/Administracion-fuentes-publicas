@@ -8,6 +8,8 @@ summary: >-
   API REST de la plataforma eDatos del Instituto (agencia IECM): 278 operaciones y 858 datasets con datos propios de
   Madrid (PIB municipal, contabilidad trimestral, nacimientos y defunciones por municipio, barrio o zona de salud,
   afiliación). JSON o XML, exportación a CSV, sin clave.
+alerts:
+  - limit por encima de 1000 se recorta a 1000 sin aviso; paginar con offset hasta total.
 access: [api-rest]
 auth: none
 formats: [json, xml, csv, zip]
@@ -48,7 +50,6 @@ gotchas:
   - Un código inexistente en dim no da error, responde 200 con observaciones vacías; comprobar que cada código pedido vuelve en representations.
   - Sin la extensión .json la API responde XML; el dataset inexistente da 404 con JSON code exception.statistical_resources.dataset.not_found.
   - La lista de datasets repite cada id una vez por versión (1.0, 1.1, 1.2); pedir ~latest en la ruta de datos y de exportación para la vigente.
-  - limit por encima de 1000 se recorta a 1000 sin aviso; paginar con offset hasta total.
   - La exportación csv_comma no devuelve un CSV sino un ZIP con observaciones y atributos, aunque la ruta diga csv.
   - "Territorio: ES30 es la Comunidad (NUTS 2) y los municipios llevan el código INE de 5 dígitos; distritos de Madrid como 28079_D17 y barrios como BARRIO_20010101_28079_B044 (distrito 04, barrio 4)."
   - El estado de cada dato (P provisional) va en attributes como otra cadena separada por ' | ', paralela a observations.

@@ -9,6 +9,8 @@ summary: >-
   Afiliación (media mensual y último día) por régimen, provincia, CNAE, sexo y municipio, la municipal en un xlsx
   largo con URL fija; pensiones contributivas por clase e importe; nómina del Ingreso Mínimo Vital; bases de
   cotización; Muestra Continua de Vidas Laborales bajo solicitud.
+alerts:
+  - En MUNCNAE los afiliados de 1 a 4 son el texto «<5» (56 % de las filas) y COD MUNICIPIO pierde el cero inicial; rellenar a cinco dígitos y no sumar «<5» como cero.
 access: [download, portal]
 auth: none
 formats: [xlsx, pdf]
@@ -46,7 +48,6 @@ gotchas:
   - Las secciones se anidan por códigos ESTnn (EST8/EST10/EST290) o por uuid (IMV, afiliación municipal) y cada fichero de wcm/connect lleva otro uuid que cambia en cada publicación.
   - Afiliación media mensual (EST290) y afiliación a último día (EST305) son series distintas con cifras distintas.
   - Los xlsx tienen varias hojas con fila de título y cabeceras combinadas; no leer como CSV ni con header=0.
-  - En MUNCNAE los afiliados de 1 a 4 son el texto «<5» (56 % de las filas) y COD MUNICIPIO pierde el cero inicial; rellenar a cinco dígitos y no sumar «<5» como cero.
   - Septiembre de 2025 tiene MUNCNAE0925.xlsx y la revisión MUNCNAE0925R.xlsx, que es la que enlaza la página; construir el nombre da la versión superada.
   - La afiliación por actividad pasa a CNAE 2025 en 2026 (Afiliación 2026_CNAE25.xlsx, MUNCNAE desde 0126) frente a CNAE 2009 antes; no encadenar series sin recodificar.
   - La MCVL no se descarga; se solicita y se entrega bajo convenio.

@@ -9,6 +9,9 @@ summary: >-
   Estadísticas de convenios colectivos, accidentes de trabajo, huelgas, regulación de empleo, ETT, cooperativas
   y mediación, con avances mensuales y monográficas anuales en xlsx y xls, más REGCON, el registro de convenios,
   acuerdos y planes de igualdad con búsqueda pública y exportación a Excel.
+alerts:
+  - Los avances mensuales son acumulados desde enero (Avance enero - julio 2026) frente al mismo periodo del año anterior; restar meses para obtener el dato de un mes.
+  - REGCON no necesita consulta_token_value_id (lo rellena el JavaScript con la hora en ms), pero ?pagina=N sin la cookie de la búsqueda devuelve en silencio el registro entero (177.915).
 access: [download, portal]
 auth: none
 formats: [xlsx, xls, pdf, html]
@@ -44,9 +47,7 @@ gotchas:
   - Una página o fichero inexistente responde 302 a /error.htm, que da 200 en HTML («Página no encontrada»); con redirecciones automáticas comprobar Content-Type antes de parsear.
   - Las rutas /estadisticas/cct/welcome.htm y /estadisticas/eat/welcome.htm responden 200 con un aviso sin datos que remite a /es/estadisticas/condiciones_trabajo_relac_laborales/.
   - Las carpetas de avances no son uniformes (CCT09SepAv, CCT08AGOAV, cct26agoav) y las monográficas cuelgan de TABLAS ESTADISTICAS, con espacio; tomar los enlaces de la página y codificar %20.
-  - Los avances mensuales son acumulados desde enero (Avance enero - julio 2026) frente al mismo periodo del año anterior; restar meses para obtener el dato de un mes.
   - Desde 2026 la actividad va en CNAE 2025, también en la monografía CCT 2024 revisada (registrados hasta junio de 2026); no encadenar con tablas en CNAE 2009 sin recodificar.
-  - REGCON no necesita consulta_token_value_id (lo rellena el JavaScript con la hora en ms), pero ?pagina=N sin la cookie de la búsqueda devuelve en silencio el registro entero (177.915).
   - En REGCON, buscar por fechas sin los campos ocultos del formulario (_idEstadoVigencia=1, _idTipoTramiteConsPublica=1...) responde 200 con «Error en la aplicación» y un código; enviarlos siempre.
   - idCnaesBusqueda lleva ids internos del desplegable (división 56 es 28 en CNAE 2009 y 1676 en CNAE 2025); el id fija la clasificación (5479 frente a 164 resultados) y la consulta tarda 1 a 3 minutos.
   - REGCON separa consultas en /regcon/pub/ (consultaPublicaEstatal para el registro actual, consultaAntiguos y consultaPublicaRegconAntiguo para el histórico).

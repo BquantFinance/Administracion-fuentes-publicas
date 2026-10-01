@@ -9,6 +9,8 @@ summary: >-
   Déficit y operaciones no financieras de las AAPP en contabilidad nacional (mensual por subsector y CCAA, series
   trimestrales y anuales desde 1995), ejecución mensual del presupuesto del Estado en caja, cuentas anuales de las
   AAPP e inventario de entes públicos (INVENTE) con API REST en JSON.
+alerts:
+  - Los xlsx mensuales (M_) y trimestrales (T_) traen valores acumulados desde enero; el dato del mes o del trimestre es la diferencia con el periodo anterior.
 access: [download, api-rest, portal]
 auth: none
 formats: [xlsx, xls, pdf, html, json]
@@ -56,7 +58,6 @@ ids: [invente, nif, dir3]
 gotchas:
   - El servidor de la IGAE cierra la conexión sin respuesta (curl error 52) con los User-Agent de curl y python-requests; con uno de navegador responde 200. La API de INVENTE no filtra el User-Agent.
   - imMensualEstado.aspx da 404 y la raíz www.pap.hacienda.gob.es/invente2/ devuelve 200 con una página «Acceso Denegado» del WAF; la aplicación vive en invente2/pagMenuPrincipalV2.aspx.
-  - Los xlsx mensuales (M_) y trimestrales (T_) traen valores acumulados desde enero; el dato del mes o del trimestre es la diferencia con el periodo anterior.
   - Los xlsx de ejecución en caja cambian de nombre según el año (MENSUAL JULIO 2026.xlsx, MENSUAL DICIEMBRE 2024 (EXCEL).xlsx, .xls con PROVISIONAL en 2015); rascar la página del año y codificar %20.
   - En M_CCAA_Sub_Det las hojas Tabla{n}b dicen «Millones de euros» en el título pero contienen % del PIB; fiarse del sufijo a o b o del Indice.
   - itnofinancierasAAPP solo trae el informe trimestral en PDF; los datos trimestrales y anuales de cada subsector están en los xlsx T_ y A_ de URL fija, con carpetas de nombre irregular.

@@ -8,6 +8,8 @@ summary: >-
   Unos 1.100 datasets de la Generalitat en Socrata (registro de entidades, contratación pública,
   subvenciones RAISC, alojamientos turísticos, meteorología XEMA, embalses, normativa del DOGC). API SODA con
   consultas SoQL en servidor, salida JSON, CSV y GeoJSON y exportación completa, sin clave.
+alerts:
+  - Sin $limit devuelve 1000 filas (JSON y CSV) sin avisar; paginar con $limit, $offset y $order=:id, porque el orden por defecto lo fija la vista (dia DESC en gn9e-3qhr) y no es único.
 access: [api-rest, download]
 auth: none
 formats: [json, csv, geojson]
@@ -46,7 +48,6 @@ rate_limit: Sin clave, cuota compartida por IP según la documentación de Socra
 quirks: []
 ids: [ine-municipio, nif, dir3, bdns, eli]
 gotchas:
-  - Sin $limit devuelve 1000 filas (JSON y CSV) sin avisar; paginar con $limit, $offset y $order=:id, porque el orden por defecto lo fija la vista (dia DESC en gn9e-3qhr) y no es único.
   - El JSON trae todo como texto, también números y recuentos ('98.33', '90751'); convertir con columns[].dataTypeName de /api/views/{id}.json o con la cabecera x-soda2-types.
   - Los fieldName se derivan del nombre catalán quitando lo no ASCII (Estació pasa a estaci, Georeferència a georefer_ncia, Títol a t_tol); copiarlos de la metadata, no deducirlos.
   - rows.csv usa nombres visibles en catalán y fechas dd/mm/aaaa, mientras /resource/{id}.csv usa fieldName y fechas ISO; no mezclar los dos formatos en un mismo cargador.

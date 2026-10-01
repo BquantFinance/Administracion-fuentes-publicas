@@ -9,6 +9,8 @@ summary: >-
   Terremotos de la Red Sísmica Nacional en el GeoJSON del visor (30 últimos días, todas las magnitudes; Canarias,
   Antártida y mundiales aparte), tablas HTML de N días (magnitud 1,5 o más o sentidos) y catálogo desde 1370 con
   búsqueda y descarga en CSV, reproducibles por script imitando el navegador.
+alerts:
+  - El catálogo solo filtra si se replica el navegador; un POST con solo los campos con prefijo devolvió los valores por defecto (2008-2016, magnitud 0-8, 61.369 eventos) sin avisar.
 access: [download, portal, scraping]
 auth: none
 formats: [geojson, html, csv, txt, kml, zip]
@@ -46,7 +48,6 @@ gotchas:
   - En el GeoJSON mag, depth e intensidad son texto; tmundiales usa fecha con barras (2026/09/24 07:40:59) y tproximos_canarias trajo justo 999 eventos el 01/10/2026, posible tope.
   - get10dias sin parámetro muestra solo 5 días (90 eventos el 01/10/2026) aunque la página diga 10; get5dias responde 200 sin tabla.
   - Las tablas incluyen eventos de Portugal, Francia y el norte de África (sufijos .POR, .FRA, .MAC, .ARG) y Hora Local usa la de Canarias en las islas (UTC+1 frente a UTC+2 en verano).
-  - El catálogo solo filtra si se replica el navegador; un POST con solo los campos con prefijo devolvió los valores por defecto (2008-2016, magnitud 0-8, 61.369 eventos) sin avisar.
   - El CSV descargado trae U+FFFD en lugar de la ó de Localización en la cabecera y el cuerpo en UTF-8; Tipo Mag. sale como código e Inten. en romanos, al revés que la tabla HTML.
   - Los eventos históricos traen la magnitud como el texto null, ids numéricos (205) en lugar de es2026tfnqm y tipo de magnitud con código propio (13).
   - Antes de 1370 el catálogo solo está en PDF (SIS-Catalogo-Anterior-1370.pdf); la caja de búsqueda admite latitud 26 a 45 y longitud -20 a 6.

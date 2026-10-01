@@ -41,7 +41,8 @@ async def main() -> None:
 
             fuentes = payload(await session.call_tool("buscar_fuentes", {"consulta": "paro municipio"}))
             assert fuentes and fuentes[0]["id"] == "sepe-estadisticas", [f["id"] for f in fuentes]
-            assert set(fuentes[0]) == {"id", "name", "sector", "access", "auth", "status", "verified", "summary"}
+            base = {"id", "name", "sector", "access", "auth", "status", "verified", "summary"}
+            assert set(fuentes[0]) == base | {"alerts"} and fuentes[0]["alerts"], fuentes[0]  # sepe-estadisticas tiene alerts
             print("buscar_fuentes('paro municipio'):", [f["id"] for f in fuentes])
 
             filtradas = payload(await session.call_tool("buscar_fuentes", {"consulta": "precios", "sector": "energia", "limite": 3}))
@@ -50,6 +51,7 @@ async def main() -> None:
 
             f = payload(await session.call_tool("ficha", {"id": "ine-api-tempus"}))
             assert f["id"] == "ine-api-tempus" and f["endpoints"] and f["gotchas"]
+            assert next(iter(f)) == "alerts" and f["alerts"], list(f)[:3]  # las alertas, lo primero
             print(f"ficha('ine-api-tempus'): {len(f['endpoints'])} endpoints, {len(f['gotchas'])} gotchas, verified {f['verified']}")
 
             missing = payload(await session.call_tool("ficha", {"id": "ine-tempus"}))

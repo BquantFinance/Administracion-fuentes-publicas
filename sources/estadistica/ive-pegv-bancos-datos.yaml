@@ -9,6 +9,8 @@ summary: >-
   Tablas del IVE por municipio, comarca y provincia (pobreza comarcal, renta per cápita, directorio de empresas,
   superficies de cultivo, indicadores demográficos, industria) con descarga estática por código de consulta en
   CSV, xlsx y PC-Axis. El INE no da la escala comarcal.
+alerts:
+  - El CSV omite las celdas confidenciales desde 2023 (la fila desaparece) y xlsxestados las marca c; antes de 2023 el guion era secreto estadístico y desde 2023 significa no aplicable.
 access: [download, portal]
 auth: none
 formats: [csv, xlsx, xls, px]
@@ -47,7 +49,6 @@ gotchas:
   - cons cambia de forma según el host; en bdt es solo la consulta (C2D3883) y en bdo variable y consulta (V0308_C1D0355). Usar el de un host en el otro devuelve la página de error.
   - Un cons erróneo o una URL sin form responden 200 con HTML (En este momento no podemos mostrarle resultados); comprobar Content-Type application/octet-stream antes de parsear.
   - El decimal depende del formato; csvpunto y csvtab usan coma (11,282) y csvcoma punto (11.282), que se confunde con miles. Unidades (miles de euros) y notas solo van en el xlsx.
-  - El CSV omite las celdas confidenciales desde 2023 (la fila desaparece) y xlsxestados las marca c; antes de 2023 el guion era secreto estadístico y desde 2023 significa no aplicable.
   - Las tablas de una sola medida traen una columna vacía de más en la cabecera (Años;Territorio;;Valor) y filas de tres campos; con pandas el valor cae en la columna sin nombre.
   - La columna territorial mezcla municipios (03001 - Atzúbia, l'), comarcas solo por nombre, provincias y Comunitat; quedarse con las filas que empiezan por cinco dígitos o se cuenta doble.
   - Las comarcas siguen la Ley 2/2020 desde los datos de 2023 y la demarcación de 1988 antes; L'Horta Oest sale vacía desde 2023 y la comarca de la capital figura como València. (con punto) en el BDT.

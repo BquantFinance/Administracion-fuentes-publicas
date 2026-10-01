@@ -9,6 +9,9 @@ summary: >-
   Catálogo CKAN de la Generalitat Valenciana (1310 conjuntos de la GVA, el Institut Cartogràfic Valencià y la
   Universidad de Alicante): contratos, ERTE, turismo, cultura, cartografía. API JSON con datastore para consultar
   filas de los CSV, volcado CSV y DCAT-AP, sin autenticación.
+alerts:
+  - rows se recorta en silencio a 1000 (10 por defecto) en package_search y limit a 32000 (100 por defecto) en datastore_search; paginar con start u offset hasta count o total.
+  - Los recursos que enlazan a bdo.gva.es (IVE) tienen copia en el datastore atrasada y con columnas fantasma (Anos, 2017, 14); para esos datos descargar la url original (ive-pegv-bancos-datos).
 access: [api-rest, download]
 auth: none
 formats: [json, csv, rdf, ttl, jsonld]
@@ -52,14 +55,12 @@ rate_limit: No documentado; sin 429 en unas 50 peticiones secuenciales el 2026-1
 quirks: [overwritten-in-place, datastore-incomplete, connection-reset-intermittent]
 ids: [ine-municipio, ine-provincia, nif, cpv, referencia-catastral]
 gotchas:
-  - rows se recorta en silencio a 1000 (10 por defecto) en package_search y limit a 32000 (100 por defecto) en datastore_search; paginar con start u offset hasta count o total.
   - _links.next es una ruta relativa sin host y sigue apareciendo después de la última página, con records vacío; parar cuando offset alcance total.
   - datastore_search_sql cerró la conexión sin respuesta HTTP en GET y en POST (2026-10-01); usar datastore_search con filters y sort, o el volcado /datastore/dump/{id}.
   - 'q en texto plano devolvió total 0 en el recurso de contratos 2026 con palabras que están en los datos; q como objeto por campo, q={"OBJETO":"ambulancia"}, sí filtró.'
   - El datastore infiere tipos por conjunto; en contratos los importes quedan como texto con coma decimal (262,5) y las fechas como texto, y los códigos INE pasan a numeric sin ceros (3001 por 03001).
   - organization solo distingue generalitat-valenciana, icv y universidad-de-alicante; el órgano va en origen_datos, texto libre con variantes (IVE en castellano y valenciano, 308 vacíos), filtrable con fq.
   - Las series se publican como un conjunto por periodo (eco-gvo-contratos-2013 a eco-gvo-contratos-2026, tra-erte-sol-2026-09); localizarlas con q=name:eco-gvo-contratos* y no fijar el nombre.
-  - Los recursos que enlazan a bdo.gva.es (IVE) tienen copia en el datastore atrasada y con columnas fantasma (Anos, 2017, 14); para esos datos descargar la url original (ive-pegv-bancos-datos).
   - Los CSV alojados vistos van en UTF-8 sin BOM y con punto y coma (GTFS con coma), pero fecha y decimal cambian por conjunto (12/01/2025 o 2024/11/22 13:35:03; 262,5 o 222.00) y hay cabeceras con espacios.
   - El servidor resetea a veces la conexión en el saludo TLS, igual que pegv, bdo y bdt; reintentar tras 5 s. portaldadesobertes.gva.es, el portal informativo, no completó TLS desde este entorno el 2026-10-01.
 tips:

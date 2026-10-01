@@ -9,6 +9,8 @@ summary: >-
   Shapefile anual a 1 de enero de las secciones censales (36.669 en 2026, ETRS89 UTM 30) con códigos de sección,
   distrito, municipio, provincia, comunidad y NUTS desde 2001, las mismas geometrías en GeoJSON por API OGC y el
   callejero del Censo Electoral con sus variaciones semestrales.
+alerts:
+  - Cada colección anual de la API mezcla secciones (TIPO SECCIONADO, 36554 en 2025) y distritos (TIPO DISTRITO, CSEC 000, 10457); filtrar TIPO='SECCIONADO', porque TIPO='SECCION' devuelve 0 sin error.
 access: [download, ogc, api-rest]
 auth: none
 formats: [shp, zip, pdf, txt, geojson, gml]
@@ -43,7 +45,6 @@ gotchas:
   - Desde 2011 el nombre interno cambia por año; carpeta España_Seccionado{AAAA}_ETRS89H30 en 2018, 2022, 2023, 2025 y 2026, Seccionado_2021 en 2021 y ninguna en el resto (SECC_CE_20110101_03_R_INE.shp en 2011).
   - La codificación del DBF cambia por año (2026 en UTF-8 y 2025 en windows-1252 según su .CPG; la Á es C3 81 o C1; de 2012 a 2015 no hay .CPG); GDAL respeta el .cpg, un lector que lo ignore no.
   - Las secciones se redibujan cada año; cruzar cada dato con el seccionado de su mismo año.
-  - Cada colección anual de la API mezcla secciones (TIPO SECCIONADO, 36554 en 2025) y distritos (TIPO DISTRITO, CSEC 000, 10457); filtrar TIPO='SECCIONADO', porque TIPO='SECCION' devuelve 0 sin error.
   - En la API, 2026 no es Secciones_2026 (404) sino SU.VectorStatisticalUnit; sin filtro cada petición tarda más de 20 s por el recuento total, con filtro CQL por CUSEC unos 2 s.
   - La página no enlaza seccionado_2026.zip, caj_esp_012026.zip ni Var_Callejero_0725_0126.zip, que existen desde marzo de 2026; construir la URL por patrón y comprobarla con HEAD.
   - La página remite a dis_registro.pdf (diseño de 2009) desde julio de 2025 y a la Orden de 11 de julio de 1997 antes; dis_registro.pdf solo describe VIAS y PSEUDOVÍAS.

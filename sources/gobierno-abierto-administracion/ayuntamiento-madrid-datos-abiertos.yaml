@@ -8,6 +8,9 @@ summary: >-
   673 conjuntos del Ayuntamiento en CKAN 2.9.11: padrón mensual por sección y edad, accidentes, censo de locales,
   presupuestos, calidad del aire y tráfico en tiempo real. API JSON, datastore con filtros, DCAT, feed Atom y una API
   dinámica con filtros por campo en ciudadesabiertas.madrid.es.
+alerts:
+  - "En el datastore todos los campos son text: sort da 1, 10, 11... 2 y filters exige el valor como texto ({\"COD_DISTRITO\":\"21\"}); convertir tipos en local."
+  - En calidad del aire en tiempo real las horas aún no medidas llegan como 0 con validación N; filtrar por Vnn igual a V. Los filtros por campo de calair_tiemporeal devolvieron 0 registros.
 access: [api-rest, download, feed]
 auth: none
 formats: [json, csv, xml, xlsx, xls, zip, txt, kml, shp, ttl, atom]
@@ -54,11 +57,9 @@ gotchas:
   - La API del portal antiguo murió con la migración a CKAN; /egob/catalogo.json y /egob/catalogo/{id}.json dan 404 y algunos ficheros /egob/catalogo/{id}.csv redirigen 302 a un recurso con otro número.
   - datastore_search_sql está tras Akamai; un SELECT en la URL o en POST JSON recibió 403 en HTML y, tras varios, todo datos.madrid.es respondió 403 cerca de un minuto. Usar datastore_search.
   - Akamai responde 403 Access Denied en HTML a peticiones sueltas, también a la API; reintentar tras unos segundos antes de dar un recurso por caído.
-  - "En el datastore todos los campos son text: sort da 1, 10, 11... 2 y filters exige el valor como texto ({\"COD_DISTRITO\":\"21\"}); convertir tipos en local."
   - Con curl las llaves de filters se interpretan como patrón glob y el JSON llega roto (409 Cannot parse JSON); usar -g o --data-urlencode.
   - El número del recurso no indica el año ni el orden; en accidentes 300228-3 es 2023 y 300228-1 es 2025. Leer description en package_show.
   - "En el padrón COD_DIST_SECCION 2062 es distrito 2 y sección 062: la sección censal INE es 28079 + 02 + 062; COD_DIST_BARRIO 205 es distrito 2, barrio 5. Los textos llegan rellenos con espacios."
-  - En calidad del aire en tiempo real las horas aún no medidas llegan como 0 con validación N; filtrar por Vnn igual a V. Los filtros por campo de calair_tiemporeal devolvieron 0 registros.
   - La consulta padron_estadistica de la API dinámica termina en 2023 (fecha_dato); el padrón vigente es el CSV mensual del conjunto 200076-0-padron.
   - "SPARQL no conseguido el 2026-10-01: GET a /sparql devuelve la página HTML con 200 y POST respondió 400 Invalid or unsupported SPARQL query y después 403."
 tips:

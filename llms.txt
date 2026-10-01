@@ -21,6 +21,7 @@ Fuentes: 95 · Recetas: 43 · Alcance actual: Administración General del Estado
 
 ## Reglas rápidas antes de programar contra una fuente
 
+- Lee primero `alerts` de la ficha: son trampas silenciosas (datos incompletos, distintos o cero sin error) y cambian la cifra que darías.
 - Lee `quirks`, `ids` y `gotchas` de la ficha: son hechos verificados con llamadas reales, no documentación oficial. `quirks` dice cómo configurar el cliente; `ids` con qué otras fuentes se cruza.
 - Muchos servidores .gob.es sirven certificados FNMT sin la cadena intermedia; curl y requests fallan hasta añadirla al bundle. Arreglo copiable en la guía Cliente HTTP (`python scripts/fnmt_bundle.py` genera ca-age.pem).
 - Envía siempre User-Agent y Accept de navegador; varios sitios (tesoro.es, seg-social.es) devuelven 403 a los valores por defecto de curl y requests.
@@ -28,6 +29,46 @@ Fuentes: 95 · Recetas: 43 · Alcance actual: Administración General del Estado
 - Espera ISO-8859-1 en feeds del BOE y CSV del Banco de España; convierte antes de parsear.
 - Ninguna fuente verificada documenta límites ni devolvió 429; para descargas masivas, peticiones secuenciales y reintento con espera ante 5xx. El Catastro bloquea la IP tras ráfagas de unas 15 peticiones y rechaza rangos de centros de datos (GitHub Actions incluido); Catastro, REData, datos.gob.es, BNE y FEGA se verifican mejor desde una IP residencial.
 - Si una URL que recuerdas falla, busca en la tabla de rutas muertas antes de dar la fuente por perdida.
+
+## Trampas silenciosas
+
+Datos incompletos, distintos o a cero sin ningún error; están en `alerts` de cada ficha.
+
+- aemps-cima-api: nombre y practiv1 buscan por subcadena; practiv1=ibuprofeno trae también DEXIBUPROFENO (260 frente a 253). Para un principio exacto, idpractiv1 con el id de maestras.
+- ayuntamiento-barcelona-datos-abiertos: El padrón municipal que publica el Ayuntamiento no es la cifra oficial; Barcelona a 1-1-2025 suma 1.732.066 frente a 1.731.649 del padrón oficial (idescat-api) y 1.713.247 del Censo anual del INE.
+- ayuntamiento-barcelona-datos-abiertos: El datastore puede no coincidir con el fichero; esm-bcn-evo 2024 tiene 1.250 filas en el datastore para un CSV declarado de 539 MB. Comparar COUNT(*) con size antes de fiarse.
+- ayuntamiento-madrid-datos-abiertos: En el datastore todos los campos son text: sort da 1, 10, 11... 2 y filters exige el valor como texto ({"COD_DISTRITO":"21"}); convertir tipos en local.
+- ayuntamiento-madrid-datos-abiertos: En calidad del aire en tiempo real las horas aún no medidas llegan como 0 con validación N; filtrar por Vnn igual a V. Los filtros por campo de calair_tiemporeal devolvieron 0 registros.
+- bde-estadisticas: listaSeries con rango=MAX devuelve como mucho las 1000 observaciones más recientes, sin aviso; el paro registrado (1118 desde 1933) llega desde 1943 aunque fechaInicio diga 1933. Completar con rango=AAAA.
+- bdns-api: La exportación pagina como la búsqueda; sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso. Pasar page y pageSize (tope 10000).
+- cnig-centro-descargas: state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido.
+- cnmc-data: datastore_search recorta limit a 32000 sin error (result.limit dice el aplicado) y _links.next empieza por //api/3/, que urljoin toma como host; paginar con offset sobre el host o usar el dump.
+- comunidad-madrid-datos-abiertos: El datastore no siempre refleja el CSV: padron_por_sexo tenía 5000 de 18718 filas (hasta 2022), el mensual de calidad del aire 1000 de 5880 y el diario 0 de 180; comparar total con el fichero.
+- comunidad-madrid-estadistica-api: limit por encima de 1000 se recorta a 1000 sin aviso; paginar con offset hasta total.
+- datacomex: pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error.
+- face-facturas: fulltext distingue mayúsculas y tildes (ayuntamiento de madrid da 0) y busca subcadenas (Ayuntamiento de Madrid trae también Madridanos y Madridejos); filtrar después por administration.code.
+- gbif-es: La encina ibérica es sobre todo Quercus rotundifolia (2881550, aceptado aparte, 1.327.134 registros en España); Quercus ilex (2879098), lo que da species/match, solo 21.322.
+- gbif-es: limit por encima de 300 se recorta a 300 sin aviso y offset + limit no puede pasar de 100.001 (400 en texto plano «Max offset of 100001 exceeded»); para más, descargas asíncronas o dividir por taxonKey o year.
+- gencat-dades-obertes: Sin $limit devuelve 1000 filas (JSON y CSV) sin avisar; paginar con $limit, $offset y $order=:id, porque el orden por defecto lo fija la vista (dia DESC en gn9e-3qhr) y no es único.
+- gva-dadesobertes-api: rows se recorta en silencio a 1000 (10 por defecto) en package_search y limit a 32000 (100 por defecto) en datastore_search; paginar con start u offset hasta count o total.
+- gva-dadesobertes-api: Los recursos que enlazan a bdo.gva.es (IVE) tienen copia en el datastore atrasada y con columnas fantasma (Anos, 2017, 14); para esos datos descargar la url original (ive-pegv-bancos-datos).
+- idee-servicios: En WMS 1.3.0 con CRS=EPSG:4258 el BBOX va en orden lat,lon; en orden lon,lat responde 200 con una imagen en blanco de 2 KB, sin error.
+- idee-servicios: En los WFS de servicios.idee.es, numberMatched repite numberReturned mientras quedan páginas (count=5 da 5; hits da 1381 en el mismo bbox); el total solo sale con resultType=hits y el final, cuando falta next.
+- idescat-api: Los municipios van con 6 dígitos (INE de 5 más dígito de control, 080193 Barcelona); en taules MUN=08019 se ignora en silencio y devuelve los 948 municipios, mientras EMEX sí acepta 08019.
+- igae-ejecucion-presupuestaria: Los xlsx mensuales (M_) y trimestrales (T_) traen valores acumulados desde enero; el dato del mes o del trimestre es la diferencia con el periodo anterior.
+- ign-sismologia: El catálogo solo filtra si se replica el navegador; un POST con solo los campos con prefijo devolvió los valores por defecto (2008-2016, magnitud 0-8, 61.369 eventos) sin avisar.
+- ine-api-tempus: En DATOS_TABLA nult cuenta periodos de la tabla; 24077 ya incluye 2026M09 (avance del IPC) sin dato del índice y nult=1 da Data vacío, mientras DATOS_SERIE cuenta datos y nult=1 da 2026M08.
+- ine-cartografia-censal: Cada colección anual de la API mezcla secciones (TIPO SECCIONADO, 36554 en 2025) y distritos (TIPO DISTRITO, CSEC 000, 10457); filtrar TIPO='SECCIONADO', porque TIPO='SECCION' devuelve 0 sin error.
+- interior-criminalidad: Los balances son acumulados desde enero (el del segundo trimestre es enero-junio) frente al mismo periodo del año anterior y su variación %; el trimestre suelto sale restando, y 2022 compara también con 2019.
+- ive-pegv-bancos-datos: El CSV omite las celdas confidenciales desde 2023 (la fila desaparece) y xlsxestados las marca c; antes de 2023 el guion era secreto estadístico y desde 2023 significa no aplicable.
+- junta-andalucia-datos-abiertos: datastore_active true no garantiza la tabla; 6 de 173 recursos dieron 404 Resource not found y las plantillas orgánicas tienen 1000 filas en el datastore frente a 36260 en el CSV. Contrastar total con el fichero.
+- junta-andalucia-datos-abiertos: Se pierden ceros a la izquierda; el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine de la API v0 llega como entero (44001) o texto ('04001') según el registro.
+- mapa-sigpac: El municipio es el código del Catastro, no el del INE; las capitales son 900 (Madrid 28:900, INE 28079; igual Toledo, Sevilla y Zaragoza) y 28:15 es Arroyomolinos. En los no capitales probados coincidió con el INE.
+- mites-estadisticas: Los avances mensuales son acumulados desde enero (Avance enero - julio 2026) frente al mismo periodo del año anterior; restar meses para obtener el dato de un mes.
+- mites-estadisticas: REGCON no necesita consulta_token_value_id (lo rellena el JavaScript con la hora en ms), pero ?pagina=N sin la cookie de la búsqueda devuelve en silencio el registro entero (177.915).
+- puertos-estado-datos: date_value no es el año sino su posición en el selector (2 es 2025); date_value=2025 devuelve la página sin ficheros y sin error.
+- segsocial-estadisticas: En MUNCNAE los afiliados de 1 a 4 son el texto «<5» (56 % de las filas) y COD MUNICIPIO pierde el cero inicial; rellenar a cinco dígitos y no sumar «<5» como cero.
+- sepe-estadisticas: Los valores de 1 a 4 llegan como texto «<5» (secreto estadístico) mezclados con enteros, ceros y celdas vacías; convertir antes de sumar y no tratar «<5» como cero.
 
 ## Dónde está cada cosa
 

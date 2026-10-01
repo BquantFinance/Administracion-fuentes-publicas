@@ -8,6 +8,8 @@ summary: >-
   CKAN 2.9 con 177 conjuntos de las consejerías (calidad del aire diaria, polen, centros educativos, farmacias,
   registros, GTFS del Consorcio, elecciones autonómicas) y 2086 tablas del Instituto de Estadística (bancos Almudena
   municipal, Baco y Desvan). API JSON, datastore y DCAT sin clave.
+alerts:
+  - "El datastore no siempre refleja el CSV: padron_por_sexo tenía 5000 de 18718 filas (hasta 2022), el mensual de calidad del aire 1000 de 5880 y el diario 0 de 180; comparar total con el fichero."
 access: [api-rest, download]
 auth: none
 formats: [json, csv, zip, ttl, rdf]
@@ -43,7 +45,6 @@ rate_limit: No documentado; ningún 429 ni bloqueo en las peticiones secuenciale
 quirks: [latin1, overwritten-in-place, datastore-incomplete]
 ids: [ine-municipio]
 gotchas:
-  - "El datastore no siempre refleja el CSV: padron_por_sexo tenía 5000 de 18718 filas (hasta 2022), el mensual de calidad del aire 1000 de 5880 y el diario 0 de 180; comparar total con el fichero."
   - Las tablas del Instituto (organización estadistica) van en CSV ISO-8859-1 con decimal punto y las de consejerías en UTF-8 con BOM y decimal coma; todas con separador punto y coma.
   - En las tablas Almudena el Código territorio municipal son 4 caracteres, municipio (3) más dígito de control y sin provincia (0796 es Madrid, 28079); los 2 dígitos 01 a 11 son zonas estadísticas.
   - En calidad del aire provincia y municipio van separados y sin ceros (28;102 es 28102); cada hora hNN lleva su validación vNN y las horas sin dato llegan vacías con N.

@@ -56,6 +56,15 @@
       "maxLength": 300,
       "description": "Qué datos hay y para qué sirven. Máx. 300 caracteres."
     },
+    "alerts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 220
+      },
+      "maxItems": 3,
+      "description": "Trampas silenciosas: el servidor devuelve datos incompletos, distintos o cero sin error. Se leen antes que nada; no se repiten en gotchas."
+    },
     "access": {
       "type": "array",
       "items": {

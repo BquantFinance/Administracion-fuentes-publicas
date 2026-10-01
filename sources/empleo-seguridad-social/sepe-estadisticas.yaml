@@ -9,6 +9,8 @@ summary: >-
   Paro registrado, demandantes, contratos y prestaciones por desempleo, mensuales: avances en xls con URL fija y
   series desde 2001, paro y contratos de todos los municipios con código INE en un xls por mes, y desglose por
   división CNAE, sexo y edad de capitales y municipios de más de 20.000.
+alerts:
+  - Los valores de 1 a 4 llegan como texto «<5» (secreto estadístico) mezclados con enteros, ceros y celdas vacías; convertir antes de sumar y no tratar «<5» como cero.
 access: [download, portal]
 auth: none
 formats: [xls, pdf, html, rss]
@@ -43,7 +45,6 @@ gotchas:
   - HEAD devuelve 403 en los ficheros; usar GET, que admite Range.
   - municipios.html (todos los municipios por provincia) llega hasta el último mes; municipios-20-45 y municipios-capitales son otras tablas con desglose por actividad, no su continuación.
   - Los xls por actividad (Muniacteco_20-45, Municipios_acteco) identifican provincia y municipio solo por nombre en filas de título; el código INE está en ESTADISTICA_MUNICIPIOS.xls y MUNI_{PROVINCIA}.
-  - Los valores de 1 a 4 llegan como texto «<5» (secreto estadístico) mezclados con enteros, ceros y celdas vacías; convertir antes de sumar y no tratar «<5» como cero.
   - xlrd falla en parte de los xls (evolparoseries, MUNI_*, Muniacteco; Expected little-endian marker) y LibreOffice no convirtió ninguno de los probados; pandas con engine calamine los lee todos.
   - En paroprovsector, parosexoedadprov y evolprovsectores la primera columna numera filas de 1 a 62 con provincias y totales de comunidad intercalados (9 ANDALUCIA), no es el código INE.
   - En evolparo.xls la variación anual del año en curso llega como texto con coma decimal ('-6,17') y la del año anterior como número.

@@ -54,7 +54,8 @@ STOPWORDS = {
 }
 INSTRUCTIONS = (
     "Catálogo de fuentes de datos de la Administración pública española. Flujo: necesidad o buscar_fuentes "
-    "para localizar la fuente, ficha para endpoints, quirks y gotchas verificados; buscar_recetas y receta para "
+    "para localizar la fuente, ficha para endpoints, quirks y gotchas verificados (alerts primero: trampas silenciosas "
+    "que cambian la cifra sin dar error); buscar_recetas y receta para "
     "procedimientos que cruzan fuentes; identificador para cruzar datos; ruta_muerta antes de dar por perdida "
     "una URL. Lee el recurso catalogo://reglas antes de programar contra una fuente."
 )
@@ -163,7 +164,7 @@ mcp = FastMCP("catalogo-fuentes-publicas", instructions=INSTRUCTIONS)
 
 @mcp.tool()
 def buscar_fuentes(consulta: str, sector: str | None = None, limite: int = 8) -> list[dict]:
-    """Busca fichas por palabras (id, nombre, etiquetas, sector, resumen, organismo). Devuelve id, name, sector, access, auth, status, verified y summary; después pide la ficha completa con ficha(id)."""
+    """Busca fichas por palabras (id, nombre, etiquetas, sector, resumen, organismo). Devuelve id, name, sector, access, auth, status, verified, summary y, si las hay, alerts (trampas silenciosas); después pide la ficha completa con ficha(id)."""
     items = SOURCES
     if sector:
         if sector not in SECTORES:
@@ -171,16 +172,18 @@ def buscar_fuentes(consulta: str, sector: str | None = None, limite: int = 8) ->
         items = [s for s in SOURCES if s["sector"] == sector]
     hits = rank(consulta, items, lambda s: SOURCE_FIELDS[s["id"]], limite)
     return [
-        {k: s.get(k) for k in ("id", "name", "sector", "access", "auth", "status", "verified", "summary")}
+        {**{k: s.get(k) for k in ("id", "name", "sector", "access", "auth", "status", "verified", "summary")},
+         **({"alerts": s["alerts"]} if s.get("alerts") else {})}
         for s in hits
     ]
 
 
 @mcp.tool()
 def ficha(id: str) -> dict:
-    """Ficha completa de una fuente (endpoints con ejemplo, quirks, ids, gotchas, tips, related). Si el id no existe, devuelve hasta 5 ids parecidos."""
+    """Ficha completa de una fuente (alerts primero, endpoints con ejemplo, quirks, ids, gotchas, tips, related). Si el id no existe, devuelve hasta 5 ids parecidos."""
     if id in BY_ID:
-        return BY_ID[id]
+        s = BY_ID[id]
+        return {"alerts": s["alerts"], **s} if s.get("alerts") else s
     return {"error": f"no existe la ficha {id}", "sugerencias": parecidos(id, BY_ID)}
 
 

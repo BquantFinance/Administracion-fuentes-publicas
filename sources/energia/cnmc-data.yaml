@@ -9,6 +9,8 @@ summary: >-
   210 datasets de la CNMC en un CKAN con datastore: electricidad y gas (cuotas de comercializadoras, cambios
   de suministrador, precios, garantías de origen, bono social), precios provinciales de carburantes,
   telecomunicaciones, audiovisual, transporte, postal y comercio electrónico.
+alerts:
+  - datastore_search recorta limit a 32000 sin error (result.limit dice el aplicado) y _links.next empieza por //api/3/, que urljoin toma como host; paginar con offset sobre el host o usar el dump.
 access: [api-rest, download, portal]
 auth: none
 formats: [csv, json, xml]
@@ -47,7 +49,6 @@ gotchas:
   - Nombres de campo normalizados sin tildes ni ñ (compannia_comercializadora_de_gas); la etiqueta original está en fields[].info.label del datastore.
   - El dump del datastore va con coma, punto decimal y cinco decimales fijos (2496967.00000) y _id primero; el CSV estático ds_*.csv va con punto y coma, coma decimal (0,732), CRLF y etiquetas originales.
   - Un dataset es una tabla de una publicación o de un año (precios provinciales 2025 ds_13984_1, 2026 ds_24451_1), no una serie; 50 de los 88 trimestrales no se tocan desde 2024, mirar periodo y metadata_modified.
-  - datastore_search recorta limit a 32000 sin error (result.limit dice el aplicado) y _links.next empieza por //api/3/, que urljoin toma como host; paginar con offset sobre el host o usar el dump.
   - Demanda, generación y PVPC actuales no están aquí (solo precio final horario de 2019 a 2021) sino en ree-redata; el precio marginal del mercado, en omie-mercado.
 tips:
   - "pandas.read_csv('https://catalogodatos.cnmc.es/datastore/dump/{id}') carga la tabla directamente; para el catálogo completo, package_search?rows=1000 y fq=organization:org_energia."

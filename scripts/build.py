@@ -37,6 +37,8 @@ def render_source_compact(s: dict) -> str:
     """Bloque de texto compacto por fuente para llms-full.txt."""
     lines = [f"## {s['id']}", f"{s['name']} | {s['org']}"]
     lines.append(f"summary: {s['summary'].strip()}")
+    for a in s.get("alerts", []) or []:
+        lines.append(f"!! {a}")
     lines.append(
         f"access: {fmt_list(s['access'])} | auth: {s['auth']} | formats: {fmt_list(s['formats'])} "
         f"| update: {s['update']} | status: {s['status']} | verified: {s.get('verified') or 'pending'}"
@@ -308,6 +310,7 @@ def main() -> None:
         "",
         "## Reglas rápidas antes de programar contra una fuente",
         "",
+        "- Lee primero `alerts` de la ficha: son trampas silenciosas (datos incompletos, distintos o cero sin error) y cambian la cifra que darías.",
         "- Lee `quirks`, `ids` y `gotchas` de la ficha: son hechos verificados con llamadas reales, no documentación oficial. `quirks` dice cómo configurar el cliente; `ids` con qué otras fuentes se cruza.",
         "- Muchos servidores .gob.es sirven certificados FNMT sin la cadena intermedia; curl y requests fallan hasta añadirla al bundle. Arreglo copiable en la guía Cliente HTTP (`python scripts/fnmt_bundle.py` genera ca-age.pem).",
         "- Envía siempre User-Agent y Accept de navegador; varios sitios (tesoro.es, seg-social.es) devuelven 403 a los valores por defecto de curl y requests.",
@@ -315,6 +318,16 @@ def main() -> None:
         "- Espera ISO-8859-1 en feeds del BOE y CSV del Banco de España; convierte antes de parsear.",
         "- Ninguna fuente verificada documenta límites ni devolvió 429; para descargas masivas, peticiones secuenciales y reintento con espera ante 5xx. El Catastro bloquea la IP tras ráfagas de unas 15 peticiones y rechaza rangos de centros de datos (GitHub Actions incluido); Catastro, REData, datos.gob.es, BNE y FEGA se verifican mejor desde una IP residencial.",
         "- Si una URL que recuerdas falla, busca en la tabla de rutas muertas antes de dar la fuente por perdida.",
+        "",
+        "## Trampas silenciosas",
+        "",
+        "Datos incompletos, distintos o a cero sin ningún error; están en `alerts` de cada ficha.",
+        "",
+    ]
+    for s in sorted(sources, key=lambda x: x["id"]):
+        for a in s.get("alerts", []) or []:
+            llms.append(f"- {s['id']}: {a}")
+    llms += [
         "",
         "## Dónde está cada cosa",
         "",
@@ -345,9 +358,11 @@ def main() -> None:
     (ROOT / "llms.txt").write_text("\n".join(llms), encoding="utf-8")
 
     # llms-min.txt: entrada ligera (reglas, fichas por sector y punteros), sin necesidades ni recetas
-    mini = llms[: llms.index("## Dónde está cada cosa")]
+    mini = llms[: llms.index("## Trampas silenciosas")]
+    con_alertas = [s["id"] for s in sorted(sources, key=lambda x: x["id"]) if s.get("alerts")]
+    mini += ["## Fichas con trampas silenciosas", "", "Antes de dar una cifra de estas fuentes, lee `alerts` en su ficha (datos incompletos, distintos o a cero sin error): " + ", ".join(con_alertas) + ".", ""]
     mini[4] = mini[4].replace("Generado:", "Entrada ligera; la completa es llms.txt · Generado:")
-    mini += ["## Fichas por sector", "", "Cada id es sources/<sector>/<id>.yaml; léela entera antes de llamar (endpoints con example y returns, quirks, gotchas).", ""]
+    mini += ["## Fichas por sector", "", "Cada id es sources/<sector>/<id>.yaml; léela entera antes de llamar (alerts, endpoints con example y returns, quirks, gotchas).", ""]
     for sector, title in vocab["sector"].items():
         items = by_sector.get(sector)
         if items:
@@ -358,7 +373,7 @@ def main() -> None:
     (ROOT / "llms-min.txt").write_text("\n".join(mini), encoding="utf-8")
 
     # llms-full.txt
-    full = [llms[0], "", llms[2], "", f"Fuentes: {len(sources)} · Generado: {date.today().isoformat()} · Formato: un bloque por fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.", ""]
+    full = [llms[0], "", llms[2], "", f"Fuentes: {len(sources)} · Generado: {date.today().isoformat()} · Formato: un bloque por fuente; '!!' marca trampas silenciosas (datos incompletos o distintos sin error); '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.", ""]
     for sector, title in vocab["sector"].items():
         items = by_sector.get(sector)
         if not items:

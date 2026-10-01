@@ -8,6 +8,8 @@ summary: >-
   APIs REST sin clave del Idescat. Tablas de 33 estadísticas (padrón, censo, PIB trimestral, renta, afiliación,
   proyecciones) en JSON-stat por Cataluña, provincia, comarca, municipio, distrito y sección censal; ficha
   municipal EMEX con unos 230 indicadores y población por entidad.
+alerts:
+  - Los municipios van con 6 dígitos (INE de 5 más dígito de control, 080193 Barcelona); en taules MUN=08019 se ignora en silencio y devuelve los 948 municipios, mientras EMEX sí acepta 08019.
 access: [api-rest]
 auth: none
 formats: [json, xml]
@@ -54,7 +56,6 @@ rate_limit: No documentado; las condiciones de uso se reservan limitar peticione
 quirks: [json-object-or-list, soft-errors-200]
 ids: [ine-municipio, ine-provincia, seccion-censal]
 gotchas:
-  - Los municipios van con 6 dígitos (INE de 5 más dígito de control, 080193 Barcelona); en taules MUN=08019 se ignora en silencio y devuelve los 948 municipios, mientras EMEX sí acepta 08019.
   - Un código de filtro inexistente (SEX=X) no da error; devuelve todas las categorías de esa dimensión con HTTP 200. Comprobar size antes de leer value.
   - Las secciones censales llevan 11 dígitos (municipio de 6 + distrito 2 + sección 3, 08019301001); quitar el sexto dígito para el código INE de 10. El padrón por sección acaba en 2022.
   - Pasar de 20.000 celdas devuelve 416 con JSON class error e id 05 (el padrón municipal completo son 79.632); trocear por YEAR o con _LAST_.

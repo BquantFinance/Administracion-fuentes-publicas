@@ -30,6 +30,7 @@ Algunos ejemplos, verificados con llamadas reales:
 - AEMET responde en dos pasos, con el fichero en ISO-8859-15 y los errores dentro de un HTTP 200.
 - En SIGPAC el municipio es el código del Catastro, no el del INE: un punto de la Puerta del Sol devuelve `28:900`, no `28079`.
 - Los CSV de los portales PC-Axis de Educación, Cultura e Interior llegan en UTF-8 aunque la cabecera diga ISO-8859-15; leídos como Latin-1 salen «autÃ³noma».
+- En GBIF la encina ibérica es sobre todo *Quercus rotundifolia* (1,3 millones de registros en España); preguntar por *Quercus ilex*, que es lo que devuelve el buscador de nombres, da 21.322 sin ningún aviso.
 
 Fuentes catalogadas: <!-- AUTO:count -->95<!-- /AUTO:count -->. Alcance actual: Administración General del Estado y, desde octubre de 2026, las cuatro comunidades más pobladas (Madrid, Cataluña, Andalucía y Comunitat Valenciana) y los ayuntamientos de Madrid y Barcelona. Después: resto de comunidades y entidades locales, Cortes y Poder Judicial, Unión Europea.
 
@@ -37,7 +38,7 @@ Fuentes catalogadas: <!-- AUTO:count -->95<!-- /AUTO:count -->. Alcance actual: 
 
 - **Una ficha por fuente**, en YAML, con campos fijos validados contra un esquema. Sin prosa de relleno: cada línea ahorra una búsqueda.
 - **Fuente única de verdad.** Solo se editan `sources/**/*.yaml`. Índices, `catalog.json` y `llms*.txt` se generan.
-- **Lo que no dice la documentación oficial.** El campo `gotchas` recoge los detalles que hacen perder horas: cabeceras obligatorias, codificaciones raras, límites no documentados, URLs que cambian.
+- **Lo que no dice la documentación oficial.** El campo `gotchas` recoge los detalles que hacen perder horas: cabeceras obligatorias, codificaciones raras, límites no documentados, URLs que cambian. Las trampas silenciosas, las que dan una cifra incompleta o distinta sin ningún error, van aparte en `alerts`, y el servidor MCP las devuelve lo primero.
 - **Verificación explícita.** `verified` lleva la fecha de la última prueba real del endpoint, o `null`. Un job semanal comprueba que las URLs siguen respondiendo.
 - **Top-down.** Se cubren primero las fuentes de mayor uso e impacto, sector a sector, hasta cubrirlo todo.
 

@@ -8,7 +8,8 @@ las opciones de curl que escriben o leen ficheros. Las variables se expanden com
 comillas simples) con el entorno; si falta una en mayúsculas el ejemplo queda skipped (así se pasan claves como
 AEMET_KEY en GitHub Actions sin escribirlas) y si es una en minúsculas, como $limit de Socrata entre comillas dobles,
 es fail: al pegarlo en una shell se expandiría a vacío. Resultado: ok (2xx), redirect (3xx sin -L), fail (4xx, 5xx o
-variable mal escapada), blocked (WAF o bloqueo de red reconocido), error (sin respuesta) o skipped.
+variable mal escapada), blocked (WAF o bloqueo de red reconocido), error (sin respuesta) o skipped (también si
+lee con -b la cookie que deja otro ejemplo).
 --muestra N imprime los primeros N bytes de cada respuesta. Espera entre peticiones al mismo host (3 s al Catastro).
 """
 from __future__ import annotations
@@ -151,6 +152,12 @@ def ejecutar(args: list[str], timeout: float, ca: str | None) -> dict:
     return {"result": res, "status": codigo, "bytes": int(float(partes[1])) if len(partes) > 1 else 0, "ms": ms, "type": tipo, "detail": detalle, "body": cuerpo}
 
 
+def necesita_cookie(ejemplo: str) -> bool:
+    """True si el curl lee un cookie jar (-b fichero, no -b "a=b") que no escribe él mismo con -c: depende de otro paso."""
+    lee = re.search(r"(?:^|\s)(?:-b|--cookie)\s+(\S+)", ejemplo)
+    return bool(lee and "=" not in lee.group(1) and not re.search(r"(?:^|\s)(?:-c|--cookie-jar)\s", ejemplo))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--only", action="append", default=[], help="id de ficha (repetible)")
@@ -175,6 +182,8 @@ def main() -> int:
                 r = {"result": "skipped", "status": None, "bytes": 0, "ms": 0, "type": "", "detail": f"falta la variable {', '.join(faltan)}", "body": b""}
             elif args is None:
                 r = {"result": "skipped", "status": None, "bytes": 0, "ms": 0, "type": "", "detail": "no es una URL ni un curl", "body": b""}
+            elif necesita_cookie(texto):
+                r = {"result": "skipped", "status": None, "bytes": 0, "ms": 0, "type": "", "detail": "lee la cookie de un paso anterior (-b fichero)", "body": b""}
             else:
                 host = urlparse(next(x for x in args if x.startswith("http"))).hostname or ""
                 espera = 3.0 if "catastro" in host else 1.0

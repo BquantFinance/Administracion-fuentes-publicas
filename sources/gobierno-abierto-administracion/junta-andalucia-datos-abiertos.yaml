@@ -8,6 +8,9 @@ summary: >-
   Catálogo CKAN 2.10 de la Junta de Andalucía (832 conjuntos de 72 organismos, 260 del IECA): presupuestos,
   tesorería, educación, medio ambiente, cultura. API JSON con datastore en 173 recursos y una API v0 aparte con
   OpenAPI (BOJA desde 1979, RPT, agenda, subvenciones), sin autenticación.
+alerts:
+  - datastore_active true no garantiza la tabla; 6 de 173 recursos dieron 404 Resource not found y las plantillas orgánicas tienen 1000 filas en el datastore frente a 36260 en el CSV. Contrastar total con el fichero.
+  - Se pierden ceros a la izquierda; el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine de la API v0 llega como entero (44001) o texto ('04001') según el registro.
 access: [api-rest, download]
 auth: none
 formats: [json, csv, xls, xlsx, ods, kml, rdf, txt]
@@ -52,10 +55,8 @@ quirks: [latin1, datastore-incomplete]
 ids: [ine-municipio, nif]
 gotchas:
   - Los 525 recursos subidos (url_type upload) apuntan a gdc-pdpopendata-ckan.paas.junta-andalucia.es, host interno sin DNS público; la misma ruta en www.juntadeandalucia.es sí descarga el fichero.
-  - datastore_active true no garantiza la tabla; 6 de 173 recursos dieron 404 Resource not found y las plantillas orgánicas tienen 1000 filas en el datastore frente a 36260 en el CSV. Contrastar total con el fichero.
   - _links.next llega como //api/3/action/datastore_search?... (sin host ni /datosabiertos/portal); calcular la página siguiente con offset hasta total.
   - datastore_search_sql responde 400 Action name not known, y /datastore/dump/{id} y /catalog.rdf dan 404 HTML del front Drupal; usar datastore_search y /dataset/{name}.rdf por conjunto.
-  - Se pierden ceros a la izquierda; el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine de la API v0 llega como entero (44001) o texto ('04001') según el registro.
   - Cada publicador sube su CSV; Educación usa ; y coma decimal en ISO-8859-1, Hacienda ; en UTF-8 y Transparencia , en UTF-8. Detectar separador y codificación por fichero.
   - Los 156 recursos del IECA con formato CSV son la página HTML del visor BADEA; los datos están en su recurso JSON INTEROPERABLE, que es la API de la ficha ieca-api-badea.
   - 'Los filtros de tema y formato son texto exacto; fq=vocab_field_activity_sector:"Sector público " lleva espacio final (sin él, 0 resultados), seguridad va en minúscula y format mezcla XML/Atom y xml/atom.'

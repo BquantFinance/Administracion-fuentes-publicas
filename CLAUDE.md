@@ -24,6 +24,8 @@ Cada línea que no ahorre una búsqueda, una prueba fallida o una hora de depura
 3. **Las trampas son el valor.** `gotchas` recoge lo que la documentación oficial no dice: cabeceras
    obligatorias, codificaciones, decimales con coma, límites no documentados, ids que no coinciden entre
    organismos, URLs que cambian, datos que parecen cero y son secreto estadístico. Una frase por trampa.
+   Las trampas silenciosas (datos incompletos, distintos o a cero sin error) van en `alerts`, tras `summary`, como
+   mucho tres por ficha y sin repetirse en `gotchas`: la evaluación del 2026-10-01 mostró que entre las demás se pierden.
 4. **`tips` solo si acelera.** Patrón de uso, librería concreta, cruce típico con otra fuente. Máximo seis.
 5. **Ejemplos copiables y respuesta descrita.** Cada endpoint principal lleva un `example` que funciona al
    pegarlo y un `returns` con la forma de la respuesta vista en esa llamada (campos clave, tipos, formato de fecha y

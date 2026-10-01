@@ -10,6 +10,7 @@ sector: sector-del-vocabulario
 tags: [tema1, tema2]
 summary: >-
   Qué datos contiene y para qué sirve. Máx. 300 caracteres.
+alerts: []   # solo trampas silenciosas (datos incompletos, distintos o cero sin error), máximo tres; no repetir en gotchas
 access: [api-rest]
 auth: none
 formats: [json]
