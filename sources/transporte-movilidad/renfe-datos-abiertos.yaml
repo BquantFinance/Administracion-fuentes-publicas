@@ -7,13 +7,13 @@ sector: transporte-movilidad
 tags: [ferrocarril, gtfs, gtfs-rt, horarios, cercanias, alta-velocidad, estaciones, viajeros, renfe, ckan]
 summary: >-
   CKAN con 44 datasets: horarios GTFS de Cercanías y de alta velocidad, larga y media distancia, feeds GTFS-RT
-  (alertas, viajes y posiciones de trenes) en protobuf y JSON, 1.036 estaciones con coordenadas, viajeros por
-  franja horaria y núcleo, y puntualidad. CC BY 4.0, sin clave.
+  (alertas, viajes y posiciones de trenes) en protobuf y JSON, 1.035 estaciones con coordenadas y viajeros por
+  franja horaria y núcleo (año 2018). CC BY 4.0, sin clave.
 access: [api-rest, download, feed]
 auth: none
 formats: [zip, csv, xlsx, json, protobuf]
 update: realtime
-coverage: "GTFS vigentes (sin fecha de versión en el fichero); viajeros por franja y puntualidad según dataset"
+coverage: "GTFS vigentes (AV y LD generado el 30-9-2026, Cercanías el 24-9-2026); viajeros por franja de 2018 y demás datasets estáticos sin cambios desde 2020-2021"
 license: CC BY 4.0 (license_title de los datasets)
 base_url: https://data.renfe.com/api/3/action
 docs_url: https://data.renfe.com/
@@ -21,31 +21,37 @@ endpoints:
   - path: /package_search?rows=100
     desc: Los 44 datasets con resources[].url, format y last_modified; package_list solo nombres; package_show?id={name} un dataset
     example: curl -s "https://data.renfe.com/api/3/action/package_show?id=horarios-cercanias"
-    returns: "CKAN {result:{id, name, title, notes, metadata_modified, resources:[{id, name, url, format, size, last_modified, mimetype}], archiver:{is_broken, reason}}}"
+    returns: "CKAN {success, result:{id, name, title, notes, metadata_modified, license_title, resources:[{id, name, url, format, size, last_modified, mimetype}], archiver}}; fechas ISO sin zona; size puede estar desfasado (9,8 MB declarados frente a 14 MB reales en Cercanías)"
   - path: https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip
-    desc: GTFS de alta velocidad, larga y media distancia (760 KB; agency, calendar, calendar_dates, routes, stops, stop_times, trips; sin feed_info)
+    desc: GTFS de alta velocidad, larga y media distancia (754 KB, 36 MB descomprimido; agency, calendar, calendar_dates, routes, stops, stop_times, trips; sin feed_info)
     example: curl -sO "https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip"
   - path: https://ssl.renfe.com/ftransit/Fichero_CER_FOMENTO/fomento_transit.zip
-    desc: GTFS de Cercanías (14 MB)
+    desc: GTFS de Cercanías (14 MB; 263 MB descomprimido, con stop_times de 241 MB, shapes y transfers)
     example: curl -sO "https://ssl.renfe.com/ftransit/Fichero_CER_FOMENTO/fomento_transit.zip"
   - path: https://ssl.renfe.com/ftransit/Fichero_estaciones/estaciones.csv
-    desc: 1.036 estaciones con CODIGO, DESCRIPCION, LATITUD, LONGITUD, DIRECION, CP, POBLACION, PROVINCIA, PAIS, CERCANIAS, ANCHO MÉTRICO y COMUN; también estaciones.xlsx
+    desc: 1.035 estaciones con CODIGO, DESCRIPCION, LATITUD, LONGITUD, DIRECION, CP, POBLACION, PROVINCIA, PAIS, CERCANIAS, ANCHO MÉTRICO y COMUN; también estaciones.xlsx
     example: curl -sO "https://ssl.renfe.com/ftransit/Fichero_estaciones/estaciones.csv"
   - path: https://gtfsrt.renfe.com/{alerts|trip_updates|vehicle_positions}.{pb|json}
-    desc: GTFS-RT de Cercanías; con sufijo _LD (trip_updates_LD, vehicle_positions_LD) para alta velocidad y larga distancia; no verificado (ver gotchas)
+    desc: GTFS-RT de Cercanías; con sufijo _LD (trip_updates_LD, vehicle_positions_LD) para alta velocidad y larga distancia
+    example: curl -s "https://gtfsrt.renfe.com/alerts.json"
+    returns: "GTFS-RT 2.0 (73 alertas, 176 trip_updates_LD el 1-10-2026); el JSON va en camelCase con timestamp y time como cadenas de segundos epoch; entity con alert, tripUpdate (delay en segundos) o vehicle; tripId y stopId cruzan con el GTFS"
   - path: https://data.renfe.com/dataset/{uuid}/resource/{id}/download/{fichero}.{csv|xlsx}
-    desc: Estaciones por núcleo, viajeros por franja horaria (Madrid, Barcelona, Valencia, Sevilla, Bilbao...), puntualidad, fichas de trenes; URL en resources[].url
+    desc: Estaciones por núcleo, viajeros por franja horaria (Madrid, Barcelona, Valencia, Sevilla, Bilbao...), indemnizaciones, fichas de trenes; URL en resources[].url
 quirks: [latin1]
 ids: []
 gotchas:
-  - gtfsrt.renfe.com cerró la conexión TLS (reset) y respondió 503 en http el 30/09/2026 desde el entorno de verificación; los feeds GTFS-RT quedan sin verificar.
-  - ssl.renfe.com cerró la conexión en una de cuatro descargas de estaciones.csv el 30/09/2026; reintentar ante ConnectionReset.
+  - gtfsrt.renfe.com y ssl.renfe.com no completaron el TLS en cerca de la mitad de las conexiones desde el entorno de verificación (sin respuesta y corte a los 11 s, 1-10-2026); reintentar con espera.
   - El GTFS de AV y LD no lleva feed_info.txt ni fecha de versión; comprobar last_modified del recurso en package_show para saber si cambió.
-  - agency.txt viene con relleno de espacios al final de las líneas; recortar antes de parsear.
-  - El CSV de estaciones va en ISO-8859-1, separador ; y todas las columnas entre comillas; CODIGO es un código de estación de 5 dígitos con ceros iniciales (01003).
-  - No localicé portal de datos abiertos de Adif (data.adif.es no responde y adif.es/datos-abiertos da 404 el 30/09/2026).
+  - Todas las líneas de los .txt van rellenas de espacios hasta 350 caracteres (AV y LD) o 150 (Cercanías), también la cabecera y campos como route_short_name (C1); recortar antes de parsear.
+  - stop_id y CODIGO llevan ceros a la izquierda (04040, 01003); leer como texto, porque pandas los convierte a entero.
+  - El CSV de estaciones va en ISO-8859-1 con CRLF, separador ; y todas las columnas entre comillas.
+  - estaciones.csv cubre las 1.006 paradas del GTFS de AV y LD (stop_id igual a CODIGO) pero solo 642 de las 1.139 de Cercanías; para el resto usar stop_lat y stop_lon del GTFS.
+  - Los datasets de viajeros por franja (año 2018, sin columna de fecha), estaciones por núcleo y fichas de trenes no cambian desde 2020-2021; compromiso-puntualidad son las indemnizaciones, no la puntualidad.
+  - En AV y LD las horas van sin cero inicial (8:30:00) y algunas pasan de 24:00; el trip_id es número de tren, un dígito y fecha de inicio (0019012026-10-01).
+  - No localicé portal de datos abiertos de Adif (data.adif.es no responde y adif.es/datos-abiertos da 404 el 1-10-2026).
 tips:
-  - gtfs-kit o partridge leen los ZIP GTFS directamente; para geometría de estaciones basta estaciones.csv con LATITUD y LONGITUD en WGS84.
+  - "gtfs_kit.read_feed(zip, dist_units='km') lee el GTFS de AV y LD sin tocarlo (recorta el relleno y deja stop_id como texto); para geometría de estaciones basta estaciones.csv en WGS84."
+  - "pd.read_csv(f, dtype=str).rename(columns=str.strip) y después str.strip en cada columna evita los nombres y valores con relleno."
 related: [dgt-datex-trafico, puertos-estado-datos, mitma-opendata-movilidad]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

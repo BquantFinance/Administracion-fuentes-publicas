@@ -6,36 +6,52 @@ level: age
 sector: empleo-seguridad-social
 tags: [sepe, paro-registrado, contratos, prestaciones, demandantes, municipios, ocupaciones, cnae]
 summary: >-
-  Datos mensuales de paro registrado, demandantes, contratos y prestaciones por desempleo: avance mensual en
-  xls con URL fija, series históricas, y desglose por municipio, actividad económica, sexo y edad en un xls
-  por comunidad autónoma y mes.
+  Paro registrado, demandantes, contratos y prestaciones por desempleo, mensuales: avances en xls con URL fija y
+  series desde 2001, paro y contratos de todos los municipios con código INE en un xls por mes, y desglose por
+  división CNAE, sexo y edad de capitales y municipios de más de 20.000.
 access: [download, portal]
 auth: none
 formats: [xls, pdf, html, rss]
 update: monthly
-coverage: "Municipios desde mayo de 2005; series nacionales largas en evolparoseries.xls"
+coverage: "Todos los municipios desde mayo de 2005; por actividad, capitales y más de 45.000 habitantes desde 2009 y de 20.000 a 45.000 desde 2017; series nacionales desde enero de 2001"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas.html
 docs_url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos.html
 endpoints:
-  - path: https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/{tabla}.xls
-    desc: Avance mensual de paro con URL fija por tabla (evolparo, evolparoseries, evolparoseries2001, evolprovsectores, paroprovsector, parosexoedadprov)
+  - path: https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/{carpeta}/{tabla}.xls
+    desc: Avance mensual con URL fija; carpeta empleo (evolparo, evolparoseries, evolparoseries2001, paroprovsector), contratos (serie_contratos), paro_prov
     example: curl -sO -A "Mozilla/5.0" "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/evolparoseries.xls"
-  - path: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios-20-45/{AAAA}/{mes}.html
-    desc: Página del mes (2020 en adelante) con un xls por comunidad autónoma; de 2005 a 2019 en municipios/{AAAA}/{mes}-{AAAA}.html
+    returns: "xls con hojas Sectores y Sexo y Edad, cinco filas de título, año solo en la primera fila de cada año (rellenar hacia abajo), mes como 201701.0 y nombre, y enteros; evolparoseries va de 2017-01 al último mes y evolparoseries2001 de 2001-01 a 2016-12 con las columnas desplazadas una posición"
+  - path: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios/{AAAA}/{mes}.html
+    desc: Página del mes con ESTADISTICA_MUNICIPIOS.xls (todos los municipios) y MUNI_{PROVINCIA}_{MMAA}.xls; hasta 2019 la página es {mes}-{AAAA}.html
+    example: curl -s -A "Mozilla/5.0" "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios/2026/agosto.html" | grep -o '/HomeSepe/dam/jcr:[^"]*ESTADISTICA_MUNICIPIOS.xls'
+    returns: "ESTADISTICA_MUNICIPIOS.xls (3,7 MB) con Indice y hojas PARO {PROVINCIA} y CONTRATOS {PROVINCIA}; ocho filas de cabecera y una fila por municipio con código INE como número (28001.0), nombre (ACEBEDA, LA), total, sexo por edad y sector; «<5» como texto y fila final de total sin código"
   - path: https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_20_45/{AAAA}/{mes}_{AAAA}/Muniacteco_20-45_{CCAA}.xls
-    desc: Demandantes parados por actividad económica, sexo, edad y municipio de una comunidad (3 MB)
+    desc: Paro y contratos por división CNAE, sexo, edad y municipio solo de 20.000 a 45.000 habitantes sin capitales; página municipios-20-45/{AAAA}/{mes}.html
     example: curl -sO -A "Mozilla/5.0" "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_20_45/2026/agosto_2026/Muniacteco_20-45_ANDALUCIA.xls"
+    returns: "xls de 3 MB con 12 hojas (paro y contratos totales, indefinidos y temporales por sexo); bloques por municipio con filas Provincia y Municipio por nombre, edades 16-19 a >59 en filas y divisiones CNAE en columnas ('00' a '99'; en contratos de 2026 '25/47  '), «<5» como texto"
+  - path: https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_capitales/{AAAA}/{mes}_{AAAA}/Municipios_acteco_{CCAA}.xls
+    desc: Mismo formato para capitales y municipios de más de 45.000 habitantes (24 en Madrid); página municipios-capitales/{AAAA}/{mes}.html desde 2009
+    example: curl -sO -A "Mozilla/5.0" "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_capitales/2026/agosto_2026/Municipios_acteco_MADRID.xls"
   - path: https://www.sepe.es/HomeSepe/rssgen/RSSServlet?namePage={pagina}.html&param1=HomeSepe
-    desc: RSS de novedades de cada página de estadísticas
-quirks: [static-html, overwritten-in-place]
+    desc: RSS de cada página de estadísticas; un único item con el enlace a la página, sin fecha ni ficheros
+    example: curl -s -A "Mozilla/5.0" "https://www.sepe.es/HomeSepe/rssgen/RSSServlet?namePage=municipios.html&param1=HomeSepe"
+    returns: "RSS 2.0 en UTF-8 con un solo item (title, link, description, category, guid) y sin pubDate; un namePage desconocido responde 302 sin cuerpo"
+quirks: [static-html, overwritten-in-place, url-drift]
+ids: [ine-municipio, cnae]
 gotchas:
   - HEAD devuelve 403 en los ficheros; usar GET, que admite Range.
-  - Los xls municipales tienen formato de informe, bloques por provincia y municipio identificados solo por nombre, sin código INE; hay que parsear las filas de título.
-  - xlrd no abre estos xls (cabecera OLE atípica) y LibreOffice tampoco los convierte; pandas con engine calamine sí los lee.
+  - municipios.html (todos los municipios por provincia) llega hasta el último mes; municipios-20-45 y municipios-capitales son otras tablas con desglose por actividad, no su continuación.
+  - Los xls por actividad (Muniacteco_20-45, Municipios_acteco) identifican provincia y municipio solo por nombre en filas de título; el código INE está en ESTADISTICA_MUNICIPIOS.xls y MUNI_{PROVINCIA}.
+  - Los valores de 1 a 4 llegan como texto «<5» (secreto estadístico) mezclados con enteros, ceros y celdas vacías; convertir antes de sumar y no tratar «<5» como cero.
+  - xlrd falla en parte de los xls (evolparoseries, MUNI_*, Muniacteco; Expected little-endian marker) y LibreOffice no convirtió ninguno de los probados; pandas con engine calamine los lee todos.
+  - En paroprovsector, parosexoedadprov y evolprovsectores la primera columna numera filas de 1 a 62 con provincias y totales de comunidad intercalados (9 ANDALUCIA), no es el código INE.
+  - En evolparo.xls la variación anual del año en curso llega como texto con coma decimal ('-6,17') y la del año anterior como número.
+  - Desde 2020 los ficheros municipales cuelgan de /HomeSepe/dam/jcr:{uuid}/ con uuid nuevo cada mes y hay páginas con nombre irregular (2025/Octubre.html, 2019/noviembre.html); tomar los enlaces de la página.
   - Los xls de avance se sobreescriben cada mes en la misma URL; guardar copia fechada para el histórico de publicaciones.
-  - La página municipios.html solo cubre 2005 a 2019; desde 2020 es municipios-20-45.html, y las capitales van aparte (municipios-capitales.html).
   - Paro registrado no es lo mismo que desempleo EPA (INE); no comparar niveles.
+tips:
+  - "Paro por municipio con código INE: GET de municipios/{AAAA}/{mes}.html, enlace a ESTADISTICA_MUNICIPIOS.xls y pd.read_excel(f, sheet_name=None, header=None, engine='calamine'); filas con código numérico en la columna 0."
 related: [ine-api-tempus, segsocial-estadisticas, ine-codigos-territoriales, mites-estadisticas]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

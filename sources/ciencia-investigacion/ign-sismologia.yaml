@@ -6,37 +6,54 @@ level: age
 sector: ciencia-investigacion
 tags: [terremotos, sismicidad, catalogo-sismico, volcanes, geofisica, tiempo-real]
 summary: >-
-  Terremotos localizados por la Red Sísmica Nacional: tablas HTML de los últimos 5, 10 y 30 días y del año
-  (magnitud 1,5 o superior o sentidos) y catálogo histórico con formulario por fechas, zona, magnitud e
-  intensidad, descargable en csv, kmz o geojson desde la web (no reproducido por script).
-access: [portal, scraping]
+  Terremotos de la Red Sísmica Nacional en el GeoJSON del visor (30 últimos días, todas las magnitudes; Canarias,
+  Antártida y mundiales aparte), tablas HTML de N días (magnitud 1,5 o más o sentidos) y catálogo desde 1370 con
+  búsqueda y descarga en CSV, reproducibles por script imitando el navegador.
+access: [download, portal, scraping]
 auth: none
-formats: [html, csv, txt, kml, geojson]
+formats: [geojson, html, csv, txt, kml, zip]
 update: realtime
-coverage: "Catálogo histórico y sismicidad reciente"
-license: Reutilización libre con cita de la fuente
+coverage: "Catálogo de 1370 a hoy (anteriores en PDF); GeoJSON de 30 días, 90 en Canarias"
+license: Reutilización libre con cita de la fuente (DOI 10.7419/162.03.2022)
 base_url: https://www.ign.es/web/ign/portal/ultimos-terremotos
 docs_url: https://www.ign.es/web/ign/portal/sis-area-sismicidad
 endpoints:
-  - path: https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/{get5dias|get10dias|get30dias|getAnio}
-    desc: Tabla HTML con evento (es2026tefhw), fecha, hora UTC y local, latitud, longitud, profundidad, magnitud, tipo de magnitud, intensidad máxima y localización
-    example: curl -s "https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/get10dias"
-  - path: https://www.ign.es/web/ign/portal/sis-catalogo-terremotos
-    desc: Formulario del catálogo (POST a /-/catalogo-terremotos/searchTerremoto) con startDate y endDate dd/mm/aaaa, caja lat/lon, magnitud, intensidad y profundidad
+  - path: https://www.ign.es/web/resources/sismologia/tproximos/todos_visualizadores.js
+    desc: JavaScript con cuatro GeoJSON (var tproximos, tproximos_canarias, tmundiales, tproximos_antartida) que alimenta el visor; Cache-Control s-maxage=120
+    example: curl -s "https://www.ign.es/web/resources/sismologia/tproximos/todos_visualizadores.js"
+    returns: "var tproximos = {FeatureCollection} y tres más; Point [lon, lat] y properties {evid, mag y depth como texto, magtype, intensidad rellena de espacios, fecha UTC AAAA-MM-DD HH:MM:SS, fechalocal, loc}; 1.286 eventos de 30 días con magnitud desde 0,0 el 01/10/2026"
+  - path: https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/get10dias?_IGNGFSSismoSismicidadReciente_WAR_IGNGFSSismoSismicidadRecienteportlet_dias={n}
+    desc: Tabla HTML de los últimos n días (magnitud 1,5 o más o sentidos); sin el parámetro muestra solo 5 días; acepta 30, 90 o 365
+    example: curl -s "https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/get10dias?_IGNGFSSismoSismicidadReciente_WAR_IGNGFSSismoSismicidadRecienteportlet_dias=10"
+    returns: "Una tabla: Evento (es2026tfnqm), Fecha dd/mm/aaaa, Hora UTC, Hora Local, Latitud, Longitud, Profundidad (km), Magnitud con punto decimal, Tipo Mag., Int. max. (romanos o Sentido), Localización; 182 filas para 10 días y 5.701 (7,7 MB) para 365"
+  - path: https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/{get30dias|getAnio}
+    desc: get30dias, solo los terremotos sentidos de 30 días (156 el 01/10/2026); getAnio, los significativos del último año (53, magnitud desde 2,6)
+  - path: https://www.ign.es/web/ign/portal/sis-catalogo-terremotos/-/catalogo-terremotos/searchTerremoto?latMin={a}&latMax={b}&longMin={c}&longMax={d}&startDate={dd/mm/aaaa}&endDate={dd/mm/aaaa}&...
+    desc: Búsqueda del catálogo; POST con los filtros sin prefijo en la URL y con prefijo en el cuerpo, más cookie y formDate de un GET previo; 50 por página
+    params: "latMin, latMax, longMin, longMax, startDate, endDate, selMagnitud (Y o N) con magMin y magMax, selIntensidad, intMin, intMax, selProf, profMin, profMax, fases (no), cond; en el cuerpo lonMin y lonMax"
+  - path: https://www.ign.es/web/ign/portal/sis-catalogo-terremotos?p_p_id=IGNSISCatalogoTerremotos_WAR_IGNSISCatalogoTerremotosportlet&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_cacheability=cacheLevelPage&p_p_col_id=column-1&p_p_col_count=1&_IGNSISCatalogoTerremotos_WAR_IGNSISCatalogoTerremotosportlet_jspPage=%2Fjsp%2Fterremoto.jsp
+    desc: Descarga de todos los resultados; POST multipart con los campos del formulario fm de la página de resultados y tipoDescarga (csv, txt, kmz, zip, geojson)
+    returns: "CSV con ; y campos rellenos de espacios a ancho fijo, CRLF: Evento;Fecha;Hora (UTC);Latitud;Longitud;Prof. (Km);Inten. (romanos);Mag.;Tipo Mag. (código: 3 mb, 4 mbLg, 6 M(mb));Localización"
   - path: https://www.ign.es/web/ign/portal/sis-catalogo-acelerogramas
     desc: Catálogos de acelerogramas, shakemaps y tsunamis enlazados desde el área de sismicidad
   - path: https://visualizadores.ign.es/tproximos
-    desc: Visor de terremotos próximos (aplicación Next.js con teselas propias)
+    desc: Visor de terremotos próximos (aplicación Next.js); sus datos salen de todos_visualizadores.js
 quirks: [js-rendered, session-required, url-drift]
 ids: []
 gotchas:
-  - No localicé API, feed ni fichero estable. El RSS y el KML de la ficha anterior (resources/sismologia/tproximos/) responden 404 y www.ign.es/fdsnws devuelve 404.
-  - Las páginas getNdias son la única fuente automatizable; parsear la tabla HTML (200 KB para 10 días). Las horas se dan en UTC y en hora local en columnas separadas.
-  - El catálogo es un portlet Liferay con búsqueda y descarga (csv, txt, kmz, zip, geojson) por JavaScript y sesión; mis envíos por script devolvieron solo la cabecera (30/09/2026); replicar las peticiones del navegador.
-  - En mis pruebas la descarga devolvió un fichero de anchos fijos (Evento, Fecha, Hora, Latitud, Longitud, Prof., Inten., Mag., Tipo Mag., Localización) aunque se eligiera csv.
-  - El tipo de magnitud varía por evento (mb, mbLg, Mw); las magnitudes históricas anteriores a la red instrumental son intensidades macrosísmicas.
+  - No hay API ni FDSN (www.ign.es/fdsnws da 404) y el RSS y el KML antiguos de /resources/sismologia/tproximos/ responden 404 (el directorio, 403); la vía estable es todos_visualizadores.js.
+  - todos_visualizadores.js no es JSON; cada una de sus cuatro variables va tras «var nombre =» y acaba en «;», así que hay que extraerlas por separado (raw_decode desde cada var).
+  - En el GeoJSON mag, depth e intensidad son texto; tmundiales usa fecha con barras (2026/09/24 07:40:59) y tproximos_canarias trajo justo 999 eventos el 01/10/2026, posible tope.
+  - get10dias sin parámetro muestra solo 5 días (90 eventos el 01/10/2026) aunque la página diga 10; get5dias responde 200 sin tabla.
+  - Las tablas incluyen eventos de Portugal, Francia y el norte de África (sufijos .POR, .FRA, .MAC, .ARG) y Hora Local usa la de Canarias en las islas (UTC+1 frente a UTC+2 en verano).
+  - El catálogo solo filtra si se replica el navegador; un POST con solo los campos con prefijo devolvió los valores por defecto (2008-2016, magnitud 0-8, 61.369 eventos) sin avisar.
+  - El CSV descargado trae U+FFFD en lugar de la ó de Localización en la cabecera y el cuerpo en UTF-8; Tipo Mag. sale como código e Inten. en romanos, al revés que la tabla HTML.
+  - Los eventos históricos traen la magnitud como el texto null, ids numéricos (205) en lugar de es2026tfnqm y tipo de magnitud con código propio (13).
+  - Antes de 1370 el catálogo solo está en PDF (SIS-Catalogo-Anterior-1370.pdf); la caja de búsqueda admite latitud 26 a 45 y longitud -20 a 6.
 tips:
-  - "pandas.read_html(get10dias)[0] recupera la tabla de últimos terremotos en una línea; convertir Fecha y Hora UTC a datetime con dayfirst=True."
+  - "Python: t = requests.get(url).text; json.JSONDecoder().raw_decode(t, t.index('{', t.index('var tproximos '))) devuelve el GeoJSON de 30 días (1.286 eventos)."
+  - "pandas.read_html(url_get10dias)[0] recupera la tabla (necesita lxml); convertir Fecha y Hora UTC a datetime con dayfirst=True."
+  - El catálogo IGN-UPM 2013 (1048-2011, Mw 3,0 o más) se consulta por ArcGIS REST en el IGME (ficha igme-geologia) sin formularios.
 related: [igme-geologia, cnig-centro-descargas]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

@@ -4,30 +4,44 @@ org: Agencia Estatal de Meteorología (AEMET)
 ministry: Para la Transición Ecológica y el Reto Demográfico
 level: age
 sector: meteorologia-clima
-tags: [aemet, series-centenarias, efemerides, cambio-climatico, proyecciones, pnacc]
+tags: [aemet, series-centenarias, efemerides, cambio-climatico, proyecciones, pnacc, rejilla]
 summary: >-
-  Páginas del portal de AEMET fuera de la API: series centenarias, efemérides, proyecciones de cambio climático
-  (AR6 y AR5) y catálogo del plan RISP. Sin descargas directas verificadas y sin FTP; radiación, ozono, normales
-  y extremos están en la API (aemet-opendata).
-access: [portal]
+  Portal de AEMET fuera de la API: series centenarias, efemérides, proyecciones de cambio climático (AR6 y AR5)
+  y catálogo RISP, con tar.gz de proyecciones AR5 diarias y de la rejilla observacional diaria de 5 km (NetCDF y
+  txt). Sin FTP; radiación, ozono, normales y extremos están en aemet-opendata.
+access: [portal, download]
 auth: none
-formats: [html, pdf]
+formats: [html, pdf, netcdf, txt]
 update: irregular
+coverage: "Rejilla diaria 1951-2022 (Canarias 1990-2022); proyecciones AR5 1961-2005 y 2006-2100"
 license: Reutilización libre con cita de la fuente (aviso legal AEMET)
 base_url: https://www.aemet.es/es/datos_abiertos
 docs_url: https://www.aemet.es/es/datos_abiertos/catalogo
 endpoints:
   - path: https://www.aemet.es/es/serviciosclimaticos/datosclimatologicos/series-centenarias
-    desc: Series centenarias, con Izaña en subpágina propia
+    desc: Series centenarias, con Izaña en subpágina propia; texto e imágenes, sin ficheros de datos
   - path: https://www.aemet.es/es/serviciosclimaticos/cambio_climat/proyecciones-AR6
     desc: Proyecciones climáticas AR6 (escenarios PNACC); AR5 en proyecciones-AR5-y-anteriores y visor en visor-AdapteCCa
   - path: https://www.aemet.es/es/datos_abiertos/catalogo
     desc: Catálogo del plan RISP con los conjuntos de datos abiertos de AEMET
+  - path: https://www.aemet.es/es/serviciosclimaticos/cambio_climat/datos_diarios?w=0&w2=0&b=1&cm={metodo}&mo={modelo}&es={escenario}&va={variable}&pe={periodo}
+    desc: Buscador GET de proyecciones regionalizadas AR5 (CMIP5) diarias por estación o rejilla; la página de resultados enlaza un tar.gz por combinación
+    params: cm = analogos, sdsm, red_neuronal o su variante _rej; mo = 24 modelos CMIP5 (ACCESS1-0, MIROC5...); es = HISTORICAL, RCP45, RCP60, RCP85; va = precip, tmax, tmin; pe = 1961-2000, 1961-2005, 2006-2100
+    example: curl -s "https://www.aemet.es/es/serviciosclimaticos/cambio_climat/datos_diarios?w=0&w2=0&b=1&cm=analogos&mo=ACCESS1-0&es=RCP85&va=tmax&pe=2006-2100" | grep -o '/documentos_d/[^"]*'
+    returns: "HTML ISO-8859-15 con «Resultados de la búsqueda» y un enlace por fichero, aquí /documentos_d/serviciosclimaticos/cambio_climat/datos_diarios/reg_e/ar5/analogos/ACCESS1-0/RCP85/tmax.ACCESS1-0.RCP85.2006-2100.ANALOGOS.tar.gz (18 MB); con sdsm_rej y precip, 367 MB"
+  - path: https://www.aemet.es/documentos_d/serviciosclimaticos/cambio_climat/datos_diarios/reg_e/ar5/{cm}/{mo}/{es}/{va}.{mo}.{es}.{pe}.{CM}.tar.gz
+    desc: Fichero de una proyección (CM es el método en mayúsculas, ANALOGOS o SDSM_REJ); tar.gz con un .dat de texto por estación
+    returns: "Visto con Range (Last-Modified 2016-07-01) un tar.gz con tmax.0001.ACCESS1-0.RCP85.2006-2100.ANALOGOS.dat...; cada .dat empieza con «tmax ACCESS1-0 RCP8.5 ANALOGOS decimas», una línea de estación (id, lat, lon, altitud) y filas estación año mes con 31 valores enteros en décimas"
+  - path: https://www.aemet.es/es/serviciosclimaticos/cambio_climat/datos_diarios?w=1
+    desc: Rejilla observacional diaria de 5 km; precipitación v1 y v2 desde 1951, Tmax y Tmin v1 desde 1951 y Canarias (ROCIOplus) desde 1990, en NetCDF por décadas y txt
+    example: curl -s "https://www.aemet.es/es/serviciosclimaticos/cambio_climat/datos_diarios?w=1" | grep -o '/documentos/[^"]*tar.gz'
+    returns: "HTML con 56 enlaces bajo /documentos/es/serviciosclimaticos/cambio_climat/datos_diarios/dato_observacional/rejilla_5km/, p. ej. v2/Serie_AEMET_v2_pcp_2022_netcdf.tar.gz (5,7 MB) o temperatura/v1/tmax/Serie_AEMET_v1_tmax_1951a2022_txt.tar.gz (631 MB, el mayor)"
 quirks: [latin1, static-html]
 gotchas:
   - El host ftpdatos.aemet.es de la ficha anterior no resuelve en DNS; no hay FTP anónimo.
-  - Las páginas van en ISO-8859-15 y no enlazan ficheros de datos en el HTML; los datos climatológicos descargables están en la API OpenData.
+  - Las páginas van en ISO-8859-15; solo las de datos_diarios (w=0 tras buscar y w=1) enlazan ficheros de datos. Series centenarias, AR6 y catálogo no enlazan datos y las normales y extremos están en la API OpenData.
+  - Desde este entorno (1/10/2026) los tar.gz de documentos_d y de la rejilla dieron 200 con Content-Length 0 o 416 «bytes */0» (CloudFront Miss), salvo una HEAD y una petición Range; comprobar el tamaño y reintentar.
   - La ruta cambio_climat/result_graficos de la ficha anterior devuelve la portada genérica; las proyecciones cuelgan de proyecciones-AR6 y proyecciones-AR5-y-anteriores.
 related: [aemet-opendata]
 status: degraded
-verified: "2026-09-30"
+verified: "2026-10-01"

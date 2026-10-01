@@ -6,9 +6,9 @@ level: age
 sector: economia-finanzas
 tags: [airef, previsiones, deuda, deficit, reglas-fiscales, pib-tiempo-real, ccaa]
 summary: >-
-  Ficheros xlsx de la AIReF: histórico de deuda por Administración, cuadro macro de previsiones, estimación en
-  tiempo real del PIB trimestral (MIPred) y por CCAA, y seguimiento del objetivo de estabilidad. Sin API localizada; los
-  Excel se enlazan desde páginas WordPress.
+  Ficheros xlsx de la AIReF: ratio de deuda pública sobre PIB por informe, cuadro macro de previsiones, estimación
+  en tiempo real del PIB trimestral (MIPred) y PIB trimestral por CCAA (METCAP); seguimiento del objetivo de
+  estabilidad solo en PDF. Sin API localizada; Excel enlazados desde WordPress.
 access: [download, portal]
 auth: none
 formats: [xlsx, pdf]
@@ -20,24 +20,28 @@ docs_url: https://www.airef.es/es/acceso-a-datos/
 endpoints:
   - path: https://www.airef.es/es/datalab/datos-economicos/observatorio-de-deuda/
     desc: Observatorio de deuda; enlaza Historico_Deuda.xlsx y los informes trimestrales en PDF
-    example: curl -sLO "https://www.airef.es/wp-content/uploads/2025/03/Historico_Deuda.xlsx"
+    example: curl -sLO --cacert ca-age.pem "https://www.airef.es/wp-content/uploads/2025/03/Historico_Deuda.xlsx"
+    returns: "Hoja Histórico_Deuda_PIB: ratio de deuda de las AAPP sobre PIB en % por año (filas 2014 a 2029) y una columna por informe (fila 4 fecha, fila 5 nombre), del más reciente al más antiguo; '-' como texto donde no hay dato"
   - path: https://www.airef.es/es/datalab/previsiones-del-pib-en-tiempo-real/
     desc: Previsión MIPred del PIB trimestral; un xlsx Datos_MIPred-{fecha}.xlsx por actualización
-    example: curl -sLO "https://www.airef.es/wp-content/uploads/DATOS-MIPRED/Datos_MIPred-2026925.xlsx"
+    example: curl -sLO --cacert ca-age.pem "https://www.airef.es/wp-content/uploads/DATOS-MIPRED/Datos_MIPred-2026925.xlsx"
+    returns: "Una hoja (MIPRED-2024 aunque el fichero sea de 2026): fila 6 fecha de cada estimación (211 columnas desde el 30/01/2024), fila 7 indicador incorporado y desde la fila 8 el trimestre como entero AAAATT (201701) con la tasa intertrimestral del PIB en %"
   - path: https://www.airef.es/es/datalab-previsiones-macroeconomicas-historicas/
-    desc: Cuadro macro de previsiones de la AIReF en xlsx (Cuadro_macro_web)
+    desc: Cuadro macro de previsiones en xlsx (Cuadro_macro_web, una hoja por agregado e históricos); la página enlaza dos versiones (Julio-2026-1 y -2), usar la última
   - path: https://www.airef.es/es/datalab/datos-economicos/seguimiento-del-objetivo-de-estabilidad/
-    desc: Seguimiento del objetivo de estabilidad por subsector
+    desc: Seguimiento del objetivo de estabilidad; solo PDF mensual (Fichas-Seguimiento_{AAAA}-{mes}.pdf), sin xlsx
   - path: https://www.airef.es/es/datalab/datos-economicos/estimacion-pib-trimestral-por-ccaa/
-    desc: Estimación del PIB trimestral por comunidad autónoma
+    desc: PIB trimestral por CCAA (METCAP); xlsx Comparador-interactivo y Cuadros-comparativos por trimestre, con las CCAA por nombre y sin código INE
 quirks: [tls-chain-incomplete, static-html, url-drift]
 gotchas:
   - El servidor envía el certificado sin la cadena intermedia FNMT; curl y requests fallan la verificación TLS salvo que se añada AC Componentes Informáticos al bundle (ver guía).
-  - Los xlsx cuelgan de wp-content/uploads con rutas que cambian en cada actualización; rascar la página para localizar el enlace vigente.
-  - Algunas URLs /es/ redirigen con 301 a la versión /ca/ con el mismo contenido; no descartar por el idioma de la URL final.
+  - Los xlsx cuelgan de wp-content/uploads con rutas que cambian (Cuadro_macro_web en 2026/07 y 2026/08, Datos_MIPred con la fecha); Historico_Deuda.xlsx sigue en 2025/03. Rascar la página en cada ejecución.
+  - Algunas URLs /es/ redirigen con 301 a la versión /ca/ o /va/ con el mismo contenido (observatorio de deuda, seguimiento del objetivo); no descartar por el idioma de la URL final.
   - Las rutas antiguas /es/datalab/ y /es/previsiones/ redirigen a páginas distintas de las esperadas; usar las de esta ficha.
   - La API REST de WordPress (wp-json) responde 403; no sirve para listar ficheros.
   - La fecha del nombre Datos_MIPred va sin ceros (2026925 es 25 de septiembre de 2026).
+  - En Datos_MIPred y Cuadro_macro_web el tipo de dato (observado, previsión, primera estimación del INE) solo se distingue por el color o la cursiva de la celda; leer con openpyxl (fill, font) si importa.
+  - Historico_Deuda.xlsx es la ratio de deuda total sobre PIB por informe, no por Administración, y su último informe es de octubre de 2024 aunque el fichero lleva Last-Modified de junio de 2026.
 related: [igae-ejecucion-presupuestaria, bde-estadisticas]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

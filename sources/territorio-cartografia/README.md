@@ -7,14 +7,14 @@ Sector `territorio-cartografia` · 4 fuentes · índice generado por `scripts/bu
 - Datos de un inmueble o parcela por referencia catastral, dirección o coordenadas → `catastro-ovc` (bloqueo por IP tras ráfagas de unas 15 peticiones)
 - Parcelario, edificios y direcciones vectoriales por municipio (INSPIRE) → `catastro-ovc`
 - Ortofotos PNOA, modelos del terreno, LiDAR y límites municipales → `cnig-centro-descargas` (descargas con reCAPTCHA; WMS, WMTS y WFS sin restricción)
-- Geocodificar una dirección y obtener su código INE → `cnig-centro-descargas` (geocoder CartoCiudad)
-- Geometría de secciones censales, distritos y municipios por año → `ine-cartografia-censal` (shapefile anual del INE; los límites municipales oficiales del IGN están tras reCAPTCHA (cnig-centro-descargas))
+- Geocodificar una dirección y obtener su código INE → `cnig-centro-descargas` (geocoder CartoCiudad; find ignora municipio_filter y no avisa si el portal no existe, elegir antes con candidates)
+- Geometría de secciones censales, distritos y municipios por año → `ine-cartografia-censal` (shapefile anual o API OGC del INE con filtro CQL; límites municipales del IGN sin reCAPTCHA en api-features.ign.es (idee-servicios))
 - Localizar cualquier servicio WMS, WFS o CSW de una Administración → `idee-servicios`
-- Carreteras y ferrocarril oficiales en vectorial → `idee-servicios` (WFS transportes de servicios.idee.es solo en GML; filtrar por bbox y paginar con count)
-- Ríos, embalses y cuencas en vectorial → `idee-servicios` (WFS hidrografia; GetCapabilities falla con 500 la mitad de las veces, repetir; GetFeature no falla)
+- Carreteras y ferrocarril oficiales en vectorial → `idee-servicios` (GeoJSON en api-features.idee.es (roadlink, railwaylink); el WFS transportes de servicios.idee.es solo da GML)
+- Ríos, embalses y cuencas en vectorial → `idee-servicios` (GeoJSON en api-features.idee.es (watercourse); el WFS hidrografia da GML)
 - Ocupación del suelo SIOSE por polígono → `idee-servicios` (110 millones de polígonos en el WFS ocupacion-suelo; sin count no responde)
 - Altitud o modelo digital del terreno de una zona → `idee-servicios` (WCS mdt con GetCoverage y SUBSET devuelve GeoTIFF; WMTS mdt para visualizar)
-- Buscar un topónimo → `idee-servicios` (WFS NGBE de www.ign.es con FILTER por nombre y GeoJSON; el geocoder de direcciones está en cnig-centro-descargas)
+- Buscar un topónimo → `idee-servicios` (api-features.ign.es/collections/namedplace/items?etiqueta={nombre} en GeoJSON; el geocoder de direcciones está en cnig-centro-descargas)
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|

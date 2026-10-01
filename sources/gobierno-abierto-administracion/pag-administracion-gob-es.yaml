@@ -6,12 +6,12 @@ level: age
 sector: gobierno-abierto-administracion
 tags: [tramites, sedes-electronicas, empleo-publico, oposiciones, sia, becas, ayudas]
 summary: >-
-  Portal ciudadano de la AGE: boletín semanal de empleo público y boletín quincenal de ayudas y becas en PDF,
-  buscador de trámites con código SIA, buscador de oficinas y directorio de sedes electrónicas. Sin API localizada ni
-  descarga estructurada; útil como índice, no como fuente de datos.
-access: [portal]
+  Portal ciudadano de la AGE: boletín semanal de empleo público y quincenal de ayudas y becas en PDF, buscadores de
+  trámites, empleo, becas y oficinas y directorio de sedes electrónicas, sin API localizada. Los códigos SIA de
+  procedimientos se descargan en xlsx por nivel desde el área pública del CTT.
+access: [portal, download]
 auth: none
-formats: [html, pdf]
+formats: [html, pdf, xlsx]
 update: weekly
 license: Reutilización libre con cita de la fuente
 base_url: https://administracion.gob.es/
@@ -19,22 +19,31 @@ docs_url: https://administracion.gob.es/espanaadmon/sia
 endpoints:
   - path: /empleopublico/boletin
     desc: Boletín semanal de convocatorias de empleo público en PDF con fecha en el nombre (Boletin_Convocatorias_Empleo_{DD}{Mes}{AAAA}.pdf)
+    example: curl -s "https://administracion.gob.es/empleopublico/boletin" | grep -o 'href="[^"]*\.pdf"'
+    returns: "Un enlace relativo al PDF vigente, /content/dam/punto-acceso-general/empleo-público/Boletin_Convocatorias_Empleo_30Septiembre2026.pdf (142 páginas, 1,8 MB)"
   - path: /empleopublico/ofertas-empleo-publico
     desc: Ofertas de empleo público de la AGE
   - path: /ayudas/boletin
-    desc: Boletín quincenal de ayudas, subvenciones, becas y premios en PDF
+    desc: Boletín quincenal de ayudas, subvenciones, becas y premios en PDF (Boletin_Convocatorias_Becas_{DD}{Mes}{AAAA}.pdf)
+  - path: https://administracionelectronica.gob.es/ctt/resources/Soluciones/215/Descargas/Listado%20Codigos%20SIA%20{nivel}.xlsx?idIniciativa=215&idElemento={n}
+    desc: Procedimientos y servicios con código SIA por nivel; idElemento AGE 11233, CCAA 11234, Universidades 11236, Otras Instituciones 11249 y EELL uno por comunidad
+    params: "EELL en Listado Codigos SIA EELL {comunidad sin tildes}.xlsx (Andalucia 11235, Comunidad de Madrid 11914...); la lista completa en verPestanaDescargas.htm?idIniciativa=sia"
+    example: 'curl -sL -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36" -c cj -b cj -o sia_age.xlsx "https://administracionelectronica.gob.es/ctt/resources/Soluciones/215/Descargas/Listado%20Codigos%20SIA%20AGE.xlsx?idIniciativa=215&idElemento=11233"'
+    returns: "xlsx de una hoja con cabecera en la fila 1: Código SIA (texto de 6 o 7 dígitos), Denominación, Descripción, Código DIR3 Departamento y Centro Directivo con su versión y nombres; AGE 7161 filas, volcado del 07/09/2026"
   - path: /espanaadmon/sia
-    desc: Qué es el SIA y enlace al buscador de trámites filtrable por código SIA
+    desc: Qué es el SIA, guía en PDF y enlace a la ficha del CTT; el buscador de trámites está en /tramites-electronicos/resultadosActuaciones
   - path: /informacion/buscador-de-oficinas
     desc: Buscador de oficinas de asistencia en materia de registro
   - path: /informacion/sedes-electronicas-y-portales-de-internet-publicos
     desc: Directorio de sedes electrónicas y portales públicos
-quirks: [static-html, url-drift]
+quirks: [static-html, url-drift, user-agent-browser, session-required]
+ids: [sia, dir3]
 gotchas:
-  - El portal se rediseñó (Adobe Experience Manager) y las rutas pag_Home/... de la ficha anterior devuelven 404; las nuevas son cortas (/empleopublico/boletin).
-  - Los boletines son PDF con la fecha en el nombre bajo /content/dam/punto-acceso-general/; rascar la página para obtener el enlace vigente.
-  - El inventario SIA no se descarga en abierto; el área pública del CTT (administracionelectronica.gob.es, idIniciativa=sia) no muestra ficheros y el completo se pide como usuario de la red SARA.
+  - Las rutas pag_Home/... redirigen con 301 a rutas cortas que no siempre existen (pag_Home/ y boletinBecas.html acaban en 404; empleoPublico/boletin.html llega a /empleopublico/boletin).
+  - Los boletines son PDF con la fecha en el nombre bajo /content/dam/punto-acceso-general/ (la carpeta de empleo lleva tilde, empleo-público); rascar la página para obtener el enlace vigente.
+  - Los xlsx de SIA están en el CTT, con el mismo WAF que dir3-directorio (User-Agent de navegador y cookie jar); el de EELL de Castilla y León pesa 51 MB y los servicios web de SIA exigen alta de usuario.
+  - El código SIA es texto con ceros a la izquierda (010170); como número pierde el cero y deja de cruzar.
   - Las convocatorias de empleo público remiten al BOE; usar la API del BOE para el texto y sus canales RSS para el seguimiento.
 related: [boe-api-sumario, dir3-directorio, bdns-api]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

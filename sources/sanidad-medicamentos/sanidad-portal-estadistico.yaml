@@ -6,14 +6,14 @@ level: age
 sector: sanidad-medicamentos
 tags: [sanidad, sns, hospitales, cmbd, altas-hospitalarias, indicadores-clave, gasto-sanitario, catalogo-hospitales, barometro]
 summary: >-
-  Catálogo Nacional de Hospitales en xlsx (849 hospitales con código, camas, municipio, dependencia y
-  complejo), consulta interactiva de cubos del SNS (altas RAE-CMBD, SIAP, recursos, gasto), Indicadores Clave
-  del SNS, Barómetro Sanitario y BDCAP. Solo el catálogo tiene descarga directa.
-access: [portal, download]
+  Catálogo Nacional de Hospitales en xlsx (848 hospitales con código, camas, municipio, dependencia, complejo y
+  alta tecnología), cubos de la Consulta Interactiva del SNS (RAE-CMBD, SIAE, SIAP, BDCAP, Barómetro) exportables
+  a CSV por POST e Indicadores Clave del SNS (186) en JSON por GET.
+access: [download, portal, api-rest]
 auth: none
-formats: [xlsx, pdf, html]
+formats: [xlsx, csv, json, pdf, html]
 update: annual
-coverage: "CNH 2025; RAE-CMBD desde 1997; indicadores según serie"
+coverage: "CNH 2025 (centros autorizados a 31/12/2024); RAE-CMBD desde 1997; Indicadores Clave 1990-2025 según indicador"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.sanidad.gob.es/estadEstudios/portada/home.htm
 docs_url: https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/tablasEstadisticas/home.htm
@@ -21,29 +21,41 @@ endpoints:
   - path: https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/docs/CNH_2025.xlsx
     desc: Catálogo Nacional de Hospitales (hojas DIRECTORIO, ESTRUCTURA FUNCIONAL, BAJAS, ALTAS y tablas de códigos de CCAA, provincias, municipios, clase y dependencia)
     example: curl -sSL -o CNH_2025.xlsx "https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/docs/CNH_2025.xlsx"
-    returns: "Una fila por hospital: CCN, CODCNH, Nombre Centro, dirección, teléfono, código de municipio de 6 dígitos (INE más dígito de control), Municipio, Cód. Provincia, Provincia, Cód. CCAA, CCAA, código postal, camas y Clase (C11...); segunda hoja ESTRUCTURA FUNCIONAL con Cod Concierto, Forma parte Complejo y CODIDCOM"
+    returns: "xlsx de 494 KB con todas las celdas como texto; DIRECTORIO DE HOSPITALES con 848 filas (CCN, CODCNH, Nombre Centro, Cód. Municipio de 6 dígitos, Cód. Provincia y Cód. CCAA con cero inicial, CAMAS, Clase C11..., Dependencia Funcional, Forma parte Complejo, CODIDCOM, ALTA, Email)"
   - path: https://pestadistico.inteligenciadegestion.sanidad.gob.es/publicoSNS/S
-    desc: Consulta Interactiva del SNS (cubos de altas, actividad, recursos y gasto); aplicación ASP.NET con __VIEWSTATE, exportación manual
-  - path: https://inclasns.sanidad.gob.es/
-    desc: Indicadores Clave del SNS por CCAA, año y sexo (gráficos, mapas y tablas en la web)
+    desc: Consulta Interactiva del SNS (RAE-CMBD, SIAE, SIAP, BDCAP, Barómetro, ENSE, mortalidad, vacunas, consumo farmacéutico, ESTUDES, EDADES); ASP.NET WebForms
+  - path: https://pestadistico.inteligenciadegestion.sanidad.gob.es/publicoSNS/C/{sistema}/{subsistema}/{consulta}/{cubo}
+    desc: Cubo OLAP con URL estable (los enlaces /publicoSNS/C/ salen de las páginas /publicoSNS/N/); su vista por defecto se descarga en CSV con un POST de vuelta
+    example: curl -s --cacert ca-age.pem -o cubo.html "https://pestadistico.inteligenciadegestion.sanidad.gob.es/publicoSNS/C/siae/escri-siae/dotacion/dotacion"
+    params: "POST con los input ocultos de la página, __EVENTTARGET=ctl00$cph_Contenido$CUCubo$OlapClient1ChartToolbar y __EVENTARGUMENT=btn::OlapClient1ChartToolbar/OlapToolbarCommandExportarACsv@False@0,0~~"
+    returns: "GET devuelve HTML WebForms; el POST devuelve text/csv ISO-8859-1 con ; y CRLF, cabecera con ; final y sin salto final (Año;Nº de Hospitales ; de 1997 a 2024 en este cubo); solo la vista por defecto"
+  - path: https://inclasns.sanidad.gob.es/export/data
+    desc: Datos de los Indicadores Clave del SNS que usa la propia web; GET JSON sin clave ni sesión, con ids internos
+    example: curl -s "https://inclasns.sanidad.gob.es/export/data?indicators=1&sex=1,2,51&areaCode=50,30&nse=71&nsc=79&nsi=84&year=28"
+    params: "indicators (1 esperanza de vida al nacer), sex 1, 2 o 51, areaCode 50 España y 30 a 49 CCAA (no INE), nse 71, nsc 79, nsi 84 (totales), year no correlativo (27=2014, 64=2015, 94=2025, 28 último)"
+    returns: "Lista JSON con un objeto por indicador: indicator (code 1000, unit, numberFormat, sourceUrl) y data[] con sex, areaCode, nse, nsc, nsi y year como {id, name} (andalucia, year2023) y value float sin redondear; data vacío si no hay ese año"
   - path: https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/UltDatos.htm
     desc: Últimos datos publicados (Barómetro Sanitario, BDCAP, visualización interactiva)
   - path: https://www.sanidad.gob.es/estadEstudios/estadisticas/estadisticas/estMinisterio/SolicitudCMBD.htm
     desc: Solicitud formal de microdatos RAE-CMBD (entrega anonimizada, sin descarga directa)
   - path: https://www.sanidad.gob.es/estadEstudios/estadisticas/estadisticas/estMinisterio/mortalidad/mortalidad.htm
     desc: Informes de mortalidad por causa (PDF, elaborados con datos del INE)
-quirks: [tls-chain-incomplete, viewstate-forms, url-drift]
+quirks: [tls-chain-incomplete, viewstate-forms, latin1, url-drift, soft-errors-200]
 ids: [ine-municipio, ine-provincia, ccaa]
 gotchas:
   - pestadistico.inteligenciadegestion.sanidad.gob.es envía solo el certificado hoja (FNMT AC Componentes Informáticos); añadir los intermedios FNMT o falla la verificación TLS.
-  - El Portal Estadístico es una aplicación WebForms; no localicé API ni URL por consulta, cada cubo se explora y exporta a mano. No localicé ficheros masivos de altas.
+  - El Portal Estadístico no tiene API; el POST de exportación solo da la vista por defecto del cubo y cambiar filas, columnas o filtros exige reproducir los postbacks del cliente OLAP. No localicé ficheros masivos de altas.
   - En el CNH el código de municipio lleva 6 dígitos (INE de 5 más dígito de control, 310977 es Estella-Lizarra 31097); CCN es el código del centro y CODCNH el del catálogo.
-  - Las rutas sisInfSanSNS/home.htm y ciudadanos/.../hospitales/home.htm ya no existen o redirigen (meta refresh) a ofertaRecursos/hospitales/home.htm.
+  - El CNH 2025 tiene 848 hospitales (849 filas contando la cabecera) y todas las celdas son texto, CAMAS incluida; recoge los centros autorizados a 31/12/2024 con más de 10 camas.
+  - En ESTRUCTURA FUNCIONAL los hospitales de un complejo llevan DC en concierto, docencia y equipos (TAC, RMN...); el dato está en la fila del complejo (Es Comlejo S, sin CCN, CODCNH igual al CODIDCOM).
+  - La API REST de INCLASNS (/doc/api, /api/v2/datos) exige una API_KEY que da el administrador (sin ella, 400 «Clave API no encontrada») y /dump/data envía la exportación masiva por correo.
+  - Las rutas sisInfSanSNS/home.htm (404) y ciudadanos/.../hospitales/home.htm (200 con meta refresh) ya no sirven; el catálogo está en ofertaRecursos/hospitales/home.htm.
   - Los microdatos RAE-CMBD se solicitan formalmente y se entregan anonimizados; no hay descarga directa.
   - Mortalidad por causa es una reelaboración de los datos del INE; para tablas y microdatos ir al INE (defunciones según la causa de muerte).
   - La vigilancia epidemiológica (RENAVE, MoMo, gripe, COVID) la publica el ISCIII, no el ministerio (ficha isciii-cne).
 tips:
-  - "CNH con pandas: read_excel(f, sheet_name='DIRECTORIO DE HOSPITALES', dtype=str) y merge con ESTRUCTURA FUNCIONAL por CCN para dependencia, concierto y complejo."
+  - "CNH con pandas: read_excel(f, sheet_name='DIRECTORIO DE HOSPITALES', dtype=str) y merge con ESTRUCTURA FUNCIONAL por CCN; para hospitales de complejo, cruzar CODIDCOM con el CODCNH de la fila del complejo."
+  - Los ids de indicador, año, sexo y CCAA de INCLASNS salen de los checkbox de https://inclasns.sanidad.gob.es/main.html (group-{id} y variableState-{variable}-{id}, con su label).
 related: [isciii-cne, aemps-cima-api, ine-api-tempus]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

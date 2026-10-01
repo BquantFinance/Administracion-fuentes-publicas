@@ -8,12 +8,12 @@ tags: [educacion, universidades, ruct, titulaciones, centros-educativos, alumnad
 summary: >-
   Estadísticas de enseñanza no universitaria en EDUCAbase (PC-Axis idéntico al del INE, con descarga CSV, px
   y xlsx por tabla), estadísticas universitarias SIIU en xlsx (matriculados y egresados por titulación
-  2015-2024), RUCT y Registro Estatal de Centros Docentes.
+  2015-2024), y RUCT y Registro Estatal de Centros Docentes con exportación xls sin sesión.
 access: [download, portal]
 auth: none
-formats: [csv, px, xlsx, html]
+formats: [csv, px, xlsx, xls, html]
 update: annual
-coverage: "EDUCAbase desde el curso 1999-2000; SIIU 2015-"
+coverage: "EDUCAbase desde el curso 1999-2000 (avance 2025-2026); SIIU 2015-"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.educacionfpydeportes.gob.es/servicios-al-ciudadano/estadisticas.html
 docs_url: https://www.educacionfpydeportes.gob.es/servicios-al-ciudadano/estadisticas/no-universitaria/alumnado/matriculado.html
@@ -21,32 +21,45 @@ endpoints:
   - path: https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm?type=pcaxis&path={ruta}&file=pcaxis&l=s0
     desc: Índice de tablas de un conjunto (ruta como /no-universitaria/alumnado/matriculado/2024-2025-rd/adultos); enlaza a EducaJaxiPx/Tabla.htm con path y file
     example: curl -s "https://estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm?type=pcaxis&path=/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos&file=pcaxis&l=s0"
+    returns: "HTML UTF-8 con enlaces Tabla.htm?path=.../adultos/l0/&amp;file=adul_01.px&amp;L=0 (13 tablas en este índice)"
   - path: https://estadisticas.educacion.gob.es/EducaJaxiPx/files/_px/es/{csv_bdsc|px|xlsx}{path}{file}?nocab=1
     desc: Descarga de una tabla en CSV (separador ;), PC-Axis o xlsx; path y file son los de Tabla.htm (por ejemplo .../adultos/l0/ y adul_01.px)
     example: curl -s "https://estadisticas.educacion.gob.es/EducaJaxiPx/files/_px/es/csv_bdsc/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos/l0/adul_01.px?nocab=1"
+    returns: "CSV UTF-8 con BOM y CRLF: cabecera Sexo;Comunidad autónoma/provincia;Titularidad;Enseñanza;Total y una fila por combinación (9.072 filas, 1 MB); punto de miles (197.079)"
   - path: https://estadisticas.educacion.gob.es/EducaJaxiPx/dlgExport.htm?path={path}&file={file}
-    desc: Diálogo de descarga de una tabla con los ocho formatos (csv, csv_bd, csv_bdsc, csv_c, csv_sc, px, xls, xlsx) y sus rutas files/_px/es/{formato}{path}{file}
+    desc: Diálogo con los ocho formatos (csv, csv_bd, csv_bdsc, csv_c, csv_sc, px, xls, xlsx); sus enlaces usan la extensión del formato (adul_01.csv_bdsc)
     example: curl -s "https://estadisticas.educacion.gob.es/EducaJaxiPx/dlgExport.htm?path=/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos/l0/&file=adul_01.px" | grep -o 'files/_px[^"]*'
-  - path: https://www.educacionfpydeportes.gob.es/servicios-al-ciudadano/estadisticas/no-universitaria/alumnado/matriculado/{curso}-rd.html
-    desc: Página por curso (1999-2000 a 2024-2025) con los enlaces a los índices de EDUCAbase; misma estructura para profesorado, centros y resultados
+  - path: https://www.educacionfpydeportes.gob.es/servicios-al-ciudadano/estadisticas/no-universitaria/alumnado/matriculado/{curso}-{rd|da}.html
+    desc: Página por curso con los índices de EDUCAbase; -rd definitivos (1999-2000 a 2024-2025), -da avance (2025-2026); igual en profesorado y centros
   - path: https://www.ciencia.gob.es/Ministerio/Estadisticas/SIIU/{Estudiantes|Afiliacion|Becas|Financiacion|Internacionalizacion|PAU}.html
     desc: SIIU con xlsx bajo /dam/jcr:{uuid}/ (MatriculadosTitulacion2015_2024.xlsx, EgresadosTitulacion2015_2023.xlsx) e informes PDF
+    returns: "Matriculados (2 MB) con hojas Grado y Máster en formato ancho: Comunidad autónoma, Universidad, Rama, Titulación y un par Matriculados y % Mujeres por curso (2024-2025** avance); cabecera en las filas 4 y 5, '-' sin dato"
+  - path: https://www.educacion.gob.es/ruct/listaestudios?consulta=1&actual=estudios&{codigoUniversidad|codigoEstudio|descripcionEstudio}={valor}&d-1335801-e=2&6578706f7274=1
+    desc: Exportación xls de una consulta de títulos del RUCT por GET, sin sesión y con todos los resultados (el HTML da 25); filtros codigoTipo (G, M, D) y codigoRama
+    example: curl -s -o ruct.xls "https://www.educacion.gob.es/ruct/listaestudios?consulta=1&actual=estudios&codigoUniversidad=010&d-1335801-e=2&6578706f7274=1"
+    returns: "xls (BIFF) con Código (7 dígitos), Título, Universidad, Nivel académico, Rama, Campo de estudio, Estado y Detalle; 710 títulos de la Complutense (010); Estado con entidades HTML (Aut&oacute;noma)"
   - path: https://www.educacion.gob.es/ruct/{consultauniversidades|consultacentros|consultaestudios}?actual={universidades|centros|estudios}
-    desc: RUCT, consulta por formulario (codigoEstudio, codigoUniversidad, codigoTipo, codigoRama) con resultados HTML en ISO-8859-1; sin exportación localizada
-  - path: https://www.educacion.gob.es/centros/
-    desc: Registro Estatal de Centros Docentes no universitarios, buscador por CCAA con JavaScript (irBuscador)
-quirks: [latin1, tls-chain-incomplete, url-drift, js-rendered]
-ids: []
+    desc: Formularios del RUCT (HTML ISO-8859-1); universidades con código de 3 dígitos (010) y centros de 8 (28027141); la exportación de centros usa d-443487-e=2
+  - path: https://www.educacion.gob.es/centros/exportarListadoCentrosExcel
+    desc: Registro Estatal de Centros Docentes no universitarios; exportación xls de todos los centros de una CCAA por POST, sin sesión
+    example: curl -s -o centros.xls -X POST --data "idComunidad=18&nivel=0&naturaleza=0&concertado=0&familia=0&ensenanza=0&modalidad=0&tipoCentro=0&denominacion=0&localidad=0" "https://www.educacion.gob.es/centros/exportarListadoCentrosExcel"
+    params: "idComunidad código INE de CCAA (01 a 19); los demás filtros a 0 (todos), no vacíos; localidad admite un código de 9 dígitos de la lista del buscador"
+    returns: "xls (BIFF) con hoja Listado de centros: COMUNIDAD AUTÓNOMA, PROVINCIA, LOCALIDAD, DENOMINACIÓN GENÉRICA y ESPECÍFICA, CÓDIGO (8 dígitos, texto), NATURALEZA, DOMICILIO, CÓD POSTAL y TELÉFONO; 49 centros en Ceuta y 619 en Asturias"
+quirks: [latin1, tls-chain-incomplete, url-drift, soft-errors-200]
+ids: [ccaa]
 gotchas:
-  - La antigua raíz estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm redirige a la web del ministerio (404); hay que entrar con path completo desde la página del curso.
-  - EDUCAbase es el mismo software que INEbase (dynPx, jaxiPx); los CSV llevan BOM y van en ISO-8859-15 con separador ; y los px en ANSI; leer con encoding latin-1.
-  - Cada curso tiene su carpeta (2024-2025-rd, rd por resultados definitivos) y los nombres de tabla se repiten entre cursos (adul_01.px); guardar el path completo.
-  - Formatos verificados el 30/09/2026; csv_bdsc (separador ;), csv_bd (tabulador), csv_sc (con título), px y xlsx; json responde 500 vacío y el índice sin subcarpeta (path=/no-universitaria) acaba con 200 en 404.html.
+  - La antigua raíz estadisticas.educacion.gob.es/EducaDynPx/educabase/index.htm y un path incompleto (path=/no-universitaria) acaban en 404.html del ministerio con 200; entrar con el path completo de la página del curso.
+  - Los CSV salen en UTF-8 con BOM aunque Content-Type diga ISO-8859-15 (como latin-1 salen «autÃ³noma»); los px sí van en ISO-8859-15 (CHARSET ANSI). csv_bd usa tabulador, csv_sc añade título y json da 500 vacío.
+  - La columna territorial mezcla CCAA con su código INE delante (01 ANDALUCÍA, 00 TOTAL) y provincias solo por nombre (Almería); las uniprovinciales salen solo como CCAA.
+  - Cada curso tiene su carpeta (2024-2025-rd definitivos, 2025-2026-da avance) y los nombres de tabla se repiten entre cursos (adul_01.px); guardar el path completo.
   - universidades.gob.es redirige a ciencia.gob.es y su certificado llega sin la cadena FNMT; los xlsx del SIIU cuelgan de rutas /dam/jcr con uuid que cambian en cada publicación.
-  - El RUCT usa jsessionid en la acción del formulario y devuelve HTML; los códigos de centro (8 dígitos) y de título son las claves estables porque los nombres cambian.
-  - Las CCAA publican datos más desagregados y recientes que el ministerio.
+  - Los xlsx del SIIU no traen código RUCT (la titulación va por nombre) y % Mujeres es una fracción (0,70), no un porcentaje.
+  - El RUCT sin código, universidad ni denominación devuelve con 200 el formulario HTML en vez del xls; el CSV (d-1335801-e=1) sale sin cabecera ni título, usar e=2. Los formularios llevan jsessionid en la acción.
+  - En el registro de centros los filtros vacíos no devuelven nada (hay que mandar 0); TELÉFONO viene casi siempre vacío y DOMICILIO con espacios de relleno.
+  - Los códigos de título (7 dígitos), de centro universitario y de centro docente (8) son las claves estables porque los nombres cambian; las CCAA publican datos más desagregados y recientes.
 tips:
-  - "Los ficheros px se leen con pyaxis (pyaxis.parse(url, encoding='ISO-8859-15')); para tablas grandes es más rápido el csv_bdsc con pandas.read_csv(sep=';', encoding='latin-1', thousands='.')."
+  - "Los px se leen con pyaxis (pyaxis.parse(url, encoding='ISO-8859-15')); para tablas grandes es más rápido el csv_bdsc con pandas.read_csv(sep=';', encoding='utf-8-sig', thousands='.', decimal=',')."
+  - Para el RUCT completo, recorrer los códigos de universidad del desplegable codigoUniversidad de consultaestudios (110 opciones) con la exportación xls.
 related: [ine-api-tempus, ine-codigos-territoriales]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

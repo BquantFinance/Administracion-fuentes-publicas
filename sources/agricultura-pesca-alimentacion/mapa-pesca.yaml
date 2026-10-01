@@ -7,13 +7,13 @@ sector: agricultura-pesca-alimentacion
 tags: [pesca, flota, registro-flota, capturas, desembarques, acuicultura, caladeros, buques]
 summary: >-
   Registro General de la Flota Pesquera 2006-2025 en un xlsx por buque y año (197.131 filas con código de
-  buque, puerto base, caladero, modalidad, arqueo, potencia, eslora y edad), capturas y desembarcos por
-  especie, destino y zona (serie 1992-2024), flota por características y acuicultura.
+  buque, puerto base, caladero, modalidad, arqueo, potencia, eslora y edad), capturas por especie FAO y zona
+  (serie 1992-2024), desembarcos por destino, flota por características y acuicultura.
 access: [download, portal]
 auth: none
 formats: [xlsx, pdf, html]
 update: annual
-coverage: "Flota 2006-2025; capturas 1992-2024"
+coverage: "Flota 2006-2025; capturas 1992-2024; acuicultura 2024 en xlsx"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-pesqueras/
 docs_url: https://www.mapa.gob.es/es/pesca/temas/registro-flota/informacion-sobre-flota-pesquera
@@ -21,13 +21,15 @@ endpoints:
   - path: https://www.mapa.gob.es/dam/mapa/contenido/pesca/temas--nuevo/registro-de-flota--flota-pesquera-espanola/registro-general-de-la-flota-pesquera/informacion-sobre-la-flota-pesquera/rgfp_bi_excel_2006_2025_20260127.xlsx
     desc: Registro de flota 2006-2025 (15 MB, hoja Datos con AÑO, CODIGOBUQUE, PUERTO BASE, PROVINCIA, CCAA, CALADERO, modalidad, ARQUEO GT, POTENCIA KW, ESLORA, EDAD)
     example: curl -sSL -o flota.xlsx "https://www.mapa.gob.es/dam/mapa/contenido/pesca/temas--nuevo/registro-de-flota--flota-pesquera-espanola/registro-general-de-la-flota-pesquera/informacion-sobre-la-flota-pesquera/rgfp_bi_excel_2006_2025_20260127.xlsx"
-    returns: "Hoja Datos (15 MB) con una fila por buque y año 2006-2025: AÑO, CODIGOBUQUE, NOMBRE BUQUE, PUERTO BASE, PROVINCIA, CCAA, CALADERO, SUBCALADERO, CENSO POR MODALIDAD Y CALADERO, MODALIDAD DE PESCA, ARQUEO GT, POTENCIA KW, ESLORA TOTAL, EDAD..."
+    returns: "Hoja única Datos, 197.131 filas (una por buque y año, de 13.398 en 2006 a 8.324 en 2025) y 14 columnas; AÑO y CODIGOBUQUE enteros, ARQUEO GT, POTENCIA KW y ESLORA TOTAL numéricos con decimales, EDAD entera; textos en mayúsculas salvo PUERTO BASE (Santander)"
   - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-pesqueras/pesca-maritima/estadistica-capturas-desembarcos
-    desc: Capturas y desembarcos en xlsx (peso y valor por especie, destino y zona del último año, serie bcap 1992-2024)
+    desc: Capturas y desembarcos en xlsx; seis tablas de peso y valor por destino y zona del último año (2024) y la serie bcap_1992_2024
+    example: curl -s "https://www.mapa.gob.es/es/estadistica/temas/estadisticas-pesqueras/pesca-maritima/estadistica-capturas-desembarcos" | grep -o 'href="[^"]*\.xlsx"'
+    returns: "bcap (1,9 MB), hoja 'Capturas_92-24 (base)' en formato largo con Año, Taxonómico, AL3 (código FAO de especie de tres letras), Zona (área FAO numérica, 21, 27, 37...), Peso vivo (kg, entero), cód. CEIUAPA y grupo; hoja especies con nombre científico y común"
   - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-pesqueras/pesca-maritima/estadistica-flota-pesquera
-    desc: Estadística de flota en xlsx (19 tablas por eslora, edad, características, 2025)
+    desc: Estadística de flota en xlsx (19 tablas de 2025 por eslora, arqueo, potencia, edad y comunidad, 2025_01_Buques_eslora a 2025_19_Buques_edad)
   - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-pesqueras/acuicultura
-    desc: Encuesta de establecimientos y encuesta económica de acuicultura (subpáginas; sin xlsx directo en la de establecimientos)
+    desc: Acuicultura; encuesta económica (16 xlsx de 2024) y de establecimientos con xlsx en subpáginas (produccion, empleo, establecimientos, alimento-suministrado)
   - path: https://www.mapa.gob.es/es/pesca/temas/registro-flota/informacion-sobre-flota-pesquera
     desc: Página del registro con el xlsx anterior y catálogos de flota en PDF
 quirks: [url-drift, static-html]
@@ -35,11 +37,13 @@ ids: []
 gotchas:
   - La ruta censo-flota-pesquera-operativa de la ficha anterior da 404; el fichero de flota está en informacion-sobre-flota-pesquera y su nombre lleva la fecha de generación (20260127), así que cambia con cada actualización.
   - CODIGOBUQUE es el identificador interno del registro español, no el CFR europeo; el xlsx no incluye el CFR ni la matrícula.
-  - Los xlsx de estadística llevan en el nombre una marca de tiempo de publicación (2025-12-17-13-41-18) y una carpeta con hash; leer los href de la página en cada descarga.
-  - Los textos del registro vienen en mayúsculas y con espacios finales; normalizar antes de agrupar por puerto o caladero.
+  - Los xlsx de estadística cuelgan de /es/dam/jcr:{uuid}/ con una marca de tiempo de publicación en el nombre (2025-12-17-13-41-18); leer los href de la página en cada descarga.
+  - CALADERO lleva un prefijo numérico (1.CALADERO NACIONAL a 5.SIN CALADERO ASIGNADO) y PROVINCIA el nombre oficial bilingüe (ALICANTE/ALACANT, VALENCIA/VALÈNCIA); los textos no traen espacios sobrantes.
+  - La serie bcap solo da peso vivo en kg por especie y área FAO; el valor en euros solo está en las tablas del último año.
   - Las notas de venta individuales no se publican; solo agregados de peso y valor.
 tips:
   - "pandas.read_excel(f, sheet_name='Datos') y luego groupby(['AÑO', 'CALADERO']) para evolución de la flota; PROVINCIA y CCAA por nombre, sin código INE."
+  - AL3 es el código alfa-3 de especie de la FAO (SAA sardinela, SKA rayas) y Zona el área de pesca FAO, así que bcap se cruza con las estadísticas de capturas de la FAO sin tabla de equivalencias.
 related: [mapa-estadisticas-agrarias, puertos-estado-datos]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

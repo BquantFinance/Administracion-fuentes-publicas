@@ -7,8 +7,8 @@ sector: agricultura-pesca-alimentacion
 tags: [pac, feaga, feader, ayudas-agrarias, beneficiarios, pagos-directos, subvenciones]
 summary: >-
   Consulta pública de beneficiarios de la PAC (FEAGA y FEADER) por ejercicio con importe y medida, informes de
-  pagos y datos abiertos del organismo. No verificable en esta sesión porque el servidor cierra la conexión;
-  las mismas ayudas están en la BDNS y el SIGPAC del FEGA vive en sigpac-hubcloud.es.
+  pagos y datos abiertos del organismo. No verificable desde aquí porque el servidor cierra la conexión;
+  parte de las ayudas está en la BDNS y el SIGPAC del FEGA vive en sigpac-hubcloud.es.
 access: [portal, download]
 auth: none
 formats: [csv, xlsx, pdf]
@@ -25,12 +25,13 @@ endpoints:
 quirks: [waf-blocks-bots]
 ids: [nif]
 gotchas:
-  - www.fega.gob.es, fega.gob.es y www.fega.es cierran la conexión (connection reset) tras el TLS con cualquier User-Agent, HTTP/1.1 o HTTP/2 desde este entorno (30/09/2026); ninguna ruta pudo comprobarse.
+  - www.fega.gob.es (30/09 y 01/10/2026), fega.gob.es y www.fega.es (30/09) cierran la conexión (connection reset) tras el TLS con cualquier User-Agent, HTTP/1.1 o HTTP/2 desde este entorno; ninguna ruta pudo comprobarse.
   - La web es una aplicación Next.js; si desde otra red responde, comprobar primero que las rutas de esta ficha siguen existiendo.
   - Por normativa europea los beneficiarios solo se publican durante dos años; los ejercicios antiguos desaparecen del portal.
-  - Las concesiones de la PAC aparecen también en la BDNS (ficha bdns-api) con estructura homogénea y sin límite de dos años.
+  - Parte de la PAC está en la BDNS (ficha bdns-api) como convocatorias autonómicas, con cobertura desigual; la ayuda básica a la renta 2025 de Extremadura (811615) trae 112.020 concesiones y la de Baleares (811678) 0.
   - Los servicios SIGPAC del FEGA (WMS, OGC API, consultas REST y GeoPackages) están en sigpac-hubcloud.es y sí responden (ficha mapa-sigpac).
-tips: []
+tips:
+  - La capa cultivo_declarado del SIGPAC (ficha mapa-sigpac) da por recinto el producto declarado en la PAC, secano o regadío y el número de expediente, sin titular ni importe.
 related: [bdns-api, mapa-sigpac, mapa-estadisticas-agrarias]
 status: unknown
 verified: null

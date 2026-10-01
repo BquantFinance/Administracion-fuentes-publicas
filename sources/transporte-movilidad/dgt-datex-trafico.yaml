@@ -6,9 +6,9 @@ level: age
 sector: transporte-movilidad
 tags: [dgt, trafico, incidencias, datex2, nap, carreteras, camaras, detectores, radares, zbe, electrolineras, tiempo-real]
 summary: >-
-  Ficheros DATEX II públicos sin clave: incidencias en tiempo real (versión 3.7, cada minuto) y cámaras en el
-  NAP; en infocar.dgt.es, medidas de 5.569 detectores cada minuto, radares, tramos, zonas de bajas emisiones,
-  puntos de recarga eléctrica e incidencias de Cataluña y Gipuzkoa.
+  Ficheros DATEX II públicos sin clave: incidencias en tiempo real (versión 3.7, cada minuto) y 1.952 cámaras en
+  el NAP; en infocar.dgt.es, medidas de unos 5.560 detectores cada minuto, radares, tramos, 47 zonas de bajas
+  emisiones, puntos de recarga eléctrica e incidencias de Cataluña y País Vasco.
 access: [download]
 auth: none
 formats: [xml, rdf]
@@ -21,34 +21,39 @@ endpoints:
   - path: https://nap.dgt.es/datex2/v3/dgt/SituationPublication/datex2_v37.xml
     desc: Incidencias activas de la red DGT en DATEX II 3.7 (perfil RTTI de la DGT), actualizado cada minuto según la ficha del NAP
     example: curl -s "https://nap.dgt.es/datex2/v3/dgt/SituationPublication/datex2_v37.xml"
-    returns: "DATEX II v3 (4,7 MB): payload/situation[@id]/situationRecord[@type,@id,@version] con situationRecordCreationTime, validity/validityStatus, cause/causeType, locationReference (roadInformation/roadName, tpegLinearLocation from y to con pointCoordinates, kilometerPoint, municipality, autonomousCommunity)"
+    returns: "DATEX II 3.7 (6,8 MB y 944 situaciones el 1-10-2026): situation[@id]/situationRecord[@xsi:type,@id,@version] con fechas ISO con zona, validity, cause/causeType y locationReference tpegLinearLocation (from, to) o tpegPointLocation con roadName, kilometerPoint y municipio y provincia por nombre"
   - path: https://nap.dgt.es/datex2/v3/dgt/DevicePublication/camaras_datex2_v37.xml
-    desc: Cámaras de tráfico con localización (95 KB)
+    desc: 1.952 cámaras (3,7 MB) con carretera, punto kilométrico, coordenadas y deviceUrl a la imagen JPG en etraffic.dgt.es
+    example: curl -s "https://nap.dgt.es/datex2/v3/dgt/DevicePublication/camaras_datex2_v37.xml" | grep -o 'https://etraffic.dgt.es/camarasEtraffic/[0-9]*\.jpg' | head
   - path: https://infocar.dgt.es/datex2/dgt/MeasuredDataPublication/detectores/content.xml
-    desc: Medidas de 5.569 puntos de detección (TrafficSpeed, intensidad) en DATEX II 1.0, 18,7 MB regenerados cada minuto
+    desc: Medidas de 5.562 puntos de detección (1-10-2026) en DATEX II 1.0, 18,7 MB regenerados cada minuto
     example: curl -s "https://infocar.dgt.es/datex2/dgt/MeasuredDataPublication/detectores/content.xml" | head -c 3000
+    returns: "d2LogicalModel 1.0: siteMeasurements con measurementSiteReference GUID_DET_n, measurementTimeDefault ISO con zona y measuredValue cuyo basicDataValue xsi:type es TrafficSpeed (km/h), TrafficHeadway, TrafficFlow (vehicleFlow por hora, múltiplos de 60) o TrafficConcentration (occupancy en %)"
   - path: https://infocar.dgt.es/datex2/dgt/PredefinedLocationsPublication/{radares|detectores|tramos_invive|tefiva|tramosriesgomotos}/content.xml
-    desc: Localizaciones predefinidas (radares fijos 62 KB, detectores, tramos INVIVE, tramos de riesgo para motos); caminoSantiago tiene subcarpetas
+    desc: Inventarios de radares (690 cabinas y 47 tramos de velocidad media, 2 MB), detectores (7.296, 18,8 MB), INVIVE, TEFIVA, motos y caminoSantiago
     example: curl -s "https://infocar.dgt.es/datex2/dgt/PredefinedLocationsPublication/radares/content.xml"
   - path: https://infocar.dgt.es/datex2/v3/dgt/zbe/ControledZonePublication/{Municipio}.xml
-    desc: Zonas de bajas emisiones en DATEX II 3 (MadridCentral, Barcelona, SevillaCartuja, ACoruña, MolinaDeSegura y otros; listado en el directorio)
+    desc: 47 zonas de bajas emisiones (MadridCentral, Madrid, Barcelona, Bilbao...) listadas en el directorio; algún nombre va codificado (ACoru%C3%B1a.xml)
   - path: https://infocar.dgt.es/datex2/v3/miterd/EnergyInfrastructureTablePublication/electrolineras.xml
-    desc: Puntos de recarga eléctrica (EnergyInfrastructureTablePublication, datos del MITERD), actualizado a diario
+    desc: Puntos de recarga eléctrica (datos del MITERD); 12.037 emplazamientos y 35.546 puntos en un XML de 83 MB regenerado a diario
   - path: https://infocar.dgt.es/datex2/{sct|dt-gv}/SituationPublication/all/content.xml
-    desc: Incidencias de Cataluña (Servei Català de Trànsit) y Gipuzkoa (Diputación Foral) en DATEX II 1.0
+    desc: Incidencias de Cataluña (Servei Català de Trànsit, 184 situaciones) y País Vasco (dt-gv, 135 con Gipuzkoa, Bizkaia y Araba) en DATEX II 1.0
   - path: https://nap.dgt.es/dataset
     desc: Catálogo del NAP con 37 datasets (paneles, límites de velocidad, mapa de tráfico, conos conectados, datos de TomTom y HERE) con licencia y frecuencia por ficha
 quirks: [url-drift, static-html]
 ids: []
 gotchas:
   - La ruta clásica infocar.dgt.es/datex2/dgt/SituationPublication/all/content.xml ya no existe (404); el directorio solo enlaza al dataset del NAP, donde vive el fichero v3.7.
-  - Conviven tres generaciones. DATEX II 1.0 (detectores, localizaciones, Cataluña, Gipuzkoa), DATEX II 3 (ZBE, electrolineras) y 3.7 con espacio de nombres propio http://levelC/schema/3; cada una necesita su parser.
+  - Conviven tres esquemas; DATEX II 1.0 (detectores, radares, tramos_invive, sct, dt-gv), DATEX II 3 estándar (electrolineras, tefiva, tramosriesgomotos) y levelC http://levelC/schema/3 (incidencias, cámaras, ZBE).
   - La API CKAN del NAP (/api/3/action) responde 403; el catálogo solo se puede leer en HTML (dos páginas) y catalog.ttl devolvió 500. Las fichas y los ficheros son públicos sin registro.
-  - El fichero de detectores pesa 18,7 MB y se regenera cada minuto sin Content-Length; descargar como máximo una vez por minuto y parsear en streaming.
-  - Sin histórico en ningún fichero; hay que archivar cada descarga. El feed LOD (lod/dgt/incidencias.rdf) contiene solo la cabecera (882 bytes).
-  - Las incidencias de la DGT no cubren Cataluña ni País Vasco; usar los ficheros sct y dt-gv del mismo servidor (Bizkaia y Álava no están).
+  - El fichero de detectores pesa 18,7 MB y se regenera cada minuto sin Content-Length, y electrolineras.xml pesa 83 MB; los tamaños de esta ficha son sin comprimir, descargar una vez por ciclo y parsear en streaming.
+  - Sin histórico en ningún fichero; hay que archivar cada descarga. El feed LOD (lod/dgt/incidencias.rdf) trae uno o ningún registro, sin localización y con fechas como Thu Oct 01 11:24:00 CEST 2026.
+  - Las incidencias de la DGT apenas cubren Cataluña (11 puntos el 1-10-2026) y nada del País Vasco; usar los ficheros sct y dt-gv del mismo servidor.
+  - En detectores el index de measuredValue no fija la magnitud (el 0 es velocidad o flujo según el punto); leer xsi:type. Velocidad 0.0 llega siempre con vehicleFlow 0, sin vehículos, no es atasco.
+  - Municipio, provincia y comunidad de las incidencias van por nombre (Ontígola, Toledo), sin código INE; para cruzar con otras fuentes usar las coordenadas.
 tips:
+  - Pedir gzip (curl --compressed; requests lo hace solo) reduce detectores de 18,7 MB a 255 KB, incidencias de 6,8 MB a 208 KB, cámaras a 95 KB y radares a 62 KB.
   - "lxml.etree.iterparse sobre el XML de detectores buscando siteMeasurements: measurementSiteReference (GUID_DET_nnnnnn) enlaza con PredefinedLocationsPublication/detectores para las coordenadas."
 related: [dgt-estadisticas]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

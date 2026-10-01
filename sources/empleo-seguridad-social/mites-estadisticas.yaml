@@ -7,36 +7,51 @@ sector: empleo-seguridad-social
 tags: [convenios-colectivos, regcon, huelgas, accidentes-laborales, regulacion-empleo, ett, planes-igualdad]
 summary: >-
   Estadísticas de convenios colectivos, accidentes de trabajo, huelgas, regulación de empleo, ETT, cooperativas
-  y mediación, con avances mensuales y monográficas anuales en xlsx, más REGCON, el registro de convenios,
-  acuerdos y planes de igualdad con búsqueda pública por código, CNAE y denominación.
+  y mediación, con avances mensuales y monográficas anuales en xlsx y xls, más REGCON, el registro de convenios,
+  acuerdos y planes de igualdad con búsqueda pública y exportación a Excel.
 access: [download, portal]
 auth: none
-formats: [xlsx, pdf, html]
+formats: [xlsx, xls, pdf, html]
 update: monthly
-coverage: "Monográficas anuales desde 2014 (accidentes) y 2016 (convenios); avances mensuales del año en curso"
+coverage: "Accidentes desde 1988 (PDF hasta 1998), monográficas 2014-2025 y avances mensuales desde diciembre de 2020; convenios desde 2006 y monográficas 2016-2024; REGCON con 177.915 registros"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.mites.gob.es/es/estadisticas/index.htm
 docs_url: https://www.mites.gob.es/es/estadisticas/index.htm
 endpoints:
   - path: https://www.mites.gob.es/es/estadisticas/condiciones_trabajo_relac_laborales/CCT/welcome.htm
-    desc: Convenios colectivos; enlaza los avances mensuales (estadisticas/cct/CCT{AA}...) y las monográficas anuales
+    desc: Convenios colectivos; enlaza avances mensuales (cct{AA}{mes}av/CCT_{MM}_{AAAA}.xls desde 2016) y monográficas anuales
+    example: curl -s --cacert ca-age.pem "https://www.mites.gob.es/es/estadisticas/condiciones_trabajo_relac_laborales/CCT/welcome.htm" | grep -o 'https://[^"]*cct26[^"]*\.xls'
+    returns: "HTML con enlaces absolutos a xls y pdf; el xls (BIFF, xlrd lo abre) trae 21 hojas (Portada, Nota informativa, Índice, CCT-1.1...) con datos acumulados hasta el mes, cabeceras en varias filas y el año unas veces número (2017.0) y otras texto ('2018')"
   - path: https://www.mites.gob.es/es/estadisticas/condiciones_trabajo_relac_laborales/EAT/welcome.htm
-    desc: Accidentes de trabajo; avances mensuales y monográficas anuales
+    desc: Accidentes de trabajo; enlaza avances mensuales (eat{AA}_{MM}/ATR_{MM}_{AAAA}.xlsx desde diciembre de 2020) y monográficas anuales
   - path: https://www.mites.gob.es/es/estadisticas/monograficas_anuales/{EAT|CCT}/{AAAA}/index.htm
-    desc: Monográfica anual con todas las tablas en xlsx y pdf
-    example: curl -sO "https://www.mites.gob.es/estadisticas/eat/eat25/TABLAS%20ESTADISTICAS/ATR_2025_A.xlsx"
+    desc: Monográfica anual; EAT con ATR_{AAAA}_{A|B|C|D|I|J}.xlsx y pdf en TABLAS ESTADISTICAS, CCT con un solo cct_{AAAA}_def.xls (la última es 2024)
+    example: curl -sO --cacert ca-age.pem "https://www.mites.gob.es/estadisticas/eat/eat25/TABLAS%20ESTADISTICAS/ATR_2025_A.xlsx"
+    returns: "xlsx de 29 hojas (Portada, Índice, ATR-A.1.1...); cada tabla con 6 a 8 filas de título y cabecera en dos filas (EN JORNADA e IN ITINERE; Total, Leves, Graves, Mortales), enteros, y CCAA y provincias por nombre con espacios finales, sin código INE"
   - path: https://expinterweb.mites.gob.es/regcon/pub/consultaPublicaEstatal
-    desc: REGCON, búsqueda pública de convenios y acuerdos de ámbito estatal (formulario POST)
-    params: "codigoConvenio, denominacion, cnae2009Pub, cnae2025Pub, fhIncripcionPublicacionDesde y Hasta, _idAmbFuncionalConsPublica, _idEstadoVigencia, más consulta_token_value_id del GET previo"
+    desc: REGCON, búsqueda pública (POST) de convenios, acuerdos y planes de igualdad de todas las autoridades laborales; 15 filas por página
+    params: "codigoConvenio (14 dígitos), denominacion, tipoBusquedaDenominacion (AND u OR), nif, fhIncripcionPublicacionDesde y Hasta (AAAA-MM-DD), idCnaesBusqueda, idEstadoVigencia, _buscar"
+    example: curl -s --cacert ca-age.pem -c cj -b cj "https://expinterweb.mites.gob.es/regcon/pub/consultaPublicaEstatal" -d "denominacion=hosteleria" -d "_buscar=" | grep -o '[0-9]* - [0-9]*&nbsp;de&nbsp;[0-9]*'
+    returns: "HTML con tabla de 15 filas (código, denominación, tipo de trámite, autoridad laboral, fecha de inscripción o publicación y vigencia desde y hasta en dd/mm/aaaa), orden aproximado de la más reciente a la más antigua y total («1 - 15 de 1415»); más páginas con GET ?pagina=N"
+  - path: https://expinterweb.mites.gob.es/regcon/pub/consultaPublicaEstatal?_exportarExcelPublicoXML=1
+    desc: Exporta en un fichero todas las filas de la última búsqueda de la sesión, no solo la página; exige la cookie de esa búsqueda (GET o POST)
+    example: curl -s --cacert ca-age.pem -b cj -o regcon.xls "https://expinterweb.mites.gob.es/regcon/pub/consultaPublicaEstatal?_exportarExcelPublicoXML=1"
+    returns: "XML Spreadsheet 2003 en ISO-8859-1 (datos_consulta_publica_{dd-mm-aaaa}.xls), no BIFF; hoja Sheet0 con cabecera y una fila por trámite en ocho celdas String (código, denominación, trámite, autoridad, fecha, vigencia desde y hasta, URL Boletín)"
 quirks: [tls-chain-incomplete, static-html, session-required]
 ids: [codigo-convenio, cnae]
 gotchas:
-  - Las rutas /estadisticas/cct/welcome.htm y /estadisticas/eat/welcome.htm de la ficha anterior son páginas de aviso que remiten a la nueva ubicación bajo /es/estadisticas/condiciones_trabajo_relac_laborales/.
-  - Los xlsx de las monográficas cuelgan de rutas con espacios (TABLAS ESTADISTICAS); codificar como %20.
-  - El certificado del servidor no incluye el intermedio FNMT; añadirlo al bundle o falla la verificación TLS (ver guía).
-  - REGCON es un formulario POST con token de sesión (consulta_token_value_id); hacer GET del formulario, conservar cookies y reenviar el token en cada búsqueda.
+  - El certificado no incluye el intermedio FNMT (curl sale con el error 60 sin bundle); usar ca-age.pem (ver guía).
+  - Una página o fichero inexistente responde 302 a /error.htm, que da 200 en HTML («Página no encontrada»); con redirecciones automáticas comprobar Content-Type antes de parsear.
+  - Las rutas /estadisticas/cct/welcome.htm y /estadisticas/eat/welcome.htm responden 200 con un aviso sin datos que remite a /es/estadisticas/condiciones_trabajo_relac_laborales/.
+  - Las carpetas de avances no son uniformes (CCT09SepAv, CCT08AGOAV, cct26agoav) y las monográficas cuelgan de TABLAS ESTADISTICAS, con espacio; tomar los enlaces de la página y codificar %20.
+  - Los avances mensuales son acumulados desde enero (Avance enero - julio 2026) frente al mismo periodo del año anterior; restar meses para obtener el dato de un mes.
+  - Desde 2026 la actividad va en CNAE 2025, también en la monografía CCT 2024 revisada (registrados hasta junio de 2026); no encadenar con tablas en CNAE 2009 sin recodificar.
+  - REGCON no necesita consulta_token_value_id (lo rellena el JavaScript con la hora en ms), pero ?pagina=N sin la cookie de la búsqueda devuelve en silencio el registro entero (177.915).
+  - En REGCON, buscar por fechas sin los campos ocultos del formulario (_idEstadoVigencia=1, _idTipoTramiteConsPublica=1...) responde 200 con «Error en la aplicación» y un código; enviarlos siempre.
+  - idCnaesBusqueda lleva ids internos del desplegable (división 56 es 28 en CNAE 2009 y 1676 en CNAE 2025); el id fija la clasificación (5479 frente a 164 resultados) y la consulta tarda 1 a 3 minutos.
   - REGCON separa consultas en /regcon/pub/ (consultaPublicaEstatal para el registro actual, consultaAntiguos y consultaPublicaRegconAntiguo para el histórico).
-  - Los nombres de las carpetas de avances mensuales no son uniformes (CCT09SepAv, CCT08AGOAV, CCT10DEF); tomar los enlaces de la página, no construirlos.
+tips:
+  - "Volcado de REGCON: buscar por fechas de inscripción (AAAA-MM-DD, con los campos ocultos) y exportar con ?_exportarExcelPublicoXML=1; trae todas las filas en una llamada (1415 en 4 s); leer con ElementTree, no con xlrd."
 related: [sepe-estadisticas, segsocial-estadisticas]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

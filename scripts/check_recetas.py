@@ -85,14 +85,16 @@ def run_check(session: requests.Session, c: dict, timeout: float, sleep: float, 
         t0 = time.time()
         try:
             r = session.request(method, c["url"], headers=headers, timeout=timeout, stream=True, verify=verify)
+            length = r.headers.get("Content-Length")
+            # Sin Content-Length (respuesta por trozos) el tamaño solo se sabe leyendo: leer hasta min_bytes.
+            limit = read_bytes if (length and length.isdigit()) else max(read_bytes, c.get("min_bytes", 0))
             raw = b""
             if method != "HEAD":
                 for chunk in r.iter_content(8192):
                     raw += chunk
-                    if len(raw) >= read_bytes:
+                    if len(raw) >= limit:
                         break
             r.close()
-            length = r.headers.get("Content-Length")
             size = int(length) if length and length.isdigit() else len(raw)
             text_utf8 = raw.decode("utf-8", "replace")
             text_lat1 = raw.decode("latin-1")

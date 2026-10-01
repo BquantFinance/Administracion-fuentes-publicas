@@ -4,16 +4,16 @@ org: Dirección General de Vivienda y Suelo
 ministry: Vivienda y Agenda Urbana
 level: age
 sector: vivienda-urbanismo
-tags: [vivienda, alquiler, precios, valor-tasado, transacciones, parque-viviendas, suelo, serpavi]
+tags: [vivienda, alquiler, precios, valor-tasado, transacciones, parque-viviendas, suelo, serpavi, secciones-censales]
 summary: >-
-  Transacciones inmobiliarias, valor tasado, estimación del parque, stock de vivienda nueva, precios del
-  suelo urbano y vivienda protegida en tablas XLS del Boletín Estadístico Online (un capítulo por
-  estadística), más SERPAVI, índices de precios de alquiler consultables por municipio y distrito.
+  Transacciones de vivienda, valor tasado, parque, vivienda libre y protegida y suelo urbano en XLS trimestrales
+  del Boletín Estadístico Online, y SERPAVI, alquiler de vivienda habitual de fuentes tributarias 2011-2024
+  por CCAA, provincia, municipio, distrito y sección censal en xlsx y GeoJSON.
 access: [download, portal]
 auth: none
-formats: [xls, pdf, html]
+formats: [xls, xlsx, geojson, shp, zip, pdf, html]
 update: quarterly
-coverage: "Valor tasado desde 1995; transacciones desde 2004; SERPAVI según año fiscal"
+coverage: "Valor tasado desde 1995 y transacciones desde 2004, trimestrales hasta 2026-2; SERPAVI anual 2011-2024 (Navarra desde 2021, Gipuzkoa desde 2022, Álava y Bizkaia solo 2024)"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.mivau.gob.es/el-ministerio/observatorios-y-estadisticas
 docs_url: https://www.mivau.gob.es/vivienda/alquila-bien-es-tu-derecho/serpavi
@@ -21,24 +21,39 @@ endpoints:
   - path: https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden={NN}000000
     desc: Capítulo del Boletín Online; orden 31 vivienda protegida, 32 libre, 33 parque, 34 transacciones, 35 valor tasado, 36 suelo, 46 viviendas tasadas
     example: curl -s "https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden=34000000"
+    returns: "HTML UTF-8 de 88 KB con enlaces relativos sedal/{código}.XLS (34 en el capítulo 34) y el título de cada tabla como texto del enlace; códigos de 8 caracteres alfanuméricos (34010110, 340101a0)"
   - path: https://apps.fomento.gob.es/BoletinOnline2/sedal/{codigo}.XLS
-    desc: Tabla en XLS (por ejemplo 34010110.XLS, 145 KB, transacciones totales); los códigos se leen en la página del capítulo
+    desc: Tabla XLS; 34010110 transacciones por CCAA y provincia, 34010210 por municipio (6,4 MB), 35101000 valor tasado, 35103500 su versión municipal (más de 25.000)
     example: curl -sSL -o transacciones.xls "https://apps.fomento.gob.es/BoletinOnline2/sedal/34010110.XLS"
+    returns: "XLS de Excel 97 de 145.920 bytes con 5 hojas de hasta 5 años (2004, 2005, 2006, 2007, 2008 a 2024, 2025, 2026), 14 filas de título y cabecera, trimestres en columnas con el último marcado 2º (**) provisional y TOTAL NACIONAL, CCAA y provincias en la columna B"
   - path: https://apps.fomento.gob.es/BoletinOnline2/?nivel=1&orden=34000000
     desc: Índice de todos los capítulos (orden 25 a 59), incluidos transporte de mercancías, MOVILIA y costes de la construcción
   - path: https://www.mivau.gob.es/el-ministerio/observatorios-y-estadisticas/estadisticas/{valor-tasado-vivienda|transacciones-inmobiliarias-compraventa|estimacion-parque-viviendas|precios-suelo-urbano|stock-vivienda-nueva|vivienda-libre}
-    desc: Página de cada estadística con metodología en PDF y enlace a su capítulo del Boletín Online
-  - path: https://www.mivau.gob.es/vivienda/alquila-bien-es-tu-derecho/serpavi/{municipio|distrito|comunidad_autonoma}
-    desc: Consulta de SERPAVI por ámbito (páginas JavaScript, metodología en PDF, sin fichero descargable)
-quirks: [url-drift, js-rendered]
-ids: []
+    desc: Página de cada estadística con metodología en PDF y enlace a su capítulo; la de stock de vivienda nueva solo enlaza PDF anuales (stock_2025.pdf)
+  - path: https://cdn.mivau.gob.es/portal-web-mivau/vivienda/serpavi/2026-03_09_bd_SERPAVI_2011-2024%20-%20DEFINITIVO%20WEB_v2.xlsx
+    desc: Base de datos de SERPAVI 2011-2024 (71 MB) enlazada en la página serpavi; hojas Metadatos, CCAA, Provincias, Municipios, Distritos y Secciones censales
+    example: curl -sS -o serpavi.xlsx "https://cdn.mivau.gob.es/portal-web-mivau/vivienda/serpavi/2026-03_09_bd_SERPAVI_2011-2024%20-%20DEFINITIVO%20WEB_v2.xlsx"
+    returns: "xlsx ancho, una fila por territorio con códigos INE como texto (CPRO 01, CUMUN 01001, CUDIS de 7 y CUSEC de 10 dígitos), nombre y 20 indicadores por año con sufijo _11 a _24 (282 a 285 columnas); celdas vacías sin dato y, en la hoja CCAA, una fila de totales sin código"
+  - path: https://cdnfomento.blob.core.windows.net/portal-web-mivau/vivienda/maps/{version}/geojson/Alquileres_{CCAA|PROVINCIAS|MUNICIPIOS|DISTRITOS_parte1 a 5}.geojson
+    desc: GeoJSON del visor serpavi/{municipio|distrito|comunidad_autonoma}, solo con 2024; la versión (20260326-0942) se lee en el JS de esas páginas
+    example: curl -sS -o serpavi_mun.geojson "https://cdnfomento.blob.core.windows.net/portal-web-mivau/vivienda/maps/20260326-0942/geojson/Alquileres_MUNICIPIOS.geojson"
+    returns: "FeatureCollection CRS84 de 15,4 MB servida como application/octet-stream; 8.095 municipios con CodINE (texto de 5 dígitos), CUMUN entero sin ceros, NMUN y 20 campos _24, como ALQM2_LV_M_VC_24 (mediana de €/m² al mes en vivienda colectiva)"
+quirks: [user-agent-browser, url-drift, overwritten-in-place, static-html, js-rendered]
+ids: [ine-municipio, ine-provincia, ccaa, seccion-censal]
 gotchas:
-  - La ruta mivau.gob.es/vivienda/estadisticas da 404; el índice está en el-ministerio/observatorios-y-estadisticas y los datos siguen en apps.fomento.gob.es (dominio antiguo, sin redirección al nuevo).
-  - Las tablas son XLS antiguos (application/vnd.ms-excel) con varias filas de cabecera; abrir con xlrd o calamine, no con openpyxl.
-  - No localicé descarga masiva ni API pública de SERPAVI; el índice por sección censal solo se consulta en la web. Se construye con datos fiscales y excluye País Vasco y Navarra.
-  - Las transacciones proceden del Consejo General del Notariado y el valor tasado de las sociedades de tasación; el ministerio agrega y publica con retraso trimestral.
+  - www.mivau.gob.es da 403 «Página web bloqueada» sin un User-Agent de navegador con plataforma (Mozilla/5.0 a secas no basta); /vivienda/estadisticas da 404 y los XLS siguen en apps.fomento.gob.es.
+  - Los XLS son de Excel 97 (BIFF); xlrd o calamine los leen y openpyxl falla con BadZipFile. Las series largas reparten los años en hojas (de hasta 5 años en 34010110, una por trimestre en 35103500).
+  - El Boletín no trae código INE; CCAA y provincias comparten la columna B con nombres rellenos de espacios, y en la tabla municipal la fila de la provincia Almería, sin datos, precede al municipio Almería.
+  - 35103500 tiene 86 hojas (T1A2005 a T2A2026) con espacios finales irregulares en el nombre, la provincia solo en su primera fila y n.r como texto en celdas numéricas.
+  - Los indicadores de SERPAVI solo se publican con 10 o más alquileres en la tipología; por debajo quedan vacíos o null (5.540 de 8.095 municipios sin mediana en vivienda colectiva en 2024).
+  - SERPAVI sale del IRPF cruzado con catastro y excluye arrendamientos a parientes; Navarra entra desde 2021, Gipuzkoa desde 2022 y Álava y Bizkaia solo en 2024.
+  - Las cabeceras reales del xlsx (ALQM2_LV_M_VC_24) no coinciden con la hoja Metadatos (ALQM2mes_LV_M_VC_AA); VC es vivienda colectiva, VU unifamiliar, M mediana y 25 y 75 percentiles.
+  - El nombre del xlsx y la carpeta de los GeoJSON cambian con cada versión (2026-03_09_..._v2, 20260326-0942); localizarlos en la página serpavi y en el JS del visor, no fijarlos.
+  - En el GeoJSON municipal CUMUN es entero (1001) y el código bueno es CodINE; en el de distritos CUMUN es texto (01001) y los nombres van en LITMUN y LITPRO, no en NMUN y NPRO.
+  - Las transacciones son escrituras ante notario remitidas por ANCERT (Consejo General del Notariado) y el valor tasado sale de las sociedades de tasación de la AEV, según las metodologías en PDF.
 tips:
-  - "Para una serie municipal de transacciones, localizar en el capítulo 34 la tabla por municipios (código 3401xxxx) y leerla con pandas.read_excel(engine='xlrd' o 'calamine')."
-related: [catastro-ovc, ine-api-tempus, ine-codigos-territoriales, mitma-boletin-estadistico-online]
+  - "pd.read_excel(url, engine='calamine', header=None, skiprows=13) sobre 34010210.XLS da los 8.131 municipios con datos de 2004 a 2026; descartar las 60 filas de CCAA y provincia, que no tienen valores."
+  - Para alquiler por sección censal, la hoja Secciones censales del xlsx de SERPAVI se cruza por CUSEC con ine-cartografia-censal o con el shapefile SECC_CE_20210101_INE_WM.zip de la misma página.
+related: [catastro-ovc, ine-api-tempus, ine-codigos-territoriales, ine-cartografia-censal, mitma-boletin-estadistico-online]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

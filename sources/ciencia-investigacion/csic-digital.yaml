@@ -6,38 +6,48 @@ level: age
 sector: ciencia-investigacion
 tags: [csic, publicaciones, acceso-abierto, oai-pmh, datasets-investigacion, repositorio, dspace]
 summary: >-
-  Publicaciones, datasets y documentos científicos del CSIC en acceso abierto. Cosecha por OAI-PMH con trece
-  formatos de metadatos (oai_dc, datacite, oai_cerif_openaire, mods, marc) y sets por instituto. La web y la
-  API REST están tras un filtro antibots; OAI-PMH es la única vía automatizable.
+  Publicaciones, datasets y documentos del CSIC (413.998 registros el 01/10/2026), con texto completo abierto cuando
+  lo hay. Cosecha por OAI-PMH con trece formatos de metadatos (oai_dc, dim, datacite, oai_cerif_openaire) y sets
+  por instituto y colección; la web y la API REST tienen filtro antibots.
 access: [oai-pmh, portal]
 auth: none
 formats: [xml, pdf]
 update: daily
-coverage: "Repositorio desde 2008; documentos desde principios del siglo XX"
+coverage: "earliestDatestamp 1994-12-31 según Identify; altas y cambios diarios"
 license: Metadatos libres; contenidos según licencia de cada ítem
 base_url: https://digital.csic.es/dspace-oai/request
 docs_url: https://digital.csic.es/dspace-oai/request?verb=Identify
 endpoints:
   - path: ?verb=ListRecords&metadataPrefix=oai_dc&from={AAAA-MM-DD}&set={set}
-    desc: Cosecha incremental; 100 registros por página y resumptionToken con completeListSize (2450 registros desde el 01/09/2026)
+    desc: Cosecha incremental; 100 registros por página, sin orden de fecha, y resumptionToken con completeListSize (2.588 desde el 01/09/2026, consultado el 01/10/2026)
     example: curl -s "https://digital.csic.es/dspace-oai/request?verb=ListRecords&metadataPrefix=oai_dc&from=2026-09-01"
+    returns: "XML OAI-PMH; cada record con header (identifier oai:digital.csic.es:10261/N, datestamp ISO UTC, setSpec com_ y col_) y oai_dc:dc (title, creator, contributor con ORCID, subject, description, date repetida, type, identifier, relation, rights); resumptionToken al final"
   - path: ?verb=ListSets
-    desc: Sets por comunidad e instituto (com_10261_NN)
+    desc: 1.997 sets de comunidad o instituto (com_10261_NN) y de colección (col_10261_NNNNNN), 100 por página con resumptionToken
     example: curl -s "https://digital.csic.es/dspace-oai/request?verb=ListSets"
   - path: ?verb=ListMetadataFormats
     desc: didl, mods, ore, mets, datacite, oai_cerif_openaire, dim, uketd_dc, qdc, oai_dc, rdf, marc y etdms
   - path: ?verb=ListIdentifiers&metadataPrefix=oai_dc&set={set}&from={AAAA-MM-DD}&until={AAAA-MM-DD}
-    desc: Solo identificadores, útil para detectar altas y cambios por instituto
+    desc: Solo cabeceras, para detectar altas y cambios por instituto; sin filtros, completeListSize da el total del repositorio
+    example: curl -s "https://digital.csic.es/dspace-oai/request?verb=ListIdentifiers&metadataPrefix=oai_dc&set=com_10261_92&from=2026-09-01&until=2026-09-30"
+    returns: "XML con header (identifier, datestamp, setSpec) por registro; 68 del Instituto de Historia en septiembre de 2026, en una página sin resumptionToken; until con fecha incluye el día entero"
 quirks: [waf-blocks-bots, js-rendered]
-ids: []
+ids: [referencia-aei]
 gotchas:
-  - digital.csic.es/rest/, /server/api y las páginas handle responden 200 con una página Anubis (prueba de trabajo en JavaScript, "Making sure you're not a bot") en vez de datos; el endpoint OAI-PMH no está filtrado.
+  - La web, /rest/ y las páginas handle responden 200 con una página Anubis («Making sure you're not a bot») y /server/api 500 «Oh noes!»; el OAI-PMH no está filtrado, ni con el User-Agent de curl.
   - OAI-PMH no tiene búsqueda por texto y la API REST está bloqueada; localizar ítems cosechando el set del instituto y filtrando en local.
-  - El resumptionToken codifica formato, fecha y cursor (oai_dc/2026-09-01T00:00:00Z///100); se pasa tal cual en verb=ListRecords&resumptionToken=.
-  - Los registros oai_dc repiten dc:identifier (handle, DOI, URL) y dc:relation (proyecto financiador); oai_cerif_openaire trae la financiación estructurada.
-  - Digital.CSIC estaba agregado en RECOLECTA, cuyo OAI ya no responde (ficha fecyt-recolecta); cosechar aquí directamente.
+  - El resumptionToken codifica formato, fecha y desplazamiento (oai_dc/2026-09-01T00:00:00Z///200 pide la tercera página); el atributo cursor cuenta páginas (0, 1, 2), no registros.
+  - dc:relation trae la financiación como info:eu-repo/grantAgreement/AEI/{plan}/{referencia}/ES/{título}/; de 27 referencias AEI, 22 casan tal cual con aei-convocatorias y 2 tras cambiar guiones U+2010 por -.
+  - dc:relation mezcla además URL, Sí, No y el literal #PLACEHOLDER_PARENT_METADATA_VALUE# (en 27 de 100 registros); filtrar por prefijo antes de usarlo.
+  - dc:identifier repite handle, DOI y a veces la cita o el ISBN en texto libre; dc:date llega dos o tres veces sin etiqueta (depósito con hora y publicación, p. ej. 2025-12).
+  - 22 de los 100 primeros registros desde el 01/09/2026 son closedAccess (solo metadatos); filtrar por dc:rights info:eu-repo/semantics/openAccess si se quiere el texto completo.
+  - oai_cerif_openaire no desglosa la financiación; el proyecto llega en OriginatesFrom/Project/Title con la misma cadena grantAgreement, aunque sí separa DOI, Handle y Access (COAR).
+  - from y until deben tener la misma granularidad; mezclar fecha y fecha con hora devuelve error badArgument con HTTP 200, así que leer el elemento error del XML.
+  - RECOLECTA ya no expone OAI-PMH (ficha fecyt-recolecta); cosechar aquí directamente.
 tips:
   - "Con la librería sickle: Sickle(base_url).ListRecords(metadataPrefix='oai_dc', **{'from': '2026-09-01'}) gestiona el resumptionToken automáticamente."
-related: [gbif-es, fecyt-recolecta]
+  - metadataPrefix=dim da los campos DSpace con cualificador (date.accessioned, date.issued, relation.publisherversion) que oai_dc aplana.
+  - Para cruzar con aei-convocatorias, extraer la referencia con la expresión grantAgreement/AEI/[^/]*/([^/]+) y normalizar los guiones antes de buscarla en la columna Referencia.
+related: [gbif-es, fecyt-recolecta, aei-convocatorias]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

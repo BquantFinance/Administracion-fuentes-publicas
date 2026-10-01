@@ -7,8 +7,8 @@ sector: comercio-industria-propiedad
 tags: [patentes, marcas, disenos, propiedad-industrial, invenes, modelos-utilidad, bopi]
 summary: >-
   Bases de datos de patentes y modelos de utilidad (INVENES), marcas y nombres comerciales (Localizador),
-  Boletín Oficial de la Propiedad Industrial y estadísticas. El cortafuegos de la OEPM rechazó todas las
-  peticiones desde este entorno (403 con support ID), así que ninguna ruta pudo verificarse.
+  Boletín Oficial de la Propiedad Industrial y estadísticas. El cortafuegos F5 de la OEPM rechazó desde este
+  entorno todo salvo el índice del Localizador (403 con support ID); sin datos verificados.
 access: [portal, download]
 auth: none
 formats: [html, pdf, xml]
@@ -19,17 +19,17 @@ base_url: https://www.oepm.es/
 docs_url: https://www.oepm.es/es/index.html
 endpoints:
   - path: https://consultas2.oepm.es/InvenesWeb/faces/busquedaInternet.jsp
-    desc: INVENES, búsqueda de patentes y modelos de utilidad españoles (no verificada, 403)
+    desc: INVENES, búsqueda de patentes y modelos de utilidad españoles (no verificada, 403 el 30/09 y el 01/10/2026)
   - path: https://consultas2.oepm.es/LocalizadorWeb/
-    desc: Localizador de marcas, nombres comerciales y diseños (no verificada, 403)
+    desc: Localizador de marcas, nombres comerciales y diseños; el índice respondió 200 el 01/10/2026 (aplicación Angular) pero su main.js dio 403
   - path: https://www.oepm.es/es/index.html
-    desc: Portada; respondió 200 una vez y 403 en los intentos siguientes con las mismas cabeceras
+    desc: Portada; respondió 200 una vez el 30/09/2026 y 403 en el resto de intentos con las mismas cabeceras, también el 01/10/2026
 quirks: [waf-blocks-bots, waf-intermittent-403, url-drift]
 ids: []
 gotchas:
-  - www.oepm.es y consultas2.oepm.es responden 403 "The requested URL was rejected" (F5) a curl y requests con cualquier User-Agent, cabeceras de navegador y cookies (30/09/2026).
+  - www.oepm.es, consultas2.oepm.es y sede.oepm.gob.es responden 403 "The requested URL was rejected" (F5) a curl y requests con cualquier User-Agent, cabeceras de navegador y cookies (30/09 y 01/10/2026).
   - Las rutas antiguas Bases_de_Datos_Invenciones y Bases_de_Datos_Marcas devuelven 403 o 410; localizar las nuevas desde la portada cuando responda.
-  - Las aplicaciones de consulta son JSF con sesión; scraping frágil. Para datos masivos usar Espacenet y OPS (EPO) o TMview (EUIPO), que incluyen los registros españoles.
+  - INVENES es JSF con sesión y el Localizador una aplicación Angular con llamadas XHR no localizadas; para datos masivos usar Espacenet y OPS (EPO) o TMview (EUIPO), que incluyen los registros españoles.
   - El BOPI se publica en PDF y XML diario; el XML es la vía más limpia para automatizar novedades (no verificado en esta sesión).
 tips: []
 related: [borme-api-sumario]

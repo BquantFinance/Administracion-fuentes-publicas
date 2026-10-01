@@ -1,35 +1,48 @@
 id: fecyt-recolecta
-name: FECYT – RECOLECTA (agregador de repositorios) e ICONO
+name: FECYT – RECOLECTA (agregador de repositorios) e indicadores de ciencia
 org: Fundación Española para la Ciencia y la Tecnología (FECYT)
 ministry: Ciencia, Innovación y Universidades
 level: age
 sector: ciencia-investigacion
-tags: [recolecta, repositorios, acceso-abierto, oai-pmh, ciencia-abierta, indicadores-ciencia]
+tags: [recolecta, repositorios, acceso-abierto, oai-pmh, ciencia-abierta, indicadores-ciencia, bibliometria]
 summary: >-
-  Agregador nacional de repositorios científicos de acceso abierto y observatorio de indicadores ICONO. En la
-  verificación el endpoint OAI-PMH ya no existe, el buscador está tras un filtro antibots e ICONO no respondió;
-  solo quedan las páginas informativas. Cosechar cada repositorio por separado.
-access: [portal]
+  Agregador nacional de repositorios de acceso abierto (RECOLECTA) y plataforma de indicadores de FECYT. RECOLECTA ya
+  no expone OAI-PMH y su buscador tiene filtro antibots; los indicadores (producción Scopus y WoS por CCAA y país,
+  percepción social, cultura científica) se descargan en CSV y XLSX.
+access: [download, portal]
 auth: none
-formats: [html]
+formats: [csv, xlsx, html]
 update: irregular
-coverage: "RECOLECTA desde 2007"
+coverage: "RECOLECTA desde 2007; indicadores bibliométricos 2016-2025; convocatorias de cultura científica 2008-2025"
 license: Metadatos libres; datos FECYT con cita de la fuente
 base_url: https://recolecta.fecyt.es/
 docs_url: https://recolecta.fecyt.es/servicios/recoleccion-de-datos-de-investigacion
 endpoints:
   - path: https://buscador.recolecta.fecyt.es/buscador-recolecta?search_api_fulltext={texto}
     desc: Buscador web de RECOLECTA; responde 403 con una comprobación de navegador (Voight-Kampff Browser Test) a clientes no interactivos
-  - path: https://icono.fecyt.es/
-    desc: ICONO, indicadores del sistema español de ciencia; sin respuesta desde este entorno (error del proxy), no verificado
-quirks: [waf-blocks-bots, url-drift]
+  - path: https://indicadores.fecyt.es/data/{fichero}.csv
+    desc: CSV que carga la plataforma de indicadores (scopus-data, wos-data, metadata, solicitudes_total, importes_total, genero, cultura, encuesta_new)
+    example: curl -sS -o scopus.csv "https://indicadores.fecyt.es/data/scopus-data.csv"
+    returns: "CSV con comas, UTF-8 sin BOM, decimal con punto; 7.903 filas y 29 columnas (Section, Indicador, Fuente, Ámbito, Entidad, Is-percentage, una columna por año de 2016 a 2025, Valor 5 años y Valor 10 años); Entidad es TOTAL España, 17 CCAA o 30 países y territorios"
+  - path: https://indicadores.fecyt.es/data/{fichero}.xlsx
+    desc: Descargas en Excel (datos-actividad-cientifica-descarga, datos-epsc-descarga, datos_encuesta_descarga, datos-convocatoria-cultura-cientifica-descarga)
+    example: curl -sS -o epsc.xlsx "https://indicadores.fecyt.es/data/datos-epsc-descarga.xlsx"
+  - path: https://indicadores.fecyt.es/
+    desc: Plataforma de indicadores (aplicación Vue); las rutas de los ficheros están en el JavaScript, no en el HTML
+quirks: [waf-blocks-bots, js-rendered, url-drift]
 ids: []
 gotchas:
-  - recolecta.fecyt.es/oai, /oai/request, /oai-pmh y /oai/openaire responden 404 (página Drupal); no se localizó ningún endpoint OAI-PMH vigente.
-  - buscador.recolecta.fecyt.es devuelve 403 y una página de comprobación de navegador para curl y requests con cualquier User-Agent.
-  - Para cosechar la producción científica española sin RECOLECTA, ir repositorio a repositorio (Digital.CSIC, repositorios universitarios) o al agregador europeo OpenAIRE, que los recoge.
-  - icono.fecyt.es no pudo verificarse (fallo de conexión en el proxy); comprobar antes de depender de él.
-tips: []
+  - recolecta.fecyt.es/oai, /oai/request, /oai-pmh y /oai/openaire responden 404 (página Drupal, 01/10/2026); no se localizó ningún endpoint OAI-PMH vigente.
+  - buscador.recolecta.fecyt.es devuelve 403 y una página de comprobación de navegador a curl, con User-Agent de navegador o sin él.
+  - /servicios/repositorios redirige a validador.recolecta.fecyt.es, que igual que evaluador corta el TLS desde una IP de centro de datos (01/10/2026); por HTTP solo redirige a HTTPS.
+  - Para cosechar sin RECOLECTA, ir repositorio a repositorio (Digital.CSIC, repositorios universitarios) o a la API de OpenAIRE (search/publications?country=ES, 4,57 millones el 01/10/2026).
+  - icono.fecyt.es no resuelve (NXDOMAIN en los DNS de fecyt.es, 01/10/2026); los indicadores de FECYT están en indicadores.fecyt.es.
+  - Desde una IP de centro de datos cerca de la mitad de las conexiones a indicadores.fecyt.es se cortaron tras el CONNECT (curl 35); reintentar tras 4 s.
+  - Indicador lleva número y fuente pegados (1_Producción científicaSCOPUS); con Is-percentage 1 el valor ya es porcentaje (2.91), pero solicitudes_total usa fracciones (0.308).
+  - metadata.csv envuelve 33 de sus 62 líneas enteras entre comillas; un parser CSV devuelve un solo campo en ellas y hay que volver a partirlas.
+  - Entidad usa nombres (Castilla - La Mancha, Madrid) sin código INE y sin Ceuta ni Melilla; en los recuentos, Valor 5 años y Valor 10 años son sumas de 2021-2025 y 2016-2025.
+tips:
+  - La lista de ficheros de datos está en el bundle /assets/index.{hash}.js (objeto con scopus, wos, metadata...); buscar "/data/" en él si cambian los nombres.
 related: [csic-digital, aei-convocatorias]
 status: degraded
-verified: "2026-09-30"
+verified: "2026-10-01"

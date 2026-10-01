@@ -23,11 +23,13 @@ endpoints:
   - path: https://www.educacionfpydeportes.gob.es/inee/dam/jcr:{uuid}/{fichero}
     desc: PISA 2022 pisa-2022-esp.rar (26,6 MB SPSS), PISA 2018 esp-06-diciembre-pisa2018.zip, PISA 2000-2015 esp-pisa00-03-06-09-12-15.zip (91,5 MB), TIMSS 2023 rar
     example: curl -sS -o pisa-2022-esp.rar "https://www.educacionfpydeportes.gob.es/inee/dam/jcr:8f5e9ff3-41ce-4661-b56e-237766dfff2d/pisa-2022-esp.rar"
+    returns: "RAR5 de 26,6 MB servido como application/x-rar-compressed;charset=UTF-8 (primer fichero PISA2022_CentrosEducativos_Esp.sav); con Range responde 206 y el tamaño total en Content-Range"
   - path: https://www.educacionfpydeportes.gob.es/inee/bases-datos/evaluaciones-nacionales.html
     desc: EGD 2009 (EGD09.xlsx) y 2010 (EGD10.xlsx), Escuela 2.0 (xlsx, sav y dta), PROA (basesddproa{excel|spss|stata}.zip) y prueba piloto de inglés en la PAU (xlsx)
   - path: https://www.educacionfpydeportes.gob.es/inee/bases-datos/evaluaciones-nacionales/evaluacion-externa.html
     desc: Evaluación externa de la reforma de Enseñanzas Medias 1984-1989; basesdedatos.zip (seis .sav REEM2G1A a REEM3G3A, 7,2 MB) y librosdecodigos.zip
     example: curl -sS -o reem_basesdedatos.zip "https://www.educacionfpydeportes.gob.es/inee/dam/jcr:9c9031fe-f08f-432c-99a9-f79fbbaebaef/basesdedatos.zip"
+    returns: zip de 7,2 MB con seis .sav (REEM2G1A a REEM3G3A, de 2 a 6 MB cada uno)
   - path: https://www.educacionfpydeportes.gob.es/inee/bases-datos/evaluaciones-internacionales/piaac.html
     desc: PIAAC ciclo 1 ronda 1, base nacional esp-31-oct.zip (21 MB); ciclo 2 solo en la OCDE
 quirks: [url-drift, static-html]
@@ -35,7 +37,7 @@ ids: []
 gotchas:
   - HEAD sobre los ficheros /inee/dam/ responde 403; usar GET, que admite Range (206) para comprobar tamaño y tipo antes de bajar 400 MB.
   - educacionyfp.gob.es y educacion.gob.es redirigen a educacionfpydeportes.gob.es/inee/portada.html; las URL de fichero llevan jcr:{uuid}, que cambia si se resube el fichero, leer los href de la página.
-  - PISA 2022, TIMSS 2023, ICILS y PISA 2012 Stata vienen en .rar (application/x-rar-compressed), que zipfile no abre; hace falta unrar o 7z. Los .sav y .dta llegan con charset=UTF-8 en el Content-Type aunque son binarios.
+  - PISA 2022, TIMSS 2023, ICILS y PISA 2012 Stata vienen en .rar (PISA 2022 en RAR5), que zipfile no abre; hace falta unrar 5 o 7z. Los .sav y .dta llegan con charset=UTF-8 en el Content-Type aunque son binarios.
   - El CSV conjunto PISA 2000-2012 pesa 404 MB con BOM UTF-8 y separador ;, una columna Participa{año} por ciclo y prefijos P00_, P03_ en las variables; el zip SPSS 2000-2015 equivalente pesa 91 MB.
   - Son la muestra española de la base internacional; pesos, réplicas y valores plausibles siguen la metodología de la OCDE o la IEA, cuyas guías de uso enlaza cada página.
   - TALIS, ICCS y PIAAC ciclo 2 no tienen fichero nacional (solo enlace a la OCDE o la IEA) y PIRLS solo trae guias-de-uso-pirls-2011.rar; PISA 2025 solo enlaza a la base internacional.
@@ -43,4 +45,4 @@ tips:
   - "pyreadstat.read_sav() lee los .sav con etiquetas; para el CSV de 404 MB usar pandas.read_csv(sep=';', encoding='utf-8-sig', usecols=[...]) seleccionando columnas."
 related: [educacion-estadisticas-ruct, ine-microdatos]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

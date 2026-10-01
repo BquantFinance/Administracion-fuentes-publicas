@@ -13,7 +13,7 @@ access: [api-rest, api-soap, download]
 auth: none
 formats: [json, csv, xml]
 update: realtime
-coverage: "Relaciones vigentes; facturas desde 2015 (las anteriores al 27/02/2026 se consultan en face.gob.es)"
+coverage: "Relaciones vigentes; facturas desde 2015, todas consultables en proveedores.face.gob.es (face.gob.es solo muestra las remitidas hasta el 27/02/2026)"
 license: Directorio reutilizable; el envío y consulta de facturas exige certificado del proveedor
 base_url: https://proveedores.face.gob.es/api/v1
 docs_url: https://proveedores.face.gob.es/inicio
@@ -21,12 +21,12 @@ endpoints:
   - path: /relations?fulltext={texto}&page={n}&limit={n}
     desc: Relaciones en JSON; cada item trae oc, og y ut con code (DIR3), name y alias, y og lleva identifier con el NIF
     example: curl -s "https://proveedores.face.gob.es/api/v1/relations?fulltext=Ayuntamiento%20de%20Madrid&limit=100&page=1"
-    params: "fulltext filtra por nombre; page empieza en 1; limit hasta 1000 (5000 devuelve 500); respuesta con items, count, total, limit y page"
-    returns: "{items:[{oc:{code, name, alias}, og:{code, identifier NIF, name}, ut:{code, name}, administration:{code, name}, hash, active}], count, total, limit, page}; los code son DIR3"
+    params: "fulltext busca subcadenas en nombres y códigos DIR3, no en el NIF; page desde 1; limit por defecto y máximo 1000"
+    returns: "{items:[{oc, og, ut:{code DIR3, name, alias}, og.identifier NIF (falta en 1 de cada 5), administration:{code, name}, edp opcional, hash, active true}], count, total, limit, page}; orden fijo no alfabético; tras la última página, 200 con items vacío"
   - path: /relations.csv?fulltext={texto}
-    desc: Lo mismo en CSV con punto y coma (oficinaContable, organoGestor, unidadTramitadora y activo); sin filtro, las 50186 relaciones en 7 MB
+    desc: Lo mismo en CSV sin NIF ni administración; admite fulltext y sin filtro da 50160 filas en 7,3 MB, 27 menos que el total del JSON
     example: curl -sO "https://proveedores.face.gob.es/api/v1/relations.csv"
-    returns: "CSV separado por ; en ISO-8859-1 con BOM: oficinaContableNombre;oficinaContableCodigoDir3;organoGestorNombre;organoGestorCodigoDir3;unidadTramitadoraNombre;unidadTramitadoraCodigoDir3;activo"
+    returns: "CSV UTF-8 con BOM separado por ; y nombres entrecomillados solo a veces: oficinaContableNombre;oficinaContableCodigoDir3;organoGestorNombre;organoGestorCodigoDir3;unidadTramitadoraNombre;unidadTramitadoraCodigoDir3;activo (1); sin resultados devuelve solo el BOM, sin cabecera"
   - path: https://webservice.face.gob.es/facturasspp2?wsdl
     desc: WSDL del servicio SOAP de presentación y consulta de facturas en producción
   - path: https://se-face-webservice.redsara.es/facturasspp2?wsdl
@@ -34,12 +34,16 @@ endpoints:
 ids: [dir3, nif]
 gotchas:
   - face.gob.es es desde el 27/02/2026 solo consulta histórica; el portal y la API viven en proveedores.face.gob.es. Las rutas /es/directorio/administraciones y /es/facturas/estadisticas de la ficha anterior ya no dan datos.
-  - Solo relations es público; statistics responde 401 y no existen administraciones ni nifs como recursos de la API.
-  - page=0 devuelve 500 (la paginación empieza en 1); relations.json no existe, el JSON se obtiene sin extensión.
+  - Solo relations es público; statistics responde 401 y administrations, administraciones y nifs dan 404.
+  - page=0, limit=0 y limit mayor de 1000 devuelven 500 con cuerpo [] en vez de un objeto de error; relations.json da 404, el JSON se pide sin extensión.
+  - fulltext distingue mayúsculas y tildes (ayuntamiento de madrid da 0) y busca subcadenas (Ayuntamiento de Madrid trae también Madridanos y Madridejos); filtrar después por administration.code.
+  - og.identifier (NIF) falta en 9790 de 50187 relaciones y no está normalizado (Q2268231d en minúscula); fulltext no encuentra por NIF.
   - El CSV llega en UTF-8 con BOM aunque Content-Type diga ISO-8859-1.
+  - relations.csv omite 27 relaciones de entes con código I y campo edp que sí devuelve el JSON; para el inventario completo paginar el JSON (51 páginas de 1000).
   - Cada factura necesita los tres códigos DIR3 (OC, OG, UT) de una relación con activo=1; el SOAP exige certificado del proveedor.
 tips:
   - El CSV completo es la forma más rápida de tener los DIR3 de todo el sector público que factura electrónicamente, sin pasar por el WAF del CTT (dir3-directorio).
+  - fulltext con el DIR3 de la administración (L01280796) devuelve exactamente sus relaciones, sin los falsos positivos de la búsqueda por nombre.
 related: [dir3-directorio, placsp-datos-abiertos]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

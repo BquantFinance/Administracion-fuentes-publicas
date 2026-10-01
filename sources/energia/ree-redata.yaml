@@ -47,7 +47,7 @@ rate_limit: No documentado; el WAF rechaza peticiones sueltas, no ráfagas concr
 quirks: [waf-intermittent-403, errors-html-or-xml]
 ids: []
 gotchas:
-  - Incapsula devuelve 403 con una página HTML a una parte de las peticiones (hasta diez seguidas el 30/09/2026); repetir la misma URL tras 3 segundos hasta obtener JSON.
+  - Incapsula responde 403 con una página HTML a parte de las peticiones (hasta diez seguidas el 30/09/2026) y a todas desde IP de nube el 01/10/2026, también www.ree.es y ESIOS; reintentar tras 3 s o cambiar de red.
   - El 400 "Los datos solicitados no están disponibles en este momento" también significa rango demasiado largo o time_trunc no admitido (evolucion con hour, precios con day); acortar el rango.
   - Un widget inexistente o una combinación no soportada devuelve 500 con una página HTML "An Error Occurred", nunca un 404 JSON.
   - Límites comprobados por petición; hour hasta tres días (precios) y un día (demanda-tiempo-real); day hasta un año; month de cinco años y year de diez dieron 400.

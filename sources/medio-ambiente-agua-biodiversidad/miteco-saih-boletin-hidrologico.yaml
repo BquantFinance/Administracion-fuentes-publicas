@@ -6,48 +6,55 @@ level: age
 sector: medio-ambiente-agua-biodiversidad
 tags: [agua, embalses, reservas, saih, caudales, aforos, cuencas, confederaciones]
 summary: >-
-  Reserva semanal de cada embalse peninsular de más de 5 hm3 desde 1988 (base Access), boletín hidrológico
+  Reserva semanal de cada embalse peninsular de más de 5 hm3 desde 1987 (base Access), boletín hidrológico
   semanal en PDF, anuario de aforos con series diarias de caudal y nivel por estación desde 1912 (CSV por
   cuenca) y listado de estaciones. Los SAIH en tiempo real son de cada confederación.
 access: [download, portal]
 auth: none
 formats: [csv, zip, pdf, html]
 update: weekly
-coverage: "Embalses 1988-; aforos 1912-2022 (anuario 2021-2022)"
+coverage: "Embalses 1987-10-06 a hoy (semanal); aforos 1912-2022 (anuario 2021-2022)"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico.html
 docs_url: https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/modelo-de-datos-bd-embalses-1988-2022_tcm30-538818.pdf
 endpoints:
   - path: https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/Historico-de-embalses/BD-Embalses.zip
-    desc: Access .mdb (10 MB comprimido, 222 MB) con la tabla T_Datos Embalses (AMBITO_NOMBRE, EMBALSE_NOMBRE, FECHA, AGUA_TOTAL, AGUA_ACTUAL, ELECTRICO_FLAG) desde 1988
+    desc: Access .mdb (10 MB comprimido, 222 MB) con una tabla cuyo nombre lleva los años (T_Datos Embalses 1988-2026); un registro por embalse y martes
     example: curl -sSL -o BD-Embalses.zip "https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/Historico-de-embalses/BD-Embalses.zip"
-    returns: "Zip (10 MB) con un único fichero BD-Embalses.mdb (Access); leer con mdbtools (mdb-tables, mdb-export) o pandas_access, no con pandas directamente"
-  - path: https://sede.miteco.gob.es/BoleHWeb/
-    desc: Boletín hidrológico semanal en PDF (aplicación con calendario JS, sin URL estable por fecha)
+    returns: "Zip de 10 MB con BD-Embalses.mdb (Jet4) y 722.717 filas de 401 embalses y 16 ámbitos desde 1987-10-06: AMBITO_NOMBRE, EMBALSE_NOMBRE, FECHA, AGUA_TOTAL y AGUA_ACTUAL (texto con coma decimal, hm3) y ELECTRICO_FLAG; 374 embalses el 29/09/2026"
+  - path: https://sede.miteco.gob.es/BoleHWeb/accion/cargador_archivo.htm?file=cache/pdf/{AAAA}{NN}/{AAAA}{NN}{SS}_es.pdf&mimetype=application/pdf
+    desc: PDF de cada sección del boletín semanal, sin sesión; es el enlace que genera el calendario JS de sede.miteco.gob.es/BoleHWeb tras el POST a bolehSRV
+    params: NN = número de boletín del año con dos dígitos (39 el de la semana al 29/09/2026); SS = 40 resumen, 50 pluviometría, 60 reserva hidráulica, 70 análisis de la reserva, 80 tendencia, 90 caudales
+    example: curl -sS -o reserva.pdf "https://sede.miteco.gob.es/BoleHWeb/accion/cargador_archivo.htm?file=cache/pdf/202639/20263960_es.pdf&mimetype=application/pdf"
+    returns: "PDF de unos 400 KB (10 páginas en la sección 60) con «NÚMERO 39 AÑO 2026», el periodo y la nota «Datos provisionales sujetos a revisión»; tablas por embalse y ámbito solo en PDF"
   - path: https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/Anuario-21-22-csv.zip
-    desc: Anuario completo en CSV (136 MB), una carpeta por cuenca con afliq.csv (indroea;fecha;altura;caudal diarios), estaf.csv, embalse.csv y anual_a.csv
+    desc: Anuario completo en CSV (136 MB), una carpeta por cuenca con afliq.csv (caudal diario), afliqe.csv (reserva diaria de embalses), estaf.csv y embalse.csv
     example: curl -sSL -o Anuario-21-22-csv.zip "https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/Anuario-21-22-csv.zip"
-    returns: "Zip (130 MB, 342 ficheros) con una carpeta por demarcación (CANTABRICO, DUERO, EBRO...) y CSV ; por tipo: afliq.csv (indroea;fecha;altura;caudal diario, fecha dd/mm/aaaa, desde 1912 en algunas estaciones), afliqc (ref_ceh;fecha;altura;caudal), afliqe, afliqi y anual_*.csv"
+    returns: "Zip de 136 MB y 342 entradas: 11 carpetas de demarcación (CANTABRICO... SIN DEFINIR) con 30 CSV ; en Latin-1 y un PDF de tablas. afliq.csv es indroea;fecha;altura;caudal, fecha dd/mm/aaaa, de 1912-01-01 a 2022-09-30; afliqe.csv es ref_ceh;fecha;reserva;salida;entrada;tipo"
   - path: https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/listado-estaciones-aforo.zip
     desc: Cuatro CSV de estaciones (río, embalse, canal, evaporimétrica) con COD_HIDRO, COD_SAIH, COD_SAICA, UTM huso 30 ETRS89, masa de agua, municipio y provincia
-    returns: "Cuatro CSV ; (Situac 1_Canal, 2_Embalse, 3_Evaporimetrica, 4_Rio) con ORGANISMO_CUENCA_VISOR, COD_SITUACION_ESTACION, COD_HIDRO (indroea), NOM_ANUARIO, COD_SAIH, COD_SAICA, ESTADO, ANO_INICIO_MEDIDAS, COORD_UTMX_H30_ETRS89, COORD_UTMY_H30_ETRS89, RIO, TERMINO_MUNICIPAL, PROVINCIA, COD_MASA_AGUA"
+    returns: "Cuatro CSV ; en Latin-1 (Situac 1_Canal, 2_Embalse, 3_Evaporimetrica, 4_Rio) con columnas en distinto orden: ORGANISMO_CUENCA_VISOR, COD_HIDRO, NOM_ANUARIO, COD_SAIH, COD_SAICA, ESTADO, ANO_INICIO_MEDIDAS, COORD_UTMX_H30_ETRS89, COORD_UTMY_H30_ETRS89, RIO, TERMINO_MUNICIPAL, PROVINCIA, COD_MASA_AGUA"
   - path: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos.html
     desc: Página del anuario con la variante mdb, la memoria y la descripción de tablas en PDF
   - path: https://www.miteco.gob.es/es/agua/temas/evaluacion-de-los-recursos-hidricos/saih.html
-    desc: Enlaces a los SAIH de cada confederación (Ebro, Tajo, Duero, Guadalquivir, Júcar, Segura, Miño-Sil, Sur), cada uno con su web y formato
-quirks: [url-drift, js-rendered]
+    desc: Enlaces a los SAIH de las confederaciones (Ebro, Tajo, Duero, Guadalquivir, Guadiana, Júcar, Segura, Miño-Sil, Cantábrico, Sur), ACA y URA, cada uno distinto
+quirks: [url-drift, js-rendered, latin1, overwritten-in-place]
 ids: []
 gotchas:
-  - No hay CSV ni xlsx del boletín semanal; el dato semanal por embalse solo está en el .mdb (fichero actualizado el 29/09/2026) y en los PDF de BoleHWeb.
-  - Leer el .mdb requiere mdbtools (mdb-export) o un driver Access; no hay lector puro Python fiable. El PDF del modelo de datos describe los campos.
-  - Los datos del boletín son provisionales y sin validar; los validados de embalses están en el anuario de aforos (embalse.csv), que llega con dos o tres años de retraso.
-  - CSV del anuario con separador ; y punto decimal, fechas dd/mm/aaaa y huecos como campo vacío; afliq.csv del Cantábrico pesa 25 MB. Once carpetas de cuenca, incluida SIN DEFINIR.
-  - Cada estación tiene varios códigos (indroea o ref_ceh en las series, COD_HIDRO, COD_SAIH y COD_SAICA en el listado); estaf.csv trae coordenadas UTM, ETRS89 y WGS84 y cod_saih.
-  - La ruta historico-de-boletines.html da 404 y el visor sig.mapama.gob.es/redes-seguimiento redirige al índice de visores de mapa.gob.es.
-  - Las capas GIS (embalses, estaciones de aforo, SAIH) se descargan en gis.miteco.gob.es tras resolver un desafío ALTCHA (ver miteco-banco-datos-naturaleza); los ZIP del catálogo CKAN dan 404.
+  - No hay CSV ni xlsx del boletín semanal; el dato por embalse solo está en el .mdb, que se sobrescribe en la misma URL (Last-Modified martes 29/09/2026), y en los PDF del boletín.
+  - La tabla del .mdb se llama «T_Datos Embalses 1988-2026» y su nombre cambia con el año (el PDF de docs_url dice 1988-2022); listar con mdb-tables -1 antes de mdb-export.
+  - AGUA_TOTAL y AGUA_ACTUAL son texto con coma decimal (91,00) y mdb-export saca FECHA como MM/DD/AA (01/05/88 es 5 de enero); usar mdb-export -T '%Y-%m-%d' y cambiar la coma por punto.
+  - Los datos del boletín son provisionales y sin validar; los validados de embalses están en afliqe.csv del anuario de aforos, que llega con dos o tres años de retraso.
+  - CSV del anuario en Latin-1 (Ñ como 0xD1), separador ; y punto decimal, fechas dd/mm/aaaa y huecos vacíos; afliq.csv del Ebro pesa 125 MB descomprimido. Once carpetas de cuenca, incluida SIN DEFINIR.
+  - COD_HIDRO del listado es indroea en ríos y ref_ceh en embalses (cruce verificado en el Ebro); cod_saih de estaf.csv está vacío en 84 de 317 estaciones del Ebro y los textos vienen rellenos de espacios.
+  - En estaf.csv y embalse.csv, long, lat, longwgs84 y latwgs84 son enteros GGMMSS (431756 es 43°17'56''), no grados decimales; xetrs89 e yetrs89 son UTM ETRS89.
+  - Un PDF de BoleHWeb inexistente o no generado responde 200 application/pdf con cuerpo vacío (2015 y 202440 el 1/10/2026; 202539 y 2026 sí); comprobar el tamaño.
+  - La ruta historico-de-boletines.html da 302 a la página de error (200) y el visor sig.mapama.gob.es/redes-seguimiento redirige al índice de visores de mapa.gob.es.
+  - Las capas GIS (f=estacionesaforos.zip, f=capassaih.zip) se bajan de gis.miteco.gob.es tras un desafío ALTCHA (ver miteco-banco-datos-naturaleza); en agua/saih.html el href lleva f&#61;, desescapar.
 tips:
-  - "Con mdbtools, mdb-export BD-Embalses.mdb 'T_Datos Embalses' > embalses.csv saca toda la serie; AGUA_ACTUAL y AGUA_TOTAL están en hm3 y ELECTRICO_FLAG distingue uso consuntivo (0) e hidroeléctrico (1)."
-  - "Series diarias de caudal listas para pandas: read_csv de afliq.csv con sep=';' y parse_dates de fecha (dayfirst=True), y merge con estaf.csv por indroea para nombre y coordenadas."
+  - "Con mdbtools: T=$(mdb-tables -1 BD-Embalses.mdb | grep T_Datos) y mdb-export -T '%Y-%m-%d' BD-Embalses.mdb \"$T\"; ELECTRICO_FLAG 0 es uso consuntivo y 1 hidroeléctrico."
+  - En Python puro, access-parser 0.0.6 leyó la tabla completa (722.717 filas) en 80 s el 2026-10-01, con FECHA ya en AAAA-MM-DD.
+  - "Series diarias de caudal listas para pandas: read_csv de afliq.csv con sep=';', encoding='latin-1' y parse_dates de fecha (dayfirst=True), y merge con estaf.csv por indroea para nombre y coordenadas."
 related: [aemet-opendata, miteco-banco-datos-naturaleza]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

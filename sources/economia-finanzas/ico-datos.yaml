@@ -6,23 +6,34 @@ level: age
 sector: economia-finanzas
 tags: [ico, financiacion, avales, pymes, lineas-ico]
 summary: >-
-  Solo documentos PDF: memoria anual, cuentas anuales consolidadas e información con relevancia prudencial.
-  No publica estadísticas descargables de las Líneas ICO ni de los avales por beneficiario.
-access: [portal]
+  Memoria, cuentas anuales consolidadas e información con relevancia prudencial en PDF, y una página con tablas HTML
+  de aprobaciones por canal (mediación, financiación directa, avales, capital), magnitudes y ratios. Sin descargas
+  tabulares ni datos por beneficiario.
+access: [portal, scraping]
 auth: none
 formats: [pdf, html]
 update: annual
+coverage: "PDF de 2022 a 2025 en la página; magnitudes de 2024, 2025 y primer semestre de 2026"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.ico.es/web/guest/ico/informe-anual
 docs_url: https://www.ico.es/web/guest/datos-abiertos
 endpoints:
   - path: https://www.ico.es/web/guest/ico/informe-anual
     desc: Memoria, cuentas anuales e informe de relevancia prudencial en PDF
+    example: curl -s "https://www.ico.es/web/guest/ico/informe-anual" | grep -o '/documents/[^"]*\.pdf/[0-9a-f-]*' | sort -u
+    returns: "HTML con enlaces /documents/20124/{carpeta}/{nombre}.pdf/{uuid}?t={marca} a memoria o EINF, cuentas consolidadas e IRP de 2022 a 2025"
+  - path: https://www.ico.es/web/guest/inversores/guia_breve_sobre_ico/principales_magnitudes_e_indicadores_de_actividad
+    desc: Tablas HTML de aprobaciones por canal (importe en M€ y operaciones), inversión crediticia, cuenta de resultados y ratios, anuales y del semestre en curso
+    example: curl -s "https://www.ico.es/web/guest/inversores/guia_breve_sobre_ico/principales_magnitudes_e_indicadores_de_actividad"
+    returns: "HTML con 8 <table>: aprobaciones a 31/12/2024, 31/12/2025 y su suma por canal (mediación y financiación directa, nacional e internacional, avales, capital), lo mismo a 30/06/2026, magnitudes, resultados y ratios; punto de miles y coma decimal"
 quirks: [static-html, url-drift]
 gotchas:
   - Las rutas /web/ico/estadisticas y /web/ico/transparencia ya no existen; redirigen a la portada.
-  - La página de datos abiertos solo recoge la normativa RISP, sin conjuntos de datos.
-  - Los PDF cuelgan de /documents/ con identificadores opacos y parámetro t de caché; los enlaces cambian con cada publicación.
+  - La página de datos abiertos solo recoge la normativa RISP y enlaza al catálogo de datos.gob.es filtrado por el ICO, que no se pudo comprobar (403 de Incapsula desde IP de nube el 01/10/2026).
+  - Los PDF cuelgan de /documents/20124/{carpeta}/{nombre}.pdf/{uuid}; el parámetro t es opcional, pero sin el uuid la URL devuelve 200 con la portada (404 blando). Localizar los enlaces en la página.
+  - Las tablas de magnitudes usan punto de miles y coma decimal (7.930 son 7930 M€) y cabeceras de dos niveles con celdas combinadas; son agregados por canal, sin línea ICO concreta ni beneficiario.
+tips:
+  - "pd.read_html(url, thousands='.', decimal=',') devuelve las 8 tablas de magnitudes con cabecera de varios niveles."
 related: [bdns-api]
 status: degraded
-verified: "2026-09-30"
+verified: "2026-10-01"

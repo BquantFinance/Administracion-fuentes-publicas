@@ -6,47 +6,62 @@ level: age
 sector: ciencia-investigacion
 tags: [biodiversidad, especies, ocurrencias, biologia, taxonomia, darwin-core, gbif, colecciones]
 summary: >-
-  95,8 millones de registros de presencia de especies en España (country=ES) y 666 datasets publicados por
-  instituciones españolas, en Darwin Core, a través de la API global de GBIF (JSON, sin clave para consultar).
-  El portal nacional y su API propia no son utilizables desde scripts.
-access: [api-rest, download, portal]
+  95,8 millones de registros de especies en España (country=ES) y 666 datasets publicados desde España, en
+  Darwin Core, por la API global de GBIF (JSON, sin clave), más la API del portal nacional (registros-ws.gbif.es,
+  59,8 millones) y el IPT del nodo con los DwC-A de 603 recursos.
+access: [api-rest, download, feed, portal]
 auth: none
-formats: [json, csv, zip]
+formats: [json, csv, zip, rss]
 update: daily
-coverage: "Registros históricos desde el siglo XVIII hasta hoy"
+coverage: "Registros con año desde el siglo XVI (7.033 de 1575-1599) hasta hoy"
 license: CC0, CC BY o CC BY-NC según dataset (campo license de cada registro)
 base_url: https://api.gbif.org/v1
 docs_url: https://techdocs.gbif.org/en/openapi/
 endpoints:
-  - path: /occurrence/search?country=ES&scientificName={nombre}&limit={n}&offset={o}
-    desc: Ocurrencias en España (sobre con offset, limit, endOfRecords, count, results, facets); limit máximo 300
+  - path: /occurrence/search?country=ES&taxonKey={clave}&limit={n}&offset={o}
+    desc: Ocurrencias en España; limit=0 devuelve solo count y facets (facet=year, basisOfRecord, datasetKey) con cualquier filtro de búsqueda
     example: curl -s "https://api.gbif.org/v1/occurrence/search?country=ES&scientificName=Lynx%20pardinus&limit=5"
-    returns: "{offset, limit, endOfRecords, count, results:[{key, datasetKey, scientificName, taxonKey, speciesKey, kingdom...species, decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, stateProvince, eventDate, year, month, day, basisOfRecord, occurrenceStatus, issues[], license}]}"
+    returns: "{offset, limit, endOfRecords, count, facets, results:[{key, datasetKey, scientificName, taxonKey, speciesKey, decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, stateProvince, gadm{level0..level3}, eventDate ISO sin zona y de precisión variable, year, basisOfRecord, issues[], license como URL}]}"
   - path: /occurrence/count?country=ES
-    desc: Recuento rápido con los mismos filtros que search (publishingCountry, taxonKey, year, gadmGid, hasCoordinate)
+    desc: Recuento rápido con un subconjunto de filtros (country, publishingCountry, taxonKey, datasetKey, year, basisOfRecord, isGeoreferenced)
     example: curl -s "https://api.gbif.org/v1/occurrence/count?country=ES"
+    returns: Número entero sin envoltorio JSON (95839088 el 01/10/2026)
   - path: /species/match?name={nombre}
-    desc: Resolver un nombre científico al taxón (usageKey, rank, status, matchType, confidence)
+    desc: Resolver un nombre científico al taxón (usageKey, rank, status, matchType, confidence); corrige erratas con matchType FUZZY
     example: curl -s "https://api.gbif.org/v1/species/match?name=Quercus%20ilex"
     returns: "{usageKey, scientificName, canonicalName, rank, status, confidence, matchType (EXACT, FUZZY, NONE), kingdom, phylum, order, family, genus, species y sus claves kingdomKey...speciesKey}"
   - path: /dataset/search?publishingCountry=ES&limit={n}
-    desc: Datasets publicados desde España (key, title, doi, type, publishingOrganizationTitle)
+    desc: Datasets publicados desde España (666 el 01/10/2026)
     example: curl -s "https://api.gbif.org/v1/dataset/search?publishingCountry=ES&limit=5"
+    returns: "{offset, limit, endOfRecords, count, results:[{key, title, doi, type (OCCURRENCE, CHECKLIST...), publishingOrganizationTitle, license como URL, recordCount}]}"
   - path: /occurrence/download/request
-    desc: Descargas masivas asíncronas (POST con predicado JSON); exigen usuario y contraseña de GBIF gratuitos
+    desc: Descargas masivas asíncronas (POST con predicado JSON); sin usuario y contraseña de GBIF responde 403 Access is denied
+  - path: https://registros-ws.gbif.es/occurrences/search?q={consulta}&fq={filtro}&pageSize={n}&startIndex={i}
+    desc: API del portal nacional (biocache de Living Atlases, OpenAPI en /v3/api-docs), sin filtro antibots; consulta Solr en q y fq
+    example: curl -s "https://registros-ws.gbif.es/occurrences/search?q=taxon_name:%22Lynx%20pardinus%22&pageSize=2"
+    returns: "{pageSize, startIndex, totalRecords, status, occurrences:[{uuid, scientificName, taxonConceptID (clave del backbone de GBIF), decimalLatitude, decimalLongitude, year, dataResourceName, institutionName, basisOfRecord, license (CC-BY-NC), assertions[]}], facetResults[]}"
+  - path: https://ipt.gbif.es/rss.do
+    desc: RSS del IPT nacional con 603 recursos; cada item enlaza el Darwin Core Archive en archive.do?r={recurso} (application/zip)
+    example: curl -s "https://ipt.gbif.es/rss.do"
   - path: https://datos.gbif.es/
-    desc: Portal nacional (Living Atlases) con visor y datasets del nodo; enlaza al IPT en ipt.gbif.es
+    desc: Portal nacional (Living Atlases) con visor y datasets del nodo; su buscador registros.gbif.es exige comprobación antibots
 quirks: [waf-blocks-bots]
 ids: []
 gotchas:
-  - La paginación de search no pasa de offset 100000 (400 "Max offset of 100001 exceeded"); para más registros usar descargas asíncronas o dividir por taxonKey, year o gadmGid.
-  - Filtrar por nombre científico es impreciso; resolver primero con species/match y filtrar por taxonKey, que incluye sinónimos y subespecies.
-  - gadmGid permite acotar por unidades administrativas GADM (ESP.8_1 es una comunidad autónoma, 5 millones de registros), sin equivalencia oficial con los códigos INE.
-  - Cada registro trae issues (COORDINATE_ROUNDED, TAXON_ID_NOT_FOUND...); filtrar con hasCoordinate=true y hasGeospatialIssue=false para análisis espacial.
-  - country=ES cuenta 95,8 millones y publishingCountry=ES 80,7 millones; son conjuntos distintos (dónde ocurre frente a quién publica).
-  - El portal nacional registros.gbif.es responde 418 con una comprobación antibots y api.gbif.es sirve un certificado que no cubre ese nombre; usar api.gbif.org.
+  - limit por encima de 300 se recorta a 300 sin aviso y offset + limit no puede pasar de 100.001 (400 en texto plano «Max offset of 100001 exceeded»); para más, descargas asíncronas o dividir por taxonKey o year.
+  - scientificName se resuelve contra el backbone igual que taxonKey (21.322 para Quercus ilex en ambos), pero una errata da count 0 sin error; species/match la corrige (matchType FUZZY).
+  - Quercus ilex (2879098) reúne 21.322 registros en España y Quercus rotundifolia (2881550), taxón aceptado aparte, 1.327.134; un nombre resuelto no garantiza el concepto buscado.
+  - occurrence/count solo acepta algunos filtros (isGeoreferenced sí; gadmGid, hasCoordinate y hasGeospatialIssue dan 400); search con limit=0 da el count con cualquier filtro.
+  - gadmGid acota por unidades GADM (ESP.8_1 Comunidad de Madrid, 5.069.352 registros; nivel 2 provincias, ESP.1.6_1 Jaén), sin equivalencia oficial con los códigos INE.
+  - Cada registro trae issues (COORDINATE_ROUNDED, TAXON_ID_NOT_FOUND...); hasCoordinate=true y hasGeospatialIssue=false dejan 91,98 de los 95,8 millones.
+  - Las especies amenazadas llegan con coordenadas degradadas (lince en iNaturalist con incertidumbre de 28.300 m, explicado en informationWithheld); no sirven para análisis finos.
+  - country=ES cuenta 95,8 millones, publishingCountry=ES 80,7 millones y el portal nacional 59,8 millones; son conjuntos distintos (dónde ocurre, quién publica, qué indexa el nodo).
+  - registros.gbif.es responde 418 con una comprobación antibots y api.gbif.es sirve el certificado de datos.gbif.es; la API del portal útil es registros-ws.gbif.es.
+  - registros-ws.gbif.es corta en 5.000 registros; si startIndex + pageSize pasa de 5.000 recorta y con startIndex de 5.000 o más responde 200 con occurrences vacío y pageSize 0.
 tips:
-  - "La librería pygbif (occurrences.search, species.name_backbone) envuelve estos endpoints; para volúmenes grandes, occurrences.download con usuario GBIF y predicado country=ES."
+  - "pygbif 0.6.6: occurrences.search(country='ES', taxonKey=...) funciona; species.name_backbone ya llama a /v2/species/match (usage.key como texto, diagnostics.matchType); occurrences.download para volúmenes grandes."
+  - taxonConceptID del portal nacional es la misma clave del backbone de GBIF (2435261 para el lince), así que species/match sirve para ambas APIs.
+  - Para un dataset entero, el DwC-A del IPT (archive.do?r=) evita paginar y respeta la versión publicada.
 related: [miteco-banco-datos-naturaleza, csic-digital]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

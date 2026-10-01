@@ -6,9 +6,9 @@ level: age
 sector: ciencia-investigacion
 tags: [aei, proyectos, convocatorias, ayudas-concedidas, financiacion-investigacion, plan-estatal, referencias-proyecto]
 summary: >-
-  Todas las ayudas concedidas por la AEI desde 2008 (130.000 filas) en un CSV descargable con año, convocatoria,
-  referencia, género del IP, área, título, CIF y entidad beneficiaria, CCAA, provincia e importe, más el buscador
-  de convocatorias con sus páginas de detalle y estadísticas en PDF.
+  Todas las ayudas concedidas por la AEI desde 2008 (130.388 filas) en CSV con año de convocatoria, convocatoria,
+  referencia, género del IP, área, título, CIF y entidad, CCAA, provincia e importe, filtrable por URL y con resumen
+  del proyecto, más el buscador de convocatorias y sus resoluciones en PDF.
 access: [download, portal]
 auth: none
 formats: [csv, html, pdf]
@@ -18,28 +18,40 @@ license: Reutilización libre con cita de la fuente
 base_url: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas
 docs_url: https://www.aei.gob.es/ayudas-concedidas/informacion-estadistica
 endpoints:
-  - path: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All
-    desc: CSV completo de ayudas concedidas (36 MB, 130.389 filas, UTF-8 con BOM, separador ;)
+  - path: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/{año}/{convocatoria}/{ccaa}/{provincia}?{filtro}={valor}
+    desc: CSV sin resumen; con All/All/All/All y keys=&area=All, el fichero completo (36,7 MB y 130.388 filas el 01/10/2026)
     example: curl -sSL -o ayudas_aei.csv "https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All"
-    returns: "CSV separado por ; (35 MB, desde 2008) con Año;Convocatoria;Referencia;Género;Área;Subárea;Título;C.I.F.;Entidad;CC.AA.;Provincia;€ Conced.; importe con punto de miles y coma decimal (192.480,00) y textos entrecomillados"
-  - path: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas?keys={texto}&convocatory=All&area=All&ccaa=All&province=All
-    desc: Buscador web (GET) con filtros name, cif, code, convocatory, area, ccaa, province, gender y granted[min|max]; resultados en HTML paginado
+    params: "Segmentos All o valor del desplegable (2024, Torres Quevedo, MADRID, BARCELONA); consulta cif (sin guiones), name, code, title, gender (1, 2, 3 o All), area, granted[min], granted[max]"
+    returns: "CSV ; UTF-8 con BOM, 12 columnas Año;Convocatoria;Referencia;Género (HOMBRE, MUJER, N/A);Área;Subárea;Título;C.I.F.;Entidad;CC.AA.;Provincia;€ Conced.; importe con punto de miles y coma decimal (192.480,00); textos entrecomillados; sin orden estricto por año"
+  - path: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download/{año}/{convocatoria}/{ccaa}/{provincia}?{filtro}={valor}
+    desc: Mismo CSV y mismos filtros con una 13.ª columna Resumen (resumen y palabras clave); 17 MB para el año 2024 completo
+    example: curl -sSL -o aei_uca_2024.csv "https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download/2024/All/All/All?cif=Q1132001G"
+    returns: "Las 12 columnas más Resumen (texto libre, vacío en 2.852 de las 7.856 filas de 2024); 55 filas y 117 KB para Q1132001G en 2024"
+  - path: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas?year={año}&cif={nif}&page={n}
+    desc: Buscador web (GET), tabla HTML de 15 resultados por página con page desde 0; sin ningún filtro no muestra resultados
+    params: "year, convocatory, code, cif, name, title, keywords, summary, area, subarea, ccaa, province, gender (1 hombre, 2 mujer, 3 no aplica), granted[min], granted[max]"
   - path: https://www.aei.gob.es/convocatorias/buscador-convocatorias?status=1&page={n}
-    desc: Listado de convocatorias (status=1 abiertas) con páginas de detalle en /convocatorias/buscador-convocatorias/{slug}
+    desc: Listado de convocatorias (status 1 abierta, 0 cerrada; filtros search, year, state_plan, program) con detalle en /convocatorias/buscador-convocatorias/{slug}
+  - path: https://www.aei.gob.es/convocatorias/buscador-convocatorias/{slug}/{convocatoria|publicaciones}
+    desc: convocatoria enlaza la resolución en PDF, el extracto del BOE y la convocatoria en la BDNS; publicaciones, las propuestas y la resolución de concesión
+    example: curl -s "https://www.aei.gob.es/convocatorias/buscador-convocatorias/ayudas-contratos-torres-quevedo-ptq-2024/publicaciones"
   - path: https://www.aei.gob.es/ayudas-concedidas/informacion-estadistica
-    desc: Informes estadísticos de ayudas por periodo (PDF)
-quirks: []
-ids: [nif]
+    desc: Informes estadísticos de ayudas por periodo del Plan Estatal (5 PDF, de 2008-2012 a 2024-2027)
+quirks: [static-html, url-drift]
+ids: [nif, referencia-aei]
 gotchas:
-  - "Columnas del CSV: Año;Convocatoria;Referencia;Género;Área;Subárea;Título;C.I.F.;Entidad;CC.AA.;Provincia;€ Conced. Importe con punto de miles y coma decimal (192.480,00)."
-  - La descarga devolvió el fichero completo tanto con keys vacío como con keys=clima (mismo tamaño); filtrar en local en vez de confiar en los parámetros.
-  - La propia página advierte de agrupar por Referencia para obtener importes globales, porque una referencia puede repetirse en varias filas.
-  - Las referencias (PID2021-123456OB-I00, RYC-2008-03681) son la clave para cruzar con publicaciones (acknowledgements) y con la BDNS, donde la misma ayuda aparece con más estructura.
-  - CC.AA. y Provincia vienen como nombres en mayúsculas sin código INE; Área y Subárea están vacías en convocatorias antiguas.
-  - Las páginas de detalle de convocatoria no enlazan ficheros descargables; las resoluciones se publican en la sede electrónica y en la BDNS.
-  - La ruta /datos-abiertos no existe (404); el CSV de ayudas es la única descarga masiva.
+  - Las dos descargas exigen al menos un filtro del buscador en la consulta (gender=All basta; keys no cuenta, es la búsqueda del sitio); sin él responden 200 con solo el BOM (3 bytes).
+  - La propia página pide agrupar por Referencia para obtener importes globales; 820 referencias se repiten con varias entidades (RYC-2008-02383 en dos centros con importes distintos).
+  - La BDNS no trae la referencia AEI; cruzar por NIF, convocatoria e importe (las 5 ayudas PTA 2025 de Q1132001G, de 56.400 € cada una, casan con la convocatoria BDNS 856153).
+  - Año es el de la convocatoria, no el de concesión; el 01/10/2026 2025 tenía 1.067 filas y 2026 92, frente a 5.500-10.300 por año en 2008-2024, sin las convocatorias grandes.
+  - 424 títulos llevan saltos de línea CRLF dentro de comillas y los registros acaban en LF; wc -l cuenta 130.956 líneas para 130.388 filas, así que leer con un parser CSV.
+  - CC.AA. y Provincia son nombres en mayúsculas sin código INE (PDO.ASTURIAS, C.VALENCIANA, EXTRANJERO); Área y Subárea vacías en el 38-67 % de las filas de 2008-2018.
+  - status=1 (Abierta) lista también convocatorias con plazo futuro cuya ficha dice Cerrada (PCI2026-2, plazo del 05/10 al 19/10/2026, vista el 01/10/2026); leer Plazos de solicitud.
+  - Los PDF de convocatorias e informes cuelgan de /sites/default/files/.../{AAAA-MM}/ según el mes de subida; localizarlos en la página en cada ejecución.
+  - La ruta /datos-abiertos responde 404 (01/10/2026); el CSV de ayudas es la única descarga masiva.
 tips:
-  - "pandas.read_csv(url, sep=';', encoding='utf-8-sig', thousands='.', decimal=',') carga el fichero directamente; agrupar por Referencia antes de sumar."
+  - "pandas.read_csv(url, sep=';', encoding='utf-8-sig', thousands='.', decimal=',') carga el fichero; añadir keep_default_na=False o Género N/A se convierte en NaN."
+  - Para un solo beneficiario, download-unlimit/All/All/All/All?cif={NIF} devuelve sus filas (970 y 261 KB para Q1132001G) sin bajar los 36,7 MB.
 related: [bdns-api, fecyt-recolecta]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

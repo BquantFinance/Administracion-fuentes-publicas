@@ -8,6 +8,6 @@ Sector `consumo-seguridad-alimentaria` · 1 fuentes · índice generado por `scr
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
-| [aesan-alertas-registros](aesan-alertas-registros.yaml) | AESAN – Alertas alimentarias, registro sanitario de empresas y datos abiertos | portal, download, scraping | none | html, xlsx | irregular | static-html, url-drift, latin1 | 2026-09-30 |
+| [aesan-alertas-registros](aesan-alertas-registros.yaml) | AESAN – Alertas alimentarias, registro sanitario de empresas y datos abiertos | portal, download, scraping | none | html, xlsx | irregular | static-html, url-drift, latin1, session-required | 2026-10-01 |
 
-- **aesan-alertas-registros**: Alertas alimentarias como páginas HTML con referencia, fecha y producto, buscador con filtros de fecha y paginación, Excel con composición y cuota de mercado de alimentos comercializados en 2022 por código EAN, lista de laboratorios RELSA y consulta del registro sanitario de empresas (JSP).
+- **aesan-alertas-registros**: Alertas alimentarias como páginas HTML con referencia, fecha y producto, buscador paginado desde enero de 2025, Excel de 29.575 alimentos comercializados en 2022 con EAN, cuota de mercado y nutrientes, laboratorios RELSA y búsqueda en el registro sanitario de empresas (RGSEAA, JSP con sesión).

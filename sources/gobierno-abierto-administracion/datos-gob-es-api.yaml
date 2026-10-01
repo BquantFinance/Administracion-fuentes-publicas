@@ -26,7 +26,7 @@ endpoints:
     desc: Datasets cuyo título contiene el texto
     example: curl -s -A "Mozilla/5.0" "https://datos.gob.es/apidata/catalog/dataset/title/paro.json?_pageSize=50"
   - path: /catalog/dataset/publisher/{codigo_dir3}.json
-    desc: Datasets de un organismo por su código DIR3 (E05251701 es la SGAD)
+    desc: Datasets de un organismo por su código DIR3 (E05251701 es el Ministerio para la Transformación Digital y de la Función Pública)
   - path: /catalog/dataset/theme/{tema}.json
     desc: Datasets por tema NTI (economia, sector-publico, medio-ambiente, empleo...)
     example: curl -s -A "Mozilla/5.0" "https://datos.gob.es/apidata/catalog/dataset/theme/economia.json?_pageSize=50"

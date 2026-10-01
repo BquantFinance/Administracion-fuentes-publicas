@@ -70,10 +70,10 @@
   steps:
     - source: mapa-sigpac
       do: "refrecinbycoord/4326/{lon}/{lat}.json devuelve la referencia SIGPAC pr:mu:ag:zo:po:pa:re; recinfobypoint añade uso, superficie, pendiente y geometría WKT"
-      example: curl -s "https://sigpac-hubcloud.es/servicioconsultassigpac/query/refrecinbycoord/4326/-3.9/40.3.json"
+      example: curl -s --compressed "https://sigpac-hubcloud.es/servicioconsultassigpac/query/refrecinbycoord/4326/-3.9/40.3.json"
     - source: mapa-sigpac
-      do: "refcatparcela/{pr}/{mu}/{ag}/{zo}/{po}/{pa}.json devuelve referencia_cat (14 caracteres, parcela)"
-      example: curl -s "https://sigpac-hubcloud.es/servicioconsultassigpac/query/refcatparcela/28/15/0/0/3/9000.json"
+      do: "refcatparcela/{pr}/{mu}/{ag}/{zo}/{po}/{pa}.json devuelve referencia_cat (14 caracteres, a veces 20) repetida una vez por recinto; el municipio SIGPAC es el del Catastro (capitales 900), no el INE"
+      example: curl -s --compressed "https://sigpac-hubcloud.es/servicioconsultassigpac/query/refcatparcela/28/15/0/0/3/9000.json"
     - source: catastro-ovc
       do: "En suelo urbano, Consulta_RCCOOR (XML, pc1+pc2 son los 14 caracteres) y después Consulta_DNPRC?RefCat= para uso, superficie, año y municipio INE; el OVC bloquea la IP tras unas 15 peticiones seguidas (403 Petición HTTP bloqueada durante más de media hora el 30/09/2026)"
       example: curl -s "https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS=EPSG:4326&Coordenada_X=-3.6960&Coordenada_Y=40.4185"
@@ -85,7 +85,7 @@
       contains: referencia_cat
     - url: https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS=EPSG:4326&Coordenada_X=-3.6960&Coordenada_Y=40.4185
       contains: <pc1>
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: parcela-a-red-natura-y-nitratos
   intent: Saber si un recinto agrícola está en Red Natura 2000 o en zona vulnerable a nitratos
@@ -94,13 +94,13 @@
     - source: mapa-sigpac
       do: "Obtener los siete códigos del recinto con refrecinbycoord/4326/{lon}/{lat}.json o recinfobypoint"
     - source: mapa-sigpac
-      do: "intersection/red_natura/{pr}/{mu}/{ag}/{zo}/{po}/{pa}/{re}.json devuelve lic_code, lic_name, zepa_code, surface_intersection y surface_tpc; intersection/nitratos igual para zonas vulnerables"
-      example: curl -s "https://sigpac-hubcloud.es/servicioconsultassigpac/intersection/red_natura/28/15/0/0/3/9000/6.json"
+      do: "intersection/red_natura/{pr}/{mu}/{ag}/{zo}/{po}/{pa}/{re}.json devuelve lic_code, lic_name, zepa_code, surface_intersection (m²) y surface_tpc (porcentaje 0-100); intersection/nitratos igual para zonas vulnerables; [] sin intersección; siempre en gzip"
+      example: curl -s --compressed "https://sigpac-hubcloud.es/servicioconsultassigpac/intersection/red_natura/28/15/0/0/3/9000/6.json"
   output: lista JSON de intersecciones con códigos LIC y ZEPA y superficie afectada
   checks:
     - url: https://sigpac-hubcloud.es/servicioconsultassigpac/intersection/red_natura/28/15/0/0/3/9000/6.json
       contains: lic_code
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: empresa-nif-a-ayudas-y-contratos
   intent: Subvenciones, ayudas de investigación y contratos públicos de una empresa o entidad por su NIF
@@ -113,7 +113,8 @@
     - source: bdns-api
       do: "grandesbeneficiarios, ayudasestado y minimis tienen el mismo patrón de búsqueda y aceptan nifCif (verificado el 2026-10-01; en ayudasestado beneficiario separa NIF y nombre con guion); exportación con concesiones/exportar?vpd=GE&tipoDoc=csv, los mismos filtros y pageSize (sin él, 50 filas)"
     - source: aei-convocatorias
-      do: "Ayudas de investigación en el CSV completo, filtrar la columna C.I.F. (separador ;, UTF-8 con BOM)"
+      do: "Ayudas de investigación con download-unlimit/All/All/All/All?cif={NIF}, que devuelve solo las filas de ese NIF (separador ;, UTF-8 con BOM); la BDNS no trae la referencia AEI, cruzar por NIF, convocatoria e importe"
+      example: curl -sS -o aei.csv "https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?cif=Q1132001G"
     - source: placsp-datos-abiertos
       do: "Contratos en los feeds ATOM y ZIP mensuales; los documentos CODICE llevan cbc:ID con schemeName NIF (adjudicatarios y órganos), filtrar por el valor y comprobar el elemento padre"
     - source: borme-api-sumario
@@ -123,23 +124,23 @@
     - url: https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=5&nifCif=Q1132001G
       headers: {Accept: application/json}
       contains: '"beneficiario":"Q1132001G'
-    - url: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?keys=&area=All
-      contains: C.I.F.
+    - url: https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All?cif=Q1132001G
+      contains: Q1132001G
       read_bytes: 4096
     - url: https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom
       contains: schemeName="NIF"
       read_bytes: 400000
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: organismo-a-dir3-y-nif
   intent: Código DIR3 y NIF de un organismo público a partir de su nombre, y su jerarquía
   inputs: []
   steps:
     - source: face-facturas
-      do: "relations?fulltext={nombre}&limit=100&page=1; cada item trae oc, og y ut con code (DIR3) y og.identifier con el NIF; relations.csv sin filtro descarga las 50186 relaciones"
+      do: "relations?fulltext={nombre}&limit=100&page=1; cada item trae oc, og y ut con code (DIR3) y og.identifier con el NIF (falta en 1 de cada 5); fulltext distingue mayúsculas y tildes y busca subcadenas (Madrid trae Madridejos), así que filtrar por administration.code o buscar por el DIR3; relations.csv omite 27 de las 50187 relaciones"
       example: curl -s "https://proveedores.face.gob.es/api/v1/relations?fulltext=Ayuntamiento%20de%20Madrid&limit=100&page=1"
     - source: dir3-directorio
-      do: "Jerarquía completa y unidades ausentes de FACe en los xlsx por nivel (AGE 2741, CCAA 2742, EELL 2744); descargar en dos pasos con cookie jar y User-Agent de navegador"
+      do: "Jerarquía completa y unidades ausentes de FACe en los xlsx por nivel (AGE 2741, CCAA 2742, EELL 2744), foto periódica y solo vigentes; un curl -L con cookie jar y User-Agent de navegador (la primera respuesta fija las cookies TS)"
     - source: datos-gob-es-api
       do: "Con el DIR3, catalog/dataset/publisher/{dir3}.json lista los datasets que publica ese organismo"
   output: DIR3 (E, L, LA, A, U...), NIF y nombres oficiales
@@ -263,7 +264,7 @@
       do: "Deuda del Estado por instrumento, vida media, tenedores y vencimientos en los cuadros mensuales {NN}.xlsx (01 nominal en circulación), con User-Agent de navegador"
       example: curl -sO -A "Mozilla/5.0" "https://www.tesoro.es/sites/default/files/estadisticas/01.xlsx"
     - source: airef-datos
-      do: "Histórico de deuda por Administración en Historico_Deuda.xlsx; la URL cambia con cada publicación, localizarla en la página del observatorio de deuda"
+      do: "Ratio de deuda pública total sobre PIB por informe (no por Administración) en Historico_Deuda.xlsx, con el último informe de octubre de 2024; localizar la URL en la página del observatorio de deuda y usar el bundle FNMT"
   output: xlsx por entidad (Hacienda), CSV por serie (BdE) y cuadros mensuales (Tesoro)
   checks:
     - url: https://www.hacienda.gob.es/cdi/sist%20financiacion%20y%20deuda/informacioneells/2025/deuda-viva-ayuntamientos-202512.xlsx
@@ -274,7 +275,7 @@
     - url: https://www.tesoro.es/sites/default/files/estadisticas/01.xlsx
       read_bytes: 1024
       fnmt: true
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: irpf-por-municipio
   intent: Renta y declarantes de IRPF por municipio y tramo, todos los ejercicios
@@ -299,34 +300,38 @@
   inputs: [ine-municipio]
   steps:
     - source: sepe-estadisticas
-      do: "La página del mes municipios-20-45/{AAAA}/{mes}.html (2020 en adelante) enlaza un xls por comunidad autónoma en {AAAA}/{mes}_{AAAA}/Muniacteco_20-45_{CCAA}.xls; de 2005 a 2019 en municipios/{AAAA}/{mes}-{AAAA}.html"
-      example: curl -sO -A "Mozilla/5.0" "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_20_45/2026/agosto_2026/Muniacteco_20-45_ANDALUCIA.xls"
+      do: "La página del mes municipios/{AAAA}/{mes}.html ({mes}-{AAAA}.html hasta 2019) enlaza ESTADISTICA_MUNICIPIOS.xls, paro y contratos de todos los municipios con código INE (28001.0) por provincia, sexo, edad y sector; el enlace lleva un jcr:{uuid} nuevo cada mes"
+      example: curl -s -A "Mozilla/5.0" "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios/2026/agosto.html" | grep -o '/HomeSepe/dam/jcr:[^"]*ESTADISTICA_MUNICIPIOS.xls'
     - source: sepe-estadisticas
-      do: "Los xls son de formato informe, sin código INE (solo nombre del municipio); xlrd no los abre, calamine sí (pandas engine=calamine)"
+      do: "Leer con pandas engine=calamine (xlrd falla en parte de los ficheros); «<5» es texto; el desglose por actividad (CNAE) solo existe para capitales y municipios de más de 20.000 habitantes (Municipios_acteco y Muniacteco_20-45)"
+      example: curl -sO -A "Mozilla/5.0" "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_20_45/2026/agosto_2026/Muniacteco_20-45_ANDALUCIA.xls"
     - source: sepe-estadisticas
       do: "Series nacionales y provinciales con URL fija en evolparoseries.xls y paroprovsector.xls"
       example: curl -sO -A "Mozilla/5.0" "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/evolparoseries.xls"
     - source: ine-codigos-territoriales
-      do: "Asignar el código INE por nombre y provincia con el diccionario anual"
-  output: xls por comunidad con demandantes parados por municipio
+      do: "Nombres y provincia oficiales del municipio con el diccionario anual; en los ficheros por actividad, sin código, cruzar por nombre"
+  output: xls con paro y contratos por municipio y código INE
   checks:
+    - url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios/2026/agosto.html
+      contains: ESTADISTICA_MUNICIPIOS.xls
+      read_bytes: 200000
     - url: https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_20_45/2026/agosto_2026/Muniacteco_20-45_ANDALUCIA.xls
       min_bytes: 1000000
       read_bytes: 1024
     - url: https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/evolparoseries.xls
       read_bytes: 1024
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: afiliacion-y-pensiones
   intent: Afiliados a la Seguridad Social por régimen, provincia, CNAE o municipio, y pensiones del mes
   inputs: [cnae, ine-municipio]
   steps:
     - source: segsocial-estadisticas
-      do: "GET de la página de la estadística (EST8/EST10/EST290 afiliación media; EST8/EST10/EST305 último día por municipio y CNAE; EST23/EST24 pensiones) con User-Agent y Accept de navegador; extraer los enlaces wcm/connect, que llevan un uuid nuevo en cada publicación"
+      do: "GET de la página de la estadística (EST8/EST10/EST290/EST291 afiliación media; EST8/EST10/EST305 último día; EST23/EST24 pensiones) con User-Agent de navegador; extraer los enlaces wcm/connect, que llevan un uuid nuevo en cada publicación; la afiliación municipal tiene URL fija, descargas/STAT/MUNCNAE{MM}{AA}.xlsx"
       example: |-
         curl -sL -A "Mozilla/5.0" -H "Accept: text/html,application/xhtml+xml" "https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST23/EST24" | grep -o 'href="[^"]*wcm/connect[^"]*"'
     - source: segsocial-estadisticas
-      do: "Descargar el xlsx con las mismas cabeceras; ante 403 repetir la misma URL tras 2 a 5 segundos (el WAF rechaza una de cada dos o tres peticiones; con Accept */* recibí 403 en 15 intentos seguidos)"
+      do: "Descargar el xlsx con curl -f o comprobando el Content-Type (el 403 llega como HTML de 708 bytes); el WAF rechaza la mitad de las peticiones con cualquier Accept, repetir la misma URL tras 4 s hasta ocho veces"
     - source: segsocial-estadisticas
       do: "Pensiones mensuales con nombre {SERIE}{AAAAMM} (PI, IP, JUCOVI, TC, EDPR, TRCA); la afiliación por actividad pasa a CNAE 2025 en 2026"
   output: xlsx con varias hojas y cabeceras combinadas (no leer con header=0)
@@ -336,12 +341,12 @@
       contains: wcm/connect
       retries: 5
       read_bytes: 400000
-    - url: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST8/EST10/EST290
+    - url: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas/EST8/EST10/EST290/EST291
       headers: {Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"}
-      contains: wcm/connect
+      contains: _CNAE25.xlsx
       retries: 5
       read_bytes: 400000
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: precio-carburantes-municipio
   intent: Precios de hoy de las gasolineras de un municipio o provincia, y el histórico de un día
@@ -397,7 +402,7 @@
   inputs: [ine-municipio]
   steps:
     - source: dgt-estadisticas
-      do: "Listado de ficheros en matraba-listados/matriculaciones-automoviles-diario.html (24 diarios del mes) y -mensual.html (desde 2014-12); bajas en bajas-automoviles-diario y -mensual"
+      do: "Listado de ficheros en matraba-listados/matriculaciones-automoviles-diario.html (24 diarios del mes) y -mensual.html (desde 2014-12); bajas en bajas-automoviles-diario y -mensual, detenidas en 2024-06 (diario) y 2024-05 (mensual)"
       example: curl -s "https://www.dgt.es/menusecundario/dgt-en-cifras/matraba-listados/matriculaciones-automoviles-diario.html" | grep -o 'href="[^"]*export_mat_[^"]*"'
     - source: dgt-estadisticas
       do: "ZIP en /microdatos/salida/{AAAA}/{M}/vehiculos/matriculaciones/export_mat_{AAAAMMDD}.zip (mes sin cero); dentro un txt de ancho fijo en Latin-1 con bastidor enmascarado y municipio INE; el diseño de registro está en PDF en la ficha del producto"
@@ -412,7 +417,7 @@
     - url: https://www.dgt.es/microdatos/salida/2026/9/vehiculos/matriculaciones/export_mat_20260929.zip
       min_bytes: 1000000
       read_bytes: 1024
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: calidad-aire-estacion
   intent: Serie horaria o diaria de un contaminante en una estación de calidad del aire
@@ -440,10 +445,10 @@
   inputs: []
   steps:
     - source: miteco-saih-boletin-hidrologico
-      do: "BD-Embalses.zip (Access, 10 MB) con la tabla T_Datos Embalses (AMBITO_NOMBRE, EMBALSE_NOMBRE, FECHA, AGUA_TOTAL, AGUA_ACTUAL, ELECTRICO_FLAG) semanal desde 1988; leer con mdbtools (mdb-export) o un driver ODBC, en la verificación no se consiguió leerlo con librerías Python puras"
+      do: "BD-Embalses.zip (Access, 10 MB) con una tabla cuyo nombre lleva los años (T_Datos Embalses 1988-2026; listarla con mdb-tables -1) y AMBITO_NOMBRE, EMBALSE_NOMBRE, FECHA, AGUA_TOTAL y AGUA_ACTUAL (texto con coma decimal, hm3) y ELECTRICO_FLAG, semanal desde 1987-10-06; mdb-export -T '%Y-%m-%d' para fechas ISO, o access-parser en Python"
       example: curl -sSL -o BD-Embalses.zip "https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/boletin-hidrologico/Historico-de-embalses/BD-Embalses.zip"
     - source: miteco-saih-boletin-hidrologico
-      do: "listado-estaciones-aforo.zip (cuatro CSV con COD_HIDRO, COD_SAIH, UTM huso 30 y municipio) y Anuario-21-22-csv.zip (136 MB, afliq.csv por cuenca con indroea;fecha;altura;caudal diarios)"
+      do: "listado-estaciones-aforo.zip (cuatro CSV en Latin-1 con COD_HIDRO, COD_SAIH, UTM huso 30 y municipio) y Anuario-21-22-csv.zip (136 MB, afliq.csv por cuenca con indroea;fecha;altura;caudal diarios y afliqe.csv con la reserva validada de embalses)"
       example: curl -sSL -o estaciones.zip "https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/listado-estaciones-aforo.zip"
     - source: miteco-saih-boletin-hidrologico
       do: "Tiempo real solo en el SAIH de cada confederación (enlaces en saih.html), cada uno con su formato"
@@ -453,8 +458,9 @@
       min_bytes: 5000000
       read_bytes: 1024
     - url: https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/evaluacion-de-los-recursos-hidricos/sistema-informacion-anuario-aforos/listado-estaciones-aforo.zip
+      min_bytes: 100000
       read_bytes: 1024
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: capa-red-natura-2000
   intent: Descargar la capa oficial de Red Natura 2000 u otra capa de biodiversidad
@@ -528,7 +534,7 @@
   inputs: [ccaa]
   steps:
     - source: isciii-cne
-      do: "momo.isciii.es/public/momo/data es un único CSV de 719 MB (comillas, coma) regenerado a diario; el servidor ignora Range y devuelve el fichero entero con 200, así que leer en streaming y filtrar por ambito (nacional, ccaa), cod_ine_ambito, cod_sexo y cod_gedad"
+      do: "momo.isciii.es/public/momo/data es un único CSV de 719 MB (comillas, coma) regenerado a diario; Range no sirve (con desplazamiento pequeño devuelve todo con 200 y con uno grande un 500 de mantenimiento), así que leer en streaming y filtrar por ambito (nacional, ccaa, provincia), cod_ine_ambito, cod_sexo y cod_gedad (all y +65 son agregados)"
       example: curl -sS "https://momo.isciii.es/public/momo/data" | head -c 2000
     - source: isciii-cne
       do: "Columnas defunciones_observadas, defunciones_estimadas_base, _q01, _q99 y atribuibles a exceso y defecto de temperatura; las últimas semanas se revisan en cada descarga"
@@ -537,7 +543,7 @@
     - url: https://momo.isciii.es/public/momo/data
       contains: defunciones_observadas
       read_bytes: 4096
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: cosecha-oai-publicaciones
   intent: Cosechar publicaciones científicas o patrimonio digital de forma incremental
@@ -567,26 +573,25 @@
       do: "INE, cambiar js por csv en la API (csv/ES/DATOS_TABLA/{id}): tabla entera, ignora nult; tabulador, UTF-8 con BOM"
       example: curl -s "https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=12"
     - source: educacion-estadisticas-ruct
-      do: "EDUCAbase, del enlace Tabla.htm?path=...&file=X.px deducir EducaJaxiPx/files/_px/es/csv_bdsc{path}{file}?nocab=1 (separador ;, ISO-8859-15, miles con punto)"
+      do: "EDUCAbase, del enlace Tabla.htm?path=...&file=X.px deducir EducaJaxiPx/files/_px/es/csv_bdsc{path}{file}?nocab=1 (separador ;, UTF-8 con BOM aunque la cabecera diga ISO-8859-15, miles con punto)"
       example: curl -s "https://estadisticas.educacion.gob.es/EducaJaxiPx/files/_px/es/csv_bdsc/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos/l0/adul_01.px?nocab=1"
     - source: interior-criminalidad
-      do: "Criminalidad, mismo patrón en sec/jaxiPx/files/_px/es/csv_bdsc{path}{file}?nocab=1 (último trimestre en /DatosBalanceAct/l0/)"
+      do: "Criminalidad, mismo patrón en sec/jaxiPx/files/_px/es/csv_bdsc{path}{file}?nocab=1 (todo el año en curso en /DatosBalanceAct/l0/; UTF-8 con BOM)"
       example: curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09004.px?nocab=1"
     - source: cultura-culturabase
-      do: "CULTURAbase, mismo patrón en CulturaJaxiPx/files/_px/es/csv_bdsc{path}{file}?nocab=1; el servidor exige el bundle FNMT con ACCOMP.crt (scripts/fnmt_bundle.py)"
-      example: curl -s --cacert ca-age.pem "https://estadisticas.cultura.gob.es/CulturaJaxiPx/files/_px/es/csv_bdsc/t1/p1/M_Anuales/l0/T1M01001.px?nocab=1"
+      do: "CULTURAbase, mismo patrón en CulturaJaxiPx/files/_px/es/csv_bdsc{path}{file}?nocab=1 (UTF-8 con BOM); la serie vigente de empleo cultural está en /t1/p1f/ y /t1/p1/ solo cubre 2008-2010"
+      example: curl -s "https://estadisticas.cultura.gob.es/CulturaJaxiPx/files/_px/es/csv_bdsc/t1/p1f/M_Anuales/l0/T1FM1001.px?nocab=1"
   output: CSV con la tabla completa; px y xlsx cambiando csv_bdsc por px o xlsx
   checks:
     - url: https://servicios.ine.es/wstempus/csv/ES/DATOS_TABLA/24077?nult=1
       contains: Periodo
-    - url: https://estadisticas.cultura.gob.es/CulturaJaxiPx/files/_px/es/csv_bdsc/t1/p1/M_Anuales/l0/T1M01001.px?nocab=1
+    - url: https://estadisticas.cultura.gob.es/CulturaJaxiPx/files/_px/es/csv_bdsc/t1/p1f/M_Anuales/l0/T1FM1001.px?nocab=1
       contains: periodo
-      fnmt: true
     - url: https://estadisticas.educacion.gob.es/EducaJaxiPx/files/_px/es/csv_bdsc/no-universitaria/alumnado/matriculado/2024-2025-rd/adultos/l0/adul_01.px?nocab=1
       contains: Total
     - url: https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09004.px?nocab=1
       contains: Periodos
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: ocurrencias-especie-espana
   intent: Registros de presencia de una especie en España, con recuento y descarga
@@ -596,7 +601,7 @@
       do: "species/match?name={nombre científico} devuelve usageKey (taxón), rank, matchType y confidence"
       example: curl -s "https://api.gbif.org/v1/species/match?name=Lynx%20pardinus"
     - source: gbif-es
-      do: "occurrence/search?country=ES&taxonKey={usageKey}&limit=300&offset={n} (offset máximo 100000; filtros hasCoordinate, year, gadmGid); occurrence/count con los mismos filtros para el total"
+      do: "occurrence/search?country=ES&taxonKey={usageKey}&limit=300&offset={n} (limit mayor se recorta a 300 sin aviso y offset + limit no pasa de 100.001; filtros hasCoordinate, year, gadmGid); para el total, search con limit=0, porque occurrence/count da 400 con hasCoordinate o gadmGid"
       example: curl -s "https://api.gbif.org/v1/occurrence/count?country=ES&taxonKey=2435261"
     - source: gbif-es
       do: "Más de 100000 registros exige una descarga asíncrona (occurrence/download/request con usuario GBIF gratuito)"
@@ -606,7 +611,7 @@
       contains: usageKey
     - url: https://api.gbif.org/v1/occurrence/count?country=ES&taxonKey=2435261
       min_bytes: 1
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: geologia-y-aguas-subterraneas-punto
   intent: Unidad geológica en un punto y puntos de agua subterránea de una provincia
@@ -619,14 +624,14 @@
       do: "BasesDatos/IGME_PuntosAgua/MapServer/0/query?where=Provincia='Madrid'&outFields=*&resultRecordCount={n} (139.697 puntos con acuífero, caudal, profundidad y usos)"
       example: curl -s "https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_PuntosAgua/MapServer/0/query?where=Provincia%3D%27Madrid%27&outFields=*&resultRecordCount=5&f=json"
     - source: igme-geologia
-      do: "La hoja MAGNA 50 en vectorial y PDF con URL estable por número de hoja (VRF_MAGNA50_{hoja}.zip)"
+      do: "La hoja MAGNA 50 por número de hoja en PDF y en VRF_MAGNA50_{hoja}.zip, que es un JPG georreferenciado en ED50, no vectorial; los vectores MAGNA están en el servicio Cartografia_Geologica/IGME_MAGNA_50"
   output: JSON ArcGIS (features[].attributes)
   checks:
     - url: https://mapas.igme.es/gis/rest/services/Cartografia_Geologica/IGME_Geode_50/MapServer/8/query?geometry=-3.70,40.42&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=CODE_UNIO,DESC_UNIT,NAME_EDA1&returnGeometry=false&f=json
       contains: DESC_UNIT
     - url: https://mapas.igme.es/gis/rest/services/BasesDatos/IGME_PuntosAgua/MapServer/0/query?where=Provincia%3D%27Madrid%27&outFields=*&resultRecordCount=2&f=json
       contains: features
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: buscar-dataset-datos-gob-es
   intent: Localizar un dataset abierto de cualquier Administración y su URL de descarga real
@@ -692,16 +697,16 @@
   inputs: [ine-municipio]
   steps:
     - source: interior-criminalidad
-      do: "Índice del trimestre en sec/dynPx/inebase/index.htm?type=pcaxis&path=/DatosBalanceAnt/{AAAA}{T}/&file=pcaxis (el último en /DatosBalanceAct/)"
+      do: "Índice del trimestre en sec/dynPx/inebase/index.htm?type=pcaxis&path=/DatosBalanceAnt/{AAAA}{T}/&file=pcaxis, que da el path y file reales de sus tablas (todo el año en curso cuelga de /DatosBalanceAct/l0/)"
       example: curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/dynPx/inebase/index.htm?type=pcaxis&path=/DatosBalanceAnt/20262/&file=pcaxis"
     - source: interior-criminalidad
-      do: "CSV con jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09006.px?nocab=1 (municipios; 09005 provincias, 09004 CCAA); cabecera Geografía;Tipología penal;Periodos:;Total, ISO-8859-15, miles con punto y decimales con coma"
+      do: "CSV con jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09006.px?nocab=1 (municipios; 09005 provincias, 09004 CCAA); cabecera Geografía;Tipología penal;Periodos:;Total, UTF-8 con BOM aunque la cabecera diga ISO-8859-15, miles con punto y decimales con coma; desde 2024 el municipio lleva delante su código INE y los balances son acumulados desde enero"
       example: curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09006.px?nocab=1"
   output: CSV con periodo actual, anterior y variación por tipología
   checks:
     - url: https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09006.px?nocab=1
       contains: Periodos
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: actos-mercantiles-borme
   intent: Constituciones, nombramientos, ceses y disoluciones de sociedades publicados en el BORME
@@ -730,14 +735,14 @@
   inputs: [ine-municipio]
   steps:
     - source: sanidad-portal-estadistico
-      do: "CNH_{AAAA}.xlsx (9 hojas, 849 hospitales en 2025) con código de hospital, camas, dependencia funcional y código de municipio INE con dígito de control (6 dígitos; quitar el último para cruzar)"
+      do: "CNH_{AAAA}.xlsx (9 hojas, 848 hospitales en 2025, todas las celdas como texto) con código de hospital, camas, dependencia funcional y código de municipio INE con dígito de control (6 dígitos; quitar el último para cruzar)"
       example: curl -sSL -o CNH_2025.xlsx "https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/docs/CNH_2025.xlsx"
   output: xlsx
   checks:
     - url: https://www.sanidad.gob.es/estadEstudios/estadisticas/sisInfSanSNS/ofertaRecursos/hospitales/docs/CNH_2025.xlsx
       min_bytes: 400000
       read_bytes: 1024
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: dataset-cnmc-a-csv
   intent: Descargar un dataset de la CNMC (energía, telecomunicaciones, postal) como CSV o consultarlo por API
@@ -763,16 +768,19 @@
   inputs: [codigo-convenio, cnae]
   steps:
     - source: mites-estadisticas
-      do: "GET de consultaPublicaEstatal conservando cookies para obtener consulta_token_value_id; POST del formulario con codigoConvenio, denominacion, cnae2009Pub o cnae2025Pub y el token; el servidor no envía el intermedio FNMT (bundle de la guía)"
-      example: curl -s -c cj -b cj --cacert ca-age.pem "https://expinterweb.mites.gob.es/regcon/pub/consultaPublicaEstatal" | grep -o 'consulta_token_value_id" value="[^"]*"'
-  output: HTML con la lista de convenios (sin API ni exportación localizada)
+      do: "POST a consultaPublicaEstatal con codigoConvenio (14 dígitos), denominacion o idCnaesBusqueda (ids internos del desplegable) y _buscar, con cookie jar; consulta_token_value_id lo rellena el JavaScript y no hace falta; el servidor no envía el intermedio FNMT (bundle de la guía)"
+      example: curl -s --cacert ca-age.pem -c cj -b cj "https://expinterweb.mites.gob.es/regcon/pub/consultaPublicaEstatal" -d "denominacion=hosteleria" -d "_buscar=" | grep -o '[0-9]* - [0-9]*&nbsp;de&nbsp;[0-9]*'
+    - source: mites-estadisticas
+      do: "?_exportarExcelPublicoXML=1 con la misma cookie exporta todas las filas de la última búsqueda en SpreadsheetML (ISO-8859-1), leer con ElementTree; ?pagina=N sin la cookie devuelve el registro entero"
+      example: curl -s --cacert ca-age.pem -b cj -o regcon.xls "https://expinterweb.mites.gob.es/regcon/pub/consultaPublicaEstatal?_exportarExcelPublicoXML=1"
+  output: HTML paginado de 15 filas y exportación SpreadsheetML con todas las filas de la búsqueda
   checks:
     - url: https://expinterweb.mites.gob.es/regcon/pub/consultaPublicaEstatal
-      contains: consulta_token_value_id
+      contains: name="denominacion"
       fnmt: true
       read_bytes: 400000
       retries: 2
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: deficit-y-ejecucion-presupuestaria
   intent: Déficit mensual de las Administraciones Públicas y ejecución del presupuesto del Estado
@@ -784,27 +792,27 @@
     - source: igae-ejecucion-presupuestaria
       do: "Ejecución mensual del presupuesto del Estado desde la página imejecucionpresupuesto.aspx (enlaces a xlsx por mes)"
     - source: hacienda-ovef
-      do: "Ejecución trimestral de las entidades locales en un xls por trimestre desde 2017"
+      do: "Ejecución trimestral de las entidades locales, agregada por CCAA y grandes ciudades, un fichero por trimestre desde el 2T de 2013 (xlsx desde 2021q2); nombres con la fecha de publicación, tomar el enlace de la página"
   output: xlsx con cuadros por subsector
   checks:
     - url: https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AACC-M/M_AACC_2026.xlsx
       min_bytes: 10000
       read_bytes: 1024
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: precio-electricidad-horario
   intent: Precio de la electricidad por hora o cuarto de hora (mercado diario, PVPC y spot) y demanda del día
   inputs: []
   steps:
     - source: omie-mercado
-      do: "Precio marginal oficial en marginalpdbc_{AAAAMMDD}.1 (96 periodos cuarto-horarios en 2026; cabecera, filas AAAA;MM;DD;periodo;precio;precio y asterisco final); el fichero del día siguiente se publica por la tarde"
-      example: curl -s "https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_20260929.1"
+      do: "Precio marginal oficial en marginalpdbc_{AAAAMMDD}.1 (96 periodos cuarto-horarios desde el 01/10/2025, 92 o 100 en los cambios de hora; cabecera, filas AAAA;MM;DD;periodo;precio;precio y asterisco final); el del día siguiente se publica hacia las 13:50; con parents%5B0%5D= responde 302 y curl sin -L guarda la redirección"
+      example: curl -s "https://www.omie.es/es/file-download?parents=marginalpdbc&filename=marginalpdbc_20260929.1"
     - source: ree-redata
       do: "PVPC y precio spot por hora en mercados/precios-mercados-tiempo-real con time_trunc=hour (hasta tres días por petición); demanda real y prevista en demanda/demanda-tiempo-real; reintentar ante el 403 del WAF"
       example: curl -s "https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real?start_date=2026-09-29T00:00&end_date=2026-09-29T23:59&time_trunc=hour"
   output: fichero de texto con 96 precios (OMIE) y JSON con series PVPC (1001) y spot (600) por hora (REData)
   checks:
-    - url: https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_20260929.1
+    - url: https://www.omie.es/es/file-download?parents=marginalpdbc&filename=marginalpdbc_20260929.1
       contains: MARGINALPDBC
     - url: https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real?start_date=2026-09-29T00:00&end_date=2026-09-29T23:59&time_trunc=hour
       headers: {Accept: application/json}
@@ -859,10 +867,10 @@
   inputs: []
   steps:
     - source: renfe-datos-abiertos
-      do: "GTFS estáticos con URL fija (google_transit.zip para AV, LD y MD; fomento_transit.zip para Cercanías); sin feed_info, la fecha de versión está en last_modified de package_show"
+      do: "GTFS estáticos con URL fija (google_transit.zip para AV, LD y MD; fomento_transit.zip para Cercanías); sin feed_info, la fecha de versión está en last_modified de package_show; las líneas de los .txt van rellenas de espacios y stop_id lleva ceros, leer como texto y recortar"
       example: curl -sO "https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip"
     - source: renfe-datos-abiertos
-      do: "estaciones.csv (ISO-8859-1, separador ;) con CODIGO, LATITUD y LONGITUD para geolocalizar; los feeds GTFS-RT de gtfsrt.renfe.com no respondieron desde el entorno de verificación"
+      do: "estaciones.csv (ISO-8859-1, separador ;) con CODIGO, LATITUD y LONGITUD para geolocalizar; los feeds GTFS-RT de gtfsrt.renfe.com (JSON y protobuf) fallan en el TLS cerca de la mitad de las veces, reintentar"
       example: curl -sO "https://ssl.renfe.com/ftransit/Fichero_estaciones/estaciones.csv"
   output: ZIP GTFS y CSV de estaciones
   checks:
@@ -874,7 +882,7 @@
       contains: CODIGO
       read_bytes: 4096
       retries: 3
-  verified: "2026-09-30"
+  verified: "2026-10-01"
 
 - id: comercio-exterior-por-producto
   intent: Exportaciones o importaciones de un producto TARIC por país y provincia, mensuales o anuales desde 1995

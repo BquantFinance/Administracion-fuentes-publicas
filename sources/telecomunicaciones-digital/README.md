@@ -8,6 +8,6 @@ Sector `telecomunicaciones-digital` · 1 fuentes · índice generado por `script
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
-| [mtdfp-cobertura-banda-ancha](mtdfp-cobertura-banda-ancha.yaml) | SETELECO – Cobertura de banda ancha por municipio, provincia y CCAA | download | none | xlsx, pdf, html | annual | static-html | 2026-09-30 |
+| [mtdfp-cobertura-banda-ancha](mtdfp-cobertura-banda-ancha.yaml) | SETELECO – Cobertura de banda ancha por municipio, provincia y CCAA | download, api-rest | none | xlsx, json, geojson, pdf, html | annual | static-html, url-drift | 2026-10-01 |
 
-- **mtdfp-cobertura-banda-ancha**: Dos xlsx con la fracción de hogares o viviendas con cobertura por tecnología (FTTH, HFC, inalámbrico fijo, 4G, 5G) y por velocidad (30 Mbps, 100 Mbps, 1 Gbps) para todos los municipios (código INE), provincias y CCAA de 2013 a 2025, entidades singulares hasta 2020 e informes anuales en PDF.
+- **mtdfp-cobertura-banda-ancha**: Dos xlsx con la fracción de hogares o viviendas con cobertura por tecnología (FTTH, HFC, inalámbrico, 4G, 5G) y velocidad (30 Mbps a 1 Gbps) por municipio (código INE), provincia y CCAA de 2013 a 2025 y por entidad singular hasta 2020, capas ArcGIS consultables del último año e informes en PDF.

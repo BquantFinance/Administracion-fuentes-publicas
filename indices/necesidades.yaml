@@ -19,21 +19,22 @@
   note: listaSeries con rango=MAX corta en las 1000 observaciones más recientes sin aviso; completar con rango=AAAA
 - need: Deuda pública por Administración (Protocolo de Déficit Excesivo)
   source: bde-estadisticas
-  note: capítulo SB_DEUAAPP; histórico también en airef-datos
+  note: capítulo SB_DEUAAPP; airef-datos solo da la ratio total sobre PIB por informe, no por Administración
 - need: Subastas del Tesoro y deuda del Estado por instrumento y tenedor
   source: tesoro-estadisticas
   note: año en curso en 11.xlsx e históricos anuales; el HTML de subastas mezcla decimales con coma y con punto
 - need: Previsiones macroeconómicas y estimación del PIB en tiempo real
   source: airef-datos
+  note: xlsx en wp-content/uploads con rutas que cambian en cada actualización; tomar el enlace de la página
 - need: Entidades supervisadas, hechos relevantes e informes financieros de cotizadas
   source: cnmv-registros
   note: sin API; formularios ASP.NET, XML mensual de IIC y RSS
 - need: Líneas ICO y avales por beneficiario
   source: ico-datos
-  note: no hay datos descargables, solo memoria y cuentas en PDF
+  note: sin datos por beneficiario ni descargas tabulares; aprobaciones agregadas por canal en tablas HTML
 - need: Cotizaciones bursátiles y precios de mercado (BME, OMIE)
   source: null
-  note: fuera del alcance actual; BME es privado y OMIE no está aún en el catálogo
+  note: BME es privado y queda fuera del alcance; el precio de la electricidad de OMIE está en omie-mercado
 - need: Renta y declarantes de IRPF por municipio, código postal o tramo
   source: aeat-estadisticas
 - need: Recaudación tributaria mensual por figura
@@ -43,6 +44,10 @@
   note: SOAP con certificado electrónico
 - need: Presupuestos, liquidaciones y deuda viva de ayuntamientos y diputaciones
   source: hacienda-ovef
+  note: CONPREL da presupuestos y liquidaciones por entidad desde 2002 con descarga directa (DescargaFichero)
+- need: Presupuestos de las comunidades autónomas
+  source: hacienda-ovef
+  note: SGCIEF/PublicacionPresupuestos; xlsx tras un GET y un POST con __VIEWSTATE, sin navegador
 - need: Tipos de IBI, IAE e IVTM por municipio
   source: hacienda-ovef
   note: consulta web con sesión (SGFAL)
@@ -65,7 +70,7 @@
   source: ine-microdatos
 - need: Turismo (FRONTUR, EGATUR, ocupación hotelera)
   source: ine-api-tempus
-  note: las operaciones son del INE; DATAESTUR (mincotur-industria-turismo) las reagrega con API de clave
+  note: las operaciones son del INE; DATAESTUR (mincotur-industria-turismo) las reagrega con una API que no exigió clave y da 504 a menudo
 - need: Renta por sección censal (Atlas de distribución de renta)
   source: ine-api-tempus
   note: operación del INE; localizar la tabla con TABLAS_OPERACION, no verificada en esta sesión
@@ -77,24 +82,28 @@
   source: bdns-api
 - need: Beneficiarios de la PAC
   source: fega-beneficiarios-pac
-  note: no verificable el 30/09/2026 (el servidor cierra la conexión); probar bdns-api concesiones con el órgano FEGA
+  note: FEGA cierra la conexión desde IP de centros de datos (30/09 y 01/10/2026); parte de los pagos directos está en bdns-api como convocatorias autonómicas, con cobertura desigual
 - need: Empresas clasificadas para contratar (ROLECE)
   source: hacienda-registro-licitadores
   note: solo con certificado electrónico
 - need: Paro registrado, demandantes y contratos por municipio
   source: sepe-estadisticas
+  note: ESTADISTICA_MUNICIPIOS.xls con código INE en municipios/{AAAA}/{mes}.html; municipios-20-45 es otra tabla
 - need: Tasa de paro, ocupados y activos (EPA)
   source: ine-api-tempus
   note: la EPA es del INE, no del SEPE
 - need: Afiliación a la Seguridad Social por régimen, actividad, provincia y municipio
   source: segsocial-estadisticas
+  note: municipal en MUNCNAE{MM}{AA}.xlsx con URL fija; «<5» como texto y municipio sin cero inicial
 - need: Pensiones contributivas e Ingreso Mínimo Vital
   source: segsocial-estadisticas
+  note: el IMV tiene sección propia con nóminas por CCAA y provincia; no está en otras prestaciones (EST45)
 - need: Muestra Continua de Vidas Laborales
   source: segsocial-estadisticas
   note: no se descarga; se solicita bajo convenio
 - need: Convenios colectivos (REGCON), huelgas, accidentes de trabajo, regulación de empleo
   source: mites-estadisticas
+  note: REGCON exporta todas las filas de una búsqueda en SpreadsheetML (?_exportarExcelPublicoXML=1)
 - need: Salarios
   source: ine-api-tempus
   note: Encuesta de Estructura Salarial en el INE; salarios en fuentes tributarias por municipio en aeat-estadisticas (modelo190_salarios)
@@ -110,7 +119,7 @@
   source: pag-administracion-gob-es
 - need: Altos cargos, retribuciones, agendas y estadísticas de derecho de acceso
   source: transparencia-portal
-  note: pocas descargas; contratos y subvenciones sin ficheros
+  note: retribuciones, contratos y convenios se exportan a xlsx en servicios-buscador (2000 filas como máximo); subvenciones en bdns-api
 - need: Datos de un inmueble o parcela por referencia catastral, dirección o coordenadas
   source: catastro-ovc
   note: bloqueo por IP tras ráfagas de unas 15 peticiones
@@ -121,10 +130,10 @@
   note: descargas con reCAPTCHA; WMS, WMTS y WFS sin restricción
 - need: Geocodificar una dirección y obtener su código INE
   source: cnig-centro-descargas
-  note: geocoder CartoCiudad
+  note: geocoder CartoCiudad; find ignora municipio_filter y no avisa si el portal no existe, elegir antes con candidates
 - need: Geometría de secciones censales, distritos y municipios por año
   source: ine-cartografia-censal
-  note: shapefile anual del INE; los límites municipales oficiales del IGN están tras reCAPTCHA (cnig-centro-descargas)
+  note: shapefile anual o API OGC del INE con filtro CQL; límites municipales del IGN sin reCAPTCHA en api-features.ign.es (idee-servicios)
 - need: Localizar cualquier servicio WMS, WFS o CSW de una Administración
   source: idee-servicios
 - need: Recintos agrícolas, usos del suelo y referencia catastral rústica
@@ -134,7 +143,7 @@
   note: clave gratuita obligatoria; el cuerpo vacío con 200 es fallo de autenticación
 - need: Proyecciones de cambio climático y series centenarias
   source: aemet-otros-servicios
-  note: sin descarga directa verificada
+  note: proyecciones AR5 y rejilla diaria de 5 km en tar.gz; desde IP de centro de datos llegaron vacíos
 - need: Calidad del aire validada por estación y contaminante
   source: miteco-calidad-aire
   note: datos anuales validados; el tiempo real lo sirve cada comunidad autónoma, fuera del alcance
@@ -173,12 +182,12 @@
   source: sanidad-nomenclator-facturacion
 - need: Ensayos clínicos (REEC) y alertas de seguridad
   source: aemps-otros-registros
-  note: sin API; el REEC exige sesión
+  note: sin API documentada; buscador JSON por GET (arise/search), detalle por POST con cookie y alertas en la API REST de WordPress
 - need: Exceso de mortalidad (MoMo), COVID-19, boletines epidemiológicos, gripe
   source: isciii-cne
 - need: Hospitales, altas hospitalarias e indicadores del Sistema Nacional de Salud
   source: sanidad-portal-estadistico
-  note: solo el Catálogo de Hospitales tiene descarga directa
+  note: Catálogo de Hospitales en xlsx; cubos exportables a CSV por POST de WebForms; Indicadores Clave en JSON (export/data)
 - need: Defunciones por causa de muerte
   source: ine-api-tempus
   note: estadística del INE; Sanidad solo publica PDF
@@ -187,17 +196,20 @@
 - need: Publicaciones científicas en acceso abierto
   source: csic-digital
   note: OAI-PMH; RECOLECTA (fecyt-recolecta) ya no expone OAI
+- need: Producción científica española por CCAA y país (Scopus, WoS) y percepción social de la ciencia
+  source: fecyt-recolecta
+  note: CSV y xlsx en indicadores.fecyt.es/data/; icono.fecyt.es ya no resuelve
 - need: Geología, hidrogeología, puntos de agua y minería
   source: igme-geologia
 - need: Terremotos recientes y catálogo sísmico
   source: ign-sismologia
-  note: tablas HTML; el catálogo solo se descargó desde navegador
+  note: GeoJSON de 30 días en el JavaScript del visor (todos_visualizadores.js); catálogo por script imitando al navegador
 - need: Datos oceanográficos en tiempo real (oleaje, mareas, boyas)
   source: puertos-estado-datos
-  note: Portus es una aplicación con API interna no reproducida
+  note: API interna de Portus sin documentar y sin clave (ubicaciones, mareas previstas, último dato por POST)
 - need: Campañas oceanográficas y datasets del IEO (catálogo de metadatos)
   source: ieo-datos-oceanograficos
-  note: catálogo CSW verificado; el ERDDAP de datos no respondió desde el entorno
+  note: solo catálogo (CSW y Elasticsearch); los datos se piden en SeaDataNet y erddap.ieo.es no resuelve
 - need: Anuario de estadística agraria, precios percibidos y pagados, consumo alimentario
   source: mapa-estadisticas-agrarias
 - need: Flota pesquera, capturas y acuicultura
@@ -207,21 +219,21 @@
   source: dgt-datex-trafico
 - need: Matriculaciones, bajas, parque de vehículos y conductores (microdatos)
   source: dgt-estadisticas
-  note: no localizados microdatos de accidentes, solo tablas
+  note: no localizados microdatos de accidentes, solo tablas; los listados de bajas acaban en 2024-06
 - need: Matrices origen-destino de movilidad por telefonía móvil
   source: mitma-opendata-movilidad
   note: el host de datos respondió 403 desde el entorno de verificación
 - need: Horarios de trenes (GTFS), estaciones con coordenadas y posiciones en tiempo real
   source: renfe-datos-abiertos
-  note: GTFS-RT no verificado desde el entorno; Adif sin portal localizado
+  note: GTFS-RT con fallos TLS intermitentes, reintentar; Adif sin portal localizado
 - need: Tráfico portuario mensual por autoridad portuaria
   source: puertos-estado-datos
 - need: Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra
   source: mitma-boletin-estadistico-online
-  note: XLS por tabla con URL fija; Aena publica además xlsx mensual y anual por aeropuerto con URL directa (aesa-aviacion)
+  note: XLS con URL fija pero solo el total y 16 aeropuertos, sin otras clases de tráfico; la red completa de Aena en aesa-aviacion
 - need: Registro de aeronaves y operadores de drones
   source: aesa-aviacion
-  note: degradada; sin ficheros verificados
+  note: matrículas activas en un PDF de AESA; operadores UAS sin listado público
 - need: Comercio exterior por producto TARIC, país y provincia desde 1995
   source: datacomex
   note: API verificada con cuenta gratuita; códigos de país numéricos, no ISO
@@ -230,6 +242,7 @@
   note: aplicación ASP.NET con viewstate; sin API
 - need: Estadísticas de industria, series BADASE y datos turísticos (DATAESTUR)
   source: mincotur-industria-turismo
+  note: la API de DATAESTUR respondió sin clave pero con 504 frecuentes; reintentar
 - need: Patentes, marcas y Boletín de la Propiedad Industrial
   source: oepm-invenes
   note: bloqueado por el cortafuegos de la OEPM desde el entorno de verificación
@@ -240,12 +253,16 @@
   source: educacion-estadisticas-ruct
 - need: Criminalidad por tipología, comunidad, provincia y municipio
   source: interior-criminalidad
+  note: balances acumulados desde enero; código INE de municipio solo desde 2024
+- need: Detenciones, victimizaciones y hechos esclarecidos por provincia, sexo y edad
+  source: interior-criminalidad
+  note: series anuales PC-Axis 2010-2025 en /Datos2/, /Datos3/ y /Datos4/
 - need: Estadística judicial y sentencias
   source: null
   note: Poder Judicial (CGPJ, CENDOJ) fuera del alcance actual
 - need: Estadísticas culturales (empleo cultural, bibliotecas, museos, cine, bono cultural)
   source: cultura-culturabase
-  note: PC-Axis con el patrón de descarga del INE; certificado con intermedia fuera de la lista FNMT
+  note: PC-Axis con el patrón de descarga del INE; CSV en UTF-8 con BOM aunque la cabecera diga ISO-8859-15
 - need: Catálogo bibliográfico de la BNE y patrimonio digital (Hispana)
   source: bne-datos
   note: datos.bne.es bloqueado desde el entorno; Hispana por OAI-PMH
@@ -301,10 +318,10 @@
   note: "solo PDF {n}_Estimacion.pdf por barómetro; las series web cargan por JavaScript sin API localizada"
 - need: "Carreteras y ferrocarril oficiales en vectorial"
   source: idee-servicios
-  note: "WFS transportes de servicios.idee.es solo en GML; filtrar por bbox y paginar con count"
+  note: "GeoJSON en api-features.idee.es (roadlink, railwaylink); el WFS transportes de servicios.idee.es solo da GML"
 - need: "Ríos, embalses y cuencas en vectorial"
   source: idee-servicios
-  note: "WFS hidrografia; GetCapabilities falla con 500 la mitad de las veces, repetir; GetFeature no falla"
+  note: "GeoJSON en api-features.idee.es (watercourse); el WFS hidrografia da GML"
 - need: "Ocupación del suelo SIOSE por polígono"
   source: idee-servicios
   note: "110 millones de polígonos en el WFS ocupacion-suelo; sin count no responde"
@@ -313,7 +330,7 @@
   note: "WCS mdt con GetCoverage y SUBSET devuelve GeoTIFF; WMTS mdt para visualizar"
 - need: "Buscar un topónimo"
   source: idee-servicios
-  note: "WFS NGBE de www.ign.es con FILTER por nombre y GeoJSON; el geocoder de direcciones está en cnig-centro-descargas"
+  note: "api-features.ign.es/collections/namedplace/items?etiqueta={nombre} en GeoJSON; el geocoder de direcciones está en cnig-centro-descargas"
 - need: "Superficie por cultivo y comunidad autónoma (ESYRCE)"
   source: mapa-estadisticas-agrarias
   note: "xlsx anual desde 2022; microdatos solo previa solicitud en sede electrónica"

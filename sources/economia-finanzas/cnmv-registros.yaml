@@ -6,7 +6,7 @@ level: age
 sector: economia-finanzas
 tags: [cnmv, mercados, cotizadas, informacion-privilegiada, oir, fondos, iic, participaciones-significativas]
 summary: >-
-  Registros oficiales de entidades supervisadas, información privilegiada (IPP) y otra información relevante (OIR),
+  Registros oficiales de entidades supervisadas, información privilegiada (IP) y otra información relevante (OIR),
   informes financieros de cotizadas, información pública de IIC en XML mensual, series estadísticas y feeds RSS.
   Portal ASP.NET sin API pública documentada.
 access: [portal, feed, download]
@@ -26,21 +26,36 @@ endpoints:
     desc: Informes financieros anuales y semestrales de cotizadas
   - path: https://www.cnmv.es/portal/publicaciones/Descarga-Informacion-Individual.aspx?ejercicio={AAAA}
     desc: Ficheros XML mensuales con la información pública individual de IIC, con esquemas XSD
+    returns: "Tabla por mes con enlaces verdocumento/ver?e= opacos a un ZIP (DOC.ZIP, 2,3 MB en mayo de 2026) con FONDMENS_{AAAAMM}.xml (valor liquidativo diario VL_Dia1 a VL_Dia31 por ISIN, punto decimal), FONDREGISTRO_{AAAAMM}.xml, XSD y PDF; unos cuatro meses de retraso"
   - path: https://www.cnmv.es/portal/publicaciones/seriesweb/inicio.aspx?codrama={1295|153|3|707}
     desc: Series estadísticas (indicadores de estrés, inversión colectiva, servicios de inversión, emisores)
+  - path: https://www.cnmv.es/portal/publicaciones/seriesweb/PagSerie?serie={codigo}
+    desc: Serie estadística completa en una tabla HTML; los códigos (XD0006, IF2009...) salen de los enlaces PagSerie del árbol Inicio.aspx?codrama=
+    example: curl -s "https://www.cnmv.es/portal/publicaciones/seriesweb/PagSerie?serie=XD0006"
+    returns: "Tabla HTML id grdSerie con Fecha dd/mm/aaaa y valor con punto de miles y coma decimal (63.311.335; 0,184), de la más reciente a la más antigua y sin paginar (1448 filas semanales en XD0006)"
   - path: https://www.cnmv.es/portal/RSS/RSS.asmx/GetDatos?iID={1|3|4}
     desc: RSS de notas de prensa (1), discursos (3) e información al sector (4)
     example: curl -s "https://www.cnmv.es/portal/RSS/RSS.asmx/GetDatos?iID=1"
-  - path: https://www.cnmv.es/portal/informacion-privilegiada/RSS.asmx/GetNoticiasCNMV
-    desc: RSS de información privilegiada del día, desde el cierre de la sesión anterior
+    returns: "RSS 2.0 con <Channel> y <Title> en mayúscula; cada item con Title, link genérico a la sección, guid AAAAMMDDhhmmss en hora peninsular y pubDate RFC 822 en GMT; 88 items en iID=1 y 23 en iID=3; iID=4 llegó sin items"
+  - path: https://www.cnmv.es/portal/{informacion-privilegiada|Otra-Informacion-Relevante}/RSS.asmx/GetNoticiasCNMV
+    desc: RSS de información privilegiada y de otra información relevante desde el cierre de la sesión anterior; cada item enlaza a Resultado-IP o Resultado-OIR?nreg={n}
+    example: curl -s "https://www.cnmv.es/portal/Otra-Informacion-Relevante/RSS.asmx/GetNoticiasCNMV"
+    returns: "Mismo RSS; Title es el emisor, link Resultado-OIR.aspx?nreg={n} (o Resultado-IP.aspx), description en HTML con hora local, tipo de comunicación y resumen, pubDate en GMT; 17 items de OIR y 1 de IP a las 12:00 del 01/10/2026"
+  - path: https://www.cnmv.es/portal/{Otra-Informacion-Relevante/Resultado-OIR|Informacion-Privilegiada/Resultado-IP}?nreg={n}
+    desc: Ficha de una comunicación de IP u OIR con el enlace al PDF en webservices/verdocumento/ver?t={guid}
+    example: curl -s "https://www.cnmv.es/portal/Otra-Informacion-Relevante/Resultado-OIR?nreg=42969" | grep -o 'verdocumento/ver?t=[^"]*'
 quirks: [viewstate-forms, static-html, url-drift]
 gotchas:
-  - La raíz /portal/ y /portal/RSS/ devuelven 403; la portada es /portal/home. Las rutas funcionan con y sin extensión .aspx.
-  - Consultas/Busqueda.aspx y HR/ResultadoBusquedaHR.aspx ya no existen (400); las búsquedas de IPP y OIR están en hr/busquedahr.aspx con division 2 y 3.
+  - La raíz /portal/ y /portal/RSS/ devuelven 403; la portada es /portal/home. Las rutas .aspx responden 301 hacia la misma ruta sin extensión, así que curl necesita -L o la ruta sin .aspx.
+  - Consultas/Busqueda.aspx y HR/ResultadoBusquedaHR.aspx ya no existen (400); las búsquedas de IP y OIR están en hr/busquedahr.aspx con division 2 y 3.
   - Formularios ASP.NET con __VIEWSTATE; para automatizar hay que hacer GET del formulario y reenviar los campos ocultos en el POST.
-  - El feed de IPP solo contiene el día en curso y puede venir vacío; el de OIR (Otra-Informacion-Relevante/RSS.asmx/GetNoticiasCNMV) devolvía 500 en la verificación.
-  - Los documentos se sirven por webservices/verdocumento/ver?e={token} con tokens opacos que no se pueden construir; la descarga no se pudo verificar desde este entorno.
-  - IPP y OIR sustituyeron a los hechos relevantes en 2020; los anteriores siguen archivados bajo esa etiqueta.
+  - Los feeds de IP y OIR solo traen lo publicado desde el cierre de la sesión anterior (1 y 17 items a las 12:00 del 01/10/2026); para el histórico, hr/busquedahr.aspx con division 2 o 3.
+  - Los PDF de IP y OIR se sirven por webservices/verdocumento/ver?t={guid}, que solo aparece en la página Resultado-IP u OIR?nreg={n}; los ZIP de IIC usan ver?e={token} opaco. Ambos descargan sin sesión.
+  - IP y OIR sustituyeron a los hechos relevantes en 2020; los anteriores siguen archivados bajo esa etiqueta.
+  - Las etiquetas RSS son <Channel> y <Title> con mayúscula, fuera del estándar; con ElementTree o lxml find('channel') y find('title') devuelven None, mientras feedparser los lee bien.
+tips:
+  - "pd.read_html(url_pagserie, thousands='.', decimal=',', attrs={'id': 'grdSerie'})[0] carga una serie entera con Fecha como texto dd/mm/aaaa."
+  - Para IP y OIR del día no hace falta formulario; del feed GetNoticiasCNMV se toma nreg, de la página Resultado el enlace verdocumento/ver?t= y de ahí el PDF.
 related: [bde-estadisticas, borme-api-sumario]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

@@ -6,39 +6,51 @@ level: age
 sector: comercio-industria-propiedad
 tags: [industria, turismo, frontur, egatur, badase, dataestur, api, coyuntura-industrial]
 summary: >-
-  Estadísticas de industria (coyuntura, vehículos, cemento, pyme) y base de series BADASE en aplicaciones
-  ASP.NET, más DATAESTUR, plataforma de datos turísticos con 124 conjuntos descargables y una API REST
-  (API-SEGITTUR v2, OpenAPI, clave de API) que reúne FRONTUR, EGATUR, afiliación y AENA.
+  Estadísticas de industria (coyuntura, vehículos, cemento, pyme), cuadro resumen del ministerio y base de
+  series BADASE (ASP.NET), más DATAESTUR, plataforma de datos turísticos con una API REST (API-SEGITTUR v2,
+  OpenAPI, 124 conjuntos en xlsx o csv) que reúne FRONTUR, EGATUR, afiliación y AENA.
 access: [api-rest, portal, download]
-auth: api-key
-formats: [json, xlsx, csv, html]
+auth: none
+formats: [xlsx, csv, json, pdf, html]
 update: monthly
-coverage: "Turismo desde 2015 en DATAESTUR; series industriales según encuesta"
+coverage: "DATAESTUR según conjunto (balanza de pagos desde 1993, FRONTUR desde octubre de 2015, la mayoría desde 2012 o 2019); series industriales según encuesta"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.dataestur.es/
 docs_url: https://www.dataestur.es/apidata/
 endpoints:
   - path: https://www.dataestur.es/app/themes/mini-mandrake/apidata/openapi.json
-    desc: Especificación OpenAPI 3 de API-SEGITTUR v2 (124 rutas _DL con filtros desde y hasta año y mes, CCAA y provincia; seguridad apiKeyHeader o apiKeyQuery)
+    desc: Especificación OpenAPI 3.0.1 de API-SEGITTUR v2 (800 KB, 124 rutas _DL; servidor /API-SEGITTUR-v2)
     example: curl -s "https://www.dataestur.es/app/themes/mini-mandrake/apidata/openapi.json"
+    returns: "JSON OpenAPI; cada ruta GET lleva parámetros con espacios y ñ ('desde (año)', 'hasta (mes)', 'CCAA de destino') con enum de valores admitidos; respuesta 200 xlsx (89 rutas) o csv (35) como adjunto y 500 con parámetros inválidos"
   - path: https://www.dataestur.es/API-SEGITTUR-v2/{conjunto}_DL
-    desc: Descarga de un conjunto (AENA_DESTINOS_DL, FRONTUR_DL...); la página API no pide clave; desde el entorno de verificación respondió 504 a los 30 s
-  - path: https://www.dataestur.es/general/{frontur|egatur}/
-    desc: Páginas de FRONTUR y EGATUR en DATAESTUR con descargas por indicador
+    desc: Descarga de un conjunto (FRONTUR_DL, EGATUR_DL, AENA_DESTINOS_DL...) filtrado por periodo y territorio
+    params: "desde (año), desde (mes), hasta (año), hasta (mes) y filtros por enum del conjunto; codificar espacios, paréntesis y ñ; hasta sin desde da 500"
+    example: curl -sS -o frontur.xlsx "https://www.dataestur.es/API-SEGITTUR-v2/FRONTUR_DL?desde%20(a%C3%B1o)=2025&desde%20(mes)=1&hasta%20(a%C3%B1o)=2025&hasta%20(mes)=1"
+    returns: "Adjunto frontur.xlsx (Content-Disposition) con hoja Sheet1 en formato largo AÑO, MES, PAIS_RESIDENCIA, TIPO_VISITANTE, CCAA_DESTINO, VISITANTES (entero), 342 filas por mes; con error, texto 'Invalid parameters in the query string or body.'"
+  - path: https://www.dataestur.es/{viajes-ocio/frontur|economia/gasto-turistico-visitantes-egatur}/
+    desc: Páginas de FRONTUR y EGATUR con cuadro Power BI; la descarga es la ruta _DL de la API
+  - path: https://www.mintur.gob.es/es-ES/IndicadoresyEstadisticas/Documents/CuadroResumen.xlsx
+    desc: Resumen de indicadores coyunturales de industria y turismo, xlsx con URL fija; boletín estadístico (73 PDF) en indicadoresyestadisticas/paginas/datostemp.aspx
+    example: curl -sS -o CuadroResumen.xlsx "https://www.mintur.gob.es/es-ES/IndicadoresyEstadisticas/Documents/CuadroResumen.xlsx"
+    returns: "Hoja CR con la fecha en la primera fila ('Últimos datos disponibles a fecha: 30/09/2026'), periodos en dos filas de cabecera (2025, 2026 (1), IV 25...) y un indicador por fila con tasas interanuales en decimal; '-' si falta el dato"
   - path: https://sedeaplicaciones.serviciosmin.gob.es/Badase/
-    desc: BADASE, base de series estadísticas de industria (ASP.NET con __VIEWSTATE, selección de series y salida en varios formatos)
+    desc: BADASE, series de coyuntura industrial, industria, turismo y sector exterior; redirige a BadasiUI/lstSeriesInformesPostBack.aspx (ASP.NET con __VIEWSTATE)
   - path: https://industria.gob.es/es-es/estadisticas
-    desc: Encuesta de coyuntura industrial, estadística de vehículos, cemento y publicaciones sobre pyme
-quirks: [viewstate-forms, url-drift]
+    desc: Encuesta de coyuntura industrial, estadística de vehículos, cemento y publicaciones sobre pyme (redirige a estadisticas/Paginas/estadisticas-informes.aspx)
+quirks: [viewstate-forms, url-drift, overwritten-in-place]
 ids: []
 gotchas:
-  - La ruta IndicadoresyEstadisticas de mintur.gob.es da 404; las estadísticas de industria viven en industria.gob.es y las de turismo en turismo.gob.es, que remite a DATAESTUR.
-  - La página API de DATAESTUR no menciona clave ni registro aunque la especificación OpenAPI declare apiKey; desde este entorno las rutas _DL dieron 504 a los 30 s con y sin cabecera (30/09/2026).
+  - Las rutas _DL alternan respuestas en 1 o 2 s con 504 Gateway Time-out a los 30 s del Front Door de Azure; el 01/10/2026 dieron datos 6 de 15 llamadas y una URL con 504 respondió al repetirla minutos después.
+  - La especificación declara clave (cabecera Ocp-Apim-Subscription-Key o parámetro subscription-key), pero las rutas _DL respondieron sin ella el 01/10/2026.
+  - Los nombres de CCAA cambian entre conjuntos (Madrid, Comunidad de en FRONTUR; Comunidad de Madrid y Castilla - La Mancha en ACTIVIDADES_OCIO); tomar los valores del enum de cada ruta.
+  - Las páginas antiguas /general/frontur/ y /general/egatur/ redirigen a dataestur.pid.segittur.es, que respondió 403 The request is blocked; usar las rutas nuevas de www.dataestur.es.
   - FRONTUR y EGATUR las produce el INE desde 2015; DATAESTUR redistribuye y añade fuentes (AENA, afiliación, telefonía móvil). Para series largas ir al INE.
-  - BADASE es una aplicación con postbacks y estado; la salida se elige en un desplegable (formato y tipo) y no localicé URL estable por serie.
+  - CuadroResumen.xlsx se sobrescribe en la misma URL; guardar copia fechada si se quiere el histórico.
+  - BADASE es una aplicación con postbacks y estado; la salida se elige en un desplegable (pantalla o archivo) y no localicé URL estable por serie.
   - El portal de datos abiertos de la sede de Industria (sede.serviciosmin.gob.es) tiene el catálogo roto (ficha miteco-energia-estadisticas).
 tips:
-  - Leer openapi.json y generar el cliente (por ejemplo con openapi-python-client); todas las rutas devuelven el conjunto completo filtrable por fechas y territorio.
+  - Leer openapi.json para obtener los nombres exactos de parámetros y los valores del enum; todas las rutas devuelven el conjunto completo filtrable por fechas y territorio.
+  - "Con requests, params={'desde (año)': 2025, 'desde (mes)': 1} codifica bien los nombres; reintentar con espera ante 504 y leer el adjunto con pandas.read_excel(io.BytesIO(r.content))."
 related: [ine-api-tempus, miteco-energia-estadisticas, aesa-aviacion]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

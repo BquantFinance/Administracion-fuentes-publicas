@@ -13,25 +13,29 @@ access: [download, portal]
 auth: none
 formats: [xlsx, csv, docx, pdf, html]
 update: monthly
-coverage: "SAAD mensual verificado de diciembre de 2025 a agosto de 2026 (serie desde 2019 en la hoja EVO); PNC 2019-; BEDPCD 2019-2024 en CSV; residencias 2022 y 2024; mayores 2010-2024"
+coverage: "SAAD mensual por URL corta de febrero de 2025 a agosto de 2026 y diciembre de 2024 (cierres anuales desde 2019 en la hoja EVO); PNC 2019-; BEDPCD 2019-2024 en CSV; residencias 2022 y 2024; mayores 2010-2024"
 base_url: https://imserso.es/el-imserso/documentacion/estadisticas
 docs_url: https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia-saad
 endpoints:
   - path: https://imserso.es/documents/d/global/estsisaad_{AAAAMMDD}
     desc: Estadística mensual del SAAD a último día de mes en xlsx (97 hojas; porsaad, indsaad, EVO, 21solsaad, 31dictsaad, 51pbgrado, 9TiempoEspera, 11ListaEspera)
     example: curl -sL -A "Mozilla/5.0" -o estsisaad_20260831.xlsx "https://imserso.es/documents/d/global/estsisaad_20260831"
+    returns: "xlsx de 968 KB (3,5 MB hasta abril de 2026); cada hoja con título, fecha (Situación a 31 de agosto de 2026) y cabecera en tres filas (ÁMBITO TERRITORIAL, grado, Nº y %); CCAA por nombre (Asturias, Principado de), enteros y porcentajes float"
   - path: https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia-saad/estadisticas-mensual
-    desc: Página del último mes con enlaces /documents/20123/{carpeta}/{fichero}/{uuid} a estsisaad, cecuidadores y evo_per_fallecidas en xlsx y pdf
+    desc: Página del último mes con enlaces /documents/20123/{carpeta}/{fichero}/{uuid} a estsisaad (solo xlsx), cecuidadores y evo_per_fallecidas (xlsx y pdf)
     example: curl -s -A "Mozilla/5.0" "https://imserso.es/el-imserso/documentacion/estadisticas/sistema-autonomia-atencion-dependencia-saad/estadisticas-mensual" | grep -o '/documents/20123/[^"]*\.xlsx[^"]*'
   - path: https://imserso.es/documents/20123/121856/{provpncs|evolpncs|disterpncs|disimppncs|evolimppncs}.{csv|xlsx|pdf}
     desc: Nómina mensual de pensiones no contributivas (número e importe por CCAA y provincia, evolución anual desde 2019, distribución por importe); misma URL cada mes
     example: curl -s -A "Mozilla/5.0" "https://imserso.es/documents/20123/121856/evolpncs.csv" | iconv -f ISO-8859-1 -t UTF-8
+    returns: "CSV en ISO-8859-1 con ; y CRLF, ocho filas de título y cabecera, importes brutos y número de pensiones de jubilación e incapacidad por año (2019-2025) y por mes del año en curso; miles con punto y decimales con coma (1.399.861.375,29), notas al pie"
   - path: https://imserso.es/documents/d/global/bdepcd_2024-1-
     desc: Base Estatal de Datos de Personas con Discapacidad 2019-2024 en CSV largo (Año;CCAA;Provincia;Grupo_DIAG0;Sexo;Grupo_grado_discapacidad;Grupo_edad;Valor)
     example: curl -sL -A "Mozilla/5.0" -o bdepcd_2024.csv "https://imserso.es/documents/d/global/bdepcd_2024-1-"
+    returns: "CSV de 17 MB y 148.626 filas; Año, Comunidad_Autónoma, Provincia por nombre, Grupo_DIAG0 (10 grupos), Sexo (H o M), Grupo_grado_discapacidad (5 tramos), Grupo_edad (6 tramos) y Valor entero de 1 en adelante"
   - path: https://imserso.es/documents/d/global/cenres_2024_agregado_provincia
     desc: Censo de centros residenciales 2024 agregado por provincia (CSV, 52 filas y 215 columnas de plazas, gestión y acreditación); censo_centros_r_2025 es el informe
     example: curl -sL -A "Mozilla/5.0" -o cenres_2024_provincia.csv "https://imserso.es/documents/d/global/cenres_2024_agregado_provincia"
+    returns: "CSV de 62 KB con IMP_PROV e IMP_CCAA por nombre y 213 columnas enteras en mayúsculas (TIP_MAYORES, GES_PUBLICA, ACRE_SI, MOTIV_EN_TRAMITE...), una fila por provincia"
   - path: https://imserso.es/documents/d/global/datos_ssppmmesp2024
     desc: Servicios sociales para personas mayores a 31/12/2024 (xlsx de 37 hojas; teleasistencia, ayuda a domicilio, centros de día, residencias); páginas 2010-2024
   - path: https://imserso.es/el-imserso/documentacion/estadisticas/{tema}
@@ -40,19 +44,19 @@ endpoints:
 quirks: [static-html, overwritten-in-place, latin1, user-agent-browser]
 ids: []
 gotchas:
-  - imserso.es responde 403 al User-Agent por defecto de curl (curl/8.0) incluso en los ficheros de /documents/; enviar un User-Agent de navegador.
-  - La URL corta /documents/d/global/{nombre sin extensión} sirve el fichero sin uuid y vale para meses anteriores (estsisaad_20260630 y estsisaad_20251231 verificados); un nombre inexistente responde 404 HTML.
+  - imserso.es responde 403 al User-Agent por defecto de curl incluso en los ficheros de /documents/; enviar un User-Agent de navegador.
+  - La URL corta /documents/d/global/{nombre} sirve el fichero sin uuid (SAAD de febrero de 2025 a agosto de 2026 y diciembre de 2024); enero de 2025, los meses anteriores y los nombres inexistentes dan 404 HTML.
   - Los xlsx del SAAD llevan fórmulas (=D10/2410165*100) y cabeceras en varias filas; leer con openpyxl data_only=True o pandas header=None y localizar la fila ÁMBITO TERRITORIAL.
-  - Los ficheros de PNC (provpncs, evolpncs) se sobreescriben cada mes con el mismo nombre; el CSV va en ISO-8859-1 con separador ;, miles con punto, decimales con coma y filas de título antes de la tabla.
-  - El CSV de la BEDPCD va en UTF-8 con BOM, separador ; y todo entrecomillado; el del censo de residencias en UTF-8 con BOM y separador coma.
-  - Los territorios van por nombre (Andalucía, A Coruña), sin código INE; cruzar por nombre normalizado con ine-codigos-territoriales.
-  - Solo el último mes está enlazado en la página del SAAD; el histórico se obtiene deduciendo el nombre por fecha (último día del mes) o de la hoja EVO (31/12/2019 al mes en curso).
+  - Las hojas del SAAD cambian entre meses (indsaad2 pasa a indsaad_2 en mayo de 2026, aparecen 53combprest y desaparece 15pbpcasaad); buscar la hoja por nombre normalizado, no por posición.
+  - Solo el último mes está enlazado en la página del SAAD y la hoja EVO solo trae los cierres anuales (31/12/2019 a 31/12/2025) y el último mes; la serie mensual exige un fichero por mes.
+  - Los ficheros de PNC se sobreescriben cada mes con el mismo nombre; el CSV va en ISO-8859-1 con ;, miles con punto, decimales con coma y filas de título, y en evolpncs JUNIO* y NOVIEMBRE* llevan la paga extra.
+  - El CSV de la BEDPCD va en UTF-8 con BOM, separador ; y todo entrecomillado, y omite las combinaciones con cero (Valor mínimo 1); el del censo de residencias va en UTF-8 con BOM y separador coma.
+  - Territorios por nombre, sin código INE, y con grafías distintas entre ficheros (Coruña, A y Valencia/Valéncia en la BEDPCD; A Coruña y Valencia/València en el censo); normalizar antes de cruzar.
   - El sufijo -1- de /documents/d/global distingue ficheros con el mismo título y cambia el formato (bdepcd_2024 es PDF y bdepcd_2024-1- el CSV; censo_centros_r_2025 docx y -1- PDF); comprobar Content-Type.
-  - La ruta .../estadisticas/sistema-autonomia-atencion-dependencia sin el sufijo -saad responde 404 con meta refresh a /pagina-no-encontrada.
   - El SAAD es gestión administrativa (solicitudes, dictámenes, prestaciones); la encuesta de discapacidad y dependencia (EDAD 2020) es del INE.
 tips:
   - "pd.read_excel(f, sheet_name='51pbgrado', header=None) para prestaciones por grado y CCAA; pd.read_csv('bdepcd_2024.csv', sep=';', encoding='utf-8-sig') para la BEDPCD."
-  - Para una serie mensual del SAAD iterar estsisaad_{AAAAMMDD} con el último día de cada mes y tomar la hoja porsaad o EVO.
+  - Para una serie mensual del SAAD iterar estsisaad_{AAAAMMDD} con el último día de cada mes desde febrero de 2025, tratar el 404 como hueco y tomar la hoja porsaad o 51pbgrado.
 related: [segsocial-estadisticas, ine-api-tempus, ine-codigos-territoriales, sanidad-portal-estadistico]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

@@ -6,58 +6,66 @@ level: age
 sector: agricultura-pesca-alimentacion
 tags: [agricultura, ganaderia, precios-agrarios, superficies, producciones, anuario, consumo-alimentario, encuestas-ganaderas, esyrce]
 summary: >-
-  Anuario de Estadística con todas las tablas en xlsx por capítulo (1999-2024), precios percibidos y pagados,
+  Anuario de Estadística con todas las tablas en xlsx por capítulo (2000-2024), precios percibidos y pagados,
   precios medios semanales, avances mensuales de superficies y producciones, ESYRCE (xlsx nacional y por
   comunidad), encuestas ganaderas y panel de consumo alimentario en hogares.
 access: [download, portal]
 auth: none
 formats: [xlsx, xls, pdf, html]
 update: monthly
-coverage: "Anuario 1999-2024; consumo 1999-; precios percibidos 2005-; ESYRCE tablas xlsx 2022-2025 y boletines PDF 2002-2023"
+coverage: "Anuario 1999-2024 (1999 solo PDF, sin 2005); consumo 1999-2026 (mensual hasta julio de 2026); precios percibidos 2005-2025; ESYRCE tablas xlsx 2022-2025 y boletines PDF 2002-2023"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.mapa.gob.es/es/estadistica/temas/
 docs_url: https://www.mapa.gob.es/es/estadistica/temas/publicaciones/anuario-de-estadistica/
 endpoints:
   - path: https://www.mapa.gob.es/es/estadistica/temas/publicaciones/anuario-de-estadistica/{AAAA}?parte={p}&capitulo={c}
-    desc: Índice de un capítulo del anuario con enlaces a xlsx por tabla y por capítulo completo (verificado 2023)
+    desc: Índice de un capítulo con enlaces a xlsx por tabla y por capítulo; sin parámetros, la página del año lista los 15 capítulos (2024 llega a parte=4&capitulo=15)
     example: curl -s "https://www.mapa.gob.es/es/estadistica/temas/publicaciones/anuario-de-estadistica/2023?parte=1&capitulo=1"
+    returns: "HTML con los href entre comillas simples y rutas con espacios y tildes sin codificar ('.../2023/FORMATO EXCEL/AE23-C01/1.1.xlsx', '.../METODOLOGIA/CAPÍTULO 1.pdf'); años sin anuario (2005, 2025) dan 404"
   - path: https://www.mapa.gob.es/estadistica/pags/anuario/{AAAA}/FORMATO EXCEL/AE{AA}-C{CC}/AE{AA}-C{CC}.xlsx
-    desc: Capítulo completo del anuario en xlsx (tablas sueltas en {n}.{m}.xlsx; PDF en FORMATO PDF y anuario entero en global {AAAA}/ANUARIO_{AAAA}.pdf)
+    desc: Capítulo completo del anuario en xlsx desde 2022 (tablas sueltas {n}.{m}.xlsx en la misma carpeta; el PDF entero cambia de nombre, GLOBAL 24/AE_24.pdf)
     example: curl -sSL -o AE23-C01.xlsx "https://www.mapa.gob.es/estadistica/pags/anuario/2023/FORMATO%20EXCEL/AE23-C01/AE23-C01.xlsx"
+    returns: "Una hoja por tabla (1.1, 1.2) con título, varias filas de cabecera, provincias con sangría de espacios y subtotales de comunidad en mayúsculas intercalados ('   GALICIA'); cifras como número y '-' en texto si no hay dato"
   - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/economia/precios-percibidos-pagados/precios-percibidos-por-los-agricultores-y-ganaderos
-    desc: Índices y precios percibidos mensuales en xlsx por periodo (2005-2014, 2015-2023, 2023-2025) y subpágina serie_historica
+    desc: Índices y precios percibidos mensuales en cinco xlsx por periodo solapado (2005-2014, 2010-2018, 2015-2023, 2020-2022, enero 2023-septiembre 2025)
   - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/economia/precios-medios-nacionales
-    desc: Precios medios nacionales semanales, un xlsx por año (precios_medios_nacionales_{AAAA}.xlsx, 2019-2024)
+    desc: Precios medios nacionales semanales, un xlsx por año 2019-2026 con sufijo irregular (precios_medios_nacionales_2026-s36.xlsx, 2024s52, 2022, 2020v2)
   - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/agricultura/avances-superficies-producciones-agricolas
-    desc: Avances mensuales de superficies y producciones (cuaderno_{mes}{AAAA}.xls desde 2018; años anteriores en subpáginas 2007-2011 y 2012-2017)
+    desc: Avances mensuales (cuaderno_{mes}{AAAA}.xls 2018-2025, .xlsm en 2026 hasta mayo, mayo bajo /es/dam/jcr:); 2007-2017 en subpáginas 2007-2011 y 2012-2017
   - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/agricultura/esyrce/
-    desc: ESYRCE; resultados provisionales 2025 en un xlsx nacional (secano, regadío, invernadero y total por cultivo) y uno por comunidad; tablas 3.1 a 3.12 desde 2022
+    desc: ESYRCE; resultados 2025 en un xlsx nacional y uno por comunidad, tablas 3.1 a 3.12 desde 2022; boletines 2002-2023 en la subpágina resultados-de-anos-anteriores
     example: curl -s "https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/agricultura/esyrce/" | grep -o 'href="[^"]*\.xlsx\?"'
   - path: https://www.mapa.gob.es/es/dam/jcr:{uuid}/{tabla}.{fecha}.xlsx
-    desc: Tabla ESYRCE 2025 (3.1 Distribución General de la Tierra, 18 hojas de 3.1.1. ESPAÑA a 3.1.18 CANARIAS; código de cultivo de dos letras, ha y coef. de variación)
+    desc: Tabla ESYRCE 2025 (3.1 Distribución General de la Tierra, 18 hojas de 3.1.1. ESPAÑA a 3.1.18 CANARIAS)
     example: curl -sS -o esyrce_3_1_2025.xlsx "https://www.mapa.gob.es/es/dam/jcr:fd8f03c8-8176-460e-9cef-bf3a80d08285/3.1%20Distribuci%C3%B3n%20General%20de%20la%20Tierra.2026-09-04-08-44-44.xlsx"
+    returns: "Cada hoja con dos bloques de columnas en paralelo (código de cultivo de dos letras, nombre, Superf. (ha) con decimales, C. Var. (%)) y filas de subtotal como TOTAL FRUTALES CITRICOS (CI)"
   - path: https://www.mapa.gob.es/dam/mapa/contenido/estadisticas/temas/estadisticas-agrarias/2.agricultura/1.-encuesta-sobre-superficies-y-rendimientos-de-cultivos--esyrce/{AAAA}/{tabla}.xlsx
-    desc: Tablas ESYRCE 2022 y 2023 (31distribuciongeneraldelatierra.xlsx...); 2024 bajo 2024/avanceresultados2024/ y boletines PDF en {AAAA}/boletin{AAAA}.pdf
+    desc: Tablas ESYRCE 2022 y 2023 (31distribuciongeneraldelatierra.xlsx...) y 2024 bajo 2024/avanceresultados2024/; boletines irregulares (boletin20231.pdf)
     example: curl -sS -o esyrce_3_1_2023.xlsx "https://www.mapa.gob.es/dam/mapa/contenido/estadisticas/temas/estadisticas-agrarias/2.agricultura/1.-encuesta-sobre-superficies-y-rendimientos-de-cultivos--esyrce/2023/31distribuciongeneraldelatierra.xlsx"
   - path: https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/ganaderia/encuestas-ganaderas
-    desc: Encuestas ganaderas por año y especie ({AAAA}_bovino.xls, ovino, caprino, porcino), 118 ficheros
+    desc: Encuestas de bovino, ovino-caprino y porcino (mayo y noviembre) desde 2002, 119 ficheros sin patrón (2006-08_porcino.xls, resultados_mayo2026_bovinoP...xlsx)
   - path: https://www.mapa.gob.es/es/alimentacion/temas/consumo-tendencias/panel-de-consumo-alimentario/series-anuales
-    desc: Panel de consumo alimentario en hogares, un xlsx por año desde 1999 ({AAAA}datosanualesdelpaneldeconsumoalimentarioenhogares.xlsx)
+    desc: Panel de consumo en hogares, por año desde 1999 xlsx de datos anuales, mensuales por CCAA, sociodemográficos (sd) y por canales; 2026 hasta julio
+    example: curl -s "https://www.mapa.gob.es/es/alimentacion/temas/consumo-tendencias/panel-de-consumo-alimentario/series-anuales" | grep -o 'href="[^"]*\.xlsx"'
+    returns: "Mensual por CCAA (6 MB) con una hoja por mes, fila de comunidades (T.ESPAÑA, CATALUÑA...) y seis medidas por comunidad (consumo y gasto per cápita, penetración %, precio medio, valor y volumen en miles); productos en filas (.TOTAL ALIMENTACION)"
   - path: https://www.mapa.gob.es/es/estadistica/temas/estadistica-digital
     desc: Cuadros de mando Power BI (cultivos, ESYRCE, ganadería, pesca), solo interactivos
 quirks: [url-drift, static-html]
 ids: []
 gotchas:
-  - El portal es Magnolia con rutas nuevas; las antiguas .aspx (default.aspx, precios-percibidos-pagados-salarios) dan 404. Las páginas de tema no llevan ficheros, hay que bajar a la subpágina concreta.
-  - Los ficheros cuelgan de /dam/mapa/contenido/ con carpetas con puntos y guiones (2.agricultura/3.-superficies-y-producciones-anuales) y nombres con sufijos (-0, v2, s52); leer los href en vez de construir URL.
-  - Hasta 2019 el anuario usa dam/.../anuario-de-estadistica/{AAAA}/ae_{AAAA}_{cc}_{ss}.xls; desde 2020, estadistica/pags/anuario/{AAAA}/FORMATO EXCEL/AE{AA}-C{CC}/ con espacios en la ruta (codificar %20).
-  - Las tablas del anuario llevan varias filas de cabecera y notas al pie; localizar la fila de cabecera antes de leer con pandas.
-  - Los últimos datos del panel de consumo (mensuales) solo se muestran en páginas y Power BI; en xlsx están las series anuales.
-  - CCAA y provincias aparecen por nombre, sin código INE; añadirlo con la ficha ine-codigos-territoriales.
-  - Los xlsx de ESYRCE 2025 cuelgan de /es/dam/jcr:{uuid}/ con nombre con espacios y fecha (codificar %20) y los de 2022-2024 de /dam/mapa/contenido/.../esyrce/{AAAA}/; el nombre de cada tabla cambia cada año, leer los href.
+  - Las rutas antiguas default.aspx redirigen (301) a la misma ruta sin .aspx y precios-percibidos-pagados-salarios da 404; las páginas de tema no llevan ficheros, hay que bajar a la subpágina concreta.
+  - Los ficheros cuelgan de /dam/mapa/contenido/ (carpetas como 1.economicas/indices--precios-y-salarios-agrarios) o, en lo publicado desde 2025, de /es/dam/jcr:{uuid}/ con hash o fecha; leer los href, no construir URL.
+  - "Carpeta del anuario según el año: AE_{AAAA}_{CC}.xls (2000-2013), .xlsx (2014), CAPITULO EXCEL (2015), CAPITULOS_TOTALES (2016-2019), CAPITULOS XLS (2020-2021), FORMATO EXCEL/AE{AA}-C{CC}/ (2022-)."
+  - El índice del anuario escribe los href entre comillas simples y con espacios sin codificar (FORMATO EXCEL); una expresión regular con comillas dobles no encuentra nada y al pedir hay que codificar %20.
+  - Las tablas del anuario mezclan provincias y subtotales de comunidad (en mayúsculas, con sangría) y llevan varias filas de cabecera y notas al pie; filtrar subtotales antes de sumar.
+  - CCAA y provincias aparecen por nombre, sin código INE y con nombres antiguos (Orense, Coruña (La)); añadir el código con la ficha ine-codigos-territoriales.
+  - Los xlsx de ESYRCE 2025 cuelgan de /es/dam/jcr:{uuid}/ y los de 2022-2024 de /dam/mapa/contenido/.../esyrce/{AAAA}/; cambian cada año el nombre del fichero y de las hojas (P. DE ASTURIAS en 2023, PRINCIPADO... en 2025).
+  - El código de cultivo de ESYRCE puede cambiar de significado entre años (MR era MANDARINO en 2023 y es HIBRIDOS Y OTRAS MANDARINAS en 2025, con MS y MT nuevos); unir series por código y nombre.
+  - Los avances de 2026 son .xlsm y el enlace de enero de 2025 apunta a cuaderno_enero2025.xlms, que da 404; filtrar los href por .xls, .xlsx y .xlsm.
   - Los microdatos de ESYRCE no se descargan; se piden en la sede electrónica (procedimiento 978) con el documento de compromiso firmado; en la web solo hay tablas agregadas y el cuadro Power BI ESYRCE DIGITAL.
 tips:
   - Para una serie larga de un cultivo, el capítulo de superficies y producciones del anuario (un xlsx por año) es más estable que los avances mensuales, que son provisionales.
+  - "Para el panel de consumo mensual, pandas.read_excel(f, sheet_name=None, header=[1, 2]) da un DataFrame por mes con columnas (comunidad, medida)."
 related: [fega-beneficiarios-pac, mapa-sigpac, mapa-pesca, ine-codigos-territoriales]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

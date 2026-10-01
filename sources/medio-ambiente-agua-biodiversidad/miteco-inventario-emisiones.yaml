@@ -21,25 +21,32 @@ endpoints:
   - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/webtabla-inv-Ed{AAAA}.xlsx
     desc: Tabla resumen de la edición (2,8 MB; hojas Intro, IPCC_SUBACTIVITIES, Total GEI por gas y sector, Contaminantes-TotalNacional, Contaminantes-SinCanarias)
     example: curl -sO "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/webtabla-inv-Ed2026.xlsx"
+    returns: "Cabecera en la fila 1 de cada hoja de datos. Total GEI, 519 filas en ancho (SECCION INV o LULUCF, códigos IPCC, CONTAMINANTE, CO2EQ1990..CO2EQ2024 en kt CO2-eq y EM1990..EM2024 en kt de gas). Contaminantes, en largo (ANNO texto, SECTOR, ACTIVIDAD NFR y una columna por contaminante)"
   - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/es-tablas-crt-edicion-{AAAA}.zip
     desc: Tablas CRT de la UNFCCC, un xlsx por año 1990-2024 (35 ficheros, 121 MB; ESP-CRT-2026-V0.3-{año}-...xlsx)
     example: curl -sO "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/es-tablas-crt-edicion-2026.zip"
+    returns: "Zip de 121 MB con 35 xlsx guardados sin comprimir (ESP-CRT-2026-V0.3-2024-20260312-083443_started.xlsx, de 3 a 3,9 MB) de 61 hojas (Index, Table1, Table1.A(a)s1...); en Table1 los títulos ocupan las filas 1 a 7, los gases la 8 y las unidades la 9"
   - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/Categorias-CRT-{AAAA}.xlsx
-    desc: Diccionario de categorías IPCC (ACTIVIDAD, sector, división, clase, subclase, actividad, subactividad y descripción)
+    desc: Diccionario de categorías IPCC, hoja IPCC_SUBACTIVIDADES de 509 filas (ACTIVIDAD, IPCC_SECTOR a IPCC_SUBACTIVIDAD, DESCRIPCIÓN y DESCRIPTION)
   - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-contaminantes-atmosfericos/es-clrtap-{territorio-nacional|dominio-emep}-edicion-{AAAA}.zip
     desc: Inventario de contaminantes atmosféricos (CLRTAP) por territorio nacional y por dominio EMEP; informe IIR en PDF en la misma carpeta
+    returns: "Zip de 1,9 MB con 35 xlsx (SPAIN_2026-CLRTAP_Annex_I_Canary_Islands_included_{año}.xlsx, excluded en dominio EMEP), hoja NFR-19 de la plantilla oficial; cabecera en las filas 10 a 13 con contaminante y unidad, datos desde la fila 14 por código NFR"
   - path: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/es-nid-edicion-{AAAA}.pdf
-    desc: Informe del inventario (NID); Nota-Avance-GEI-{AAAA}.pdf en la carpeta superior con el avance del último año
+    desc: Informe del inventario (NID, 46 MB); Nota-Avance-GEI-{AAAA}.pdf en la carpeta superior con el avance del último año (2025 publicado en agosto de 2026)
 quirks: [static-html, url-drift]
 ids: []
 gotchas:
-  - Los nombres llevan la edición (Ed2026, edicion-2026, CRT-2026-V0.3) y cambian cada año; tomar los enlaces de la página en cada ejecución.
-  - La tabla resumen abre con una hoja de introducción y filas de título antes de la cabecera; localizar la fila de cabecera antes de leer con pandas.
+  - Los nombres llevan la edición (Ed2026, edicion-2026, CRT-2026-V0.3) y solo está la última; Ed2025 y edicion-2025 redirigen a la página de error. Tomar los enlaces de la página y guardar copia de cada edición.
+  - Un fichero inexistente responde 302 a /es/error/404.html, que da 200 con HTML; con curl -L se guarda HTML con nombre .xlsx o .zip. Comprobar Content-Type o no seguir redirecciones.
+  - Total GEI trae dos bloques por año, CO2EQ{año} en kt CO2-eq y EM{año} en kt de gas, aunque UNIDAD diga Gg en todas; SECCION LULUCF son absorciones negativas, filtrar INV para el total sin LULUCF.
+  - Las unidades de los contaminantes solo están en la hoja Intro (kt de NOx a CO, t metales y PAH, g I-TEQ dioxinas, kg HCB y PCB); la columna NO2 es NOx expresado como NO2.
+  - Contaminantes-TotalNacional incluye Canarias y Contaminantes-SinCanarias es la cobertura CLRTAP (dominio EMEP); son coberturas alternativas, no partes que se sumen.
   - Las tablas CRT son las hojas oficiales de reporte de la UNFCCC (una tabla por categoría y año), no una serie plana; para series usar la tabla resumen.
   - El avance del último año (Nota-Avance-GEI) sale meses antes que la edición completa; no mezclar avance e inventario.
 tips:
-  - "pd.read_excel('webtabla-inv-Ed2026.xlsx', sheet_name='Total GEI por gas y sector', header=None) y buscar la fila de cabecera por su primer texto."
+  - "pd.read_excel('webtabla-inv-Ed2026.xlsx', sheet_name='Total GEI por gas y sector') lee directo; la suma de CO2EQ2024 en las filas con SECCION INV da 267.707 kt (284.422 en 1990)."
+  - Los xlsx del ZIP CRT van sin comprimir; con Range (remotezip o zipfile sobre un fichero HTTP) se extrae un año en 6 peticiones y 3,9 MB sin bajar los 121 MB.
   - Emisiones por instalación en miteco-prtr; el inventario agrega por categoría IPCC y no identifica complejos.
 related: [miteco-prtr, miteco-calidad-aire, ree-redata]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

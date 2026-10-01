@@ -6,40 +6,55 @@ level: age
 sector: consumo-seguridad-alimentaria
 tags: [alertas-alimentarias, seguridad-alimentaria, rgseaa, registro-sanitario, alimentos, ean, laboratorios, aesan]
 summary: >-
-  Alertas alimentarias como páginas HTML con referencia, fecha y producto, buscador con filtros de fecha y
-  paginación, Excel con composición y cuota de mercado de alimentos comercializados en 2022 por código EAN,
-  lista de laboratorios RELSA y consulta del registro sanitario de empresas (JSP).
+  Alertas alimentarias como páginas HTML con referencia, fecha y producto, buscador paginado desde enero de
+  2025, Excel de 29.575 alimentos comercializados en 2022 con EAN, cuota de mercado y nutrientes, laboratorios
+  RELSA y búsqueda en el registro sanitario de empresas (RGSEAA, JSP con sesión).
 access: [portal, download, scraping]
 auth: none
 formats: [html, xlsx]
 update: irregular
-coverage: "Alertas de 2026 en el buscador paginado; Excel de alimentos con datos de 2022"
+coverage: "Alertas desde enero de 2025 en el buscador (170 el 01/10/2026); Excel de alimentos con datos de 2022; RELSA a 31/03/2025"
 license: Reutilización libre con cita de la fuente
-base_url: https://www.aesan.gob.es/alertas/alertas-alimentarias
+base_url: https://www.aesan.gob.es/
 docs_url: https://www.aesan.gob.es/datos-abiertos
 endpoints:
   - path: /alertas/alertas-alimentarias
-    desc: Últimas alertas enlazadas como /alertas/{AAAA}_{NN}; cada página lleva en el h1 el producto, el origen y la referencia (Ref. ES2026/575) y la fecha en el cuerpo
+    desc: Últimas alertas en tres bloques (población general, alergias e intolerancias, complementos alimenticios) enlazadas como /alertas/{AAAA}_{NN}
     example: curl -s "https://www.aesan.gob.es/alertas/alertas-alimentarias" | grep -o 'href="/alertas/20[0-9_a-zA-Z]*"'
-  - path: /alertas/buscador-alertas?quantity={n}&filter-select=&filter-initDate={dd/mm/aaaa}&filter-endDate={dd/mm/aaaa}
-    desc: Buscador en HTML con 20 alertas por página; páginas siguientes en /alertas/buscador-alertas/2, /3
-    example: curl -s "https://www.aesan.gob.es/alertas/buscador-alertas?quantity=50&filter-select=&filter-initDate=01/01/2026&filter-endDate=30/09/2026"
+    returns: "HTML con unos 18 enlaces <a href title> cuyo title trae producto, origen y referencia (Ref. ES2026/482) y fecha en texto '07 Agosto 2026'; la página de cada alerta repite el título en el h1 y la fecha en dd/mm/aaaa"
+  - path: /alertas/buscador-alertas/{n}
+    desc: Todas las alertas, 20 por página de la más reciente hacia atrás (/alertas/buscador-alertas, /2 ... /9 el 01/10/2026; la última llega a enero de 2025)
+    params: "quantity, filter-select (tipo de alerta) y filter-initDate/filter-endDate no cambiaron la respuesta del servidor el 01/10/2026; filtrar en local"
+    example: curl -s "https://www.aesan.gob.es/alertas/buscador-alertas/2" | grep -o 'href="/alertas/20[0-9_a-zA-Z]*"'
   - path: /datos-abiertos/alimentos-y-bebidas
-    desc: Enlace a BasedatosWeb.xlsx (12 MB, hoja DATOS con IdCategoria, Categoria, Subcategoria, AÑO, FUENTE, CuotaMercadoTotalEan, EAN, Nombrecomercial, Fabricante...)
+    desc: Enlace a BasedatosWeb.xlsx (12 MB), base de alimentos y bebidas comercializados en 2022
+    example: curl -s "https://www.aesan.gob.es/datos-abiertos/alimentos-y-bebidas" | grep -o 'href="[^"]*\.xlsx"'
+    returns: "Hoja Tabla1 con 29.575 filas y 31 columnas (IdCategoria, Categoria, Subcategoria, AÑO, FUENTE, CuotaMercadoTotalEan decimal, EAN numérico, Nombrecomercial, Fabricante, Marca, Ingredientes, nutrientes) y hoja DATOS con título en la fila 1, cabecera en la 2 y 19 columnas sin cuota"
   - path: /datos-abiertos/control-oficial-y-red-alertas
-    desc: RELSA_PNIR xlsx (laboratorios de la Red de Laboratorios de Seguridad Alimentaria) y documentos de la red
+    desc: RELSA_PNIR_{dd_mm_aaaa}.xlsx (laboratorios de la Red de Laboratorios de Seguridad Alimentaria) y documentos de la red
+    returns: "Hoja default_1 con la fecha de actualización en A2 y la cabecera en la fila 2 desde la columna C (Laboratorio, Matriz, Categoría, Sustancia, Grupo nivel 2 a 4, Método analítico, Límite del método, Unidad, Tipo de límite...); 10.795 filas"
   - path: https://rgsa-web-aesan.mscbs.es/rgsa/formulario_principal_js.jsp
-    desc: Consulta del Registro General Sanitario de Empresas Alimentarias y Alimentos (formulario JSP en ISO-8859-1); sin descarga masiva localizada
-quirks: [static-html, url-drift, latin1]
+    desc: Formulario del Registro General Sanitario de Empresas Alimentarias (JSP en ISO-8859-1); productos y UE en formulario_producto_js.jsp y formulario_ue_js.jsp
+  - path: https://rgsa-web-aesan.mscbs.es/rgsa/procesaBusquedaServlet
+    desc: Búsqueda de establecimientos por POST; responde 302 a resultado_principal.jsp con 10 resultados por página
+    params: "tipo_buscador=principal, pagina, razon_social, numero1-3, clave (sector), categoria, actividad, comunidad (AND, MAD...), provincia (M, B...), localidad; todos presentes aunque vacíos"
+    example: curl -sL -b "" -d "tipo_buscador=principal&pagina=1&razon_social=MERCADONA&numero1=&numero2=&numero3=&clave=&categoria=&actividad=&comunidad=&provincia=&localidad=" "https://rgsa-web-aesan.mscbs.es/rgsa/procesaBusquedaServlet" | iconv -f ISO-8859-1 -t UTF-8
+    returns: "HTML en ISO-8859-1 con '38 resultados', 'Página 1 de 4' y una tabla con Nº RGSEAA (20.22420/A, clave.número/provincia), razón social, domicilio, localidad, provincia y CCAA; páginas siguientes por GET ?pagina={n}&tipo_buscador=principal con la misma cookie"
+quirks: [static-html, url-drift, latin1, session-required]
 ids: []
 gotchas:
-  - No localicé RSS ni API de alertas (varias rutas rss y feed probadas dan 404 el 30/09/2026); la lista y el buscador son HTML con los enlaces en href.
-  - Los identificadores de alerta no son uniformes (2026_68, 2026_65_rev, 2026_55_ampliacion_1, 2026_Ampliacion_45); tomar el enlace, no construirlo.
+  - No localicé RSS ni API de alertas (rss, alertas/rss y alertas/feed dan 404 el 01/10/2026); la lista y el buscador son HTML con los enlaces en href.
+  - Una página del buscador más allá de la última (/10, /50) devuelve 200 con el contenido de la última; parar cuando se repitan los enlaces, no al recibir un error.
+  - Los identificadores de alerta no son uniformes (2026_68, 2026_65_rev, 2026_55_ampliacion_1, 2026_52_Ampliacion_1); tomar el enlace, no construirlo.
   - Los ficheros de datos abiertos cuelgan de /dam/jcr:{uuid}/ y la URL cambia con cada publicación; localizarlos en la página.
-  - BasedatosWeb.xlsx recoge datos de 2022 aportados por terceros (FUENTE Kantar Worldpanel), no un registro oficial actualizado.
+  - BasedatosWeb.xlsx recoge datos de 2022 aportados por terceros (FUENTE Kantar Wordlpanel, con la errata), no un registro oficial actualizado.
+  - El EAN de BasedatosWeb.xlsx es numérico (1.738 de 8 dígitos y 20 de 12); leerlo como texto y no rellenar ceros a ciegas.
+  - procesaBusquedaServlet responde 405 Método no permitido si falta algún campo del formulario aunque vaya vacío, y resultado_principal.jsp sale sin resultados si el redirect no lleva la cookie JSESSIONID del POST.
+  - El RGSEAA no es un censo de tiendas; MERCADONA devuelve solo 38 establecimientos.
   - La ruta aesan.gob.es/datos-abiertos/registro-general-sanitario-empresas-alimentarias-alimentos da 404; el registro se consulta en rgsa-web-aesan.mscbs.es.
 tips:
-  - Para vigilar alertas, descargar la lista cada día y comparar los href con los ya vistos; el h1 contiene producto, origen y referencia.
+  - Para vigilar alertas, descargar la lista cada día y comparar los href con los ya vistos; el title de cada enlace ya contiene producto, origen, referencia y la fecha va al lado.
+  - Con requests, una Session y data con todos los campos del formulario bastan para el RGSEAA; decodificar con resp.content.decode('latin-1').
 related: [aemps-otros-registros, mapa-estadisticas-agrarias]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

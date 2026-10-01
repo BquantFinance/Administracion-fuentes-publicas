@@ -7,13 +7,13 @@ sector: gobierno-abierto-administracion
 tags: [dir3, organismos, unidades-organicas, oficinas-registro, codigos, estructura-administrativa]
 summary: >-
   Inventario oficial de unidades orgánicas, entidades y oficinas de todas las Administraciones con código DIR3,
-  jerarquía, NIF, provincia y estado. Descarga pública en xlsx por nivel más catálogos auxiliares; es la clave
-  de FACe, PLACSP, BDNS y datos.gob.es.
+  jerarquía, NIF y estado. Descarga pública en xlsx por nivel (foto periódica, no diaria) más catálogos
+  auxiliares; es la clave de FACe, PLACSP, BDNS y datos.gob.es.
 access: [download, portal]
 auth: none
 formats: [xlsx, pdf]
-update: daily
-coverage: "Unidades vigentes (estado V) y transitorias (T); las oficinas y catálogos, vigentes"
+update: irregular
+coverage: "Solo unidades y oficinas vigentes (estado V) a la fecha del volcado; sin extinguidas ni histórico"
 license: Reutilización libre con cita de la fuente
 base_url: https://administracionelectronica.gob.es/ctt/verPestanaDescargas.htm?idIniciativa=dir3
 docs_url: https://administracionelectronica.gob.es/ctt/verPestanaGeneral.htm?idIniciativa=dir3
@@ -21,27 +21,31 @@ endpoints:
   - path: https://administracionelectronica.gob.es/ctt/resources/Soluciones/238/Descargas/Listado%20Unidades%20{nivel}.xlsx?idIniciativa=238&idElemento={n}
     desc: Unidades orgánicas por nivel; idElemento AGE 2741, CCAA 2742, EELL 2744, Universidades 2808, Institucionales 2810
     params: "Justicia en Listado-unidades-organicas-Justicia.xlsx con idElemento 7326"
-    example: 'UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"; curl -s -A "$UA" -H "Accept: text/html" -c cj -b cj -o /dev/null "https://administracionelectronica.gob.es/ctt/verPestanaDescargas.htm?idIniciativa=dir3"; curl -sL -A "$UA" -c cj -b cj -o unidades_age.xlsx "https://administracionelectronica.gob.es/ctt/resources/Soluciones/238/Descargas/Listado%20Unidades%20AGE.xlsx?idIniciativa=238&idElemento=2741"'
+    example: 'curl -sL -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36" -c cj -b cj -o unidades_age.xlsx "https://administracionelectronica.gob.es/ctt/resources/Soluciones/238/Descargas/Listado%20Unidades%20AGE.xlsx?idIniciativa=238&idElemento=2741"'
+    returns: "xlsx con la hoja de datos más Leyenda de campos y Catálogos de clasificación; fila 1 y columna A vacías, cabecera en B2; todo como texto (nivel '1', fechas dd/mm/aa) y vacíos como cadena vacía o nulo; AGE 19919 filas, CCAA 18825, EELL 26606 con C_ID_AMB_PROVINCIA, C_DESC_PROV y CONTACTOS"
   - path: https://administracionelectronica.gob.es/ctt/resources/Soluciones/238/Descargas/Listado%20Oficinas%20{nivel}.xlsx?idIniciativa=238&idElemento={n}
     desc: Oficinas de registro y atención por nivel; idElemento AGE 2745, EELL 2807, Universidades 2809, Institucionales 2811
-    params: "Oficinas SIR en Listado de oficinas SIR.xlsx con idElemento 2740"
+    params: "SIR en Listado de oficinas SIR.xlsx (2740); CCAA en listado-oficinas-CCAA.xlsx (10669); Justicia en Listado Oficinas Administracion Justicia.xlsx (23813)"
   - path: https://administracionelectronica.gob.es/ctt/resources/Soluciones/238/Descargas/Catalogo%20de%20{catalogo}.xlsx?idIniciativa=238&idElemento={n}
     desc: Catálogos auxiliares; idElemento Localidades 428, Provincias 427, Países 425, Tipos de Entidad Publica 423, Tipos de Unidad Organica 424, Tipos de Via 429
+    params: "Comunidades Autónomas (426) y Servicios de Oficinas (2835) llevan guiones en lugar de espacios, Catalogo-de-Comunidades-Autonomas.xlsx"
   - path: https://proveedores.face.gob.es/api/v1/relations.csv
-    desc: Alternativa sin WAF, las 50000 relaciones oficina contable, órgano gestor y unidad tramitadora con sus DIR3 (ver face-facturas)
+    desc: Alternativa sin WAF y al día, las 50000 relaciones oficina contable, órgano gestor y unidad tramitadora con sus DIR3 (ver face-facturas)
 quirks: [session-required, user-agent-browser, static-html]
 ids: [dir3, nif, ine-provincia]
 gotchas:
   - El portal CTT (F5) responde Request Rejected con código 200 a User-Agent genéricos.
-  - La primera petición devuelve 302 a la misma URL fijando cookies TS; con User-Agent de navegador completo y cookie jar, la segunda petición pasa.
-  - La descarga de cada xlsx exige las mismas cookies; sin ellas devuelve Request Rejected. curl -L sin cookie jar entra en bucle de redirecciones.
-  - Las rutas antiguas /ctt/dir3 y /ctt/dir3/descargas redirigen a verPestanaGeneral.htm y verPestanaDescargas.htm con idIniciativa=dir3.
-  - Hoja de unidades con fila de título y cabecera en la fila 2 (leer con header=1).
-  - Columnas clave. C_ID_UD_ORGANICA (código DIR3), C_ID_DEP_UD_SUPERIOR y C_ID_DEP_UD_PRINCIPAL (jerarquía), C_ID_NIVEL_ADMON, C_ID_TIPO_ENT_PUBLICA, C_ID_ESTADO, NIF_CIF y C_ID_AMB_PROVINCIA.
+  - La primera petición devuelve 302 a la misma URL fijando cookies TS; con User-Agent de navegador y cookie jar, curl -L pasa al segundo intento, también directo al xlsx sin visitar antes la página.
+  - Sin cookie jar, curl -L entra en bucle de redirecciones y cada xlsx devuelve Request Rejected.
+  - Los xlsx son una foto periódica, no diaria; el 01/10/2026 los listados tenían fecha 30/06/2026 y solo estado V (la hoja dice V+T pero no trae T). Lo que factura hoy está al día en face-facturas.
+  - Fila 1 y columna A vacías y cabecera en la fila 2 (header=1 y descartar la primera columna); C_DNM_UD_ORGANICA se repite para unidad, superior y raíz (pandas añade .1 y .2).
+  - Columnas clave. C_ID_UD_ORGANICA (DIR3), C_ID_DEP_UD_SUPERIOR y C_ID_DEP_UD_PRINCIPAL (jerarquía), C_ID_NIVEL_ADMON, C_ID_TIPO_ENT_PUBLICA, C_ID_ESTADO y NIF_CIF (vacío en el 38 % de la AGE); provincia solo en EELL.
+  - Los catálogos llevan una fila de formato (A(2), A(50)) tras la cabecera (dos filas en Países), nombres rellenos con espacios y códigos que mezclan número y texto (Cod.CA 16 y '08'); leer como texto y recortar.
   - Los códigos DIR3 tienen 9 caracteres, una o dos letras y dígitos (E05251701, EA0008567, LA0002807, U01700001); no convertir a número ni recortar.
+  - Las rutas antiguas /ctt/dir3 y /ctt/dir3/descargas redirigen a verPestanaGeneral.htm y verPestanaDescargas.htm con idIniciativa=dir3.
   - La base completa consolidada y los servicios web SOAP están en el área privada de la red SARA para usuarios registrados; el área pública solo tiene los xlsx por nivel.
 tips:
   - Las relaciones de FACe (face-facturas) dan en un solo CSV el DIR3 de oficina contable, órgano gestor y unidad tramitadora de quien recibe facturas, sin pasar por el WAF del CTT.
 related: [datos-gob-es-api, bdns-api, placsp-datos-abiertos, face-facturas]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

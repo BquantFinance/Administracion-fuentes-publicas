@@ -6,33 +6,46 @@ level: age
 sector: gobierno-abierto-administracion
 tags: [transparencia, publicidad-activa, altos-cargos, retribuciones, agendas, contratos, convenios, derecho-de-acceso]
 summary: >-
-  Publicidad activa de la AGE por materias (organización y empleo público, altos cargos, planificación,
-  normativa, contratos, convenios, subvenciones) y estadísticas del derecho de acceso en xlsx. Portal Adobe
-  Experience Manager con contenido por página; sin API localizada y pocas descargas.
+  Publicidad activa de la AGE: buscador con exportación a xlsx de contratos (835607, menores incluidos), convenios,
+  retribuciones y actividad privada de altos cargos, filtrable por DIR3, y estadísticas del derecho de acceso y
+  resoluciones denegatorias en xlsx y ods. Sin API localizada.
 access: [portal, download]
 auth: none
-formats: [html, xlsx, pdf]
+formats: [html, xlsx, ods, zip, pdf]
 update: monthly
-coverage: "2014-"
+coverage: "2013-"
 license: Reutilización libre con cita de la fuente
 base_url: https://transparencia.gob.es/
 docs_url: https://transparencia.gob.es/publicidad-activa/por-materias/tramites
 endpoints:
+  - path: /servicios-buscador/buscar.htm?categoria={licitaciones|convenios|retribuciones|autorizaciones_ind}&ente={DIR3,...}&lang=es&pag={n}
+    desc: Buscador de publicidad activa; ente admite varios DIR3 raíz separados por coma (así agrupa el formulario cada ministerio) y la página enlaza la exportación
+    example: curl -s -A "Mozilla/5.0" "https://transparencia.gob.es/servicios-buscador/buscar.htm?categoria=retribuciones&ente=EA0008567&lang=es"
+    returns: "HTML de 490 KB con el total (835607 Resultados encontrados en licitaciones) y 10 filas por página en tres tablas (dos horizontales iguales y una vertical); importes 95943,96€ y fechas dd/mm/aaaa; enlace /servicios-buscador/buscar/expTab.htm con inputEncode (filtro JSON en base64) y nResultados"
+  - path: /servicios-buscador/buscar/expTab.htm?claveDescripcion={texto}&categoria={cat}&inputEncode={base64}&nResultados={n}
+    desc: Exportación de la búsqueda; tomar el enlace de la página de resultados y codificar los espacios de claveDescripcion (Actividad%20privada)
+    returns: "ZIP con {marca de tiempo}_{claveDescripcion}_1.xlsx, hoja HOJA1 y cabecera en la fila 1; importes numéricos, años y fechas como texto dd/mm/aaaa; devuelve las primeras nResultados filas sin aviso y con más de 2000 responde 500 en texto plano"
   - path: /publicidad-activa/por-materias/tramites/{contratos|contratos-estadisticas|convenios-encomiendas|subvenciones|subvenciones-partidos-politicos}
-    desc: Contratos, convenios, encomiendas y subvenciones de la AGE
+    desc: Páginas de contratos, convenios y subvenciones; contratos y convenios enlazan al buscador y las de subvenciones a la BDNS
   - path: /publicidad-activa/por-materias/altos-cargos/{retribuciones|agendaAACC|actividad-privada-cese}
-    desc: Retribuciones, agendas y actividad tras el cese de altos cargos
+    desc: Retribuciones, agendas y actividad tras el cese de altos cargos; retribuciones y actividad privada enlazan al buscador
   - path: /derecho-acceso/datos-derecho-de-acceso
-    desc: Estadísticas de solicitudes de acceso; xlsx bajo /content/dam/transparencia_home/masinformacion/elportalencifras/{AAAA}-cifras/
+    desc: Estadísticas trimestrales del derecho de acceso en datos_{AAAA}-{MM}.VersionDefinitiva.xlsx y .ods, en la carpeta {AAAA}-cifras del ejemplo
     example: curl -sO "https://transparencia.gob.es/content/dam/transparencia_home/masinformacion/elportalencifras/2026-cifras/datos_2026-06.VersionDefinitiva.xlsx"
+    returns: "xlsx de 16 hojas (Índice, tráfico del portal y 14 del derecho de acceso por mes, vía, resolución, causa, ministerio, materia, género y reclamaciones); título en la fila 1 y cabecera en la 2; acumulados desde 12/2014; hay celdas de texto como 2014*, 10.141 o 100,00%"
   - path: /derecho-acceso/resoluciones-denegatorias/resolucionesdenegatorias{AAAA}
-    desc: Resoluciones denegatorias por año
+    desc: Resoluciones denegatorias por año con el PDF de cada expediente; la de 2025 enlaza el ods consolidado hasta el 4T de 2025
+    example: curl -sO "https://transparencia.gob.es/content/dam/transparencia_home/derechodeacceso/odsdenegatorias/Denegatorias_publicar_completo_hasta_4T_2025.ods"
+    returns: "ods de una hoja (4T_2025_Publicar) con título y cabecera en la fila 2; Expediente, Ministerio, Asunto, Fecha de la resolución dd/mm/aaaa, causas del art. 14.1 marcadas con X y enlace al PDF; 662 resoluciones"
 quirks: [static-html, url-drift]
+ids: [dir3]
 gotchas:
   - El portal se rediseñó (Adobe Experience Manager); las rutas transparencia_Home/index/... de la ficha anterior devuelven 404 o redirigen. Las nuevas cuelgan de /publicidad-activa/por-materias/ y /derecho-acceso/.
   - Cada página pesa 400 KB porque incluye el menú completo; el contenido propio va al final del HTML.
-  - En la verificación, las páginas de contratos, convenios y subvenciones no enlazan ficheros descargables; el detalle por expediente está en PLACSP y BDNS (fichas propias).
-  - Los xlsx llevan la fecha en el nombre (datos_2026-06.VersionDefinitiva.xlsx); rascar la página para obtener el vigente.
+  - Contratos, convenios, retribuciones y actividad privada no se enlazan como ficheros; se consultan y exportan en servicios-buscador. Las subvenciones remiten a la BDNS y la agenda de altos cargos no enlaza datos.
+  - La exportación admite como máximo 2000 filas (la página lo avisa; 2001 da 500) y contratos tiene 835607; trocear por ente (DIR3 de cada ministerio u órgano).
+  - datos_{AAAA}-{MM}.xlsx, mensual y enlazado en Portal en cifras, solo trae el tráfico del portal; el derecho de acceso va en el .VersionDefinitiva trimestral que enlaza su página (2026-06 el 01/10/2026).
+  - Los meses sin fichero y el año en curso de resoluciones denegatorias (resolucionesdenegatorias2026) dan 404 con una página HTML de 340 KB.
 related: [datos-gob-es-api, dir3-directorio, bdns-api, placsp-datos-abiertos]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

@@ -27,28 +27,31 @@ endpoints:
   - path: /package_show?id={name}
     desc: Ficha de un dataset con sus recursos; el CSV con datastore_active true admite datastore_search
   - path: /datastore_search?resource_id={id}&limit={n}
-    desc: Registros en JSON con fields tipados y etiqueta original en info.label; limit por defecto 100, limit alto devuelve la tabla entera
+    desc: Registros en JSON con fields tipados y etiqueta original en info.label; limit por defecto 100 y tope 32000 aplicado sin aviso; paginar con offset
     example: curl -s "https://catalogodatos.cnmc.es/api/3/action/datastore_search?resource_id=522dcc75-b5c4-4c8d-9ec3-c8d8cf66d6b2&limit=5"
-    returns: "{result:{records:[{_id, una clave por columna}], fields:[{id, type}], total, _links:{start, next}}}"
+    returns: "{help, success, result:{records:[{_id, una clave por columna}], fields:[{id, type, info:{label}}], total, limit, _links:{start, next}}}; numeric con cinco decimales (2496967.00000), fechas como text AAAA-MM-DD; _links empiezan por //api/3/"
   - path: https://catalogodatos.cnmc.es/datastore/dump/{resource_id}?format={csv|json|xml}
     desc: Volcado completo de un recurso del datastore
     example: curl -s "https://catalogodatos.cnmc.es/datastore/dump/522dcc75-b5c4-4c8d-9ec3-c8d8cf66d6b2?format=csv"
+    returns: "CSV con coma, _id en la primera columna, cabeceras normalizadas y numéricos con punto y cinco decimales (0.73200); format=json da {fields, records} con cada registro como lista y format=xml <data><row _id>"
   - path: https://catalogodatos.cnmc.es/dataset/{uuid}/resource/{id}/download/ds_{n}_{v}.{csv|json|xml}
     desc: Ficheros estáticos de cada dataset (URL en resources[].url de package_show)
+    returns: "CSV con punto y coma, coma decimal (0,732), CRLF y las etiquetas originales como cabecera (BOM UTF-8 en los recientes); JSON como lista de objetos con claves normalizadas; XML <resultado><registro>"
   - path: https://data.cnmc.es/{energia|telecomunicaciones-y-sector-audiovisual|transporte-y-postal|panel-de-hogares}
     desc: Portal de navegación (Drupal) con fichas por dataset; las descargas y la API están en catalogodatos.cnmc.es
 quirks: [url-drift, js-rendered]
 ids: []
 gotchas:
   - La API no está en data.cnmc.es (su /api/3 devuelve 404) sino en catalogodatos.cnmc.es; el portal solo enlaza a ella por JavaScript.
-  - Cada dataset publica un CSV con datastore (dump y datastore_search) y CSV, JSON y XML estáticos; uno de los resource_id que cita la documentación (8afd824c) ya no existe, comprobar con package_show.
+  - Cada dataset publica un CSV con datastore (dump y datastore_search) y CSV, JSON y XML estáticos; los resource_id que cita la documentación (8afd824c, c45b35d4) ya no existen (404), comprobar con package_show.
   - Nombres de campo normalizados sin tildes ni ñ (compannia_comercializadora_de_gas); la etiqueta original está en fields[].info.label del datastore.
-  - CSV con coma como separador, UTF-8 y cinco decimales fijos en los numéricos (2496967.00000); la primera columna siempre es _id, índice del datastore.
-  - Un dataset es una tabla de una publicación (Tabla 10, Tabla 17), no una serie; buscar por texto del título y comprobar periodo y frecuenciaActualizacion en extras.
-  - Datos de operación del sistema eléctrico (demanda, generación, PVPC) no están aquí sino en Red Eléctrica (ree-redata) y el precio marginal del mercado en omie-mercado.
+  - El dump del datastore va con coma, punto decimal y cinco decimales fijos (2496967.00000) y _id primero; el CSV estático ds_*.csv va con punto y coma, coma decimal (0,732), CRLF y etiquetas originales.
+  - Un dataset es una tabla de una publicación o de un año (precios provinciales 2025 ds_13984_1, 2026 ds_24451_1), no una serie; 50 de los 88 trimestrales no se tocan desde 2024, mirar periodo y metadata_modified.
+  - datastore_search recorta limit a 32000 sin error (result.limit dice el aplicado) y _links.next empieza por //api/3/, que urljoin toma como host; paginar con offset sobre el host o usar el dump.
+  - Demanda, generación y PVPC actuales no están aquí (solo precio final horario de 2019 a 2021) sino en ree-redata; el precio marginal del mercado, en omie-mercado.
 tips:
   - "pandas.read_csv('https://catalogodatos.cnmc.es/datastore/dump/{id}') carga la tabla directamente; para el catálogo completo, package_search?rows=1000 y fq=organization:org_energia."
-  - Ejemplos oficiales de uso de la API en gitlab.cnmc.es/cnmcdata/cnmcdata-api-ejemplos.
+  - package_search?q=title:"Precios diarios provinciales"&sort=metadata_modified desc&rows=1 devuelve el dataset del último año, que cambia de name cada año.
 related: [minetur-precios-carburantes, miteco-energia-estadisticas, ree-redata, omie-mercado]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

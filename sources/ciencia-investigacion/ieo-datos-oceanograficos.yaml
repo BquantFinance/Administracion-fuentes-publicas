@@ -6,29 +6,31 @@ level: age
 sector: ciencia-investigacion
 tags: [oceanografia, campanas, csw, geonetwork, seadatanet, temperatura, salinidad, ieo, csic]
 summary: >-
-  Catálogo GeoNetwork del centro de datos oceanográficos del IEO con 7.582 registros (campañas, datasets y
-  series) consultable por CSW 2.0.2 (listado paginado y metadato ISO 19139) y por la API de búsqueda
-  Elasticsearch de GeoNetwork. El ERDDAP de datos no respondió desde el entorno.
+  Catálogo GeoNetwork del centro de datos oceanográficos del IEO con 7.582 registros (sobre todo campañas, más
+  corrientes, batimetrías, datasets y series) por CSW 2.0.2 (listado y metadato ISO 19139) y por la API
+  Elasticsearch de GeoNetwork. Los datos se piden en SeaDataNet; erddap.ieo.es no resuelve.
 access: [ogc, api-rest, portal]
 auth: none
 formats: [xml, json]
 update: irregular
-coverage: "7.582 registros el 30/09/2026; campañas desde los años 2000 según los identificadores"
+coverage: "Campañas de 1914 a 2026 según la fecha del recurso; 7.582 registros por CSW el 01/10/2026"
 license: Reutilización libre con cita de la fuente
 base_url: https://nodc.ieo.es/geonetwork/srv/spa/csw
 docs_url: https://ieo.csic.es/datos-oceanograficos/
 endpoints:
   - path: ?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecords&resultType=results&typeNames=csw:Record&ElementSetName=brief&maxRecords={n}&startPosition={p}
-    desc: Listado paginado (numberOfRecordsMatched 7582; cada registro con dc:identifier, dc:title, dc:type y BoundingBox WGS84); resultType=hits solo cuenta
+    desc: Listado paginado (numberOfRecordsMatched 7582; maxRecords=500 funciona); resultType=hits solo cuenta
     example: curl -s "https://nodc.ieo.es/geonetwork/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecords&resultType=results&typeNames=csw:Record&ElementSetName=brief&maxRecords=10&startPosition=1"
+    returns: "XML csw:SearchResults (numberOfRecordsMatched, numberOfRecordsReturned, nextRecord) con csw:BriefRecord (dc:identifier, dc:title, dc:type, ows:BoundingBox EPSG:4326 en orden latitud longitud, 43.00 -6.50)"
   - path: ?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecordById&ElementSetName=full&outputSchema=http://www.isotc211.org/2005/gmd&ID={id}
     desc: Metadato ISO 19139 completo (gmd:MD_Metadata) de un registro por su identificador (urn:SDN:CSR:LOCAL:... en campañas)
     example: curl -s "https://nodc.ieo.es/geonetwork/srv/spa/csw?SERVICE=CSW&VERSION=2.0.2&REQUEST=GetRecordById&ElementSetName=full&outputSchema=http://www.isotc211.org/2005/gmd&ID=urn:SDN:CSR:LOCAL:29JR200311060"
+    returns: "csw:GetRecordByIdResponse con gmd:MD_Metadata (45 KB en el ejemplo): fileIdentifier, fechas, organizaciones y gmd:URL hacia SeaDataNet; un ID inexistente devuelve el elemento vacío con HTTP 200"
   - path: https://nodc.ieo.es/geonetwork/srv/api/search/records/_search
-    desc: Búsqueda de texto libre por POST JSON (Elasticsearch de GeoNetwork; query_string, size, _source); hits.hits[]._source con resourceTitleObject y resourceType
+    desc: Búsqueda por POST JSON (Elasticsearch de GeoNetwork; query_string, term, size, _source, aggs); no exige cabecera Accept
     example: |-
       curl -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{"query":{"query_string":{"query":"temperatura"}},"size":5}' "https://nodc.ieo.es/geonetwork/srv/api/search/records/_search"
-    returns: "Elasticsearch {hits:{total:{value}, hits:[{_id, _source:{metadataIdentifier, resourceTitleObject{default}, resourceAbstractObject, resourceType[], link:[{protocol, url, name}], format[], Org, inspireTheme, dateStamp}}]}}"
+    returns: "Elasticsearch {hits:{total:{value, relation}, hits:[{_id, _source:{metadataIdentifier, resourceTitleObject{default, langspa, langeng}, resourceType[], link:[{protocol, url, name}], format[], Org, inspireTheme, dateStamp, resourceTemporalDateRange}}]}}; 11 resultados en el ejemplo"
   - path: https://nodc.ieo.es/geonetwork/srv/spa/catalog.search
     desc: Interfaz web del catálogo (JavaScript); las fichas se enlazan como #/metadata/{uuid}
 quirks: [errors-html-or-xml, js-rendered]
@@ -36,10 +38,16 @@ ids: []
 gotchas:
   - Los filtros CQL_TEXT (AnyText like, dc:title like) responden 200 con un ows:ExceptionReport (UnknownFormatConversionException); filtrar con la API _search o recorrer el listado completo.
   - La API antigua srv/spa/q responde 500 con el texto "Use ES search instead".
-  - Los primeros miles de registros son campañas (dc:type campañas, identificador SeaDataNet urn:SDN:CSR:LOCAL); los datasets con descarga se localizan mejor con _search por resourceType.
-  - erddap.ieo.es no resolvió desde el entorno de verificación (30/09/2026); solo se verificó el catálogo, no la descarga de perfiles o series.
+  - Los datos no se sirven aquí; los enlaces del metadato (php_geonetwork/2csr3.php y 2cdi3.php?ieoid=) redirigen a csr.seadatanet.org y cdi.seadatanet.org, donde se piden.
+  - Las gmd:URL llevan saltos de línea y tabuladores dentro (2csr3.php?ieoid= seguido de espacios y 29JR200311060); quitar el espacio en blanco antes de pedirlas.
+  - nextRecord no vuelve a 0 al acabar (7583 tras el último registro) y un startPosition mayor que el total da 200 con ows:ExceptionReport; parar cuando numberOfRecordsReturned < maxRecords.
+  - ows:BoundingBox va en EPSG:4326 con orden latitud longitud (LowerCorner 43.00 -6.50); invertirlo antes de usarlo como x y.
+  - Los registros son sobre todo campañas (7.100 de 7.599 documentos en _search; currents 201, dataset 22, series 19); _search cuenta 7.599 y el CSW 7.582, no mezclar totales.
+  - erddap.ieo.es no resuelve (NXDOMAIN en los DNS de ieo.es, 01/10/2026) y la página de datos oceanográficos no enlaza otro servicio de datos; solo se verificó el catálogo.
 tips:
-  - Paginar con startPosition y nextRecord de la respuesta; maxRecords=100 funciona.
+  - Paginar con startPosition y nextRecord de la respuesta; maxRecords=500 funciona (301 KB por página en brief).
+  - En _search, _source con la lista de campos (metadataIdentifier, resourceTitleObject.default, link.url) baja la respuesta de 182 KB a 3 KB para 5 resultados.
+  - Una petición con size 0 y aggs (terms sobre resourceType, date_histogram sobre creationDateForResource) resume el catálogo sin paginar.
 related: [gbif-es, csic-digital, puertos-estado-datos, igme-geologia]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

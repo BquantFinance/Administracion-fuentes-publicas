@@ -13,26 +13,30 @@ access: [download]
 auth: none
 formats: [xlsx, pdf]
 update: annual
-coverage: "Ejercicios 2014-2025 (64 xlsx); los años sin presupuesto aprobado aparecen como proyecto (2019-P, 2023-P, 2024-P, 2025-P)"
+coverage: "Carpetas 2014 a 2019, 2021 a 2023, 2019-P, 2023-P, 2024-P y 2025-P (64 xlsx); cada cuadro trae la serie desde 1995 (libros de 2019) o desde 2017 (2025-P)"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/DocumentacionEstadisticas/Estadisticas/Paginas/Estadisticas.aspx
 docs_url: https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/DocumentacionEstadisticas/Documentacion/Paginas/Documentacion.aspx
 endpoints:
   - path: https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/accesodocumentacion/DocumentacionEstadisticas/Estadisticas/Documents/{AAAA|AAAA-P}/{NN nombre}.xlsx
     desc: Un libro por bloque y ejercicio; 01 PGE Consolidados, 02 Presupuestos del Estado, 03 Seguridad Social, 04 Organismos Autónomos, 05 resto de entes
-    example: curl -sO "https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/accesodocumentacion/DocumentacionEstadisticas/Estadisticas/Documents/2025-P/02%20Presupuestos%20del%20Estado.xlsx"
+    example: curl -sO -A "Mozilla/5.0" "https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/accesodocumentacion/DocumentacionEstadisticas/Estadisticas/Documents/2025-P/02%20Presupuestos%20del%20Estado.xlsx"
+    returns: "xlsx con hoja Estadística (portada con la fecha, Enero 2026) y una hoja por cuadro; título en la fila 4, Millones de euros en la 5 y cabecera en la 6 con un ejercicio por columna; subtotales como fórmulas con valor en caché; nota (P) Proyecto"
   - path: https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/DocumentacionEstadisticas/Estadisticas/Paginas/Estadisticas.aspx
     desc: Página índice con los 64 enlaces xlsx y sus PDF (SharePoint; los enlaces están en el HTML)
-    example: curl -s "https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/DocumentacionEstadisticas/Estadisticas/Paginas/Estadisticas.aspx" | grep -o 'href="[^"]*\.xlsx"'
-quirks: [static-html]
+    example: curl -s -A "Mozilla/5.0" "https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/DocumentacionEstadisticas/Estadisticas/Paginas/Estadisticas.aspx" | grep -o 'href="[^"]*\.xlsx"'
+quirks: [static-html, user-agent-browser]
 ids: []
 gotchas:
-  - Los nombres llevan espacios y tildes (02 Presupuestos del Estado.xlsx) y cambian entre años (05 resto Entes presupuesto limitativo en 2023, resto de Entidades del SP en 2025-P); tomar los enlaces de la página.
-  - Cada libro abre con una hoja índice (Estadística) y una hoja por cuadro (11, 12.1, 12.2, 13...); las hojas de cuadro llevan filas de título vacías antes de la cabecera.
-  - Los ejercicios con presupuesto prorrogado solo tienen la versión proyecto (sufijo -P); no existe carpeta 2020 ni 2024 sin sufijo.
+  - Con el User-Agent de curl o de python-requests el servidor cierra la conexión sin responder (curl 52, Empty reply from server); con Mozilla/5.0 o el de urllib responde 200.
+  - Los nombres llevan espacios y tildes y cambian entre años (02 Presupuesto del Estado hasta 2016 y Presupuestos desde 2017; el 05 cambia en 2023, 2023-P y 2024-P); tomar los enlaces de la página.
+  - Las hojas de cuadro tienen nombres irregulares (11, 12.1, 141 en el libro 01; 21, 221 en el 02); recorrerlas todas en vez de fijar nombres.
+  - Las cabeceras de ejercicio mezclan número y texto con espacios y llamadas (2017, ' 2018-P', '2013 (**)', '1996 base'); normalizar antes de pivotar.
+  - No hay carpeta 2020 ni 2026 y 2015 no tiene el libro 01; 2019 y 2023 tienen versión sin sufijo y -P, y 2024 y 2025 solo -P.
   - Es el presupuesto aprobado o proyectado, no la ejecución; la ejecución mensual está en igae-ejecucion-presupuestaria.
 tips:
-  - "pd.read_excel(url, sheet_name=None, header=None) carga todas las hojas; localizar la cabecera por la primera fila con texto en la primera columna."
+  - "pd.read_excel(url, sheet_name=None, header=5) carga todas las hojas con la cabecera de los cuadros; pandas descarga con urllib, cuyo User-Agent sí acepta el servidor."
+  - La serie larga sale de dos libros, 2019-P (1995 a 2019-P) y 2025-P (2017 a 2025-P), con los mismos cuadros por hoja.
 related: [igae-ejecucion-presupuestaria, hacienda-ovef, tesoro-estadisticas]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

@@ -6,36 +6,53 @@ level: age
 sector: transporte-movilidad
 tags: [puertos, trafico-portuario, contenedores, mercancias, oceanografia, boyas, oleaje, mareas, portus]
 summary: >-
-  Cuadros resumen mensuales de tráfico por autoridad portuaria en xlsx (mercancías por naturaleza, líquidos,
-  sólidos, mercancía general, contenedores, pesca), memorias anuales en PDF y Portus, aplicación de datos
-  oceanográficos en tiempo real, históricos y predicciones con API interna.
-access: [download, portal]
+  Cuadros mensuales de tráfico por autoridad portuaria en xlsx desde 2012 (graneles, mercancía general,
+  contenedores, pasajeros, pesca), anuario y memorias en PDF, y Portus, visor oceanográfico cuya API interna
+  da sin clave mareas previstas y último dato de boyas y mareógrafos.
+access: [download, portal, api-rest]
 auth: none
 formats: [xlsx, pdf, html, json]
 update: monthly
-coverage: "Cuadros mensuales del año en curso y anteriores según selector; oceanografía en tiempo real"
+coverage: "Cuadros mensuales de enero de 2012 a agosto de 2026; anuario 2021-2025; oceanografía en tiempo real y mareas previstas a unos tres días"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.puertos.es/datos/estadisticas/mensuales
 docs_url: https://bancodatos.puertos.es/BD/peticiones/Manual_Usuario_Descargaportus.pdf
 endpoints:
-  - path: https://www.puertos.es/datos/estadisticas/mensuales
-    desc: Selector por año con enlaces "Descargar XLS" y PDF de cada mes (title del enlace con el nombre CuadrosResumen_{AAAA}_{MM}.xlsx)
-  - path: https://www.puertos.es/file-download/download/private/{id}
-    desc: Descarga directa del xlsx mensual (1,2 MB; 12 hojas, id opaco por fichero, por ejemplo 6200 para agosto de 2026)
+  - path: https://www.puertos.es/datos/estadisticas/mensuales?date_value={n}
+    desc: Página de un año con un bloque por mes (time datetime) y enlaces Descargar XLS y PDF; n es un índice, 1 para 2026 hasta 15 para 2012, no el año
+    example: curl -s "https://www.puertos.es/datos/estadisticas/mensuales?date_value=2" | grep -o 'time datetime="[^"]*"\|download/[a-z]*/[0-9]*" type="[^;"]*'
+  - path: https://www.puertos.es/file-download/download/{private|public}/{id}
+    desc: Descarga directa del xlsx mensual (1,2 MB, 45 hojas) o su PDF; id opaco por fichero, por ejemplo 6200 para agosto de 2026
     example: curl -sSL -o CuadrosResumen_2026_08.xlsx "https://www.puertos.es/file-download/download/private/6200"
+    returns: "xlsx con Portada, Cálculo, Resumen general y una hoja por magnitud (Total tráfico, TEUS, Pasajeros total...); cabecera en filas 5 y 6 (mes y acumulado de dos años), una fila por autoridad portuaria (28) y TOTAL; toneladas con decimales y Var. (%) en porcentaje"
   - path: https://www.puertos.es/datos/estadisticas/anuales
-    desc: Memorias anuales por autoridad portuaria en PDF (system/files/{AAAA-MM}/Memoria Anual {AAAA} AP {puerto}.pdf)
+    desc: Anuario Estadístico OPPE en PDF (2021 a 2025; 25 MB el de 2025) y memorias anuales de 2024 por autoridad portuaria, en system/files/{AAAA-MM}/
+  - path: https://portus.puertos.es/portussvr/api/ubicaciones/
+    desc: Lista JSON de 916 ubicaciones (48 puertos, 627 playas, 241 localidades) con id, nombre, latitud y longitud; API interna de Portus sin documentar
+    example: curl -s "https://portus.puertos.es/portussvr/api/ubicaciones/"
+  - path: https://portus.puertos.es/portussvr/api/predData/portus/SEA_LEVEL_PLEABAJA/{id}?locale=es
+    desc: Pleamares y bajamares previstas de un puerto (id de ubicaciones/); estaciones/nearest/{id} da el mareógrafo más cercano
+    example: curl -s "https://portus.puertos.es/portussvr/api/predData/portus/SEA_LEVEL_PLEABAJA/12130?locale=es"
+    returns: "Lista JSON de unos 11 extremos {fecha 'AAAA-MM-DD hh:mm:ss.0' sin zona y coherente con UTC, datos:[{nombreParametro indicador (1.0 pleamar, 0.0 bajamar) y nivel en metros, valor como cadena}], ceroRef}"
+  - path: https://portus.puertos.es/portussvr/api/lastData/station/{id}?locale=es
+    desc: Último dato de una estación por POST con la lista de variables en el cuerpo (SEA_LEVEL en mareógrafos); metadatos en estaciones/hist?id={id}&locale=es
+    example: |-
+      curl -s -X POST -H "Content-Type: application/json" -d '["SEA_LEVEL"]' "https://portus.puertos.es/portussvr/api/lastData/station/3219?locale=es"
+    returns: "{fecha 'AAAA-MM-DD hh:mm:ss.0' en UTC sin zona, datos:[{nombreParametro, paramEseoo, valor como cadena entera, factor, unidad, averia}]}; la magnitud es valor/factor (1960 con factor 1000 son 1,96 m)"
   - path: https://portus.puertos.es/
-    desc: Portus, visor Vue con estaciones (boyas, mareógrafos, radar HF, puntos de modelo) sobre la API interna https://portus.puertos.es/portussvr/api
+    desc: Portus, visor Vue con estaciones (boyas, mareógrafos, radar HF, puntos de modelo) que consume la API https://portus.puertos.es/portussvr/api
 quirks: [js-rendered, url-drift]
 ids: []
 gotchas:
-  - Las rutas SharePoint antiguas (es-es/estadisticas/Paginas/*.aspx) redirigen a /datos/estadisticas/...; /es-es/estadisticas responde 403 (estadisticas-bk).
-  - Los xlsx no tienen URL por fecha; el id numérico de file-download hay que leerlo del HTML de la página del año (atributo title con el nombre del fichero).
-  - El cuadro mensual tiene hojas Portada, Cálculo y Resumen general antes de las tablas, con cabeceras en varias filas; localizar la fila de cabecera por hoja.
-  - No localicé serie histórica en xlsx en la web nueva; hay que descargar los cuadros mes a mes y apilarlos.
-  - La API de Portus (portussvr/api) no está documentada y sus rutas se construyen en el código; las probadas a mano responden 404. Los históricos oceanográficos se piden por formulario según el manual de descarga.
-tips: []
+  - Las rutas SharePoint antiguas (es-es/estadisticas/Paginas/*.aspx) redirigen a /datos/estadisticas/...; /es-es/estadisticas redirige a estadisticas-bk, que responde 403.
+  - date_value no es el año sino su posición en el selector (2 es 2025); date_value=2025 devuelve la página sin ficheros y sin error.
+  - Los xlsx no tienen URL por fecha y el title del enlace no sigue un patrón (CuadrosResumen_2022_12.xlsx, 01 Enero 2022.xlsx); emparejar cada id con el time datetime de su bloque y el tipo con el atributo type.
+  - El cuadro mensual tiene 45 hojas con cabeceras en dos filas y ' ' como variación sin base; Resumen naturalezas3 está vacía y llena de #DIV/0!, la buena es Resumen naturalezas.
+  - Las hojas Evolución Mensual e Interanual son plantillas internas con datos de 2019 a 2022; no sirven como serie. No localicé serie histórica en xlsx; hay que apilar los cuadros mes a mes.
+  - Los nombres de los PDF de anuario mezclan í precompuesta (%C3%AD) y descompuesta (i%CC%81) según el año; copiar el href tal cual en vez de construir la URL.
+  - La API de Portus no está documentada y algunas rutas responden 404 en JSON (mapDomainResources/); los históricos oceanográficos se piden por formulario según el manual de descarga.
+tips:
+  - Para la marea de un puerto, tomar su id en ubicaciones/ (A Coruña 12130) y pedir predData; para el dato observado, estaciones/nearest/{id} y después lastData/station con POST.
 related: [mapa-pesca, aemet-opendata, mitma-boletin-estadistico-online]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

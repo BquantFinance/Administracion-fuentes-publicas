@@ -6,45 +6,54 @@ level: age
 sector: empleo-seguridad-social
 tags: [seguridad-social, afiliacion, pensiones, cotizaciones, autonomos, regimenes, ingreso-minimo-vital, mcvl]
 summary: >-
-  Afiliación (media mensual y último día) por régimen, provincia, CNAE, sexo y municipio; pensiones contributivas
-  por clase e importe; Ingreso Mínimo Vital; bases de cotización; Muestra Continua de Vidas Laborales bajo
-  solicitud. Excel mensuales y anuales servidos por un gestor de contenidos.
+  Afiliación (media mensual y último día) por régimen, provincia, CNAE, sexo y municipio, la municipal en un xlsx
+  largo con URL fija; pensiones contributivas por clase e importe; nómina del Ingreso Mínimo Vital; bases de
+  cotización; Muestra Continua de Vidas Laborales bajo solicitud.
 access: [download, portal]
 auth: none
 formats: [xlsx, pdf]
 update: monthly
-coverage: "Afiliación media con ficheros anuales y serie por regímenes; pensiones y afiliación mensuales del año en curso"
+coverage: "Afiliación media en xlsx anuales desde 2021 y serie por regímenes; afiliación municipal mensual desde enero de 2023; pensiones del último mes; nóminas del IMV de 2024 a 2026"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas
 docs_url: https://www.seg-social.es/wps/portal/wss/internet/EstadisticasPresupuestosEstudios/Estadisticas
 endpoints:
-  - path: /EST8/EST10/EST290
-    desc: Afiliación media mensual; xlsx anuales (Afiliación {AAAA}.xlsx) y serie por regímenes; EST291 totales, EST292 extranjeros
+  - path: /EST8/EST10/EST290/EST291
+    desc: Afiliación media mensual, totales; Afiliación {AAAA}.xlsx de 2021 a 2026 (2026_CNAE25) y serie por regímenes; EST292 extranjeros
   - path: /EST8/EST10/EST305
-    desc: Afiliación a último día del mes por régimen, CNAE a dos dígitos, sexo y municipio
+    desc: Afiliación a último día del mes; subpáginas de totales (EST306), extranjeros (EST307), municipal y provincial por CNAE a 4 dígitos
+  - path: https://www.seg-social.es/descargas/STAT/MUNCNAE{MM}{AA}.xlsx
+    desc: Afiliados a último día por municipio, régimen, CNAE a dos dígitos y sexo en formato largo; URL fija sin uuid, 25 MB por mes
+    example: for i in 1 2 3 4 5 6 7 8; do curl -sfL -A "Mozilla/5.0" -o MUNCNAE0826.xlsx "https://www.seg-social.es/descargas/STAT/MUNCNAE0826.xlsx" && break; sleep 4; done
+    returns: "Una hoja MUNCNAE0826 de 512.982 filas con FECHA (202608), COD PROVINCIA y COD MUNICIPIO enteros sin cero inicial (1001 es 01001), nombres, COD REGIMEN, COD CNAE (float, vacío si no consta), COD SEXO y AFILIADOS como entero o texto «<5»"
   - path: /EST23/EST24
-    desc: Pensiones contributivas del mes; xlsx y pdf con nombre {SERIE}{AAAAMM} (PI, IP, JUCOVI, TC, EDPR, TRCA)
+    desc: Pensiones contributivas del mes; xlsx y pdf {SERIE}{AAAAMM} (REG, CA, TC, IP, PI, MIN, BM, ED, EDCA, EDPR, TRCA, TRPR, JUCOVI, ICONCEPTOS)
+  - path: /cbe2fda1-3ac7-4bc8-a5ec-06c178839e11
+    desc: Ingreso Mínimo Vital; nóminas en subpáginas por año ({AAAAMM}_IMV - Nómina.xlsx por CCAA y provincia), altas acumuladas, solicitudes y dosier
   - path: /EST45
-    desc: Otras prestaciones, incluido el Ingreso Mínimo Vital (subpáginas EST46, EST169, EST247, EST274, EST280, EST282)
+    desc: Otras prestaciones (incapacidad temporal EST46, nacimiento y cuidado de menor, riesgo en embarazo y lactancia, cese de actividad de autónomos); sin IMV
   - path: /EST211
     desc: Muestra Continua de Vidas Laborales; documentación y procedimiento de solicitud de los microdatos
   - path: https://www.seg-social.es/wps/wcm/connect/wss/{uuid}/{fichero}.xlsx?MOD=AJPERES
-    desc: Patrón de descarga de cualquier fichero; el uuid cambia con cada publicación y se toma del enlace de la página
-    example: curl -sL -A "Mozilla/5.0" -o PI202609.xlsx "https://www.seg-social.es/wps/wcm/connect/wss/1ac3470e-8f62-4407-b772-28f189b71be1/PI202609.xlsx?MOD=AJPERES"
-    returns: "Libros con varias hojas y títulos en varias filas; el de pensiones internacionales (PI{AAAAMM}) trae Indice_internacional, PI_país_residencia y PI_país_convenio con PAÍS y, por clase de pensión (incapacidad, jubilación, viudedad, orfandad, favor de familiares), Número e Importe (€)"
+    desc: Patrón de descarga de los demás ficheros; el uuid cambia con cada publicación y se toma del enlace de la página
+    example: for i in 1 2 3 4 5 6 7 8; do curl -sfL -A "Mozilla/5.0" -o PI202609.xlsx "https://www.seg-social.es/wps/wcm/connect/wss/1ac3470e-8f62-4407-b772-28f189b71be1/PI202609.xlsx?MOD=AJPERES" && break; sleep 4; done
+    returns: "PI{AAAAMM} trae hojas Indice_internacional (con espacio final), PI_país_residencia y PI_país_convenio; dos filas de cabecera (clase de pensión; Número e Importe (€)), fila Total, Número entero, Importe float sin redondear (5116287.280000002) y '-' como texto para cero"
 quirks: [waf-intermittent-403, url-drift, static-html]
-ids: [cnae]
+ids: [cnae, ine-municipio, ine-provincia]
 gotchas:
-  - El WAF (Akamai) responde 403 "Acceso denegado" a una de cada dos o tres peticiones, también en las descargas; reintentar la misma URL tras 2 a 5 segundos funciona.
-  - Enviar también Accept de navegador (text/html,application/xhtml+xml...); con el Accept */* de requests recibí 403 en 15 peticiones seguidas el 30/09/2026 y 200 al cambiarlo.
-  - Los códigos ESTnn son estables y se anidan (EST8/EST10/EST290); las hojas finales llevan un uuid en la ruta y cada fichero otro uuid distinto en wps/wcm/connect.
+  - El WAF (Akamai) responde 403 «Acceso denegado» a la mitad de las peticiones, también en descargas y con Accept de navegador o */* por igual (01/10/2026); reintentar la misma URL tras 4 s, hasta ocho veces.
+  - Con curl -o sin -f el 403 se guarda como un HTML de 708 bytes con el nombre del xlsx; usar -f o comprobar Content-Type antes de guardar. Un fichero inexistente sí responde 404.
+  - Las secciones se anidan por códigos ESTnn (EST8/EST10/EST290) o por uuid (IMV, afiliación municipal) y cada fichero de wcm/connect lleva otro uuid que cambia en cada publicación.
   - Afiliación media mensual (EST290) y afiliación a último día (EST305) son series distintas con cifras distintas.
   - Los xlsx tienen varias hojas con fila de título y cabeceras combinadas; no leer como CSV ni con header=0.
-  - La afiliación por actividad pasa a CNAE 2025 en 2026 (Afiliación 2026_CNAE25.xlsx) frente a CNAE 2009 en los anteriores; no encadenar series sin recodificar.
+  - En MUNCNAE los afiliados de 1 a 4 son el texto «<5» (56 % de las filas) y COD MUNICIPIO pierde el cero inicial; rellenar a cinco dígitos y no sumar «<5» como cero.
+  - Septiembre de 2025 tiene MUNCNAE0925.xlsx y la revisión MUNCNAE0925R.xlsx, que es la que enlaza la página; construir el nombre da la versión superada.
+  - La afiliación por actividad pasa a CNAE 2025 en 2026 (Afiliación 2026_CNAE25.xlsx, MUNCNAE desde 0126) frente a CNAE 2009 antes; no encadenar series sin recodificar.
   - La MCVL no se descarga; se solicita y se entrega bajo convenio.
   - eSTADISS (pensiones interactivas) vive en la sede electrónica con una URL WebSphere opaca; tomar el enlace del índice, no fijarlo.
 tips:
   - Flujo típico. GET del índice de la estadística para obtener el enlace wcm/connect vigente, descargar con las mismas cabeceras y reintentar ante 403.
+  - "Afiliación municipal: pd.read_excel('MUNCNAE0826.xlsx', engine='calamine') la lee en 13 s; COD MUNICIPIO.astype(str).str.zfill(5) da el código INE para cruzar con ine-codigos-territoriales."
 related: [sepe-estadisticas, igae-ejecucion-presupuestaria, mites-estadisticas]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

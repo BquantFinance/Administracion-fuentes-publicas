@@ -7,7 +7,7 @@ Sector `estadistica` · 7 fuentes · índice generado por `scripts/build.py`, no
 - Cualquier estadística oficial del INE (IPC, EPA, PIB, padrón, natalidad, empresas) → `ine-api-tempus`
 - Códigos INE de municipios, provincias y comunidades → `ine-codigos-territoriales`
 - Microdatos de encuestas (EPA, condiciones de vida, presupuestos familiares, censo) → `ine-microdatos`
-- Turismo (FRONTUR, EGATUR, ocupación hotelera) → `ine-api-tempus` (las operaciones son del INE; DATAESTUR (mincotur-industria-turismo) las reagrega con API de clave)
+- Turismo (FRONTUR, EGATUR, ocupación hotelera) → `ine-api-tempus` (las operaciones son del INE; DATAESTUR (mincotur-industria-turismo) las reagrega con una API que no exigió clave y da 504 a menudo)
 - Renta por sección censal (Atlas de distribución de renta) → `ine-api-tempus` (operación del INE; localizar la tabla con TABLAS_OPERACION, no verificada en esta sesión)
 - Empresas activas por actividad y tamaño (DIRCE) → `ine-api-tempus`
 - Tasa de paro, ocupados y activos (EPA) → `ine-api-tempus` (la EPA es del INE, no del SEPE)

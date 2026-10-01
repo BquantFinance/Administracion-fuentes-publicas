@@ -6,48 +6,55 @@ level: age
 sector: sanidad-medicamentos
 tags: [epidemiologia, renave, vigilancia, gripe, covid, enfermedades-transmisibles, mortalidad, momo, sivira]
 summary: >-
-  Vigilancia epidemiológica nacional: exceso de mortalidad diario MoMo en CSV (nacional y CCAA por sexo y
-  edad desde 2015), histórico COVID-19 por provincia, sexo y edad en CSV (2020-2023), boletines semanales,
-  informes anuales RENAVE e informes semanales SiVIRA (gripe, COVID-19, VRS) en PDF.
+  Vigilancia epidemiológica: exceso de mortalidad diario MoMo en CSV (nacional, CCAA y provincia por sexo y
+  edad desde 2015), histórico COVID-19 por provincia, sexo y edad en CSV (2020-2023), tablas xlsx del informe
+  semanal SiVIRA (gripe, COVID-19, VRS) y boletines e informes anuales RENAVE en PDF.
 access: [download, portal]
 auth: none
-formats: [csv, pdf, html]
+formats: [csv, xlsx, pdf, html]
 update: weekly
-coverage: "MoMo 2015-; COVID-19 2020-2023; boletines semanales 2019-; informes anuales RENAVE 2012-"
+coverage: "MoMo 2015-; COVID-19 2020-2023; SiVIRA en HTML y xlsx 2024-; boletines semanales 2019-; informes anuales RENAVE 2012-"
 license: Reutilización libre con cita de la fuente
 base_url: https://cne.isciii.es/
 docs_url: https://cne.isciii.es/servicios/enfermedades-transmisibles/vigilancia-mortalidad-momo
 endpoints:
   - path: https://momo.isciii.es/public/momo/data
-    desc: CSV completo de MoMo (719 MB, regenerado a diario hasta el día anterior); ignora la cabecera Range y envía el fichero entero, leer en streaming
+    desc: CSV completo de MoMo (719 MB, regenerado a diario; Last-Modified 06:13 UTC el 01/10/2026); no admite Range, leer en streaming
     example: curl -sS "https://momo.isciii.es/public/momo/data" | head -c 2000
-    returns: "CSV UTF-8 con ambito (nacional, ccaa, provincia), cod_ambito, cod_ine_ambito, nombre_ambito, cod_sexo, nombre_sexo, cod_gedad, nombre_gedad, fecha_defuncion, defunciones_observadas, defunciones_estimadas_base, _q01, _q99, defunciones_atrib_exc_temp, defunciones_atrib_def_temp"
+    returns: "CSV UTF-8 sin BOM, coma y textos entre comillas: ambito (nacional, ccaa, provincia), cod_ambito (ISO 3166-2, AN), cod_ine_ambito (entero sin cero inicial), cod_sexo (1, 6, all), cod_gedad, fecha_defuncion AAAA-MM-DD y defunciones_* con punto decimal, también las observadas (108.88)"
   - path: https://momo.isciii.es/panel_momo/
-    desc: Panel MoMo con gráficos por ámbito; enlaza la metodología en gesdoc.isciii.es
+    desc: Panel MoMo (flexdashboard) cuya sección Datos documenta las columnas; enlaza la metodología en gesdoc.isciii.es
   - path: https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres.csv
-    desc: COVID-19 diario por provincia de residencia, sexo y edad (38 MB; num_casos, num_hosp, num_uci, num_def); variantes _60_mas y todas_edades
+    desc: COVID-19 diario por provincia de residencia, sexo y edad, todas las edades, de 2020-01-01 a 2022-03-27 (38 MB); variantes en gotchas
     example: curl -sSL -o covid.csv "https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres.csv"
-    returns: "CSV provincia_iso,sexo,grupo_edad,fecha,num_casos,num_hosp,num_uci,num_def; una fila por provincia, sexo, grupo de edad y día desde 2020-01-01"
+    returns: "CSV ASCII con coma: provincia_iso,sexo (H, M, NC),grupo_edad (0-9 a 80+, NC),fecha AAAA-MM-DD,num_casos,num_hosp,num_uci,num_def enteros; ordenado por fecha y provincia; admite Range (206)"
   - path: https://cne.isciii.es/servicios/enfermedades-transmisibles/objetivos-boletines
-    desc: Boletín epidemiológico semanal en PDF, un documento por semana en /documents/d/cne/is-{AAMMDD}-web-pdf
+    desc: Boletín epidemiológico semanal en PDF; slugs /documents/d/cne/is_n-{nº}-{AAAAMMDD}_web desde 2023 e is-{AAMMDD}-web-pdf en 2019, con variantes
   - path: https://cne.isciii.es/servicios/enfermedades-transmisibles/informes
     desc: Informes anuales RENAVE (/documents/d/cne/ano-{AAAA} desde 2019, renave_informe_anual_{AAAA} anteriores)
   - path: https://cne.isciii.es/servicios/enfermedades-transmisibles/enfermedades-a-z/{enfermedad}
     desc: Página por enfermedad con protocolo e informes anuales (por ejemplo dengue, con informe_renave_dengue-{AAAA})
   - path: https://cne.isciii.es/servicios/enfermedades-transmisibles/enfermedades-a-z/gripe-covid-19-y-otros-virus-respiratorios
-    desc: Informes semanales SiVIRA en PDF (informe-20semanal_sivira_{SS}{AAAA}-pdf) e informes de temporada
+    desc: Índice SiVIRA; PDF hasta 2024-02 (informe-20semanal_sivira_{SS}{AAAA}-pdf) y después HTML en docsivira.isciii.es/Informe_semanal_SiVIRA_{AAAASS}.html
+  - path: https://docsivira.isciii.es/excel/tablas_informe_SiVIRA_{AAAASS}.xlsx
+    desc: Tablas del informe semanal SiVIRA (tasas de IRAs e IRAG y positividad de gripe, SARS-CoV-2 y VRS por CCAA, sexo y edad); enlazadas desde el HTML semanal
+    example: curl -sS -o sivira.xlsx "https://docsivira.isciii.es/excel/tablas_informe_SiVIRA_202638.xlsx"
+    returns: "xlsx de 74 hojas: series largas (tasa, tempo 2022-2023, ccaa como texto 1 a 19, ano_semana AAAASS) y tablas de 6 semanas por CCAA con nombre en mayúsculas sin tildes; números mezclados con textos con coma decimal (106,7) y #NUM!"
 quirks: [url-drift, static-html]
-ids: [ccaa]
+ids: [ccaa, ine-provincia]
 gotchas:
   - Las rutas cne.isciii.es/servicios/renave y /servicios/renave/boletines dan 404; el portal es Liferay y los documentos cuelgan de /documents/d/cne/{slug}, con slugs irregulares (espacios codificados como -20).
-  - MoMo es un solo CSV de 719 MB (comillas, coma); columnas ambito (nacional, ccaa), cod_ine_ambito, cod_sexo (all, 1, 6), cod_gedad, fecha_defuncion, defunciones observadas, estimadas (base, q01, q99) y por temperatura.
-  - Las estimaciones MoMo se revisan de forma retrospectiva; las últimas semanas cambian en cada descarga y las defunciones observadas de los últimos días están incompletas.
-  - Los CSV COVID no se actualizan desde el 23/01/2024; provincia_iso es el código ISO 3166-2 de provincia (A, AB, AL), no el INE, y grupo_edad NC es no consta.
-  - La página cnecovid.isciii.es/covid19/ pesa 18 MB (gráficos incrustados); ir directamente a los CSV de resources.
-  - sivira.isciii.es no respondió desde este entorno (error de proxy); los informes SiVIRA se publican como PDF en cne.isciii.es y no hay datos tabulares descargables.
-  - Los boletines y los informes anuales son PDF; los datos de enfermedades de declaración obligatoria no se publican en CSV.
+  - MoMo es un solo CSV de 719 MB y Range no sirve; con desplazamiento pequeño responde 200 con el fichero entero y con uno grande (700 MB) un 500 con una página «en mantenimiento».
+  - Las cifras MoMo se revisan hacia atrás (las últimas semanas cambian en cada descarga) y defunciones_observadas lleva decimales porque se corrige por el retraso de notificación.
+  - cod_gedad mezcla grupos solapados (+65 suma 65-74, 75-84 y +85) con all, y cod_sexo trae all; sumar todas las filas de un día cuenta varias veces.
+  - El CSV COVID de todas las edades acaba el 2022-03-27; casos_..._provres_60_mas.csv cubre 60 y más hasta 2023-07-05 y hosp_uci_def_sexo_edad_provres_todas_edades.csv (sin num_casos) va de 2022-03-28 a 2023-07-05.
+  - En los CSV COVID provincia_iso es el código ISO 3166-2 de provincia (A, AB, AL), no el INE, y NC es no consta en sexo y edad; no se actualizan desde el 23/01/2024 (Last-Modified).
+  - La página cnecovid.isciii.es/covid19/ pesa 18 MB y docsivira.isciii.es/Informe_semanal_SiVIRA_{AAAASS}.html unos 15 MB (gráficos incrustados); ir directamente a los CSV y xlsx.
+  - En el índice SiVIRA los href a PDF llevan un espacio final y los de docsivira nombres irregulares (Informe_ o informe_, SiVIRA o SIVIRA, sufijo _n{nº} en 2024); docsivira no distingue mayúsculas.
+  - El xlsx de SiVIRA declara la dimensión A1:A1 y openpyxl en modo read_only lee una sola fila si no se llama a ws.reset_dimensions().
+  - sivira.isciii.es no fue accesible desde este entorno (CONNECT rechazado por el proxy el 01/10/2026). Boletines e informes anuales son PDF; las enfermedades de declaración obligatoria no se publican en CSV.
 tips:
-  - "MoMo con pandas: read_csv(url, parse_dates=['fecha_defuncion']) y filtrar ambito == 'nacional' y cod_gedad == 'all' para la serie diaria nacional; cod_ine_ambito enlaza con el código INE de CCAA."
+  - "MoMo con pandas: read_csv(url, chunksize=10**6, dtype=str) filtrando ambito == 'nacional', cod_sexo == 'all' y cod_gedad == 'all' da la serie diaria nacional; cod_ine_ambito es el INE de CCAA o provincia."
 related: [sanidad-portal-estadistico, ine-api-tempus]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

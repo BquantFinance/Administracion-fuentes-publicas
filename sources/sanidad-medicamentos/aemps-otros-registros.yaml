@@ -6,42 +6,61 @@ level: age
 sector: sanidad-medicamentos
 tags: [ensayos-clinicos, reec, eudract, productos-sanitarios, notas-informativas, alertas, farmacovigilancia, rss]
 summary: >-
-  Registro Español de Estudios Clínicos (11.926 estudios) con buscador y ficha pública por estudio, notas
-  informativas y alertas de seguridad de medicamentos, productos sanitarios y cosméticos con RSS. Sin API
-  documentada ni descarga masiva; el REEC es una aplicación JavaScript con sesión.
-access: [portal, feed]
+  Registro Español de Estudios Clínicos (11.936 estudios el 1/10/2026) con buscador JSON por GET y detalle por
+  estudio en arrays JSON tras fijar sesión; notas informativas y alertas de seguridad por RSS y API REST de
+  WordPress (5.249 entradas). Sin API documentada ni descarga masiva del REEC.
+access: [api-rest, feed, portal]
 auth: none
-formats: [html, rss, pdf]
+formats: [json, rss, html, pdf]
 update: daily
-coverage: "REEC desde 2013; notas informativas desde 2010"
+coverage: "REEC desde 2013; notas informativas desde 2004"
 license: Reutilización libre con cita de la fuente
 base_url: https://reec.aemps.es/reec/public/web.html
 docs_url: https://www.aemps.gob.es/comunicacion/notas-informativas/notas-informativas-aemps/
 endpoints:
-  - path: https://reec.aemps.es/reec/public/web.html
-    desc: Buscador del REEC (texto libre y búsqueda avanzada); los resultados se cargan por POST a /reec/buscador/* con sesión
-  - path: https://reec.aemps.es/reec/estudio/{id}
-    desc: Ficha pública de un estudio por identificador (número EudraCT, por ejemplo 2020-000001-01)
-    example: curl -s "https://reec.aemps.es/reec/estudio/2020-000001-01"
+  - path: https://reec.aemps.es/reec/arise/search?q={texto}&correct_query=false
+    desc: Buscador del REEC por texto libre o número EudraCT o EU CT; GET sin sesión que devuelve todos los resultados de una vez
+    example: curl -s "https://reec.aemps.es/reec/arise/search?q=melanoma&correct_query=false"
+    returns: "JSON servido como text/plain ISO-8859-1 (cuerpo ASCII con escapes unicode): query, total_results, exact_match (al buscar un número) y trials[] con euct, id interno, title, indication, rank, relevance (alta o media), deprioritized y url; sin paginación (1.349 trials y 660 KB para melanoma)"
+  - path: https://reec.aemps.es/reec/estudio/{euct}
+    desc: Enlace público de un estudio (EudraCT 2018-002520-16 o EU CT 2024-513375-40-00); no trae datos, fija el estudio en la sesión y redirige
+    example: curl -s -c cj.txt -o /dev/null -w "%{http_code} %{redirect_url}\n" "https://reec.aemps.es/reec/estudio/2024-513375-40-00"
+    returns: "302 a /reec/public/detail.html con cookie JSESSIONID si el estudio existe; 302 a /reec/public/web.html si no existe, nunca 404"
+  - path: https://reec.aemps.es/reec/detalle/{getDetailIdentifiacionByIdEstudio|getDetailInformacionByIdEstudio|getDetailCentroByIdEstudio}
+    desc: Identificación, información y centros del estudio fijado en la sesión; POST con la cookie que deja /reec/estudio/{euct}
+    example: curl -s -b cj.txt -X POST "https://reec.aemps.es/reec/detalle/getDetailCentroByIdEstudio"
+    returns: "Arrays JSON posicionales sin nombres de campo; identificación con 52 posiciones (id interno, euct, estado reec.dicc.*, títulos, fechas en milisegundos epoch); centros como lista de arrays con hospital, provincia, CCAA, id de organización EMA (ORG-...) e investigador"
   - path: https://reec.aemps.es/reec/buscador/count
-    desc: Número total de estudios registrados (POST con cuerpo JSON vacío; GET responde 405)
+    desc: Número total de estudios registrados (POST con o sin cuerpo; GET responde 405)
     example: 'curl -s -X POST -H "Content-Type: application/json" -d "{}" "https://reec.aemps.es/reec/buscador/count"'
+    returns: Entero sin envoltorio (11936 el 01/10/2026) con Content-Type application/json
   - path: https://www.aemps.gob.es/feed/
-    desc: RSS 2.0 de todas las publicaciones de la AEMPS (notas informativas, alertas, boletines)
+    desc: RSS 2.0 de todas las publicaciones de la AEMPS; ?paged=2 da las 30 anteriores y /category/{slug}/feed/ filtra (seguridad-3, notasinformativas)
     example: curl -s "https://www.aemps.gob.es/feed/"
+    returns: "RSS 2.0 UTF-8 con 30 items por página (title, link, pubDate RFC 822 en +0000, varias category en CDATA, description); el primer item es el más reciente"
+  - path: https://www.aemps.gob.es/wp-json/wp/v2/posts
+    desc: API REST de WordPress con todas las publicaciones (5.249 el 01/10/2026), incluidas notas informativas y notas de seguridad
+    example: curl -s "https://www.aemps.gob.es/wp-json/wp/v2/posts?categories=312&per_page=5&_fields=id,date,link,title,class_list"
+    params: "categories=17 (notas informativas, 1.766) o 312 (seguridad, 201); after y before (AAAA-MM-DDTHH:MM:SS); search; per_page hasta 100 (101 da 400); page; order; _fields"
+    returns: "Lista JSON con id, date (hora de Madrid) y date_gmt en ISO sin zona, link, title.rendered, content.rendered en HTML, categories (ids) y class_list (category-{slug}); totales en las cabeceras X-WP-Total y X-WP-TotalPages"
   - path: https://www.aemps.gob.es/comunicacion/notas-informativas/notas-informativas-aemps/
-    desc: Listado de notas informativas por tipo (medicamentos de uso humano, veterinarios, productos sanitarios, cosméticos)
-quirks: [session-required, js-rendered, waf-blocks-bots]
-ids: []
+    desc: Listado HTML de notas informativas por tipo (uso humano, veterinarios, productos sanitarios, cosméticos) y por año con ?fec=AAAA&cat=48
+quirks: [session-required, js-rendered, errors-html-or-xml, soft-errors-200]
+ids: [ine-provincia, ccaa]
 gotchas:
-  - El REEC no tiene API documentada. Sus endpoints internos (buscador/count, getEstudiosIdByLikes, getEstudiosIdByFiltro, getEstudiosByIdSession) son POST con sesión y devuelven vacío fuera de la secuencia del buscador.
-  - Las fichas /reec/estudio/{id} son HTML sin datos estructurados; para datos completos y descarga masiva de ensayos europeos usar CTIS o EU CTR, que incluyen los españoles.
-  - La ruta /informa/ (índice y búsqueda) responde 403 Forbidden con cualquier User-Agent, pero cada nota bajo /informa/{slug}/ y el listado en /comunicacion/ responden 200.
-  - Los feeds por categoría (por ejemplo /comunicacion/notas-informativas-productos-sanitarios/feed/) existen pero vienen casi vacíos; usar el feed global y filtrar por categoría.
-  - Las alertas de productos sanitarios se publican como notas HTML y PDF sin identificador estructurado ni tabla descargable.
-  - Los datos de notificaciones de farmacovigilancia (FEDRA) no son abiertos; labofar.aemps.es (registro de laboratorios) y los registros RECOPS y RPS solo ofrecen trámites con certificado.
+  - El REEC no tiene API documentada; arise/search y buscador/count van sin sesión, pero getEstudiosIdByLikes, getEstudiosIdByFiltro y getEstudiosByIdSession guardan resultados en sesión y sueltos dan vacío.
+  - arise/search es semántico y no pagina; total_results incluye los tangenciales (relevance media, deprioritized true) y para melanoma solo 181 de 1.349 tenían relevance alta.
+  - /reec/estudio/{euct} no devuelve la ficha; la página pide los datos por POST a /reec/detalle/* con la cookie JSESSIONID, y sin ella responden 500 en HTML. Ruta con errata del servidor (getDetailIdentifiacion).
+  - Las respuestas de /reec/detalle/* son arrays sin nombres de campo; el significado de cada posición solo se deduce de /reec/resources/js/studyDetail.js.
+  - En los centros, provincia y CCAA llegan como enteros INE sin cero inicial (8 Barcelona, 9 Cataluña) y el nombre del investigador con entidades HTML (Mar&iacute;a).
+  - euct mezcla EudraCT (14 caracteres, 2018-002520-16) y EU CT de CTIS (17, 2024-513375-40-00); ambos valen en /reec/estudio/ y en q. Algunos títulos traen ¿ espurios entre palabras (Ensayo¿ ¿clínico¿).
+  - La ruta /informa/ (índice) responde 403 con cualquier User-Agent, pero cada nota bajo /informa/{slug}/ y el listado en /comunicacion/ responden 200.
+  - Los feeds de página (/comunicacion/notas-informativas-productos-sanitarios/feed/) salen vacíos; los de categoría WordPress (/category/seguridad-3/feed/) traen 30 items.
+  - En la API de WordPress /wp/v2/categories responde 401 (el slug sale de class_list) y order=asc empieza por entradas con la fecha nula -0001-11-30T00:00:00.
+  - Las alertas de productos sanitarios son notas HTML y PDF sin identificador estructurado; FEDRA (farmacovigilancia) no es abierto y labofar, RECOPS y RPS solo ofrecen trámites con certificado.
 tips:
-  - Para seguir alertas en tiempo real, sondear el feed global cada hora y filtrar por category (Notas informativas, Alertas) en cada item.
+  - Para vigilar alertas, sondear /category/seguridad-3/feed/ o /wp-json/wp/v2/posts?categories=312&after={última date} y deduplicar por id.
+  - Para datos masivos de ensayos usar CTIS o EU CTR, que incluyen los españoles; el REEC sirve el detalle de un estudio por sesión.
 related: [aemps-cima-api]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

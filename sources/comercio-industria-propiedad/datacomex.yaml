@@ -13,7 +13,7 @@ access: [api-rest, portal, download]
 auth: registration
 formats: [json, csv, xlsx, html]
 update: monthly
-coverage: "Anual y mensual desde 1995; definitivos hasta 2023, provisionales en adelante (julio de 2026 el 30/09/2026)"
+coverage: "Anual y mensual desde 1995; definitivos hasta 2023, provisionales en adelante (julio de 2026 el 01/10/2026)"
 license: Reutilización libre con cita de la fuente
 base_url: https://datacomex.comercio.es/
 docs_url: https://datacomex.comercio.es/Data/AyudaApi
@@ -24,30 +24,34 @@ endpoints:
       curl -s -X POST -H "Content-Type: application/json" -d "{\"Usuario\":\"$DATACOMEX_USER\",\"Pass\":\"$DATACOMEX_PASS\"}" "https://comercio.serviciosmin.gob.es/DatacomexAPI/IniciarSesion" | sed 's/^"token://; s/"$//'
   - path: https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f={E|I|I/E}&pe={periodo}&pa={pais}&ta={taric}&pr={provincia}
     desc: Datos en JSON (Resultados con flujo, periodo, pais, id_pais, prov, id_prov, taric, euros, kilos, mensaje); los cinco parámetros son obligatorios
-    params: "pe en AAAA, AAAAMM, LastM, LastY, ALL (anual desde 1995) o ALLM (mensual desde 1995); pa código numérico de país (001 Francia) o ALL; ta TARIC de 2 a 8 dígitos o ALL; pr INE de 2 dígitos o ALL"
+    params: "pe AAAA, AAAAMM, LastY, LastM, ALL, ALLM, D2018 (desde), H2019 (meses del año); pa 001, ALL o TOTAL; ta TARIC, ALL (capítulos), AT2 a AT6, TOTAL o H1001 (hijos); pr 28, ALL o TOTAL; listas con punto"
     example: 'curl -s -H "Authorization: Bearer $DATACOMEX_TOKEN" "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerDatos?f=E&pe=LastM&pa=ALL&ta=1001&pr=28"'
     returns: "{Resultados:[{flujo, periodo (Julio de 2026 o 2025), pais, id_pais (3 dígitos), prov, id_prov (INE), taric, euros, kilos (texto con coma decimal), mensaje (dato provisional)}]}; Resultados vacío, sin error, cuando la combinación no tiene comercio"
   - path: https://datacomex.comercio.es/Metadata/{Comex|Empresas|UEAnual|UEMensual}
-    desc: Metadatos y clasificaciones de cada base (aplicación JavaScript); no localicé descarga de la tabla de códigos de país
+    desc: Metadatos y clasificaciones de cada base (aplicación JavaScript); los códigos que pide la API están en los catálogos Obtener* de abajo
   - path: https://datacomex_v6.comercio.es/
-    desc: Versión anterior del portal, todavía en línea
+    desc: Versión anterior del portal, todavía en línea (el aviso del portal dice que por tiempo limitado)
   - path: https://comercio.serviciosmin.gob.es/DatacomexAPI/{ObtenerPaises|ObtenerPeriodos|ObtenerProvincias|ObtenerFlujos|ObtenerTarics}
-    desc: Catálogos de valores para pa, pe, pr, f y ta; responden sin token; ObtenerTarics pesa 7,5 MB (en plural, ObtenerTaric da 404)
+    desc: Catálogos de valores para pa, pe, pr, f y ta; responden sin token; ObtenerTarics pesa 7,6 MB y tarda unos 16 s (en plural, ObtenerTaric da 404)
     example: curl -s "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerPaises"
-    returns: "ObtenerPaises [{Id (001), Pais, UE}] 292; ObtenerPeriodos [{Periodo, CodPeriodo (2026, 202607), Nivel (1 año, 2 mes), DatosDefinitivos}] 411; ObtenerProvincias [{Provincia, CodProvincia (INE)}] 54; ObtenerFlujos [{Flujo, CodFlujo (E, I)}]; ObtenerTarics [{Taric, TaricPadre, Nombre, Nivel}] 7,5 MB"
+    returns: "ObtenerPaises [{Id (001), Pais, UE (UE27 o Extra UE27)}] 292; ObtenerPeriodos [{Periodo, CodPeriodo (2026, 202607), Nivel (1 año, 2 mes), DatosDefinitivos (true hasta 202312)}] 411; ObtenerProvincias [{Provincia, CodProvincia}] 54; ObtenerFlujos E, I; ObtenerTarics [{Taric, TaricPadre, Nombre, Nivel 1 a 5}] 74.540"
 quirks: [session-required, js-rendered, errors-html-or-xml]
 ids: [ine-provincia]
 gotchas:
-  - Sin token, ObtenerDatos da 401 (Se ha denegado la autorización), en XML con Accept de navegador y en JSON con application/json; token inválido, 500 sin cuerpo. Token en Authorization Bearer o access_token.
-  - El registro (nombre, correo y contraseña, sin captcha) envía un correo de activación; hasta activar la cuenta no hay token. La descarga masiva del portal también exige sesión.
-  - Si falta cualquiera de los cinco parámetros la API responde 200 con un único registro cuyo mensaje es "Error de sintaxis. Faltan parámetros"; comprobar mensaje antes de parsear.
+  - Sin token ObtenerDatos da 401 (Se ha denegado la autorización), en XML con Accept de navegador y en JSON con application/json o sin Accept; un token inválido da 500 sin cuerpo en Bearer y 401 en access_token.
+  - El registro (nombre, correo y contraseña, sin captcha) envía un correo de activación; hasta activar la cuenta no hay token. La descarga masiva y la de metadatos del portal también exigen sesión.
+  - Si falta cualquiera de los cinco parámetros la API responde 200 con un único registro cuyo mensaje es "Error de sintaxis. Faltan parámetros"; pe distingue mayúsculas (lastm da un Catch de conversión a date).
   - pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error.
-  - Los valores de pe distinguen mayúsculas (lastm da un mensaje Catch de que la cadena no se puede convertir al tipo date); ta=ALL devuelve capítulos de 2 dígitos.
   - euros y kilos llegan como texto con coma decimal; periodo es texto ("Julio de 2026", "2025"); mensaje indica dato definitivo, provisional o provisional acumulado hasta el mes.
-  - Los códigos de provincia son los del INE de dos dígitos (pr=28 Madrid); la fuente primaria es la AEAT (Aduanas).
+  - Los códigos de provincia son los del INE de dos dígitos (pr=28 Madrid), pero ObtenerProvincias añade 0 Total Nacional y 00 No determinado y no sigue el orden del código; la fuente primaria es la AEAT.
+  - En ObtenerPaises el Id 0 es Total Mundo y la marca UE27 cubre 37 códigos, con España (011), Ceuta, Melilla, históricos (002 Bélgica y Luxemburgo) y especiales (951, 978); no sirve para filtrar los 27 Estados.
+  - ObtenerTarics trunca Nombre a unos 31 caracteres tras el código, en los niveles 3 a 5 da como TaricPadre el código de 4 dígitos y trae 4.393 códigos especiales con letras (00SS, 99YYY98000).
+  - Según la ayuda, más de 1.000.000 de filas estimadas, ta=AT4 con varios periodos o ta=AT6 con varios periodos o países dan resultado null; ese límite y los valores D, H, TOTAL y AT no se probaron sin token.
+  - La ayuda pone de ejemplo ta=1001 como caballos, pero en ObtenerTarics 1001 es trigo y morcajo y caballos es 0101.
 tips:
   - Guardar el token y reutilizarlo; una llamada con pe=ALLM, un TARIC y un país devuelve toda la serie mensual desde 1995 (379 filas en 2 segundos), mejor que iterar por meses.
   - "pd.DataFrame(r.json()['Resultados']) y convertir euros y kilos con str.replace(',', '.').astype(float)."
+  - Cachear ObtenerTarics en local (7,6 MB, unos 16 s) y usar Nivel o la longitud del código para elegir el nivel de detalle.
 related: [datainvex, aeat-estadisticas]
 status: active
 verified: "2026-09-30"

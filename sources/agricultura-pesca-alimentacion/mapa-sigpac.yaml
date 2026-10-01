@@ -8,10 +8,10 @@ tags: [sigpac, parcelas-agricolas, recintos, usos-suelo, wms, ogc-api, geopackag
 summary: >-
   Recintos SIGPAC de toda España (uso, superficie, pendiente, regadío, altitud) con OGC API Features,
   consultas REST por coordenadas o códigos (referencia catastral, Red Natura, nitratos), WMS, teselas
-  vectoriales y GeoPackage por provincia y campaña. Sin clave, licencia CC BY 4.0.
+  vectoriales, listas de códigos y GeoPackage por provincia y campaña. Sin clave, licencia CC BY 4.0.
 access: [api-rest, ogc, download, portal]
 auth: none
-formats: [json, geojson, gpkg, zip, xml, pdf]
+formats: [json, geojson, gpkg, zip, xml, protobuf, pdf]
 update: annual
 coverage: "Campañas 2025 y 2026 en descarga; campaña en uso en los servicios"
 license: CC BY 4.0
@@ -19,43 +19,57 @@ base_url: https://sigpac-hubcloud.es/
 docs_url: https://sigpac-hubcloud.es/html/csp/descServicio.html
 endpoints:
   - path: https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfobypoint/{srid}/{x}/{y}.json
-    desc: Recinto que contiene un punto (códigos SIGPAC, superficie, pendiente_media, coef_regadio, uso_sigpac, altitud, wkt); con extensión .geojson devuelve GeoJSON
-    example: curl -s "https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfobypoint/4326/-3.9/40.3.json"
-    returns: "Lista de recintos [{provincia, municipio, agregado, zona, poligono, parcela, recinto, superficie (ha), pendiente_media, coef_regadio, admisibilidad, incidencias, uso_sigpac (ZU, TA, OV...), region}]"
+    desc: Recinto que contiene un punto en el srid indicado (4326 lon/lat, 4258, 25830 en metros); con extensión .geojson devuelve FeatureCollection
+    example: curl -s --compressed "https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfobypoint/4326/-3.9/40.3.json"
+    returns: "Lista [{provincia, municipio, agregado, zona, poligono, parcela, recinto (enteros), superficie (ha, 125.3768), pendiente_media (%, 7.7), coef_regadio, admisibilidad, incidencias (texto '221,235,74'), uso_sigpac (ZU, TA, OV...), region, altitud, srid, wkt}]; [] si no hay recinto"
   - path: https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfo/{pr}/{mu}/{ag}/{zo}/{po}/{pa}/{re}.json
-    desc: Propiedades de un recinto por códigos; recinfoparc devuelve todos los recintos de la parcela y recincentroid su centroide
-    example: curl -s "https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfo/28/15/0/0/3/9000/6.json"
+    desc: Propiedades de un recinto por códigos; recinfoparc/{pr}/.../{pa}.json devuelve todos los recintos de la parcela y recincentroid el centroide
+    example: curl -s --compressed "https://sigpac-hubcloud.es/servicioconsultassigpac/query/recinfo/28/15/0/0/3/9000/6.json"
+    returns: "Misma lista que recinfobypoint con srid 4258 y wkt en texto; recincentroid da [{srid, wkt POINT}]; códigos inexistentes devuelven 200 con []"
   - path: https://sigpac-hubcloud.es/servicioconsultassigpac/query/refcatparcela/{pr}/{mu}/{ag}/{zo}/{po}/{pa}.json
-    desc: Referencia catastral de la parcela SIGPAC (referencia_cat de 14 caracteres); refrecinbycoord da los códigos SIGPAC de un punto
-    example: curl -s "https://sigpac-hubcloud.es/servicioconsultassigpac/query/refcatparcela/28/15/0/0/3/9000.json"
-  - path: https://sigpac-hubcloud.es/servicioconsultassigpac/intersection/{red_natura|nitratos}/{pr}/{mu}/{ag}/{zo}/{po}/{pa}/{re}.json
-    desc: Intersección del recinto con Red Natura 2000 (lic_code, zepa_code, surface_intersection, surface_tpc) o zonas vulnerables a nitratos
+    desc: Referencia catastral de la parcela SIGPAC; refrecinbycoord/{srid}/{x}/{y}.json da la referencia SIGPAC de un punto
+    example: curl -s --compressed "https://sigpac-hubcloud.es/servicioconsultassigpac/query/refcatparcela/28/15/0/0/3/9000.json"
+    returns: "Lista con la misma fila repetida una vez por recinto [{provincia, municipio, agregado, zona, poligono, parcela, referencia_cat ('28015A00309000')}]; refrecinbycoord da [{refrecinto: '28:15:0:0:3:9000:6'}]"
+  - path: https://sigpac-hubcloud.es/servicioconsultassigpac/intersection/{red_natura|nitratos|fitosanitarios|montanera|pastos}/{pr}/{mu}/{ag}/{zo}/{po}/{pa}/{re}.json
+    desc: Intersección del recinto con Red Natura 2000, zonas vulnerables a nitratos, zonas de fitosanitarios, montanera o pastos permanentes (también .geojson)
+    example: curl -s --compressed "https://sigpac-hubcloud.es/servicioconsultassigpac/intersection/red_natura/28/15/0/0/3/9000/6.json"
+    returns: "Lista [{códigos del recinto, surface_intersection (m²), surface_tpc (porcentaje 0-100 del recinto), lic_code, lic_name, zepa_code, zepa_name}]; fitosanitarios trae descripcion en vez de los códigos LIC y ZEPA; [] sin intersección"
   - path: https://sigpac-hubcloud.es/ogcapi/collections/{recintos|cultivo_declarado|elementos_paisaje_area|elementos_paisaje_linea|elementos_paisaje_punto}/items?bbox={bbox}&limit={n}&f=json
-    desc: OGC API Features con filtro por bbox y por atributos (provincia=28); numberMatched y paginación estándar
+    desc: OGC API Features con filtro por bbox y por atributos (provincia=28&municipio=15&poligono=3...); campos filtrables en /collections/{id}/queryables
+    params: "bbox lon,lat; limit 10 por defecto y 250 como máximo (un valor mayor se recorta sin aviso); offset para paginar"
     example: curl -s "https://sigpac-hubcloud.es/ogcapi/collections/recintos/items?bbox=-3.71,40.41,-3.70,40.42&limit=5&f=json"
-    returns: "GeoJSON FeatureCollection {features:[{id, properties:{dn_pk, provincia, municipio, agregado, zona, poligono, parcela, recinto, pendiente_media, altitud}, geometry Polygon en WGS84}], numberMatched, numberReturned, links[]}"
+    returns: "GeoJSON FeatureCollection {features:[{id, properties:{dn_pk, provincia, municipio, agregado, zona, poligono, parcela, recinto, pendiente_media, altitud}, geometry Polygon CRS84}], numberMatched, numberReturned, timeStamp, links[] con rel next}; recintos no trae uso_sigpac ni superficie"
   - path: https://sigpac-hubcloud.es/geopackages/{campaña}/recintos/{PP}_{PROVINCIA}_rec_{campaña}_{AAAAMMDD}_gpkg.zip
-    desc: Descarga masiva por provincia (50 ficheros de 200 a 900 MB por campaña; listado en el directorio geopackages/{campaña}/recintos/ y en elementos_del_paisaje/)
+    desc: Descarga por provincia (50 zip de 120 MB a 1,35 GB, 34 GB en 2026); directorios recintos, elementos_del_paisaje y, en 2025, cultivo_declarado
     example: curl -sSL -o 01_ALAVA.zip "https://sigpac-hubcloud.es/geopackages/2026/recintos/01_ALAVA_rec_2026_20251201_gpkg.zip"
   - path: https://sigpac-hubcloud.es/wms?SERVICE=WMS&REQUEST=GetCapabilities
-    desc: WMS con capas AU.Sigpac:recinto, cultivo_declarado y e_paisaje (CRS 84, EPSG 25829-25831); réplica en https://wms.mapa.gob.es/sigpac/wms
+    desc: WMS 1.3.0 con capas AU.Sigpac:recinto, cultivo_declarado, e_paisaje, e_paisaje_linea y e_paisaje_punto (CRS:84, EPSG 4258, 4326, 3857, 25829-25831)
   - path: https://sigpac-hubcloud.es/mvt/{capa}@3857@{pbf|geojson}/{z}/{x}/{y}.{pbf|geojson}
-    desc: Teselas vectoriales de la campaña en uso (anterior/ para la previa) para recinto, cultivo_declarado y elementos del paisaje
-  - path: https://sigpac-hubcloud.es/codigossigpac/provincia.json
-    desc: Lista de códigos de provincia; las de municipio, uso y aprovechamiento anunciadas en listCod devolvieron 404 con esos nombres
+    desc: Teselas vectoriales de la campaña en uso (prefijo anterior/ para la previa) de recinto, cultivo_declarado, e_paisaje, e_paisaje_linea y e_paisaje_punto
+    example: curl -s -o tesela.geojson "https://sigpac-hubcloud.es/mvt/recinto@3857@geojson/15/16029/12369.geojson"
+    returns: "FeatureCollection en EPSG:3857 (metros) con properties provincia, municipio, agregado, zona, poligono, parcela, recinto, pendiente_media (décimas, 77), altitud, uso_sigpac, coef_regadio, incidencias, region; unos 700 KB por tesela z15"
+  - path: https://sigpac-hubcloud.es/codigossigpac/{lista}.json
+    desc: Listas de códigos provincia, municipio{pr} (municipio28), cod_uso_sigpac, cod_producto, cod_aprovechamiento, cod_incidencia, cod_lineasad y cod_region_2023
+    example: curl -s "https://sigpac-hubcloud.es/codigossigpac/municipio28.json"
+    returns: "{nombre, descripcion, codigos:[{codigo, descripcion}]}; codigo entero salvo en cod_uso_sigpac (texto, AG, TA...); municipio28 tiene 179 municipios con Madrid en 900 y cod_producto 933 productos"
 quirks: [url-drift]
-ids: [referencia-sigpac, referencia-catastral, ine-provincia, ine-municipio]
+ids: [referencia-sigpac, referencia-catastral, ine-provincia]
 gotchas:
-  - Los códigos de provincia y municipio de SIGPAC son los del INE (28/15 es Madrid/Alcorcón) y agregado y zona suelen ser 0; la referencia completa se escribe pr:mu:ag:zo:po:pa:re (28:15:0:0:3:9000:6).
-  - Las consultas por códigos devuelven la geometría en srid 4258 (ETRS89) y las consultas por punto en el srid pedido; wkt en texto, no GeoJSON, salvo con extensión .geojson.
-  - refcatparcela repite la misma fila varias veces (una por recinto); deduplicar. La referencia catastral es la de 14 caracteres de la parcela rústica.
-  - Códigos incorrectos devuelven 400 Bad Request sin cuerpo JSON; comprobar antes con refrecinbycoord o recinfobypoint.
-  - Las capas cambian cada campaña y los recintos se renumeran; los GeoPackages se publican por campaña (directorios 2025 y 2026) con la fecha de generación en el nombre.
-  - La descarga.aspx de mapa.gob.es citada antes da 404; el visor sigpac.mapa.gob.es/fega/visor es un componente web (wc-vsp.js de 3,6 MB) sin URL de datos propia.
+  - El municipio es el código del Catastro, no el del INE; las capitales son 900 (Madrid 28:900, INE 28079; igual Toledo, Sevilla y Zaragoza) y 28:15 es Arroyomolinos. En los no capitales probados coincidió con el INE.
+  - Las consultas de servicioconsultassigpac llegan siempre en gzip con Content-Encoding aunque no se pida; curl sin --compressed y urllib entregan bytes comprimidos, requests descomprime solo.
+  - Un recinto, parcela o punto inexistente devuelve 200 con []; solo un código no numérico da 400 con el texto plano Bad Request.
+  - refcatparcela repite la fila una vez por recinto (deduplicar) y referencia_cat suele tener 14 caracteres, pero en algunas parcelas trae 20 (41900A020090050000IQ en Sevilla); los 14 primeros identifican la parcela.
+  - Unidades distintas; superficie del recinto en ha, surface_intersection en m², surface_tpc en porcentaje 0-100 y parc_supcult de cultivo_declarado en m² aunque la documentación de MVT diga áreas.
+  - En las teselas MVT pendiente_media va en décimas de porcentaje (77) y en REST y OGC API con decimal (7.7).
+  - La colección recintos de la OGC API no trae uso_sigpac ni superficie; para el uso en bloque, teselas MVT geojson o GeoPackage.
+  - Las capas cambian cada campaña y los recintos se renumeran; la fecha del nombre de cada GeoPackage varía por provincia (20251025, 20251201, 20251215) y el listado IIS usa HREF en mayúsculas con espacios y Ñ codificados.
+  - La descarga.aspx de mapa.gob.es da 404, la réplica WMS wms.mapa.gob.es/sigpac/wms respondió 502 (01/10/2026) y el visor sigpac.mapa.gob.es/fega/visor es un componente web (wc-vsp.js) sin URL de datos propia.
   - Los Excel y visores de las CCAA con SIGPAC propio (por ejemplo Cataluña) pueden diferir; el catálogo del FEGA es la referencia estatal.
 tips:
   - Cruce parcela agrícola con catastro en dos llamadas. refrecinbycoord con las coordenadas, refcatparcela con los códigos; después Consulta_DNPRC de la ficha catastro-ovc para el detalle catastral.
-  - "Para procesar una provincia entera, descargar el GeoPackage y leerlo con geopandas.read_file(zip, layer=...) o con ogr2ogr; para consultas puntuales masivas, OGC API con bbox pequeños y limit alto."
+  - "Para procesar una provincia entera, descargar el GeoPackage y leerlo con geopandas.read_file(zip, layer=...) o con ogr2ogr; para muchas consultas puntuales, OGC API con bbox pequeños, limit=250 y el enlace next."
+  - Cargar una vez cod_uso_sigpac, cod_producto y cod_incidencia de codigossigpac para traducir uso_sigpac, parc_producto e incidencias (lista de códigos separados por coma).
+  - La capa cultivo_declarado (OGC API, MVT o GeoPackage 2025) da por recinto el producto declarado en la PAC, secano o regadío (parc_sistexp) y el número de expediente.
 related: [catastro-ovc, fega-beneficiarios-pac, miteco-banco-datos-naturaleza]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

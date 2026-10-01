@@ -4,10 +4,11 @@ Sector `justicia-interior-seguridad` · 1 fuentes · índice generado por `scrip
 
 ## Dónde está cada cosa
 
-- Criminalidad por tipología, comunidad, provincia y municipio → `interior-criminalidad`
+- Criminalidad por tipología, comunidad, provincia y municipio → `interior-criminalidad` (balances acumulados desde enero; código INE de municipio solo desde 2024)
+- Detenciones, victimizaciones y hechos esclarecidos por provincia, sexo y edad → `interior-criminalidad` (series anuales PC-Axis 2010-2025 en /Datos2/, /Datos3/ y /Datos4/)
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
-| [interior-criminalidad](interior-criminalidad.yaml) | Ministerio del Interior – Portal Estadístico de Criminalidad (balances en PC-Axis) | download, portal | none | csv, px, xlsx, html | quarterly | latin1, js-rendered, url-drift | 2026-09-30 |
+| [interior-criminalidad](interior-criminalidad.yaml) | Ministerio del Interior – Portal Estadístico de Criminalidad (balances y series anuales) | download, portal | none | csv, px, xlsx, html | quarterly | latin1, js-rendered, static-html, errors-html-or-xml, url-drift | 2026-10-01 |
 
-- **interior-criminalidad**: Balances trimestrales de criminalidad (infracciones penales conocidas por tipología, con comparación interanual) por comunidad autónoma, provincia y municipio de más de 20.000 habitantes desde 2016, servidos con el sistema PC-Axis del INE y descargables en CSV, px y xlsx por tabla.
+- **interior-criminalidad**: Balances trimestrales acumulados de infracciones penales por tipología (CCAA, provincia, isla y municipio) desde 2016, con comparación interanual, y series anuales 2010-2025 de hechos conocidos, esclarecidos, detenciones y victimizaciones por CCAA y provincia; PC-Axis con descarga CSV, px y xlsx.

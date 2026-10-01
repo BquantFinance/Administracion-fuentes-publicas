@@ -6,30 +6,38 @@ level: age
 sector: comercio-industria-propiedad
 tags: [inversion-extranjera, inversion-exterior, ied, flujos, stock, paises, sectores]
 summary: >-
-  Flujos y stock de inversión extranjera en España y española en el exterior por país, sector y CCAA, a partir
-  del Registro de Inversiones Exteriores. Aplicación ASP.NET de consulta multidimensional (cubos Inversión
-  Extranjera e Inversión Española); no localicé API ni ficheros de descarga directa.
+  Flujos y stock de inversión extranjera en España y española en el exterior por país, sector y CCAA, del
+  Registro de Inversiones Exteriores. Aplicación ASP.NET multidimensional (cubos Inversión Extranjera e
+  Inversión Española); sin API ni descarga directa localizadas; el informe HTML sale por script.
 access: [portal]
 auth: none
 formats: [html, xlsx]
 update: quarterly
-coverage: "Registro de Inversiones Exteriores"
+coverage: "1993- (Registro de Inversiones Exteriores)"
 license: Reutilización libre con cita de la fuente
 base_url: https://datainvex.comercio.es/
 docs_url: https://datainvex.comercio.es/
 endpoints:
   - path: https://datainvex.comercio.es/init.aspx?cubo={Inversión Extranjera|Inversion Española}&idioma=es-ES
-    desc: Entrada a cada cubo; redirige a principal_invex.aspx, que carga el selector dif/seleccion.aspx?cubo=... en un marco
+    desc: Entrada a cada cubo; fija las cookies de sesión y redirige (302) a principal_invex.aspx, que carga dif/seleccion.aspx?cubo=... en un iframe
   - path: https://datainvex.comercio.es/dif/seleccion.aspx?cubo=Inversi%C3%B3n%20Extranjera
-    desc: Selector de informe y medidas (formulario con __VIEWSTATE y __EVENTVALIDATION, controles listaInforme, listaSeleccion, medidas, enviarDatos)
-quirks: [viewstate-forms, js-rendered]
+    desc: Selector de informe y medidas; formulario FormInforme que se envía por POST a la misma URL
+    params: "__VIEWSTATE, __VIEWSTATEGENERATOR, __EVENTVALIDATION, medidas (texto sin tildes), listaInforme (0 a 9), listaSeleccion (miembros elegidos en los árboles) y enviarDatos=Ver el informe"
+    returns: "HTML con los tres campos ocultos; medidas con 8 valores ('Flujos Inversion Bruta en miles de euros', neta, stock de posición, cifra de negocio, empleo, resultados, inmovilizado, reinversión); listaInforme 0 Histórico por País Último a 9 Evolución gráfica"
+  - path: https://datainvex.comercio.es/PaginaInforme.aspx?cubo=Inversi%u00f3n+Extranjera
+    desc: Informe en HTML (Reporting Services) tras el POST a seleccion.aspx y un GET a CabeceraPersonalizada.aspx?cubo=..., todo con la misma sesión
+    returns: "HTML con título, filtros aplicados ('OPERACIONES NO ETVE', Periodo=Todos los años...) y celdas en miles de euros con punto de miles y coma decimal (676.878.187,98)"
+quirks: [viewstate-forms, js-rendered, session-required]
 ids: []
 gotchas:
-  - Toda la navegación es un formulario ASP.NET con estado (__VIEWSTATE, __EVENTVALIDATION); automatizar exige reproducir cada postback en orden y con sesión.
-  - La exportación a Excel se hace desde la propia aplicación tras seleccionar el informe; no se pudo verificar por script.
+  - "Flujo que funcionó por script el 01/10/2026: GET init.aspx, GET dif/seleccion.aspx, POST con los campos ocultos, medidas, listaInforme y enviarDatos, GET CabeceraPersonalizada.aspx?cubo= y GET PaginaInforme.aspx?cubo=."
+  - Sin miembros en listaSeleccion el informe da solo el total (todos los años y países); el desglose exige los árboles JavaScript (dialogos/dimension.aspx) o el drilldown, que por script dio sesión caducada.
+  - Los errores llegan con HTTP 200 y una página «Se ha producido un error» con Código 2 (sesión caducada) o 4 (datos caducados); buscar ese texto antes de parsear.
+  - El menú de la aplicación exporta a Excel, PDF e imagen (PaginaInforme.aspx?ext=EXCEL), pero por script devolvió el error Código 4 el 01/10/2026; exportación no conseguida.
+  - Por defecto el cubo de inversión extranjera muestra OPERACIONES NO ETVE; las ETVE (entidades de tenencia de valores) se eligen en la dimensión NO ETVE vs ETVE.
   - Distingue país inmediato y país último (ETVE, holdings); elegir la dimensión correcta cambia mucho las cifras.
   - No coincide con la balanza de pagos del Banco de España por diferencias metodológicas (ficha bde-estadisticas).
 tips: []
 related: [datacomex, bde-estadisticas]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

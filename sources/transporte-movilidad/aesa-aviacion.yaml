@@ -6,45 +6,54 @@ level: age
 sector: transporte-movilidad
 tags: [aviacion, aeropuertos, pasajeros, operaciones, mercancias, trafico-aereo, aena, aeronaves, matriculas, drones]
 summary: >-
-  Informes mensuales y anuales de tráfico de Aena desde 2004 en xlsx y PDF con URL directa (pasajeros,
+  Informes mensuales y anuales de tráfico de Aena desde 2004 en Excel y PDF con URL directa (pasajeros,
   operaciones y mercancía por aeropuerto con variación interanual); cuadros por compañía y destino solo con
-  registro. Registro de aeronaves y de operadores UAS de AESA sin listado descargable.
+  registro. Aeronaves matriculadas de AESA en un PDF; operadores UAS sin listado público.
 access: [download, portal]
 auth: none
-formats: [xlsx, pdf, html]
+formats: [xlsx, xls, pdf, html]
 update: monthly
-coverage: "Informes mensuales 2004-2026 y anuales 2004-2025"
+coverage: "Informes mensuales 2004-2026 (último, agosto de 2026) y anuales 2004-2025; matrículas activas a 1-9-2026"
 license: Condiciones propias de Aena (sociedad mercantil estatal); reutilización libre con cita de la fuente en AESA
 base_url: https://www.aena.es/es/estadisticas/inicio.html
 docs_url: https://www.aena.es/es/estadisticas/glosario-y-ayuda.html
 endpoints:
   - path: https://www.aena.es/es/estadisticas/informes-mensuales.html?anio={AAAA}
-    desc: Doce bloques div.informes (id=Enero a Diciembre) con enlaces PDF y XLS a /sites/Satellite?...blobwhere={id}; años 2004-2026 en el selector
-    example: curl -s "https://www.aena.es/es/estadisticas/informes-mensuales.html?anio=2025" | grep -o 'blobwhere=[0-9]*&amp;ssbinary=true'
+    desc: Un div.informes por mes publicado (id=Enero a Diciembre) con enlaces PDF y XLS o XLSX a /sites/Satellite?...blobwhere={id}; años 2004-2026 en el selector
+    example: curl -s "https://www.aena.es/es/estadisticas/informes-mensuales.html?anio=2025" | grep -o 'blobwhere=[0-9]*'
   - path: https://www.aena.es/sites/Satellite?blobcol=urldata&blobkey=id&blobtable=MungoBlobs&blobwhere={id}&ssbinary=true
-    desc: Fichero del informe; el XLS es xlsx (55 KB) con la hoja Ranking mensual y tres bloques (pasajeros, operaciones, mercancías) por aeropuerto con total y variación
+    desc: Fichero del informe; xlsx de 30 a 81 KB desde 2022 y Excel 97 (.xls) hasta 2021; nombre real en Content-Disposition
     example: curl -sL -o aena_2025_01.xlsx "https://www.aena.es/sites/Satellite?blobcol=urldata&blobkey=id&blobtable=MungoBlobs&blobwhere=1576870695595&ssbinary=true"
+    returns: "xlsx con hojas Mozart Reports (metadato) y Ranking mensual; cabeceras en filas 5 y 6, datos desde la 8 en B:D, F:H y J:L (aeropuerto, total entero, variación como fracción o ---); 66 aeropuertos (España, Brasil y Luton), nombres con espacios finales y 5 filas Total"
   - path: https://www.aena.es/es/estadisticas/informes-anuales.html
     desc: Informes anuales 2004-2025 (22 pares PDF y XLS en una sola página); el xlsx anual tiene la hoja AÑO {AAAA} con la misma estructura que el mensual
     example: curl -sL -o aena_2025.xlsx "https://www.aena.es/sites/Satellite?blobcol=urldata&blobkey=id&blobtable=MungoBlobs&blobwhere=1576873058143&ssbinary=true"
   - path: https://www.aena.es/es/estadisticas/{informes-detallados|consultas-personalizadas}.html
-    desc: Cuadros de mando por compañía, aeropuerto y destino en MicroStrategy (informeswpa.aena.es); exigen registro e inicio de sesión (token en la URL)
+    desc: Cuadros de mando por compañía, aeropuerto y destino en MicroStrategy (informeswpa.aena.es); exigen registro e inicio de sesión Azure AD B2C (id_token en la URL)
+  - path: https://www.seguridadaerea.gob.es/sites/default/files/aeronaves_inscritas.pdf
+    desc: Relación de matrículas activas de AESA (316 páginas, 5.566 aeronaves a 1-9-2026) con matrícula, fecha, fabricante, modelo, número de serie, año, motor y clase
+    example: curl -sO "https://www.seguridadaerea.gob.es/sites/default/files/aeronaves_inscritas.pdf"
+    returns: "PDF apaisado de 1,8 MB, una fila por matrícula EC- con fecha dd/mm/aaaa, fabricante, modelo, número de serie, año de construcción, marca y modelo de motor, número de motores y clase (AVION, GLOBO, ULM - AVION...); sin titular"
   - path: https://www.seguridadaerea.gob.es/es/ambitos/aeronaves/registro-de-matriculas-de-aeronaves-civiles/registro-de-matriculas
-    desc: Registro de Matrícula de Aeronaves Civiles con cuadros estadísticos anuales en PDF (registro general, AFI, ULM); no localicé listado descargable de aeronaves
+    desc: Página del Registro de Matrícula con el PDF de aeronaves inscritas y cuadros estadísticos anuales en PDF (registro general, AFI y ULM; el último, 2023)
   - path: https://www.seguridadaerea.gob.es/es/ambitos/drones/registro-de-operador-de-drones-uas
     desc: Registro de operadores de UAS; el alta y la consulta se hacen en sede.seguridadaerea.gob.es con identificación electrónica
-quirks: [static-html, url-drift]
+quirks: [static-html, url-drift, overwritten-in-place]
 ids: []
 gotchas:
   - Los enlaces PDF y XLS están en el HTML servido de informes-mensuales.html?anio= e informes-anuales.html (div.descargas); el JavaScript solo conmuta pestañas y no hace falta navegador ni sesión.
-  - El id de blobwhere es un número opaco sin fecha (1576870695595 es enero de 2025); rascar la página en cada ejecución y emparejar cada div.informes con su texto Informe {mes} {año}.
-  - Lo etiquetado XLS es xlsx (Content-Type spreadsheetml); cabeceras en las filas 5 a 7, datos desde la 8, variaciones como fracción (0.084 es 8,4 por ciento), mercancía en kilogramos y hoja Mozart Reports de metadato.
-  - Los informes se publican como Datos provisionales; el Boletín Estadístico del MITMA (mitma-boletin-estadistico-online) da la misma serie mensual por aeropuerto con URL fija.
+  - El id de blobwhere es opaco y sin fecha (1576870695595 es enero de 2025) y el PDF no siempre lleva el id menor; emparejar cada div.informes con Informe {mes} {año} y el tipo con la etiqueta PDF, XLS o XLSX.
+  - Hasta 2021 los ficheros son Excel 97 (.xls, xlrd) con hojas y columnas que cambian por año y nombres antiguos con espacios duros (MADRID-BARAJAS); desde 2022 son xlsx con la hoja Ranking mensual o AÑO {AAAA}.
+  - Cada bloque (pasajeros, operaciones, mercancía en kilogramos) va ordenado por su propia cifra, así que la fila 10 es Gran Canaria en pasajeros y Zaragoza en mercancía; unir por nombre de aeropuerto, no por fila.
+  - La hoja incluye aeropuertos de Brasil y Londres-Luton con filas Total aeropuertos españoles, Total BOAB, Total ANB y Total Red Aena; para España usar Total aeropuertos españoles y no sumar filas.
+  - El año en curso y el anterior figuran como Datos provisionales y los años cerrados se republican como Definitivo con otro id y otro nombre de fichero; no fijar ids.
+  - El Boletín del MITMA (mitma-boletin-estadistico-online) tiene URL fija pero solo 16 aeropuertos y sin otras clases de tráfico; Madrid 2025 da 68.115.417 pasajeros frente a 68.179.054 de Aena.
   - Aena es sociedad mercantil estatal (51 por ciento público) y publica por cuenta propia; sus condiciones de reutilización no son las de la AGE.
-  - informeswpa.aena.es/MicroStrategyLibrary/api/status responde JSON sin autenticación, pero los cuadros detallados exigen usuario registrado.
-  - La ruta matriculacion-de-aeronaves de AESA responde 200 con cuerpo vacío; la información está en registro-de-matriculas-de-aeronaves-civiles y no localicé ningún Excel con el censo de aeronaves.
+  - seguridadaerea.gob.es responde 200 con una página de error de 2,5 MB (Ha ocurrido un error) a cualquier ruta inexistente, como matriculacion-de-aeronaves; comprobar el contenido, no el código.
+  - El PDF de aeronaves inscritas se sustituye en la misma URL (fecha en la cabecera de cada página) y solo lista matrículas activas; guardar copia fechada para seguir altas y bajas.
 tips:
-  - "pd.read_excel(f, sheet_name='Ranking mensual', header=None, skiprows=7, usecols='B:D') da aeropuerto, pasajeros y variación; repetir con F:H (operaciones) y J:L (mercancías)."
+  - "pd.read_excel(f, sheet_name='Ranking mensual', header=None, skiprows=7, usecols='B:D') da aeropuerto, pasajeros y variación; repetir con F:H (operaciones) y J:L (mercancías) y unir por nombre."
+  - pdftotext -layout conserva las columnas del PDF de aeronaves; los valores largos (NO DISPONIBLE, ULM - AVION) se parten en la línea anterior y la siguiente a la de la matrícula.
 related: [mitma-boletin-estadistico-online, dgt-estadisticas, ine-api-tempus, mincotur-industria-turismo]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

@@ -6,7 +6,7 @@
 ine-operaciones:
   source: ine-api-tempus
   use: "Id o Codigo como {id_o_codigo} en TABLAS_OPERACION, VARIABLES_OPERACION y VALORES_VARIABLEOPERACION; las 112 operaciones con OPERACIONES_DISPONIBLES"
-  verified: "2026-09-30"
+  verified: "2026-10-01"
   entries:
     - {code: "25", name: "IPC", note: "Índice de Precios de Consumo (IPC)"}
     - {code: "18", name: "IPCA", note: "Índice de Precios de Consumo Armonizado (IPCA)"}
@@ -47,7 +47,7 @@ ine-operaciones:
 ine-variables:
   source: ine-api-tempus
   use: "Filtro tv={variable}:{Id de valor} en DATOS_TABLA; los Id de valor salen de VALORES_VARIABLEOPERACION/{variable}/{operacion} (campo Id, no Codigo)"
-  verified: "2026-09-30"
+  verified: "2026-10-01"
   entries:
     - {code: "3", name: "Tipo de dato", note: "72 Dato base"}
     - {code: "18", name: "Sexo"}
@@ -66,7 +66,7 @@ ine-variables:
 ine-ccaa:
   source: ine-api-tempus
   use: "code es el código INE de la comunidad; note da el Id del INE para tv=70:{Id} (padrón, IPC y demás operaciones con variable 70)"
-  verified: "2026-09-30"
+  verified: "2026-10-01"
   entries:
     - {code: "00", name: "Total Nacional", note: "tv=70:16473"}
     - {code: "01", name: "Andalucía", note: "tv=70:8997"}
@@ -92,7 +92,7 @@ ine-ccaa:
 ine-provincias:
   source: ine-api-tempus
   use: "code es el código INE de la provincia (dos dígitos, también IDProvincia en carburantes e id_prov en DataComex); note da el Id para tv=115:{Id}"
-  verified: "2026-09-30"
+  verified: "2026-10-01"
   entries:
     - {code: "01", name: "Araba/Álava", note: "tv=115:2"}
     - {code: "02", name: "Albacete", note: "tv=115:3"}
@@ -150,8 +150,8 @@ ine-provincias:
 datacomex-paises:
   source: datacomex
   use: "Parámetro pa de ObtenerDatos (3 dígitos, no ISO); los 40 principales destinos de exportación de 2025; la lista completa (292, con marca UE27) la da ObtenerPaises sin token"
-  note: "951 y 952 son avituallamiento (combustible y provisiones a buques y aeronaves), no países; Corea del Sur aparece como Corea del"
-  verified: "2026-09-30"
+  note: "951 y 952 son avituallamiento (combustible y provisiones a buques y aeronaves), no países; la marca UE27 de ObtenerPaises cubre 37 códigos, no sirve para filtrar los 27 Estados"
+  verified: "2026-10-01"
   entries:
     - {code: "001", name: "Francia"}
     - {code: "004", name: "Alemania"}
@@ -172,7 +172,7 @@ datacomex-paises:
     - {code: "030", name: "Suecia"}
     - {code: "009", name: "Grecia"}
     - {code: "508", name: "Brasil"}
-    - {code: "647", name: "Emiratos Árabes"}
+    - {code: "647", name: "Emiratos Árabes Unidos"}
     - {code: "007", name: "Irlanda"}
     - {code: "732", name: "Japón"}
     - {code: "038", name: "Austria"}
@@ -184,14 +184,14 @@ datacomex-paises:
     - {code: "208", name: "Argelia"}
     - {code: "664", name: "India"}
     - {code: "800", name: "Australia"}
-    - {code: "728", name: "Corea del"}
+    - {code: "728", name: "Corea del Sur (Rep. de Corea)"}
     - {code: "512", name: "Chile"}
     - {code: "220", name: "Egipto"}
     - {code: "624", name: "Israel"}
     - {code: "388", name: "Sudáfrica"}
     - {code: "043", name: "Andorra"}
     - {code: "028", name: "Noruega"}
-    - {code: "951", name: "Avituall.y combust.intercambios"}
+    - {code: "951", name: "Avituall.y combust.intercambios comunitarios"}
     - {code: "952", name: "Avituallamiento terceros"}
 
 aemet-estaciones-capitales:
@@ -467,3 +467,27 @@ ive-bdo-consultas:
   entries:
     - {code: "V0308_C1D0355", name: "Empresas activas según tipo por municipio", note: "2017-2025"}
     - {code: "V0292_C2D0339", name: "Empresas activas por condición jurídica y tamaño, Comunitat y provincias"}
+
+inclasns-ids:
+  source: sanidad-portal-estadistico
+  use: "Parámetros areaCode, sex y year de inclasns.sanidad.gob.es/export/data; la lista completa está en los checkbox variableState-{variable}-{id} de main.html"
+  note: "areaCode no es el código INE (de 30 a 49 sin el 33); los ids de año no son correlativos; nse 71, nsc 79 y nsi 84 son los totales; un año sin dato devuelve data vacío"
+  verified: "2026-10-01"
+  entries:
+    - {code: "50", name: "España", note: "areaCode"}
+    - {code: "30", name: "Andalucía", note: "areaCode; las CCAA siguen el orden del INE de 30 a 49 saltando el 33"}
+    - {code: "43", name: "Comunidad de Madrid", note: "areaCode"}
+    - {code: "51", name: "Total", note: "sex; 1 hombre, 2 mujer"}
+    - {code: "28", name: "Último año disponible", note: "year; responde con el id del año real (92 en esperanza de vida)"}
+    - {code: "64", name: "2015", note: "year"}
+    - {code: "89", name: "2020", note: "year"}
+    - {code: "92", name: "2023", note: "year"}
+    - {code: "94", name: "2025", note: "year"}
+
+aemps-wp-categorias:
+  source: aemps-otros-registros
+  use: "categories={code} en www.aemps.gob.es/wp-json/wp/v2/posts; /wp/v2/categories responde 401, el slug sale de class_list y sirve en /category/{slug}/feed/"
+  verified: "2026-10-01"
+  entries:
+    - {code: "17", name: "Notas informativas", note: "slug notasinformativas; 1.766 entradas"}
+    - {code: "312", name: "Seguridad", note: "slug seguridad-3; 201 entradas (alertas)"}

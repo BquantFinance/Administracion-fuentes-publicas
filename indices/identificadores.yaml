@@ -21,6 +21,14 @@ ine-municipio:
       how: el Catálogo de Hospitales lo guarda con dígito de control (6 dígitos)
     - via: ine-cartografia-censal
       how: CUMUN en el shapefile de secciones censales; disolver por CUMUN da el contorno municipal del año
+    - via: interior-criminalidad
+      how: prefijo de 5 dígitos en la columna Geografía de la tabla municipal desde 2024 (antes solo el nombre)
+    - via: mivau-precios-vivienda-alquiler
+      how: CUMUN como texto en el xlsx de SERPAVI y CodINE en su GeoJSON municipal (allí CUMUN es entero)
+    - via: segsocial-estadisticas
+      how: COD MUNICIPIO de MUNCNAE{MM}{AA}.xlsx, entero sin cero inicial; rellenar a cinco dígitos
+    - via: sepe-estadisticas
+      how: código como número (28001.0) en ESTADISTICA_MUNICIPIOS.xls
 ine-provincia:
   format: 2 dígitos, 01 a 52
   regex: '^(0[1-9]|[1-4]\d|5[0-2])$'
@@ -42,7 +50,7 @@ ine-entidad-singular:
     - via: ine-codigos-territoriales
       how: búsqueda por nombre en nomen2/tabla.do (POST) con población por sexo, edad o nacionalidad desde 2000; completo en Nacional_{AAAA}.zip
     - via: mtdfp-cobertura-banda-ancha
-      how: columna Código ESP de la hoja ES del fichero de cobertura 2013-2020 (61.819 entidades)
+      how: columna Código ESP de la hoja ES del fichero de cobertura 2013-2020 (61.818 entidades)
     - via: idee-servicios
       how: codine en api-features.ign.es/collections/nuc, con polígono y habitantes
 ccaa:
@@ -50,10 +58,16 @@ ccaa:
   regex: '^(0[1-9]|1\d)$'
   example: "13"
   issuer: ine-codigos-territoriales
-  gotcha: el orden no es alfabético ni el de Eurostat (NUTS2 ES11...)
+  gotcha: el orden no es alfabético ni el de Eurostat (NUTS2 ES11...); Hacienda (deuda viva, parámetro CCAA de CONPREL) numera distinto de 10 a 17 (Extremadura 10, Madrid 12)
   joins:
     - via: isciii-cne
-      how: MoMo usa cod_ine_ambito con este código para ambito ccaa
+      how: MoMo usa cod_ine_ambito con este código para ambito ccaa, como entero sin cero inicial (1, no 01)
+    - via: cis-estudios
+      how: CCAA del CIS coincide salvo 7 y 8, intercambiados (7 Castilla-La Mancha, 8 Castilla y León)
+    - via: educacion-estadisticas-ruct
+      how: idComunidad del Registro de Centros (01 a 19) y prefijo de la columna territorial de EDUCAbase (01 ANDALUCÍA)
+    - via: aemps-otros-registros
+      how: los centros de cada estudio del REEC traen CCAA y provincia del INE como enteros sin cero inicial (9 Cataluña, 8 Barcelona)
     - via: minetur-precios-carburantes
       how: IDCCAA propio, con 07 y 08 intercambiados respecto al INE; el resto coincide
     - via: ieca-api-badea
@@ -69,6 +83,10 @@ nuts:
       how: CountrySubentityCode (NUTS-2021) en RealizedLocation de cada licitación
     - via: idee-servicios
       how: codnut1 a codnut3 en api-features.ign.es/collections/administrativeunit
+    - via: ine-cartografia-censal
+      how: CNUT0 a CNUT3 por sección; concatenados dan el NUTS3 (ES + 2 + 1 + 1 = ES211)
+    - via: mtdfp-cobertura-banda-ancha
+      how: campo nuts de las capas ArcGIS de cobertura
 seccion-censal:
   format: 10 dígitos, municipio (5) + distrito (2) + sección (3)
   regex: '^\d{10}$'
@@ -82,6 +100,8 @@ seccion-censal:
       how: renta por sección en el Atlas de distribución de renta (operación del INE)
     - via: mitma-opendata-movilidad
       how: zonificación por distritos y municipios de los estudios de movilidad (host no verificable)
+    - via: mivau-precios-vivienda-alquiler
+      how: CUSEC en la hoja Secciones censales del xlsx de SERPAVI (alquiler de 2011 a 2024)
 referencia-catastral:
   format: 14 caracteres alfanuméricos (parcela) o 20 (inmueble, con 4 dígitos y 2 letras de control)
   regex: '^[0-9A-Z]{14}(\d{4}[A-Z]{2})?$'
@@ -100,7 +120,7 @@ referencia-sigpac:
   regex: '^\d{1,2}:\d{1,3}:\d+:\d+:\d+:\d+:\d+$'
   example: 28:15:0:0:3:9000:6
   issuer: mapa-sigpac
-  gotcha: los códigos de provincia y municipio son los del INE; polígono y parcela coinciden con Catastro en rústica, el resto no
+  gotcha: la provincia es la del INE, pero el municipio es el del Catastro (capitales 900, Madrid 28:900 frente al INE 28079); polígono y parcela coinciden con Catastro en rústica
   joins:
     - via: mapa-sigpac
       how: coordenadas a recinto con refrecinbycoord; recinto a Red Natura o nitratos con intersection
@@ -139,13 +159,17 @@ dir3:
       how: datasets de un organismo con catalog/dataset/publisher/{dir3}.json
     - via: placsp-datos-abiertos
       how: cbc:ID con schemeName DIR3 identifica el órgano de contratación
+    - via: transparencia-portal
+      how: servicios-buscador/buscar.htm?ente={DIR3} filtra contratos, convenios y retribuciones (admite varios DIR3 separados por coma)
 sia:
   format: 6 o 7 dígitos
   regex: '^\d{6,7}$'
-  example: "200125"
+  example: "010170"
   issuer: pag-administracion-gob-es
-  gotcha: identifica el procedimiento, no el organismo; sin descarga abierta del catálogo SIA
-  joins: []
+  gotcha: identifica el procedimiento, no el organismo; es texto con ceros a la izquierda (210 de los 7161 de la AGE), como número deja de cruzar
+  joins:
+    - via: pag-administracion-gob-es
+      how: Listado Codigos SIA {nivel}.xlsx del CTT da el DIR3 del departamento y del centro directivo de cada procedimiento
 invente:
   format: INV y 8 dígitos, código del Inventario de Entes del Sector Público
   regex: '^INV\d{8}$'
@@ -176,24 +200,26 @@ cpv:
     - via: boe-feeds
       how: RSS de anuncios de licitación por división CPV (canal_cpv.php)
 cnae:
-  format: sección (letra A a U) o 2 a 4 dígitos (división, grupo, clase)
-  regex: '^([A-U]|\d{2,4})$'
+  format: sección (letra A a U) o 2 a 4 dígitos (división, grupo, clase); algunas fuentes escriben la clase con punto (20.14)
+  regex: '^([A-U]|\d{2,4}|\d{2}\.\d{1,2})$'
   example: "4711"
   issuer: null
   gotcha: CNAE 2025 sustituye a CNAE 2009 desde 2026 en Seguridad Social y REGCON; no encadenar series sin recodificar
   joins:
     - via: segsocial-estadisticas
-      how: afiliación por CNAE a dos dígitos (EST305)
+      how: afiliación por CNAE a dos dígitos (EST305) y en MUNCNAE (COD CNAE como número)
     - via: mites-estadisticas
-      how: REGCON filtra por cnae2009Pub y cnae2025Pub
+      how: REGCON filtra con idCnaesBusqueda, ids internos del desplegable (la división 56 es 28 en CNAE 2009 y 1676 en CNAE 2025)
     - via: miteco-prtr
-      how: inventario de complejos industriales con CNAE
+      how: CNAE-2009 con punto (20.14) en el inventario de complejos; quitar el punto para cruzar con 4 dígitos
+    - via: sepe-estadisticas
+      how: divisiones CNAE como columnas ('00' a '99') en los xls de paro y contratos por actividad
 codigo-convenio:
   format: 14 dígitos
   regex: '^\d{14}$'
-  example: null
+  example: "42000085011981"
   issuer: mites-estadisticas
-  gotcha: se consulta en REGCON con codigoConvenio; ejemplo no verificado en esta sesión
+  gotcha: se consulta en REGCON con codigoConvenio; un mismo código agrupa todos los trámites del convenio (31 para la hostelería de Soria)
   joins: []
 cn-medicamento:
   format: 6 dígitos
@@ -226,3 +252,12 @@ eli:
   joins:
     - via: boe-api-legislacion-consolidada
       how: url_eli en los metadatos de cada norma
+referencia-aei:
+  format: prefijo de convocatoria, año o número y sufijos separados por guiones (PID2022-136883OB-C22, RYC-2008-03681)
+  regex: '^[A-Z]{2,6}(-[A-Z]{1,4})?-?\d{2,6}(-[0-9A-Z]+)+$'
+  example: RYC-2008-03681
+  issuer: aei-convocatorias
+  gotcha: una referencia se repite en varias filas o entidades (agrupar antes de sumar importes); la BDNS no la trae
+  joins:
+    - via: csic-digital
+      how: dc:relation info:eu-repo/grantAgreement/AEI/{plan}/{referencia}/ de los registros OAI-PMH; normalizar los guiones U+2010

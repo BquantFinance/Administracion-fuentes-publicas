@@ -43,8 +43,9 @@ Dos trampas verificadas el 2026-09-30:
 - Algunos .cer de la sede (Tipo1_G2, Tipo2_G2, Tipo2_G2R) son PEM con una cabecera de texto (Subject, Issuer) delante
   del bloque BEGIN CERTIFICATE; convertirlos como DER produce un bundle que curl rechaza con el error 77. Extraer el
   bloque PEM o dejar que `fnmt_bundle.py` lo haga.
-- www.cultura.gob.es firma con una intermedia (AC Componentes Informáticos) que no está en la lista de la sede; se
-  obtiene de la extensión AIA del certificado (http://www.cert.fnmt.es/certs/ACCOMP.crt). Y si `REQUESTS_CA_BUNDLE` o
+- pestadistico.inteligenciadegestion.sanidad.gob.es firma con una intermedia (AC Componentes Informáticos) que no
+  está en la lista de la sede; se obtiene de la extensión AIA del certificado (http://www.cert.fnmt.es/certs/ACCOMP.crt).
+  www.cultura.gob.es la usaba en septiembre de 2026 y el 2026-10-01 ya enviaba la cadena completa. Y si `REQUESTS_CA_BUNDLE` o
   `CURL_CA_BUNDLE` están definidos en el entorno (proxies corporativos, sandboxes), `requests.Session` ignora
   `session.verify` y usa esa variable: pasar `verify="ca-age.pem"` en cada petición o apuntar la variable al bundle.
 
@@ -112,10 +113,12 @@ petición aislada también puede recibir el 403.
 
 ## session-required
 
-Hacienda (aplicación de presupuestos de entidades locales, SGCIEF) devuelve "sesión expirada" a cualquier URL de
-descarga pedida directamente, incluso con cookies y Referer, porque la sesión se crea en la navegación por el
-menú; automatizar con navegador (Playwright). REGCON (convenios colectivos) es más simple: GET del formulario,
-conservar cookies y reenviar el token consulta_token_value_id en el POST.
+Hacienda (presupuestos de las comunidades autónomas, SGCIEF/PublicacionPresupuestos) devuelve sesion_expirada a
+las URL de descarga pedidas directamente; con un cookie jar bastan un GET de inicio.aspx y del formulario y un POST
+con sus __VIEWSTATE y __EVENTVALIDATION para recibir el xlsx, sin navegador (verificado el 2026-10-01). REGCON
+(convenios colectivos) acepta el POST del formulario con cookie jar; consulta_token_value_id lo rellena el
+JavaScript con la hora y no hace falta. La paginación (?pagina=N) y la exportación (?_exportarExcelPublicoXML=1)
+dependen de la búsqueda guardada en la sesión: sin la cookie, ?pagina=N devuelve el registro entero sin avisar.
 
 ## captcha-required
 
@@ -137,28 +140,30 @@ altcha = base64.b64encode(json.dumps({k: ch[k] for k in ("algorithm", "challenge
 r = s.post(base, params={"handler": "Download"}, data={"__RequestVerificationToken": tok, "f": "rn2000.zip", "altcha": altcha}, stream=True)
 ```
 
-El desafío caduca (`expires` en `salt`), así que pedirlo justo antes del POST. Verificado el 2026-09-30 con
-rn2000.zip (133 MB, 0,05 s de cálculo).
+El desafío caduca a los 120 s (`expires` en `salt`), así que pedirlo justo antes del POST; sin el campo altcha el
+POST da 400. Verificado el 2026-09-30 y el 2026-10-01 con rn2000.zip (133 MB, entre 0,05 y 0,2 s de cálculo).
 
 ## js-rendered
 
 Contenido generado en el navegador. Antes de lanzar un navegador sin cabeza, mirar en las herramientas de red
 qué llamadas XHR hace la página: casi siempre devuelven JSON y se pueden replicar con requests. Casos
-verificados: los buscadores del REEC (AEMPS), Portus (Puertos del Estado), las estadísticas de Aena, el
-catálogo sísmico del IGN y SERPAVI no me dejaron localizar una URL de datos reutilizable, así que la ficha lo dice y remite a
-la alternativa.
+verificados el 2026-10-01: el buscador del REEC (arise/search, JSON por GET), Portus (portussvr/api, mareas y
+último dato), el visor de terremotos del IGN (todos_visualizadores.js con cuatro GeoJSON) y el visor de SERPAVI
+(GeoJSON en un blob de Azure cuya carpeta de versión se lee en el JavaScript de la página).
 
-Caso aparte y muy rentable: los portales PC-Axis clonados del INE (INEbase, EDUCAbase de Educación y el
-portal de criminalidad de Interior) se navegan con JavaScript pero sirven cada tabla en tres formatos con una
+Caso aparte y muy rentable: los portales PC-Axis clonados del INE (INEbase, EDUCAbase de Educación, CULTURAbase
+y el portal de criminalidad de Interior) se navegan con JavaScript pero sirven cada tabla en tres formatos con una
 URL fija que se deduce del enlace `Tabla.htm?path=...&file=X.px`:
 
 ```
-https://{host}/{app}/files/_px/es/csv_bdsc{path}{file}?nocab=1   CSV con ; e ISO-8859-15
+https://{host}/{app}/files/_px/es/csv_bdsc{path}{file}?nocab=1   CSV con ; en UTF-8 con BOM
 https://{host}/{app}/files/_px/es/px{path}{file}                  PC-Axis
 https://{host}/{app}/files/_px/es/xlsx{path}{file}?nocab=1        Excel
 ```
 
-`{app}` es `EducaJaxiPx` en estadisticas.educacion.gob.es y `sec/jaxiPx` en estadisticasdecriminalidad.ses.mir.es.
+`{app}` es `EducaJaxiPx` en estadisticas.educacion.gob.es, `CulturaJaxiPx` en estadisticas.cultura.gob.es y
+`sec/jaxiPx` en estadisticasdecriminalidad.ses.mir.es. El CSV llega en UTF-8 con BOM aunque Content-Type diga
+ISO-8859-15 (decodificado como latin-1 sale «autÃ³noma»; usar utf-8-sig); el px sí va en ISO-8859-15.
 
 ## static-html
 

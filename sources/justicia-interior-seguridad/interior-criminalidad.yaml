@@ -1,44 +1,58 @@
 id: interior-criminalidad
-name: Ministerio del Interior – Portal Estadístico de Criminalidad (balances en PC-Axis)
+name: Ministerio del Interior – Portal Estadístico de Criminalidad (balances y series anuales)
 org: Secretaría de Estado de Seguridad
 ministry: Interior
 level: age
 sector: justicia-interior-seguridad
-tags: [criminalidad, delitos, infracciones-penales, balances, municipios, provincias, pc-axis]
+tags: [criminalidad, delitos, infracciones-penales, balances, series-anuales, detenciones, victimizaciones, municipios, provincias, pc-axis]
 summary: >-
-  Balances trimestrales de criminalidad (infracciones penales conocidas por tipología, con comparación
-  interanual) por comunidad autónoma, provincia y municipio de más de 20.000 habitantes desde 2016, servidos
-  con el sistema PC-Axis del INE y descargables en CSV, px y xlsx por tabla.
+  Balances trimestrales acumulados de infracciones penales por tipología (CCAA, provincia, isla y municipio)
+  desde 2016, con comparación interanual, y series anuales 2010-2025 de hechos conocidos, esclarecidos,
+  detenciones y victimizaciones por CCAA y provincia; PC-Axis con descarga CSV, px y xlsx.
 access: [download, portal]
 auth: none
 formats: [csv, px, xlsx, html]
 update: quarterly
-coverage: "2016-4 a 2026-2 (balances trimestrales)"
+coverage: "Balances 2016-1 a 2026-2 (acumulados desde enero); series anuales 2010-2025"
 license: Reutilización libre con cita de la fuente
 base_url: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/
-docs_url: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/balances.html
+docs_url: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/metodologia.html
 endpoints:
   - path: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/balances.html
-    desc: Selector de año y trimestre; cada uno enlaza a datos.html?type=jaxi&path=/DatosBalanceAnt/{AAAA}{T}/
+    desc: Selector de 2016-1 a 2026-2; cada uno abre datos.html?type=jaxi&path=/DatosBalanceAnt/{AAAA}{T}/, que solo incrusta en un iframe el índice de abajo
   - path: https://estadisticasdecriminalidad.ses.mir.es/sec/dynPx/inebase/index.htm?type=pcaxis&path=/DatosBalanceAnt/{AAAA}{T}/&file=pcaxis
-    desc: Índice de tablas del trimestre (CCAA, provincias, municipios de más de 20.000 habitantes) con enlaces a jaxiPx/Tabla.htm y al diálogo de exportación
+    desc: Índice del trimestre (path DatosBalanceAnt también en el año en curso) con el path y file reales de sus tres tablas, CCAA, provincias y municipios e islas
     example: curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/dynPx/inebase/index.htm?type=pcaxis&path=/DatosBalanceAnt/20262/&file=pcaxis"
+    returns: "HTML UTF-8 de 17 KB con un bloque por tabla (título, última modificación, tamaño) y enlaces Tabla.htm?path=...&file=X.px con el & escapado como &amp;; el de 2026-2 apunta a /DatosBalanceAct/l0/09004.px a 09006.px, modificados el 17/09/2026"
   - path: https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/{csv_bdsc|px|xlsx}{path}{file}?nocab=1
-    desc: Descarga de una tabla; en el último trimestre path=/DatosBalanceAct/l0/ y file 09004.px (CCAA), 09005.px (provincias), 09006.px (municipios)
+    desc: Descarga de una tabla con el path y file del índice; balances de 2026-2 en /DatosBalanceAct/l0/ 09004 (CCAA), 09005 (provincias) y 09006 (municipios)
     example: curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09004.px?nocab=1"
+    returns: "CSV largo ámbito;Tipología penal;Periodos:;Total (ámbito es Comunidades autónomas, Provincias o Geografía), UTF-8 con BOM, miles con punto y decimal con coma; 09004 son 96 KB y 1.197 filas (21 ámbitos x 19 tipologías x 3 periodos), 09006 son 2,3 MB y 28.842 filas"
   - path: https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/Tabla.htm?path={path}&file={file}&L=0
-    desc: Tabla interactiva con el enlace dlgExport.htm para elegir formato
-quirks: [latin1, js-rendered, url-drift]
-ids: []
+    desc: Tabla interactiva con el enlace dlgExport.htm para elegir formato; el xlsx es una tabla ancha con cinco filas de título
+  - path: https://estadisticasdecriminalidad.ses.mir.es/sec/dynPx/inebase/index.htm?type=pcaxis&path=/Datos{N}/&file=pcaxis
+    desc: Series anuales por CCAA y provincia; N 1 hechos conocidos, 2 esclarecidos, 3 detenciones e investigados, 4 victimizaciones, 11 allanamiento y usurpación
+    example: curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/dynPx/inebase/index.htm?type=pcaxis&path=/Datos1/&file=pcaxis"
+  - path: https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/Datos1/l0/01002.px?nocab=1
+    desc: Hechos conocidos por provincia (01001 por CCAA); el resto de series sigue el patrón /Datos{N}/l0/ con los file de su índice
+    example: curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/Datos1/l0/01002.px?nocab=1"
+    returns: "CSV largo Provincias;Tipología penal;periodo;Total, UTF-8 con BOM, 1,96 MB y 38.720 filas (55 ámbitos, con En el extranjero y Desconocida, x 44 tipologías x 16 años de 2025 a 2010 en orden descendente); provincias solo por nombre"
+quirks: [latin1, js-rendered, static-html, errors-html-or-xml, url-drift]
+ids: [ine-municipio]
 gotchas:
-  - datos.html solo incrusta un iframe del sistema PC-Axis (sec/dynPx); para automatizar ir directamente a index.htm y a files/_px con el path y el file que muestra el índice de cada trimestre.
-  - Los ficheros del trimestre vigente cuelgan de DatosBalanceAct/l0/ y los anteriores de DatosBalanceAnt con otros números de tabla (99010 a 99012 en el índice de 2019-4); la ruta DatosBalanceAnt/{AAAA}{T}/l0/ no existe.
-  - CSV con BOM, separador ; e ISO-8859-15; miles con punto. Las columnas son tipología penal, periodo (enero-junio 2025, enero-junio 2026, variación) y ámbito.
-  - Municipios y provincias vienen por nombre sin código INE; cruzar por nombre normalizado con ine-codigos-territoriales.
-  - No incluye el detalle de Mossos d'Esquadra ni Ertzaintza salvo en agregados; la tipología cambió con la reforma penal de 2015.
+  - Todo el año en curso cuelga de /DatosBalanceAct/l0/ (09001 a 09003 el primer trimestre, 09004 a 09006 el segundo) y los años cerrados de /DatosBalanceAnt/l0/ con números irregulares (69001 en 2016-1, 1509012 en 2025-4).
+  - El CSV llega en UTF-8 con BOM aunque Content-Type diga ISO-8859-15, así que resp.text o latin-1 dan «autÃ³nomas»; decodificar con utf-8-sig. El px sí va en ISO-8859-15.
+  - Los balances son acumulados desde enero (el del segundo trimestre es enero-junio) frente al mismo periodo del año anterior y su variación %; el trimestre suelto sale restando, y 2022 compara también con 2019.
+  - Desde 2024 el municipio lleva delante su código INE (08019 Barcelona); antes era «- Municipio de Almería» (2016-2020) o «-Municipio de Almería» (2021-2023). Provincias e islas van solo por nombre.
+  - La tabla municipal mezcla filas de CCAA en mayúsculas, «Provincia de X», islas, municipios, EXTRANJERA y NACIONAL; quedarse con las que empiezan por cinco dígitos antes de sumar o cruzar.
+  - "El umbral municipal cambia: capitales y más de 50.000 habitantes en 2016, más de 30.000 en 2017-2020 y más de 20.000 desde 2021; la serie de un municipio mediano empieza más tarde."
+  - La tipología de los balances cambia (8 indicadores en 2016, 14 en 2017, 15 en 2018-2021, 19 desde 2022 con cibercriminalidad) y también las etiquetas (1.-Homicidios frente a 1. Homicidios).
+  - Un fichero inexistente (trimestre aún no publicado o file mal deducido) responde 302 a /error/404.html, que devuelve 200 en HTML; comprobar Content-Type o no seguir redirecciones.
+  - Los datos del año en curso están pendientes de consolidar (nota del px); computan Policía Nacional, Guardia Civil, policías autonómicas y locales, con detalle completo también en Cataluña y País Vasco.
   - Los datos judiciales (sentencias, juzgados) los publica el CGPJ, fuera del alcance AGE actual.
 tips:
-  - "pandas.read_csv(url, sep=';', encoding='latin-1', thousands='.') sobre el csv_bdsc; filtrar la fila de variación porcentual antes de sumar."
+  - "pandas.read_csv(url, sep=';', encoding='utf-8-sig', thousands='.', decimal=',') sobre el csv_bdsc; código INE con str.extract(r'^(\\d{5}) ') y quitar las filas de Variación % antes de sumar."
+  - Para una serie anual por municipio, tomar el balance del cuarto trimestre de cada año (enero-diciembre); las series anuales 2010-2025 solo bajan a provincia, con las mismas 44 tipologías todos los años.
 related: [ine-codigos-territoriales]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

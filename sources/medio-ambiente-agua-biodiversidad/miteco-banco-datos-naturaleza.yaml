@@ -19,33 +19,38 @@ base_url: https://www.miteco.gob.es/es/cartografia-y-sig/ide/descargas/biodivers
 docs_url: https://www.miteco.gob.es/es/biodiversidad/servicios/banco-datos-naturaleza/informacion-disponible.html
 endpoints:
   - path: https://www.miteco.gob.es/es/cartografia-y-sig/ide/descargas/biodiversidad/{tema}.html
-    desc: Páginas de descarga por tema con los enlaces a gis.miteco.gob.es
+    desc: Páginas de descarga por tema con los enlaces a gis.miteco.gob.es; mfe enlaza subpáginas por comunidad y existe también habitat-art17-2007_2012
     params: tema = rn2000, enp, mfe, iezh, humedales-ramsar, humedales-turberas, mab, iba, ieet, ospar, rampe, zepim, regiones-biogeograficas, vias_pecuarias, habitat-art17-2013_2018, especies-art17-2013_2018
   - path: https://gis.miteco.gob.es/descargas/app/DescargaFichero?f={fichero}
     desc: Formulario de descarga de una capa; el fichero llega con POST a ?handler=Download tras resolver el desafío ALTCHA
     params: f = rn2000.zip (133 MB, shapefile PS_Natura2000_2025), gml_natura2000.zip, enp.zip, gml_enp.zip, estacionesaforos.zip, capassaih.zip
+    returns: "El POST con token, f y altcha da 200 application/octet-stream con Content-Disposition attachment; rn2000.zip son 133.473.440 bytes (Last-Modified 23/06/2026, primer miembro PS_Natura2000_2025_c.CPG). Sin altcha responde 400 vacío"
   - path: https://gis.miteco.gob.es/descargas/app/DescargaFichero?handler=Altcha
     desc: Desafío ALTCHA en JSON (algorithm SHA-256, challenge, salt, signature, maxnumber 100000)
     example: curl -s "https://gis.miteco.gob.es/descargas/app/DescargaFichero?handler=Altcha"
+    returns: "Objeto JSON con algorithm (SHA-256), challenge (64 hex), salt con sufijo ?expires={epoch}& (caduca a los 120 s), signature (64 hex) y maxnumber 100000"
   - path: https://iepnb.gob.es/nuestros-datos/descargas
     desc: 28 ficheros directos en storage.googleapis.com (IFN2 a IFN4, MFE400, hábitats CNH21 en gdb.zip, IEZH en shp, GeoJSON y kmz, diccionarios xlsx)
     example: curl -sSL -o IEZH_shp_2025.zip "https://storage.googleapis.com/gestor-doc-portal-iepnb/Ecosistemas/inventario_esp_zonas_humedas/zonas_humedas/IEZH_shp_2025.zip"
+    returns: "Zip de 3,6 MB con IEZH_P_2025 (.shp, .shx, .dbf, .prj y .CPG UTF-8) en ETRS89 UTM 30N"
   - path: https://catalogo.datosabiertos.miteco.gob.es/api/3/action/package_search?q={texto}
-    desc: Catálogo CKAN del ministerio (1037 datasets DCAT-AP con inspire_id y hvd); sirve para localizar y documentar, sus recursos ZIP y WMS están rotos
-    example: curl -s "https://catalogo.datosabiertos.miteco.gob.es/api/3/action/package_search?q=natura&rows=5"
-quirks: [captcha-required, url-drift]
+    desc: Catálogo CKAN DCAT-AP del ministerio; el 1/10/2026 su API daba 404 y la portada «El catálogo se está desplegando actualmente»
+    example: curl -s --cacert ca-age.pem "https://catalogo.datosabiertos.miteco.gob.es/api/3/action/package_search?q=natura&rows=5"
+quirks: [captcha-required, url-drift, tls-chain-incomplete]
 ids: []
 gotchas:
   - Las descargas de gis.miteco.gob.es no son URL directas. El GET devuelve un formulario con __RequestVerificationToken y un widget ALTCHA; hay que hacer POST a ?handler=Download con f, altcha y el token, con cookies.
-  - ALTCHA es una prueba de trabajo pensada para resolverse en cliente, no un captcha visual. Hallar n tal que sha256(salt + n) sea igual a challenge (0,05 s en Python) y enviar el JSON en base64. Verificado con rn2000.zip.
-  - Todos los WMS de wms.mapama.gob.es (RedNatura, ENP, Embalses, CalidadAire) responden ServiceExceptionReport con NullReferenceException en 1.1.1 y 1.3.0; los de geoserver.iepnb.es dan 403 desde este entorno.
-  - Los recursos ZIP del catálogo CKAN (mapama.gob.es/app/descargas/descargafichero.aspx) redirigen a mapa.gob.es y dan 404; el ATOM INSPIRE de mapama tiene cero entradas y el de gis.miteco da 404.
+  - ALTCHA es una prueba de trabajo, no un captcha visual. Hallar n con sha256(salt + n) igual a challenge (menos de 0,2 s en Python) y enviar el JSON en base64; el desafío caduca a los 120 s.
+  - Todos los WMS de wms.mapama.gob.es (RedNatura, ENP, Embalses, CalidadAire) responden 200 con NullReferenceException en 1.1.1 y 1.3.0; los de geoserver.iepnb.es dan 403 desde este entorno.
+  - catalogo.datosabiertos.miteco.gob.es y wms.mapama.gob.es no envían la intermedia FNMT (curl error 60); usar el bundle de guides/cliente-http.md.
+  - Los recursos ZIP del CKAN (mapama.gob.es/app/descargas/descargafichero.aspx) acaban en 404 en mapa.gob.es, y el ATOM enlazado en biodiversidad.html (gis.miteco.gob.es/descargas/atom/CategBiodiversidad) da 404.
   - El CKAN de iepnb.gob.es/catalogo responde pero está vacío (package_list vacío, count 0); los ficheros del IEPNB están en la página de descargas.
-  - El CKAN de MITECO devuelve 502 de forma intermitente (2 de 6 peticiones) y la ruta /catalogo/api/3 falla siempre; usar /api/3 y reintentar.
+  - El 1/10/2026 /api/3 y /catalogo/api/3 del CKAN de MITECO daban 404 en tres intentos; el 30/09/2026 respondía /api/3 con 502 intermitentes. Reintentar más tarde.
+  - Los ficheros del IEPNB llevan fecha en el nombre (CNH21_ext_20260529.gdb.zip, diccionarios _20260717.xlsx) y cambian al actualizarse; tomar los enlaces de la página de descargas.
   - Capas en ETRS89 (geográficas o UTM por huso según capa); comprobar el .prj de cada shapefile antes de cruzar.
 tips:
   - "Receta en guides/cliente-http.md (captcha-required). GET ?f=capa para el token, GET ?handler=Altcha, buscar n con sha256(salt+n) == challenge y POST ?handler=Download con token, f y altcha en base64."
   - Las ocurrencias de especies (registros puntuales) están en GBIF a través del nodo español (ficha gbif-es); aquí solo hay distribución en cuadrículas y capas de espacios y hábitats.
 related: [gbif-es, cnig-centro-descargas, miteco-saih-boletin-hidrologico]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

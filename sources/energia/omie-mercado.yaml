@@ -6,44 +6,49 @@ level: age
 sector: energia
 tags: [electricidad, mercado-diario, mercado-intradiario, precio-marginal, omie, mibel, curvas-oferta-demanda, casacion]
 summary: >-
-  Precio marginal del mercado diario en España y Portugal (96 periodos cuarto-horarios por día en 2026),
-  programas de casación, curvas de oferta y demanda, ofertas, intradiario de subastas y continuo, capacidades
-  e indisponibilidades. Ficheros de texto con URL fija, sin clave.
+  Precio marginal del mercado diario en España y Portugal (96 periodos cuarto-horarios desde el 01/10/2025, 24
+  horarios antes), programas de casación, curvas de oferta y demanda, ofertas, intradiario de subastas y continuo,
+  capacidades e indisponibilidades. Ficheros de texto con URL fija, sin clave.
 access: [download]
 auth: none
 formats: [csv, txt, zip]
 update: daily
-coverage: "Ficheros diarios en línea desde el 18/12/2023; ZIP mensuales anteriores en las carpetas de ficheros mensuales"
+coverage: "Diarios desde el 01/01/2023 (listado del 2026-10-01); 2018 a 2022 en ZIP anuales {carpeta}_{AAAA}.zip; ZIP mensuales desde 2017 o 2018 según familia"
 base_url: https://www.omie.es/es/file-access-list
 docs_url: https://www.omie.es/es/market-results/daily/daily-market/day-ahead-price
 endpoints:
-  - path: https://www.omie.es/es/file-download?parents%5B0%5D={carpeta}&filename={carpeta}_{AAAAMMDD}.{version}
-    desc: Fichero diario de una carpeta; marginalpdbc (precio España), marginalpdbcpt (Portugal), pdbc_stota (programas), curva_pbc, cab y det (ofertas), precios_pibcic
-    example: curl -s "https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_20260929.1"
-    returns: "Texto separado por ; con cabecera MARGINALPDBC; y filas AAAA;MM;DD;periodo;precio;precio; (EUR/MWh, decimal con punto) más una fila final con asterisco; sin cabecera de columnas"
-  - path: https://www.omie.es/es/file-download?parents%5B0%5D=marginalpibc&filename=marginalpibc_{AAAAMMDD}{SS}.1
-    desc: Precio marginal del intradiario de subastas; SS es la sesión (01 a 03 en 2026)
-    example: curl -s "https://www.omie.es/es/file-download?parents%5B0%5D=marginalpibc&filename=marginalpibc_2026092901.1"
-  - path: https://www.omie.es/es/file-access-list?parents%5B0%5D={carpeta}&dir={nombre}&realdir={carpeta}
-    desc: Listado HTML de los ficheros de una carpeta (1018 en marginalpdbc, desde el 18/12/2023); sin parámetros, las 67 carpetas de todos los mercados
-    example: curl -s "https://www.omie.es/es/file-access-list?parents%5B0%5D=marginalpdbc&dir=Precios%20horarios%20del%20mercado%20diario%20en%20Espa%C3%B1a&realdir=marginalpdbc" | grep -o 'filename=[^"&]*'
-  - path: https://www.omie.es/es/file-download?parents%5B0%5D={carpeta_mensual}&filename={familia}_{AAAAMM}.zip
-    desc: ZIP mensuales; comunzip agrupa todas las familias (trades, pibcie, pibcipt) y curva_pbc_uof y curva_pibc_uof tienen carpeta propia (202607 verificado)
-    example: curl -sO "https://www.omie.es/es/file-download?parents%5B0%5D=curva_pbc_uof&filename=curva_pbc_uof_202607.zip"
+  - path: https://www.omie.es/es/file-download?parents={carpeta}&filename={carpeta}_{AAAAMMDD}.{version}
+    desc: Fichero diario, publicado hacia las 13:50 del día anterior (hora peninsular); marginalpdbc, marginalpdbcpt (Portugal), pdbc_stota, curva_pbc (21 MB)
+    example: curl -s "https://www.omie.es/es/file-download?parents=marginalpdbc&filename=marginalpdbc_20260929.1"
+    returns: "Texto ASCII separado por ; con CRLF, cabecera MARGINALPDBC; y filas AAAA;MM;DD;periodo;precio;precio; (EUR/MWh, decimal con punto) más una fila final con asterisco; sin cabecera de columnas; 96 filas en 2026"
+  - path: https://www.omie.es/es/file-download?parents=marginalpibc&filename=marginalpibc_{AAAAMMDD}{SS}.1
+    desc: Precio marginal del intradiario de subastas, mismo formato que marginalpdbc; SS es la sesión, 01 a 03 desde el 14/06/2024 y 01 a 06 antes
+    example: curl -s "https://www.omie.es/es/file-download?parents=marginalpibc&filename=marginalpibc_2026092901.1"
+  - path: https://www.omie.es/es/file-access-list?realdir={carpeta}
+    desc: Listado HTML de una carpeta con nombre, tamaño y fecha de cada fichero; sin parámetros, las 67 carpetas de todos los mercados
+    example: curl -s "https://www.omie.es/es/file-access-list?realdir=marginalpdbc" | grep -o 'filename=[^"&]*'
+    returns: "Tabla HTML Nombre, Tamaño (bytes en td data-val), Modificado (dd/mm/aaaa hh:mm:ss); el 01/10/2026 marginalpdbc listaba 1370 diarios desde el 01/01/2023 y los ZIP anuales 2018 a 2022"
+  - path: https://www.omie.es/es/file-download?parents={carpeta}&filename={carpeta}_{AAAA}.zip
+    desc: ZIP anual con todos los ficheros diarios de 2018 a 2022, en la misma carpeta que los diarios (marginalpdbc_2022.zip, 365 ficheros, 117 KB)
+    example: curl -s -o marginalpdbc_2022.zip "https://www.omie.es/es/file-download?parents=marginalpdbc&filename=marginalpdbc_2022.zip"
+  - path: https://www.omie.es/es/file-download?parents={carpeta_mensual}&filename={familia}_{AAAAMM}.zip
+    desc: ZIP mensuales por carpeta de familia; cab, det, curva_pbc_uof y curva_pibc_uof solo salen así; comunzip reúne solo algunos ZIP recientes, no la serie
+    example: curl -s -o cab_202606.zip "https://www.omie.es/es/file-download?parents=cab&filename=cab_202606.zip"
   - path: https://www.omie.es/es/market-results/daily/daily-market/day-ahead-price
     desc: Página de resultados con gráficos; los datos salen de los mismos ficheros
 quirks: [latin1, static-html]
 ids: []
 gotchas:
-  - "marginalpdbc: cabecera MARGINALPDBC;, filas AAAA;MM;DD;periodo;precio;precio; y un asterisco final; 96 periodos por día en 2026 frente a 24 el 01/01/2025; las dos columnas de precio coinciden en los días vistos."
+  - Periodos cuarto-horarios desde el 01/10/2025, 96 por día, 92 el 29/03/2026 y 100 el 26/10/2025 por el cambio de hora; 24 antes. No fijar 96 al parsear; las dos columnas de precio coinciden en los días vistos.
   - Los ficheros con cabecera "OMIE - Mercado de electricidad" (pdbc_stota, curva_pbc) van en ISO-8859-1, con coma decimal y punto de miles, dos filas de título antes de las columnas y periodos H1Q1 a H24Q4.
-  - El sufijo de versión (.1, .2, .3) marca republicaciones; el listado dice cuál existe y una versión inexistente devuelve 404 con HTML.
-  - Un fichero diario anterior al 18/12/2023 devuelve 404 aunque el histórico exista; para años anteriores usar los ZIP mensuales.
-  - El parámetro se envía como parents[0] (parents%5B0%5D); la redirección lo reescribe a parents= y ambas formas funcionan.
-  - El intradiario continuo publica precios_pibcic (máximo, mínimo y medio por periodo) y precios_pibcic_ronda; el de subastas lleva la sesión pegada a la fecha.
+  - El sufijo .1, .2, .3 marca republicaciones y solo queda la última (marginalpdbc_20230528.1 da 404 porque existe .2); el listado dice cuál existe y lo inexistente devuelve 404 con HTML.
+  - Un fichero diario anterior al 01/01/2023 devuelve 404 (HTML); 2018 a 2022 están en {carpeta}_{AAAA}.zip de la misma carpeta; años anteriores a 2018 no localizados en el listado.
+  - parents%5B0%5D={carpeta} responde 302 hacia parents={carpeta}; curl sin -L guarda la página de redirección en vez del fichero, así que conviene usar parents= directamente.
+  - El intradiario continuo publica precios_pibcic (máximo, mínimo y medio por periodo con columnas ES y PT, coma decimal) y precios_pibcic_ronda; el de subastas lleva la sesión pegada a la fecha.
+  - cab, det y curvas con unidad (curva_pbc_uof) salen con 90 días de retraso; el 30/09/2026 los ZIP de 202607 tenían 2 días, un mes completo de curvas pesa unos 100 MB y cab va en ancho fijo.
 tips:
   - "pd.read_csv(url, sep=';', skiprows=1, header=None).dropna(subset=[3]).iloc[:, :6] lee marginalpdbc y descarta la fila del asterisco; columnas año, mes, día, periodo y dos precios."
   - Precios horarios PVPC y spot ya combinados, y demanda y generación, en ree-redata; OMIE es la fuente primaria del precio marginal.
 related: [ree-redata, cnmc-data]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

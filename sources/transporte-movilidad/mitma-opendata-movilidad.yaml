@@ -6,35 +6,37 @@ level: age
 sector: transporte-movilidad
 tags: [movilidad, matrices-origen-destino, telefonia-movil, viajes, distritos, big-data]
 summary: >-
-  Matrices diarias de viajes origen-destino entre distritos, municipios y grandes áreas urbanas, por hora,
-  distancia y motivo, estimadas con telefonía móvil desde 2020, en CSV comprimidos diarios más zonificaciones.
-  El servidor de datos respondió 403 desde este entorno; las páginas del ministerio sí.
+  Matrices diarias de viajes, pernoctaciones y personas entre distritos, municipios y grandes áreas urbanas,
+  estimadas con telefonía móvil desde 2022, en CSV comprimidos con zonificaciones, estudios completos y rutas
+  por carretera. El servidor de datos respondió 403 desde el entorno de verificación.
 access: [download]
 auth: none
 formats: [csv, zip, shp, geojson]
-update: daily
-coverage: "2020-02- (estudio básico diario desde 2022 con la metodología vigente)"
+update: irregular
+coverage: "Diario de 2022-01 a 2025-06 más 17 días del segundo semestre de 2025, según la página del ministerio (1-10-2026); 2020-2021 en estudios anteriores"
 license: Reutilización libre con cita de la fuente
 base_url: https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/opendata-movilidad
 docs_url: https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/metodologia-del-estudio-de-movilidad-con-bigdata
 endpoints:
   - path: https://movilidad-opendata.mitma.es/
-    desc: Índice de ficheros diarios por estudio, zonificación y tipo (no verificado, responde 403 desde este entorno)
+    desc: Índice de ficheros por estudio, zonificación (municipal, distritos, GAU) y producto, con carpeta de metadatos de calidad (no verificado, 403 desde este entorno)
   - path: https://movilidad-opendata.mitma.es/estudios_basicos/por-distritos/viajes/ficheros-diarios/{AAAA-MM}/{AAAAMMDD}_Viajes_distritos.csv.gz
     desc: Ruta habitual de los ficheros diarios de viajes por distrito (no verificada, 403)
   - path: https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/estudio-basico-diario
     desc: Descripción del estudio básico diario y enlaces a los ficheros especiales (DANA de Valencia en cdnfomento.blob.core.windows.net/hermes/bigdata/)
-  - path: https://cbim.mitma.es/
-    desc: Visor del estudio (Centro de Big data e Inteligencia de Movilidad)
+  - path: https://cibim.transportes.gob.es/
+    desc: Visor del estudio (Centro de Big data e Inteligencia de Movilidad); cbim.mitma.es redirige aquí
 quirks: [waf-blocks-bots]
 ids: [ine-municipio]
 gotchas:
-  - movilidad-opendata.mitma.es devolvió 403 con cuerpo Internal Server Error (HTML de 3,3 KB) para la raíz, /zonificacion/ y un fichero concreto, con y sin User-Agent de navegador (30/09/2026); posible bloqueo por red.
-  - Hay dos estudios con metodologías distintas, 2020-2021 (versión 1) y 2022 en adelante (versión 2); no mezclar series.
+  - movilidad-opendata.mitma.es devolvió 403 con cuerpo Internal Server Error (HTML de 3,3 KB) con User-Agent de navegador el 30-9 y el 1-10-2026; posible bloqueo por red.
+  - La serie tiene versiones que no se deben mezclar; 2020-2021 (estudios anteriores), 2022 a junio de 2025 y desde el 1-7-2025, con ajustes metodológicos descritos en un PDF de la página.
+  - Faltan días por incidencias de Orange (26, 27, 30 y 31 oct y 1-3 nov de 2023; 4, 18 y 19 abr y 10 y 11 nov de 2024) y por el apagón (28 y 29 abr de 2025); 29 a 31 oct de 2024 con anomalías por la DANA.
   - Cada día son cientos de MB comprimidos en gzip, con ficheros por distrito, municipio y gran área urbana; los ids de zona son códigos INE de municipio o INE más distrito censal y algunos municipios pequeños van agrupados.
   - El contenedor público de Azure del ministerio (cdnfomento.blob.core.windows.net/hermes, listable con restype=container&comp=list) solo tiene los ficheros de la DANA de Valencia, no las matrices diarias.
-  - Existe un paquete R y Python de terceros (spanishoddata) que descarga y normaliza estos ficheros; útil como referencia de rutas y esquemas.
-tips: []
+  - La página del ministerio ya no enlaza el servidor de ficheros sino fichas del catálogo HERMES (hermes.tragsatec.es) para rutas por carretera, que respondieron 403 a la ficha y a la API CKAN.
+tips:
+  - spanishoddata (R) y pySpainMobility (Python), enlazados desde la página del ministerio aunque son de terceros, descargan y normalizan estos ficheros; sirven de referencia de rutas y esquemas.
 related: [ine-codigos-territoriales, dgt-estadisticas]
 status: active
 verified: null

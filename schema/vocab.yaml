@@ -115,6 +115,7 @@ ids:
   cpv: Código CPV de contratación pública
   cnae: Código CNAE de actividad económica
   codigo-convenio: Código de convenio colectivo de REGCON
+  referencia-aei: Referencia de una ayuda de la Agencia Estatal de Investigación (PID2022-136883OB-C22, RYC-2008-03681)
   cn-medicamento: Código nacional de medicamento de la AEMPS
   boe-id: Identificador BOE o BORME (BOE-A-AAAA-NNNNN, BORME-A-AAAA-NNN-PP)
   eli: URI ELI de norma

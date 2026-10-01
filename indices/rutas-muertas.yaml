@@ -205,10 +205,10 @@
   checked: "2026-09-30"
 - old: https://www.ign.es/resources/sismologia/tproximos/
   status: 404
-  new: https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/get10dias
+  new: https://www.ign.es/web/resources/sismologia/tproximos/todos_visualizadores.js
   source: ign-sismologia
-  note: el RSS y el KML de últimos terremotos que colgaban aquí dan 404 (el directorio, 403); www.ign.es/fdsnws no existe
-  checked: "2026-09-30"
+  note: "el RSS y el KML de últimos terremotos que colgaban aquí dan 404 (el directorio, 403) y www.ign.es/fdsnws da 404; el GeoJSON de 30 días va en el JavaScript del visor"
+  checked: "2026-10-01"
 - old: https://www.fega.gob.es/
   status: reset
   new: null
@@ -266,11 +266,11 @@
   note: todas las rutas SharePoint es-es/estadisticas/Paginas/*.aspx redirigen a /datos/estadisticas/
   checked: "2026-09-30"
 - old: https://www.mincotur.gob.es/es-es/IndicadoresyEstadisticas/Paginas/Estadisticas.aspx
-  status: 404
-  new: https://industria.gob.es/es-es/estadisticas
+  status: redirect
+  new: https://www.mintur.gob.es/es-es/IndicadoresyEstadisticas/Paginas/Estadisticas.aspx
   source: mincotur-industria-turismo
-  note: redirige a mintur.gob.es con la misma ruta, que da 404
-  checked: "2026-09-30"
+  note: "302 a mintur.gob.es con la misma ruta, que dio 404 el 30/09/2026 y 200 el 01/10/2026; industria en industria.gob.es/es-es/estadisticas"
+  checked: "2026-10-01"
 - old: https://consultas2.oepm.es/InvenesWeb/faces/busquedaInternet.jsp
   status: blocked
   new: null
@@ -307,10 +307,10 @@
   checked: "2026-09-30"
 - old: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios/2020/enero-2020.html
   status: 404
-  new: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios-20-45/2020/enero.html
+  new: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios/2020/enero.html
   source: sepe-estadisticas
-  note: la ruta municipios/{AAAA}/{mes}-{AAAA}.html solo existe hasta 2019
-  checked: "2026-09-30"
+  note: "desde 2020 la página del mes es municipios/{AAAA}/{mes}.html; municipios-20-45 es otra tabla (de 20.000 a 45.000 habitantes)"
+  checked: "2026-10-01"
 - old: https://ftpdatos.aemet.es/
   status: dns
   new: https://opendata.aemet.es/opendata/api
@@ -408,11 +408,11 @@
   note: "el catálogo nuevo se renderiza por JavaScript y sus consultas con q= o start= disparan el anti-bot"
   checked: "2026-09-30"
 - old: https://www.cis.es/cis/opencms/ES/index.html
-  status: redirect
+  status: "404"
   new: https://www.cis.es/
   source: cis-estudios
-  note: "portal OpenCms antiguo; las rutas 2_bancodedatos/estudios/ver.jsp responden 404"
-  checked: "2026-09-30"
+  note: "portal OpenCms antiguo; 302 a /en/cis/opencms/ES/index.html, que da 404, igual que las rutas 2_bancodedatos/estudios/ver.jsp"
+  checked: "2026-10-01"
 - old: https://www.inmujeres.gob.es/MujerCifras/
   status: "403"
   new: https://www.inmujeres.gob.es/MujerCifras/Home.htm
@@ -478,4 +478,106 @@
   new: https://www.sanidad.gob.es/profesionales/nomenclator.do?metodo=buscarProductos&especialidad=%25%25%25&d-4015021-e=1&6578706f7274=1
   source: sanidad-nomenclator-facturacion
   note: "devuelve la página HTML con 200; el CSV es la exportación del buscador"
+  checked: "2026-10-01"
+- old: https://gitlab.cnmc.es/cnmcdata/cnmcdata-api-ejemplos
+  status: redirect
+  new: https://data.cnmc.es/reutilizadores
+  source: cnmc-data
+  note: "302 a users/sign_in; los ejemplos de la API ya no son públicos"
+  checked: "2026-10-01"
+- old: https://catalogodatos.cnmc.es/api/3/action/datastore_search?limit=32000&resource_id=c45b35d4-0714-4373-b0ec-3bd71f157098
+  status: "404"
+  new: https://catalogodatos.cnmc.es/api/3/action/package_search
+  source: cnmc-data
+  note: "ejemplo de la documentación con un recurso retirado (también 8afd824c); localizar el vigente con package_search o package_show"
+  checked: "2026-10-01"
+- old: https://cbim.mitma.es/
+  status: redirect
+  new: https://cibim.transportes.gob.es/
+  source: mitma-opendata-movilidad
+  note: "301 al dominio nuevo del Centro de Big Data e Inteligencia de Movilidad"
+  checked: "2026-10-01"
+- old: https://www.seguridadaerea.gob.es/es/ambitos/aeronaves/matriculacion-de-aeronaves
+  status: empty
+  new: https://www.seguridadaerea.gob.es/es/ambitos/aeronaves/registro-de-matriculas-de-aeronaves-civiles/registro-de-matriculas
+  source: aesa-aviacion
+  note: "200 con una página de error de 2,5 MB, como cualquier ruta inexistente de AESA"
+  checked: "2026-10-01"
+- old: https://www.adif.es/datos-abiertos
+  status: "404"
+  new: null
+  source: renfe-datos-abiertos
+  note: "no localicé portal de datos abiertos de Adif; data.adif.es no responde"
+  checked: "2026-10-01"
+- old: https://www.puertos.es/es-es/estadisticas
+  status: "403"
+  new: https://www.puertos.es/datos/estadisticas/mensuales
+  source: puertos-estado-datos
+  note: "301 a /datos/estadisticas-bk, que responde 403"
+  checked: "2026-10-01"
+- old: https://gis.miteco.gob.es/descargas/atom/CategBiodiversidad/downloadservice.xml
+  status: "404"
+  new: https://gis.miteco.gob.es/descargas/app/DescargaFichero
+  source: miteco-banco-datos-naturaleza
+  note: "sigue enlazado desde descargas/biodiversidad.html; la descarga vigente es un POST con desafío ALTCHA"
+  checked: "2026-10-01"
+- old: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/webtabla-inv-Ed2025.xlsx
+  status: redirect
+  new: https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/webtabla-inv-Ed2026.xlsx
+  source: miteco-inventario-emisiones
+  note: "302 a /es/error/404.html, que responde 200; solo se publica la última edición"
+  checked: "2026-10-01"
+- old: https://www.hacienda.gob.es/es-ES/CDI/Paginas/ImpuestosTasasEELL/ImpuestosTasasEELL.aspx
+  status: "404"
+  new: https://serviciostelematicosext.hacienda.gob.es/SGFAL/ConsultaTipos/html/portadaconsultasm.aspx
+  source: hacienda-ovef
+  note: "tipos de IBI, IAE, IVTM y otros tributos locales por municipio"
+  checked: "2026-10-01"
+- old: https://www.dataestur.es/general/frontur/
+  status: redirect
+  new: https://www.dataestur.es/viajes-ocio/frontur/
+  source: mincotur-industria-turismo
+  note: "301 a dataestur.pid.segittur.es, que respondió 403 The request is blocked; igual /general/egatur/"
+  checked: "2026-10-01"
+- old: https://www.cultura.gob.es/servicios-a-la-ciudadania/estadisticas/cultura/mc/culturabase/museos.html
+  status: redirect
+  new: https://www.cultura.gob.es/servicios-a-la-ciudadania/estadisticas/cultura/mc/culturabase/museos-y-colecciones-museograficas.html
+  source: cultura-culturabase
+  note: "302 a /comunes/errores/404.html, que responde 200"
+  checked: "2026-10-01"
+- old: https://cnecovid.isciii.es/covid19/resources/casos_hosp_uci_def_sexo_edad_provres_todas_edades.csv
+  status: "404"
+  new: https://cnecovid.isciii.es/covid19/resources/hosp_uci_def_sexo_edad_provres_todas_edades.csv
+  source: isciii-cne
+  note: "el fichero de todas las edades desde el 2022-03-28 no lleva el prefijo casos_ ni la columna num_casos"
+  checked: "2026-10-01"
+- old: https://www.aemps.gob.es/comunicacion/notas-informativas-productos-sanitarios/feed/
+  status: empty
+  new: https://www.aemps.gob.es/category/productossanitarios/feed/
+  source: aemps-otros-registros
+  note: "200 con 0 items; los feeds de categoría de WordPress (/category/{slug}/feed/) traen 30"
+  checked: "2026-10-01"
+- old: https://icono.fecyt.es/
+  status: dns
+  new: https://indicadores.fecyt.es/
+  source: fecyt-recolecta
+  note: "NXDOMAIN; los indicadores de FECYT se descargan en indicadores.fecyt.es/data/"
+  checked: "2026-10-01"
+- old: https://erddap.ieo.es/
+  status: dns
+  new: null
+  source: ieo-datos-oceanograficos
+  note: "NXDOMAIN; los datos del IEO se piden en SeaDataNet (csr.seadatanet.org y cdi.seadatanet.org)"
+  checked: "2026-10-01"
+- old: http://info.igme.es/bdaguas/PointInfo.aspx?id=1623-8-0001
+  status: "404"
+  new: https://info.igme.es/BDAguas/
+  source: igme-geologia
+  note: "es el campo URLDetalle de IGME_PuntosAgua; da 404 también por https"
+  checked: "2026-10-01"
+- old: https://www.ign.es/web/ign/portal/ultimos-terremotos/-/ultimos-terremotos/get5dias
+  status: empty
+  new: https://www.ign.es/web/resources/sismologia/tproximos/todos_visualizadores.js
+  source: ign-sismologia
+  note: "200 sin tabla; get10dias con el parámetro portlet_dias da N días"
   checked: "2026-10-01"
