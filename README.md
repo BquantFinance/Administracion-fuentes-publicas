@@ -32,6 +32,7 @@ Algunos ejemplos, verificados con llamadas reales:
 - AEMET responde en dos pasos, con el fichero en ISO-8859-15 y los errores dentro de un HTTP 200.
 - En SIGPAC el municipio es el código del Catastro, no el del INE: un punto de la Puerta del Sol devuelve `28:900`, no `28079`, y otros 4.448 municipios cambian de número. La traducción, con el Id interno que exige el INE Tempus, DIR3, NIF del ayuntamiento, NUTS3 y coordenadas, está en [`datos/municipios.csv`](datos/municipios.csv).
 - Los CSV de los portales PC-Axis de Educación, Cultura e Interior llegan en UTF-8 aunque la cabecera diga ISO-8859-15; leídos como Latin-1 salen «autÃ³noma».
+- Las concesiones de la BDNS caducan a los cuatro años y las de personas físicas al año siguiente: hoy no queda ninguna de 2021. Y 41,6 de los 95,8 millones de registros de GBIF en España son CC BY-NC, no aptos para un producto comercial ([licencias, cita literal y datos personales](guides/reutilizacion.md)).
 - En GBIF la encina ibérica es sobre todo *Quercus rotundifolia* (1,3 millones de registros en España); preguntar por *Quercus ilex*, que es lo que devuelve el buscador de nombres, da 21.322 sin ningún aviso.
 
 Fuentes catalogadas: <!-- AUTO:count -->95<!-- /AUTO:count -->. Alcance actual: Administración General del Estado y, desde octubre de 2026, las cuatro comunidades más pobladas (Madrid, Cataluña, Andalucía y Comunitat Valenciana) y los ayuntamientos de Madrid y Barcelona. Después: resto de comunidades y entidades locales, Cortes y Poder Judicial, Unión Europea.
@@ -93,9 +94,9 @@ datos/municipios.csv         los 8.132 municipios con su código INE, Id del INE
 scripts/                     validate.py, build.py, check_links.py, check_recetas.py, check_ejemplos.py, fnmt_bundle.py, mcp_catalogo.py (servidor MCP local)
 scripts/clientes/            sesión HTTP, clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC, y cargadores (BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex, Saiku)
 scripts/clientes/muestras/   respuestas reales recortadas para probar los parsers sin red (python scripts/test_clientes.py)
-evals/                       20 tareas con respuesta esperada para medir lo que aporta el repo a un agente
+evals/                       24 tareas con respuesta esperada para medir lo que aporta el repo a un agente
 templates/source.yaml        plantilla de ficha
-guides/                      guías transversales (identificadores para cruzar datasets, etc.)
+guides/                      guías transversales (cliente HTTP, identificadores, servidor MCP, reutilización y datos personales)
 ```
 
 ## Uso rápido

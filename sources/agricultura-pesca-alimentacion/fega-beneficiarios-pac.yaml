@@ -27,7 +27,7 @@ ids: [nif]
 gotchas:
   - www.fega.gob.es (30/09 y 01/10/2026), fega.gob.es y www.fega.es (30/09) cierran la conexión (connection reset) tras el TLS con cualquier User-Agent, HTTP/1.1 o HTTP/2 desde este entorno; ninguna ruta pudo comprobarse.
   - La web es una aplicación Next.js; si desde otra red responde, comprobar primero que las rutas de esta ficha siguen existiendo.
-  - Por normativa europea los beneficiarios solo se publican durante dos años; los ejercicios antiguos desaparecen del portal.
+  - Según el art. 98.4 del Reglamento (UE) 2021/2116, cada publicación se consulta dos años y quien cobra 1.250 € o menos en el año sale sin nombre, así que sumar por beneficiario no da el total pagado.
   - Parte de la PAC está en la BDNS (ficha bdns-api) como convocatorias autonómicas, con cobertura desigual; la ayuda básica a la renta 2025 de Extremadura (811615) trae 112.020 concesiones y la de Baleares (811678) 0.
   - Los servicios SIGPAC del FEGA (WMS, OGC API, consultas REST y GeoPackages) están en sigpac-hubcloud.es y sí responden (ficha mapa-sigpac).
 tips:

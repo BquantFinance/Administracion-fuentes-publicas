@@ -63,6 +63,7 @@ tips:
   - "pygbif 0.6.6: occurrences.search(country='ES', taxonKey=...) funciona; species.name_backbone ya llama a /v2/species/match (usage.key como texto, diagnostics.matchType); occurrences.download para volúmenes grandes."
   - taxonConceptID del portal nacional es la misma clave del backbone de GBIF (2435261 para el lince), así que species/match sirve para ambas APIs.
   - Para un dataset entero, el DwC-A del IPT (archive.do?r=) evita paginar y respeta la versión publicada.
+  - Para uso comercial, license=CC_BY_4_0&license=CC0_1_0 excluye las CC BY-NC (en España quedan 54,2 de 95,8 millones de ocurrencias, 2026-10-01).
 related: [miteco-banco-datos-naturaleza, csic-digital]
 status: active
 verified: "2026-10-01"

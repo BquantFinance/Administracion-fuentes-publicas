@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 148 necesidades, 21 identificadores, 23 grupos de códigos, 99 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 149 necesidades, 21 identificadores, 23 grupos de códigos, 99 rutas muertas.
 
 ## Recetas por intención
 
@@ -770,6 +770,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Alertas alimentarias, registro sanitario de empresas alimentarias y laboratorios → `aesan-alertas-registros` (alertas solo en HTML; sin RSS ni API localizados)
 
 **Sin fuente en el catálogo**
+- Si una fuente se puede usar en un producto comercial, cómo citarla y qué hacer con sus datos personales → ninguna (guides/reutilizacion.md, con las normas leídas en el BOE; la licencia de cada fuente está en el campo license de su ficha)
 - Cotizaciones bursátiles y precios de mercado (BME, OMIE) → ninguna (BME es privado y queda fuera del alcance; el precio de la electricidad de OMIE está en omie-mercado)
 - Deudores con Hacienda de más de 600.000 € (lista del artículo 95 bis LGT) → ninguna (la AEAT la publica en su sede en junio y por ley deja de ser accesible a los tres meses y no debe indexarse; el 01/10/2026 la de 2026 ya daba 404)
 - Concursos de acreedores de una empresa por NIF → ninguna (publicidadconcursal.es busca por NIF pero exige resolver un CAPTCHA (no automatizable); los edictos de los juzgados de lo mercantil salen en la sección IV del BOE, sin búsqueda por NIF en la API)

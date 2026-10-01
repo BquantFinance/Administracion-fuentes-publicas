@@ -209,8 +209,11 @@ Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
   de la AEAT deja de ser accesible a los tres meses por ley (art. 95 bis LGT; la de 2026 daba 404 el 01/10) y el
   Registro Público Concursal exige CAPTCHA: anotados en necesidades, sin automatizar. Contratos y BORME por NIF o
   denominación necesitan el almacén (punto 5).
-- Siguiente trabajo, en este orden: (3) guía de reutilización comercial y datos personales por fuente, con las
-  normas leídas en el BOE; (4) histórico y sincronización de las fuentes clave (desde cuándo, cómo bajarlo todo, cuánto
+- Hecho el 2026-10-01 (segunda sesión): `guides/reutilizacion.md` con la Ley 37/2007, el RD 1495/2011, el RD 130/2019,
+  el TRLCI y el art. 95 bis LGT leídos en la API del BOE y el art. 98.4 del Reglamento (UE) 2021/2116; cita literal
+  de BOE, AEMET e INE; licencias NC y SA medidas (GBIF, CNMC, Junta). Las concesiones de la BDNS caducan a los cuatro
+  años y las de personas físicas al año siguiente (2021 da 0): cobertura y alerta corregidas en la ficha.
+- Siguiente trabajo, en este orden: (4) histórico y sincronización de las fuentes clave (desde cuándo, cómo bajarlo todo, cuánto
   ocupa medido, cómo detectar lo nuevo); (5) almacén en Parquet o DuckDB con GitHub Actions listo para clonar. Del
   propietario: release v0.3.0, ronda desde una IP residencial, token de DataComex y más comunidades cuando lo decida.
 

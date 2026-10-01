@@ -55,3 +55,6 @@ por CPV, ficha de un municipio, subvenciones y perfil público de una empresa po
   con `municipio` o `datos/municipios.csv`.
 - Catastro, datos.gob.es, REE, BNE y FEGA rechazan IP de centros de datos: si fallan desde la nube, prueba otra red
   antes de dar la fuente por caída, y mira `ruta_muerta(url)` si una URL recordada ya no responde.
+- Antes de meter datos en un producto: la licencia está en `license` de la ficha; la cita literal de cada sede, las
+  licencias NC y SA (GBIF, CNMC, Junta), los datos personales (BDNS, Catastro, BORME) y los datos que caducan (BDNS a
+  los 4 años, PAC a los 2, deudores de la AEAT a los 3 meses), en `guides/reutilizacion.md`.

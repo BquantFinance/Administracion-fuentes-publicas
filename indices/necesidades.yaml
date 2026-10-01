@@ -1,6 +1,9 @@
 # Dónde está cada cosa: necesidad habitual, ficha que la resuelve y la nota que evita el desvío típico.
 # source: null cuando no hay fuente en el catálogo (la nota dice por qué). build.py agrupa por sector de la fuente.
 
+- need: Si una fuente se puede usar en un producto comercial, cómo citarla y qué hacer con sus datos personales
+  source: null
+  note: guides/reutilizacion.md, con las normas leídas en el BOE; la licencia de cada fuente está en el campo license de su ficha
 - need: Sumario diario del BOE con identificador y URLs de cada disposición
   source: boe-api-sumario
 - need: Texto consolidado, vigencia y versiones de una norma
