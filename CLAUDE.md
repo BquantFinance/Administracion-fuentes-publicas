@@ -36,7 +36,7 @@ Cada línea que no ahorre una búsqueda, una prueba fallida o una hora de depura
 7. **Castellano en valores, inglés en claves.** Sin markdown dentro de los valores. Sin dos puntos seguidos de
    espacio en valores sin comillas, porque rompe el YAML.
 8. **Fuente única de verdad.** Solo se editan `sources/**/*.yaml`, `indices/*.yaml`, `guides/*.md`, `schema/`,
-   `scripts/` y `evals/` (`datos/municipios.csv` lo genera `python scripts/municipios.py`, con red; `validate.py` lo comprueba), más los ficheros de distribución del servidor MCP (`pyproject.toml`, `server.json`, `glama.json`,
+   `scripts/`, `evals/`, `ejemplos/`, `plugins/` y `.claude-plugin/` (`datos/municipios.csv` lo genera `python scripts/municipios.py`, con red; `validate.py` lo comprueba), más los ficheros de distribución del servidor MCP (`pyproject.toml`, `server.json`, `glama.json`,
    `Dockerfile`, `mcpb/`) y `.github/`. `catalog.json`, `llms.txt`, `llms-full.txt`, `indices/README.md`, los `README.md` de sector y la
    tabla del README raíz se regeneran con `python scripts/build.py` y se suben en el mismo commit.
 9. **No borrar fichas.** Una fuente muerta pasa a `status: deprecated` con la sustituta en `gotchas`.
@@ -135,9 +135,10 @@ verificación, comunidades autónomas) y las evaluaciones al final; todo eso que
 
 1. **Medir donde importa.** Hecho el 2026-10-01 (`evals/resultados-2026-10-01.md`): tareas difíciles con el modelo por
    defecto y con Sonnet, y entrada ligera. Mismo acierto; con catálogo, la mitad de llamadas y casi ninguna fallida.
-   Pendiente, al final: tanda con tokens bien medidos (suma de usage por turno en
-   `~/.claude/projects/<proyecto>/<sesión>/subagents/agent-*.jsonl`, no el total del arnés), condición MCP, Haiku,
-   tareas con trampas silenciosas y tres repeticiones; Catastro bloqueado.
+   Hecho también el 2026-10-01 (`evals/resultados-2026-10-01-tanda3.md`): Haiku, siete trampas silenciosas, condición
+   MCP, tres repeticiones y tokens bien medidos. Sin catálogo 3 de 21, con ficheros 10, con MCP 13; tokens de entrada
+   un 30 % y un 43 % menos. Con las alertas, las tres trampas que seguían fallando pasan de 5 a 18 de 18, siempre que la
+   alerta diga la operación exacta con un ejemplo numérico. Pendiente: modelo mayor y más repeticiones si se quiere.
 2. **Distribución antes que más fichas.** Hecho el 2026-10-01 lo instalable: `pipx install git+...` o `uvx` dan el
    comando `mcp-catalogo`, que descarga `catalog.json` si no hay copia local (`guides/servidor-mcp.md`). Preparado el
    mismo día el alta en registros: `server.json` (io.github.BquantFinance/catalogo-fuentes-publicas, validado con
@@ -180,15 +181,17 @@ Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
   sesión, idéntica a `main` al cierre. `claude/magical-volta-cjszgk` y `claude/eager-albattani-9me81y` son antiguas y
   se pueden borrar.
 - Publicación: release v0.1.0 y entrada `io.github.BquantFinance/catalogo-fuentes-publicas` en el registro oficial de
-  MCP. Versión 0.2.0 (alertas, herramienta municipio, clientes) ya subida en los tres ficheros; falta crear la release
-  v0.2.0 desde la web. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` y crear la release
+  MCP. Release v0.2.0 publicada (alertas, municipio, clientes). Versión 0.3.0 (herramientas MCP que traen datos, plugin
+  de Claude Code con skill, ejemplos) subida en server.json, pyproject.toml, mcpb/manifest.json y los dos ficheros del
+  plugin; falta crear la release v0.3.0 desde la web. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` y crear la release
   vX.Y.Z desde la web de GitHub; `publicar-mcp.yml` hace el resto.
 - CI: `ci.yml` (validate, build y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC, manual y al
   cambiar el propio flujo; recetas, ejemplos, cargadores y enlaces desde la IP de GitHub; comenta en el issue de
   verificación si algo falla). La clave `AEMET_KEY` está como secreto del repositorio.
 - Credenciales fuera del repo: cuenta de DataComex con el correo del propietario (API probada el 2026-09-30); clave de
   AEMET (secreto de GitHub). ESIOS sin token. Nada de esto se escribe en fichas ni commits.
-- Evaluación: `evals/tareas.yaml` (20 tareas), `evals/resultados-2026-09-30.md`, `evals/resultados-2026-10-01.md` y
+- Evaluación: `evals/tareas.yaml` (24 tareas), `evals/resultados-2026-09-30.md`, `evals/resultados-2026-10-01.md`,
+  `evals/resultados-2026-10-01-tanda3.md` y
   `evals/consumo.py`, que suma el consumo real por turno desde las transcripciones de los subagentes. No hay ejecutor
   en el repo.
 - Imagen y apoyo: logo en `.github/assets/` (claro, oscuro, símbolo y vista previa) y Ko-fi del propietario en

@@ -72,6 +72,11 @@ jobs:
           ejecutar scripts/clientes/pcaxis.py
           ejecutar scripts/clientes/arcgis.py
           ejecutar scripts/clientes/ogc.py
+          ejecutar ejemplos/carburante_cerca.py "Alcalá de Henares" gasoleo 8
+          ejecutar ejemplos/boe_hoy.py
+          ejecutar ejemplos/mi_municipio.py 28005
+          ejecutar ejemplos/subvenciones_empresa.py Q1132001G
+          ejecutar ejemplos/licitaciones.py 45
           if [ -n "$AEMET_KEY" ]; then ejecutar scripts/clientes/aemet.py 16078; else echo "AEMET sin clave: omitido" >> cargadores-report.md; fi
           cat cargadores-report.md
           echo "exit=$fallos" >> "$GITHUB_OUTPUT"

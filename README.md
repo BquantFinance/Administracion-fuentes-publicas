@@ -16,7 +16,9 @@ Catálogo de fuentes de datos de la Administración pública española para desa
 ## Empieza aquí
 
 - **Agente con MCP** (Claude, Cursor y cualquier cliente MCP): `uvx --from git+https://github.com/BquantFinance/Administracion-fuentes-publicas mcp-catalogo`, o [![Instalar en Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/link/mcp/install?name=catalogo-fuentes-publicas&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJnaXQraHR0cHM6Ly9naXRodWIuY29tL0JxdWFudEZpbmFuY2UvQWRtaW5pc3RyYWNpb24tZnVlbnRlcy1wdWJsaWNhcyIsIm1jcC1jYXRhbG9nbyJdfQ%3D%3D). Carga solo la ficha que hace falta y trae datos ya resueltos: `descargar(url)` con certificados FNMT, codificación y bloqueos, tablas PC-Axis, BOE, subvenciones por NIF, CKAN y Socrata ([guía](guides/servidor-mcp.md)).
+- **Claude Code**: `/plugin marketplace add BquantFinance/Administracion-fuentes-publicas` y `/plugin install fuentes-publicas@fuentes-publicas` instalan la skill y el servidor MCP de una vez. La skill sola, en [`plugins/fuentes-publicas/skills/fuentes-publicas/`](plugins/fuentes-publicas/skills/fuentes-publicas/SKILL.md) (copiar a `~/.claude/skills/`).
 - **Agente sin MCP**: [`llms-min.txt`](llms-min.txt) (7 KB) o [`llms.txt`](llms.txt); todo el catálogo en [`catalog.json`](catalog.json) o [`llms-full.txt`](llms-full.txt).
+- **Ejemplos que funcionan**: [`ejemplos/`](ejemplos/) (carburante más barato cerca, BOE del día, licitaciones nuevas por CPV, ficha de un municipio, subvenciones de una empresa).
 - **Código**: [`scripts/clientes/`](scripts/clientes/), en Python: una sesión HTTP que ya trae las CA de FNMT, User-Agent de navegador, reintentos y detección de bloqueos de WAF; clientes para CKAN, Socrata, PC-Axis, ArcGIS REST y OGC API que paginan sin topes silenciosos; y cargadores de BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex y Saiku. Probados contra respuestas reales.
 
 ## Lo que no dice la documentación oficial
@@ -28,7 +30,7 @@ Algunos ejemplos, verificados con llamadas reales:
 - Para filtrar un municipio, el INE no quiere su código (`02001`) sino un Id interno (`6124`).
 - Muchos servidores `.gob.es` envían el certificado FNMT sin la intermedia: el navegador entra, `curl` y `requests` fallan ([arreglo](guides/cliente-http.md)).
 - AEMET responde en dos pasos, con el fichero en ISO-8859-15 y los errores dentro de un HTTP 200.
-- En SIGPAC el municipio es el código del Catastro, no el del INE: un punto de la Puerta del Sol devuelve `28:900`, no `28079`, y otros 4.448 municipios cambian de número. La traducción, con DIR3, NIF del ayuntamiento, NUTS3 y coordenadas, está en [`datos/municipios.csv`](datos/municipios.csv).
+- En SIGPAC el municipio es el código del Catastro, no el del INE: un punto de la Puerta del Sol devuelve `28:900`, no `28079`, y otros 4.448 municipios cambian de número. La traducción, con el Id interno que exige el INE Tempus, DIR3, NIF del ayuntamiento, NUTS3 y coordenadas, está en [`datos/municipios.csv`](datos/municipios.csv).
 - Los CSV de los portales PC-Axis de Educación, Cultura e Interior llegan en UTF-8 aunque la cabecera diga ISO-8859-15; leídos como Latin-1 salen «autÃ³noma».
 - En GBIF la encina ibérica es sobre todo *Quercus rotundifolia* (1,3 millones de registros en España); preguntar por *Quercus ilex*, que es lo que devuelve el buscador de nombres, da 21.322 sin ningún aviso.
 
@@ -85,7 +87,9 @@ catalog.json                 todo el catálogo (generado)
 llms.txt / llms-full.txt     entrada para agentes (generado)
 indices/*.yaml               recetas por intención, necesidades, identificadores, códigos que son parámetros, rutas muertas (fuente de verdad)
 indices/README.md            los cinco índices en texto (generado)
-datos/municipios.csv         los 8.132 municipios con su código INE, SIGPAC y Catastro, DIR3, NIF, NUTS3 y coordenadas (scripts/municipios.py)
+ejemplos/                    proyectos pequeños que funcionan (carburante, BOE, licitaciones, municipio, subvenciones)
+plugins/, .claude-plugin/    plugin de Claude Code con la skill y el servidor MCP
+datos/municipios.csv         los 8.132 municipios con su código INE, Id del INE Tempus, SIGPAC y Catastro, DIR3, NIF, NUTS3 y coordenadas (scripts/municipios.py)
 scripts/                     validate.py, build.py, check_links.py, check_recetas.py, check_ejemplos.py, fnmt_bundle.py, mcp_catalogo.py (servidor MCP local)
 scripts/clientes/            sesión HTTP, clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC, y cargadores (BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex, Saiku)
 scripts/clientes/muestras/   respuestas reales recortadas para probar los parsers sin red (python scripts/test_clientes.py)
@@ -105,7 +109,7 @@ curl -s .../catalog.json | jq '.sources[] | select(.sector=="economia-finanzas" 
 ```
 
 ```python
-# pip install "fuentes-publicas-mcp[clientes] @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas"
+# pip install "fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas"
 from fuentes_publicas.clientes import ckan, socrata, pcaxis, arcgis, ogc
 from fuentes_publicas.clientes.sesion import sesion  # requests.Session con FNMT, User-Agent, reintentos y bloqueos
 
@@ -125,7 +129,7 @@ Además de las fichas, `indices/` responde a las preguntas que se hacen antes de
 - **Códigos que son parámetros**: valores que las APIs exigen y no se adivinan (Id del INE para `tv`, países de DataComex, estación de AEMET por capital, productos de carburantes, rangos del BOE), obtenidos con llamadas reales.
 - **Rutas muertas**: URLs de documentación antigua que ya no sirven y su sustituta.
 
-**Medido** ([evals/](evals/)): en diez tareas resueltas por el mismo agente con y sin catálogo (dos modelos), el acierto fue el mismo; con catálogo, en las tareas difíciles las llamadas HTTP y los pasos del agente bajan a la mitad y las fallidas casi a cero. El consumo de tokens está pendiente de medir bien: las dos primeras tandas registraron el contexto final de cada agente, no los tokens procesados en todos sus turnos.
+**Medido** ([evals/](evals/)): en diez tareas resueltas por el mismo agente con y sin catálogo (dos modelos), el acierto fue el mismo; con catálogo, en las tareas difíciles las llamadas HTTP y los pasos del agente bajan a la mitad y las fallidas casi a cero. En tareas con trampas silenciosas y un modelo pequeño (Haiku, tres repeticiones, tokens medidos turno a turno), el acierto pasa de 3 de 21 sin catálogo a 13 de 21 con el servidor MCP, con un 43 % menos de tokens; con las alertas, las trampas que aún fallaban pasan de 5 a 18 de 18.
 
 Todo en [indices/README.md](indices/README.md) y, para consumo programático, bajo la clave `indices` de `catalog.json`. Cada endpoint principal de una ficha lleva `example` (llamada copiable) y `returns` (forma de la respuesta vista en esa llamada). `python scripts/mcp_catalogo.py` expone el catálogo por MCP en local para cargar solo lo necesario ([guía](guides/servidor-mcp.md)).
 

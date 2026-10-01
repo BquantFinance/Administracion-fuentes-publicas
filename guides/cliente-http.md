@@ -5,7 +5,7 @@ documento da el arreglo copiable para cada uno. Filtrar `catalog.json` por `quir
 antes de la primera petición.
 
 En Python todo esto ya está hecho en `scripts/clientes/sesion.py` (instalable con
-`pip install "fuentes-publicas-mcp[clientes] @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas"`):
+`pip install "fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas"`):
 `sesion()` devuelve una `requests.Session` con las CA de FNMT (genera `ca-age.pem` en `~/.cache/fuentes-publicas` la
 primera vez y lo pasa en cada petición aunque `REQUESTS_CA_BUNDLE` esté definido), User-Agent de navegador, reintentos
 con espera ante 429, 5xx, cortes y 403 intermitentes, y la excepción `Bloqueado` ante páginas de Incapsula, Akamai,

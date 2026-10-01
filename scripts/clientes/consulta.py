@@ -18,19 +18,22 @@ import json as _json
 import os
 import socket
 import sys
+import time
 import zipfile
 from urllib.parse import urlparse
 
 try:
     from . import bdns, boe, ckan, pcaxis, socrata
-    from .sesion import BLOQUEOS, contenido, sesion, texto
+    from .sesion import BLOQUEOS, CACHE, contenido, sesion, texto
 except ImportError:
     sys.path.insert(0, os.path.dirname(__file__))
     import bdns, boe, ckan, pcaxis, socrata  # noqa: E401
-    from sesion import BLOQUEOS, contenido, sesion, texto
+    from sesion import BLOQUEOS, CACHE, contenido, sesion, texto
 
 TOPE_BYTES = 25_000_000
+MUNICIPIOS_URL = "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/datos/municipios.csv"
 _S = None
+_MUNICIPIOS: list[dict] = []
 
 
 def _sesion():
@@ -233,6 +236,54 @@ def socrata_filas(conjunto: str, where: str | None = None, select: str | None = 
     filas = socrata.consulta(conjunto, where=where, select=select, order=order or (None if select else ":id"),
                              limit=limite)
     return {"conjunto": conjunto, "filas": filas, "nota": "sin $limit Socrata da 1.000 filas; aquí limit es explícito"}
+
+
+def municipios() -> list[dict]:
+    """datos/municipios.csv del repo (o descargado de GitHub y cacheado): una fila por municipio con ine, dc, nombre,
+    cpro, ccaa, provincia, nuts3, ine_tempus_id, sigpac, dir3, nif, lat, lon y nucleo (caché de 30 días)."""
+    if not _MUNICIPIOS:
+        from pathlib import Path
+        local = Path(__file__).resolve().parents[2] / "datos" / "municipios.csv"
+        cache = CACHE / "municipios.csv"
+        if local.is_file():
+            t = local.read_text(encoding="utf-8")
+        elif cache.is_file() and time.time() - cache.stat().st_mtime < 30 * 86400:
+            t = cache.read_text(encoding="utf-8")
+        else:
+            t = texto(_sesion().get(MUNICIPIOS_URL))
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            cache.write_text(t, encoding="utf-8")
+        _MUNICIPIOS.extend(csv.DictReader(io.StringIO(t)))
+    return _MUNICIPIOS
+
+
+def buscar_municipio(consulta: str, limite: int = 5, filas: list[dict] | None = None) -> list[dict]:
+    """Por código INE (28079 o 280796), SIGPAC (28:900), DIR3 (L01280796), NIF del ayuntamiento o nombre (sin tildes,
+    con artículo pospuesto o no: «Coruña, A», «A Coruña»)."""
+    import difflib
+    import unicodedata
+
+    def norm(s: str) -> str:
+        s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower()
+        partes = [p.strip() for p in s.split(",")]
+        if len(partes) == 2 and len(partes[1].split()) == 1:
+            s = f"{partes[1]} {partes[0]}"  # «Coruña, A» -> «a coruña»
+        return " ".join("".join(c if c.isalnum() else " " for c in s).split())
+
+    filas = filas if filas is not None else municipios()
+    q = consulta.strip()
+    exactos = [f for f in filas if q.upper() in (f["ine"], f["ine"] + f["dc"], f["sigpac"], f["dir3"], f["nif"])]
+    if exactos:
+        return exactos[:limite]
+    nq = norm(q)
+    iguales = [f for f in filas if nq == norm(f["nombre"]) or nq in [norm(p) for p in f["nombre"].split("/")]]
+    if iguales:
+        return iguales[:limite]
+    contienen = sorted((f for f in filas if nq and nq in norm(f["nombre"])), key=lambda f: len(f["nombre"]))
+    if contienen:
+        return contienen[:limite]
+    nombres = {norm(f["nombre"]): f for f in filas}
+    return [nombres[n] for n in difflib.get_close_matches(nq, list(nombres), n=limite, cutoff=0.75)]
 
 
 if __name__ == "__main__":

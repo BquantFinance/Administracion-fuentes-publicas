@@ -813,6 +813,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - vía `mivau-precios-vivienda-alquiler`: CUMUN como texto en el xlsx de SERPAVI y CodINE en su GeoJSON municipal (allí CUMUN es entero)
 - vía `segsocial-estadisticas`: COD MUNICIPIO de MUNCNAE{MM}{AA}.xlsx, entero sin cero inicial; rellenar a cinco dígitos
 - vía `sepe-estadisticas`: código como número (28001.0) en ESTADISTICA_MUNICIPIOS.xls
+- vía `ine-api-tempus`: el filtro tv=19 pide el Id interno, no el código (02001 es tv=19:6124); columna ine_tempus_id de datos/municipios.csv
 - vía `dir3-directorio`: el ayuntamiento es L01 + INE + dígito de control (L01280796); su NIF no se deduce del código (Vitoria P0106800F), está en datos/municipios.csv
 
 **ine-provincia**

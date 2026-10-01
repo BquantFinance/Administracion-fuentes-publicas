@@ -736,6 +736,7 @@ docs_url: https://www.ine.es/dyngs/DAB/index.htm?cid=1099
   devuelve: CSV en UTF-8 con BOM (la cabecera dice ISO-8859-15), una columna por variable, Periodo (2026M08 o 2025) y Total con coma decimal y punto de miles, "" sin dato; en tablas municipales código y nombre van juntos (01051 Agurain/Salvatierra); px en ISO-8859-15; xlsx en formato informe
 rate_limit: No documentado; una tabla grande con nult=1 devuelve 600 KB (4248 series en la 25333) y la 29005 sin filtro 5,6 MB (14,6 MB con tip=AM)
 quirks: errors-html-or-xml, soft-errors-200
+! VALORES_VARIABLEOPERACION/19/22, la lista de Id de los 8.132 municipios para tv=19, tardó 107 s (884 KB) el 01/10/2026; el Id está ya en la columna ine_tempus_id de datos/municipios.csv.
 ! Los códigos de serie y los ids de tabla cambian con cada cambio de base; el IPC general fue IPC206446 (hasta 2021M12), IPC251852 (hasta 2025M12) y es IPC290751 (base 2025).
 ! TABLAS_OPERACION incluye tablas cerradas (2852, padrón por provincias hasta 2021) con Anyo_Periodo_fin o FechaRef_fin en ms ('null' si sigue viva); la 50902, ya fuera del listado, responde con datos hasta 2025M12.
 ! DATOS_TABLA da Data del periodo más reciente al más antiguo y DATOS_SERIE al revés, con nult y con date (Abengibre en 29005, 2025 y 2024 frente a 2024 y 2025); ordenar por Anyo y FK_Periodo.

@@ -1,0 +1,16 @@
+{
+  "name": "fuentes-publicas",
+  "owner": {
+    "name": "BquantFinance",
+    "url": "https://github.com/BquantFinance"
+  },
+  "description": "Datos públicos de España para agentes: catálogo verificado, servidor MCP que trae datos y skill",
+  "plugins": [
+    {
+      "name": "fuentes-publicas",
+      "source": "./plugins/fuentes-publicas",
+      "description": "Skill y servidor MCP del catálogo de fuentes públicas de España: dónde está cada dato, sus trampas y herramientas que lo traen ya resuelto",
+      "version": "0.3.0"
+    }
+  ]
+}

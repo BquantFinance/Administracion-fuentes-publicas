@@ -18,8 +18,20 @@ _cache: dict[str, dict[str, int]] = {}
 
 
 def id_municipio(codigo_ine: str, operacion: str | int = 22) -> int:
-    """Id interno del INE (el que exige tv=19:{Id}) a partir del código INE de 5 dígitos; una llamada, cacheada."""
+    """Id interno del INE (el que exige tv=19:{Id}) a partir del código INE de 5 dígitos. Para la operación 22 sale de
+    datos/municipios.csv (columna ine_tempus_id); si no, una llamada lenta (30 s o más), cacheada."""
     key = str(operacion)
+    if key == "22" and key not in _cache:
+        try:
+            try:
+                from .consulta import municipios
+            except ImportError:
+                from consulta import municipios
+            ids = {f["ine"]: int(f["ine_tempus_id"]) for f in municipios() if f.get("ine_tempus_id")}
+            if ids:
+                _cache[key] = ids
+        except Exception:  # noqa: BLE001  (sin CSV ni red a GitHub: se pide al INE)
+            pass
     if key not in _cache:
         s = session()
         _cache[key] = mapa_ids(s.get(f"{BASE}/VALORES_VARIABLEOPERACION/19/{operacion}", timeout=120, verify=s.verify).json())

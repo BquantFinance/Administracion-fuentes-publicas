@@ -36,7 +36,7 @@ def validate_municipios() -> list[str]:
     path = ROOT / "datos" / "municipios.csv"
     if not path.exists():
         return []
-    cols = ["ine", "dc", "nombre", "cpro", "ccaa", "provincia", "nuts3", "sigpac", "sigpac_cruce", "dir3", "nif",
+    cols = ["ine", "dc", "nombre", "cpro", "ccaa", "provincia", "nuts3", "ine_tempus_id", "sigpac", "sigpac_cruce", "dir3", "nif",
             "lat", "lon", "nucleo"]
     with path.open(encoding="utf-8", newline="") as fh:
         filas = list(csv.DictReader(fh))

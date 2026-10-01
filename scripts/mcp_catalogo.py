@@ -291,21 +291,9 @@ def municipios() -> list[dict]:
 @mcp.tool()
 def municipio(consulta: str, limite: int = 5) -> list[dict]:
     """Códigos de un municipio en cada sistema: INE (5 dígitos y dígito de control), SIGPAC y Catastro (las capitales
-    son 900: Madrid 28:900, no 28079), DIR3 y NIF del ayuntamiento, CCAA, provincia, NUTS3 y coordenadas de su núcleo
-    capital. Acepta código INE (28079 o 280796), SIGPAC (28:900), DIR3 (L01280796), NIF (P2807900B) o nombre."""
-    filas, q = municipios(), consulta.strip()
-    exactos = [f for f in filas if q.upper() in (f["ine"], f["ine"] + f["dc"], f["sigpac"], f["dir3"], f["nif"])]
-    if exactos:
-        return exactos[:limite]
-    nq = norm(q).strip()
-    iguales = [f for f in filas if norm(f["nombre"]) == nq or nq in [norm(p).strip() for p in f["nombre"].split("/")]]
-    if iguales:
-        return iguales[:limite]
-    contienen = [f for f in filas if nq and nq in norm(f["nombre"])]
-    if contienen:
-        return sorted(contienen, key=lambda f: len(f["nombre"]))[:limite]
-    nombres = {norm(f["nombre"]): f for f in filas}
-    return [nombres[n] for n in difflib.get_close_matches(nq, list(nombres), n=limite, cutoff=0.75)]
+    son 900: Madrid 28:900, no 28079), DIR3 y NIF del ayuntamiento, CCAA, provincia, NUTS3, Id del INE Tempus (el
+    que exige tv=19:Id) y coordenadas de su núcleo capital. Acepta código INE (28079 o 280796), SIGPAC (28:900), DIR3 (L01280796), NIF (P2807900B) o nombre."""
+    return _consulta().buscar_municipio(consulta, limite, municipios())
 
 
 def _consulta():

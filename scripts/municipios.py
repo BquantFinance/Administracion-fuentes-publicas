@@ -2,6 +2,7 @@
 """Genera datos/municipios.csv: una fila por municipio con los códigos que exigen las distintas fuentes.
 
 Columnas: ine (5 dígitos), dc (dígito de control), nombre (INE), cpro, ccaa (código INE), provincia (DIR3), nuts3 (IGN),
+ine_tempus_id (Id interno que exige el INE Tempus en tv=19:Id, de VALORES_VARIABLEOPERACION/19/22),
 sigpac (código de municipio de SIGPAC, que es el del Catastro: capitales 900), sigpac_cruce (cómo se emparejó con el
 INE), dir3 (ayuntamiento, L01 + ine + dc), nif (del ayuntamiento, DIR3), lat y lon (núcleo capital del municipio, IGN,
 ETRS89), nucleo (su nombre).
@@ -77,6 +78,12 @@ def ine() -> tuple[list[dict], str]:
     raise RuntimeError("no encuentro el diccionario de municipios del INE de este año ni del anterior")
 
 
+def tempus() -> dict[str, int]:
+    """Código INE -> Id interno del INE Tempus (variable 19); la llamada tarda de 30 s a varios minutos."""
+    r = S.get("https://servicios.ine.es/wstempus/js/ES/VALORES_VARIABLEOPERACION/19/22", timeout=600)
+    return {v["Codigo"]: v["Id"] for v in json(r)}
+
+
 def sigpac(cpros: list[str]) -> dict[str, list[tuple[int, str]]]:
     out = {}
     for p in cpros:
@@ -150,6 +157,7 @@ def main() -> int:
     listas = sigpac(cpros)
     ay, prov = dir3()
     nuts, capital = ign()
+    ids_tempus = tempus()
     por_prov = collections.defaultdict(list)
     for m in munis:
         por_prov[m["cpro"]].append(m)
@@ -168,7 +176,7 @@ def main() -> int:
                 sigpac_cod, metodo = punto, "punto"
         filas.append({
             "ine": m["ine"], "dc": m["dc"], "nombre": m["nombre"], "cpro": m["cpro"], "ccaa": m["ccaa"],
-            "provincia": prov.get(m["cpro"], ""), "nuts3": nuts.get(m["ine"]) or "",
+            "provincia": prov.get(m["cpro"], ""), "nuts3": nuts.get(m["ine"]) or "", "ine_tempus_id": ids_tempus.get(m["ine"], ""),
             "sigpac": sigpac_cod, "sigpac_cruce": metodo,
             "dir3": cod if cod in ay else "", "nif": (ay[cod].get("NIF_CIF") or "").strip() if cod in ay else "",
             "lat": round(c["latitud"], 6) if c else "", "lon": round(c["longitud"], 6) if c else "",
@@ -190,7 +198,7 @@ def main() -> int:
           f"capitales en {distintos} municipios")
     cuenta = collections.Counter(f["sigpac_cruce"] for f in filas)
     print(f"{out}: {len(filas)} municipios ({url_ine}); sigpac {dict(cuenta)}; dir3 {sum(1 for f in filas if f['dir3'])}; "
-          f"nuts3 {sum(1 for f in filas if f['nuts3'])}; coordenadas {sum(1 for f in filas if f['lat'] != '')}")
+          f"nuts3 {sum(1 for f in filas if f['nuts3'])}; tempus {sum(1 for f in filas if f['ine_tempus_id'] != '')}; coordenadas {sum(1 for f in filas if f['lat'] != '')}")
     return 0
 
 

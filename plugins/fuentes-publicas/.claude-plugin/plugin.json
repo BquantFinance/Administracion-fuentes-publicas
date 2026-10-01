@@ -1,0 +1,19 @@
+{
+  "name": "fuentes-publicas",
+  "displayName": "Fuentes públicas de España",
+  "version": "0.3.0",
+  "description": "Skill y servidor MCP del catálogo de fuentes públicas de España: dónde está cada dato, sus trampas y herramientas que lo traen ya resuelto",
+  "author": {
+    "name": "BquantFinance",
+    "url": "https://github.com/BquantFinance"
+  },
+  "homepage": "https://github.com/BquantFinance/Administracion-fuentes-publicas",
+  "repository": "https://github.com/BquantFinance/Administracion-fuentes-publicas",
+  "license": "CC0-1.0",
+  "mcpServers": {
+    "catalogo-fuentes-publicas": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/BquantFinance/Administracion-fuentes-publicas", "mcp-catalogo"]
+    }
+  }
+}
