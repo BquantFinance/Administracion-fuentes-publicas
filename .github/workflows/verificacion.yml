@@ -14,6 +14,7 @@ on:
         required: false
         default: "0"
   push:
+    branches: [main]   # sin esto, cada etiqueta de release y la rama de trabajo lanzaban otra verificación completa
     paths:
       - ".github/workflows/verificacion.yml"   # una ejecución al cambiar el flujo; cron y dispatch exigen que esté en la rama por defecto
 
