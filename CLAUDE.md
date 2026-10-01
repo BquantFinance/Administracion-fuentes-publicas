@@ -196,9 +196,16 @@ Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
   en el repo.
 - Imagen y apoyo: logo en `.github/assets/` (claro, oscuro, símbolo y vista previa) y Ko-fi del propietario en
   `.github/FUNDING.yml` y en el README.
-- Siguiente trabajo, en este orden: ronda desde una IP residencial para las 7 fichas sin fecha de hoy y los hosts
-  bloqueados, y DataComex con token (punto 6); evaluación con tokens bien medidos, condición MCP, Haiku y tres
-  repeticiones (punto 1); más comunidades solo cuando lo indique el propietario (punto 5).
+- Enfoque acordado con el propietario el 2026-10-01: lo que acelera a quien desarrolla con agentes, a devs, a gente que
+  trastea y a startups; que el agente obtenga el dato, no solo sepa dónde está. Hecho ese día: clientes genéricos,
+  alertas, tabla de municipios, herramientas MCP que traen datos, plugin de Claude Code con skill y ejemplos.
+- Siguiente trabajo, en este orden: (1) reescribir las 35 alertas con la operación exacta y un ejemplo numérico, que es
+  lo que hizo funcionar la de Interior (tanda 3); (2) perfil de empresa por NIF (BDNS ya, contratos de PLACSP, deudores
+  de la AEAT, concursos del BOE y del Registro Público Concursal, BORME por denominación; la lista de deudores no se
+  localizó aún en la sede el 2026-10-01); (3) guía de reutilización comercial y datos personales por fuente, con las
+  normas leídas en el BOE; (4) histórico y sincronización de las fuentes clave (desde cuándo, cómo bajarlo todo, cuánto
+  ocupa medido, cómo detectar lo nuevo); (5) almacén en Parquet o DuckDB con GitHub Actions listo para clonar. Del
+  propietario: release v0.3.0, ronda desde una IP residencial, token de DataComex y más comunidades cuando lo decida.
 
 ## Lo que no se hace
 
