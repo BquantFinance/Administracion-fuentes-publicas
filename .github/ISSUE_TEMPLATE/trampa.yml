@@ -1,0 +1,31 @@
+name: Trampa nueva
+description: Algo que la documentación oficial no dice y te ha hecho perder tiempo con una fuente del catálogo
+title: "[trampa] <fuente>: <una frase>"
+labels: [trampa]
+body:
+  - type: input
+    id: fuente
+    attributes:
+      label: Ficha o URL
+      description: id de la ficha (por ejemplo ine-api-tempus) o URL de la fuente si no está en el catálogo
+    validations:
+      required: true
+  - type: textarea
+    id: que_pasa
+    attributes:
+      label: Qué pasa
+      description: La llamada exacta (curl o URL), qué devuelve y qué esperabas; fecha en que lo viste
+    validations:
+      required: true
+  - type: textarea
+    id: como_se_esquiva
+    attributes:
+      label: Cómo se esquiva
+      description: Cabecera, parámetro, codificación o ruta que lo arregla, si la conoces
+  - type: checkboxes
+    id: verificado
+    attributes:
+      label: Verificación
+      options:
+        - label: Lo he reproducido hoy con una llamada real, no lo cito de memoria
+          required: true

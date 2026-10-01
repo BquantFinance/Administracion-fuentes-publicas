@@ -98,6 +98,34 @@ por impacto. Las verificaciones se hacen con el bundle FNMT y el User-Agent de n
 `guides/cliente-http.md`. `verificacion.yml` (cron semanal y ejecución manual) solo corre desde la rama por defecto del
 repositorio.
 
+## Siguientes pasos, por orden de retorno (2026-10-01)
+
+Diagnóstico honesto tras la primera evaluación (`evals/resultados-2026-09-30.md`): en tareas fáciles con un modelo
+potente el catálogo no cambia el acierto; ahorra la mitad de llamadas y evita las fallidas, y cuesta más tokens si se
+carga `llms.txt` entero. El valor está concentrado en las trampas no deducibles, las rutas muertas y los códigos
+internos. Lo que falta no son más fichas, sino demostrarlo donde importa, hacerlo instalable y mantenerlo.
+
+1. **Medir donde importa.** Segunda tanda de `evals/` con las tareas difíciles (AEMET con clave, CODICE de PLACSP,
+   DataComex, filtro `tv` del INE, Saiku de Igualdad, Catastro bloqueado) y con un modelo barato (Sonnet o Haiku),
+   donde la diferencia debería ser grande. Si no lo es, hay que saberlo.
+2. **Distribución antes que más fichas.** MCP instalable en una línea (`uvx` o `pipx` desde el repo, con descarga de
+   `catalog.json` si no hay copia local), alta en los registros de MCP, bloque de configuración copiable para Claude
+   Code, Cursor y Claude Desktop.
+3. **Entrada ligera.** `llms-min.txt` (reglas rápidas, fichas por sector y punteros a los índices, sin recetas ni
+   necesidades) para quitar el sobrecoste de tokens; medirlo igual que la primera tanda.
+4. **Código listo, no solo descripciones.** Cargadores en Python para las fuentes más traicioneras (AEMET con los dos
+   pasos y la codificación, parser CODICE de PLACSP, consulta MDX a Saiku, sesión de DataComex) y una carpeta de
+   respuestas de muestra para probar parsers sin red.
+5. **Cobertura con demanda real.** Comunidades autónomas por tamaño (Madrid, Cataluña, Andalucía, Comunidad
+   Valenciana) y los portales de datos de Madrid y Barcelona, que tienen API; antes que el resto de la AGE.
+6. **Mantenimiento con dueño.** Una sesión mensual que corra `verificacion.yml`, arregle lo roto y pase la ronda desde
+   una IP residencial para los hosts que bloquean centros de datos (lista en «Estado de verificación»). Sin esto, el
+   catálogo caduca; un catálogo con errores es peor que ninguno.
+7. **Trampas de la comunidad.** Plantilla de issue «trampa nueva» (`.github/ISSUE_TEMPLATE/trampa.yml`): URL, qué
+   pasa, cómo se esquiva. Cada trampa confirmada entra en la ficha con fecha.
+
+Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
+
 ## Lo que no se hace
 
 - No se añaden agregadores privados, servicios de pago ni datos de terceros sobre datos públicos.
