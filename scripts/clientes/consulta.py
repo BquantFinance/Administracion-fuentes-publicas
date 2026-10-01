@@ -18,8 +18,10 @@ import json as _json
 import os
 import socket
 import sys
+import threading
 import time
 import zipfile
+from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlparse
 
 try:
@@ -167,11 +169,28 @@ def _hojas_xlsx(datos: bytes, filas: int = 5) -> list[dict] | str:
     return hojas
 
 
+_MEMO: dict = {}
+_MEMO_LOCK = threading.Lock()
+
+
+def _memo(clave, ttl: float, fn):
+    """Caché en memoria del proceso (el servidor MCP vive toda la sesión) para ficheros grandes que cambian poco: una
+    tabla de criminalidad son 2,3 MB y antes se bajaba en cada perfil de municipio."""
+    with _MEMO_LOCK:
+        hit = _MEMO.get(clave)
+        if hit and time.time() - hit[0] < ttl:
+            return hit[1]
+    valor = fn()
+    with _MEMO_LOCK:
+        _MEMO[clave] = (time.time(), valor)
+    return valor
+
+
 def tabla_pcaxis(tabla: str | int, filtro: str | None = None, max_filas: int = 200) -> dict:
     """Tabla PC-Axis en csv_bdsc (id del INE, Tabla.htm o URL de fichero) con números convertidos; filtro deja las
     filas en las que algún campo contiene el texto (un código INE, un nombre, un periodo)."""
     url = pcaxis.url_csv(tabla)
-    filas = pcaxis.leer(texto(_sesion().get(url)))
+    filas = _memo(("pcaxis", url), 6 * 3600, lambda: pcaxis.leer(texto(_sesion().get(url))))
     if filtro:
         f = filtro.lower()
         filas = [x for x in filas if any(f in str(v).lower() for v in x.values())]
@@ -333,7 +352,7 @@ def empresa_nif(nif: str, max_filas: int = 10) -> dict:
     prohibiciones = []
     if nombre:
         clave = normalizar_nombre(nombre)
-        raiz = ET.fromstring(contenido(_sesion().get(PROHIBICIONES)))
+        raiz = ET.fromstring(_memo("prohibiciones", 6 * 3600, lambda: contenido(_sesion().get(PROHIBICIONES))))
         for p in raiz:
             d = {c.tag: (c.text or "").strip() for c in p}
             if normalizar_nombre(d.get("denominacionSocial", "")) == clave:
@@ -397,7 +416,7 @@ def perfil_municipio(municipio: str) -> dict:
         return {"anio": fecha[:4], "renta_neta_media_por_persona": v, "fuente": "ine-api-tempus, Atlas de renta, tabla 30824"}
 
     def empleo(conjunto):
-        serie = sepe.municipio(m["ine"], conjunto)
+        serie = sepe.municipio(m["ine"], conjunto, datos=_memo(("sepe", conjunto), 3600, lambda: sepe.filas(conjunto)))
         total = next(k for k in serie[-1] if k.startswith("total"))
         return {"mes": serie[-1]["mes"], total: serie[-1][total], "serie": {f["mes"]: f[total] for f in serie},
                 "ultimo_desglose": serie[-1], "fuente": "sepe-estadisticas, CSV de datos abiertos"}
@@ -414,11 +433,13 @@ def perfil_municipio(municipio: str) -> dict:
                         "nota": "acumulado desde enero, no trimestral; balance de Interior", "fuente": "interior-criminalidad"}
         return {"nota": "Interior solo publica municipios de más de 20.000 habitantes"}
 
-    bloque("poblacion", poblacion)
-    bloque("renta", renta)
-    bloque("paro_registrado", lambda: empleo("paro"))
-    bloque("contratos", lambda: empleo("contratos"))
-    bloque("criminalidad", criminalidad)
+    tareas = {"poblacion": poblacion, "renta": renta, "paro_registrado": lambda: empleo("paro"),
+              "contratos": lambda: empleo("contratos"), "criminalidad": criminalidad}
+    with ThreadPoolExecutor(len(tareas)) as ex:  # bloques independientes: el perfil tarda lo que el más lento
+        futuros = {k: ex.submit(bloque, k, f) for k, f in tareas.items()}
+    for k in tareas:
+        futuros[k].result()
+    out = {"municipio": out["municipio"], **{k: out[k] for k in tareas}}  # orden fijo, no el de llegada
     out["notas"] = ["paro registrado (SEPE) no es el desempleo de la EPA (INE)",
                     "None en paro o contratos es «<5», secreto estadístico de 1 a 4"]
     return out
@@ -466,6 +487,11 @@ def bde_periodo(fecha_valor: str, frecuencia: str) -> str:
 
 
 def coyuntura() -> dict:
+    """Como _coyuntura, con media hora de caché en memoria."""
+    return _memo("coyuntura", 1800, _coyuntura)
+
+
+def _coyuntura() -> dict:
     """Último dato de los indicadores de coyuntura de España en una llamada (INE y Banco de España), cada uno con su
     periodo, tipo de dato, serie y fuente, y la prima de riesgo calculada en el último mes común (bono español menos
     alemán, en puntos básicos). Un indicador que falle trae error sin tumbar el resto."""
@@ -502,6 +528,17 @@ def coyuntura() -> dict:
     except Exception as exc:  # noqa: BLE001
         out["prima_riesgo"] = {"error": f"{type(exc).__name__}: {str(exc)[:200]}"}
     return out
+
+
+def en_lote(fn, valores: list, paralelo: int = 4) -> list:
+    """Aplica fn a varios valores a la vez (perfiles de municipio, empresas por NIF); un fallo queda en su posición."""
+    def uno(v):
+        try:
+            return fn(v)
+        except Exception as exc:  # noqa: BLE001
+            return {"consulta": v, "error": f"{type(exc).__name__}: {str(exc)[:200]}"}
+    with ThreadPoolExecutor(max(1, min(paralelo, len(valores)))) as ex:
+        return list(ex.map(uno, valores))
 
 
 if __name__ == "__main__":

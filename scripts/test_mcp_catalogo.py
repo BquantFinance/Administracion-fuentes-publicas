@@ -125,6 +125,11 @@ async def main() -> None:
             pm = payload(res)
             assert pm["municipio"]["nombre"] == "Abengibre" and pm["poblacion"]["habitantes"] > 0 and pm["paro_registrado"]["mes"], pm
             print(f"perfil_municipio('02001'): {pm['poblacion']['habitantes']:.0f} habitantes, paro {pm['paro_registrado']['mes']} {pm['paro_registrado']['total_paro_registrado']}")
+            lote = payload(await session.call_tool("perfil_municipio", {"municipio": ["02001", "28005"]}))
+            assert [x["municipio"]["ine"] for x in lote["perfiles"]] == ["02001", "28005"], lote
+            emps = payload(await session.call_tool("empresa_nif", {"nif": ["B37033297", "A95758389"], "max_filas": 2}))
+            assert len(emps["empresas"]) == 2 and emps["empresas"][1]["nif"] == "A95758389", emps
+            print(f"lotes: 2 perfiles ({list(lote['perfiles'][0])[:3]}...), 2 empresas")
             alm = payload(await session.call_tool("almacen_sql", {"consulta": "select 1 as uno"}))
             assert alm.get("filas") == [[1]] or "almacén" in alm.get("error", ""), alm  # con o sin almacén local
             print(f"almacen_sql: {alm.get('filas') or alm['error']}")

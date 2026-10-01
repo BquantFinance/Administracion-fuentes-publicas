@@ -403,10 +403,13 @@ def _empresa_compacta(r: dict) -> dict:
 
 
 @herramienta
-def empresa_nif(nif: str, max_filas: int = 5) -> dict:
+def empresa_nif(nif: str | list[str], max_filas: int = 5) -> dict:
     """Lo público de una empresa o entidad por NIF: si es sector público (con DIR3), subvenciones, ayudas de Estado y
     minimis con totales (BDNS), ayudas de la AEI y prohibiciones de contratar; con almacén local, contratos adjudicados
-    y actos del BORME. no_cubierto dice dónde mirar lo demás."""
+    y actos del BORME. no_cubierto dice dónde mirar lo demás. Con una lista de hasta 10 NIF, todos en una llamada."""
+    if isinstance(nif, list):
+        c = _consulta()
+        return {"empresas": [_empresa_compacta(r) for r in c.en_lote(lambda n: c.empresa_nif(n, max_filas), nif[:10], 3)]}
     return _empresa_compacta(_datos(_consulta().empresa_nif, nif, max_filas))
 
 
@@ -418,13 +421,18 @@ def coyuntura() -> dict:
 
 
 @herramienta
-def perfil_municipio(municipio: str, solo_codigos: bool = False) -> dict:
+def perfil_municipio(municipio: str | list[str], solo_codigos: bool = False) -> dict:
     """Un municipio (nombre, código INE, SIGPAC, DIR3 o NIF) en una llamada: sus códigos en cada sistema (SIGPAC y
     Catastro numeran distinto que el INE), padrón, renta media, paro y contratos del año por mes y criminalidad.
-    solo_codigos=True da solo los códigos de hasta 5 candidatos, sin red."""
+    solo_codigos=True da solo los códigos de hasta 5 candidatos, sin red. Con una lista de hasta 20, todos en una llamada."""
+    c = _consulta()
+    if isinstance(municipio, list):
+        if solo_codigos:
+            return {"candidatos": {q: c.buscar_municipio(q, 5) for q in municipio[:20]}}
+        return {"perfiles": c.en_lote(c.perfil_municipio, municipio[:20], 4)}
     if solo_codigos:
-        return {"candidatos": _consulta().buscar_municipio(municipio, 5)}
-    return _datos(_consulta().perfil_municipio, municipio)
+        return {"candidatos": c.buscar_municipio(municipio, 5)}
+    return _datos(c.perfil_municipio, municipio)
 
 
 @herramienta
