@@ -4,6 +4,15 @@ on:
   schedule:
     - cron: "17 6 * * 1"   # lunes 06:17 UTC
   workflow_dispatch:
+    inputs:
+      solo:
+        description: "ids de ficha para check_ejemplos, separados por espacios (vacío = todas)"
+        required: false
+        default: ""
+      muestra:
+        description: "bytes de cada respuesta de check_ejemplos que se imprimen en el log (0 = ninguno)"
+        required: false
+        default: "0"
   push:
     paths:
       - ".github/workflows/verificacion.yml"   # una ejecución al cambiar el flujo; cron y dispatch exigen que esté en la rama por defecto
@@ -31,6 +40,17 @@ jobs:
           set +e
           python scripts/check_recetas.py --ca ca-age.pem --report recetas-report.md --fail
           echo "exit=$?" >> "$GITHUB_OUTPUT"
+      - name: Ejemplos de las fichas contra los servidores reales
+        id: ejemplos
+        env:
+          SOLO: ${{ github.event.inputs.solo }}
+          MUESTRA: ${{ github.event.inputs.muestra || '0' }}
+        run: |
+          set +e
+          filtro=""
+          for id in $SOLO; do filtro="$filtro --only $id"; done
+          python scripts/check_ejemplos.py --ca ca-age.pem --report ejemplos-report.md --fail --muestra "$MUESTRA" $filtro
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
       - name: Cargadores de scripts/clientes contra los servidores reales
         id: cargadores
         run: |
@@ -57,15 +77,16 @@ jobs:
           name: informes-verificacion
           path: |
             recetas-report.md
+            ejemplos-report.md
             cargadores-report.md
             link-report.md
       - name: Abrir o actualizar el issue si hay fallos
-        if: steps.recetas.outputs.exit != '0' || steps.cargadores.outputs.exit != '0'
+        if: steps.recetas.outputs.exit != '0' || steps.ejemplos.outputs.exit != '0' || steps.cargadores.outputs.exit != '0'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           titulo="Verificación semanal: comprobaciones de recetas con fail o error"
-          cuerpo="$(cat recetas-report.md cargadores-report.md | head -c 60000)"
+          cuerpo="$(cat recetas-report.md cargadores-report.md ejemplos-report.md | head -c 60000)"
           num=$(gh issue list --state open --search "\"$titulo\" in:title" --json number --jq '.[0].number')
           if [ -n "$num" ]; then
             gh issue comment "$num" --body "$cuerpo"

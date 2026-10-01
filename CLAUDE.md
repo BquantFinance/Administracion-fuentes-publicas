@@ -48,6 +48,8 @@ python scripts/validate.py        # esquema, vocabulario, ids, referencias
 python scripts/build.py           # regenera todo lo derivado
 python scripts/check_links.py     # informe de URLs (necesita red)
 python scripts/check_recetas.py   # batería de regresión de las recetas (necesita red; --report, --fail)
+python scripts/check_ejemplos.py  # ejecuta el example de cada endpoint de las fichas (necesita red; --only, --muestra, --report, --fail)
+python scripts/test_clientes.py   # parsers de scripts/clientes contra las muestras reales, sin red (corre en CI)
 python scripts/fnmt_bundle.py     # genera ca-age.pem (certifi + CA de FNMT) para los hosts con cadena incompleta
 python scripts/mcp_catalogo.py    # servidor MCP por stdio sobre catalog.json (guides/servidor-mcp.md); prueba real con test_mcp_catalogo.py, fuera de CI
 ```

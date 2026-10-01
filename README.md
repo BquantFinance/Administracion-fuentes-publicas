@@ -59,7 +59,7 @@ catalog.json                 todo el catálogo (generado)
 llms.txt / llms-full.txt     entrada para agentes (generado)
 indices/*.yaml               recetas por intención, necesidades, identificadores, códigos que son parámetros, rutas muertas (fuente de verdad)
 indices/README.md            los cinco índices en texto (generado)
-scripts/                     validate.py, build.py, check_links.py, check_recetas.py, fnmt_bundle.py, mcp_catalogo.py (servidor MCP local)
+scripts/                     validate.py, build.py, check_links.py, check_recetas.py, check_ejemplos.py, fnmt_bundle.py, mcp_catalogo.py (servidor MCP local)
 scripts/clientes/            cargadores en Python que resuelven las trampas (BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex, Saiku)
 scripts/clientes/muestras/   respuestas reales recortadas para probar los parsers sin red (python scripts/test_clientes.py)
 evals/                       20 tareas con respuesta esperada para medir lo que aporta el repo a un agente
