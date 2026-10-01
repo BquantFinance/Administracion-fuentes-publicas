@@ -4,3 +4,9 @@ __pycache__/
 link-report.md
 recetas-report.md
 ca-age.pem
+
+# empaquetado del MCP
+build/
+*.egg-info/
+dist/
+__pycache__/

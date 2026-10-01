@@ -1,2 +1,0 @@
-[console_scripts]
-mcp-catalogo = fuentes_publicas.mcp_catalogo:main

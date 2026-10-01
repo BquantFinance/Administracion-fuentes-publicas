@@ -40,6 +40,7 @@ gotchas:
   - No localicé API de búsqueda; el link de cada entry es un deeplink al detalle web, no un recurso estructurado.
   - "updated es la fecha del último cambio del expediente, no la de publicación; la fecha de cada anuncio va en ValidNoticeInfo/AdditionalPublicationStatus/AdditionalPublicationDocumentReference/IssueDate."
   - "En el feed de plataformas agregadas (1044) las entradas pueden no traer TotalAmount ni ID con schemeName DIR3 del órgano; usar TaxExclusiveAmount y el nombre."
+  - "El feed 643 puede ir horas por detrás de la web: el 2026-10-01 a las 10:30 su última entrada era de las 20:17 de la víspera y el buscador ya mostraba anuncios de las 08:27; para lo de hoy, buscador JSF o esperar."
 tips:
   - Identificadores útiles en cada entry. cbc:ContractFolderID (expediente), cbc:ItemClassificationCode (CPV), cbc:ID del órgano (código DIR3, p. ej. L01280647) y cbc:TypeCode (tipo de contrato).
   - Para el histórico completo, cargar los ZIP mensuales de los tres feeds y deduplicar por id con updated máximo. La página de datos abiertos publica OpenPLACSP, la herramienta oficial de descarga.
