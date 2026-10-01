@@ -1,6 +1,6 @@
 name: publicar-mcp
 
-# Al subir una etiqueta vX.Y.Z: empaqueta mcpb/ como .mcpb fijado a esa etiqueta, lo adjunta a una release de GitHub y
+# Al subir una etiqueta vX.Y.Z (o crear una release con ella desde la web de GitHub): empaqueta mcpb/ como .mcpb fijado a esa etiqueta, lo adjunta a una release de GitHub y
 # publica server.json en el registro oficial de MCP con OIDC de GitHub (io.github.BquantFinance/*). Sin secretos ni
 # cuentas externas. La versión de server.json debe coincidir con la etiqueta.
 on:
@@ -32,14 +32,18 @@ jobs:
           PY
       - name: Empaquetar el .mcpb
         run: npx -y @anthropic-ai/mcpb@2.1.2 pack mcpb catalogo-fuentes-publicas.mcpb
-      - name: Crear la release con el paquete
+      - name: Adjuntar el paquete a la release (la crea si no existe; si se creó desde la web, solo sube el fichero)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" catalogo-fuentes-publicas.mcpb --title "$GITHUB_REF_NAME" --notes "Servidor MCP del catálogo de fuentes públicas de España.
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" catalogo-fuentes-publicas.mcpb --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" catalogo-fuentes-publicas.mcpb --title "$GITHUB_REF_NAME" --notes "Servidor MCP del catálogo de fuentes públicas de España.
 
           Sin instalar nada: uvx --from git+https://github.com/$GITHUB_REPOSITORY@$GITHUB_REF_NAME mcp-catalogo
           El paquete .mcpb hace lo mismo y necesita uv (https://docs.astral.sh/uv/). Configuración por cliente en guides/servidor-mcp.md."
+          fi
       - name: Completar server.json con la URL y el hash del paquete
         run: |
           python3 - <<'PY'
