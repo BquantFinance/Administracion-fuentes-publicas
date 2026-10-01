@@ -16,6 +16,27 @@ mcp-catalogo
 
 Con `uvx` sin instalar nada: `uvx --from git+https://github.com/BquantFinance/Administracion-fuentes-publicas mcp-catalogo`.
 En la configuración del cliente, `command` es entonces `mcp-catalogo` (o `uvx` con esos `args`) y no hace falta `cwd`.
+Trampas verificadas el 2026-10-01: la forma `git+https` necesita `git` en el PATH (si no, uv falla con «Git executable not
+found»); pipx 1.17 usa uv como motor si lo encuentra y exige uv 0.9.17 o posterior (con uno anterior,
+`pipx install --backend pip git+...`). El paquete instala el mismo servidor con dos nombres, `mcp-catalogo` y
+`fuentes-publicas-mcp`; el segundo es el que ejecutan los clientes que instalan desde el registro de MCP con uvx.
+
+Cursor (mismo formato en `~/.cursor/mcp.json`, global, y en `.cursor/mcp.json` en la raíz de un proyecto; si Cursor no
+encuentra `uvx`, poner su ruta absoluta en `command`):
+
+```json
+{
+  "mcpServers": {
+    "catalogo-fuentes-publicas": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/BquantFinance/Administracion-fuentes-publicas", "mcp-catalogo"]
+    }
+  }
+}
+```
+
+[![Instalar en Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/link/mcp/install?name=catalogo-fuentes-publicas&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJnaXQraHR0cHM6Ly9naXRodWIuY29tL0JxdWFudEZpbmFuY2UvQWRtaW5pc3RyYWNpb24tZnVlbnRlcy1wdWJsaWNhcyIsIm1jcC1jYXRhbG9nbyJdfQ%3D%3D)
 
 Configuración para Claude Code (`.mcp.json` en el proyecto o `~/.claude.json`) y Claude Desktop
 (`claude_desktop_config.json`), con la ruta absoluta del repo en `args` y `cwd`:
@@ -47,3 +68,15 @@ Herramientas (respuestas JSON compactas; búsqueda por palabras sin acentos ni m
 Recursos: `catalogo://llms.txt` (el fichero entero) y `catalogo://reglas` (solo las reglas rápidas antes de programar).
 
 Prueba real sin CI: `python scripts/test_mcp_catalogo.py` arranca el servidor por stdio y llama a todas las herramientas.
+
+## Registros
+
+- Registro oficial de MCP: `io.github.BquantFinance/catalogo-fuentes-publicas`, descrito en `server.json`. Al subir una
+  etiqueta `vX.Y.Z` (con la misma versión en `pyproject.toml` y `server.json`), `.github/workflows/publicar-mcp.yml`
+  publica el paquete en PyPI por Trusted Publishing y la entrada en el registro por OIDC de GitHub, sin secretos. Requisito
+  previo, una vez: el propietario da de alta en PyPI un publicador pendiente (proyecto `fuentes-publicas-mcp`, owner
+  `BquantFinance`, repositorio `Administracion-fuentes-publicas`, workflow `publicar-mcp.yml`, entorno `pypi`).
+- Glama: indexa el registro oficial; `glama.json` declara al mantenedor y `Dockerfile` construye la imagen que prueba.
+- Smithery: paquete MCPB en `mcpb/` (`npx -y @anthropic-ai/mcpb pack mcpb`); publicar exige cuenta en Smithery.
+
+<!-- mcp-name: io.github.BquantFinance/catalogo-fuentes-publicas -->

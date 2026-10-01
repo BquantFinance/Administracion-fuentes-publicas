@@ -34,7 +34,8 @@ Cada línea que no ahorre una búsqueda, una prueba fallida o una hora de depura
 7. **Castellano en valores, inglés en claves.** Sin markdown dentro de los valores. Sin dos puntos seguidos de
    espacio en valores sin comillas, porque rompe el YAML.
 8. **Fuente única de verdad.** Solo se editan `sources/**/*.yaml`, `indices/*.yaml`, `guides/*.md`, `schema/`,
-   `scripts/` y `evals/`. `catalog.json`, `llms.txt`, `llms-full.txt`, `indices/README.md`, los `README.md` de sector y la
+   `scripts/` y `evals/`, más los ficheros de distribución del servidor MCP (`pyproject.toml`, `server.json`, `glama.json`,
+   `Dockerfile`, `mcpb/`) y `.github/`. `catalog.json`, `llms.txt`, `llms-full.txt`, `indices/README.md`, los `README.md` de sector y la
    tabla del README raíz se regeneran con `python scripts/build.py` y se suben en el mismo commit.
 9. **No borrar fichas.** Una fuente muerta pasa a `status: deprecated` con la sustituta en `gotchas`.
 10. **Rendimientos decrecientes.** Si un sector solo tiene portales sin API y datos que ya da el INE, una
@@ -117,8 +118,13 @@ autónomas) y las evaluaciones al final.
    `~/.claude/projects/<proyecto>/<sesión>/subagents/agent-*.jsonl`, no el total del arnés), condición MCP, Haiku,
    tareas con trampas silenciosas y tres repeticiones; Catastro bloqueado.
 2. **Distribución antes que más fichas.** Hecho el 2026-10-01 lo instalable: `pipx install git+...` o `uvx` dan el
-   comando `mcp-catalogo`, que descarga `catalog.json` si no hay copia local (`guides/servidor-mcp.md`). Pendiente: alta
-   en los registros de MCP (Smithery, Glama, registro oficial) y bloque de configuración para Cursor.
+   comando `mcp-catalogo`, que descarga `catalog.json` si no hay copia local (`guides/servidor-mcp.md`). Preparado el
+   mismo día el alta en registros: `server.json` (io.github.BquantFinance/catalogo-fuentes-publicas, validado con
+   mcp-publisher), `.github/workflows/publicar-mcp.yml` (al subir una etiqueta vX.Y.Z publica en PyPI por Trusted
+   Publishing y en el registro oficial por OIDC), `glama.json`, `Dockerfile`, `mcpb/` para Smithery, alias
+   `fuentes-publicas-mcp`, LICENSE con el texto completo de CC0 (GitHub no detectaba el resumen) y bloque de Cursor con
+   botón en la guía. Falta lo que exige cuentas del propietario: publicador pendiente en PyPI y etiqueta v0.1.0, Add
+   Server y Claim en Glama, cuenta en Smithery.
 3. **Entrada ligera.** Hecho el 2026-10-01: `build.py` genera `llms-min.txt` (7 KB) y la segunda tanda lo midió.
 4. **Código listo, no solo descripciones.** Hecho el 2026-10-01: `scripts/clientes/` con BOE y BORME (`boe.py`), BDNS
    (`bdns.py`), AEMET, INE Tempus, DataComex, PLACSP y Saiku, probados con llamadas reales; `scripts/clientes/muestras/`

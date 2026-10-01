@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,12 +7,17 @@ name = "fuentes-publicas-mcp"
 version = "0.1.0"
 description = "Servidor MCP del catálogo de fuentes de datos de la Administración pública española"
 readme = "guides/servidor-mcp.md"
-license = { text = "CC0-1.0" }
+license = "CC0-1.0"
 requires-python = ">=3.10"
 dependencies = ["mcp>=1.0", "pyyaml>=6.0"]
 
+[project.urls]
+Repository = "https://github.com/BquantFinance/Administracion-fuentes-publicas"
+Documentation = "https://github.com/BquantFinance/Administracion-fuentes-publicas/blob/main/guides/servidor-mcp.md"
+
 [project.scripts]
 mcp-catalogo = "fuentes_publicas.mcp_catalogo:main"
+fuentes-publicas-mcp = "fuentes_publicas.mcp_catalogo:main"
 
 [tool.setuptools]
 packages = ["fuentes_publicas", "fuentes_publicas.clientes"]
