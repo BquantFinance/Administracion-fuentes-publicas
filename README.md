@@ -7,7 +7,7 @@
 
 # Administración fuentes públicas
 
-[![CI](https://github.com/BquantFinance/Administracion-fuentes-publicas/actions/workflows/ci.yml/badge.svg)](https://github.com/BquantFinance/Administracion-fuentes-publicas/actions/workflows/ci.yml) [![Licencia CC0](https://img.shields.io/badge/licencia-CC0%201.0-blue)](LICENSE)
+[![CI](https://github.com/BquantFinance/Administracion-fuentes-publicas/actions/workflows/ci.yml/badge.svg)](https://github.com/BquantFinance/Administracion-fuentes-publicas/actions/workflows/ci.yml) [![Licencia CC0](https://img.shields.io/badge/licencia-CC0%201.0-blue)](LICENSE) [![Apoya en Ko-fi](https://img.shields.io/badge/Ko--fi-apoya%20el%20proyecto-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/gsnchez)
 
 *Spanish public-sector data sources, catalogued for AI agents and developers: verified endpoints, response shapes, pitfalls, and recipes. Start at `llms.txt`.*
 
