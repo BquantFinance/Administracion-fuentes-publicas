@@ -120,11 +120,11 @@ autónomas) y las evaluaciones al final.
 2. **Distribución antes que más fichas.** Hecho el 2026-10-01 lo instalable: `pipx install git+...` o `uvx` dan el
    comando `mcp-catalogo`, que descarga `catalog.json` si no hay copia local (`guides/servidor-mcp.md`). Preparado el
    mismo día el alta en registros: `server.json` (io.github.BquantFinance/catalogo-fuentes-publicas, validado con
-   mcp-publisher), `.github/workflows/publicar-mcp.yml` (al subir una etiqueta vX.Y.Z publica en PyPI por Trusted
-   Publishing y en el registro oficial por OIDC), `glama.json`, `Dockerfile`, `mcpb/` para Smithery, alias
-   `fuentes-publicas-mcp`, LICENSE con el texto completo de CC0 (GitHub no detectaba el resumen) y bloque de Cursor con
-   botón en la guía. Falta lo que exige cuentas del propietario: publicador pendiente en PyPI y etiqueta v0.1.0, Add
-   Server y Claim en Glama, cuenta en Smithery.
+   mcp-publisher), `.github/workflows/publicar-mcp.yml` (al subir una etiqueta vX.Y.Z empaqueta `mcpb/`, lo adjunta a
+   una release de GitHub y publica en el registro oficial por OIDC; sin PyPI, que exige 2FA al propietario), `glama.json`,
+   `Dockerfile`, alias `fuentes-publicas-mcp`, LICENSE con el texto completo de CC0 (GitHub no detectaba el resumen) y
+   bloque de Cursor con botón en la guía. Pendiente del propietario: Claim en Glama y, si se quiere, cuenta en Smithery y
+   PyPI.
 3. **Entrada ligera.** Hecho el 2026-10-01: `build.py` genera `llms-min.txt` (7 KB) y la segunda tanda lo midió.
 4. **Código listo, no solo descripciones.** Hecho el 2026-10-01: `scripts/clientes/` con BOE y BORME (`boe.py`), BDNS
    (`bdns.py`), AEMET, INE Tempus, DataComex, PLACSP y Saiku, probados con llamadas reales; `scripts/clientes/muestras/`

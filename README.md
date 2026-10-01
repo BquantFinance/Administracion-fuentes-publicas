@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/logo-oscuro.svg">
+    <img alt="fuentes públicas: datos públicos de España para agentes y devs" src=".github/assets/logo.svg" width="560">
+  </picture>
+</p>
+
 # Administración fuentes públicas
 
 [![CI](https://github.com/BquantFinance/Administracion-fuentes-publicas/actions/workflows/ci.yml/badge.svg)](https://github.com/BquantFinance/Administracion-fuentes-publicas/actions/workflows/ci.yml) [![Licencia CC0](https://img.shields.io/badge/licencia-CC0%201.0-blue)](LICENSE)

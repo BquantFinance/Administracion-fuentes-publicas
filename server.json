@@ -9,17 +9,5 @@
     "id": "1397848182"
   },
   "websiteUrl": "https://github.com/BquantFinance/Administracion-fuentes-publicas/blob/main/guides/servidor-mcp.md",
-  "version": "0.1.0",
-  "packages": [
-    {
-      "registryType": "pypi",
-      "registryBaseUrl": "https://pypi.org",
-      "identifier": "fuentes-publicas-mcp",
-      "version": "0.1.0",
-      "runtimeHint": "uvx",
-      "transport": {
-        "type": "stdio"
-      }
-    }
-  ]
+  "version": "0.1.0"
 }

@@ -15,28 +15,69 @@
   "homepage": "https://github.com/BquantFinance/Administracion-fuentes-publicas",
   "documentation": "https://github.com/BquantFinance/Administracion-fuentes-publicas/blob/main/guides/servidor-mcp.md",
   "license": "CC0-1.0",
-  "keywords": ["espana", "datos-abiertos", "administracion-publica", "api", "catalogo"],
+  "keywords": [
+    "espana",
+    "datos-abiertos",
+    "administracion-publica",
+    "api",
+    "catalogo"
+  ],
   "server": {
     "type": "python",
     "entry_point": "server/main.py",
     "mcp_config": {
       "command": "uvx",
-      "args": ["fuentes-publicas-mcp==0.1.0"]
+      "args": [
+        "--from",
+        "git+https://github.com/BquantFinance/Administracion-fuentes-publicas@v0.1.0",
+        "mcp-catalogo"
+      ]
     }
   },
   "tools": [
-    {"name": "buscar_fuentes", "description": "Busca fichas por palabras y sector"},
-    {"name": "ficha", "description": "Ficha completa de una fuente: endpoints, ejemplos, trampas"},
-    {"name": "buscar_recetas", "description": "Busca procedimientos que cruzan fuentes"},
-    {"name": "receta", "description": "Pasos de una receta con ejemplos"},
-    {"name": "necesidad", "description": "Qué fuente resuelve una necesidad habitual"},
-    {"name": "identificador", "description": "Formato, regex y cruces de un identificador"},
-    {"name": "ruta_muerta", "description": "Si una URL antigua ha muerto y su sustituta"},
-    {"name": "codigos", "description": "Códigos que las APIs exigen como parámetro"},
-    {"name": "sectores", "description": "Sectores del catálogo con número de fichas"}
+    {
+      "name": "buscar_fuentes",
+      "description": "Busca fichas por palabras y sector"
+    },
+    {
+      "name": "ficha",
+      "description": "Ficha completa de una fuente: endpoints, ejemplos, trampas"
+    },
+    {
+      "name": "buscar_recetas",
+      "description": "Busca procedimientos que cruzan fuentes"
+    },
+    {
+      "name": "receta",
+      "description": "Pasos de una receta con ejemplos"
+    },
+    {
+      "name": "necesidad",
+      "description": "Qué fuente resuelve una necesidad habitual"
+    },
+    {
+      "name": "identificador",
+      "description": "Formato, regex y cruces de un identificador"
+    },
+    {
+      "name": "ruta_muerta",
+      "description": "Si una URL antigua ha muerto y su sustituta"
+    },
+    {
+      "name": "codigos",
+      "description": "Códigos que las APIs exigen como parámetro"
+    },
+    {
+      "name": "sectores",
+      "description": "Sectores del catálogo con número de fichas"
+    }
   ],
   "compatibility": {
-    "platforms": ["darwin", "linux", "win32"],
+    "platforms": [
+      "darwin",
+      "linux",
+      "win32"
+    ],
     "runtimes": {
       "python": ">=3.10"
     }

@@ -1,57 +1,60 @@
 name: publicar-mcp
 
-# Publica el paquete en PyPI (Trusted Publishing) y server.json en el registro oficial de MCP (OIDC de GitHub).
-# Se dispara al subir una etiqueta vX.Y.Z; la versión de la etiqueta, de pyproject.toml y de server.json debe coincidir.
+# Al subir una etiqueta vX.Y.Z: empaqueta mcpb/ como .mcpb fijado a esa etiqueta, lo adjunta a una release de GitHub y
+# publica server.json en el registro oficial de MCP con OIDC de GitHub (io.github.BquantFinance/*). Sin secretos ni
+# cuentas externas. La versión de server.json debe coincidir con la etiqueta.
 on:
   push:
     tags: ["v*"]
 
 jobs:
-  pypi:
+  publicar:
     runs-on: ubuntu-latest
-    environment: pypi
     permissions:
-      id-token: write
-      contents: read
+      contents: write   # crear la release
+      id-token: write   # OIDC para el registro de MCP
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.12"
-      - name: Comprobar que etiqueta, pyproject.toml y server.json llevan la misma versión
+          node-version: "22"
+      - name: Fijar el paquete MCPB a la etiqueta y comprobar la versión de server.json
         run: |
-          python - <<'PY'
-          import json, os, tomllib
-          tag = os.environ["GITHUB_REF_NAME"].removeprefix("v")
-          py = tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]
-          sj = json.load(open("server.json", encoding="utf-8"))
-          found = {tag, py, sj["version"], *(p["version"] for p in sj.get("packages", []))}
-          assert len(found) == 1, f"versiones distintas: etiqueta {tag}, pyproject {py}, server.json {sj['version']}"
+          python3 - <<'PY'
+          import json, os
+          tag = os.environ["GITHUB_REF_NAME"]; v = tag.removeprefix("v"); repo = os.environ["GITHUB_REPOSITORY"]
+          s = json.load(open("server.json", encoding="utf-8"))
+          assert s["version"] == v, f"server.json lleva {s['version']} y la etiqueta es {tag}"
+          m = json.load(open("mcpb/manifest.json", encoding="utf-8"))
+          m["version"] = v
+          m["server"]["mcp_config"]["args"] = ["--from", f"git+https://github.com/{repo}@{tag}", "mcp-catalogo"]
+          json.dump(m, open("mcpb/manifest.json", "w", encoding="utf-8"), ensure_ascii=False, indent=2)
           PY
-      - name: Construir sdist y wheel
-        run: pip install build && python -m build
-      - name: Publicar en PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-
-  registro-mcp:
-    needs: pypi
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - name: Esperar a que PyPI sirva la versión (el registro la consulta al publicar)
+      - name: Empaquetar el .mcpb
+        run: npx -y @anthropic-ai/mcpb@2.1.2 pack mcpb catalogo-fuentes-publicas.mcpb
+      - name: Crear la release con el paquete
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          V="${GITHUB_REF_NAME#v}"
-          for i in $(seq 1 20); do
-            curl -fsS "https://pypi.org/pypi/fuentes-publicas-mcp/$V/json" > /dev/null && exit 0
-            sleep 15
-          done
-          echo "::error::PyPI no sirve fuentes-publicas-mcp $V"
-          exit 1
+          gh release create "$GITHUB_REF_NAME" catalogo-fuentes-publicas.mcpb --title "$GITHUB_REF_NAME" --notes "Servidor MCP del catálogo de fuentes públicas de España.
+
+          Sin instalar nada: uvx --from git+https://github.com/$GITHUB_REPOSITORY@$GITHUB_REF_NAME mcp-catalogo
+          El paquete .mcpb hace lo mismo y necesita uv (https://docs.astral.sh/uv/). Configuración por cliente en guides/servidor-mcp.md."
+      - name: Completar server.json con la URL y el hash del paquete
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os
+          tag = os.environ["GITHUB_REF_NAME"]; repo = os.environ["GITHUB_REPOSITORY"]
+          sha = hashlib.sha256(open("catalogo-fuentes-publicas.mcpb", "rb").read()).hexdigest()
+          s = json.load(open("server.json", encoding="utf-8"))
+          s["packages"] = [{"registryType": "mcpb", "fileSha256": sha, "transport": {"type": "stdio"},
+                            "identifier": f"https://github.com/{repo}/releases/download/{tag}/catalogo-fuentes-publicas.mcpb"}]
+          json.dump(s, open("server.json", "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+          print(json.dumps(s, ensure_ascii=False, indent=2))
+          PY
       - name: Instalar mcp-publisher
-        run: curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
       - name: Validar server.json
         run: ./mcp-publisher validate
       - name: Autenticar con OIDC de GitHub (concede io.github.BquantFinance/*)

@@ -72,11 +72,11 @@ Prueba real sin CI: `python scripts/test_mcp_catalogo.py` arranca el servidor po
 ## Registros
 
 - Registro oficial de MCP: `io.github.BquantFinance/catalogo-fuentes-publicas`, descrito en `server.json`. Al subir una
-  etiqueta `vX.Y.Z` (con la misma versión en `pyproject.toml` y `server.json`), `.github/workflows/publicar-mcp.yml`
-  publica el paquete en PyPI por Trusted Publishing y la entrada en el registro por OIDC de GitHub, sin secretos. Requisito
-  previo, una vez: el propietario da de alta en PyPI un publicador pendiente (proyecto `fuentes-publicas-mcp`, owner
-  `BquantFinance`, repositorio `Administracion-fuentes-publicas`, workflow `publicar-mcp.yml`, entorno `pypi`).
+  etiqueta `vX.Y.Z` (con la misma versión en `server.json`), `.github/workflows/publicar-mcp.yml` empaqueta `mcpb/` como
+  `.mcpb` fijado a esa etiqueta, lo adjunta a una release de GitHub y publica la entrada en el registro por OIDC de GitHub:
+  sin secretos ni cuentas externas. El registro admite paquetes MCPB alojados en releases de GitHub y exige su sha256, que
+  el workflow calcula. PyPI es opcional (`uvx fuentes-publicas-mcp`, más corto) y exige al propietario una cuenta con 2FA.
 - Glama: indexa el registro oficial; `glama.json` declara al mantenedor y `Dockerfile` construye la imagen que prueba.
-- Smithery: paquete MCPB en `mcpb/` (`npx -y @anthropic-ai/mcpb pack mcpb`); publicar exige cuenta en Smithery.
+- Smithery: el mismo `.mcpb` de la release (`npx -y @anthropic-ai/mcpb pack mcpb` en local); publicar exige cuenta en Smithery.
 
 <!-- mcp-name: io.github.BquantFinance/catalogo-fuentes-publicas -->
