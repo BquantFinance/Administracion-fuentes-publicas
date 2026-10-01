@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "catalogo-fuentes-publicas",
   "display_name": "Catálogo de fuentes públicas de España",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Fuentes de datos públicos de España verificadas: endpoints, trampas, recetas, identificadores y códigos que exigen las APIs.",
   "author": {
     "name": "BquantFinance",
@@ -29,7 +29,7 @@
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/BquantFinance/Administracion-fuentes-publicas@v0.1.0",
+        "git+https://github.com/BquantFinance/Administracion-fuentes-publicas@v0.2.0",
         "mcp-catalogo"
       ]
     }

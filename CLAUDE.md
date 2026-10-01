@@ -180,7 +180,8 @@ Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
   sesión, idéntica a `main` al cierre. `claude/magical-volta-cjszgk` y `claude/eager-albattani-9me81y` son antiguas y
   se pueden borrar.
 - Publicación: release v0.1.0 y entrada `io.github.BquantFinance/catalogo-fuentes-publicas` en el registro oficial de
-  MCP. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` y crear la release
+  MCP. Versión 0.2.0 (alertas, herramienta municipio, clientes) ya subida en los tres ficheros; falta crear la release
+  v0.2.0 desde la web. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` y crear la release
   vX.Y.Z desde la web de GitHub; `publicar-mcp.yml` hace el resto.
 - CI: `ci.yml` (validate, build y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC, manual y al
   cambiar el propio flujo; recetas, ejemplos, cargadores y enlaces desde la IP de GitHub; comenta en el issue de
