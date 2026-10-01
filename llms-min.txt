@@ -1,0 +1,65 @@
+# Administración fuentes públicas (España)
+
+> Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
+
+Fuentes: 85 · Recetas: 43 · Alcance actual: Administración General del Estado · Entrada ligera; la completa es llms.txt · Generado: 2026-10-01
+
+## Cómo usar este repo
+
+- Todo el catálogo (fichas e índices) en un fichero: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/catalog.json
+- Todas las fichas en texto compacto: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/llms-full.txt
+- Entrada ligera (reglas, fichas por sector y punteros, unos 7 KB): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/llms-min.txt
+- Una ficha: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/<sector>/<id>.yaml
+- Índices para agentes (recetas paso a paso, identificadores con regex y cruces, rutas muertas con sustituta): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/README.md
+- Códigos que son parámetros (Id de municipio, provincia y CCAA del INE para tv, países de DataComex, estaciones de AEMET por capital, productos de carburantes, rangos y secciones del BOE): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/codigos.yaml
+- Servidor MCP local para cargar solo la ficha, receta o necesidad que haga falta: python scripts/mcp_catalogo.py (configuración y herramientas en https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/servidor-mcp.md)
+- Cada endpoint principal lleva `returns` (forma de la respuesta vista en una llamada real: campos, tipos, fechas, decimales, paginación) y `example` (llamada copiable).
+- Esquema de ficha: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json
+- Vocabulario (sectores, acceso, auth, formatos, quirks, ids): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml
+- `verified: null` significa que la ficha se redactó a partir de documentación oficial pero aún no se ha probado el endpoint.
+
+## Reglas rápidas antes de programar contra una fuente
+
+- Lee `quirks`, `ids` y `gotchas` de la ficha: son hechos verificados con llamadas reales, no documentación oficial. `quirks` dice cómo configurar el cliente; `ids` con qué otras fuentes se cruza.
+- Muchos servidores .gob.es sirven certificados FNMT sin la cadena intermedia; curl y requests fallan hasta añadirla al bundle. Arreglo copiable en la guía Cliente HTTP (`python scripts/fnmt_bundle.py` genera ca-age.pem).
+- Envía siempre User-Agent y Accept de navegador; varios sitios (tesoro.es, seg-social.es) devuelven 403 a los valores por defecto de curl y requests.
+- Las APIs del BOE exigen Accept explícito (application/json o application/xml) y devuelven los errores siempre en XML.
+- Espera ISO-8859-1 en feeds del BOE y CSV del Banco de España; convierte antes de parsear.
+- Ninguna fuente verificada documenta límites ni devolvió 429; para descargas masivas, peticiones secuenciales y reintento con espera ante 5xx. El Catastro bloquea la IP tras ráfagas de unas 15 peticiones y rechaza rangos de centros de datos (GitHub Actions incluido); Catastro, REData, datos.gob.es, BNE y FEGA se verifican mejor desde una IP residencial.
+- Si una URL que recuerdas falla, busca en la tabla de rutas muertas antes de dar la fuente por perdida.
+
+## Fichas por sector
+
+Cada id es sources/<sector>/<id>.yaml; léela entera antes de llamar (endpoints con example y returns, quirks, gotchas).
+
+- Legislación y boletines oficiales: boe-api-legislacion-consolidada, boe-api-sumario, boe-eli, boe-feeds, borme-api-sumario
+- Economía, finanzas y mercados: airef-datos, bde-estadisticas, cnmv-registros, ico-datos, tesoro-estadisticas
+- Hacienda, tributos y presupuestos: aeat-estadisticas, aeat-servicios-web, hacienda-central-informacion, hacienda-ovef, igae-ejecucion-presupuestaria, sepg-presupuestos-generales-estado
+- Estadística oficial: ine-api-tempus, ine-codigos-territoriales, ine-microdatos
+- Contratación pública y subvenciones: bdns-api, hacienda-registro-licitadores, placsp-datos-abiertos
+- Empleo y Seguridad Social: mites-estadisticas, segsocial-estadisticas, sepe-estadisticas
+- Gobierno abierto, transparencia y organización administrativa: datos-gob-es-api, dir3-directorio, face-facturas, pag-administracion-gob-es, transparencia-portal
+- Territorio, catastro y cartografía: catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal
+- Meteorología y clima: aemet-opendata, aemet-otros-servicios
+- Medio ambiente, agua y biodiversidad: miteco-banco-datos-naturaleza, miteco-calidad-aire, miteco-inventario-emisiones, miteco-prtr, miteco-saih-boletin-hidrologico
+- Energía: cnmc-data, minetur-precios-carburantes, miteco-energia-estadisticas, omie-mercado, ree-redata
+- Sanidad y medicamentos: aemps-cima-api, aemps-otros-registros, isciii-cne, sanidad-nomenclator-facturacion, sanidad-portal-estadistico
+- Ciencia e investigación (biología, química, geología, oceanografía): aei-convocatorias, csic-digital, fecyt-recolecta, gbif-es, ieo-datos-oceanograficos, igme-geologia, ign-sismologia
+- Agricultura, pesca y alimentación: fega-beneficiarios-pac, mapa-estadisticas-agrarias, mapa-pesca, mapa-sigpac
+- Transporte y movilidad: aesa-aviacion, dgt-datex-trafico, dgt-estadisticas, mitma-boletin-estadistico-online, mitma-opendata-movilidad, puertos-estado-datos, renfe-datos-abiertos
+- Comercio exterior, industria y propiedad industrial: datacomex, datainvex, mincotur-industria-turismo, oepm-invenes
+- Educación y universidades: educacion-estadisticas-ruct, inee-bases-datos
+- Justicia, interior y seguridad: interior-criminalidad
+- Cultura y patrimonio: bne-datos, cultura-culturabase
+- Demografía, migraciones y sociedad: cis-estudios, igualdad-estadisticas-violencia-genero, imserso-dependencia, inmujeres-mujeres-cifras
+- Vivienda y urbanismo: mivau-precios-vivienda-alquiler
+- Telecomunicaciones y sociedad digital: mtdfp-cobertura-banda-ancha
+- Consumo y seguridad alimentaria: aesan-alertas-registros
+
+## Índices
+
+- Necesidad a fuente (una línea por pregunta habitual): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/necesidades.yaml
+- Recetas que cruzan fuentes: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/recetas.yaml
+- Códigos que son parámetros: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/codigos.yaml
+- Rutas muertas con sustituta: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/rutas-muertas.yaml
+- Identificadores con regex y cruces: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/identificadores.yaml

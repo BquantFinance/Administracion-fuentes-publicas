@@ -20,7 +20,7 @@ endpoints:
   - path: /boe/sumario/{AAAAMMDD}
     desc: Sumario del día, anidado en diario > seccion > departamento > epigrafe > item
     example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/boe/sumario/20240102"'
-    returns: "{status, data.sumario.diario[]:{numero, sumario_diario, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]:{identificador, control, titulo, url_pdf:{texto, szBytes}, url_html, url_xml}}}}}}; secciones sin epígrafe llevan item bajo departamento; un solo elemento llega como objeto"
+    returns: "{status, data.sumario.diario[]:{numero, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]:{identificador, titulo, url_pdf:{texto, szBytes}, url_html, url_xml}}}}}}; en 4, 5A y 5B item cuelga de departamento y en 5C de departamento.texto; un elemento solo es objeto, no lista"
   - path: https://www.boe.es/diario_boe/xml.php?id={BOE-A-AAAA-NNNNN}
     desc: Texto completo y metadatos de una disposición en XML; no necesita cabecera Accept
     example: curl -s "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-87"

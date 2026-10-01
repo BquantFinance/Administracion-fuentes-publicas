@@ -295,7 +295,6 @@ def main() -> None:
         "",
         f"- Todo el catálogo (fichas e índices) en un fichero: {REPO_RAW}/catalog.json",
         f"- Todas las fichas en texto compacto: {REPO_RAW}/llms-full.txt",
-        f"- Entrada ligera (reglas, fichas por sector y punteros, unos 7 KB): {REPO_RAW}/llms-min.txt",
         f"- Una ficha: {REPO_RAW}/sources/<sector>/<id>.yaml",
         f"- Índices para agentes (recetas paso a paso, identificadores con regex y cruces, rutas muertas con sustituta): {REPO_RAW}/indices/README.md",
         f"- Códigos que son parámetros (Id de municipio, provincia y CCAA del INE para tv, países de DataComex, estaciones de AEMET por capital, productos de carburantes, rangos y secciones del BOE): {REPO_RAW}/indices/codigos.yaml",
@@ -342,19 +341,6 @@ def main() -> None:
         llms.append(f"- [{title}]({REPO_RAW}/guides/{g.name})")
     llms += ["", "## Optional", "", f"- [Contribuir]({REPO_RAW}/CONTRIBUTING.md)", f"- [Plantilla de ficha]({REPO_RAW}/templates/source.yaml)", ""]
     (ROOT / "llms.txt").write_text("\n".join(llms), encoding="utf-8")
-
-    # llms-min.txt: entrada ligera (reglas, fichas por sector y punteros), sin necesidades ni recetas
-    mini = llms[: llms.index("## Dónde está cada cosa")]
-    mini[4] = mini[4].replace("Generado:", "Entrada ligera; la completa es llms.txt · Generado:")
-    mini += ["## Fichas por sector", "", "Cada id es sources/<sector>/<id>.yaml; léela entera antes de llamar (endpoints con example y returns, quirks, gotchas).", ""]
-    for sector, title in vocab["sector"].items():
-        items = by_sector.get(sector)
-        if items:
-            mini.append(f"- {title}: " + ", ".join(s["id"] for s in items))
-    mini += ["", "## Índices", "", f"- Necesidad a fuente (una línea por pregunta habitual): {REPO_RAW}/indices/necesidades.yaml",
-             f"- Recetas que cruzan fuentes: {REPO_RAW}/indices/recetas.yaml", f"- Códigos que son parámetros: {REPO_RAW}/indices/codigos.yaml",
-             f"- Rutas muertas con sustituta: {REPO_RAW}/indices/rutas-muertas.yaml", f"- Identificadores con regex y cruces: {REPO_RAW}/indices/identificadores.yaml", ""]
-    (ROOT / "llms-min.txt").write_text("\n".join(mini), encoding="utf-8")
 
     # llms-full.txt
     full = [llms[0], "", llms[2], "", f"Fuentes: {len(sources)} · Generado: {date.today().isoformat()} · Formato: un bloque por fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.", ""]

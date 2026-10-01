@@ -71,6 +71,7 @@ tips:
   - En Python, pandas.json_normalize sobre Data de cada serie; con tip=A la fecha ya viene en ISO 8601.
   - Ids verificados; 24077 IPC índice general, 76134 tasas IPC, 14506 tasas de paro EPA, 29005 padrón por municipio, 59060 alquiler (IPVA) por municipio, 49075 defunciones por causa, 30656 Atlas de renta (Albacete).
   - VALORES_VARIABLEOPERACION/19/{operacion} da los 8.142 municipios con Codigo INE e Id; tv=19:{Id} filtra cualquier tabla municipal (el Atlas de renta tiene nueve tablas por provincia con nombres repetidos).
+  - "Las tablas nacionales grandes (30824, Atlas de renta por municipio, distrito y sección) responden 200 con status de restricciones de volumen sin filtro; con tv de municipio e indicador devuelven la serie completa."
 related: [ine-codigos-territoriales, ine-microdatos]
 status: active
 verified: "2026-09-30"

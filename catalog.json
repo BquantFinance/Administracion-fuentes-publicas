@@ -1,7 +1,7 @@
 {
  "name": "Administración fuentes públicas",
  "description": "Catálogo de fuentes de datos de la Administración pública española, optimizado para agentes.",
- "generated": "2026-09-30",
+ "generated": "2026-10-01",
  "repo": "https://github.com/BquantFinance/Administracion-fuentes-publicas",
  "schema": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json",
  "vocab": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml",
@@ -1003,6 +1003,12 @@
     {
      "path": "https://datacomex_v6.comercio.es/",
      "desc": "Versión anterior del portal, todavía en línea"
+    },
+    {
+     "path": "https://comercio.serviciosmin.gob.es/DatacomexAPI/{ObtenerPaises|ObtenerPeriodos|ObtenerProvincias|ObtenerFlujos|ObtenerTarics}",
+     "desc": "Catálogos de valores para pa, pe, pr, f y ta; responden sin token; ObtenerTarics pesa 7,5 MB (en plural, ObtenerTaric da 404)",
+     "example": "curl -s \"https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerPaises\"",
+     "returns": "ObtenerPaises [{Id (001), Pais, UE}] 292; ObtenerPeriodos [{Periodo, CodPeriodo (2026, 202607), Nivel (1 año, 2 mes), DatosDefinitivos}] 411; ObtenerProvincias [{Provincia, CodProvincia (INE)}] 54; ObtenerFlujos [{Flujo, CodFlujo (E, I)}]; ObtenerTarics [{Taric, TaricPadre, Nombre, Nivel}] 7,5 MB"
     }
    ],
    "quirks": [
@@ -1510,7 +1516,7 @@
    "endpoints": [
     {
      "path": "sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom",
-     "desc": "Licitaciones de perfiles alojados en la Plataforma; unas 235 entradas y 6 MB por página",
+     "desc": "Licitaciones de perfiles alojados en la Plataforma; entre 127 y 235 entradas y de 4 a 6 MB por página",
      "example": "curl -s \"https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom\"",
      "returns": "Atom; cada entry lleva ContractFolderStatus (CODICE): ContractFolderID, ContractFolderStatusCode, LocatedContractingParty/Party/PartyIdentification/ID (DIR3), ProcurementProject/Name, BudgetAmount/TaxExclusiveAmount, RequiredCommodityClassification/ItemClassificationCode (CPV) y RealizedLocation/CountrySubentityCode"
     },
@@ -1539,7 +1545,9 @@
     "Espacios de nombres cac y cbc (urn:dgpe:names:draft:codice) más las extensiones cac-place-ext y cbc-place-ext; registrarlos en lxml. El feed declara at (tombstones) para entradas borradas.",
     "Los ZIP no admiten HEAD (respuesta vacía) ni Range; descargar completos.",
     "El PDF de especificación enlazado en datos abiertos (DGPE_PLACSP_OpenPLACSP_v.2.2.pdf) responde HTML; la documentación de CODICE está en la propia página del portal.",
-    "No localicé API de búsqueda; el link de cada entry es un deeplink al detalle web, no un recurso estructurado."
+    "No localicé API de búsqueda; el link de cada entry es un deeplink al detalle web, no un recurso estructurado.",
+    "updated es la fecha del último cambio del expediente, no la de publicación; la fecha de cada anuncio va en ValidNoticeInfo/AdditionalPublicationStatus/AdditionalPublicationDocumentReference/IssueDate.",
+    "En el feed de plataformas agregadas (1044) las entradas pueden no traer TotalAmount ni ID con schemeName DIR3 del órgano; usar TaxExclusiveAmount y el nombre."
    ],
    "tips": [
     "Identificadores útiles en cada entry. cbc:ContractFolderID (expediente), cbc:ItemClassificationCode (CPV), cbc:ID del órgano (código DIR3, p. ej. L01280647) y cbc:TypeCode (tipo de contrato).",
@@ -3508,7 +3516,8 @@
     "Los ids de tabla del portal INEbase (parámetro t=NNNNN en la URL) son los mismos que acepta DATOS_TABLA.",
     "En Python, pandas.json_normalize sobre Data de cada serie; con tip=A la fecha ya viene en ISO 8601.",
     "Ids verificados; 24077 IPC índice general, 76134 tasas IPC, 14506 tasas de paro EPA, 29005 padrón por municipio, 59060 alquiler (IPVA) por municipio, 49075 defunciones por causa, 30656 Atlas de renta (Albacete).",
-    "VALORES_VARIABLEOPERACION/19/{operacion} da los 8.142 municipios con Codigo INE e Id; tv=19:{Id} filtra cualquier tabla municipal (el Atlas de renta tiene nueve tablas por provincia con nombres repetidos)."
+    "VALORES_VARIABLEOPERACION/19/{operacion} da los 8.142 municipios con Codigo INE e Id; tv=19:{Id} filtra cualquier tabla municipal (el Atlas de renta tiene nueve tablas por provincia con nombres repetidos).",
+    "Las tablas nacionales grandes (30824, Atlas de renta por municipio, distrito y sección) responden 200 con status de restricciones de volumen sin filtro; con tv de municipio e indicador devuelven la serie completa."
    ],
    "related": [
     "ine-codigos-territoriales",
@@ -4788,7 +4797,7 @@
      "path": "/boe/sumario/{AAAAMMDD}",
      "desc": "Sumario del día, anidado en diario > seccion > departamento > epigrafe > item",
      "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/boe/sumario/20240102\"",
-     "returns": "{status, data.sumario.diario[]:{numero, sumario_diario, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]:{identificador, control, titulo, url_pdf:{texto, szBytes}, url_html, url_xml}}}}}}; secciones sin epígrafe llevan item bajo departamento; un solo elemento llega como objeto"
+     "returns": "{status, data.sumario.diario[]:{numero, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]:{identificador, titulo, url_pdf:{texto, szBytes}, url_html, url_xml}}}}}}; en 4, 5A y 5B item cuelga de departamento y en 5C de departamento.texto; un elemento solo es objeto, no lista"
     },
     {
      "path": "https://www.boe.es/diario_boe/xml.php?id={BOE-A-AAAA-NNNNN}",
@@ -8847,6 +8856,7 @@
      }
     ],
     "output": "series JSON con MetaData (variable, nombre y Codigo INE) y Data por año",
+    "note": "Alternativa sin buscar la tabla provincial: la tabla nacional 30824 con tv=19:{Id municipio}&tv=482:284048 (renta neta media por persona; 284052 por hogar) devuelve la serie 2015-2023; sin filtro responde 200 con status de restricciones de volumen. Verificado el 2026-10-01.",
     "checks": [
      {
       "url": "https://servicios.ine.es/wstempus/js/ES/VALORES_VARIABLEOPERACION/19/22",
@@ -11050,7 +11060,7 @@
    },
    "datacomex-paises": {
     "source": "datacomex",
-    "use": "Parámetro pa de ObtenerDatos (3 dígitos, no ISO); los 40 principales destinos de exportación de 2025; los 237 códigos salen de id_pais en una llamada con pa=ALL",
+    "use": "Parámetro pa de ObtenerDatos (3 dígitos, no ISO); los 40 principales destinos de exportación de 2025; la lista completa (292, con marca UE27) la da ObtenerPaises sin token",
     "note": "951 y 952 son avituallamiento (combustible y provisiones a buques y aeronaves), no países; Corea del Sur aparece como Corea del",
     "verified": "2026-09-30",
     "entries": [

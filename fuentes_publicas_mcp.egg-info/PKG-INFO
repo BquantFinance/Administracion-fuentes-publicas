@@ -1,3 +1,15 @@
+Metadata-Version: 2.4
+Name: fuentes-publicas-mcp
+Version: 0.1.0
+Summary: Servidor MCP del catálogo de fuentes de datos de la Administración pública española
+License: CC0-1.0
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: mcp>=1.0
+Requires-Dist: pyyaml>=6.0
+Dynamic: license-file
+
 # Servidor MCP del catálogo
 
 `scripts/mcp_catalogo.py` expone `catalog.json` por MCP (transporte stdio) para que un agente cargue solo la ficha,
@@ -5,17 +17,6 @@ la receta o la necesidad que le hace falta en vez de todo `llms.txt`. Necesita `
 (`python scripts/build.py`); si falta, el servidor termina con un mensaje que lo indica. Instalación:
 `pip install -r scripts/requirements.txt` (paquete `mcp`, funciona con 1.x y 2.x). Arranque manual:
 `python scripts/mcp_catalogo.py` (habla JSON-RPC por stdin/stdout; normalmente lo lanza el cliente MCP).
-
-Instalación en una línea, sin clonar el repo (descarga `catalog.json` y `llms.txt` de GitHub la primera vez y los
-guarda en `~/.cache/fuentes-publicas`; con `CATALOGO_DIR` se usa una copia local):
-
-```bash
-pipx install git+https://github.com/BquantFinance/Administracion-fuentes-publicas   # o: uv tool install git+https://...
-mcp-catalogo
-```
-
-Con `uvx` sin instalar nada: `uvx --from git+https://github.com/BquantFinance/Administracion-fuentes-publicas mcp-catalogo`.
-En la configuración del cliente, `command` es entonces `mcp-catalogo` (o `uvx` con esos `args`) y no hace falta `cwd`.
 
 Configuración para Claude Code (`.mcp.json` en el proyecto o `~/.claude.json`) y Claude Desktop
 (`claude_desktop_config.json`), con la ruta absoluta del repo en `args` y `cwd`:

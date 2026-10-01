@@ -149,7 +149,7 @@ ine-provincias:
 
 datacomex-paises:
   source: datacomex
-  use: "Parámetro pa de ObtenerDatos (3 dígitos, no ISO); los 40 principales destinos de exportación de 2025; los 237 códigos salen de id_pais en una llamada con pa=ALL"
+  use: "Parámetro pa de ObtenerDatos (3 dígitos, no ISO); los 40 principales destinos de exportación de 2025; la lista completa (292, con marca UE27) la da ObtenerPaises sin token"
   note: "951 y 952 son avituallamiento (combustible y provisiones a buques y aeronaves), no países; Corea del Sur aparece como Corea del"
   verified: "2026-09-30"
   entries:

@@ -2,7 +2,7 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 85 · Generado: 2026-09-30 · Formato: un bloque por fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
+Fuentes: 85 · Generado: 2026-10-01 · Formato: un bloque por fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
 
 # SECTOR legislacion-boletines: Legislación y boletines oficiales
 
@@ -63,7 +63,7 @@ base_url: https://www.boe.es/datosabiertos/api
 docs_url: https://www.boe.es/datosabiertos/api/api.php
 - /boe/sumario/{AAAAMMDD} :: Sumario del día, anidado en diario > seccion > departamento > epigrafe > item
   ej: curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/boe/sumario/20240102"
-  devuelve: {status, data.sumario.diario[]:{numero, sumario_diario, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]:{identificador, control, titulo, url_pdf:{texto, szBytes}, url_html, url_xml}}}}}}; secciones sin epígrafe llevan item bajo departamento; un solo elemento llega como objeto
+  devuelve: {status, data.sumario.diario[]:{numero, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]:{identificador, titulo, url_pdf:{texto, szBytes}, url_html, url_xml}}}}}}; en 4, 5A y 5B item cuelga de departamento y en 5C de departamento.texto; un elemento solo es objeto, no lista
 - https://www.boe.es/diario_boe/xml.php?id={BOE-A-AAAA-NNNNN} :: Texto completo y metadatos de una disposición en XML; no necesita cabecera Accept
   ej: curl -s "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-87"
   devuelve: XML documento con metadatos (identificador, departamento y rango con atributo codigo, fecha_disposicion, titulo, fecha_publicacion, seccion, url_pdf, estatus_derogacion), analisis (materias, notas, referencias anteriores y posteriores) y texto
@@ -478,6 +478,7 @@ quirks: errors-html-or-xml
 + En Python, pandas.json_normalize sobre Data de cada serie; con tip=A la fecha ya viene en ISO 8601.
 + Ids verificados; 24077 IPC índice general, 76134 tasas IPC, 14506 tasas de paro EPA, 29005 padrón por municipio, 59060 alquiler (IPVA) por municipio, 49075 defunciones por causa, 30656 Atlas de renta (Albacete).
 + VALORES_VARIABLEOPERACION/19/{operacion} da los 8.142 municipios con Codigo INE e Id; tv=19:{Id} filtra cualquier tabla municipal (el Atlas de renta tiene nueve tablas por provincia con nombres repetidos).
++ Las tablas nacionales grandes (30824, Atlas de renta por municipio, distrito y sección) responden 200 con status de restricciones de volumen sin filtro; con tv de municipio e indicador devuelven la serie completa.
 related: ine-codigos-territoriales, ine-microdatos
 
 ## ine-codigos-territoriales
@@ -608,7 +609,7 @@ coverage: 2012-
 license: Reutilización libre con cita de la fuente
 base_url: https://contrataciondelestado.es/sindicacion/
 docs_url: https://contrataciondelestado.es/wps/portal/DatosAbiertos
-- sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom :: Licitaciones de perfiles alojados en la Plataforma; unas 235 entradas y 6 MB por página
+- sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom :: Licitaciones de perfiles alojados en la Plataforma; entre 127 y 235 entradas y de 4 a 6 MB por página
   ej: curl -s "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom"
   devuelve: Atom; cada entry lleva ContractFolderStatus (CODICE): ContractFolderID, ContractFolderStatusCode, LocatedContractingParty/Party/PartyIdentification/ID (DIR3), ProcurementProject/Name, BudgetAmount/TaxExclusiveAmount, RequiredCommodityClassification/ItemClassificationCode (CPV) y RealizedLocation/CountrySubentityCode
 - sindicacion_1044/PlataformasAgregadasSinMenores.atom :: Licitaciones agregadas desde plataformas autonómicas y locales, sin contratos menores
@@ -623,6 +624,8 @@ ids: dir3, cpv
 ! Los ZIP no admiten HEAD (respuesta vacía) ni Range; descargar completos.
 ! El PDF de especificación enlazado en datos abiertos (DGPE_PLACSP_OpenPLACSP_v.2.2.pdf) responde HTML; la documentación de CODICE está en la propia página del portal.
 ! No localicé API de búsqueda; el link de cada entry es un deeplink al detalle web, no un recurso estructurado.
+! updated es la fecha del último cambio del expediente, no la de publicación; la fecha de cada anuncio va en ValidNoticeInfo/AdditionalPublicationStatus/AdditionalPublicationDocumentReference/IssueDate.
+! En el feed de plataformas agregadas (1044) las entradas pueden no traer TotalAmount ni ID con schemeName DIR3 del órgano; usar TaxExclusiveAmount y el nombre.
 + Identificadores útiles en cada entry. cbc:ContractFolderID (expediente), cbc:ItemClassificationCode (CPV), cbc:ID del órgano (código DIR3, p. ej. L01280647) y cbc:TypeCode (tipo de contrato).
 + Para el histórico completo, cargar los ZIP mensuales de los tres feeds y deduplicar por id con updated máximo. La página de datos abiertos publica OpenPLACSP, la herramienta oficial de descarga.
 related: bdns-api, hacienda-registro-licitadores, dir3-directorio
@@ -1993,6 +1996,9 @@ docs_url: https://datacomex.comercio.es/Data/AyudaApi
   devuelve: {Resultados:[{flujo, periodo (Julio de 2026 o 2025), pais, id_pais (3 dígitos), prov, id_prov (INE), taric, euros, kilos (texto con coma decimal), mensaje (dato provisional)}]}; Resultados vacío, sin error, cuando la combinación no tiene comercio
 - https://datacomex.comercio.es/Metadata/{Comex|Empresas|UEAnual|UEMensual} :: Metadatos y clasificaciones de cada base (aplicación JavaScript); no localicé descarga de la tabla de códigos de país
 - https://datacomex_v6.comercio.es/ :: Versión anterior del portal, todavía en línea
+- https://comercio.serviciosmin.gob.es/DatacomexAPI/{ObtenerPaises|ObtenerPeriodos|ObtenerProvincias|ObtenerFlujos|ObtenerTarics} :: Catálogos de valores para pa, pe, pr, f y ta; responden sin token; ObtenerTarics pesa 7,5 MB (en plural, ObtenerTaric da 404)
+  ej: curl -s "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerPaises"
+  devuelve: ObtenerPaises [{Id (001), Pais, UE}] 292; ObtenerPeriodos [{Periodo, CodPeriodo (2026, 202607), Nivel (1 año, 2 mes), DatosDefinitivos}] 411; ObtenerProvincias [{Provincia, CodProvincia (INE)}] 54; ObtenerFlujos [{Flujo, CodFlujo (E, I)}]; ObtenerTarics [{Taric, TaricPadre, Nombre, Nivel}] 7,5 MB
 quirks: session-required, js-rendered, errors-html-or-xml
 ids: ine-provincia
 ! Sin token, ObtenerDatos responde 401 con XML (Se ha denegado la autorización); con un token inválido, 500 con cuerpo vacío. El token va en la cabecera Authorization Bearer o en el parámetro access_token.

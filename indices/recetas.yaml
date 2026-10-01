@@ -910,6 +910,7 @@
     - source: ine-cartografia-censal
       do: "Geometría de secciones y municipios del mismo año para mapear (CUSEC y CUMUN)"
   output: series JSON con MetaData (variable, nombre y Codigo INE) y Data por año
+  note: "Alternativa sin buscar la tabla provincial: la tabla nacional 30824 con tv=19:{Id municipio}&tv=482:284048 (renta neta media por persona; 284052 por hogar) devuelve la serie 2015-2023; sin filtro responde 200 con status de restricciones de volumen. Verificado el 2026-10-01."
   checks:
     - url: https://servicios.ine.es/wstempus/js/ES/VALORES_VARIABLEOPERACION/19/22
       contains: "31195"

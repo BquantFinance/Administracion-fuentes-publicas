@@ -31,6 +31,10 @@ endpoints:
     desc: Metadatos y clasificaciones de cada base (aplicación JavaScript); no localicé descarga de la tabla de códigos de país
   - path: https://datacomex_v6.comercio.es/
     desc: Versión anterior del portal, todavía en línea
+  - path: https://comercio.serviciosmin.gob.es/DatacomexAPI/{ObtenerPaises|ObtenerPeriodos|ObtenerProvincias|ObtenerFlujos|ObtenerTarics}
+    desc: Catálogos de valores para pa, pe, pr, f y ta; responden sin token; ObtenerTarics pesa 7,5 MB (en plural, ObtenerTaric da 404)
+    example: curl -s "https://comercio.serviciosmin.gob.es/DatacomexAPI/ObtenerPaises"
+    returns: "ObtenerPaises [{Id (001), Pais, UE}] 292; ObtenerPeriodos [{Periodo, CodPeriodo (2026, 202607), Nivel (1 año, 2 mes), DatosDefinitivos}] 411; ObtenerProvincias [{Provincia, CodProvincia (INE)}] 54; ObtenerFlujos [{Flujo, CodFlujo (E, I)}]; ObtenerTarics [{Taric, TaricPadre, Nombre, Nivel}] 7,5 MB"
 quirks: [session-required, js-rendered, errors-html-or-xml]
 ids: [ine-provincia]
 gotchas:

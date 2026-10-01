@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fuentes-publicas-mcp"
+version = "0.1.0"
+description = "Servidor MCP del catálogo de fuentes de datos de la Administración pública española"
+readme = "guides/servidor-mcp.md"
+license = { text = "CC0-1.0" }
+requires-python = ">=3.10"
+dependencies = ["mcp>=1.0", "pyyaml>=6.0"]
+
+[project.scripts]
+mcp-catalogo = "fuentes_publicas.mcp_catalogo:main"
+
+[tool.setuptools]
+packages = ["fuentes_publicas"]
+
+[tool.setuptools.package-dir]
+fuentes_publicas = "scripts"

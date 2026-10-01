@@ -2,12 +2,13 @@
 
 > Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
 
-Fuentes: 85 · Recetas: 43 · Alcance actual: Administración General del Estado · Generado: 2026-09-30
+Fuentes: 85 · Recetas: 43 · Alcance actual: Administración General del Estado · Generado: 2026-10-01
 
 ## Cómo usar este repo
 
 - Todo el catálogo (fichas e índices) en un fichero: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/catalog.json
 - Todas las fichas en texto compacto: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/llms-full.txt
+- Entrada ligera (reglas, fichas por sector y punteros, unos 7 KB): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/llms-min.txt
 - Una ficha: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/<sector>/<id>.yaml
 - Índices para agentes (recetas paso a paso, identificadores con regex y cruces, rutas muertas con sustituta): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/README.md
 - Códigos que son parámetros (Id de municipio, provincia y CCAA del INE para tv, países de DataComex, estaciones de AEMET por capital, productos de carburantes, rangos y secciones del BOE): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/codigos.yaml
