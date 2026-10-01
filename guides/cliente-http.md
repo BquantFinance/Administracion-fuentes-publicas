@@ -228,7 +228,8 @@ Comparar `total` de `datastore_search` con el fichero y, para tablas completas, 
 ## waf-temporary-ban
 
 El WAF bloquea la IP para todo el host durante minutos. datos.madrid.es (Akamai) lo hace tras consultas a
-`datastore_search_sql`, cerca de un minuto; el Catastro, tras ráfagas de unas 15 peticiones. Espaciar las peticiones,
+`datastore_search_sql`, cerca de un minuto; el Catastro, tras ráfagas de unas 15 peticiones; PLACSP, el 2026-10-01, entre
+20 minutos y tres horas, con 200 y un HTML de 187 bytes en lugar del feed. Espaciar las peticiones,
 cachear y no reintentar en bucle: cada intento alarga el bloqueo.
 
 ## connection-reset-intermittent

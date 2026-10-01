@@ -53,7 +53,7 @@ BLOQUEOS = [
     ("Petici&#243;n HTTP bloqueada", "bloqueo por IP del Catastro tras ráfagas; esperar minutos o cambiar de red", False),
     ("The requested URL was rejected", "F5 (OEPM, ENAIRE): rechaza clientes automatizados", False),
     ("Request Rejected", "WAF del CTT o F5: hace falta cookie jar y User-Agent de navegador", False),
-    ("Web Application Firewall has denied", "WAF de PLACSP: 200 con HTML de 187 bytes; rechaza la IP (centros de datos)", False),
+    ("Web Application Firewall has denied", "WAF de PLACSP: 200 con HTML de 187 bytes; bloqueo temporal de la IP, esperar y espaciar las descargas", False),
     ("Making sure you", "Anubis (Digital.CSIC y otros): prueba de trabajo en JavaScript", False),
     ("hcaptcha.com", "reto hCaptcha (Open Data BCN fuera de /data/api/): probar desde una IP residencial", False),
     ("Acceso denegado", "Akamai (Seguridad Social): 403 intermitente", True),

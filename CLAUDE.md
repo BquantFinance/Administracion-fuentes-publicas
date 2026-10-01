@@ -99,8 +99,8 @@ Barcelona. Más comunidades, entidades locales, Cortes, Poder Judicial o UE solo
 - **Hosts que rechazan IP de centros de datos**: Catastro, REData, www.ree.es, ESIOS, datos.gob.es, BNE, FEGA, OEPM,
   movilidad-opendata.mitma.es, geoserver.iepnb.es, sivira.isciii.es, analisis.cis.es y www.inmujer.es; intermitentes
   Seguridad Social, renfe, DATAESTUR, indicadores.fecyt.es e IECA; desde GitHub, MINETUR y Catastro. PLACSP
-  (contrataciondelestado.es y contrataciondelsectorpublico.gob.es) responde desde el 2026-10-01 hacia las 17:00 UTC, a
-  esta IP y a la de GitHub, 200 con la página de su WAF en atom y ZIP; a las 16:57 servía el feed. Se re-verifican
+  (contrataciondelestado.es y contrataciondelsectorpublico.gob.es) bloqueó el 2026-10-01 esta IP y la de GitHub con 200
+  y la página de su WAF en atom y ZIP, al menos de 17:24 a 17:42 UTC; a las 16:57 y a las 19:46 servía el feed (temporal). Se re-verifican
   desde una IP residencial (pendiente). Verificación desde GitHub del 2026-10-01: sobre 42998e7, recetas 88 de 93
   (Catastro, MINETUR, DGT y un corte de GBIF) y ejemplos de fichas 368 de 380 (429 de AEMET, 504 de DATAESTUR); sobre
   5b79d2d, recetas 91 de 93 (MINETUR) y ejemplos 367 de 380 (CIMA con un 500 y un timeout, 10 de 10 al repetir; DATAESTUR), y los cargadores

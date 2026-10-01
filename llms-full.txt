@@ -988,7 +988,7 @@ docs_url: https://www.hacienda.gob.es/es-ES/GobiernoAbierto/Datos%20Abiertos/Pag
 - sindicacion_{n}/{nombre_feed}_{AAAA}.zip y sindicacion_{n}/{nombre_feed}_{AAAA}{MM}.zip :: Histórico en ZIP anual y, solo en 2025 y 2026, mensual; el 643 pesa 150 a 300 MB al mes y 2,2 GB al año, el 1044 y el 1143 de 12 a 37 MB al mes
   ej: curl -sO "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_202508.zip"
   devuelve: ZIP con varios .atom del mismo formato encadenados por rel=next relativo; se empieza por el que se llama como el feed (licitacionesPerfilesContratanteCompleto3.atom); descomprimido ocupa de 10 a 18 veces más
-quirks: soft-errors-200
+quirks: soft-errors-200, waf-temporary-ban
 ids: dir3, nif, cpv, nuts
 ! La página vigente solo trae lo último; rel=next lleva a instantáneas de 500 entradas con la hora de la regeneración y un sufijo (_20260930_201747.atom, _20260930_201747_1.atom...); un día laborable ocupa unas 7 páginas.
 ! Las bajas llegan como at:deleted-entry (ref = id de la entry, when, at:comment type ANULADA en el 643 y CERRADA en el 1044) delante y fuera de los entry; un parser que solo lee entry no las ve.

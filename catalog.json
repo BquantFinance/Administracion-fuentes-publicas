@@ -1788,7 +1788,8 @@
     }
    ],
    "quirks": [
-    "soft-errors-200"
+    "soft-errors-200",
+    "waf-temporary-ban"
    ],
    "ids": [
     "dir3",
