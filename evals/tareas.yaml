@@ -1,4 +1,4 @@
-# Batería de 20 tareas para medir lo que aporta el repo a un agente (ver evals/README.md).
+# Batería de 24 tareas para medir lo que aporta el repo a un agente (ver evals/README.md).
 # Cada tarea: ask (lo que pediría un usuario), expected (qué debe contener una respuesta correcta), sources (fichas que la
 # resuelven), check (llamada que da el valor de referencia en el momento de la prueba) y trap (lo que falla sin el repo).
 
@@ -13,12 +13,12 @@
 
 - id: paro-municipio
   ask: "Paro registrado en Abengibre (Albacete) en agosto de 2026, por sexo"
-  expected: "Cifras tomadas del fichero xls mensual del SEPE por comunidad (Muniacteco_20-45_CASTILLA-LA MANCHA), no de la EPA del INE ni de un agregado provincial"
+  expected: "Total y sexo de la fila de Abengibre en la hoja PARO ALBACETE de ESTADISTICA_MUNICIPIOS.xls de la página del mes (agosto de 2026, 18 parados, 5 hombres y 13 mujeres); no de la EPA del INE ni de Muniacteco_20-45, que es por actividad"
   sources: [sepe-estadisticas]
   check:
-    url: "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios-20-45.html"
-    contains: "municipios"
-  trap: "El paro por municipio es del SEPE (xls por CCAA y mes, con User-Agent de navegador); la EPA del INE no baja de provincia"
+    url: "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios/2026/agosto.html"
+    contains: "ESTADISTICA_MUNICIPIOS"
+  trap: "El paro por municipio es del SEPE (xls por mes con User-Agent de navegador, «<5» como texto y el código INE como número); la EPA del INE no baja de provincia"
 
 - id: gasolinera-mas-barata
   ask: "Gasolinera más barata en gasóleo A hoy en la provincia de Cuenca"
@@ -186,3 +186,41 @@
     contains: "defunciones_observadas"
     read_bytes: 4000
   trap: "El servidor ignora Range y sirve el CSV completo (decenas de MB); cod_ine_ambito usa el código INE de la comunidad"
+
+# Trampas silenciosas (tercera tanda, 2026-10-01): la vía directa da una cifra plausible y errónea sin ningún error.
+
+- id: criminalidad-trimestre
+  ask: "¿Cuántas infracciones penales se registraron en el municipio de Barcelona en el segundo trimestre (abril a junio) de 2026?"
+  expected: "37.548: III. TOTAL INFRACCIONES PENALES de 08019 Barcelona en 09006 (enero-junio, 75.461) menos 09003 (enero-marzo, 37.913)"
+  sources: [interior-criminalidad]
+  check:
+    url: "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09003.px?nocab=1"
+    contains: "enero-marzo 2026"
+  trap: "El balance del segundo trimestre es acumulado desde enero; dar 75.461 es el error típico"
+
+- id: encina-gbif
+  ask: "¿Cuántos registros de encina hay en España en GBIF?"
+  expected: "1.327.134 de Quercus rotundifolia (2881550), o 1.348.456 sumando Quercus ilex (2879098, 21.322); no 21.322 solo"
+  sources: [gbif-es]
+  check:
+    url: "https://api.gbif.org/v1/occurrence/count?country=ES&taxonKey=2881550"
+    contains: "1"
+  trap: "species/match de encina o Quercus ilex da 2879098; la encina ibérica es Quercus rotundifolia, taxón aceptado aparte"
+
+- id: referencia-catastral-direccion
+  ask: "Referencia catastral del edificio de la calle Alcalá 50 de Madrid"
+  expected: "1446401VK4714E (14 caracteres de la parcela), vía refCatastral del portal en CartoCiudad o Consulta_DNPLOC del Catastro"
+  sources: [catastro-ovc, cnig-centro-descargas]
+  check:
+    url: "https://www.cartociudad.es/geocoder/api/geocoder/candidates?q=calle%20alcala%2050%20madrid&limit=3"
+    contains: "Alcal"
+  trap: "El Catastro rechaza IP de centros de datos; find de CartoCiudad ignora municipio_filter y puede devolver otro municipio"
+
+- id: padron-cm-datastore
+  ask: "Población empadronada en Alcalá de Henares por sexo en el último año disponible, según el portal de datos abiertos de la Comunidad de Madrid"
+  expected: "2025: 97.925 hombres y 105.283 mujeres (203.208), del CSV de padron_por_sexo; el datastore se queda en 2022 con 5.000 de 18.718 filas"
+  sources: [comunidad-madrid-datos-abiertos]
+  check:
+    url: "https://datos.comunidad.madrid/api/3/action/datastore_search?resource_id=bc69f395-1f96-4fc2-a115-025c55b905ad&limit=1"
+    contains: "5000"
+  trap: "datastore_search responde sin error con una tabla recortada y antigua; el dato vigente está en el fichero CSV del recurso"

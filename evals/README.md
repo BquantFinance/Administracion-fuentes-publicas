@@ -24,10 +24,15 @@ valor. La de AEMET exige `AEMET_KEY` en las dos condiciones.
 Segunda tanda (`resultados-2026-10-01.md`): tareas difíciles con el modelo por defecto y con Claude Sonnet, y entrada
 ligera. Acierto igual; con catálogo, la mitad de llamadas y casi ninguna fallida.
 
-La columna tokens de las dos tandas es el contexto final de cada agente que devuelve el arnés, no el consumo: cada turno
+Tercera tanda (`resultados-2026-10-01-tanda3.md`): siete trampas silenciosas con Claude Haiku, condición MCP, tres
+repeticiones y tokens medidos con `consumo.py`. Sin catálogo 3 de 21, con ficheros 10 de 21 y con MCP 13 de 21, con un
+30 % y un 43 % menos de tokens de entrada. Con el campo `alerts`, las tres trampas que seguían fallando pasan de 5 a 18
+de 18 cuando la alerta dice la operación exacta con un ejemplo numérico.
+
+La columna tokens de las dos primeras tandas es el contexto final de cada agente que devuelve el arnés, no el consumo: cada turno
 reenvía el contexto entero, así que los tokens procesados crecen con el número de pasos, que el catálogo reduce en las
-tareas difíciles. La siguiente tanda suma la entrada de cada turno desde la transcripción del agente (campo usage de
-cada mensaje) en vez de usar ese total.
+tareas difíciles. La tercera tanda ya suma la entrada de cada turno desde la transcripción del agente (campo usage de
+cada mensaje, `consumo.py`).
 
 ## Qué mide y qué no
 
