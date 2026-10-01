@@ -28,7 +28,7 @@ Algunos ejemplos, verificados con llamadas reales:
 - Para filtrar un municipio, el INE no quiere su código (`02001`) sino un Id interno (`6124`).
 - Muchos servidores `.gob.es` envían el certificado FNMT sin la intermedia: el navegador entra, `curl` y `requests` fallan ([arreglo](guides/cliente-http.md)).
 - AEMET responde en dos pasos, con el fichero en ISO-8859-15 y los errores dentro de un HTTP 200.
-- En SIGPAC el municipio es el código del Catastro, no el del INE: un punto de la Puerta del Sol devuelve `28:900`, no `28079`.
+- En SIGPAC el municipio es el código del Catastro, no el del INE: un punto de la Puerta del Sol devuelve `28:900`, no `28079`, y otros 4.448 municipios cambian de número. La traducción, con DIR3, NIF del ayuntamiento, NUTS3 y coordenadas, está en [`datos/municipios.csv`](datos/municipios.csv).
 - Los CSV de los portales PC-Axis de Educación, Cultura e Interior llegan en UTF-8 aunque la cabecera diga ISO-8859-15; leídos como Latin-1 salen «autÃ³noma».
 - En GBIF la encina ibérica es sobre todo *Quercus rotundifolia* (1,3 millones de registros en España); preguntar por *Quercus ilex*, que es lo que devuelve el buscador de nombres, da 21.322 sin ningún aviso.
 
@@ -85,6 +85,7 @@ catalog.json                 todo el catálogo (generado)
 llms.txt / llms-full.txt     entrada para agentes (generado)
 indices/*.yaml               recetas por intención, necesidades, identificadores, códigos que son parámetros, rutas muertas (fuente de verdad)
 indices/README.md            los cinco índices en texto (generado)
+datos/municipios.csv         los 8.132 municipios con su código INE, SIGPAC y Catastro, DIR3, NIF, NUTS3 y coordenadas (scripts/municipios.py)
 scripts/                     validate.py, build.py, check_links.py, check_recetas.py, check_ejemplos.py, fnmt_bundle.py, mcp_catalogo.py (servidor MCP local)
 scripts/clientes/            sesión HTTP, clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC, y cargadores (BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex, Saiku)
 scripts/clientes/muestras/   respuestas reales recortadas para probar los parsers sin red (python scripts/test_clientes.py)

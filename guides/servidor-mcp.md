@@ -63,6 +63,9 @@ Herramientas (respuestas JSON compactas; búsqueda por palabras sin acentos ni m
 - `identificador(id)`: format, regex, example, issuer, gotcha, joins, used_by de un identificador del vocabulario.
 - `ruta_muerta(url)`: busca la URL exacta o por prefijo en rutas muertas; devuelve status, sustituta, ficha y fecha.
 - `codigos(grupo=None)`: códigos que son parámetros (INE, DataComex, AEMET, carburantes, BOE); sin grupo lista los grupos, con grupo sus entradas.
+- `municipio(consulta, limite=5)`: los códigos de un municipio en cada sistema (INE con dígito de control, SIGPAC y
+  Catastro, DIR3 y NIF del ayuntamiento, CCAA, provincia, NUTS3 y coordenadas de su capital) desde `datos/municipios.csv`;
+  acepta código INE, SIGPAC (28:900), DIR3, NIF o nombre.
 - `sectores()`: sectores con título y número de fichas.
 
 Recursos: `catalogo://llms.txt` (el fichero entero) y `catalogo://reglas` (solo las reglas rápidas antes de programar).

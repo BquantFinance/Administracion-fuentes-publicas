@@ -300,6 +300,7 @@ def main() -> None:
         f"- Entrada ligera (reglas, fichas por sector y punteros, unos 7 KB): {REPO_RAW}/llms-min.txt",
         f"- Una ficha: {REPO_RAW}/sources/<sector>/<id>.yaml",
         f"- Índices para agentes (recetas paso a paso, identificadores con regex y cruces, rutas muertas con sustituta): {REPO_RAW}/indices/README.md",
+        f"- Los 8.132 municipios con su código en cada sistema (INE con dígito de control, SIGPAC y Catastro, DIR3 y NIF del ayuntamiento, CCAA, NUTS3 y coordenadas de la capital): {REPO_RAW}/datos/municipios.csv, o la herramienta municipio del servidor MCP. El código de municipio de SIGPAC y Catastro no es el del INE en más de la mitad de los municipios.",
         f"- Códigos que son parámetros (Id de municipio, provincia y CCAA del INE para tv, países de DataComex, estaciones de AEMET por capital, productos de carburantes, rangos y secciones del BOE): {REPO_RAW}/indices/codigos.yaml",
         f"- Servidor MCP local para cargar solo la ficha, receta o necesidad que haga falta: python scripts/mcp_catalogo.py (configuración y herramientas en {REPO_RAW}/guides/servidor-mcp.md)",
         "- Código Python que ya resuelve las trampas: sesión HTTP con CA de FNMT, reintentos y detección de WAF; clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC que paginan sin topes silenciosos; cargadores de BOE, BDNS, AEMET, INE, PLACSP. En scripts/clientes/ (pip install \"fuentes-publicas-mcp[clientes] @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas\" y from fuentes_publicas.clientes import ckan).",

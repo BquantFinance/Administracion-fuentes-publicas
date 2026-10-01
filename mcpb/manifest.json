@@ -68,6 +68,10 @@
       "description": "Códigos que las APIs exigen como parámetro"
     },
     {
+      "name": "municipio",
+      "description": "Códigos de un municipio en cada sistema: INE, SIGPAC y Catastro, DIR3 y NIF del ayuntamiento, CCAA, NUTS3 y coordenadas"
+    },
+    {
       "name": "sectores",
       "description": "Sectores del catálogo con número de fichas"
     }

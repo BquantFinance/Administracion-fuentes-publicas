@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 144 necesidades, 21 identificadores, 23 grupos de códigos, 99 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 145 necesidades, 21 identificadores, 23 grupos de códigos, 99 rutas muertas.
 
 ## Recetas por intención
 
@@ -615,6 +615,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Empresas activas por actividad y tamaño (DIRCE) → `ine-api-tempus`
 - Tasa de paro, ocupados y activos (EPA) → `ine-api-tempus` (la EPA es del INE, no del SEPE)
 - Salarios → `ine-api-tempus` (Encuesta de Estructura Salarial en el INE; salarios en fuentes tributarias por municipio en aeat-estadisticas (modelo190_salarios))
+- Pasar un municipio entre códigos INE, SIGPAC o Catastro, DIR3, NIF del ayuntamiento, NUTS3 y coordenadas → `ine-codigos-territoriales` (datos/municipios.csv o la herramienta municipio del MCP; SIGPAC y Catastro numeran distinto que el INE en más de la mitad de los municipios)
 - Defunciones por causa de muerte → `ine-api-tempus` (estadística del INE; Sanidad solo publica PDF)
 - Padrón, nacimientos, defunciones y migraciones → `ine-api-tempus`
 - Índice de precios de vivienda y de alquiler → `ine-api-tempus`
@@ -808,6 +809,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - vía `mivau-precios-vivienda-alquiler`: CUMUN como texto en el xlsx de SERPAVI y CodINE en su GeoJSON municipal (allí CUMUN es entero)
 - vía `segsocial-estadisticas`: COD MUNICIPIO de MUNCNAE{MM}{AA}.xlsx, entero sin cero inicial; rellenar a cinco dígitos
 - vía `sepe-estadisticas`: código como número (28001.0) en ESTADISTICA_MUNICIPIOS.xls
+- vía `dir3-directorio`: el ayuntamiento es L01 + INE + dígito de control (L01280796); su NIF no se deduce del código (Vitoria P0106800F), está en datos/municipios.csv
 
 **ine-provincia**
 - trampa: Ceuta 51 y Melilla 52; el ISO 3166-2 (provincia_iso en los CSV COVID del ISCIII) es otro sistema
@@ -850,8 +852,9 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - vía `cnig-centro-descargas`: refCatastral de 14 caracteres en los portales del geocoder de CartoCiudad
 
 **referencia-sigpac**
-- trampa: la provincia es la del INE, pero el municipio es el del Catastro (capitales 900, Madrid 28:900 frente al INE 28079); polígono y parcela coinciden con Catastro en rústica
+- trampa: la provincia es la del INE, pero el municipio es el del Catastro (capitales 900, Madrid 28:900 frente al INE 28079, y otros 4.448 con número distinto); polígono y parcela coinciden con Catastro en rústica
 - vía `mapa-sigpac`: coordenadas a recinto con refrecinbycoord; recinto a Red Natura o nitratos con intersection
+- vía `ine-codigos-territoriales`: municipio SIGPAC a INE con datos/municipios.csv (columna sigpac), emparejado por nombre con codigossigpac/municipio{pr}.json y contrastado por punto
 
 **idema**
 - trampa: las predicciones no usan idema sino el código INE de municipio; inventario en valores/climatologicos/inventarioestaciones

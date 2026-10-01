@@ -14,7 +14,7 @@ from mcp.client.stdio import stdio_client
 
 ROOT = Path(__file__).resolve().parent.parent
 SERVER = ROOT / "scripts" / "mcp_catalogo.py"
-TOOLS = {"buscar_fuentes", "ficha", "buscar_recetas", "receta", "necesidad", "identificador", "ruta_muerta", "sectores", "codigos"}
+TOOLS = {"buscar_fuentes", "ficha", "buscar_recetas", "receta", "necesidad", "identificador", "ruta_muerta", "sectores", "codigos", "municipio"}
 
 
 def payload(result):
@@ -85,6 +85,11 @@ async def main() -> None:
             prov = payload(await session.call_tool("codigos", {"grupo": "ine-provincias"}))
             assert any(e["code"] == "28" for e in prov["entries"]), prov
             print(f"codigos(): {len(grupos)} grupos; ine-provincias: {len(prov['entries'])} entradas")
+            mun = payload(await session.call_tool("municipio", {"consulta": "28:900"}))
+            assert mun[0]["ine"] == "28079" and mun[0]["dir3"] == "L01280796", mun
+            alcala = payload(await session.call_tool("municipio", {"consulta": "Alcala de Henares"}))
+            assert alcala[0]["ine"] == "28005" and alcala[0]["sigpac"] == "28:5", alcala
+            print(f"municipio('28:900'): {mun[0]['nombre']} {mun[0]['ine']}; municipio('Alcala de Henares'): {alcala[0]['ine']}")
             secs = payload(await session.call_tool("sectores", {}))
             assert sum(s["sources"] for s in secs) == catalog["count"]
             print(f"sectores(): {len(secs)} sectores, {sum(s['sources'] for s in secs)} fichas")

@@ -12,6 +12,7 @@ Sector `estadistica` · 7 fuentes · índice generado por `scripts/build.py`, no
 - Empresas activas por actividad y tamaño (DIRCE) → `ine-api-tempus`
 - Tasa de paro, ocupados y activos (EPA) → `ine-api-tempus` (la EPA es del INE, no del SEPE)
 - Salarios → `ine-api-tempus` (Encuesta de Estructura Salarial en el INE; salarios en fuentes tributarias por municipio en aeat-estadisticas (modelo190_salarios))
+- Pasar un municipio entre códigos INE, SIGPAC o Catastro, DIR3, NIF del ayuntamiento, NUTS3 y coordenadas → `ine-codigos-territoriales` (datos/municipios.csv o la herramienta municipio del MCP; SIGPAC y Catastro numeran distinto que el INE en más de la mitad de los municipios)
 - Defunciones por causa de muerte → `ine-api-tempus` (estadística del INE; Sanidad solo publica PDF)
 - Padrón, nacimientos, defunciones y migraciones → `ine-api-tempus`
 - Índice de precios de vivienda y de alquiler → `ine-api-tempus`

@@ -10,7 +10,7 @@ summary: >-
   consultas REST por coordenadas o códigos (referencia catastral, Red Natura, nitratos), WMS, teselas
   vectoriales, listas de códigos y GeoPackage por provincia y campaña. Sin clave, licencia CC BY 4.0.
 alerts:
-  - El municipio es el código del Catastro, no el del INE; las capitales son 900 (Madrid 28:900, INE 28079; igual Toledo, Sevilla y Zaragoza) y 28:15 es Arroyomolinos. En los no capitales probados coincidió con el INE.
+  - El municipio es el código del Catastro, no el del INE; las capitales son 900 (Madrid 28:900, INE 28079) y otros 4.448 municipios cambian de número (Tórtoles 05246 es 5:247); traducir con datos/municipios.csv.
 access: [api-rest, ogc, download, portal]
 auth: none
 formats: [json, geojson, gpkg, zip, xml, protobuf, pdf]

@@ -5,6 +5,7 @@ Un agente carga solo lo que necesita (una ficha, una receta, una necesidad) en v
 Arranque: python scripts/mcp_catalogo.py (desde el repo) o mcp-catalogo tras instalarlo con pip o uvx; si no hay catalog.json local lo descarga de GitHub y lo cachea en ~/.cache/fuentes-publicas.
 Prueba real: python scripts/test_mcp_catalogo.py.
 """
+import csv
 import difflib
 import json
 import re
@@ -28,7 +29,7 @@ CACHE_DIR = Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache") / "
 
 
 def locate(name: str) -> Path:
-    """catalog.json o llms.txt: variable CATALOGO_DIR, directorio actual, raíz del repo o copia descargada de GitHub."""
+    """catalog.json, llms.txt o datos/municipios.csv: variable CATALOGO_DIR, directorio actual, raíz del repo o copia descargada de GitHub."""
     candidates = [Path(os.environ["CATALOGO_DIR"]) / name] if os.environ.get("CATALOGO_DIR") else []
     candidates += [Path.cwd() / name, ROOT / name]
     for c in candidates:
@@ -36,7 +37,7 @@ def locate(name: str) -> Path:
             return c
     cached = CACHE_DIR / name
     try:
-        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        cached.parent.mkdir(parents=True, exist_ok=True)
         req = urllib.request.Request(f"{REPO_RAW}/{name}", headers={"User-Agent": "fuentes-publicas-mcp"})
         with urllib.request.urlopen(req, timeout=30) as r, cached.open("wb") as fh:
             fh.write(r.read())
@@ -56,7 +57,8 @@ INSTRUCTIONS = (
     "Catálogo de fuentes de datos de la Administración pública española. Flujo: necesidad o buscar_fuentes "
     "para localizar la fuente, ficha para endpoints, quirks y gotchas verificados (alerts primero: trampas silenciosas "
     "que cambian la cifra sin dar error); buscar_recetas y receta para "
-    "procedimientos que cruzan fuentes; identificador para cruzar datos; ruta_muerta antes de dar por perdida "
+    "procedimientos que cruzan fuentes; identificador para cruzar datos; municipio para los códigos INE, SIGPAC o "
+    "Catastro, DIR3, NUTS3 y coordenadas de un municipio; ruta_muerta antes de dar por perdida "
     "una URL. Lee el recurso catalogo://reglas antes de programar contra una fuente."
 )
 
@@ -254,6 +256,37 @@ def codigos(grupo: str | None = None) -> dict | list[dict]:
     if grupo in CODIGOS:
         return CODIGOS[grupo]
     return {"error": f"no existe el grupo {grupo}", "sugerencias": parecidos(grupo, CODIGOS)}
+
+
+_MUNICIPIOS: list[dict] = []
+
+
+def municipios() -> list[dict]:
+    """datos/municipios.csv, cargado la primera vez que se pide (lo descarga si no hay copia local)."""
+    if not _MUNICIPIOS:
+        with locate("datos/municipios.csv").open(encoding="utf-8", newline="") as fh:
+            _MUNICIPIOS.extend(csv.DictReader(fh))
+    return _MUNICIPIOS
+
+
+@mcp.tool()
+def municipio(consulta: str, limite: int = 5) -> list[dict]:
+    """Códigos de un municipio en cada sistema: INE (5 dígitos y dígito de control), SIGPAC y Catastro (las capitales
+    son 900: Madrid 28:900, no 28079), DIR3 y NIF del ayuntamiento, CCAA, provincia, NUTS3 y coordenadas de su núcleo
+    capital. Acepta código INE (28079 o 280796), SIGPAC (28:900), DIR3 (L01280796), NIF (P2807900B) o nombre."""
+    filas, q = municipios(), consulta.strip()
+    exactos = [f for f in filas if q.upper() in (f["ine"], f["ine"] + f["dc"], f["sigpac"], f["dir3"], f["nif"])]
+    if exactos:
+        return exactos[:limite]
+    nq = norm(q).strip()
+    iguales = [f for f in filas if norm(f["nombre"]) == nq or nq in [norm(p).strip() for p in f["nombre"].split("/")]]
+    if iguales:
+        return iguales[:limite]
+    contienen = [f for f in filas if nq and nq in norm(f["nombre"])]
+    if contienen:
+        return sorted(contienen, key=lambda f: len(f["nombre"]))[:limite]
+    nombres = {norm(f["nombre"]): f for f in filas}
+    return [nombres[n] for n in difflib.get_close_matches(nq, list(nombres), n=limite, cutoff=0.75)]
 
 
 @mcp.tool()

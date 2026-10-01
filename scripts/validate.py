@@ -8,7 +8,7 @@ import sys
 
 from jsonschema import Draft202012Validator
 
-from common import INDEX_FILES, SCHEMA, load_indices, load_sources, load_vocab
+from common import INDEX_FILES, ROOT, SCHEMA, load_indices, load_sources, load_vocab
 
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -27,6 +27,33 @@ def _str(errors: list[str], where: str, obj: dict, key: str, max_len: int, requi
         errors.append(f"{where}: '{key}' debe ser texto no vacío")
     elif len(val) > max_len:
         errors.append(f"{where}: '{key}' supera {max_len} caracteres ({len(val)})")
+
+
+def validate_municipios() -> list[str]:
+    """datos/municipios.csv (generado por scripts/municipios.py): columnas fijas, ine único de 5 dígitos, formatos."""
+    import csv
+    import re
+    path = ROOT / "datos" / "municipios.csv"
+    if not path.exists():
+        return []
+    cols = ["ine", "dc", "nombre", "cpro", "ccaa", "provincia", "nuts3", "sigpac", "sigpac_cruce", "dir3", "nif",
+            "lat", "lon", "nucleo"]
+    with path.open(encoding="utf-8", newline="") as fh:
+        filas = list(csv.DictReader(fh))
+    errores = [] if filas and list(filas[0]) == cols else [f"{path.name}: columnas distintas de {cols}"]
+    vistos = set()
+    for f in filas:
+        w = f"{path.name}: {f.get('ine')}"
+        if not re.fullmatch(r"\d{5}", f.get("ine") or "") or f["ine"] in vistos or f["ine"][:2] != f.get("cpro"):
+            errores.append(f"{w}: ine inválido, repetido o de otra provincia")
+        vistos.add(f.get("ine"))
+        if f.get("sigpac") and not re.fullmatch(rf"{int(f['cpro'])}:\d{{1,3}}", f["sigpac"]):
+            errores.append(f"{w}: sigpac '{f['sigpac']}' no es provincia:municipio")
+        if f.get("dir3") and f["dir3"] != f"L01{f['ine']}{f['dc']}":
+            errores.append(f"{w}: dir3 '{f['dir3']}' no es L01 + ine + dc")
+    if len(filas) < 8000:
+        errores.append(f"{path.name}: solo {len(filas)} municipios")
+    return errores[:20]
 
 
 def validate_indices(ids: set[str], vocab: dict) -> list[str]:
@@ -233,6 +260,8 @@ def main() -> int:
         n_idx = len(INDEX_FILES)
     except Exception as exc:  # fichero ausente o YAML roto
         errors.append(f"indices/: no se pudieron cargar los índices ({exc})")
+
+    errors += validate_municipios()
 
     if errors:
         print("\n".join(errors), file=sys.stderr)

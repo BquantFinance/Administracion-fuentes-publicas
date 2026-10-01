@@ -138,6 +138,9 @@
   source: idee-servicios
 - need: Recintos agrícolas, usos del suelo y referencia catastral rústica
   source: mapa-sigpac
+- need: Pasar un municipio entre códigos INE, SIGPAC o Catastro, DIR3, NIF del ayuntamiento, NUTS3 y coordenadas
+  source: ine-codigos-territoriales
+  note: datos/municipios.csv o la herramienta municipio del MCP; SIGPAC y Catastro numeran distinto que el INE en más de la mitad de los municipios
 - need: Predicción, observación, climatología, avisos y radar
   source: aemet-opendata
   note: clave gratuita obligatoria; el cuerpo vacío con 200 es fallo de autenticación

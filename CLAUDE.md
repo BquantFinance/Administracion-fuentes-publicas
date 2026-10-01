@@ -36,7 +36,7 @@ Cada línea que no ahorre una búsqueda, una prueba fallida o una hora de depura
 7. **Castellano en valores, inglés en claves.** Sin markdown dentro de los valores. Sin dos puntos seguidos de
    espacio en valores sin comillas, porque rompe el YAML.
 8. **Fuente única de verdad.** Solo se editan `sources/**/*.yaml`, `indices/*.yaml`, `guides/*.md`, `schema/`,
-   `scripts/` y `evals/`, más los ficheros de distribución del servidor MCP (`pyproject.toml`, `server.json`, `glama.json`,
+   `scripts/` y `evals/` (`datos/municipios.csv` lo genera `python scripts/municipios.py`, con red; `validate.py` lo comprueba), más los ficheros de distribución del servidor MCP (`pyproject.toml`, `server.json`, `glama.json`,
    `Dockerfile`, `mcpb/`) y `.github/`. `catalog.json`, `llms.txt`, `llms-full.txt`, `indices/README.md`, los `README.md` de sector y la
    tabla del README raíz se regeneran con `python scripts/build.py` y se suben en el mismo commit.
 9. **No borrar fichas.** Una fuente muerta pasa a `status: deprecated` con la sustituta en `gotchas`.
@@ -53,6 +53,7 @@ python scripts/check_links.py     # informe de URLs (necesita red)
 python scripts/check_recetas.py   # batería de regresión de las recetas (necesita red; --report, --fail)
 python scripts/check_ejemplos.py  # ejecuta el example de cada endpoint de las fichas (necesita red; --only, --muestra, --report, --fail)
 python scripts/test_clientes.py   # parsers y clientes de scripts/clientes contra las muestras reales, sin red (corre en CI)
+python scripts/municipios.py      # regenera datos/municipios.csv (INE, SIGPAC, DIR3, IGN; necesita red, un minuto)
 python scripts/fnmt_bundle.py     # genera ca-age.pem (certifi + CA de FNMT) para los hosts con cadena incompleta
 python scripts/mcp_catalogo.py    # servidor MCP por stdio sobre catalog.json (guides/servidor-mcp.md); prueba real con test_mcp_catalogo.py, fuera de CI
 ```
@@ -105,7 +106,9 @@ veces por trozos sin Content-Length; `check_recetas.py` lee ya hasta min_bytes e
 (`verificacion.yml`, ejecución del 2026-10-01 sobre 8cc6308): 87 de 89 comprobaciones de recetas ok (MINETUR cortó la
 conexión dos veces), ejemplos de las fichas 213 ok de 228 (los fallos eran del analizador de opciones de curl,
 corregido después, la exportación de Saiku que necesita sesión, el CKAN de MITECO en despliegue, un 429 de AEMET y dos
-cortes de Catastro) y los seis cargadores de `scripts/clientes/` correctos, AEMET incluido con el secreto.
+cortes de Catastro) y los seis cargadores de `scripts/clientes/` correctos, AEMET incluido con el secreto. Ejecución
+manual del mismo día sobre 1db65b2: 92 de 92 recetas, 367 de 379 ejemplos (DATAESTUR 504, DGT lenta, Catastro y dos
+ejemplos que leen la cookie de otro paso, que `check_ejemplos.py` ya omite) y los seis cargadores.
 
 Hosts que rechazan o cortan IP de centros de datos (2026-10-01): desde el entorno de agentes, Catastro (403 y error del
 proxy), REData, www.ree.es, ESIOS y datos.gob.es (Incapsula), BNE (Cloudflare), FEGA (reset), OEPM (F5),
@@ -153,8 +156,11 @@ verificación, comunidades autónomas) y las evaluaciones al final; todo eso que
    (`aemet.py 16078`). Hecho también el 2026-10-01: `sesion.py` (sesión HTTP común con FNMT, User-Agent, reintentos y
    excepción `Bloqueado` ante WAF; `_http.py` queda como compatibilidad y `fnmt_bundle.py` la usa) y clientes genéricos
    `ckan`, `socrata`, `pcaxis`, `arcgis` y `ogc` que paginan sin topes silenciosos, con muestras, pruebas sin red y extra
-   de instalación `[clientes]`. Pendiente: muestras de ObtenerDatos de DataComex y del fichero de datos de AEMET
-   (necesitan credenciales) y cargador de Catastro (desde una IP residencial).
+   de instalación `[clientes]`. Hecho también ese día: campo `alerts` (35 trampas silenciosas movidas desde gotchas
+   en 28 fichas; el MCP las devuelve lo primero) y `datos/municipios.csv` con `scripts/municipios.py` (8.132 municipios
+   con INE, SIGPAC, DIR3, NIF, NUTS3 y coordenadas; SIGPAC y Catastro numeran distinto que el INE en 4.448 además de
+   las 41 capitales con 900) y la herramienta MCP `municipio`. Pendiente: muestras de ObtenerDatos de DataComex y del
+   fichero de datos de AEMET (necesitan credenciales) y cargador de Catastro (desde una IP residencial).
 5. **Cobertura con demanda real.** Hecho el 2026-10-01: portal de datos e instituto de estadística de Madrid,
    Cataluña (Idescat), Andalucía (IECA) y Comunitat Valenciana (IVE), y portales de los ayuntamientos de Madrid y
    Barcelona (10 fichas, con sus necesidades y códigos). Siguientes comunidades por tamaño solo cuando el propietario lo
