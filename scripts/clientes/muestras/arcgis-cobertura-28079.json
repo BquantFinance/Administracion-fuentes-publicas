@@ -1,0 +1,217 @@
+{
+ "objectIdFieldName": "FID",
+ "uniqueIdField": {
+  "name": "FID",
+  "isSystemMaintained": true
+ },
+ "globalIdFieldName": "",
+ "geometryProperties": {
+  "shapeAreaFieldName": "Shape__Area",
+  "shapeLengthFieldName": "Shape__Length",
+  "units": "esriMeters"
+ },
+ "geometryType": "esriGeometryPolygon",
+ "spatialReference": {
+  "wkid": 102100,
+  "latestWkid": 3857
+ },
+ "fields": [
+  {
+   "name": "FID",
+   "type": "esriFieldTypeOID",
+   "alias": "FID",
+   "sqlType": "sqlTypeInteger",
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "cod_ccaa",
+   "type": "esriFieldTypeString",
+   "alias": "cod_ccaa",
+   "sqlType": "sqlTypeNVarchar",
+   "length": 2,
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "ccaa",
+   "type": "esriFieldTypeString",
+   "alias": "ccaa",
+   "sqlType": "sqlTypeNVarchar",
+   "length": 35,
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "cod_provin",
+   "type": "esriFieldTypeString",
+   "alias": "cod_provin",
+   "sqlType": "sqlTypeNVarchar",
+   "length": 2,
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "provincia",
+   "type": "esriFieldTypeString",
+   "alias": "provincia",
+   "sqlType": "sqlTypeNVarchar",
+   "length": 35,
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "cod_munici",
+   "type": "esriFieldTypeString",
+   "alias": "cod_munici",
+   "sqlType": "sqlTypeNVarchar",
+   "length": 5,
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "municipio",
+   "type": "esriFieldTypeString",
+   "alias": "municipio",
+   "sqlType": "sqlTypeNVarchar",
+   "length": 50,
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "nuts",
+   "type": "esriFieldTypeString",
+   "alias": "nuts",
+   "sqlType": "sqlTypeNVarchar",
+   "length": 10,
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "tecnologia",
+   "type": "esriFieldTypeString",
+   "alias": "tecnologia",
+   "sqlType": "sqlTypeNVarchar",
+   "length": 50,
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "porcentaje",
+   "type": "esriFieldTypeDouble",
+   "alias": "porcentaje",
+   "sqlType": "sqlTypeFloat",
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "isla",
+   "type": "esriFieldTypeString",
+   "alias": "isla",
+   "sqlType": "sqlTypeNVarchar",
+   "length": 35,
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "habitantes",
+   "type": "esriFieldTypeInteger",
+   "alias": "habitantes",
+   "sqlType": "sqlTypeInteger",
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "viviendas_",
+   "type": "esriFieldTypeInteger",
+   "alias": "viviendas_",
+   "sqlType": "sqlTypeInteger",
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "hogares_to",
+   "type": "esriFieldTypeInteger",
+   "alias": "hogares_to",
+   "sqlType": "sqlTypeInteger",
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "municipio_",
+   "type": "esriFieldTypeString",
+   "alias": "municipio_",
+   "sqlType": "sqlTypeNVarchar",
+   "length": 35,
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "fecha",
+   "type": "esriFieldTypeDate",
+   "alias": "fecha",
+   "sqlType": "sqlTypeTimestamp2",
+   "length": 8,
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "Shape_Leng",
+   "type": "esriFieldTypeDouble",
+   "alias": "Shape_Leng",
+   "sqlType": "sqlTypeFloat",
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "Shape_Area",
+   "type": "esriFieldTypeDouble",
+   "alias": "Shape_Area",
+   "sqlType": "sqlTypeFloat",
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "Shape__Area",
+   "type": "esriFieldTypeDouble",
+   "alias": "Shape__Area",
+   "sqlType": "sqlTypeFloat",
+   "domain": null,
+   "defaultValue": null
+  },
+  {
+   "name": "Shape__Length",
+   "type": "esriFieldTypeDouble",
+   "alias": "Shape__Length",
+   "sqlType": "sqlTypeFloat",
+   "domain": null,
+   "defaultValue": null
+  }
+ ],
+ "features": [
+  {
+   "attributes": {
+    "FID": 4368,
+    "cod_ccaa": "13",
+    "ccaa": "Madrid. Comunidad de",
+    "cod_provin": "28",
+    "provincia": "Madrid",
+    "cod_munici": "28079",
+    "municipio": "Madrid",
+    "nuts": "ES300",
+    "tecnologia": "FTTH",
+    "porcentaje": 99.387461357,
+    "isla": " ",
+    "habitantes": 3416771,
+    "viviendas_": 1516146,
+    "hogares_to": 1320733,
+    "municipio_": "No",
+    "fecha": 1751241600000,
+    "Shape_Leng": 1.83202089594,
+    "Shape_Area": 0.0642304272121,
+    "Shape__Area": 1046200788.3912354,
+    "Shape__Length": 229144.347398118
+   }
+  }
+ ]
+}

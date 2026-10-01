@@ -1,0 +1,39 @@
+{
+ "x-soda2-fields": [
+  "dia",
+  "estaci",
+  "nivell_absolut",
+  "percentatge_volum_embassat",
+  "volum_embassat"
+ ],
+ "x-soda2-types": [
+  "floating_timestamp",
+  "text",
+  "number",
+  "number",
+  "number"
+ ],
+ "body": [
+  {
+   "dia": "2018-07-05T00:00:00.000",
+   "estaci": "Embassament de Riudecanyes",
+   "nivell_absolut": "210.93",
+   "percentatge_volum_embassat": "45.8",
+   "volum_embassat": "2.44"
+  },
+  {
+   "dia": "2004-08-19T00:00:00.000",
+   "estaci": "Embassament de Darnius Boadella (Darnius)",
+   "nivell_absolut": "151.89",
+   "percentatge_volum_embassat": "64.9",
+   "volum_embassat": "39.67"
+  },
+  {
+   "dia": "2000-09-14T00:00:00.000",
+   "estaci": "Embassament de la Llosa del Cavall (Navès)",
+   "nivell_absolut": "788.86",
+   "percentatge_volum_embassat": "50.5",
+   "volum_embassat": "40.44"
+  }
+ ]
+}

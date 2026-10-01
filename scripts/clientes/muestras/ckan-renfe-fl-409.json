@@ -1,0 +1,1 @@
+{"help": "https://data.renfe.com/api/3/action/help_show?name=package_search", "success": false, "error": {"__type": "Validation Error", "fl": ["No es una lista"]}}

@@ -1,0 +1,118 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "dn_pk": 452282820,
+    "provincia": 45,
+    "municipio": 23,
+    "agregado": 0,
+    "zona": 0,
+    "poligono": 1,
+    "parcela": 48,
+    "recinto": 2,
+    "pendiente_media": 6.0,
+    "altitud": 656
+   },
+   "id": 452282820,
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -4.002284644587167,
+       39.80209219188792
+      ],
+      [
+       -4.0023414755704385,
+       39.80211222547589
+      ],
+      [
+       -4.002334015676172,
+       39.802142484986334
+      ],
+      [
+       -4.002311970431326,
+       39.802162182459966
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dn_pk": 452282866,
+    "provincia": 45,
+    "municipio": 23,
+    "agregado": 0,
+    "zona": 0,
+    "poligono": 1,
+    "parcela": 31,
+    "recinto": 1,
+    "pendiente_media": 16.2,
+    "altitud": 643
+   },
+   "id": 452282866,
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -4.002227587292498,
+       39.8055553547624
+      ],
+      [
+       -4.00225072218482,
+       39.80565376082607
+      ],
+      [
+       -4.0022478731757625,
+       39.80569894012504
+      ],
+      [
+       -4.00223571941544,
+       39.80577437977266
+      ]
+     ]
+    ]
+   }
+  }
+ ],
+ "numberMatched": 4938,
+ "numberReturned": 250,
+ "links": [
+  {
+   "type": "application/geo+json",
+   "rel": "self",
+   "title": "This document as GeoJSON",
+   "href": "https://sigpac-hubcloud.es/ogcapi/collections/recintos/items?f=json&bbox=-4.10,39.80,-4.00,39.90&limit=250&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F4258"
+  },
+  {
+   "rel": "alternate",
+   "type": "application/ld+json",
+   "title": "This document as RDF (JSON-LD)",
+   "href": "https://sigpac-hubcloud.es/ogcapi/collections/recintos/items?f=jsonld&bbox=-4.10,39.80,-4.00,39.90&limit=250&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F4258"
+  },
+  {
+   "type": "text/html",
+   "rel": "alternate",
+   "title": "This document as HTML",
+   "href": "https://sigpac-hubcloud.es/ogcapi/collections/recintos/items?f=html&bbox=-4.10,39.80,-4.00,39.90&limit=250&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F4258"
+  },
+  {
+   "type": "application/geo+json",
+   "rel": "next",
+   "title": "Items (next)",
+   "href": "https://sigpac-hubcloud.es/ogcapi/collections/recintos/items?offset=250&bbox=-4.10,39.80,-4.00,39.90&limit=250&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F4258"
+  },
+  {
+   "type": "application/json",
+   "title": "Recintos SIGPAC",
+   "rel": "collection",
+   "href": "https://sigpac-hubcloud.es/ogcapi/collections/recintos"
+  }
+ ],
+ "timeStamp": "2026-10-01T12:54:45.941259Z"
+}

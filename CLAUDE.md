@@ -50,7 +50,7 @@ python scripts/build.py           # regenera todo lo derivado
 python scripts/check_links.py     # informe de URLs (necesita red)
 python scripts/check_recetas.py   # batería de regresión de las recetas (necesita red; --report, --fail)
 python scripts/check_ejemplos.py  # ejecuta el example de cada endpoint de las fichas (necesita red; --only, --muestra, --report, --fail)
-python scripts/test_clientes.py   # parsers de scripts/clientes contra las muestras reales, sin red (corre en CI)
+python scripts/test_clientes.py   # parsers y clientes de scripts/clientes contra las muestras reales, sin red (corre en CI)
 python scripts/fnmt_bundle.py     # genera ca-age.pem (certifi + CA de FNMT) para los hosts con cadena incompleta
 python scripts/mcp_catalogo.py    # servidor MCP por stdio sobre catalog.json (guides/servidor-mcp.md); prueba real con test_mcp_catalogo.py, fuera de CI
 ```
@@ -148,8 +148,11 @@ verificación, comunidades autónomas) y las evaluaciones al final; todo eso que
    (`bdns.py`), AEMET, INE Tempus, DataComex, PLACSP y Saiku, probados con llamadas reales; `scripts/clientes/muestras/`
    con respuestas reales recortadas y `python scripts/test_clientes.py`, sin red, en CI; `verificacion.yml` ejecuta los
    cargadores contra los servidores cada semana; el 2026-10-01 pasaron los seis desde GitHub, AEMET con el secreto
-   (`aemet.py 16078`). Pendiente: muestras de ObtenerDatos de DataComex y del fichero de datos de AEMET (necesitan
-   credenciales) y cargador de Catastro (desde una IP residencial).
+   (`aemet.py 16078`). Hecho también el 2026-10-01: `sesion.py` (sesión HTTP común con FNMT, User-Agent, reintentos y
+   excepción `Bloqueado` ante WAF; `_http.py` queda como compatibilidad y `fnmt_bundle.py` la usa) y clientes genéricos
+   `ckan`, `socrata`, `pcaxis`, `arcgis` y `ogc` que paginan sin topes silenciosos, con muestras, pruebas sin red y extra
+   de instalación `[clientes]`. Pendiente: muestras de ObtenerDatos de DataComex y del fichero de datos de AEMET
+   (necesitan credenciales) y cargador de Catastro (desde una IP residencial).
 5. **Cobertura con demanda real.** Hecho el 2026-10-01: portal de datos e instituto de estadística de Madrid,
    Cataluña (Idescat), Andalucía (IECA) y Comunitat Valenciana (IVE), y portales de los ayuntamientos de Madrid y
    Barcelona (10 fichas, con sus necesidades y códigos). Siguientes comunidades por tamaño solo cuando el propietario lo

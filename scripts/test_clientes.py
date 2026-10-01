@@ -20,12 +20,18 @@ M = DIR / "muestras"
 sys.path.insert(0, str(DIR))
 
 import aemet  # noqa: E402
+import arcgis  # noqa: E402
 import bdns  # noqa: E402
 import boe  # noqa: E402
+import ckan  # noqa: E402
 import datacomex  # noqa: E402
 import ine_tempus  # noqa: E402
+import ogc  # noqa: E402
+import pcaxis  # noqa: E402
 import placsp  # noqa: E402
 import saiku  # noqa: E402
+import sesion  # noqa: E402
+import socrata  # noqa: E402
 
 
 def _sin_red(*a, **k):
@@ -198,6 +204,124 @@ def placsp_feed_y_anulaciones():
     assert obra["importe_sin_iva"] == "98030.3" and obra["organo_dir3"]
     fechas = [e["updated"] for e in entradas]
     assert fechas == sorted(fechas, reverse=True)
+
+
+def respuesta(cuerpo: bytes, tipo: str = "application/json", estado: int = 200, url: str = "https://x.gob.es/a"):
+    r = requests.Response()
+    r.status_code, r._content, r.url = estado, cuerpo, url
+    r.headers["Content-Type"] = tipo
+    return r
+
+
+@test
+def sesion_texto_bloqueos_y_gzip():
+    import gzip
+    csv_ = (M / "pcaxis-ine-24077.csv").read_bytes()
+    r = respuesta(csv_, "text/plain;charset=ISO-8859-15")
+    r.encoding = "ISO-8859-15"
+    assert sesion.texto(r).startswith("Grupos COICOP 2011;") and "Índice general" in sesion.texto(r)  # BOM fuera, UTF-8
+    assert "Año;" in sesion.texto((M / "ckan-comunidad-madrid-padron.csv").read_bytes())  # Latin-1 real
+    assert sesion.contenido(respuesta(gzip.compress(b"[1]"))) == b"[1]"  # gzip sin Content-Encoding
+    assert sesion.contenido(respuesta(gzip.compress(b"x"), url="https://x.es/f.csv.gz")).startswith(b"\x1f\x8b")
+    assert sesion.json(respuesta(b'\xef\xbb\xbf{"a": 1}')) == {"a": 1}
+    try:
+        sesion.json(respuesta(b"<html>Error</html>", "text/html"))
+    except ValueError as e:
+        assert "no es JSON" in str(e)
+    else:
+        raise AssertionError("HTML con 200 tomado por JSON")
+    assert sesion.bloqueo(respuesta(b'<script src="/_Incapsula_Resource?x">', "text/html")) == (
+        sesion.BLOQUEOS[0][1], False)
+    assert sesion.bloqueo(respuesta("<h1>Acceso denegado</h1>".encode(), "text/html", 403))[1] is True
+    assert sesion.bloqueo(respuesta("<p>Acceso denegado a la sede</p>".encode(), "text/html", 200)) is None
+    assert sesion.bloqueo(respuesta(b'{"x": "Access Denied"}', "application/json", 403)) is None
+
+
+@test
+def ckan_errores_y_tope_silencioso():
+    for nombre, tipo in (("ckan-error-404.json", "Not Found Error"), ("ckan-renfe-fl-409.json", "Validation Error")):
+        try:
+            ckan.resultado(js(nombre), "x")
+        except ckan.ErrorCkan as e:
+            assert tipo in str(e)
+        else:
+            raise AssertionError(nombre)
+    res = ckan.resultado(js("ckan-cnmc-datastore-tope.json"))
+    assert res["limit"] == 32000 and res["total"] == 75553 and res["_links"]["next"].startswith("//api/3/")
+    # paginar con un portal falso que recorta a 3 filas lo que se pida: hay que llegar a total sin perder filas
+    datos = list(range(10))
+    original = ckan.accion
+
+    def falso(portal, nombre, **params):
+        lote = datos[params["offset"]:params["offset"] + min(params["limit"], 3)]
+        return {"records": [{"_id": i} for i in lote], "total": len(datos)}
+    ckan.accion = falso
+    try:
+        assert [f["_id"] for f in ckan.filas("x", "r", por_pagina=50)] == datos
+    finally:
+        ckan.accion = original
+
+
+@test
+def ckan_host_interno_y_csv():
+    r = js("ckan-andalucia-package-show.json")["result"]["resources"][0]
+    assert "gdc-pdpopendata" in r["url"] and ckan.url_descarga(r).startswith("https://www.juntadeandalucia.es/datosabiertos/portal/")
+    assert ckan.contar_csv((M / "ckan-comunidad-madrid-padron.csv").read_bytes()) == 3  # Latin-1, ; y CRLF
+
+
+@test
+def socrata_tipos_y_errores():
+    m = js("socrata-gn9e-3qhr.json")
+    filas = socrata.tipar(m["body"], dict(zip(m["x-soda2-fields"], m["x-soda2-types"])))
+    assert filas[0]["nivell_absolut"] == 210.93 and isinstance(filas[0]["dia"], str)
+    assert socrata.tipar([{"n": "90751"}], {"n": "number"})[0]["n"] == 90751
+    assert socrata._soql({"where": "a=1", "limit": 5, "estaci": "x"}) == {"$where": "a=1", "$limit": 5, "estaci": "x"}
+    assert js("socrata-error-404.json")["code"] == "dataset.missing"
+
+
+@test
+def pcaxis_urls_numeros_y_csv():
+    ed = "https://estadisticas.educacion.gob.es/EducaJaxiPx"
+    assert pcaxis.url_csv(24077) == "https://www.ine.es/jaxiT3/files/t/es/csv_bdsc/24077.csv?nocab=1"
+    assert pcaxis.url_csv("https://www.ine.es/jaxiT3/Tabla.htm?t=24077&L=0") == pcaxis.url_csv("24077")
+    assert pcaxis.url_csv(f"{ed}/Tabla.htm?path=/no-universitaria/adultos/l0/&amp;file=adul_01.px&amp;L=0") == (
+        f"{ed}/files/_px/es/csv_bdsc/no-universitaria/adultos/l0/adul_01.px?nocab=1")
+    assert pcaxis.url_csv("https://www.ine.es/jaxi/Tabla.htm?path=/t20/e245/p08/l0/&file=01002.px") == (
+        "https://www.ine.es/jaxi/files/_px/es/csv_bdsc/t20/e245/p08/l0/01002.px?nocab=1")
+    assert pcaxis.url_csv(pcaxis.url_csv(24077), "px").endswith("/px/24077.px?nocab=1")
+    assert pcaxis.numero("197.079") == 197079 and pcaxis.numero("926,6") == 926.6 and pcaxis.numero("..") is None
+    assert pcaxis.periodo_iso("2026M09") == "2026-09" and pcaxis.periodo_iso("2025T3") == "2025-Q3"
+    ine = pcaxis.leer((M / "pcaxis-ine-24077.csv").read_bytes())
+    assert ine[0]["Total"] is None and ine[1]["Total"] == 104.638 and ine[0]["Grupos COICOP 2011"] == "Índice general"
+    cul = pcaxis.leer((M / "pcaxis-cultura-T1FM1001.csv").read_bytes())
+    assert cul[0]["Total"] == 926.6 and cul[0]["periodo"].startswith("De 2025-3T")
+
+
+@test
+def arcgis_oid_fechas_y_error_200():
+    info = js("arcgis-igme-capa.json")
+    assert info["objectIdField"] is None and arcgis.campo_oid(info) == "FID"
+    assert info["advancedQueryCapabilities"]["supportsPagination"] is False
+    assert js("arcgis-igme-sin-paginacion.json")["error"]["message"] == "Pagination is not supported."
+    c = js("arcgis-cobertura-28079.json")
+    a = arcgis.fechas_iso(dict(c["features"][0]["attributes"]), c)
+    assert a["cod_munici"] == "28079" and a["fecha"].startswith("2025-06-30")
+
+
+@test
+def ogc_next_y_tope():
+    p = js("ogc-sigpac-recintos-tope.json")
+    nxt = ogc.siguiente(p)
+    assert p["numberReturned"] == 250 and "limit=250" in nxt and "offset=250" in nxt  # se pidió limit=1000
+    paginas = {"u0": {"features": [1, 2], "links": [{"rel": "next", "href": "u1"}]},
+               "u1": {"features": [3], "links": [{"rel": "next", "href": "u1"}]}}  # next repetido: parar
+    original = ogc.json
+    ogc._S = type("S", (), {"get": lambda self, url, params=None: url})()
+    ogc.json = paginas.__getitem__
+    try:
+        assert list(ogc.entidades("u0")) == [1, 2, 3]
+    finally:
+        ogc.json, ogc._S = original, None
 
 
 def main() -> int:

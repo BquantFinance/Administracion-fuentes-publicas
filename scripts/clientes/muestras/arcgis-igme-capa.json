@@ -1,0 +1,46 @@
+{
+ "name": "Catálogo de terremotos IGN-UPM 2013",
+ "objectIdField": null,
+ "maxRecordCount": 1000,
+ "fields": [
+  {
+   "name": "FID",
+   "type": "esriFieldTypeOID",
+   "alias": "FID",
+   "domain": null
+  },
+  {
+   "name": "Shape",
+   "type": "esriFieldTypeGeometry",
+   "alias": "Shape",
+   "domain": null
+  },
+  {
+   "name": "EVID",
+   "type": "esriFieldTypeDouble",
+   "alias": "EVID",
+   "domain": null
+  },
+  {
+   "name": "AÑO",
+   "type": "esriFieldTypeDouble",
+   "alias": "AÑO",
+   "domain": null
+  },
+  {
+   "name": "MES",
+   "type": "esriFieldTypeDouble",
+   "alias": "MES",
+   "domain": null
+  },
+  {
+   "name": "DIA",
+   "type": "esriFieldTypeDouble",
+   "alias": "DIA",
+   "domain": null
+  }
+ ],
+ "advancedQueryCapabilities": {
+  "supportsPagination": false
+ }
+}

@@ -11,6 +11,9 @@ license = "CC0-1.0"
 requires-python = ">=3.10"
 dependencies = ["mcp>=1.0", "pyyaml>=6.0"]
 
+[project.optional-dependencies]
+clientes = ["requests>=2.31", "certifi>=2024.2"]
+
 [project.urls]
 Repository = "https://github.com/BquantFinance/Administracion-fuentes-publicas"
 Documentation = "https://github.com/BquantFinance/Administracion-fuentes-publicas/blob/main/guides/servidor-mcp.md"

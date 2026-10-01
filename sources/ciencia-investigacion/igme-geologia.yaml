@@ -51,7 +51,7 @@ gotchas:
   - GEODE 50 tiene 10 capas; las unidades están en la 8 (Recintos geología) y el Cuaternario en la 6; la consulta por punto en la 6 devuelve vacío fuera de recintos cuaternarios.
   - VRF_MAGNA50_{hoja}.zip no es vectorial; trae un JPG georreferenciado (jgw y aux.xml) en geográficas ED50. Los vectores MAGNA están en el servicio IGME_MAGNA_50.
   - Las hojas se numeran por MTN50 (NUM 1 a 1120, 1.114 hojas) con sufijo B o C en las bis (Id=91B da VRF_MAGNA50_91B.zip y MMagna0091B.pdf); un Id sin hoja (1120) da 200 sin enlaces.
-  - IGME_ZESIS_CatalogoTerremotos responde 400 «Pagination is not supported» a resultOffset y 400 a outStatistics; trocear por FID (1.000 por consulta) o por AÑO codificado (A%C3%91O).
+  - IGME_ZESIS_CatalogoTerremotos da HTTP 200 con error 400 «Pagination is not supported» a resultOffset; trocear por FID o pedir returnIdsOnly y objectIds por POST (1.000 ids en GET dan error de IIS).
   - Provincia en puntos de agua usa nombres oficiales bilingües (Alacant/Alicante, Araba/Álava, València/Valencia) y no hay puntos en Canarias; Expr1 y Expr2 son X e Y UTM ETRS89 del huso HUSO.
   - URLDetalle (info.igme.es/bdaguas/PointInfo.aspx?id=) responde 404 por http y por https (01/10/2026); la ficha del punto solo se ve en la aplicación BDAguas.
   - info.igme.es y /cartografiadigital/ redirigen por JavaScript (window.location), no por HTTP; /catalogo/default.aspx dio una vez 500 «Timeout expired» y 200 al reintentar.

@@ -17,7 +17,7 @@ Catálogo de fuentes de datos de la Administración pública española para desa
 
 - **Agente con MCP** (Claude, Cursor y cualquier cliente MCP): `uvx --from git+https://github.com/BquantFinance/Administracion-fuentes-publicas mcp-catalogo`, o [![Instalar en Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/link/mcp/install?name=catalogo-fuentes-publicas&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJnaXQraHR0cHM6Ly9naXRodWIuY29tL0JxdWFudEZpbmFuY2UvQWRtaW5pc3RyYWNpb24tZnVlbnRlcy1wdWJsaWNhcyIsIm1jcC1jYXRhbG9nbyJdfQ%3D%3D). Carga solo la ficha que hace falta ([guía](guides/servidor-mcp.md)).
 - **Agente sin MCP**: [`llms-min.txt`](llms-min.txt) (7 KB) o [`llms.txt`](llms.txt); todo el catálogo en [`catalog.json`](catalog.json) o [`llms-full.txt`](llms-full.txt).
-- **Código**: cargadores en Python que ya resuelven las trampas en [`scripts/clientes/`](scripts/clientes/) (BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex, Saiku), probados contra respuestas reales.
+- **Código**: [`scripts/clientes/`](scripts/clientes/), en Python: una sesión HTTP que ya trae las CA de FNMT, User-Agent de navegador, reintentos y detección de bloqueos de WAF; clientes para CKAN, Socrata, PC-Axis, ArcGIS REST y OGC API que paginan sin topes silenciosos; y cargadores de BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex y Saiku. Probados contra respuestas reales.
 
 ## Lo que no dice la documentación oficial
 
@@ -85,7 +85,7 @@ llms.txt / llms-full.txt     entrada para agentes (generado)
 indices/*.yaml               recetas por intención, necesidades, identificadores, códigos que son parámetros, rutas muertas (fuente de verdad)
 indices/README.md            los cinco índices en texto (generado)
 scripts/                     validate.py, build.py, check_links.py, check_recetas.py, check_ejemplos.py, fnmt_bundle.py, mcp_catalogo.py (servidor MCP local)
-scripts/clientes/            cargadores en Python que resuelven las trampas (BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex, Saiku)
+scripts/clientes/            sesión HTTP, clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC, y cargadores (BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex, Saiku)
 scripts/clientes/muestras/   respuestas reales recortadas para probar los parsers sin red (python scripts/test_clientes.py)
 evals/                       20 tareas con respuesta esperada para medir lo que aporta el repo a un agente
 templates/source.yaml        plantilla de ficha
@@ -100,6 +100,17 @@ curl -s https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-p
 
 # Fuentes de un sector con API REST y sin autenticación
 curl -s .../catalog.json | jq '.sources[] | select(.sector=="economia-finanzas" and (.access|index("api-rest")) and .auth=="none") | .id'
+```
+
+```python
+# pip install "fuentes-publicas-mcp[clientes] @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas"
+from fuentes_publicas.clientes import ckan, socrata, pcaxis, arcgis, ogc
+from fuentes_publicas.clientes.sesion import sesion  # requests.Session con FNMT, User-Agent, reintentos y bloqueos
+
+pcaxis.tabla(24077)[:3]                 # IPC del INE en CSV: UTF-8 real, coma decimal y periodo sin dato como None
+list(socrata.filas("gn9e-3qhr"))        # 87.930 filas de la Generalitat, no las 1.000 que da Socrata sin $limit
+list(ckan.filas("cnmc", rid))           # todas las filas del datastore aunque el portal recorte limit a 32.000
+ckan.comparar("comunidad-madrid", rec)  # el datastore del padrón tiene 5.000 filas; el CSV, 18.718
 ```
 
 ## Índices para agentes

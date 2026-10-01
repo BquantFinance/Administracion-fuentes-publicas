@@ -1,0 +1,94 @@
+{
+ "help": "https://catalogodatos.cnmc.es/api/3/action/help_show?name=datastore_search",
+ "success": true,
+ "result": {
+  "include_total": true,
+  "limit": 32000,
+  "records_format": "objects",
+  "resource_id": "b5a89db0-239f-4c8a-bd98-6575858359ae",
+  "total_estimation_threshold": null,
+  "records": [
+   {
+    "_id": 1,
+    "fecha_precio": "2023-01-01",
+    "provincia": "Albacete",
+    "producto": "Gasolina 95 E5",
+    "promedio_de_pai_diario_cubo": 0.859,
+    "promedio_de_pvp_diario_cubo": 1.611
+   },
+   {
+    "_id": 2,
+    "fecha_precio": "2023-01-01",
+    "provincia": "Albacete",
+    "producto": "Gasolina 98 E5",
+    "promedio_de_pai_diario_cubo": 0.967,
+    "promedio_de_pvp_diario_cubo": 1.779
+   },
+   {
+    "_id": 3,
+    "fecha_precio": "2023-01-01",
+    "provincia": "Albacete",
+    "producto": "Gasóleo A habitual",
+    "promedio_de_pai_diario_cubo": 1.022,
+    "promedio_de_pvp_diario_cubo": 1.695
+   }
+  ],
+  "fields": [
+   {
+    "id": "_id",
+    "type": "int"
+   },
+   {
+    "id": "fecha_precio",
+    "type": "text",
+    "info": {
+     "label": "Fecha Precio",
+     "notes": "atributo",
+     "type_override": ""
+    }
+   },
+   {
+    "id": "provincia",
+    "type": "text",
+    "info": {
+     "label": "Provincia",
+     "notes": "atributo",
+     "type_override": ""
+    }
+   },
+   {
+    "id": "producto",
+    "type": "text",
+    "info": {
+     "label": "Producto",
+     "notes": "atributo",
+     "type_override": ""
+    }
+   },
+   {
+    "id": "promedio_de_pai_diario_cubo",
+    "type": "numeric",
+    "info": {
+     "label": "Promedio de Pai Diario CUBO €/litro",
+     "notes": "indicador",
+     "type_override": ""
+    }
+   },
+   {
+    "id": "promedio_de_pvp_diario_cubo",
+    "type": "numeric",
+    "info": {
+     "label": "Promedio de Pvp Diario CUBO €/litro",
+     "notes": "indicador",
+     "type_override": ""
+    }
+   }
+  ],
+  "_links": {
+   "start": "//api/3/action/datastore_search?resource_id=b5a89db0-239f-4c8a-bd98-6575858359ae&limit=50000",
+   "next": "//api/3/action/datastore_search?resource_id=b5a89db0-239f-4c8a-bd98-6575858359ae&limit=50000&offset=32000"
+  },
+  "total": 75553,
+  "total_was_estimated": false
+ }
+}

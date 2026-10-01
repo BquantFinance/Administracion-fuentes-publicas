@@ -48,6 +48,7 @@ gotchas:
   - estaciones.csv cubre las 1.006 paradas del GTFS de AV y LD (stop_id igual a CODIGO) pero solo 642 de las 1.139 de Cercanías; para el resto usar stop_lat y stop_lon del GTFS.
   - Los datasets de viajeros por franja (año 2018, sin columna de fecha), estaciones por núcleo y fichas de trenes no cambian desde 2020-2021; compromiso-puntualidad son las indemnizaciones, no la puntualidad.
   - En AV y LD las horas van sin cero inicial (8:30:00) y algunas pasan de 24:00; el trip_id es número de tren, un dígito y fecha de inicio (0019012026-10-01).
+  - El CKAN 2.8 de Renfe rechaza fl=name,title en package_search con Validation Error «No es una lista» (otros CKAN lo aceptan); repetir el parámetro, fl=name&fl=title (1-10-2026).
   - No localicé portal de datos abiertos de Adif (data.adif.es no responde y adif.es/datos-abiertos da 404 el 1-10-2026).
 tips:
   - "gtfs_kit.read_feed(zip, dist_units='km') lee el GTFS de AV y LD sin tocarlo (recorta el relleno y deja stop_id como texto); para geometría de estaciones basta estaciones.csv en WGS84."

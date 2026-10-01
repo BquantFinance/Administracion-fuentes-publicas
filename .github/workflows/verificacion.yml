@@ -67,6 +67,11 @@ jobs:
           ejecutar scripts/clientes/ine_tempus.py 02001
           ejecutar scripts/clientes/saiku.py
           ejecutar scripts/clientes/placsp.py 1
+          ejecutar scripts/clientes/ckan.py
+          ejecutar scripts/clientes/socrata.py
+          ejecutar scripts/clientes/pcaxis.py
+          ejecutar scripts/clientes/arcgis.py
+          ejecutar scripts/clientes/ogc.py
           if [ -n "$AEMET_KEY" ]; then ejecutar scripts/clientes/aemet.py 16078; else echo "AEMET sin clave: omitido" >> cargadores-report.md; fi
           cat cargadores-report.md
           echo "exit=$fallos" >> "$GITHUB_OUTPUT"

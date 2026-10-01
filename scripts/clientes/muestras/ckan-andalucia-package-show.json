@@ -1,0 +1,91 @@
+{
+ "success": true,
+ "result": {
+  "author": "",
+  "author_email": "",
+  "creator_user_id": "52d4643d-891d-4684-b9f3-1ff3a36fb825",
+  "field_activity_sector": [
+   "Educación"
+  ],
+  "field_create_date": "2021/08/01",
+  "field_create_metadata_date": "1700/01/01",
+  "field_geographic_coverage": [
+   "Andalucía"
+  ],
+  "field_hvd_category": [],
+  "field_is_hvd_int": "",
+  "field_related_inf": "",
+  "field_update_date": "2025/10/22",
+  "field_update_frecuency": [
+   "Anual"
+  ],
+  "id": "b2b4a3f6-690e-4e0e-b2ab-50e3da65c08b",
+  "isopen": true,
+  "license_id": "CC-BY-4.0",
+  "license_title": "Reconocimiento 4.0 Internacional (CC BY 4.0)",
+  "license_url": "http://creativecommons.org/licenses/by/4.0/deed.es_ES",
+  "maintainer": "",
+  "maintainer_email": "",
+  "metadata_created": "2018-02-26T15:40:04.610577",
+  "metadata_modified": "2026-08-11T12:19:16.224411",
+  "name": "plantillas-organicas-de-centros-docentes-publicos",
+  "notes": "Información de las plantillas orgánicas de los centros docentes públicos dependi",
+  "num_resources": 4,
+  "num_tags": 4,
+  "organization": {
+   "id": "676e58a7-475f-4278-b6ef-c1c547eb577b",
+   "name": "educacion",
+   "title": "Educación",
+   "type": "organization",
+   "description": "Conjuntos de datos de la Consejería de Educación",
+   "image_url": "2026-08-11-103934.705669Datos-abiertos---CE-1.png",
+   "created": "2026-08-11T10:39:34.717406",
+   "is_organization": true,
+   "approval_status": "approved",
+   "state": "active"
+  },
+  "owner_org": "676e58a7-475f-4278-b6ef-c1c547eb577b",
+  "private": false,
+  "state": "active",
+  "title": "Plantillas orgánicas de centros docentes públicos",
+  "type": "dataset",
+  "url": "",
+  "version": "",
+  "resources": [
+   {
+    "cache_last_updated": null,
+    "cache_url": null,
+    "created": "2018-02-26T16:42:28.992264",
+    "datastore_active": true,
+    "description": "",
+    "format": "CSV",
+    "hash": "",
+    "id": "a639f1f4-c949-421f-887d-65496d9d69dd",
+    "last_modified": "2025-10-22T06:47:14.320034",
+    "metadata_modified": "2025-10-22T06:47:14.384054",
+    "mimetype": "text/csv",
+    "mimetype_inner": null,
+    "name": "CSV - Curso 2025/2026 - Plantillas orgánicas de los centros docentes públicos",
+    "package_id": "b2b4a3f6-690e-4e0e-b2ab-50e3da65c08b",
+    "position": 0,
+    "resource_type": null,
+    "size": 4410802,
+    "state": "active",
+    "url": "https://gdc-pdpopendata-ckan.paas.junta-andalucia.es/datosabiertos/portal/dataset/b2b4a3f6-690e-4e0e-b2ab-50e3da65c08b/resource/a639f1f4-c949-421f-887d-65496d9d69dd/download/plantilla_organica_2025_2026.csv",
+    "url_type": "upload"
+   }
+  ],
+  "tags": [
+   {
+    "display_name": "centros educativos",
+    "id": "0af722ed-e36f-4e42-915c-a5ea89934d1f",
+    "name": "centros educativos",
+    "state": "active",
+    "vocabulary_id": null
+   }
+  ],
+  "groups": [],
+  "relationships_as_subject": [],
+  "relationships_as_object": []
+ }
+}

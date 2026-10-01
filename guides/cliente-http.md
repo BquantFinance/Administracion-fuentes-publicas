@@ -4,6 +4,15 @@ Arreglos verificados con llamadas reales el 2026-09-30. Cada ficha indica en `qu
 documento da el arreglo copiable para cada uno. Filtrar `catalog.json` por `quirks` permite configurar el cliente
 antes de la primera petición.
 
+En Python todo esto ya está hecho en `scripts/clientes/sesion.py` (instalable con
+`pip install "fuentes-publicas-mcp[clientes] @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas"`):
+`sesion()` devuelve una `requests.Session` con las CA de FNMT (genera `ca-age.pem` en `~/.cache/fuentes-publicas` la
+primera vez y lo pasa en cada petición aunque `REQUESTS_CA_BUNDLE` esté definido), User-Agent de navegador, reintentos
+con espera ante 429, 5xx, cortes y 403 intermitentes, y la excepción `Bloqueado` ante páginas de Incapsula, Akamai,
+F5, Anubis o el bloqueo por IP del Catastro, que no reintenta. `texto()` y `json()` resuelven BOM, UTF-8 con cabecera
+ISO-8859-15, Latin-1 real y gzip sin anunciar. Encima, `ckan`, `socrata`, `pcaxis`, `arcgis` y `ogc` paginan sin
+topes silenciosos.
+
 ## tls-chain-incomplete: certificados FNMT sin intermedio
 
 Muchos servidores públicos (airef.es, tesoro.es, registrodelicitadores.gob.es, energia.gob.es, mites.gob.es,
