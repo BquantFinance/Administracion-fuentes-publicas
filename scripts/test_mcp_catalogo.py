@@ -16,7 +16,7 @@ from mcp.client.stdio import stdio_client
 ROOT = Path(__file__).resolve().parent.parent
 SERVER = ROOT / "scripts" / "mcp_catalogo.py"
 TOOLS = {"buscar_fuentes", "ficha", "buscar_recetas", "receta", "necesidad", "identificador", "ruta_muerta", "sectores", "codigos", "municipio", "descargar", "tabla_pcaxis", "boe_sumario",
-         "subvenciones_nif", "ckan_buscar", "ckan_filas", "socrata_filas"}
+         "subvenciones_nif", "empresa_nif", "ckan_buscar", "ckan_filas", "socrata_filas"}
 
 
 def payload(result):
@@ -96,6 +96,9 @@ async def main() -> None:
             assert d["estado"] == 200 and d["formato"] == "json" and d["fichas"][0]["id"].startswith("boe"), d
             px = payload(await session.call_tool("tabla_pcaxis", {"tabla": "24077", "max_filas": 2}))
             assert px["columnas"][-1] == "Total" and px["filas"], px
+            emp = payload(await session.call_tool("empresa_nif", {"nif": "Q1132001G", "max_filas": 1}))
+            assert emp["sector_publico"]["codigoDir3"] == "U00500001" and emp["aei"]["total"] > 0, emp.get("error", emp.keys())
+            print(f"empresa_nif('Q1132001G'): {emp['nombre']}, {emp['subvenciones']['concesiones']['total']} concesiones, {emp['aei']['total']} ayudas AEI")
             bloq = payload(await session.call_tool("descargar", {"url": "http://localhost:8080/"}))
             assert "error" in bloq, bloq
             print(f"descargar: {d['formato']} con fichas {[f['id'] for f in d['fichas']][:2]}; tabla_pcaxis 24077: {px['filas'][0]}")

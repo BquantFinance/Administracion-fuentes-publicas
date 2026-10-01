@@ -204,9 +204,12 @@ Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
 - Hecho el 2026-10-01 (segunda sesión): 17 alertas reescritas con la operación exacta y un ejemplo numérico comprobado
   ese día (IGAE, Trabajo, SEPE, Seguridad Social, BdE, GBIF, IGN, INE, CNMC, BDNS, Comunidad de Madrid, FACe, IVE,
   Junta); las demás ya lo decían. En Trabajo, el fichero de cada mes revisa los anteriores (julio 563 o 562 convenios).
-- Siguiente trabajo, en este orden: (2) perfil de empresa por NIF (BDNS ya, contratos de PLACSP, deudores
-  de la AEAT, concursos del BOE y del Registro Público Concursal, BORME por denominación; la lista de deudores no se
-  localizó aún en la sede el 2026-10-01); (3) guía de reutilización comercial y datos personales por fuente, con las
+- Hecho el 2026-10-01 (segunda sesión): perfil de empresa por NIF (`consulta.empresa_nif`, herramienta MCP y
+  `ejemplos/empresa_nif.py`) con Invente, BDNS, AEI y prohibiciones de contratar por denominación. La lista de deudores
+  de la AEAT deja de ser accesible a los tres meses por ley (art. 95 bis LGT; la de 2026 daba 404 el 01/10) y el
+  Registro Público Concursal exige CAPTCHA: anotados en necesidades, sin automatizar. Contratos y BORME por NIF o
+  denominación necesitan el almacén (punto 5).
+- Siguiente trabajo, en este orden: (3) guía de reutilización comercial y datos personales por fuente, con las
   normas leídas en el BOE; (4) histórico y sincronización de las fuentes clave (desde cuándo, cómo bajarlo todo, cuánto
   ocupa medido, cómo detectar lo nuevo); (5) almacén en Parquet o DuckDB con GitHub Actions listo para clonar. Del
   propietario: release v0.3.0, ronda desde una IP residencial, token de DataComex y más comunidades cuando lo decida.

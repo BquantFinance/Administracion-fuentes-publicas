@@ -286,5 +286,67 @@ def buscar_municipio(consulta: str, limite: int = 5, filas: list[dict] | None = 
     return [nombres[n] for n in difflib.get_close_matches(nq, list(nombres), n=limite, cutoff=0.75)]
 
 
+INVENTE = "https://www.pap.hacienda.gob.es/Invente2/api/EntidadesSPI_ConFiltros"
+AEI_CSV = "https://www.aei.gob.es/ayudas-concedidas/buscador-ayudas-concedidas/download-unlimit/All/All/All/All"
+PROHIBICIONES = "https://visor.registrodelicitadores.gob.es/svcr/controller/prohibiciones"
+FORMAS = r"\b(S ?L ?U?|S ?A ?U?|S ?L ?L|S ?COOP(?: ?AND| ?V)?|SOCIEDAD (?:LIMITADA|ANONIMA)(?: UNIPERSONAL)?|SLNE|S ?C ?P?|C ?B)\b"
+
+
+def normalizar_nombre(s: str) -> str:
+    """Denominación comparable: sin tildes ni signos y sin forma jurídica (S.L., SA, S. COOP...)."""
+    import re
+    import unicodedata
+    s = unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode().upper()
+    s = re.sub(r"[^A-Z0-9 ]+", " ", s)
+    s = re.sub(FORMAS, " ", " ".join(s.split()))
+    return " ".join(s.split())
+
+
+def _numero_es(v: str) -> float:
+    return float(v.replace(".", "").replace(",", ".")) if v and v.strip() else 0.0
+
+
+def empresa_nif(nif: str, max_filas: int = 10) -> dict:
+    """Lo que las fuentes públicas dicen de un NIF sin certificado: si es sector público (Invente), subvenciones,
+    ayudas de Estado y minimis (BDNS), ayudas de la AEI y prohibiciones de contratar vigentes (por denominación, porque
+    el XML oculta el NIF). Contratos y actos del BORME no tienen consulta por NIF: ver no_cubierto."""
+    import xml.etree.ElementTree as ET
+    nif = nif.upper().strip()
+    out: dict = {"nif": nif}
+    r = _sesion().get(INVENTE, params={"nif": nif})
+    entes = _json.loads(texto(r)).get("EntidadesSPI", []) if r.status_code == 200 and r.content.strip() else []
+    out["sector_publico"] = entes[0] if entes else None
+    out["subvenciones"] = subvenciones_nif(nif, max_filas)
+    nombre = entes[0]["DenominacionSocial"] if entes else None
+    for col in ("concesiones", "ayudasestado", "minimis"):
+        filas = out["subvenciones"][col]["filas"]
+        if not nombre and filas and filas[0].get("beneficiario"):
+            nombre = bdns.separar_beneficiario(filas[0]["beneficiario"])[1]
+    aei = list(csv.DictReader(io.StringIO(texto(_sesion().get(AEI_CSV, params={"cif": nif}))), delimiter=";"))
+    aei = [f for f in aei if (f.get("C.I.F.") or "").strip().upper() == nif]
+    if not nombre and aei:
+        nombre = aei[0].get("Entidad")
+    out["nombre"] = nombre
+    out["aei"] = {"total": len(aei), "importe_total": round(sum(_numero_es(f.get("€ Conced.", "")) for f in aei), 2),
+                  "filas": aei[:max_filas]}
+    prohibiciones = []
+    if nombre:
+        clave = normalizar_nombre(nombre)
+        raiz = ET.fromstring(contenido(_sesion().get(PROHIBICIONES)))
+        for p in raiz:
+            d = {c.tag: (c.text or "").strip() for c in p}
+            if normalizar_nombre(d.get("denominacionSocial", "")) == clave:
+                prohibiciones.append({k: d.get(k) for k in ("denominacionSocial", "causaProhibicion", "ambitoProhibicion",
+                                                            "autoridad", "fechaInicioProhibicion", "fechaFinProhibicion")})
+    out["prohibiciones_contratar"] = prohibiciones
+    out["no_cubierto"] = {
+        "contratos": "PLACSP no tiene búsqueda por NIF: filtrar adjudicatarios (cbc:ID schemeName NIF) en los ZIP mensuales (ficha placsp-datos-abiertos)",
+        "borme": "el BORME no trae NIF ni búsqueda: recorrer los BORME-A por denominación (ficha borme-api-sumario)",
+        "concursos": "publicidadconcursal.es busca por NIF, pero exige resolver un CAPTCHA",
+        "deudores_aeat": "la lista del art. 95 bis LGT (deudas de más de 600.000 €) solo es accesible tres meses tras publicarse, en junio",
+    }
+    return out
+
+
 if __name__ == "__main__":
     print(_json.dumps(descargar(sys.argv[1], 2000), ensure_ascii=False, indent=1, default=str))

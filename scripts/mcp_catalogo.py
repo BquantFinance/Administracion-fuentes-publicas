@@ -60,7 +60,7 @@ INSTRUCTIONS = (
     "que cambian la cifra sin dar error); buscar_recetas y receta para "
     "procedimientos que cruzan fuentes; identificador para cruzar datos; municipio para los códigos INE, SIGPAC o "
     "Catastro, DIR3, NUTS3 y coordenadas de un municipio; descargar, tabla_pcaxis, boe_sumario, subvenciones_nif, "
-    "ckan_buscar, ckan_filas y socrata_filas traen los datos ya resueltos (certificados, codificación, paginación); ruta_muerta antes de dar por perdida "
+    "empresa_nif, ckan_buscar, ckan_filas y socrata_filas traen los datos ya resueltos (certificados, codificación, paginación); ruta_muerta antes de dar por perdida "
     "una URL. Lee el recurso catalogo://reglas antes de programar contra una fuente."
 )
 
@@ -358,6 +358,14 @@ def subvenciones_nif(nif: str, max_filas: int = 20) -> dict:
     """Subvenciones, ayudas de Estado, minimis y grandes beneficiarios de un NIF en la BDNS, con totales y las más
     recientes."""
     return _datos(_consulta().subvenciones_nif, nif, max_filas)
+
+
+@mcp.tool()
+def empresa_nif(nif: str, max_filas: int = 10) -> dict:
+    """Lo público de una empresa o entidad por NIF sin certificado: si es sector público (Invente, con DIR3),
+    subvenciones, ayudas de Estado y minimis (BDNS), ayudas de la AEI y prohibiciones de contratar vigentes (por
+    denominación). no_cubierto dice dónde mirar contratos, BORME, concursos y deudores."""
+    return _datos(_consulta().empresa_nif, nif, max_filas)
 
 
 @mcp.tool()

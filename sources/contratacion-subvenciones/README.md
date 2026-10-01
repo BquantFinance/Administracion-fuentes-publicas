@@ -5,6 +5,7 @@ Sector `contratacion-subvenciones` · 3 fuentes · índice generado por `scripts
 ## Dónde está cada cosa
 
 - Licitaciones, adjudicaciones y contratos menores de todas las Administraciones → `placsp-datos-abiertos`
+- Todo lo público de una empresa o entidad por su NIF (ayudas, si es sector público, prohibiciones de contratar) → `bdns-api` (herramienta empresa_nif del MCP o consulta.empresa_nif (BDNS, AEI, Invente y prohibiciones por denominación); contratos y BORME no tienen consulta por NIF)
 - Convocatorias y concesiones de subvenciones, ayudas de Estado, minimis, grandes beneficiarios → `bdns-api`
 - Empresas clasificadas para contratar (ROLECE) → `hacienda-registro-licitadores` (solo con certificado electrónico)
 - Prohibiciones de contratar vigentes → `hacienda-registro-licitadores` (XML público del visor del ROLECE; el NIF va oculto, cruzar por nombre)

@@ -80,6 +80,8 @@ añadir a la configuración del cliente `"env": {"EXTRA_CA_BUNDLE": "/ruta/ca-de
   filas con números convertidos; filtro por texto en cualquier campo (08019, un nombre, un periodo).
 - `boe_sumario(fecha, diario="boe", seccion=None, texto=None)`: disposiciones del día del BOE o del BORME.
 - `subvenciones_nif(nif)`: concesiones, ayudas de Estado, minimis y grandes beneficiarios de un NIF en la BDNS.
+- `empresa_nif(nif)`: perfil público de un NIF: si es sector público (Invente, con DIR3), BDNS, ayudas de la AEI y
+  prohibiciones de contratar vigentes; `no_cubierto` dice dónde están contratos, BORME, concursos y deudores.
 - `ckan_buscar(portal, texto)` y `ckan_filas(portal, recurso, filtros=None, limite=100)`: portales CKAN (comunidad-madrid,
   madrid, barcelona, gva, andalucia, cnmc, renfe o la URL de su API), paginando sin topes y con el total del datastore.
 - `socrata_filas(conjunto, where=None, select=None, order=None, limite=100)`: datos de la Generalitat de Catalunya.

@@ -78,6 +78,15 @@
   source: ine-api-tempus
 - need: Licitaciones, adjudicaciones y contratos menores de todas las Administraciones
   source: placsp-datos-abiertos
+- need: Todo lo público de una empresa o entidad por su NIF (ayudas, si es sector público, prohibiciones de contratar)
+  source: bdns-api
+  note: herramienta empresa_nif del MCP o consulta.empresa_nif (BDNS, AEI, Invente y prohibiciones por denominación); contratos y BORME no tienen consulta por NIF
+- need: Deudores con Hacienda de más de 600.000 € (lista del artículo 95 bis LGT)
+  source: null
+  note: la AEAT la publica en su sede en junio y por ley deja de ser accesible a los tres meses y no debe indexarse; el 01/10/2026 la de 2026 ya daba 404
+- need: Concursos de acreedores de una empresa por NIF
+  source: null
+  note: publicidadconcursal.es busca por NIF pero exige resolver un CAPTCHA (no automatizable); los edictos de los juzgados de lo mercantil salen en la sección IV del BOE, sin búsqueda por NIF en la API
 - need: Convocatorias y concesiones de subvenciones, ayudas de Estado, minimis, grandes beneficiarios
   source: bdns-api
 - need: Beneficiarios de la PAC

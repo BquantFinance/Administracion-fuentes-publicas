@@ -88,6 +88,10 @@
       "description": "Subvenciones, ayudas de Estado y minimis de un NIF en la BDNS"
     },
     {
+      "name": "empresa_nif",
+      "description": "Lo público de una empresa o entidad por NIF: sector público, subvenciones, ayudas de la AEI y prohibiciones de contratar"
+    },
+    {
       "name": "ckan_buscar",
       "description": "Conjuntos y recursos de los portales CKAN autonómicos, municipales y de la CNMC y Renfe"
     },

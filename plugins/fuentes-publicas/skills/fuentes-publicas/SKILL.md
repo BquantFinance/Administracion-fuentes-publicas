@@ -16,7 +16,7 @@ Catálogo verificado con llamadas reales: https://github.com/BquantFinance/Admin
    (acumulados desde enero, topes de filas sin aviso, datastores recortados, taxones o códigos que no son el esperado).
    Aplica la operación que indican antes de responder.
 3. Trae el dato. Con MCP: `descargar(url)` (certificados FNMT, codificación, bloqueos y resumen del CSV, JSON, xlsx o
-   ZIP), `tabla_pcaxis`, `boe_sumario`, `subvenciones_nif`, `ckan_buscar`, `ckan_filas`, `socrata_filas`, `municipio`.
+   ZIP), `tabla_pcaxis`, `boe_sumario`, `subvenciones_nif`, `empresa_nif`, `ckan_buscar`, `ckan_filas`, `socrata_filas`, `municipio`.
    En Python, los mismos clientes (abajo). Con curl, el `example` de cada endpoint de la ficha.
 4. Si cruzas fuentes, busca una receta (`buscar_recetas` o `.../main/indices/recetas.yaml`) y el identificador común
    (`identificador(id)`): suelen encadenar dos o tres fichas con un paso que no es obvio.
@@ -40,7 +40,7 @@ ine_tempus.id_municipio("28079")             # el INE filtra por Id interno (tv=
 ```
 
 Ejemplos que funcionan, en `ejemplos/` del repo: carburante más barato cerca, BOE del día filtrado, licitaciones nuevas
-por CPV, ficha de un municipio, subvenciones de una empresa por NIF.
+por CPV, ficha de un municipio, subvenciones y perfil público de una empresa por NIF.
 
 ## Reglas que evitan los fallos más comunes
 

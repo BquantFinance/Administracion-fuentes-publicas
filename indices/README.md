@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 145 necesidades, 21 identificadores, 23 grupos de códigos, 99 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 148 necesidades, 21 identificadores, 23 grupos de códigos, 99 rutas muertas.
 
 ## Recetas por intención
 
@@ -633,6 +633,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **Contratación pública y subvenciones**
 - Licitaciones, adjudicaciones y contratos menores de todas las Administraciones → `placsp-datos-abiertos`
+- Todo lo público de una empresa o entidad por su NIF (ayudas, si es sector público, prohibiciones de contratar) → `bdns-api` (herramienta empresa_nif del MCP o consulta.empresa_nif (BDNS, AEI, Invente y prohibiciones por denominación); contratos y BORME no tienen consulta por NIF)
 - Convocatorias y concesiones de subvenciones, ayudas de Estado, minimis, grandes beneficiarios → `bdns-api`
 - Empresas clasificadas para contratar (ROLECE) → `hacienda-registro-licitadores` (solo con certificado electrónico)
 - Prohibiciones de contratar vigentes → `hacienda-registro-licitadores` (XML público del visor del ROLECE; el NIF va oculto, cruzar por nombre)
@@ -770,6 +771,8 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **Sin fuente en el catálogo**
 - Cotizaciones bursátiles y precios de mercado (BME, OMIE) → ninguna (BME es privado y queda fuera del alcance; el precio de la electricidad de OMIE está en omie-mercado)
+- Deudores con Hacienda de más de 600.000 € (lista del artículo 95 bis LGT) → ninguna (la AEAT la publica en su sede en junio y por ley deja de ser accesible a los tres meses y no debe indexarse; el 01/10/2026 la de 2026 ya daba 404)
+- Concursos de acreedores de una empresa por NIF → ninguna (publicidadconcursal.es busca por NIF pero exige resolver un CAPTCHA (no automatizable); los edictos de los juzgados de lo mercantil salen en la sección IV del BOE, sin búsqueda por NIF en la API)
 - Estadística judicial y sentencias → ninguna (Poder Judicial (CGPJ, CENDOJ) fuera del alcance actual)
 - Ayuda oficial al desarrollo y acción exterior → ninguna (sin fuente en el catálogo todavía)
 - Extranjeros con certificado de registro o tarjeta de residencia, autorizaciones y protección internacional → ninguna (Observatorio Permanente de la Inmigración en inclusion.gob.es; el host respondió 403 (Akamai) a IP de centro de datos el 2026-09-30; verificar desde otra red)
