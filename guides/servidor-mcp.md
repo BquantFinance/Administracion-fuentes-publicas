@@ -71,8 +71,8 @@ Prueba real sin CI: `python scripts/test_mcp_catalogo.py` arranca el servidor po
 
 ## Registros
 
-- Registro oficial de MCP: `io.github.BquantFinance/catalogo-fuentes-publicas`, descrito en `server.json`. Al subir una
-  etiqueta `vX.Y.Z` (con la misma versión en `server.json`), `.github/workflows/publicar-mcp.yml` empaqueta `mcpb/` como
+- Registro oficial de MCP: `io.github.BquantFinance/catalogo-fuentes-publicas`, descrito en `server.json`. Al publicar
+  una release `vX.Y.Z` en GitHub (con la misma versión en `server.json`), `.github/workflows/publicar-mcp.yml` empaqueta `mcpb/` como
   `.mcpb` fijado a esa etiqueta, lo adjunta a una release de GitHub y publica la entrada en el registro por OIDC de GitHub:
   sin secretos ni cuentas externas. El registro admite paquetes MCPB alojados en releases de GitHub y exige su sha256, que
   el workflow calcula. PyPI es opcional (`uvx fuentes-publicas-mcp`, más corto) y exige al propietario una cuenta con 2FA.
