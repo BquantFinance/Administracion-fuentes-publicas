@@ -9,7 +9,7 @@ Fuentes: 85 · Generado: 2026-10-01 · Formato: un bloque por fuente; '!' marca 
 ## boe-api-legislacion-consolidada
 BOE – API de legislación consolidada | Agencia Estatal Boletín Oficial del Estado (AEBOE)
 summary: Textos consolidados de normas estatales y autonómicas por bloques (artículos, disposiciones) con todas las versiones de cada bloque, metadatos, análisis (materias, referencias) y vigencia. Listado filtrable por fecha de actualización, búsqueda por título y tablas auxiliares de códigos.
-access: api-rest | auth: none | formats: json, xml | update: daily | status: active | verified: 2026-09-30
+access: api-rest | auth: none | formats: json, xml | update: daily | status: active | verified: 2026-10-01
 coverage: Normas vigentes y derogadas desde 1978, algunas anteriores
 license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
 base_url: https://www.boe.es/datosabiertos/api/legislacion-consolidada
@@ -46,25 +46,26 @@ ids: boe-id, eli
 ! En query_string el término va con campo (titulo:vivienda); un término suelto devuelve vacío. En range, gte y lte son obligatorios en formato AAAAMMDD.
 ! from y to filtran por fecha_actualizacion (última modificación del consolidado), no por fecha de publicación; para eso usar range en query.
 ! Solo hay normas con texto consolidado; una disposición del BOE sin consolidar devuelve 404 aunque su id exista.
-! Cada bloque trae una o varias version con fecha_vigencia; para el texto vigente quedarse con la de fecha_vigencia más reciente.
+! Cada bloque trae una o varias version con fecha_vigencia; para el texto vigente quedarse con la de fecha_vigencia más reciente que no sea posterior a hoy.
 + Flujo de actualización diaria. Listado con from=ayer, y después metadatos o texto de cada identificador devuelto.
 + Para un artículo concreto, indice para localizar el id de bloque y luego texto/bloque/{id}.
 + Los códigos numéricos de rango, materia y departamento se traducen con datos-auxiliares.
++ scripts/clientes/boe.py pagina el listado (normas), lee metadatos e índice y elige la versión vigente de un bloque (bloque y version_vigente).
 + El OpenAPI 3.1 está embebido en api.php (variable openApiFile); el documento técnico es APIconsolidada.pdf en /datosabiertos/documentos/.
 related: boe-api-sumario, boe-eli
 
 ## boe-api-sumario
 BOE – API de sumarios | Agencia Estatal Boletín Oficial del Estado (AEBOE)
 summary: Sumario diario del BOE en JSON o XML: todas las disposiciones y anuncios publicados cada día con identificador, título, sección, departamento, epígrafe y URLs de PDF, HTML y XML del texto completo de cada uno.
-access: api-rest | auth: none | formats: json, xml, pdf, html | update: daily | status: active | verified: 2026-09-30
+access: api-rest | auth: none | formats: json, xml, pdf, html | update: daily | status: active | verified: 2026-10-01
 coverage: 1960-09-
 license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
 base_url: https://www.boe.es/datosabiertos/api
 docs_url: https://www.boe.es/datosabiertos/api/api.php
 - /boe/sumario/{AAAAMMDD} :: Sumario del día, anidado en diario > seccion > departamento > epigrafe > item
   ej: curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/boe/sumario/20240102"
-  devuelve: {status, data.sumario.diario[]:{numero, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]:{identificador, titulo, url_pdf:{texto, szBytes}, url_html, url_xml}}}}}}; en 4, 5A y 5B item cuelga de departamento y en 5C de departamento.texto; un elemento solo es objeto, no lista
-- https://www.boe.es/diario_boe/xml.php?id={BOE-A-AAAA-NNNNN} :: Texto completo y metadatos de una disposición en XML; no necesita cabecera Accept
+  devuelve: {status, data.sumario:{metadatos, diario[]:{numero, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]}}}}}}; item {identificador, titulo, url_pdf{texto, szBytes}, url_html, url_xml}; en 4, 5A y 5B item cuelga de departamento; nodos texto intermedios; un solo elemento es objeto
+- https://www.boe.es/diario_boe/xml.php?id={BOE-A-AAAA-NNNNN} :: Texto completo y metadatos de una disposición o anuncio en XML; no necesita cabecera Accept
   ej: curl -s "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-87"
   devuelve: XML documento con metadatos (identificador, departamento y rango con atributo codigo, fecha_disposicion, titulo, fecha_publicacion, seccion, url_pdf, estatus_derogacion), analisis (materias, notas, referencias anteriores y posteriores) y texto
 - https://www.boe.es/diario_boe/txt.php?id={id} :: Versión HTML de la disposición
@@ -75,16 +76,18 @@ quirks: accept-header-required, json-object-or-list, errors-html-or-xml, no-week
 ids: boe-id
 ! Cabecera Accept obligatoria con application/json o application/xml; sin ella, o con */*, responde 400.
 ! Los errores (400, 404, 500) llegan siempre con cuerpo XML aunque se pida JSON; comprobar el código HTTP antes de parsear.
-! En JSON, item, departamento y epigrafe son objeto si hay un elemento y lista si hay varios; normalizar a lista antes de iterar.
-! No hay BOE los domingos ni festivos nacionales; esos días la API devuelve 404.
+! En JSON, diario, seccion, departamento, epigrafe e item son objeto si hay un elemento y lista si hay varios; normalizar a lista antes de iterar.
+! Entre niveles aparecen nodos texto (departamento.texto en las secciones 4 y 5C, seccion.texto en algún número) y un día puede traer dos números (241 y 242 el 30/09/2026); recorrer el árbol sin suponer niveles.
+! El BOE sale todos los días salvo los domingos, festivos nacionales incluidos (el 1/1 y el 25/12 solo con secciones 1 a 3); los domingos la API devuelve 404.
 ! Algunos días antiguos (p. ej. 19700102) devuelven 500 aunque exista boletín; reintentar o saltar.
 ! Cada item trae url_pdf.texto, url_html y url_xml ya construidas; no montar la URL del PDF a mano (BOE-A-2024-1 no está en 2024/01/02).
 ! Los identificadores siguen el patrón BOE-A-AAAA-NNNNN (disposiciones) y BOE-B-AAAA-NNNNN (anuncios); la numeración es anual.
 ! No hay búsqueda por texto en esta API; descargar sumarios y filtrar en local, o usar la API de legislación consolidada.
-! En el JSON del sumario, departamento, epigrafe e item llegan como objeto cuando hay uno solo y como lista cuando hay varios; normalizar a lista antes de iterar.
-+ Un sumario diario pesa entre 100 y 200 KB en JSON; para histórico iterar por fecha y tratar 404 como día sin publicación.
+! xml.php con un id inexistente responde 200 con raíz error (descripcion No se encontró el documento original) y Content-Type text/html; comprobar la raíz.
++ Un sumario diario pesa entre 50 y 500 KB en JSON (85 KB en festivos, 450 KB un lunes); para histórico iterar por fecha y tratar 404 como día sin publicación.
 + El OpenAPI 3.1 completo está embebido en api.php (variable openApiFile); el documento técnico es APIsumarioBOE.pdf en /datosabiertos/documentos/.
 + Para detectar publicaciones nuevas sin descargar el sumario entero, usar los feeds RSS (boe-feeds).
++ scripts/clientes/boe.py aplana el sumario con todas sus variantes (items), lee el XML de cada disposición (documento) y recorre días saltando domingos (sumarios).
 related: boe-api-legislacion-consolidada, borme-api-sumario, boe-feeds
 
 ## boe-eli
@@ -136,7 +139,7 @@ related: boe-api-sumario, borme-api-sumario
 ## borme-api-sumario
 BORME – API de sumarios y actos mercantiles | Agencia Estatal Boletín Oficial del Estado (AEBOE)
 summary: Sumario diario del Boletín Oficial del Registro Mercantil con los actos inscritos por provincia (constituciones, nombramientos, ceses, ampliaciones, disoluciones), otros actos y anuncios, con XML y PDF de cada documento.
-access: api-rest, download | auth: none | formats: json, xml, pdf, html | update: daily | status: active | verified: 2026-09-30
+access: api-rest, download | auth: none | formats: json, xml, pdf, html | update: daily | status: active | verified: 2026-10-01
 coverage: 2009-
 license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
 base_url: https://www.boe.es/datosabiertos/api
@@ -157,10 +160,12 @@ ids: boe-id
 ! Cabecera Accept obligatoria (application/json o application/xml); sin ella 400. Los errores llegan siempre en XML.
 ! En JSON, item y apartado son objeto si hay un elemento y lista si hay varios; normalizar antes de iterar.
 ! El XML de la sección A no tiene campos por acto. Cada empresa es un p class articulo (número - denominación) seguido de un p class parrafo con los actos separados por punto y los Datos registrales al final.
-! El sufijo del id de las secciones A y B es el código de provincia (01 Álava ... 52 Melilla), no un correlativo.
+! El sufijo del id de las secciones A y B es el código de provincia (01 Álava ... 52 Melilla), no un correlativo; el 99 de la sección A es el índice alfabético de sociedades del día.
 ! No se publica sábados, domingos ni festivos; esos días 404. El sumario estructurado empieza en enero de 2009.
 ! El BORME no incluye cuentas anuales ni socios; eso está en el Registro Mercantil (Colegio de Registradores, de pago).
-+ Los tipos de acto en el parrafo son un vocabulario fijo (Constitución, Nombramientos, Ceses, Revocaciones, Ampliación de capital, Disolución, Modificaciones estatutarias...) y sirven de separador al parsear.
++ Los tipos de acto en el parrafo son un vocabulario fijo (Constitución, Nombramientos, Ceses/Dimisiones, Revocaciones, Ampliación de capital, Disolución...) y sirven de separador al parsear.
++ Para buscar una empresa en un día, el XML BORME-A-AAAA-NNN-99 es una tabla con denominación, id del documento de provincia y número de asiento; evita bajar las 52 provincias.
++ scripts/clientes/boe.py (borme_empresas) separa número, denominación, registro, actos y datos registrales de cada empresa; un acto fuera de su lista queda con tipo None.
 related: boe-api-sumario, boe-feeds
 
 # SECTOR economia-finanzas: Economía, finanzas y mercados
@@ -552,38 +557,41 @@ related: ine-api-tempus
 ## bdns-api
 BDNS – Base de Datos Nacional de Subvenciones (API REST) | Intervención General de la Administración del Estado (IGAE)
 summary: Convocatorias (655000), concesiones, ayudas de Estado, minimis, grandes beneficiarios, sanciones, planes estratégicos y subvenciones a partidos políticos de todas las Administraciones (Estado, CCAA, EELL). API REST JSON paginada sin autenticación y exportación a CSV y xlsx.
-access: api-rest, download, portal | auth: none | formats: json, csv, xlsx | update: daily | status: active | verified: 2026-09-30
+access: api-rest, download, portal | auth: none | formats: json, csv, xlsx | update: daily | status: active | verified: 2026-10-01
 coverage: Convocatorias desde 2014; concesiones desde 2016 según administración
 license: Reutilización con las restricciones del aviso legal, repetido en cada respuesta (campo advertencia)
 base_url: https://www.infosubvenciones.es/bdnstrans/api
 docs_url: https://www.infosubvenciones.es/bdnstrans/GE/es/api
 - /convocatorias/busqueda?page={n}&pageSize={n} :: Búsqueda paginada de convocatorias (numeroConvocatoria, descripcion, fechaRecepcion, nivel1 a nivel3, mrr) [descripcion, fechaDesde y fechaHasta en dd/mm/aaaa, tipoAdministracion=C (estatal), numeroConvocatoria, mrr, vpd, order y direccion]
   ej: curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=50&fechaDesde=01/09/2026&fechaHasta=30/09/2026&order=fechaRecepcion&direccion=desc"
-  devuelve: Página Spring {content:[{id, numeroConvocatoria, descripcion, fechaRecepcion, nivel1 (ESTATAL, AUTONOMICA, LOCAL), nivel2, nivel3, mrr, codigoInvente}], totalElements, totalPages, number, size, last}
+  devuelve: Página Spring {content:[{id, numeroConvocatoria, descripcion, fechaRecepcion (AAAA-MM-DD), nivel1 (ESTADO, AUTONOMICA, LOCAL, OTROS), nivel2, nivel3, mrr, codigoInvente}], totalElements, totalPages, number, size, last, advertencia}
 - /convocatorias?numConv={numero_bdns} :: Detalle completo de una convocatoria (órgano, instrumentos, presupuesto, bases, documentos)
   ej: curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv=800000"
   devuelve: Objeto {id, codigoBDNS, organo{nivel1,nivel2,nivel3}, fechaRecepcion, tipoConvocatoria, presupuestoTotal, instrumentos[], tiposBeneficiarios[], sectores[{codigo CNAE, descripcion}], regiones[{descripcion con NUTS}], descripcion, sedeElectronica, mrr}
-- /concesiones/busqueda?page={n}&pageSize={n} :: Concesiones con beneficiario, importe, ayuda equivalente, instrumento y convocatoria [numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa]
+- /concesiones/busqueda?page={n}&pageSize={n} :: Concesiones con beneficiario, importe, ayuda equivalente, instrumento y convocatoria [numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa, nifCif (NIF del beneficiario), beneficiario (idPersona interno, no el NIF)]
   ej: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=50&numeroConvocatoria=931918"
-  devuelve: content:[{id, codConcesion, fechaConcesion, beneficiario (NIF y nombre en la misma cadena), instrumento, importe, ayudaEquivalente, urlBR, numeroConvocatoria, idConvocatoria, convocatoria, nivel1, nivel2, nivel3}]
+  devuelve: content:[{id, codConcesion, fechaConcesion (AAAA-MM-DD), beneficiario (NIF y nombre en la misma cadena), idPersona, instrumento, importe y ayudaEquivalente (números), urlBR, numeroConvocatoria, convocatoria, nivel1, nivel2, nivel3, fechaAlta}]
 - /{coleccion}/busqueda?page={n}&pageSize={n} :: Mismo patrón para ayudasestado, minimis, grandesbeneficiarios, sanciones, planesestrategicos y partidospoliticos
   ej: curl -s "https://www.infosubvenciones.es/bdnstrans/api/grandesbeneficiarios/busqueda?page=0&pageSize=50"
   devuelve: grandesbeneficiarios devuelve content:[{idPersona, beneficiario (NIF y nombre), ejercicio, ayudaETotal}] con la misma paginación Spring (totalElements, totalPages)
-- /{coleccion}/exportar?vpd=GE&tipoDoc={csv|xlsx} :: Exportación con los mismos filtros que la búsqueda; verificada en convocatorias y concesiones
-  ej: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/exportar?vpd=GE&tipoDoc=csv&fechaDesde=29/09/2026&fechaHasta=29/09/2026" | iconv -f WINDOWS-1252 -t UTF-8
+- /{coleccion}/exportar?vpd=GE&tipoDoc={csv|xlsx} :: Exportación con los mismos filtros y la misma paginación que la búsqueda; verificada en convocatorias y concesiones
+  ej: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/exportar?vpd=GE&tipoDoc=csv&page=0&pageSize=10000&fechaDesde=29/09/2026&fechaHasta=29/09/2026" | iconv -f WINDOWS-1252 -t UTF-8
+  devuelve: CSV separado por comas con cabecera en castellano (Administración, Código BDNS, Convocatoria, Beneficiario, Importe...); fechas dd/mm/aaaa, punto decimal, título de convocatoria cortado a 128 caracteres
 - /convocatorias/ultimas?page={n}&pageSize={n} :: Últimas convocatorias registradas
-rate_limit: No documentado; pageSize se limita en silencio a 10000 (4 MB y 6 s por página). El aviso legal se reserva bloquear usos abusivos.
+rate_limit: No documentado; pageSize se limita en silencio a 10000 (unos 9 MB y 7 s por página de concesiones en JSON). El aviso legal se reserva bloquear usos abusivos.
 quirks: latin1, errors-html-or-xml
 ids: bdns, nif, invente
 ! Con un Accept de navegador (que incluye application/xml) la API responde XML (raíz ObjectNode) con el mismo contenido; pedir Accept: application/json para JSON.
 ! Las fechas de filtro van en dd/mm/aaaa; en ISO (2026-09-01) responde 400 con JSON de campos codigo y errores.
 ! pageSize mayor de 10000 no da error, devuelve 10000. La respuesta es un Page de Spring (content, totalElements, totalPages, last) más el campo advertencia con el aviso legal.
-! Los beneficiarios personas físicas van con el DNI parcialmente oculto (***1490**) y nombre; las jurídicas con el NIF completo delante del nombre, todo en el mismo campo beneficiario.
+! beneficiario junta NIF y nombre (en ayudasestado separados por guion); las personas físicas llevan el DNI enmascarado con formas distintas (***0456**, ****7918*, ***0647).
+! La exportación pagina como la búsqueda; sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso. Pasar page y pageSize (tope 10000).
 ! La exportación exige vpd (GE es el portal general) o responde 400 "No se ha informado el portal"; el CSV llega en windows-1252, no en UTF-8.
-! El filtro beneficiario en concesiones/busqueda devolvió 400 en la verificación; filtrar por convocatoria o fechas y cribar en local.
+! Por beneficiario se filtra con nifCif (verificado en concesiones, minimis, ayudasestado y grandesbeneficiarios) o con beneficiario=idPersona; beneficiario con un NIF da 400.
 ! La documentación es un Swagger UI dentro de la aplicación Angular (docs_url); no hay URL estable del fichero OpenAPI. Un endpoint inexistente devuelve 404 con HTML de Tomcat.
 + Para descargar todo, paginar con pageSize=10000 y trocear por fechaDesde y fechaHasta mensuales; totalElements indica el volumen antes de empezar.
 + numeroConvocatoria (código BDNS) es el identificador estable y público; id es interno y significa cosas distintas en cada colección.
++ scripts/clientes/bdns.py pagina hasta el final, convierte fechas a dd/mm/aaaa, separa NIF y nombre y exporta con pageSize.
 related: placsp-datos-abiertos, dir3-directorio, boe-api-sumario
 
 ## hacienda-registro-licitadores
@@ -2002,7 +2010,7 @@ docs_url: https://datacomex.comercio.es/Data/AyudaApi
   devuelve: ObtenerPaises [{Id (001), Pais, UE}] 292; ObtenerPeriodos [{Periodo, CodPeriodo (2026, 202607), Nivel (1 año, 2 mes), DatosDefinitivos}] 411; ObtenerProvincias [{Provincia, CodProvincia (INE)}] 54; ObtenerFlujos [{Flujo, CodFlujo (E, I)}]; ObtenerTarics [{Taric, TaricPadre, Nombre, Nivel}] 7,5 MB
 quirks: session-required, js-rendered, errors-html-or-xml
 ids: ine-provincia
-! Sin token, ObtenerDatos responde 401 con XML (Se ha denegado la autorización); con un token inválido, 500 con cuerpo vacío. El token va en la cabecera Authorization Bearer o en el parámetro access_token.
+! Sin token, ObtenerDatos da 401 (Se ha denegado la autorización), en XML con Accept de navegador y en JSON con application/json; token inválido, 500 sin cuerpo. Token en Authorization Bearer o access_token.
 ! El registro (nombre, correo y contraseña, sin captcha) envía un correo de activación; hasta activar la cuenta no hay token. La descarga masiva del portal también exige sesión.
 ! Si falta cualquiera de los cinco parámetros la API responde 200 con un único registro cuyo mensaje es "Error de sintaxis. Faltan parámetros"; comprobar mensaje antes de parsear.
 ! pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error.

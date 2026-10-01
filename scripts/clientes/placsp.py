@@ -7,6 +7,7 @@ from __future__ import annotations
 import os
 import sys
 import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
 from typing import Iterator
 
 try:
@@ -22,6 +23,7 @@ NS = {
     "cac": "urn:dgpe:names:draft:codice:schema:xsd:CommonAggregateComponents-2",
     "ext": "urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonAggregateComponents-2",
     "extb": "urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonBasicComponents-2",
+    "at": "http://purl.org/atompub/tombstones/1.0",
 }
 
 
@@ -55,26 +57,37 @@ def parse_entry(entry) -> dict:
     }
 
 
+def parse_feed(contenido: bytes) -> tuple[list[dict], str | None]:
+    """Entradas de una página, de la más reciente a la más antigua, y URL de la página anterior (link rel=next).
+
+    Las anulaciones no son entry: llegan como at:deleted-entry (ref = id de la entrada, when, comment type ANULADA)."""
+    root = ET.fromstring(contenido)
+    out = [parse_entry(e) for e in root.findall("a:entry", NS)]
+    for d in root.findall("at:deleted-entry", NS):
+        c = d.find("at:comment", NS)
+        out.append({"id": d.get("ref"), "updated": d.get("when"), "deleted": True, "motivo": c.get("type") if c is not None else None})
+    out.sort(key=lambda e: datetime.fromisoformat(e["updated"]) if e.get("updated") else datetime.min.replace(tzinfo=timezone.utc), reverse=True)
+    nxt = [l.get("href") for l in root.findall("a:link", NS) if l.get("rel") == "next"]
+    return out, nxt[0] if nxt else None
+
+
 def entradas(url: str = FEED, max_paginas: int = 1) -> Iterator[dict]:
-    """Recorre el feed y sus páginas anteriores (link rel=next); cada página pesa varios MB."""
+    """Recorre el feed y sus páginas anteriores; la vigente trae lo del día y las anteriores pesan 14 a 16 MB."""
     s = session(accept="application/atom+xml, application/xml;q=0.9, */*;q=0.8")
     for _ in range(max_paginas):
-        root = ET.fromstring(s.get(url, timeout=180, verify=s.verify).content)
-        for e in root.findall("a:entry", NS):
-            yield parse_entry(e)
-        nxt = [l.get("href") for l in root.findall("a:link", NS) if l.get("rel") == "next"]
-        if not nxt:
+        pagina, url = parse_feed(s.get(url, timeout=180, verify=s.verify).content)
+        yield from pagina
+        if not url:
             return
-        url = nxt[0]
 
 
 if __name__ == "__main__":
     n = int(sys.argv[1]) if len(sys.argv) > 1 else 1
     vistos: dict[str, dict] = {}
     for e in entradas(max_paginas=n):
-        if not e.get("deleted") and e["id"] not in vistos:  # un expediente aparece una vez por cambio de estado; el feed va del más reciente al más antiguo
-            vistos[e["id"]] = e
-    obras = [e for e in vistos.values() if any(c.startswith("45") for c in e["cpv"]) and e["importe_sin_iva"] and float(e["importe_sin_iva"]) > 1_000_000]
-    print(len(vistos), "expedientes;", len(obras), "obras de más de un millón sin IVA")
+        vistos.setdefault(e["id"], e)  # una entrada por cambio de estado, de la más reciente a la más antigua: vale la primera
+    vivos = [e for e in vistos.values() if not e.get("deleted")]
+    obras = [e for e in vivos if any(c.startswith("45") for c in e["cpv"]) and e["importe_sin_iva"] and float(e["importe_sin_iva"]) > 1_000_000]
+    print(len(vivos), "expedientes,", len(vistos) - len(vivos), "anulados;", len(obras), "obras de más de un millón sin IVA")
     for e in obras[:10]:
         print(e["fecha_publicacion"], e["estado"], e["expediente"], e["organo"], e["importe_sin_iva"])

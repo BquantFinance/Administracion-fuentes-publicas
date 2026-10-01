@@ -22,7 +22,7 @@ endpoints:
     desc: Búsqueda paginada de convocatorias (numeroConvocatoria, descripcion, fechaRecepcion, nivel1 a nivel3, mrr)
     example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=50&fechaDesde=01/09/2026&fechaHasta=30/09/2026&order=fechaRecepcion&direccion=desc"
     params: "descripcion, fechaDesde y fechaHasta en dd/mm/aaaa, tipoAdministracion=C (estatal), numeroConvocatoria, mrr, vpd, order y direccion"
-    returns: "Página Spring {content:[{id, numeroConvocatoria, descripcion, fechaRecepcion, nivel1 (ESTATAL, AUTONOMICA, LOCAL), nivel2, nivel3, mrr, codigoInvente}], totalElements, totalPages, number, size, last}"
+    returns: "Página Spring {content:[{id, numeroConvocatoria, descripcion, fechaRecepcion (AAAA-MM-DD), nivel1 (ESTADO, AUTONOMICA, LOCAL, OTROS), nivel2, nivel3, mrr, codigoInvente}], totalElements, totalPages, number, size, last, advertencia}"
   - path: /convocatorias?numConv={numero_bdns}
     desc: Detalle completo de una convocatoria (órgano, instrumentos, presupuesto, bases, documentos)
     example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv=800000"
@@ -30,31 +30,34 @@ endpoints:
   - path: /concesiones/busqueda?page={n}&pageSize={n}
     desc: Concesiones con beneficiario, importe, ayuda equivalente, instrumento y convocatoria
     example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=50&numeroConvocatoria=931918"
-    params: "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa"
-    returns: "content:[{id, codConcesion, fechaConcesion, beneficiario (NIF y nombre en la misma cadena), instrumento, importe, ayudaEquivalente, urlBR, numeroConvocatoria, idConvocatoria, convocatoria, nivel1, nivel2, nivel3}]"
+    params: "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa, nifCif (NIF del beneficiario), beneficiario (idPersona interno, no el NIF)"
+    returns: "content:[{id, codConcesion, fechaConcesion (AAAA-MM-DD), beneficiario (NIF y nombre en la misma cadena), idPersona, instrumento, importe y ayudaEquivalente (números), urlBR, numeroConvocatoria, convocatoria, nivel1, nivel2, nivel3, fechaAlta}]"
   - path: /{coleccion}/busqueda?page={n}&pageSize={n}
     desc: Mismo patrón para ayudasestado, minimis, grandesbeneficiarios, sanciones, planesestrategicos y partidospoliticos
     example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/grandesbeneficiarios/busqueda?page=0&pageSize=50"
     returns: "grandesbeneficiarios devuelve content:[{idPersona, beneficiario (NIF y nombre), ejercicio, ayudaETotal}] con la misma paginación Spring (totalElements, totalPages)"
   - path: /{coleccion}/exportar?vpd=GE&tipoDoc={csv|xlsx}
-    desc: Exportación con los mismos filtros que la búsqueda; verificada en convocatorias y concesiones
-    example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/exportar?vpd=GE&tipoDoc=csv&fechaDesde=29/09/2026&fechaHasta=29/09/2026" | iconv -f WINDOWS-1252 -t UTF-8
+    desc: Exportación con los mismos filtros y la misma paginación que la búsqueda; verificada en convocatorias y concesiones
+    example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/exportar?vpd=GE&tipoDoc=csv&page=0&pageSize=10000&fechaDesde=29/09/2026&fechaHasta=29/09/2026" | iconv -f WINDOWS-1252 -t UTF-8
+    returns: "CSV separado por comas con cabecera en castellano (Administración, Código BDNS, Convocatoria, Beneficiario, Importe...); fechas dd/mm/aaaa, punto decimal, título de convocatoria cortado a 128 caracteres"
   - path: /convocatorias/ultimas?page={n}&pageSize={n}
     desc: Últimas convocatorias registradas
-rate_limit: No documentado; pageSize se limita en silencio a 10000 (4 MB y 6 s por página). El aviso legal se reserva bloquear usos abusivos.
+rate_limit: No documentado; pageSize se limita en silencio a 10000 (unos 9 MB y 7 s por página de concesiones en JSON). El aviso legal se reserva bloquear usos abusivos.
 quirks: [latin1, errors-html-or-xml]
 ids: [bdns, nif, invente]
 gotchas:
   - "Con un Accept de navegador (que incluye application/xml) la API responde XML (raíz ObjectNode) con el mismo contenido; pedir Accept: application/json para JSON."
   - Las fechas de filtro van en dd/mm/aaaa; en ISO (2026-09-01) responde 400 con JSON de campos codigo y errores.
   - pageSize mayor de 10000 no da error, devuelve 10000. La respuesta es un Page de Spring (content, totalElements, totalPages, last) más el campo advertencia con el aviso legal.
-  - Los beneficiarios personas físicas van con el DNI parcialmente oculto (***1490**) y nombre; las jurídicas con el NIF completo delante del nombre, todo en el mismo campo beneficiario.
+  - beneficiario junta NIF y nombre (en ayudasestado separados por guion); las personas físicas llevan el DNI enmascarado con formas distintas (***0456**, ****7918*, ***0647).
+  - La exportación pagina como la búsqueda; sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso. Pasar page y pageSize (tope 10000).
   - La exportación exige vpd (GE es el portal general) o responde 400 "No se ha informado el portal"; el CSV llega en windows-1252, no en UTF-8.
-  - El filtro beneficiario en concesiones/busqueda devolvió 400 en la verificación; filtrar por convocatoria o fechas y cribar en local.
+  - Por beneficiario se filtra con nifCif (verificado en concesiones, minimis, ayudasestado y grandesbeneficiarios) o con beneficiario=idPersona; beneficiario con un NIF da 400.
   - La documentación es un Swagger UI dentro de la aplicación Angular (docs_url); no hay URL estable del fichero OpenAPI. Un endpoint inexistente devuelve 404 con HTML de Tomcat.
 tips:
   - Para descargar todo, paginar con pageSize=10000 y trocear por fechaDesde y fechaHasta mensuales; totalElements indica el volumen antes de empezar.
   - numeroConvocatoria (código BDNS) es el identificador estable y público; id es interno y significa cosas distintas en cada colección.
+  - scripts/clientes/bdns.py pagina hasta el final, convierte fechas a dd/mm/aaaa, separa NIF y nombre y exporta con pageSize.
 related: [placsp-datos-abiertos, dir3-directorio, boe-api-sumario]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

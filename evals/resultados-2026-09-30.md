@@ -1,5 +1,10 @@
 # Resultados de la evaluación · 2026-09-30
 
+> Corrección del 2026-10-01: la columna tokens es la que devuelve el arnés al terminar cada agente, que es el tamaño de su
+> contexto final, no los tokens procesados (cada turno reenvía el contexto entero; un agente de prueba con 7 turnos marcó
+> 44.535 y procesó 306.004 de entrada). Las comparaciones de tokens de este fichero no miden coste; las de llamadas,
+> fallidas, usos de herramienta y tiempo siguen valiendo.
+
 Cinco tareas de `tareas.yaml`, cada una resuelta una vez sin catálogo (A) y una vez con catálogo (B) por el mismo modelo
 (agente Claude con Bash, curl y python en un sandbox; en B lee `llms.txt` entero y después solo la ficha, receta o índice que
 necesita). Tokens y usos de herramienta son los que reporta el arnés para cada agente; llamadas y fallidas las declara el propio

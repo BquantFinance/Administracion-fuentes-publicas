@@ -116,7 +116,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
    ```
    curl -s -H "Accept: application/json" "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=100&nifCif=Q1132001G"
    ```
-2. `bdns-api`: grandesbeneficiarios, ayudasestado y minimis tienen el mismo patrón de búsqueda (nifCif verificado solo en concesiones); exportación con concesiones/exportar?vpd=GE&tipoDoc=csv y los mismos filtros
+2. `bdns-api`: grandesbeneficiarios, ayudasestado y minimis tienen el mismo patrón de búsqueda y aceptan nifCif (verificado el 2026-10-01; en ayudasestado beneficiario separa NIF y nombre con guion); exportación con concesiones/exportar?vpd=GE&tipoDoc=csv, los mismos filtros y pageSize (sin él, 50 filas)
 3. `aei-convocatorias`: Ayudas de investigación en el CSV completo, filtrar la columna C.I.F. (separador ;, UTF-8 con BOM)
 4. `placsp-datos-abiertos`: Contratos en los feeds ATOM y ZIP mensuales; los documentos CODICE llevan cbc:ID con schemeName NIF (adjudicatarios y órganos), filtrar por el valor y comprobar el elemento padre
 5. `borme-api-sumario`: Actos societarios solo por nombre y fecha en el XML de cada provincia (receta actos-mercantiles-borme)
@@ -184,7 +184,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
    ```
    curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv=800000"
    ```
-3. `bdns-api`: Exportación masiva con convocatorias/exportar?vpd=GE&tipoDoc=csv y los mismos filtros (windows-1252; tope de 10000 filas sin aviso)
+3. `bdns-api`: Exportación masiva con convocatorias/exportar?vpd=GE&tipoDoc=csv, los mismos filtros y page y pageSize (sin pageSize devuelve 50 filas sin aviso; tope 10000; windows-1252)
 - salida: JSON paginado de convocatorias y detalle por número BDNS
 
 **deuda-publica-por-administracion** · Deuda de un ayuntamiento, de una comunidad autónoma o del Estado

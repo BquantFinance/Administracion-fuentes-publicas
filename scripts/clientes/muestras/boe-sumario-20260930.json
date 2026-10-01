@@ -1,0 +1,232 @@
+{
+ "status": {
+  "code": "200",
+  "text": "ok"
+ },
+ "data": {
+  "sumario": {
+   "metadatos": {
+    "publicacion": "BOE",
+    "fecha_publicacion": "20260930"
+   },
+   "diario": [
+    {
+     "numero": "242",
+     "sumario_diario": {
+      "identificador": "BOE-S-2026-242",
+      "url_pdf": {
+       "szBytes": "142004",
+       "szKBytes": "139",
+       "texto": "https://www.boe.es/boe/dias/2026/09/30/pdfs/BOE-S-2026-242.pdf"
+      }
+     },
+     "seccion": {
+      "codigo": "3",
+      "nombre": "III. Otras disposiciones",
+      "texto": {
+       "departamento": {
+        "codigo": "7786",
+        "nombre": "PRESIDENCIA DEL GOBIERNO",
+        "texto": {
+         "epigrafe": [
+          {
+           "nombre": "Situación de interés para la seguridad nacional",
+           "item": {
+            "identificador": "BOE-A-2026-20384",
+            "control": "2026/15037",
+            "titulo": "Real Decreto 795/2026, de 30 de septiembre, por el que se modifica el Real Decreto 705/2026, de 26 de agosto, por el que se aprueba la Declaración de Recursos a emplear en la situación de interés para la Seguridad Nacional en la ciudad de Ceuta, en aplicación de lo dispuesto en el artículo 29 de la Ley 36/2015, de 28 de septiembre, de Seguridad Nacional.",
+            "url_pdf": {
+             "szBytes": "210468",
+             "szKBytes": "206",
+             "pagina_inicial": "128376",
+             "pagina_final": "128379",
+             "texto": "https://www.boe.es/boe/dias/2026/09/30/pdfs/BOE-A-2026-20384.pdf"
+            },
+            "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-20384",
+            "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2026-20384"
+           }
+          }
+         ]
+        }
+       }
+      }
+     }
+    },
+    {
+     "numero": "241",
+     "sumario_diario": {
+      "identificador": "BOE-S-2026-241",
+      "url_pdf": {
+       "szBytes": "414657",
+       "szKBytes": "405",
+       "texto": "https://www.boe.es/boe/dias/2026/09/30/pdfs/BOE-S-2026-241.pdf"
+      }
+     },
+     "seccion": [
+      {
+       "codigo": "1",
+       "nombre": "I. Disposiciones generales",
+       "departamento": [
+        {
+         "codigo": "7723",
+         "nombre": "JEFATURA DEL ESTADO",
+         "epigrafe": [
+          {
+           "nombre": "Medidas urgentes",
+           "item": [
+            {
+             "identificador": "BOE-A-2026-20264",
+             "control": "2026/15025",
+             "titulo": "Real Decreto-ley 24/2026, de 29 de septiembre, por el que se establecen medidas relacionadas con el plan de respuesta inmediata, reconstrucción y relanzamiento frente a los daños causados por la Depresión Aislada en Niveles Altos (DANA) en diferentes municipios entre el 28 de octubre y el 4 de noviembre de 2024.",
+             "url_pdf": {
+              "szBytes": "227381",
+              "szKBytes": "222",
+              "pagina_inicial": "127748",
+              "pagina_final": "127754",
+              "texto": "https://www.boe.es/boe/dias/2026/09/30/pdfs/BOE-A-2026-20264.pdf"
+             },
+             "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-20264",
+             "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2026-20264"
+            },
+            {
+             "identificador": "BOE-A-2026-20265",
+             "control": "2026/15026",
+             "titulo": "Real Decreto-ley 25/2026, de 29 de septiembre, por el que se adoptan y se prorrogan determinadas medidas en el marco del Plan Integral de Respuesta a la Crisis en Oriente Medio.",
+             "url_pdf": {
+              "szBytes": "594396",
+              "szKBytes": "580",
+              "pagina_inicial": "127755",
+              "pagina_final": "127817",
+              "texto": "https://www.boe.es/boe/dias/2026/09/30/pdfs/BOE-A-2026-20265.pdf"
+             },
+             "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-20265",
+             "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2026-20265"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "codigo": "7786",
+         "nombre": "PRESIDENCIA DEL GOBIERNO",
+         "epigrafe": [
+          {
+           "nombre": "Situación de interés para la seguridad nacional",
+           "item": {
+            "identificador": "BOE-A-2026-20267",
+            "control": "2026/15000",
+            "titulo": "Real Decreto 761/2026, de 29 de septiembre, por el que se modifica el Real Decreto 681/2026, de 25 de agosto, por el que se declara la situación de interés para la seguridad nacional en la ciudad de Ceuta.",
+            "url_pdf": {
+             "szBytes": "210718",
+             "szKBytes": "206",
+             "pagina_inicial": "127914",
+             "pagina_final": "127917",
+             "texto": "https://www.boe.es/boe/dias/2026/09/30/pdfs/BOE-A-2026-20267.pdf"
+            },
+            "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-20267",
+            "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2026-20267"
+           }
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "codigo": "5A",
+       "nombre": "V. Anuncios. - A. Contratación del Sector Público",
+       "departamento": [
+        {
+         "codigo": "6110",
+         "nombre": "MINISTERIO DE DEFENSA",
+         "item": [
+          {
+           "identificador": "BOE-B-2026-31605",
+           "titulo": "Anuncio de formalización de contratos de: Dirección de Adquisiciones del Mando de Apoyo Logístico del Ejército del Aire y del Espacio. Objeto: 20266322 Adquisición de carretillas elevadoras aerotransportables 5T. Expediente: 2026/EA02/00000126E.",
+           "url_pdf": {
+            "szBytes": "218435",
+            "szKBytes": "213",
+            "pagina_inicial": "51253",
+            "pagina_final": "51254",
+            "texto": "https://www.boe.es/boe/dias/2026/09/30/pdfs/BOE-B-2026-31605.pdf"
+           },
+           "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-B-2026-31605",
+           "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-B-2026-31605"
+          },
+          {
+           "identificador": "BOE-B-2026-31606",
+           "titulo": "Anuncio de formalización de contratos de: Dirección General del INTA. Objeto: Cámara climatica portatil. Expediente: 582026047100.",
+           "url_pdf": {
+            "szBytes": "215583",
+            "szKBytes": "211",
+            "pagina_inicial": "51255",
+            "pagina_final": "51256",
+            "texto": "https://www.boe.es/boe/dias/2026/09/30/pdfs/BOE-B-2026-31606.pdf"
+           },
+           "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-B-2026-31606",
+           "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-B-2026-31606"
+          }
+         ]
+        },
+        {
+         "codigo": "5140",
+         "nombre": "MINISTERIO DE HACIENDA",
+         "item": [
+          {
+           "identificador": "BOE-B-2026-31622",
+           "titulo": "Anuncio de licitación de: Parque Móvil del Estado. Objeto: Mantenimiento integral y otros servicios adicionales del conjunto de edificios e instalaciones del Parque Móvil del Estado, O.A . Expediente: 2026PR400045.",
+           "url_pdf": {
+            "szBytes": "227511",
+            "szKBytes": "222",
+            "pagina_inicial": "51284",
+            "pagina_final": "51286",
+            "texto": "https://www.boe.es/boe/dias/2026/09/30/pdfs/BOE-B-2026-31622.pdf"
+           },
+           "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-B-2026-31622",
+           "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-B-2026-31622"
+          },
+          {
+           "identificador": "BOE-B-2026-31623",
+           "titulo": "Anuncio de formalización de contratos de: Dirección del Servicio de Gestión Económica de la Agencia Estatal de la Administración Tributaria. Objeto: Suministro de tenazas para el Departamento de Aduanas e IIEE. Expediente: 26710052700.",
+           "url_pdf": {
+            "szBytes": "215478",
+            "szKBytes": "210",
+            "pagina_inicial": "51287",
+            "pagina_final": "51288",
+            "texto": "https://www.boe.es/boe/dias/2026/09/30/pdfs/BOE-B-2026-31623.pdf"
+           },
+           "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-B-2026-31623",
+           "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-B-2026-31623"
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "codigo": "5C",
+       "nombre": "V. Anuncios. - C. Anuncios particulares",
+       "departamento": {
+        "codigo": "9202",
+        "nombre": "ANUNCIOS PARTICULARES",
+        "texto": {
+         "item": {
+          "identificador": "BOE-B-2026-31696",
+          "titulo": "FONDO NARANJA MONETARIO, FI (FONDO ABSORBENTE) FONDO NARANJA GARANTIZADO 2026, FI (FONDO ABSORBIDO).",
+          "url_pdf": {
+           "szBytes": "201097",
+           "szKBytes": "196",
+           "pagina_inicial": "51447",
+           "pagina_final": "51447",
+           "texto": "https://www.boe.es/boe/dias/2026/09/30/pdfs/BOE-B-2026-31696.pdf"
+          },
+          "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-B-2026-31696",
+          "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-B-2026-31696"
+         }
+        }
+       }
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -111,7 +111,7 @@
       example: |-
         curl -s -H "Accept: application/json" "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=100&nifCif=Q1132001G"
     - source: bdns-api
-      do: "grandesbeneficiarios, ayudasestado y minimis tienen el mismo patrón de búsqueda (nifCif verificado solo en concesiones); exportación con concesiones/exportar?vpd=GE&tipoDoc=csv y los mismos filtros"
+      do: "grandesbeneficiarios, ayudasestado y minimis tienen el mismo patrón de búsqueda y aceptan nifCif (verificado el 2026-10-01; en ayudasestado beneficiario separa NIF y nombre con guion); exportación con concesiones/exportar?vpd=GE&tipoDoc=csv, los mismos filtros y pageSize (sin él, 50 filas)"
     - source: aei-convocatorias
       do: "Ayudas de investigación en el CSV completo, filtrar la columna C.I.F. (separador ;, UTF-8 con BOM)"
     - source: placsp-datos-abiertos
@@ -237,7 +237,7 @@
       do: "convocatorias?numConv={numero} da órgano, instrumentos, presupuesto, bases y documentos; codigoBDNS es la clave estable"
       example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/convocatorias?numConv=800000"
     - source: bdns-api
-      do: "Exportación masiva con convocatorias/exportar?vpd=GE&tipoDoc=csv y los mismos filtros (windows-1252; tope de 10000 filas sin aviso)"
+      do: "Exportación masiva con convocatorias/exportar?vpd=GE&tipoDoc=csv, los mismos filtros y page y pageSize (sin pageSize devuelve 50 filas sin aviso; tope 10000; windows-1252)"
   output: JSON paginado de convocatorias y detalle por número BDNS
   checks:
     - url: https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=2&fechaDesde=01/09/2026&fechaHasta=30/09/2026&order=fechaRecepcion&direccion=desc

@@ -62,12 +62,13 @@ gotchas:
   - En query_string el término va con campo (titulo:vivienda); un término suelto devuelve vacío. En range, gte y lte son obligatorios en formato AAAAMMDD.
   - from y to filtran por fecha_actualizacion (última modificación del consolidado), no por fecha de publicación; para eso usar range en query.
   - Solo hay normas con texto consolidado; una disposición del BOE sin consolidar devuelve 404 aunque su id exista.
-  - Cada bloque trae una o varias version con fecha_vigencia; para el texto vigente quedarse con la de fecha_vigencia más reciente.
+  - Cada bloque trae una o varias version con fecha_vigencia; para el texto vigente quedarse con la de fecha_vigencia más reciente que no sea posterior a hoy.
 tips:
   - Flujo de actualización diaria. Listado con from=ayer, y después metadatos o texto de cada identificador devuelto.
   - Para un artículo concreto, indice para localizar el id de bloque y luego texto/bloque/{id}.
   - Los códigos numéricos de rango, materia y departamento se traducen con datos-auxiliares.
+  - scripts/clientes/boe.py pagina el listado (normas), lee metadatos e índice y elige la versión vigente de un bloque (bloque y version_vigente).
   - El OpenAPI 3.1 está embebido en api.php (variable openApiFile); el documento técnico es APIconsolidada.pdf en /datosabiertos/documentos/.
 related: [boe-api-sumario, boe-eli]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

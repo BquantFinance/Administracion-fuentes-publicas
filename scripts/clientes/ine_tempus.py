@@ -22,20 +22,20 @@ def id_municipio(codigo_ine: str, operacion: str | int = 22) -> int:
     key = str(operacion)
     if key not in _cache:
         s = session()
-        valores = s.get(f"{BASE}/VALORES_VARIABLEOPERACION/19/{operacion}", timeout=120, verify=s.verify).json()
-        _cache[key] = {v["Codigo"]: v["Id"] for v in valores}
+        _cache[key] = mapa_ids(s.get(f"{BASE}/VALORES_VARIABLEOPERACION/19/{operacion}", timeout=120, verify=s.verify).json())
     try:
         return _cache[key][codigo_ine]
     except KeyError:
         raise KeyError(f"código INE {codigo_ine} no está en la variable 19 de la operación {operacion}") from None
 
 
-def datos_tabla(id_tabla: int, tv: dict[int, int] | None = None, nult: int = 2) -> list[dict]:
-    """DATOS_TABLA con tip=AM (fechas ISO y metadatos). nult=2 por defecto: con 1, el último periodo puede venir vacío."""
-    s = session()
-    params = [("nult", nult), ("tip", "AM")] + [("tv", f"{var}:{val}") for var, val in (tv or {}).items()]
-    r = s.get(f"{BASE}/DATOS_TABLA/{id_tabla}", params=params, timeout=120, verify=s.verify)
-    o = r.json()
+def mapa_ids(valores: list[dict]) -> dict[str, int]:
+    """Código INE (Codigo) a Id interno, a partir de VALORES_VARIABLEOPERACION/19/{operacion}."""
+    return {v["Codigo"]: v["Id"] for v in valores}
+
+
+def limpiar_tabla(o, id_tabla: int | str = "") -> list[dict]:
+    """Respuesta de DATOS_TABLA sin periodos vacíos; una tabla grande sin filtros devuelve {"status": ...} con HTTP 200."""
     if isinstance(o, dict) and "status" in o:
         raise RuntimeError(f"INE tabla {id_tabla}: {o['status']} (añadir filtros tv)")
     for serie in o:
@@ -43,9 +43,17 @@ def datos_tabla(id_tabla: int, tv: dict[int, int] | None = None, nult: int = 2) 
     return o
 
 
+def datos_tabla(id_tabla: int, tv: dict[int, int] | None = None, nult: int = 2) -> list[dict]:
+    """DATOS_TABLA con tip=AM (fechas ISO y metadatos). nult=2 por defecto: con 1, el último periodo puede venir vacío."""
+    s = session()
+    params = [("nult", nult), ("tip", "AM")] + [("tv", f"{var}:{val}") for var, val in (tv or {}).items()]
+    return limpiar_tabla(s.get(f"{BASE}/DATOS_TABLA/{id_tabla}", params=params, timeout=120, verify=s.verify).json(), id_tabla)
+
+
 def ultimo_valor(serie: dict) -> tuple[str, float]:
-    d = serie["Data"][-1]
-    return d.get("T3_Periodo") or d["Fecha"][:10], d["Valor"]
+    """Dato más reciente por Fecha: DATOS_TABLA devuelve Data del periodo más reciente al más antiguo."""
+    d = max(serie["Data"], key=lambda d: d["Fecha"])
+    return d["Fecha"][:10], d["Valor"]
 
 
 if __name__ == "__main__":

@@ -1,0 +1,218 @@
+{
+ "status": {
+  "code": "200",
+  "text": "ok"
+ },
+ "data": {
+  "sumario": {
+   "metadatos": {
+    "publicacion": "BOE",
+    "fecha_publicacion": "20240102"
+   },
+   "diario": [
+    {
+     "numero": "2",
+     "sumario_diario": {
+      "identificador": "BOE-S-2024-2",
+      "url_pdf": {
+       "szBytes": "329057",
+       "szKBytes": "321",
+       "texto": "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-S-2024-2.pdf"
+      }
+     },
+     "seccion": [
+      {
+       "codigo": "2A",
+       "nombre": "II. Autoridades y personal. - A. Nombramientos, situaciones e incidencias",
+       "departamento": [
+        {
+         "codigo": "9562",
+         "nombre": "MINISTERIO DE ASUNTOS EXTERIORES, UNIÓN EUROPEA Y COOPERACIÓN",
+         "epigrafe": [
+          {
+           "nombre": "Destinos",
+           "item": {
+            "identificador": "BOE-A-2024-87",
+            "control": "2023/26904",
+            "titulo": "Resolución de 21 de diciembre de 2023, de la Subsecretaría, por la que se resuelve la convocatoria de libre designación, efectuada por Resolución de 5 de septiembre de 2023.",
+            "url_pdf": {
+             "szBytes": "207671",
+             "szKBytes": "203",
+             "pagina_inicial": "335",
+             "pagina_final": "336",
+             "texto": "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-A-2024-87.pdf"
+            },
+            "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2024-87",
+            "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-87"
+           }
+          }
+         ]
+        },
+        {
+         "codigo": "9585",
+         "nombre": "MINISTERIO DE LA PRESIDENCIA, JUSTICIA Y RELACIONES CON LAS CORTES",
+         "epigrafe": [
+          {
+           "nombre": "Situaciones",
+           "item": [
+            {
+             "identificador": "BOE-A-2024-88",
+             "control": "2023/26907",
+             "titulo": "Resolución de 22 de diciembre de 2023, de la Dirección General de Seguridad Jurídica y Fe Pública, por la que se declara la jubilación del notario de Avilés don Tomás Domínguez Bautista.",
+             "url_pdf": {
+              "szBytes": "191876",
+              "szKBytes": "187",
+              "pagina_inicial": "337",
+              "pagina_final": "337",
+              "texto": "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-A-2024-88.pdf"
+             },
+             "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2024-88",
+             "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-88"
+            },
+            {
+             "identificador": "BOE-A-2024-89",
+             "control": "2023/26908",
+             "titulo": "Resolución de 27 de diciembre de 2023, de la Dirección General para el Servicio Público de Justicia, por la que se declara la jubilación de doña María Victoria Gutiérrez Díaz, Fiscal con destino en la Sección Territorial de Málaga de la Fiscalía de la Comunidad Autónoma de Andalucía.",
+             "url_pdf": {
+              "szBytes": "192565",
+              "szKBytes": "188",
+              "pagina_inicial": "338",
+              "pagina_final": "338",
+              "texto": "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-A-2024-89.pdf"
+             },
+             "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2024-89",
+             "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-89"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "codigo": "4",
+       "nombre": "IV. Administración de Justicia",
+       "departamento": {
+        "codigo": "9546",
+        "nombre": "JUZGADOS DE PRIMERA INSTANCIA E INSTRUCCIÓN",
+        "texto": {
+         "item": [
+          {
+           "identificador": "BOE-B-2024-1",
+           "titulo": "ALMERIA",
+           "url_pdf": {
+            "szBytes": "141128",
+            "szKBytes": "138",
+            "pagina_inicial": "1",
+            "pagina_final": "1",
+            "texto": "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-B-2024-1.pdf"
+           },
+           "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-B-2024-1",
+           "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-B-2024-1"
+          },
+          {
+           "identificador": "BOE-B-2024-2",
+           "titulo": "ALZIRA",
+           "url_pdf": {
+            "szBytes": "141425",
+            "szKBytes": "138",
+            "pagina_inicial": "2",
+            "pagina_final": "2",
+            "texto": "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-B-2024-2.pdf"
+           },
+           "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-B-2024-2",
+           "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-B-2024-2"
+          },
+          {
+           "identificador": "BOE-B-2024-3",
+           "titulo": "AMURRIO",
+           "url_pdf": {
+            "szBytes": "141639",
+            "szKBytes": "138",
+            "pagina_inicial": "3",
+            "pagina_final": "3",
+            "texto": "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-B-2024-3.pdf"
+           },
+           "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-B-2024-3",
+           "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-B-2024-3"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "codigo": "5B",
+       "nombre": "V. Anuncios. - B. Otros anuncios oficiales",
+       "departamento": [
+        {
+         "codigo": "9586",
+         "nombre": "MINISTERIO DE TRANSPORTES Y MOVILIDAD SOSTENIBLE",
+         "item": [
+          {
+           "identificador": "BOE-B-2024-76",
+           "titulo": "Resolución de la Dirección General del Sector Ferroviario por la que se abre Información Pública y se convoca a los propietarios de los bienes y derechos afectados al levantamiento de las actas previas correspondientes al Expediente de Expropiación Forzosa 217ADIF2397 motivado por las obras del \"Proyecto de supresión de los Pasos a Nivel de los PP.KK. 361/620 y 361/845 de la línea León - A Coruña - T.M. Monforte de Lemos\" en el término municipal de Monforte de Lemos (Lugo).",
+           "url_pdf": {
+            "szBytes": "238644",
+            "szKBytes": "233",
+            "pagina_inicial": "149",
+            "pagina_final": "151",
+            "texto": "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-B-2024-76.pdf"
+           },
+           "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-B-2024-76",
+           "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-B-2024-76"
+          },
+          {
+           "identificador": "BOE-B-2024-77",
+           "titulo": "Resolución de la Dirección General del Sector Ferroviario por la que se abre Información Pública y se convoca a los propietarios de los bienes y derechos afectados al levantamiento de las actas previas correspondientes al Expediente de Expropiación Forzosa 305ADIF2398 motivado por las obras del \"Proyecto de construcción para la Duplicación de Vía entre La Carrera y Pola de Siero, en la Línea Oviedo – Santander. Vía y Electrificación\" en el término municipal de Siero (Asturias).",
+           "url_pdf": {
+            "szBytes": "237130",
+            "szKBytes": "232",
+            "pagina_inicial": "152",
+            "pagina_final": "154",
+            "texto": "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-B-2024-77.pdf"
+           },
+           "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-B-2024-77",
+           "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-B-2024-77"
+          }
+         ]
+        },
+        {
+         "codigo": "9575",
+         "nombre": "MINISTERIO PARA LA TRANSICIÓN ECOLÓGICA Y EL RETO DEMOGRÁFICO",
+         "item": [
+          {
+           "identificador": "BOE-B-2024-79",
+           "titulo": "Anuncio de la Confederación Hidrográfica del Duero, O.A., de información pública de la modificación de características de la concesión de un aprovechamiento de aguas superficiales, en el término municipal de Pereruela (Zamora).",
+           "url_pdf": {
+            "szBytes": "155066",
+            "szKBytes": "151",
+            "pagina_inicial": "157",
+            "pagina_final": "158",
+            "texto": "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-B-2024-79.pdf"
+           },
+           "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-B-2024-79",
+           "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-B-2024-79"
+          },
+          {
+           "identificador": "BOE-B-2024-80",
+           "titulo": "Anuncio de la Confederación Hidrográfica del Duero, O.A., de información pública de la concesión de un aprovechamiento de aguas subterráneas para riego, en el término municipal de Aldea Real (Segovia).",
+           "url_pdf": {
+            "szBytes": "152741",
+            "szKBytes": "149",
+            "pagina_inicial": "159",
+            "pagina_final": "160",
+            "texto": "https://www.boe.es/boe/dias/2024/01/02/pdfs/BOE-B-2024-80.pdf"
+           },
+           "url_html": "https://www.boe.es/diario_boe/txt.php?id=BOE-B-2024-80",
+           "url_xml": "https://www.boe.es/diario_boe/xml.php?id=BOE-B-2024-80"
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

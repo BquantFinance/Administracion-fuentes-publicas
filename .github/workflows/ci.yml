@@ -16,11 +16,13 @@ jobs:
       - run: pip install -r scripts/requirements.txt
       - name: Validar fichas e índices
         run: python scripts/validate.py
+      - name: Parsers de los cargadores contra las muestras, sin red
+        run: python scripts/test_clientes.py
       - name: Regenerar artefactos y comprobar que están al día
         run: |
           python scripts/build.py
           # build.py escribe la fecha de generación; se ignora esa línea al comparar
-          if git diff --ignore-matching-lines='"generated": ' --ignore-matching-lines='Generado: ' --quiet -- catalog.json llms.txt llms-full.txt indices/README.md sources README.md; then
+          if git diff --ignore-matching-lines='"generated": ' --ignore-matching-lines='Generado: ' --quiet -- catalog.json llms.txt llms-min.txt llms-full.txt indices/README.md sources README.md; then
             echo "Artefactos generados al día"
           else
             echo "::error::Los artefactos generados no coinciden con las fuentes; ejecuta python scripts/build.py y sube el resultado"

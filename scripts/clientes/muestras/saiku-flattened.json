@@ -1,0 +1,93 @@
+{
+ "cellset": [
+  [
+   {
+    "value": "Año",
+    "type": "ROW_HEADER_HEADER",
+    "properties": {
+     "hierarchy": "[02 Estructura temporal - Año].[Año]",
+     "dimension": "02 Estructura temporal - Año",
+     "level": "[02 Estructura temporal - Año].[Año].[Año]"
+    }
+   },
+   {
+    "value": "Llamadas pertinentes",
+    "type": "COLUMN_HEADER",
+    "properties": {
+     "uniquename": "[Measures].[Llamadas pertinentes]",
+     "hierarchy": "[Measures]",
+     "dimension": "Measures",
+     "level": "[Measures].[MeasuresLevel]"
+    }
+   }
+  ],
+  [
+   {
+    "value": "2024",
+    "type": "ROW_HEADER",
+    "properties": {
+     "uniquename": "[02 Estructura temporal - Año].[Año].&[2024]",
+     "hierarchy": "[02 Estructura temporal - Año].[Año]",
+     "dimension": "02 Estructura temporal - Año",
+     "level": "[02 Estructura temporal - Año].[Año].[Año]"
+    }
+   },
+   {
+    "value": "106196",
+    "type": "DATA_CELL",
+    "properties": {
+     "position": "0:17",
+     "raw": "106196.0"
+    }
+   }
+  ],
+  [
+   {
+    "value": "2025",
+    "type": "ROW_HEADER",
+    "properties": {
+     "uniquename": "[02 Estructura temporal - Año].[Año].&[2025]",
+     "hierarchy": "[02 Estructura temporal - Año].[Año]",
+     "dimension": "02 Estructura temporal - Año",
+     "level": "[02 Estructura temporal - Año].[Año].[Año]"
+    }
+   },
+   {
+    "value": "110595",
+    "type": "DATA_CELL",
+    "properties": {
+     "position": "0:18",
+     "raw": "110595.0"
+    }
+   }
+  ],
+  [
+   {
+    "value": "2026",
+    "type": "ROW_HEADER",
+    "properties": {
+     "uniquename": "[02 Estructura temporal - Año].[Año].&[2026]",
+     "hierarchy": "[02 Estructura temporal - Año].[Año]",
+     "dimension": "02 Estructura temporal - Año",
+     "level": "[02 Estructura temporal - Año].[Año].[Año]"
+    }
+   },
+   {
+    "value": "85414",
+    "type": "DATA_CELL",
+    "properties": {
+     "position": "0:19",
+     "raw": "85414.0"
+    }
+   }
+  ]
+ ],
+ "rowTotalsLists": null,
+ "colTotalsLists": null,
+ "runtime": 18,
+ "error": null,
+ "height": 21,
+ "width": 2,
+ "topOffset": 1,
+ "leftOffset": 0
+}

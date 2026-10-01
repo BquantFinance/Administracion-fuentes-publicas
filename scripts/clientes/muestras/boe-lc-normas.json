@@ -1,0 +1,68 @@
+{
+ "status": {
+  "code": "200",
+  "text": "ok"
+ },
+ "data": [
+  {
+   "fecha_actualizacion": "20260930T221002Z",
+   "identificador": "BOE-A-2012-6690",
+   "ambito": {
+    "codigo": "1",
+    "texto": "Estatal"
+   },
+   "departamento": {
+    "codigo": "9220",
+    "texto": "Ministerio de Agricultura, Alimentación y Medio Ambiente"
+   },
+   "rango": {
+    "codigo": "1350",
+    "texto": "Orden"
+   },
+   "fecha_disposicion": "20120516",
+   "numero_oficial": "AAA/1053/2012",
+   "titulo": "Orden AAA/1053/2012, de 16 de mayo, por la que se designa el Laboratorio Nacional de Referencia de Inspecciones de Equipos de Aplicación de Productos Fitosanitarios.",
+   "diario": "Boletín Oficial del Estado",
+   "fecha_publicacion": "20120521",
+   "diario_numero": "121",
+   "fecha_vigencia": "20120522",
+   "vigencia_agotada": "S",
+   "estado_consolidacion": {
+    "codigo": "4",
+    "texto": "Desactualizado"
+   },
+   "url_eli": "https://www.boe.es/eli/es/o/2012/05/16/aaa1053",
+   "url_html_consolidada": "https://www.boe.es/buscar/act.php?id=BOE-A-2012-6690"
+  },
+  {
+   "fecha_actualizacion": "20260930T221001Z",
+   "identificador": "BOE-A-2004-19459",
+   "ambito": {
+    "codigo": "1",
+    "texto": "Estatal"
+   },
+   "departamento": {
+    "codigo": "3210",
+    "texto": "Ministerio de Fomento"
+   },
+   "rango": {
+    "codigo": "1350",
+    "texto": "Orden"
+   },
+   "fecha_disposicion": "20041028",
+   "numero_oficial": "FOM/3743/2004",
+   "titulo": "Orden FOM/3743/2004, de 28 de octubre, por la que se aprueban las bases reguladoras de la concesión de ayudas a las sociedades de garantía recíproca que operen en el sector del transporte por carretera.",
+   "diario": "Boletín Oficial del Estado",
+   "fecha_publicacion": "20041116",
+   "diario_numero": "276",
+   "fecha_vigencia": "20041117",
+   "vigencia_agotada": "S",
+   "estado_consolidacion": {
+    "codigo": "3",
+    "texto": "Finalizado"
+   },
+   "url_eli": "https://www.boe.es/eli/es/o/2004/10/28/fom3743",
+   "url_html_consolidada": "https://www.boe.es/buscar/act.php?id=BOE-A-2004-19459"
+  }
+ ]
+}

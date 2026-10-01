@@ -183,8 +183,9 @@ elemento y una lista cuando hay varios. Normalizar: `x if isinstance(x, list) el
 
 ## no-weekend-data
 
-BOE y BORME no se publican domingos ni festivos (BORME tampoco sábados); la API devuelve 404 esos días. Al
-iterar fechas, tratar 404 como día sin publicación, no como error. Algún día antiguo devuelve 500; reintentar
+El BOE no se publica los domingos (sí los festivos nacionales, con menos secciones) y el BORME tampoco los sábados
+ni los festivos; la API devuelve 404 esos días (verificado el 2026-10-01). Al iterar fechas, tratar 404 como día sin
+publicación, no como error. Algún día antiguo devuelve 500; reintentar
 una vez y saltar.
 
 ## Ritmo de peticiones

@@ -1,0 +1,54 @@
+{
+ "content": [
+  {
+   "idConcesion": 145092266,
+   "numeroConvocatoria": "888690",
+   "idConvocatoria": 1090251,
+   "convocatoria": "Deducción por inversiones en producciones cinematográficas españolas y extranjeras arts. 36.1., 36.2, y 39.3 LIS AÑO 2024",
+   "idPersona": 5538235,
+   "codConcesion": "VF145092266",
+   "convocante": "ESTADO MINISTERIO DE HACIENDA AGENCIA ESTATAL DE ADMINISTRACIÓN TRIBUTARIA",
+   "reglamento": "SIN REGLAMENTO - NOTIFICACIÓN PREVIA",
+   "objetivo": null,
+   "instrumento": "VENTAJA FISCAL",
+   "tipoBeneficiario": "GRAN EMPRESA",
+   "fechaConcesion": "2025-07-12",
+   "fechaAlta": "2026-03-11",
+   "beneficiario": "A02066116 - BODEGAS PIQUERAS SA",
+   "importe": 55990.18,
+   "ayudaEquivalente": 55990.18,
+   "region": "ES - ESPAÑA ",
+   "sectores": "11 - Fabricación de bebidas",
+   "ayudaEstado": "SA.105988",
+   "urlAyudaEstado": "https://competition-cases.ec.europa.eu/cases/SA.105988",
+   "entidad": null,
+   "intermediario": null
+  }
+ ],
+ "pageable": {
+  "sort": {
+   "sorted": true,
+   "unsorted": false,
+   "empty": false
+  },
+  "pageNumber": 0,
+  "pageSize": 2,
+  "offset": 0,
+  "paged": true,
+  "unpaged": false
+ },
+ "last": false,
+ "totalElements": 9,
+ "totalPages": 5,
+ "first": true,
+ "sort": {
+  "sorted": true,
+  "unsorted": false,
+  "empty": false
+ },
+ "numberOfElements": 2,
+ "size": 2,
+ "number": 0,
+ "empty": false,
+ "advertencia": "La reutilización de los datos del Sistema Nacional de Publicidad de Subvenciones y Ayudas Públicas está sujeta a una serie de restricciones y consideraciones legales. Consulte el aviso legal en https://www.infosubvenciones.es/bdnstrans/GE/es/avisolegal.Además, el usuario debe ser consciente que la información presentada es de naturaleza dinámica, y que los datos pueden ser sometidos a correcciones, inserciones, modificaciones y eliminaciones en momentos posteriores a su extracción. Accesos al API del sistema Nacional de Publicidad de Subvenciones y Ayudas Públicas. La Administración Presupuestaria, para salvaguardar la protección del acceso libre e irrestricto de los ciudadanos a este Portal y a su información podrá adoptar medidas restrictivas de acceso al API ante situaciones de manifiesto abuso del servicio, riesgos de seguridad, o uso fraudulento de la información descargada, de acuerdo con las buenas prácticas de gestión de datos abiertos (https://datos.gob.es/es/blog/limitaciones-la-consulta-de-una-api) establecidas por el Ministerio para la Transformación Digital y de la Función Pública."
+}

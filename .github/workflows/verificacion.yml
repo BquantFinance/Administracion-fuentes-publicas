@@ -31,6 +31,25 @@ jobs:
           set +e
           python scripts/check_recetas.py --ca ca-age.pem --report recetas-report.md --fail
           echo "exit=$?" >> "$GITHUB_OUTPUT"
+      - name: Cargadores de scripts/clientes contra los servidores reales
+        id: cargadores
+        run: |
+          set +e
+          fallos=0
+          echo "# Cargadores · $(date -u +%F)" > cargadores-report.md
+          ejecutar() {
+            salida=$(timeout 600 python "$@" 2>&1); rc=$?
+            [ $rc -ne 0 ] && fallos=$((fallos+1))
+            { echo; echo "## $* · exit $rc"; echo '```'; echo "$salida" | tail -n 15; echo '```'; } >> cargadores-report.md
+          }
+          ejecutar scripts/clientes/boe.py
+          ejecutar scripts/clientes/bdns.py
+          ejecutar scripts/clientes/ine_tempus.py 02001
+          ejecutar scripts/clientes/saiku.py
+          ejecutar scripts/clientes/placsp.py 1
+          if [ -n "$AEMET_KEY" ]; then ejecutar scripts/clientes/aemet.py 16078; else echo "AEMET sin clave: omitido" >> cargadores-report.md; fi
+          cat cargadores-report.md
+          echo "exit=$fallos" >> "$GITHUB_OUTPUT"
       - name: Informe de enlaces de las fichas
         run: python scripts/check_links.py > link-report.md || true
       - uses: actions/upload-artifact@v4
@@ -38,14 +57,15 @@ jobs:
           name: informes-verificacion
           path: |
             recetas-report.md
+            cargadores-report.md
             link-report.md
       - name: Abrir o actualizar el issue si hay fallos
-        if: steps.recetas.outputs.exit != '0'
+        if: steps.recetas.outputs.exit != '0' || steps.cargadores.outputs.exit != '0'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           titulo="Verificación semanal: comprobaciones de recetas con fail o error"
-          cuerpo="$(head -c 60000 recetas-report.md)"
+          cuerpo="$(cat recetas-report.md cargadores-report.md | head -c 60000)"
           num=$(gh issue list --state open --search "\"$titulo\" in:title" --json number --jq '.[0].number')
           if [ -n "$num" ]; then
             gh issue comment "$num" --body "$cuerpo"

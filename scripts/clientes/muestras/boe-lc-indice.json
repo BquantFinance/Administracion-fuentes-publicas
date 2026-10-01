@@ -1,0 +1,36 @@
+{
+ "status": {
+  "code": "200",
+  "text": "ok"
+ },
+ "data": [
+  {
+   "bloque": [
+    {
+     "id": "preambulo",
+     "titulo": "",
+     "fecha_actualizacion": "19781229",
+     "url": "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/bloque/preambulo"
+    },
+    {
+     "id": "tpreliminar",
+     "titulo": "TÍTULO PRELIMINAR",
+     "fecha_actualizacion": "19781229",
+     "url": "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/bloque/tpreliminar"
+    },
+    {
+     "id": "a1",
+     "titulo": "Artículo 1",
+     "fecha_actualizacion": "19781229",
+     "url": "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/bloque/a1"
+    },
+    {
+     "id": "a2",
+     "titulo": "Artículo 2",
+     "fecha_actualizacion": "19781229",
+     "url": "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-1978-31229/texto/bloque/a2"
+    }
+   ]
+  }
+ ]
+}

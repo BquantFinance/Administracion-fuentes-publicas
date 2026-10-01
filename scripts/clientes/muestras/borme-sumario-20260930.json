@@ -1,0 +1,105 @@
+{
+ "status": {
+  "code": "200",
+  "text": "ok"
+ },
+ "data": {
+  "sumario": {
+   "metadatos": {
+    "publicacion": "BORME",
+    "fecha_publicacion": "20260930"
+   },
+   "diario": [
+    {
+     "numero": "189",
+     "sumario_diario": {
+      "identificador": "BORME-S-2026-189",
+      "url_pdf": {
+       "szBytes": "220952",
+       "szKBytes": "216",
+       "texto": "https://www.boe.es/borme/dias/2026/09/30/pdfs/BORME-S-2026-189.pdf"
+      }
+     },
+     "seccion": [
+      {
+       "codigo": "A",
+       "nombre": "SECCIÓN PRIMERA. Empresarios. Actos inscritos",
+       "item": [
+        {
+         "identificador": "BORME-A-2026-189-28",
+         "titulo": "MADRID",
+         "url_pdf": {
+          "szBytes": "1018340",
+          "szKBytes": "994",
+          "pagina_inicial": "45882",
+          "pagina_final": "45928",
+          "texto": "https://www.boe.es/borme/dias/2026/09/30/pdfs/BORME-A-2026-189-28.pdf"
+         },
+         "url_html": "https://www.boe.es/diario_borme/txt.php?id=BORME-A-2026-189-28",
+         "url_xml": "https://www.boe.es/diario_borme/xml.php?id=BORME-A-2026-189-28"
+        },
+        {
+         "identificador": "BORME-A-2026-189-99",
+         "titulo": "ÍNDICE ALFABÉTICO DE SOCIEDADES",
+         "url_pdf": {
+          "szBytes": "1328875",
+          "szKBytes": "1298",
+          "pagina_inicial": "45981",
+          "pagina_final": "46012",
+          "texto": "https://www.boe.es/borme/dias/2026/09/30/pdfs/BORME-A-2026-189-99.pdf"
+         },
+         "url_html": "https://www.boe.es/diario_borme/txt.php?id=BORME-A-2026-189-99",
+         "url_xml": "https://www.boe.es/diario_borme/xml.php?id=BORME-A-2026-189-99"
+        }
+       ]
+      },
+      {
+       "codigo": "B",
+       "nombre": "SECCIÓN PRIMERA. Empresarios. Otros actos publicados en el Registro Mercantil",
+       "item": [
+        {
+         "identificador": "BORME-B-2026-189-09",
+         "titulo": "BURGOS",
+         "url_pdf": {
+          "szBytes": "191442",
+          "szKBytes": "187",
+          "pagina_inicial": "46013",
+          "pagina_final": "46013",
+          "texto": "https://www.boe.es/borme/dias/2026/09/30/pdfs/BORME-B-2026-189-09.pdf"
+         },
+         "url_html": "https://www.boe.es/diario_borme/txt.php?id=BORME-B-2026-189-09",
+         "url_xml": "https://www.boe.es/diario_borme/xml.php?id=BORME-B-2026-189-09"
+        }
+       ]
+      },
+      {
+       "codigo": "C",
+       "nombre": "SECCIÓN SEGUNDA. Anuncios y avisos legales",
+       "apartado": [
+        {
+         "codigo": "002",
+         "nombre": "CONVOCATORIAS DE JUNTAS",
+         "item": [
+          {
+           "identificador": "BORME-C-2026-5247",
+           "titulo": "ARQUITECTOS Y PROMOCIONES, S.A.",
+           "url_pdf": {
+            "szBytes": "186176",
+            "szKBytes": "182",
+            "pagina_inicial": "6518",
+            "pagina_final": "6518",
+            "texto": "https://www.boe.es/borme/dias/2026/09/30/pdfs/BORME-C-2026-5247.pdf"
+           },
+           "url_html": "https://www.boe.es/diario_borme/txt.php?id=BORME-C-2026-5247",
+           "url_xml": "https://www.boe.es/diario_borme/xml.php?id=BORME-C-2026-5247"
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

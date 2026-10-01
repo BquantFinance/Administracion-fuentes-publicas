@@ -1,5 +1,10 @@
 # Resultados de la evaluación · 2026-10-01 (segunda tanda)
 
+> Corrección del 2026-10-01: la columna tokens es la que devuelve el arnés al terminar cada agente, que es el tamaño de su
+> contexto final, no los tokens procesados (cada turno reenvía el contexto entero; un agente de prueba con 7 turnos marcó
+> 44.535 y procesó 306.004 de entrada). Las comparaciones de tokens de este fichero no miden coste; las de llamadas,
+> fallidas, usos de herramienta y tiempo siguen valiendo.
+
 Tres preguntas que la primera tanda dejó abiertas: qué pasa en las tareas difíciles (clave de AEMET, CODICE de PLACSP, DataComex,
 Atlas de renta del INE con filtro tv, API Saiku del portal de violencia de género), qué pasa con un modelo más barato (Claude Sonnet)
 y cuánto ahorra una entrada ligera (`llms-min.txt`, 7 KB) frente a `llms.txt` entero (33 KB). Mismo protocolo que la primera tanda:

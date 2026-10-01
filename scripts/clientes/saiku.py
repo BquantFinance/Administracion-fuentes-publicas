@@ -17,6 +17,11 @@ BASE = "https://estadisticasviolenciagenero.igualdad.gob.es/saiku/rest/saiku/ano
 CATALOGO = "VDG_CIUDADANO_PRO"
 
 
+def filas(o: dict) -> list[list]:
+    """Cellset de result/flattened como filas de valores, cabecera primero; los números llegan como texto (raw lleva el decimal)."""
+    return [[c.get("value") for c in fila] for fila in o["cellset"]]
+
+
 class Saiku:
     def __init__(self):
         self.s = session()
@@ -35,7 +40,7 @@ class Saiku:
             self.s.post(f"{BASE}/query/{nombre}", data={"connection": "xmla", "cube": cubo, "catalog": CATALOGO, "schema": "", "type": "MDX"}, timeout=60, verify=self.s.verify)
             o = self.s.post(f"{BASE}/query/{nombre}/result/flattened", data={"mdx": mdx}, timeout=120, verify=self.s.verify).json()
             if o.get("cellset"):
-                return [[c.get("value") for c in fila] for fila in o["cellset"]]
+                return filas(o)
         raise RuntimeError(f"Saiku: {o.get('error')}")
 
     def csv(self, nombre: str = "q1") -> bytes:

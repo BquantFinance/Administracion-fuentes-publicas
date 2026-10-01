@@ -1,0 +1,39 @@
+{
+ "status": {
+  "code": "200",
+  "text": "ok"
+ },
+ "data": [
+  {
+   "fecha_actualizacion": "20260520T074424Z",
+   "identificador": "BOE-A-1978-31229",
+   "ambito": {
+    "codigo": "1",
+    "texto": "Estatal"
+   },
+   "departamento": {
+    "codigo": "1220",
+    "texto": "Cortes Generales"
+   },
+   "rango": {
+    "codigo": "1070",
+    "texto": "Constitución"
+   },
+   "fecha_disposicion": "19781227",
+   "titulo": "Constitución Española.",
+   "diario": "Boletín Oficial del Estado",
+   "fecha_publicacion": "19781229",
+   "diario_numero": "311",
+   "fecha_vigencia": "19781229",
+   "estatus_derogacion": "N",
+   "estatus_anulacion": "N",
+   "vigencia_agotada": "N",
+   "estado_consolidacion": {
+    "codigo": "3",
+    "texto": "Finalizado"
+   },
+   "url_eli": "https://www.boe.es/eli/es/c/1978/12/27/(1)",
+   "url_html_consolidada": "https://www.boe.es/buscar/act.php?id=BOE-A-1978-31229"
+  }
+ ]
+}

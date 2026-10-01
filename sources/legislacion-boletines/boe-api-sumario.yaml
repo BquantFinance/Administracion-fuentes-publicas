@@ -20,9 +20,9 @@ endpoints:
   - path: /boe/sumario/{AAAAMMDD}
     desc: Sumario del día, anidado en diario > seccion > departamento > epigrafe > item
     example: 'curl -s -H "Accept: application/json" "https://www.boe.es/datosabiertos/api/boe/sumario/20240102"'
-    returns: "{status, data.sumario.diario[]:{numero, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]:{identificador, titulo, url_pdf:{texto, szBytes}, url_html, url_xml}}}}}}; en 4, 5A y 5B item cuelga de departamento y en 5C de departamento.texto; un elemento solo es objeto, no lista"
+    returns: "{status, data.sumario:{metadatos, diario[]:{numero, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]}}}}}}; item {identificador, titulo, url_pdf{texto, szBytes}, url_html, url_xml}; en 4, 5A y 5B item cuelga de departamento; nodos texto intermedios; un solo elemento es objeto"
   - path: https://www.boe.es/diario_boe/xml.php?id={BOE-A-AAAA-NNNNN}
-    desc: Texto completo y metadatos de una disposición en XML; no necesita cabecera Accept
+    desc: Texto completo y metadatos de una disposición o anuncio en XML; no necesita cabecera Accept
     example: curl -s "https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-87"
     returns: "XML documento con metadatos (identificador, departamento y rango con atributo codigo, fecha_disposicion, titulo, fecha_publicacion, seccion, url_pdf, estatus_derogacion), analisis (materias, notas, referencias anteriores y posteriores) y texto"
   - path: https://www.boe.es/diario_boe/txt.php?id={id}
@@ -36,17 +36,19 @@ ids: [boe-id]
 gotchas:
   - Cabecera Accept obligatoria con application/json o application/xml; sin ella, o con */*, responde 400.
   - Los errores (400, 404, 500) llegan siempre con cuerpo XML aunque se pida JSON; comprobar el código HTTP antes de parsear.
-  - En JSON, item, departamento y epigrafe son objeto si hay un elemento y lista si hay varios; normalizar a lista antes de iterar.
-  - No hay BOE los domingos ni festivos nacionales; esos días la API devuelve 404.
+  - En JSON, diario, seccion, departamento, epigrafe e item son objeto si hay un elemento y lista si hay varios; normalizar a lista antes de iterar.
+  - Entre niveles aparecen nodos texto (departamento.texto en las secciones 4 y 5C, seccion.texto en algún número) y un día puede traer dos números (241 y 242 el 30/09/2026); recorrer el árbol sin suponer niveles.
+  - El BOE sale todos los días salvo los domingos, festivos nacionales incluidos (el 1/1 y el 25/12 solo con secciones 1 a 3); los domingos la API devuelve 404.
   - Algunos días antiguos (p. ej. 19700102) devuelven 500 aunque exista boletín; reintentar o saltar.
   - Cada item trae url_pdf.texto, url_html y url_xml ya construidas; no montar la URL del PDF a mano (BOE-A-2024-1 no está en 2024/01/02).
   - Los identificadores siguen el patrón BOE-A-AAAA-NNNNN (disposiciones) y BOE-B-AAAA-NNNNN (anuncios); la numeración es anual.
   - No hay búsqueda por texto en esta API; descargar sumarios y filtrar en local, o usar la API de legislación consolidada.
-  - "En el JSON del sumario, departamento, epigrafe e item llegan como objeto cuando hay uno solo y como lista cuando hay varios; normalizar a lista antes de iterar."
+  - xml.php con un id inexistente responde 200 con raíz error (descripcion No se encontró el documento original) y Content-Type text/html; comprobar la raíz.
 tips:
-  - Un sumario diario pesa entre 100 y 200 KB en JSON; para histórico iterar por fecha y tratar 404 como día sin publicación.
+  - Un sumario diario pesa entre 50 y 500 KB en JSON (85 KB en festivos, 450 KB un lunes); para histórico iterar por fecha y tratar 404 como día sin publicación.
   - El OpenAPI 3.1 completo está embebido en api.php (variable openApiFile); el documento técnico es APIsumarioBOE.pdf en /datosabiertos/documentos/.
   - Para detectar publicaciones nuevas sin descargar el sumario entero, usar los feeds RSS (boe-feeds).
+  - scripts/clientes/boe.py aplana el sumario con todas sus variantes (items), lee el XML de cada disposición (documento) y recorre días saltando domingos (sumarios).
 related: [boe-api-legislacion-consolidada, borme-api-sumario, boe-feeds]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

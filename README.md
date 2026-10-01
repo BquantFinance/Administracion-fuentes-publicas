@@ -60,6 +60,8 @@ llms.txt / llms-full.txt     entrada para agentes (generado)
 indices/*.yaml               recetas por intención, necesidades, identificadores, códigos que son parámetros, rutas muertas (fuente de verdad)
 indices/README.md            los cinco índices en texto (generado)
 scripts/                     validate.py, build.py, check_links.py, check_recetas.py, fnmt_bundle.py, mcp_catalogo.py (servidor MCP local)
+scripts/clientes/            cargadores en Python que resuelven las trampas (BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex, Saiku)
+scripts/clientes/muestras/   respuestas reales recortadas para probar los parsers sin red (python scripts/test_clientes.py)
 evals/                       20 tareas con respuesta esperada para medir lo que aporta el repo a un agente
 templates/source.yaml        plantilla de ficha
 guides/                      guías transversales (identificadores para cruzar datasets, etc.)
@@ -85,7 +87,7 @@ Además de las fichas, `indices/` responde a las preguntas que se hacen antes de
 - **Códigos que son parámetros**: valores que las APIs exigen y no se adivinan (Id del INE para `tv`, países de DataComex, estación de AEMET por capital, productos de carburantes, rangos del BOE), obtenidos con llamadas reales.
 - **Rutas muertas**: URLs de documentación antigua que ya no sirven y su sustituta.
 
-**Medido** ([evals/](evals/)): en diez tareas resueltas por el mismo agente con y sin catálogo (dos modelos), el acierto fue el mismo; con catálogo las llamadas HTTP bajan a la mitad y las fallidas o inútiles casi a cero. Leer `llms.txt` entero cuesta un 34 % más de tokens; `llms-min.txt` lo deja en un 11 % y el servidor MCP lo evita.
+**Medido** ([evals/](evals/)): en diez tareas resueltas por el mismo agente con y sin catálogo (dos modelos), el acierto fue el mismo; con catálogo, en las tareas difíciles las llamadas HTTP y los pasos del agente bajan a la mitad y las fallidas casi a cero. El consumo de tokens está pendiente de medir bien: las dos primeras tandas registraron el contexto final de cada agente, no los tokens procesados en todos sus turnos.
 
 Todo en [indices/README.md](indices/README.md) y, para consumo programático, bajo la clave `indices` de `catalog.json`. Cada endpoint principal de una ficha lleva `example` (llamada copiable) y `returns` (forma de la respuesta vista en esa llamada). `python scripts/mcp_catalogo.py` expone el catálogo por MCP en local para cargar solo lo necesario ([guía](guides/servidor-mcp.md)).
 

@@ -38,11 +38,13 @@ gotchas:
   - Cabecera Accept obligatoria (application/json o application/xml); sin ella 400. Los errores llegan siempre en XML.
   - En JSON, item y apartado son objeto si hay un elemento y lista si hay varios; normalizar antes de iterar.
   - El XML de la sección A no tiene campos por acto. Cada empresa es un p class articulo (número - denominación) seguido de un p class parrafo con los actos separados por punto y los Datos registrales al final.
-  - El sufijo del id de las secciones A y B es el código de provincia (01 Álava ... 52 Melilla), no un correlativo.
+  - El sufijo del id de las secciones A y B es el código de provincia (01 Álava ... 52 Melilla), no un correlativo; el 99 de la sección A es el índice alfabético de sociedades del día.
   - No se publica sábados, domingos ni festivos; esos días 404. El sumario estructurado empieza en enero de 2009.
   - El BORME no incluye cuentas anuales ni socios; eso está en el Registro Mercantil (Colegio de Registradores, de pago).
 tips:
-  - Los tipos de acto en el parrafo son un vocabulario fijo (Constitución, Nombramientos, Ceses, Revocaciones, Ampliación de capital, Disolución, Modificaciones estatutarias...) y sirven de separador al parsear.
+  - Los tipos de acto en el parrafo son un vocabulario fijo (Constitución, Nombramientos, Ceses/Dimisiones, Revocaciones, Ampliación de capital, Disolución...) y sirven de separador al parsear.
+  - Para buscar una empresa en un día, el XML BORME-A-AAAA-NNN-99 es una tabla con denominación, id del documento de provincia y número de asiento; evita bajar las 52 provincias.
+  - scripts/clientes/boe.py (borme_empresas) separa número, denominación, registro, actos y datos registrales de cada empresa; un acto fuera de su lista queda con tipo None.
 related: [boe-api-sumario, boe-feeds]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

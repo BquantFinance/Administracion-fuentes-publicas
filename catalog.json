@@ -1020,7 +1020,7 @@
     "ine-provincia"
    ],
    "gotchas": [
-    "Sin token, ObtenerDatos responde 401 con XML (Se ha denegado la autorización); con un token inválido, 500 con cuerpo vacío. El token va en la cabecera Authorization Bearer o en el parámetro access_token.",
+    "Sin token, ObtenerDatos da 401 (Se ha denegado la autorización), en XML con Accept de navegador y en JSON con application/json; token inválido, 500 sin cuerpo. Token en Authorization Bearer o access_token.",
     "El registro (nombre, correo y contraseña, sin captcha) envía un correo de activación; hasta activar la cuenta no hay token. La descarga masiva del portal también exige sesión.",
     "Si falta cualquiera de los cinco parámetros la API responde 200 con un único registro cuyo mensaje es \"Error de sintaxis. Faltan parámetros\"; comprobar mensaje antes de parsear.",
     "pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error.",
@@ -1364,7 +1364,7 @@
      "desc": "Búsqueda paginada de convocatorias (numeroConvocatoria, descripcion, fechaRecepcion, nivel1 a nivel3, mrr)",
      "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=50&fechaDesde=01/09/2026&fechaHasta=30/09/2026&order=fechaRecepcion&direccion=desc\"",
      "params": "descripcion, fechaDesde y fechaHasta en dd/mm/aaaa, tipoAdministracion=C (estatal), numeroConvocatoria, mrr, vpd, order y direccion",
-     "returns": "Página Spring {content:[{id, numeroConvocatoria, descripcion, fechaRecepcion, nivel1 (ESTATAL, AUTONOMICA, LOCAL), nivel2, nivel3, mrr, codigoInvente}], totalElements, totalPages, number, size, last}"
+     "returns": "Página Spring {content:[{id, numeroConvocatoria, descripcion, fechaRecepcion (AAAA-MM-DD), nivel1 (ESTADO, AUTONOMICA, LOCAL, OTROS), nivel2, nivel3, mrr, codigoInvente}], totalElements, totalPages, number, size, last, advertencia}"
     },
     {
      "path": "/convocatorias?numConv={numero_bdns}",
@@ -1376,8 +1376,8 @@
      "path": "/concesiones/busqueda?page={n}&pageSize={n}",
      "desc": "Concesiones con beneficiario, importe, ayuda equivalente, instrumento y convocatoria",
      "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=50&numeroConvocatoria=931918\"",
-     "params": "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa",
-     "returns": "content:[{id, codConcesion, fechaConcesion, beneficiario (NIF y nombre en la misma cadena), instrumento, importe, ayudaEquivalente, urlBR, numeroConvocatoria, idConvocatoria, convocatoria, nivel1, nivel2, nivel3}]"
+     "params": "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa, nifCif (NIF del beneficiario), beneficiario (idPersona interno, no el NIF)",
+     "returns": "content:[{id, codConcesion, fechaConcesion (AAAA-MM-DD), beneficiario (NIF y nombre en la misma cadena), idPersona, instrumento, importe y ayudaEquivalente (números), urlBR, numeroConvocatoria, convocatoria, nivel1, nivel2, nivel3, fechaAlta}]"
     },
     {
      "path": "/{coleccion}/busqueda?page={n}&pageSize={n}",
@@ -1387,15 +1387,16 @@
     },
     {
      "path": "/{coleccion}/exportar?vpd=GE&tipoDoc={csv|xlsx}",
-     "desc": "Exportación con los mismos filtros que la búsqueda; verificada en convocatorias y concesiones",
-     "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/concesiones/exportar?vpd=GE&tipoDoc=csv&fechaDesde=29/09/2026&fechaHasta=29/09/2026\" | iconv -f WINDOWS-1252 -t UTF-8"
+     "desc": "Exportación con los mismos filtros y la misma paginación que la búsqueda; verificada en convocatorias y concesiones",
+     "example": "curl -s \"https://www.infosubvenciones.es/bdnstrans/api/concesiones/exportar?vpd=GE&tipoDoc=csv&page=0&pageSize=10000&fechaDesde=29/09/2026&fechaHasta=29/09/2026\" | iconv -f WINDOWS-1252 -t UTF-8",
+     "returns": "CSV separado por comas con cabecera en castellano (Administración, Código BDNS, Convocatoria, Beneficiario, Importe...); fechas dd/mm/aaaa, punto decimal, título de convocatoria cortado a 128 caracteres"
     },
     {
      "path": "/convocatorias/ultimas?page={n}&pageSize={n}",
      "desc": "Últimas convocatorias registradas"
     }
    ],
-   "rate_limit": "No documentado; pageSize se limita en silencio a 10000 (4 MB y 6 s por página). El aviso legal se reserva bloquear usos abusivos.",
+   "rate_limit": "No documentado; pageSize se limita en silencio a 10000 (unos 9 MB y 7 s por página de concesiones en JSON). El aviso legal se reserva bloquear usos abusivos.",
    "quirks": [
     "latin1",
     "errors-html-or-xml"
@@ -1409,14 +1410,16 @@
     "Con un Accept de navegador (que incluye application/xml) la API responde XML (raíz ObjectNode) con el mismo contenido; pedir Accept: application/json para JSON.",
     "Las fechas de filtro van en dd/mm/aaaa; en ISO (2026-09-01) responde 400 con JSON de campos codigo y errores.",
     "pageSize mayor de 10000 no da error, devuelve 10000. La respuesta es un Page de Spring (content, totalElements, totalPages, last) más el campo advertencia con el aviso legal.",
-    "Los beneficiarios personas físicas van con el DNI parcialmente oculto (***1490**) y nombre; las jurídicas con el NIF completo delante del nombre, todo en el mismo campo beneficiario.",
+    "beneficiario junta NIF y nombre (en ayudasestado separados por guion); las personas físicas llevan el DNI enmascarado con formas distintas (***0456**, ****7918*, ***0647).",
+    "La exportación pagina como la búsqueda; sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso. Pasar page y pageSize (tope 10000).",
     "La exportación exige vpd (GE es el portal general) o responde 400 \"No se ha informado el portal\"; el CSV llega en windows-1252, no en UTF-8.",
-    "El filtro beneficiario en concesiones/busqueda devolvió 400 en la verificación; filtrar por convocatoria o fechas y cribar en local.",
+    "Por beneficiario se filtra con nifCif (verificado en concesiones, minimis, ayudasestado y grandesbeneficiarios) o con beneficiario=idPersona; beneficiario con un NIF da 400.",
     "La documentación es un Swagger UI dentro de la aplicación Angular (docs_url); no hay URL estable del fichero OpenAPI. Un endpoint inexistente devuelve 404 con HTML de Tomcat."
    ],
    "tips": [
     "Para descargar todo, paginar con pageSize=10000 y trocear por fechaDesde y fechaHasta mensuales; totalElements indica el volumen antes de empezar.",
-    "numeroConvocatoria (código BDNS) es el identificador estable y público; id es interno y significa cosas distintas en cada colección."
+    "numeroConvocatoria (código BDNS) es el identificador estable y público; id es interno y significa cosas distintas en cada colección.",
+    "scripts/clientes/bdns.py pagina hasta el final, convierte fechas a dd/mm/aaaa, separa NIF y nombre y exporta con pageSize."
    ],
    "related": [
     "placsp-datos-abiertos",
@@ -1424,7 +1427,7 @@
     "boe-api-sumario"
    ],
    "status": "active",
-   "verified": "2026-09-30"
+   "verified": "2026-10-01"
   },
   {
    "id": "hacienda-registro-licitadores",
@@ -4747,12 +4750,13 @@
     "En query_string el término va con campo (titulo:vivienda); un término suelto devuelve vacío. En range, gte y lte son obligatorios en formato AAAAMMDD.",
     "from y to filtran por fecha_actualizacion (última modificación del consolidado), no por fecha de publicación; para eso usar range en query.",
     "Solo hay normas con texto consolidado; una disposición del BOE sin consolidar devuelve 404 aunque su id exista.",
-    "Cada bloque trae una o varias version con fecha_vigencia; para el texto vigente quedarse con la de fecha_vigencia más reciente."
+    "Cada bloque trae una o varias version con fecha_vigencia; para el texto vigente quedarse con la de fecha_vigencia más reciente que no sea posterior a hoy."
    ],
    "tips": [
     "Flujo de actualización diaria. Listado con from=ayer, y después metadatos o texto de cada identificador devuelto.",
     "Para un artículo concreto, indice para localizar el id de bloque y luego texto/bloque/{id}.",
     "Los códigos numéricos de rango, materia y departamento se traducen con datos-auxiliares.",
+    "scripts/clientes/boe.py pagina el listado (normas), lee metadatos e índice y elige la versión vigente de un bloque (bloque y version_vigente).",
     "El OpenAPI 3.1 está embebido en api.php (variable openApiFile); el documento técnico es APIconsolidada.pdf en /datosabiertos/documentos/."
    ],
    "related": [
@@ -4760,7 +4764,7 @@
     "boe-eli"
    ],
    "status": "active",
-   "verified": "2026-09-30"
+   "verified": "2026-10-01"
   },
   {
    "id": "boe-api-sumario",
@@ -4798,11 +4802,11 @@
      "path": "/boe/sumario/{AAAAMMDD}",
      "desc": "Sumario del día, anidado en diario > seccion > departamento > epigrafe > item",
      "example": "curl -s -H \"Accept: application/json\" \"https://www.boe.es/datosabiertos/api/boe/sumario/20240102\"",
-     "returns": "{status, data.sumario.diario[]:{numero, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]:{identificador, titulo, url_pdf:{texto, szBytes}, url_html, url_xml}}}}}}; en 4, 5A y 5B item cuelga de departamento y en 5C de departamento.texto; un elemento solo es objeto, no lista"
+     "returns": "{status, data.sumario:{metadatos, diario[]:{numero, seccion[]:{codigo, nombre, departamento[]:{codigo, nombre, epigrafe[]:{nombre, item[]}}}}}}; item {identificador, titulo, url_pdf{texto, szBytes}, url_html, url_xml}; en 4, 5A y 5B item cuelga de departamento; nodos texto intermedios; un solo elemento es objeto"
     },
     {
      "path": "https://www.boe.es/diario_boe/xml.php?id={BOE-A-AAAA-NNNNN}",
-     "desc": "Texto completo y metadatos de una disposición en XML; no necesita cabecera Accept",
+     "desc": "Texto completo y metadatos de una disposición o anuncio en XML; no necesita cabecera Accept",
      "example": "curl -s \"https://www.boe.es/diario_boe/xml.php?id=BOE-A-2024-87\"",
      "returns": "XML documento con metadatos (identificador, departamento y rango con atributo codigo, fecha_disposicion, titulo, fecha_publicacion, seccion, url_pdf, estatus_derogacion), analisis (materias, notas, referencias anteriores y posteriores) y texto"
     },
@@ -4829,18 +4833,20 @@
    "gotchas": [
     "Cabecera Accept obligatoria con application/json o application/xml; sin ella, o con */*, responde 400.",
     "Los errores (400, 404, 500) llegan siempre con cuerpo XML aunque se pida JSON; comprobar el código HTTP antes de parsear.",
-    "En JSON, item, departamento y epigrafe son objeto si hay un elemento y lista si hay varios; normalizar a lista antes de iterar.",
-    "No hay BOE los domingos ni festivos nacionales; esos días la API devuelve 404.",
+    "En JSON, diario, seccion, departamento, epigrafe e item son objeto si hay un elemento y lista si hay varios; normalizar a lista antes de iterar.",
+    "Entre niveles aparecen nodos texto (departamento.texto en las secciones 4 y 5C, seccion.texto en algún número) y un día puede traer dos números (241 y 242 el 30/09/2026); recorrer el árbol sin suponer niveles.",
+    "El BOE sale todos los días salvo los domingos, festivos nacionales incluidos (el 1/1 y el 25/12 solo con secciones 1 a 3); los domingos la API devuelve 404.",
     "Algunos días antiguos (p. ej. 19700102) devuelven 500 aunque exista boletín; reintentar o saltar.",
     "Cada item trae url_pdf.texto, url_html y url_xml ya construidas; no montar la URL del PDF a mano (BOE-A-2024-1 no está en 2024/01/02).",
     "Los identificadores siguen el patrón BOE-A-AAAA-NNNNN (disposiciones) y BOE-B-AAAA-NNNNN (anuncios); la numeración es anual.",
     "No hay búsqueda por texto en esta API; descargar sumarios y filtrar en local, o usar la API de legislación consolidada.",
-    "En el JSON del sumario, departamento, epigrafe e item llegan como objeto cuando hay uno solo y como lista cuando hay varios; normalizar a lista antes de iterar."
+    "xml.php con un id inexistente responde 200 con raíz error (descripcion No se encontró el documento original) y Content-Type text/html; comprobar la raíz."
    ],
    "tips": [
-    "Un sumario diario pesa entre 100 y 200 KB en JSON; para histórico iterar por fecha y tratar 404 como día sin publicación.",
+    "Un sumario diario pesa entre 50 y 500 KB en JSON (85 KB en festivos, 450 KB un lunes); para histórico iterar por fecha y tratar 404 como día sin publicación.",
     "El OpenAPI 3.1 completo está embebido en api.php (variable openApiFile); el documento técnico es APIsumarioBOE.pdf en /datosabiertos/documentos/.",
-    "Para detectar publicaciones nuevas sin descargar el sumario entero, usar los feeds RSS (boe-feeds)."
+    "Para detectar publicaciones nuevas sin descargar el sumario entero, usar los feeds RSS (boe-feeds).",
+    "scripts/clientes/boe.py aplana el sumario con todas sus variantes (items), lee el XML de cada disposición (documento) y recorre días saltando domingos (sumarios)."
    ],
    "related": [
     "boe-api-legislacion-consolidada",
@@ -4848,7 +4854,7 @@
     "boe-feeds"
    ],
    "status": "active",
-   "verified": "2026-09-30"
+   "verified": "2026-10-01"
   },
   {
    "id": "boe-eli",
@@ -5054,19 +5060,21 @@
     "Cabecera Accept obligatoria (application/json o application/xml); sin ella 400. Los errores llegan siempre en XML.",
     "En JSON, item y apartado son objeto si hay un elemento y lista si hay varios; normalizar antes de iterar.",
     "El XML de la sección A no tiene campos por acto. Cada empresa es un p class articulo (número - denominación) seguido de un p class parrafo con los actos separados por punto y los Datos registrales al final.",
-    "El sufijo del id de las secciones A y B es el código de provincia (01 Álava ... 52 Melilla), no un correlativo.",
+    "El sufijo del id de las secciones A y B es el código de provincia (01 Álava ... 52 Melilla), no un correlativo; el 99 de la sección A es el índice alfabético de sociedades del día.",
     "No se publica sábados, domingos ni festivos; esos días 404. El sumario estructurado empieza en enero de 2009.",
     "El BORME no incluye cuentas anuales ni socios; eso está en el Registro Mercantil (Colegio de Registradores, de pago)."
    ],
    "tips": [
-    "Los tipos de acto en el parrafo son un vocabulario fijo (Constitución, Nombramientos, Ceses, Revocaciones, Ampliación de capital, Disolución, Modificaciones estatutarias...) y sirven de separador al parsear."
+    "Los tipos de acto en el parrafo son un vocabulario fijo (Constitución, Nombramientos, Ceses/Dimisiones, Revocaciones, Ampliación de capital, Disolución...) y sirven de separador al parsear.",
+    "Para buscar una empresa en un día, el XML BORME-A-AAAA-NNN-99 es una tabla con denominación, id del documento de provincia y número de asiento; evita bajar las 52 provincias.",
+    "scripts/clientes/boe.py (borme_empresas) separa número, denominación, registro, actos y datos registrales de cada empresa; un acto fuera de su lista queda con tipo None."
    ],
    "related": [
     "boe-api-sumario",
     "boe-feeds"
    ],
    "status": "active",
-   "verified": "2026-09-30"
+   "verified": "2026-10-01"
   },
   {
    "id": "miteco-banco-datos-naturaleza",
@@ -7511,7 +7519,7 @@
      },
      {
       "source": "bdns-api",
-      "do": "grandesbeneficiarios, ayudasestado y minimis tienen el mismo patrón de búsqueda (nifCif verificado solo en concesiones); exportación con concesiones/exportar?vpd=GE&tipoDoc=csv y los mismos filtros"
+      "do": "grandesbeneficiarios, ayudasestado y minimis tienen el mismo patrón de búsqueda y aceptan nifCif (verificado el 2026-10-01; en ayudasestado beneficiario separa NIF y nombre con guion); exportación con concesiones/exportar?vpd=GE&tipoDoc=csv, los mismos filtros y pageSize (sin él, 50 filas)"
      },
      {
       "source": "aei-convocatorias",
@@ -7732,7 +7740,7 @@
      },
      {
       "source": "bdns-api",
-      "do": "Exportación masiva con convocatorias/exportar?vpd=GE&tipoDoc=csv y los mismos filtros (windows-1252; tope de 10000 filas sin aviso)"
+      "do": "Exportación masiva con convocatorias/exportar?vpd=GE&tipoDoc=csv, los mismos filtros y page y pageSize (sin pageSize devuelve 50 filas sin aviso; tope 10000; windows-1252)"
      }
     ],
     "output": "JSON paginado de convocatorias y detalle por número BDNS",

@@ -1,0 +1,146 @@
+[
+ {
+  "COD": "DPOP163",
+  "Nombre": "Abengibre. Total. Total habitantes. Personas. ",
+  "T3_Unidad": "Personas",
+  "T3_Escala": " ",
+  "MetaData": [
+   {
+    "Id": 6124,
+    "T3_Variable": "Municipios",
+    "Nombre": "Abengibre",
+    "Codigo": "02001"
+   },
+   {
+    "Id": 451,
+    "T3_Variable": "Sexo",
+    "Nombre": "Total",
+    "Codigo": "0"
+   },
+   {
+    "Id": 8677,
+    "T3_Variable": "Tamaño de los municipios",
+    "Nombre": "Total habitantes",
+    "Codigo": "0"
+   },
+   {
+    "Id": 20258,
+    "T3_Variable": "Tipo de dato",
+    "Nombre": "Personas",
+    "Codigo": ""
+   }
+  ],
+  "Data": [
+   {
+    "Fecha": "2025-01-01T00:00:00.000+01:00",
+    "T3_TipoDato": "Definitivo",
+    "T3_Periodo": "A",
+    "Anyo": 2025,
+    "Valor": 753.0
+   },
+   {
+    "Fecha": "2024-01-01T00:00:00.000+01:00",
+    "T3_TipoDato": "Definitivo",
+    "T3_Periodo": "A",
+    "Anyo": 2024,
+    "Valor": 759.0
+   }
+  ]
+ },
+ {
+  "COD": "DPOP164",
+  "Nombre": "Abengibre. Hombres. Total habitantes. Personas. ",
+  "T3_Unidad": "Personas",
+  "T3_Escala": " ",
+  "MetaData": [
+   {
+    "Id": 6124,
+    "T3_Variable": "Municipios",
+    "Nombre": "Abengibre",
+    "Codigo": "02001"
+   },
+   {
+    "Id": 452,
+    "T3_Variable": "Sexo",
+    "Nombre": "Hombres",
+    "Codigo": "1"
+   },
+   {
+    "Id": 8677,
+    "T3_Variable": "Tamaño de los municipios",
+    "Nombre": "Total habitantes",
+    "Codigo": "0"
+   },
+   {
+    "Id": 20258,
+    "T3_Variable": "Tipo de dato",
+    "Nombre": "Personas",
+    "Codigo": ""
+   }
+  ],
+  "Data": [
+   {
+    "Fecha": "2025-01-01T00:00:00.000+01:00",
+    "T3_TipoDato": "Definitivo",
+    "T3_Periodo": "A",
+    "Anyo": 2025,
+    "Valor": 378.0
+   },
+   {
+    "Fecha": "2024-01-01T00:00:00.000+01:00",
+    "T3_TipoDato": "Definitivo",
+    "T3_Periodo": "A",
+    "Anyo": 2024,
+    "Valor": 374.0
+   }
+  ]
+ },
+ {
+  "COD": "DPOP165",
+  "Nombre": "Abengibre. Mujeres. Total habitantes. Personas. ",
+  "T3_Unidad": "Personas",
+  "T3_Escala": " ",
+  "MetaData": [
+   {
+    "Id": 6124,
+    "T3_Variable": "Municipios",
+    "Nombre": "Abengibre",
+    "Codigo": "02001"
+   },
+   {
+    "Id": 453,
+    "T3_Variable": "Sexo",
+    "Nombre": "Mujeres",
+    "Codigo": "2"
+   },
+   {
+    "Id": 8677,
+    "T3_Variable": "Tamaño de los municipios",
+    "Nombre": "Total habitantes",
+    "Codigo": "0"
+   },
+   {
+    "Id": 20258,
+    "T3_Variable": "Tipo de dato",
+    "Nombre": "Personas",
+    "Codigo": ""
+   }
+  ],
+  "Data": [
+   {
+    "Fecha": "2025-01-01T00:00:00.000+01:00",
+    "T3_TipoDato": "Definitivo",
+    "T3_Periodo": "A",
+    "Anyo": 2025,
+    "Valor": 375.0
+   },
+   {
+    "Fecha": "2024-01-01T00:00:00.000+01:00",
+    "T3_TipoDato": "Definitivo",
+    "T3_Periodo": "A",
+    "Anyo": 2024,
+    "Valor": 385.0
+   }
+  ]
+ }
+]

@@ -1,0 +1,93 @@
+{
+ "content": [
+  {
+   "id": 157593824,
+   "codConcesion": "SB157593824",
+   "fechaConcesion": "2026-09-29",
+   "beneficiario": "A02066116 BODEGAS PIQUERAS S.A.",
+   "instrumento": "SUBVENCIÓN y ENTREGA DINERARIA SIN CONTRAPRESTACIÓN ",
+   "importe": 266332.63,
+   "ayudaEquivalente": 266332.63,
+   "urlBR": "https://www.boe.es/boe/dias/2022/10/26/pdfs/BOE-A-2022-17475.pdf",
+   "tieneProyecto": false,
+   "numeroConvocatoria": "667124",
+   "idConvocatoria": 868684,
+   "convocatoria": "Orden, de 27/12/2022, de la Consejería de Agricultura, Agua y Desarrollo Rural, por la que se precisan las bases reguladoras par",
+   "descripcionCooficial": null,
+   "nivel1": "AUTONOMICA",
+   "nivel2": "CASTILLA-LA MANCHA",
+   "nivel3": "DIRECCIÓN GENERAL PRODUCCIÓN AGROALIMENTARIA Y COOPERATIVAS",
+   "codigoInvente": null,
+   "idPersona": 5538235,
+   "fechaAlta": "2026-10-01"
+  },
+  {
+   "id": 157590082,
+   "codConcesion": "SB157590082",
+   "fechaConcesion": "2026-09-29",
+   "beneficiario": "***0456** NOMBRE APELLIDO APELLIDO",
+   "instrumento": "SUBVENCIÓN y ENTREGA DINERARIA SIN CONTRAPRESTACIÓN ",
+   "importe": 115.38,
+   "ayudaEquivalente": 115.38,
+   "urlBR": "https://236ws.dpteruel.es/DPT/bopt.nsf/0/EAA1FB266444B583C12580640026FC33",
+   "tieneProyecto": false,
+   "numeroConvocatoria": "902155",
+   "idConvocatoria": 1103716,
+   "convocatoria": "Convocatoria y concesión de subvenciones dirigidas a unidades familiares en cuyo ámbito existan una o más personas celíacas o con intolerancia al gluten.",
+   "descripcionCooficial": null,
+   "nivel1": "LOCAL",
+   "nivel2": "CALANDA",
+   "nivel3": "AYUNTAMIENTO DE CALANDA",
+   "codigoInvente": null,
+   "idPersona": 22324908,
+   "fechaAlta": "2026-09-30"
+  },
+  {
+   "id": 157590016,
+   "codConcesion": "SB157590016",
+   "fechaConcesion": "2026-09-29",
+   "beneficiario": "***0647 NOMBRE APELLIDO APELLIDO",
+   "instrumento": "SUBVENCIÓN y ENTREGA DINERARIA SIN CONTRAPRESTACIÓN ",
+   "importe": 8400,
+   "ayudaEquivalente": 8400,
+   "urlBR": "https://www.boe.es/boe/dias/2005/04/26/pdfs/A14154-14157.pdf",
+   "tieneProyecto": false,
+   "numeroConvocatoria": "906248",
+   "idConvocatoria": 1107809,
+   "convocatoria": "Resolución de 18 de mayo de 2026 de la Dirección de la Agencia Española de Cooperación Internacional para el Desarrollo, por la que se aprueba la convocatoria de Becas MAEC-AECID para residencias en la Real Academia de España en Roma, 2026-2027.",
+   "descripcionCooficial": null,
+   "nivel1": "ESTADO",
+   "nivel2": "MINISTERIO DE ASUNTOS EXTERIORES, UNIÓN EUROPEA Y COOPERACIÓN",
+   "nivel3": "AGENCIA ESTATAL AGENCIA ESPAÑOLA DE COOPERACIÓN INTERNACIONAL PARA EL DESARROLLO",
+   "codigoInvente": "INV00000095",
+   "idPersona": 22324780,
+   "fechaAlta": "2026-09-30"
+  }
+ ],
+ "pageable": {
+  "sort": {
+   "sorted": true,
+   "unsorted": false,
+   "empty": false
+  },
+  "pageNumber": 0,
+  "pageSize": 2000,
+  "offset": 0,
+  "unpaged": false,
+  "paged": true
+ },
+ "last": true,
+ "totalPages": 1,
+ "totalElements": 968,
+ "first": true,
+ "sort": {
+  "sorted": true,
+  "unsorted": false,
+  "empty": false
+ },
+ "numberOfElements": 3,
+ "size": 2000,
+ "number": 0,
+ "empty": false,
+ "advertencia": "La reutilización de los datos del Sistema Nacional de Publicidad de Subvenciones y Ayudas Públicas está sujeta a una serie de restricciones y consideraciones legales. Consulte el aviso legal en https://www.infosubvenciones.es/bdnstrans/GE/es/avisolegal.Además, el usuario debe ser consciente que la información presentada es de naturaleza dinámica, y que los datos pueden ser sometidos a correcciones, inserciones, modificaciones y eliminaciones en momentos posteriores a su extracción. Accesos al API del sistema Nacional de Publicidad de Subvenciones y Ayudas Públicas. La Administración Presupuestaria, para salvaguardar la protección del acceso libre e irrestricto de los ciudadanos a este Portal y a su información podrá adoptar medidas restrictivas de acceso al API ante situaciones de manifiesto abuso del servicio, riesgos de seguridad, o uso fraudulento de la información descargada, de acuerdo con las buenas prácticas de gestión de datos abiertos (https://datos.gob.es/es/blog/limitaciones-la-consulta-de-una-api) establecidas por el Ministerio para la Transformación Digital y de la Función Pública."
+}

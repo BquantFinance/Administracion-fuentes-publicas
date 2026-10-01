@@ -1,0 +1,32 @@
+[
+ {
+  "Id": "0",
+  "Pais": "Total Mundo",
+  "UE": ""
+ },
+ {
+  "Id": "001",
+  "Pais": "Francia",
+  "UE": "UE27"
+ },
+ {
+  "Id": "002",
+  "Pais": "Bélgica y Luxemburgo (h.31/12/98)",
+  "UE": "UE27"
+ },
+ {
+  "Id": "003",
+  "Pais": "Países Bajos",
+  "UE": "UE27"
+ },
+ {
+  "Id": "004",
+  "Pais": "Alemania",
+  "UE": "UE27"
+ },
+ {
+  "Id": "005",
+  "Pais": "Italia",
+  "UE": "UE27"
+ }
+]

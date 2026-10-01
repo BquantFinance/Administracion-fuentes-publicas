@@ -1,0 +1,7 @@
+{
+ "codigo": "ERR_VALIDACION",
+ "errores": [
+  "No se ha podido obtener el cuerpo de la petición. Alguno de los parámetros es incorrecto.",
+  "El parámetro 'fechaDesde' no tiene un formato correcto."
+ ]
+}

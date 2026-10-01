@@ -101,21 +101,28 @@ repositorio.
 ## Siguientes pasos, por orden de retorno (2026-10-01)
 
 Diagnóstico honesto tras la primera evaluación (`evals/resultados-2026-09-30.md`): en tareas fáciles con un modelo
-potente el catálogo no cambia el acierto; ahorra la mitad de llamadas y evita las fallidas, y cuesta más tokens si se
-carga `llms.txt` entero. El valor está concentrado en las trampas no deducibles, las rutas muertas y los códigos
-internos. Lo que falta no son más fichas, sino demostrarlo donde importa, hacerlo instalable y mantenerlo.
+potente el catálogo no cambia el acierto; ahorra la mitad de llamadas y evita las fallidas. Las cifras de tokens de
+las dos primeras tandas medían el contexto final de cada agente, no el consumo (corregido el 2026-10-01 en `evals/`).
+El valor está concentrado en las trampas no deducibles, las rutas muertas y los códigos internos, y solo vale si las
+fichas son exactas: la auditoría del 2026-10-01 encontró errores en fichas marcadas como verificadas (exportación de
+la BDNS que se queda en 50 filas, BOE en festivos, nivel1 de la BDNS). Orden acordado con el propietario el
+2026-10-01: dejarlo presentable antes de medir (correcciones y auditoría, registros MCP, verificación, comunidades
+autónomas) y las evaluaciones al final.
 
 1. **Medir donde importa.** Hecho el 2026-10-01 (`evals/resultados-2026-10-01.md`): tareas difíciles con el modelo por
-   defecto y con Sonnet, y entrada ligera. Mismo acierto; con catálogo, la mitad de llamadas y casi ninguna fallida;
-   `llms-min.txt` deja el sobrecoste de tokens en un 11 %. Queda por medir Catastro bloqueado y un
-   modelo aún más barato (Haiku).
+   defecto y con Sonnet, y entrada ligera. Mismo acierto; con catálogo, la mitad de llamadas y casi ninguna fallida.
+   Pendiente, al final: tanda con tokens bien medidos (suma de usage por turno en
+   `~/.claude/projects/<proyecto>/<sesión>/subagents/agent-*.jsonl`, no el total del arnés), condición MCP, Haiku,
+   tareas con trampas silenciosas y tres repeticiones; Catastro bloqueado.
 2. **Distribución antes que más fichas.** Hecho el 2026-10-01 lo instalable: `pipx install git+...` o `uvx` dan el
    comando `mcp-catalogo`, que descarga `catalog.json` si no hay copia local (`guides/servidor-mcp.md`). Pendiente: alta
    en los registros de MCP (Smithery, Glama, registro oficial) y bloque de configuración para Cursor.
 3. **Entrada ligera.** Hecho el 2026-10-01: `build.py` genera `llms-min.txt` (7 KB) y la segunda tanda lo midió.
-4. **Código listo, no solo descripciones.** En curso el 2026-10-01: `scripts/clientes/` (AEMET, INE Tempus, DataComex,
-   PLACSP, Saiku) probados con llamadas reales; falta la carpeta de respuestas de muestra para probar parsers sin red
-   y cargadores para BOE, BDNS y Catastro (cuando se pueda verificar desde una IP residencial).
+4. **Código listo, no solo descripciones.** Hecho el 2026-10-01: `scripts/clientes/` con BOE y BORME (`boe.py`), BDNS
+   (`bdns.py`), AEMET, INE Tempus, DataComex, PLACSP y Saiku, probados con llamadas reales; `scripts/clientes/muestras/`
+   con respuestas reales recortadas y `python scripts/test_clientes.py`, sin red, en CI; `verificacion.yml` ejecuta los
+   cargadores contra los servidores cada semana. Pendiente: muestras de ObtenerDatos de DataComex y del fichero de datos
+   de AEMET (necesitan credenciales) y cargador de Catastro (desde una IP residencial).
 5. **Cobertura con demanda real.** Comunidades autónomas por tamaño (Madrid, Cataluña, Andalucía, Comunidad
    Valenciana) y los portales de datos de Madrid y Barcelona, que tienen API; antes que el resto de la AGE.
 6. **Mantenimiento con dueño.** Una sesión mensual que corra `verificacion.yml`, arregle lo roto y pase la ronda desde
@@ -138,15 +145,16 @@ Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
 - Evaluación: `evals/tareas.yaml` (20 tareas), `evals/resultados-2026-09-30.md` y `evals/resultados-2026-10-01.md`.
   Las ejecuciones se hicieron con subagentes del propio arnés (tokens y usos de herramienta del arnés); no hay
   ejecutor en el repo.
-- `scripts/clientes/`: aemet, ine_tempus, datacomex, placsp y saiku probados el 2026-10-01 con llamadas reales
-  (AEMET solo ejercitó la espera por 429, porque la cuota por minuto estaba agotada por la evaluación; repetir
-  `AEMET_KEY=... python scripts/clientes/aemet.py 16078` en la siguiente sesión).
+- `scripts/clientes/`: boe, bdns, ine_tempus, placsp y saiku probados el 2026-10-01 con llamadas reales desde el
+  entorno; aemet (rehecho: sin clave fallaba con KeyError y dependía del Content-Type) se prueba con el secreto en
+  `verificacion.yml`; datacomex sin probar de nuevo (sin credenciales en el entorno). Corregidos ese día: placsp
+  ignoraba las anulaciones (at:deleted-entry) e ine_tempus.ultimo_valor devolvía el periodo más antiguo.
 - Hallazgos de la evaluación ya volcados en fichas: catálogos de DataComex (ObtenerPaises, ObtenerTarics...), tabla
   nacional 30824 del Atlas con filtros tv, item de la sección 5C del BOE bajo departamento.texto, regeneración
   diaria del feed de PLACSP y buscador JSF como vía para lo publicado hoy.
-- Siguiente trabajo, en este orden: carpeta de respuestas de muestra y cargadores de BOE y BDNS (punto 4); alta del
-  MCP en registros y configuración para Cursor (punto 2); comunidades autónomas por tamaño y portales de Madrid y
-  Barcelona (punto 5); mantenimiento mensual y ronda desde IP residencial (punto 6); medir Catastro y Haiku (punto 1).
+- Siguiente trabajo, en este orden (acordado el 2026-10-01): auditoría a fondo de las fichas de uso masivo; alta del MCP
+  en registros y configuración para Cursor (punto 2); verificación y ronda desde IP residencial (punto 6); comunidades
+  autónomas por tamaño y portales de Madrid y Barcelona (punto 5); evaluación con tokens bien medidos (punto 1).
 
 ## Lo que no se hace
 

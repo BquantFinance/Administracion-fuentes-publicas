@@ -38,7 +38,7 @@ endpoints:
 quirks: [session-required, js-rendered, errors-html-or-xml]
 ids: [ine-provincia]
 gotchas:
-  - Sin token, ObtenerDatos responde 401 con XML (Se ha denegado la autorización); con un token inválido, 500 con cuerpo vacío. El token va en la cabecera Authorization Bearer o en el parámetro access_token.
+  - Sin token, ObtenerDatos da 401 (Se ha denegado la autorización), en XML con Accept de navegador y en JSON con application/json; token inválido, 500 sin cuerpo. Token en Authorization Bearer o access_token.
   - El registro (nombre, correo y contraseña, sin captcha) envía un correo de activación; hasta activar la cuenta no hay token. La descarga masiva del portal también exige sesión.
   - Si falta cualquiera de los cinco parámetros la API responde 200 con un único registro cuyo mensaje es "Error de sintaxis. Faltan parámetros"; comprobar mensaje antes de parsear.
   - pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error.

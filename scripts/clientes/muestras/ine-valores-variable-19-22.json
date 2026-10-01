@@ -1,0 +1,44 @@
+[
+ {
+  "Id": 559,
+  "FK_Variable": 19,
+  "Nombre": "Albacete",
+  "Codigo": "02003",
+  "FK_JerarquiaPadres": [
+   3,
+   292620,
+   392237
+  ]
+ },
+ {
+  "Id": 566,
+  "FK_Variable": 19,
+  "Nombre": "Cuenca",
+  "Codigo": "16078",
+  "FK_JerarquiaPadres": [
+   17,
+   392249
+  ]
+ },
+ {
+  "Id": 2813,
+  "FK_Variable": 19,
+  "Nombre": "Madrid",
+  "Codigo": "28079",
+  "FK_JerarquiaPadres": [
+   29,
+   292100,
+   392368
+  ]
+ },
+ {
+  "Id": 6124,
+  "FK_Variable": 19,
+  "Nombre": "Abengibre",
+  "Codigo": "02001",
+  "FK_JerarquiaPadres": [
+   3,
+   392236
+  ]
+ }
+]
