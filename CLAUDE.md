@@ -99,15 +99,17 @@ Barcelona. Más comunidades, entidades locales, Cortes, Poder Judicial o UE solo
 - **Hosts que rechazan IP de centros de datos**: Catastro, REData, www.ree.es, ESIOS, datos.gob.es, BNE, FEGA, OEPM,
   movilidad-opendata.mitma.es, geoserver.iepnb.es, sivira.isciii.es, analisis.cis.es y www.inmujer.es; intermitentes
   Seguridad Social, renfe, DATAESTUR, indicadores.fecyt.es e IECA; desde GitHub, MINETUR y Catastro. Se re-verifican
-  desde una IP residencial (pendiente).
+  desde una IP residencial (pendiente). Verificación desde GitHub del 2026-10-01 sobre 42998e7: recetas 88 de 93
+  (Catastro, MINETUR, DGT y un corte de GBIF), ejemplos de fichas 368 de 380 (429 de AEMET, 504 de DATAESTUR),
+  cargadores y ejemplos bien salvo adjudicaciones.py, que pasaba de 10 minutos (ahora con 0, solo hoy).
 - **Evaluación** (`evals/`): con Haiku y trampas silenciosas, acierto 3 de 21 sin catálogo, 10 con ficheros y 13 con
   MCP, con un 30 % y un 43 % menos de tokens de entrada. Sin medir aún: productos, `perfil_municipio`, `coyuntura`,
   `empresa_nif`, almacén.
 - **Publicación**: releases v0.1.0 a v0.3.0 y entrada `io.github.BquantFinance/catalogo-fuentes-publicas` en el registro
   oficial de MCP. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` (y en
   los dos ficheros del plugin) y crear la release vX.Y.Z desde la web; `publicar-mcp.yml` empaqueta, adjunta y publica.
-  v0.4.0 publicada el 2026-10-01 (registro oficial, sha256 del .mcpb coincide). 0.5.0 (respuestas compactas) subida en
-  esos ficheros; falta crear la release v0.5.0 desde la web.
+  v0.4.0 y v0.5.0 (respuestas compactas) publicadas el 2026-10-01 (registro oficial, sha256 del .mcpb coincide). Los
+  lotes y la caché de `perfil_municipio` y `empresa_nif` aún no están en ninguna release.
 - **CI**: `ci.yml` (validate, build al día y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC,
   manual y al cambiar el flujo: recetas, ejemplos de fichas, cargadores, ejemplos y enlaces desde la IP de GitHub;
   comenta en el issue de verificación si algo falla). Secreto `AEMET_KEY` en el repositorio.

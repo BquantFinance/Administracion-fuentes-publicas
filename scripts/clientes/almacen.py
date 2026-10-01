@@ -386,15 +386,20 @@ class Almacen:
             e.sort()
             self.guardar_estado()
 
-    def sync_placsp(self, desde: date, fin: float, feeds=FEEDS, log=print) -> int:
+    def sync_placsp(self, desde: date, fin: float, feeds=FEEDS, log=print, max_paginas: int | None = None) -> int:
         """Sigue rel=next desde la página vigente de cada feed hasta una instantánea ya cargada o anterior a desde. Las
-        instantáneas no cambian de contenido, así que se apuntan como vistas (solo si la cadena se recorrió sin cortes)."""
+        instantáneas no cambian de contenido, así que se apuntan como vistas (solo si la cadena se recorrió sin cortes).
+        max_paginas acota cada feed: las instantáneas del 643 pesan 14 a 17 MB y desde algunas redes bajan despacio."""
         s = sesion(accept="application/atom+xml, application/xml;q=0.9, */*;q=0.8")
         est = self.estado.setdefault("placsp", {}).setdefault("paginas", {})
         n = 0
         for feed in feeds:
             vistas, nuevas, url, completo = set(est.get(feed, [])), [], FEEDS[feed] + ".atom", False
+            leidas = 0
             while url:
+                if max_paginas and leidas >= max_paginas:
+                    log(f"placsp {feed}: tope de {max_paginas} páginas")
+                    break
                 if url in vistas:
                     completo = True
                     break
@@ -402,6 +407,7 @@ class Almacen:
                     log(f"placsp {feed}: tiempo agotado")
                     break
                 entradas, siguiente = placsp.parse_feed(s.get(url, timeout=300).content)
+                leidas += 1
                 self.añadir(filas_placsp(entradas, feed))
                 n += len(entradas)
                 fechas = [e["updated"][:10] for e in entradas if e.get("updated")]
@@ -567,6 +573,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--desde", help="AAAA-MM-DD; por defecto, ayer")
     s.add_argument("--hasta", help="AAAA-MM-DD; por defecto, ayer")
     s.add_argument("--minutos", type=float, default=0, help="tope de tiempo; 0 sin tope")
+    s.add_argument("--paginas", type=int, default=0, help="tope de páginas por feed de PLACSP; 0 sin tope")
     z = sub.add_parser("zip-placsp", help="carga ZIP mensuales o anuales de PLACSP")
     z.add_argument("periodo", nargs="+", help="AAAAMM (2025 y 2026) o AAAA")
     z.add_argument("--feeds", default="643,1044,1143")
@@ -589,7 +596,7 @@ def main(argv: list[str] | None = None) -> int:
         alm = Almacen(a.dir)
         for f in [x.strip() for x in a.fuentes.split(",") if x.strip()]:
             if f == "placsp":
-                n = alm.sync_placsp(desde, fin)
+                n = alm.sync_placsp(desde, fin, max_paginas=a.paginas or None)
             elif f in POR_DIA:
                 n = alm.sync_dias(f, desde, hasta, fin)
             else:

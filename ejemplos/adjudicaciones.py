@@ -2,11 +2,12 @@
 """Quién gana contratos públicos: las mayores adjudicaciones de los últimos días y los adjudicatarios que más suman,
 cargadas en el almacén local en Parquet (scripts/clientes/almacen.py; fichas placsp-datos-abiertos y guides/almacen.md).
 
-Uso: python ejemplos/adjudicaciones.py [dias] [prefijo_cpv]          p. ej. 3 72  (72: servicios TI)
+Uso: python ejemplos/adjudicaciones.py [dias] [prefijo_cpv]          p. ej. 3 72  (72: servicios TI); 0 es solo hoy
      FUENTES_ALMACEN=~/datos/almacen python ejemplos/adjudicaciones.py
 
 Necesita duckdb (pip install duckdb). La primera vez sigue la cadena de los tres feeds hasta el primer día pedido (unos
-dos minutos por día); después solo baja lo nuevo. Trampas que resuelve: una entrada por cambio de estado (vale la última,
+dos minutos por día desde una red doméstica, más desde algunas nubes); después solo baja lo nuevo. Con 0 basta la
+página vigente de cada feed. Trampas que resuelve: una entrada por cambio de estado (vale la última,
 vista adjudicaciones_ultimo), una fila por lote y adjudicatario, NIF con guiones o en minúscula normalizado, y los
 adjudicatarios personas físicas sin NIF ni nombre (persona_fisica).
 """
