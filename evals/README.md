@@ -21,6 +21,10 @@ valor. La de AEMET exige `AEMET_KEY` en las dos condiciones.
 `resultados-2026-09-30.md`: cinco tareas, una ejecución por condición. Mismo acierto (5 de 5), la mitad de llamadas HTTP
 (11 frente a 23), cero fallidas o inútiles (frente a 8) y un 34 % más de tokens por leer `llms.txt` entero.
 
+Segunda tanda (`resultados-2026-10-01.md`): tareas difíciles con el modelo por defecto y con Claude Sonnet, y entrada
+ligera. Acierto igual; con catálogo, la mitad de llamadas y casi ninguna fallida; `llms-min.txt` deja el sobrecoste de tokens
+en un 11 %.
+
 ## Qué mide y qué no
 
 Mide llamadas evitadas, errores evitados y tokens gastados en tareas típicas; no mide cobertura (para eso está

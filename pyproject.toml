@@ -15,7 +15,8 @@ dependencies = ["mcp>=1.0", "pyyaml>=6.0"]
 mcp-catalogo = "fuentes_publicas.mcp_catalogo:main"
 
 [tool.setuptools]
-packages = ["fuentes_publicas"]
+packages = ["fuentes_publicas", "fuentes_publicas.clientes"]
 
 [tool.setuptools.package-dir]
 fuentes_publicas = "scripts"
+"fuentes_publicas.clientes" = "scripts/clientes"

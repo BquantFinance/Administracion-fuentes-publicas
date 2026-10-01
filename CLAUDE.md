@@ -105,26 +105,48 @@ potente el catálogo no cambia el acierto; ahorra la mitad de llamadas y evita l
 carga `llms.txt` entero. El valor está concentrado en las trampas no deducibles, las rutas muertas y los códigos
 internos. Lo que falta no son más fichas, sino demostrarlo donde importa, hacerlo instalable y mantenerlo.
 
-1. **Medir donde importa.** Segunda tanda de `evals/` con las tareas difíciles (AEMET con clave, CODICE de PLACSP,
-   DataComex, filtro `tv` del INE, Saiku de Igualdad, Catastro bloqueado) y con un modelo barato (Sonnet o Haiku),
-   donde la diferencia debería ser grande. Si no lo es, hay que saberlo.
-2. **Distribución antes que más fichas.** MCP instalable en una línea (`uvx` o `pipx` desde el repo, con descarga de
-   `catalog.json` si no hay copia local), alta en los registros de MCP, bloque de configuración copiable para Claude
-   Code, Cursor y Claude Desktop.
-3. **Entrada ligera.** `llms-min.txt` (reglas rápidas, fichas por sector y punteros a los índices, sin recetas ni
-   necesidades) para quitar el sobrecoste de tokens; medirlo igual que la primera tanda.
-4. **Código listo, no solo descripciones.** Cargadores en Python para las fuentes más traicioneras (AEMET con los dos
-   pasos y la codificación, parser CODICE de PLACSP, consulta MDX a Saiku, sesión de DataComex) y una carpeta de
-   respuestas de muestra para probar parsers sin red.
+1. **Medir donde importa.** Hecho el 2026-10-01 (`evals/resultados-2026-10-01.md`): tareas difíciles con el modelo por
+   defecto y con Sonnet, y entrada ligera. Mismo acierto; con catálogo, la mitad de llamadas y casi ninguna fallida;
+   `llms-min.txt` deja el sobrecoste de tokens en un 11 %. Queda por medir Catastro bloqueado y un
+   modelo aún más barato (Haiku).
+2. **Distribución antes que más fichas.** Hecho el 2026-10-01 lo instalable: `pipx install git+...` o `uvx` dan el
+   comando `mcp-catalogo`, que descarga `catalog.json` si no hay copia local (`guides/servidor-mcp.md`). Pendiente: alta
+   en los registros de MCP (Smithery, Glama, registro oficial) y bloque de configuración para Cursor.
+3. **Entrada ligera.** Hecho el 2026-10-01: `build.py` genera `llms-min.txt` (7 KB) y la segunda tanda lo midió.
+4. **Código listo, no solo descripciones.** En curso el 2026-10-01: `scripts/clientes/` (AEMET, INE Tempus, DataComex,
+   PLACSP, Saiku) probados con llamadas reales; falta la carpeta de respuestas de muestra para probar parsers sin red
+   y cargadores para BOE, BDNS y Catastro (cuando se pueda verificar desde una IP residencial).
 5. **Cobertura con demanda real.** Comunidades autónomas por tamaño (Madrid, Cataluña, Andalucía, Comunidad
    Valenciana) y los portales de datos de Madrid y Barcelona, que tienen API; antes que el resto de la AGE.
 6. **Mantenimiento con dueño.** Una sesión mensual que corra `verificacion.yml`, arregle lo roto y pase la ronda desde
    una IP residencial para los hosts que bloquean centros de datos (lista en «Estado de verificación»). Sin esto, el
    catálogo caduca; un catálogo con errores es peor que ninguno.
-7. **Trampas de la comunidad.** Plantilla de issue «trampa nueva» (`.github/ISSUE_TEMPLATE/trampa.yml`): URL, qué
-   pasa, cómo se esquiva. Cada trampa confirmada entra en la ficha con fecha.
+7. **Trampas de la comunidad.** Hecho el 2026-10-01: plantilla de issue «trampa nueva» (`.github/ISSUE_TEMPLATE/trampa.yml`).
+   Cada trampa confirmada entra en la ficha con fecha.
 
 Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
+
+## Estado al cierre de la sesión del 2026-10-01 (para retomar)
+
+- Ramas: `main` es la rama por defecto y contiene todo; `claude/magical-volta-cjszgk` es la rama de trabajo de la
+  sesión anterior, idéntica a `main` al cierre. Las siguientes sesiones pueden trabajar directamente en `main` o en una
+  rama nueva; `claude/eager-albattani-9me81y` es antigua y se puede borrar.
+- CI: `ci.yml` (validate y build en cada push) y `verificacion.yml` (lunes 06:17 UTC y manual; recetas y enlaces
+  desde la IP de GitHub; abre un issue si algo falla). La clave `AEMET_KEY` está como secreto del repositorio.
+- Credenciales fuera del repo: cuenta de DataComex con el correo del propietario (API probada); clave de AEMET
+  (secreto de GitHub). ESIOS sin token. Nada de esto se escribe en fichas ni commits.
+- Evaluación: `evals/tareas.yaml` (20 tareas), `evals/resultados-2026-09-30.md` y `evals/resultados-2026-10-01.md`.
+  Las ejecuciones se hicieron con subagentes del propio arnés (tokens y usos de herramienta del arnés); no hay
+  ejecutor en el repo.
+- `scripts/clientes/`: aemet, ine_tempus, datacomex, placsp y saiku probados el 2026-10-01 con llamadas reales
+  (AEMET solo ejercitó la espera por 429, porque la cuota por minuto estaba agotada por la evaluación; repetir
+  `AEMET_KEY=... python scripts/clientes/aemet.py 16078` en la siguiente sesión).
+- Hallazgos de la evaluación ya volcados en fichas: catálogos de DataComex (ObtenerPaises, ObtenerTarics...), tabla
+  nacional 30824 del Atlas con filtros tv, item de la sección 5C del BOE bajo departamento.texto, regeneración
+  diaria del feed de PLACSP y buscador JSF como vía para lo publicado hoy.
+- Siguiente trabajo, en este orden: carpeta de respuestas de muestra y cargadores de BOE y BDNS (punto 4); alta del
+  MCP en registros y configuración para Cursor (punto 2); comunidades autónomas por tamaño y portales de Madrid y
+  Barcelona (punto 5); mantenimiento mensual y ronda desde IP residencial (punto 6); medir Catastro y Haiku (punto 1).
 
 ## Lo que no se hace
 

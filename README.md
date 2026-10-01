@@ -85,7 +85,7 @@ Además de las fichas, `indices/` responde a las preguntas que se hacen antes de
 - **Códigos que son parámetros**: valores que las APIs exigen y no se adivinan (Id del INE para `tv`, países de DataComex, estación de AEMET por capital, productos de carburantes, rangos del BOE), obtenidos con llamadas reales.
 - **Rutas muertas**: URLs de documentación antigua que ya no sirven y su sustituta.
 
-**Medido** ([evals/](evals/)): en cinco tareas típicas resueltas por el mismo agente con y sin catálogo, el acierto fue el mismo (5 de 5), las llamadas HTTP bajaron de 23 a 11 y las fallidas o inútiles de 8 a 0; leer `llms.txt` entero costó un 34 % más de tokens, que es lo que el servidor MCP evita.
+**Medido** ([evals/](evals/)): en diez tareas resueltas por el mismo agente con y sin catálogo (dos modelos), el acierto fue el mismo; con catálogo las llamadas HTTP bajan a la mitad y las fallidas o inútiles casi a cero. Leer `llms.txt` entero cuesta un 34 % más de tokens; `llms-min.txt` lo deja en un 11 % y el servidor MCP lo evita.
 
 Todo en [indices/README.md](indices/README.md) y, para consumo programático, bajo la clave `indices` de `catalog.json`. Cada endpoint principal de una ficha lleva `example` (llamada copiable) y `returns` (forma de la respuesta vista en esa llamada). `python scripts/mcp_catalogo.py` expone el catálogo por MCP en local para cargar solo lo necesario ([guía](guides/servidor-mcp.md)).
 

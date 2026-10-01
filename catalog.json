@@ -1516,7 +1516,7 @@
    "endpoints": [
     {
      "path": "sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom",
-     "desc": "Licitaciones de perfiles alojados en la Plataforma; entre 127 y 235 entradas y de 4 a 6 MB por página",
+     "desc": "Licitaciones de perfiles alojados en la Plataforma; la página vigente trae lo del día (127 a 235 entradas) y las anteriores unas 500 y 14 a 16 MB",
      "example": "curl -s \"https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom\"",
      "returns": "Atom; cada entry lleva ContractFolderStatus (CODICE): ContractFolderID, ContractFolderStatusCode, LocatedContractingParty/Party/PartyIdentification/ID (DIR3), ProcurementProject/Name, BudgetAmount/TaxExclusiveAmount, RequiredCommodityClassification/ItemClassificationCode (CPV) y RealizedLocation/CountrySubentityCode"
     },
@@ -1548,7 +1548,7 @@
     "No localicé API de búsqueda; el link de cada entry es un deeplink al detalle web, no un recurso estructurado.",
     "updated es la fecha del último cambio del expediente, no la de publicación; la fecha de cada anuncio va en ValidNoticeInfo/AdditionalPublicationStatus/AdditionalPublicationDocumentReference/IssueDate.",
     "En el feed de plataformas agregadas (1044) las entradas pueden no traer TotalAmount ni ID con schemeName DIR3 del órgano; usar TaxExclusiveAmount y el nombre.",
-    "El feed 643 puede ir horas por detrás de la web: el 2026-10-01 a las 10:30 su última entrada era de las 20:17 de la víspera y el buscador ya mostraba anuncios de las 08:27; para lo de hoy, buscador JSF o esperar."
+    "El feed 643 se regenera una vez al día hacia las 20:15 (el 1044 hacia las 03:00); de día va horas por detrás del buscador JSF del portal, que sí muestra lo publicado hoy (comprobado el 2026-10-01)."
    ],
    "tips": [
     "Identificadores útiles en cada entry. cbc:ContractFolderID (expediente), cbc:ItemClassificationCode (CPV), cbc:ID del órgano (código DIR3, p. ej. L01280647) y cbc:TypeCode (tipo de contrato).",
