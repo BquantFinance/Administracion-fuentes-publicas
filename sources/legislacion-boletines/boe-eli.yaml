@@ -28,10 +28,10 @@ gotchas:
   - La fecha de la URI es la de la disposición (firma), no la de publicación en el BOE.
   - En las órdenes el número lleva delante el código del departamento en minúsculas (o/2025/01/16/trm59 para la Orden TRM/59/2025).
   - Responde 200 con HTML directamente, sin redirección y sin negociación de contenido; Accept application/rdf+xml devuelve el mismo HTML.
-  - Sufijos distintos de con y dof redirigen a una página de error con 400.
+  - Una norma inexistente o un sufijo distinto de con y dof responden 200 con una página de error (title Error 404); comprobar el title o el identificador BOE, no el código HTTP.
 tips:
   - Para obtener la URI ELI a partir de un id BOE, el campo url_eli de /id/{id}/metadatos de la API de legislación consolidada.
   - Para los metadatos ELI en RDF/XML sin parsear RDFa, /id/{id}/metadata-eli de la misma API.
 related: [boe-api-legislacion-consolidada]
 status: active
-verified: "2026-09-30"
+verified: "2026-10-01"

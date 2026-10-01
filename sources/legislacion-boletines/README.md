@@ -14,8 +14,8 @@ Sector `legislacion-boletines` · 5 fuentes · índice generado por `scripts/bui
 |---|---|---|---|---|---|---|---|
 | [boe-api-legislacion-consolidada](boe-api-legislacion-consolidada.yaml) | BOE – API de legislación consolidada | api-rest | none | json, xml | daily | accept-header-required, errors-html-or-xml | 2026-10-01 |
 | [boe-api-sumario](boe-api-sumario.yaml) | BOE – API de sumarios | api-rest | none | json, xml, pdf, html | daily | accept-header-required, json-object-or-list, errors-html-or-xml, no-weekend-data | 2026-10-01 |
-| [boe-eli](boe-eli.yaml) | ELI – Identificador Europeo de Legislación en el BOE | download | none | html, rdf | daily | — | 2026-09-30 |
-| [boe-feeds](boe-feeds.yaml) | BOE y BORME – Feeds RSS | feed | none | rss, xml | daily | latin1 | 2026-09-30 |
+| [boe-eli](boe-eli.yaml) | ELI – Identificador Europeo de Legislación en el BOE | download | none | html, rdf | daily | — | 2026-10-01 |
+| [boe-feeds](boe-feeds.yaml) | BOE y BORME – Feeds RSS | feed | none | rss, xml | daily | latin1 | 2026-10-01 |
 | [borme-api-sumario](borme-api-sumario.yaml) | BORME – API de sumarios y actos mercantiles | api-rest, download | none | json, xml, pdf, html | daily | accept-header-required, json-object-or-list, errors-html-or-xml, no-weekend-data | 2026-10-01 |
 
 - **boe-api-legislacion-consolidada**: Textos consolidados de normas estatales y autonómicas por bloques (artículos, disposiciones) con todas las versiones de cada bloque, metadatos, análisis (materias, referencias) y vigencia. Listado filtrable por fecha de actualización, búsqueda por título y tablas auxiliares de códigos.

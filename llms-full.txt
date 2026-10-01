@@ -93,7 +93,7 @@ related: boe-api-legislacion-consolidada, borme-api-sumario, boe-feeds
 ## boe-eli
 ELI – Identificador Europeo de Legislación en el BOE | Agencia Estatal Boletín Oficial del Estado (AEBOE)
 summary: URIs estables ELI para normas publicadas en el BOE, que resuelven a la página HTML de la norma con metadatos RDFa de la ontología eli embebidos, interoperables con EUR-Lex y otros boletines europeos.
-access: download | auth: none | formats: html, rdf | update: daily | status: active | verified: 2026-09-30
+access: download | auth: none | formats: html, rdf | update: daily | status: active | verified: 2026-10-01
 license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
 base_url: https://www.boe.es/eli/
 docs_url: https://www.boe.es/legislacion/eli.php
@@ -106,7 +106,7 @@ ids: eli, boe-id
 ! La fecha de la URI es la de la disposición (firma), no la de publicación en el BOE.
 ! En las órdenes el número lleva delante el código del departamento en minúsculas (o/2025/01/16/trm59 para la Orden TRM/59/2025).
 ! Responde 200 con HTML directamente, sin redirección y sin negociación de contenido; Accept application/rdf+xml devuelve el mismo HTML.
-! Sufijos distintos de con y dof redirigen a una página de error con 400.
+! Una norma inexistente o un sufijo distinto de con y dof responden 200 con una página de error (title Error 404); comprobar el title o el identificador BOE, no el código HTTP.
 + Para obtener la URI ELI a partir de un id BOE, el campo url_eli de /id/{id}/metadatos de la API de legislación consolidada.
 + Para los metadatos ELI en RDF/XML sin parsear RDFa, /id/{id}/metadata-eli de la misma API.
 related: boe-api-legislacion-consolidada
@@ -114,7 +114,7 @@ related: boe-api-legislacion-consolidada
 ## boe-feeds
 BOE y BORME – Feeds RSS | Agencia Estatal Boletín Oficial del Estado (AEBOE)
 summary: Canales RSS 2.0 del sumario diario del BOE (completo o por sección), del BORME, de canales temáticos (ayudas, becas, convenios colectivos, sentencias del TC) y de anuncios de licitación por división CPV.
-access: feed | auth: none | formats: rss, xml | update: daily | status: active | verified: 2026-09-30
+access: feed | auth: none | formats: rss, xml | update: daily | status: active | verified: 2026-10-01
 license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
 base_url: https://www.boe.es/rss/
 docs_url: https://www.boe.es/rss/
@@ -131,7 +131,7 @@ docs_url: https://www.boe.es/rss/
 quirks: latin1
 ! Los feeds van en ISO-8859-1, no en UTF-8; convertir antes de parsear o los acentos se corrompen.
 ! Los feeds de sumario solo contienen el día en curso; los canales temáticos guardan unas ocho semanas. Para histórico usar la API de sumarios.
-! canal.php sin c válido responde 200 con cuerpo vacío, no un error.
+! canal.php con un c inexistente responde 200 con cuerpo vacío (1 byte) y sin c redirige con 302; no hay error explícito.
 ! La lista completa de canales y divisiones CPV está en el HTML de https://www.boe.es/rss/ (no hay índice legible por máquina).
 ! Las alertas personalizadas por correo (Mi BOE) no tienen API.
 related: boe-api-sumario, borme-api-sumario
