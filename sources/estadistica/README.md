@@ -5,6 +5,8 @@ Sector `estadistica` · 7 fuentes · índice generado por `scripts/build.py`, no
 ## Dónde está cada cosa
 
 - Cualquier estadística oficial del INE (IPC, EPA, PIB, padrón, natalidad, empresas) → `ine-api-tempus`
+- Último dato de coyuntura de España (IPC, paro EPA y registrado, PIB, Euríbor, bono a 10 años, prima de riesgo) → `ine-api-tempus` (herramienta MCP coyuntura o consulta.coyuntura; el IPC del último mes suele ser avance y el PIB que se publica es el corregido; Euríbor y bonos en bde-estadisticas)
+- Todo lo básico de un municipio de una vez (códigos, padrón, renta, paro, contratos, criminalidad) → `ine-api-tempus` (herramienta MCP perfil_municipio o consulta.perfil_municipio; combina INE, SEPE, Interior y datos/municipios.csv)
 - Códigos INE de municipios, provincias y comunidades → `ine-codigos-territoriales`
 - Microdatos de encuestas (EPA, condiciones de vida, presupuestos familiares, censo) → `ine-microdatos`
 - Turismo (FRONTUR, EGATUR, ocupación hotelera) → `ine-api-tempus` (las operaciones son del INE; DATAESTUR (mincotur-industria-turismo) las reagrega con una API que no exigió clave y da 504 a menudo)

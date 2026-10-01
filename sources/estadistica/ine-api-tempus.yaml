@@ -10,6 +10,8 @@ summary: >-
   valores) y datos de tablas y series (IPC, EPA, PIB, padrón, natalidad, empresas). JSON y CSV, sin autenticación.
 alerts:
   - "En DATOS_TABLA nult cuenta periodos de la tabla, publicados o no: 24077 ya trae 2026M09 vacío; pedir nult=2 y quedarse con el último Valor no nulo (2026M08, 104,638), o usar DATOS_SERIE, que con nult=1 da 2026M08."
+  - "El último dato puede ser avance y se revisa: IPC290750 da 4,9 en 2026M09 con FK_TipoDato 3 (avance; T3_TipoDato con tip=AM) y 4,3 en 2026M08 definitivo (1); pedir tip=AM y decir el tipo."
+  - "PIB, usar las series corregidas de estacionalidad y calendario: 2026T2 da 0,68 % trimestral en CNTR6653 y 4,79 % en la sin corregir CNTR6722 (tabla 67822); la que se publica es la corregida."
 access: [api-rest]
 auth: none
 formats: [json, csv]

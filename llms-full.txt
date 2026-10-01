@@ -246,6 +246,8 @@ quirks: gzip-unannounced, latin1, soft-errors-200
 ! Los catálogos escriben el fichero del cuadro en mayúsculas (BE0101.csv) pero la URL real va en minúsculas (be0101.csv); en mayúsculas responde 302 a app.bde.es/pmk/id y acaba en 404 HTML.
 ! catalogo_be.csv tiene filas con comillas sin escapar en Notas (18 a 23 campos) y pd.read_csv falla en la línea 13682; leer con csv.reader y cortar a 17 campos, porque on_bad_lines pierde filas.
 ! catalogo_pb.csv (encuesta de préstamos bancarios) está congelado, con Last-Modified 2023-03-01, datos hasta DIC 2021 y códigos que la API no reconoce (errNum 404).
+! favoritas fecha cada periodo por su primer día (2026-04-01 con codFrecuencia Q es 2026T2) y D_1JA0D000 trae unidad «m pers.» pero el valor son personas (2.355.918 en agosto de 2026, como suma el SEPE).
++ Prima de riesgo, D_G2B1I0ZP menos D_1NBBO308 en el último mes común (julio de 2026, 3,534 - 3,07 = 46 puntos básicos); el alemán va un mes por detrás.
 + Flujo típico. Buscar el código en catalogo_*.csv por la descripción (un código se repite en varios cuadros, 15.693 filas para 12.833 códigos) y pedir listaSeries con rango=MAX o año a año.
 + Códigos verificados. D_1NBAF472 euríbor a un año mensual, DTCCBCEUSDEUR.B USD/EUR diario, DTNPDE2010_P0000P_PS_APU deuda PDE sobre PIB trimestral.
 + Una serie diaria completa sale en una sola petición del CSV de su cuadro (tc_1_1.csv, 1,9 MB, desde 1999) en lugar de una llamada a la API por año.
@@ -711,6 +713,8 @@ related: junta-andalucia-datos-abiertos, ine-api-tempus, ine-codigos-territorial
 INE – API JSON (Tempus3) | Instituto Nacional de Estadística (INE)
 summary: Acceso programático a las 112 operaciones estadísticas del INE: metadatos (operaciones, tablas, variables, valores) y datos de tablas y series (IPC, EPA, PIB, padrón, natalidad, empresas). JSON y CSV, sin autenticación.
 !! En DATOS_TABLA nult cuenta periodos de la tabla, publicados o no: 24077 ya trae 2026M09 vacío; pedir nult=2 y quedarse con el último Valor no nulo (2026M08, 104,638), o usar DATOS_SERIE, que con nult=1 da 2026M08.
+!! El último dato puede ser avance y se revisa: IPC290750 da 4,9 en 2026M09 con FK_TipoDato 3 (avance; T3_TipoDato con tip=AM) y 4,3 en 2026M08 definitivo (1); pedir tip=AM y decir el tipo.
+!! PIB, usar las series corregidas de estacionalidad y calendario: 2026T2 da 0,68 % trimestral en CNTR6653 y 4,79 % en la sin corregir CNTR6722 (tabla 67822); la que se publica es la corregida.
 access: api-rest | auth: none | formats: json, csv | update: daily | status: active | verified: 2026-10-01
 coverage: Según operación; IPC general: índice desde 2002M01 (tabla 24077), variación mensual desde 1961M02 y anual desde 1962M01 (76134)
 sync.since: Según tabla (Anyo_Periodo_ini en TABLAS_OPERACION); en el IPC, variación mensual desde 1961

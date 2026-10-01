@@ -49,5 +49,6 @@ sirven los servidores; los de PC-Axis en UTF-8 con BOM.
 | arcgis-igme-sin-paginacion.json | query con resultOffset en esa capa (error con HTTP 200) |
 | ogc-sigpac-recintos-tope.json | recintos SIGPAC con limit=1000 (llegan 250; dos features guardadas) |
 | sepe-paro-municipios-2026.csv | CSV de datos abiertos del SEPE, título y cabecera más julio y agosto de siete municipios (windows-1252, «<5», códigos de antes de las fusiones) |
+| ine-datos-serie-IPC290750.json | DATOS_SERIE del IPC general, variación anual, nult=2 y tip=AM: 2026M08 definitivo y 2026M09 avance |
 
 Faltan, porque necesitan credenciales: el fichero de datos de AEMET (ISO-8859-15) y ObtenerDatos de DataComex.

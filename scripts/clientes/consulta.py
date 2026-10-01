@@ -424,5 +424,85 @@ def perfil_municipio(municipio: str) -> dict:
     return out
 
 
+# Indicadores de coyuntura: (clave, fuente, serie, descripción, nota). Códigos verificados el 2026-10-01 (indices/codigos.yaml).
+INDICADORES = (
+    ("ipc_variacion_anual", "ine", "IPC290750", "IPC, variación anual del índice general (%)", "base 2025; el último mes suele ser avance"),
+    ("ipc_variacion_mensual", "ine", "IPC290752", "IPC, variación mensual del índice general (%)", "base 2025"),
+    ("paro_epa", "ine", "EPA452434", "Tasa de paro EPA, total nacional (%)", "trimestral; no es el paro registrado"),
+    ("pib_variacion_trimestral", "ine", "CNTR6653", "PIB, variación trimestral en volumen, corregida de estacionalidad y calendario (%)",
+     "la serie sin corregir (CNTR6722) da otra cifra"),
+    ("pib_variacion_anual", "ine", "CNTR6654", "PIB, variación anual en volumen, corregida de estacionalidad y calendario (%)", ""),
+    ("paro_registrado", "bde", "D_1JA0D000", "Paro registrado (personas)", "el BdE pone unidad «m pers.», pero son personas"),
+    ("euribor_12m", "bde", "D_1NBAF472", "Euríbor a un año, media mensual (%)", ""),
+    ("dolar_por_euro", "bde", "DTCCBCEUSDEUR.B", "Dólares estadounidenses por euro", "diario"),
+    ("deuda_pde_pib", "bde", "DTNPDE2010_P0000P_PS_APU", "Deuda PDE de las AAPP (% del PIB)", "trimestral"),
+    ("bono_10_anios", "bde", "D_G2B1I0ZP", "Rendimiento del bono del Estado a 10 años, media mensual (%)", ""),
+    ("bono_aleman_10_anios", "bde", "D_1NBBO308", "Rendimiento de la deuda alemana a 10 años, media mensual (%)", "suele ir un mes por detrás"),
+)
+TIPO_DATO_INE = {1: "definitivo", 2: "provisional", 3: "avance"}
+BDE_API = "https://app.bde.es/bierest/resources/srdatosapp"
+
+
+def ine_ultimo(serie: dict) -> dict:
+    """Último dato con valor de un DATOS_SERIE con tip=AM: periodo (2026-09, 2026T2, 2025), valor y tipo (definitivo,
+    provisional o avance; el IPC del último mes suele ser avance y se revisa)."""
+    d = max((x for x in serie.get("Data", []) if x.get("Valor") is not None), key=lambda x: x["Fecha"])
+    p = d.get("T3_Periodo") or ""
+    periodo = f"{d['Anyo']}-{p[1:]}" if p.startswith("M") else f"{d['Anyo']}{p}" if p.startswith("T") else str(d["Anyo"])
+    tipo = d.get("T3_TipoDato") or TIPO_DATO_INE.get(d.get("FK_TipoDato"), "")
+    return {"periodo": periodo, "valor": d["Valor"], "tipo": tipo.lower()}
+
+
+def bde_periodo(fecha_valor: str, frecuencia: str) -> str:
+    """El BdE fecha cada periodo por su primer día: 2026-04-01 con frecuencia Q es 2026T2, 2026-09-01 con M es 2026-09."""
+    f = (fecha_valor or "")[:10]
+    if frecuencia == "M":
+        return f[:7]
+    if frecuencia == "Q":
+        return f"{f[:4]}T{(int(f[5:7]) - 1) // 3 + 1}"
+    if frecuencia == "A":
+        return f[:4]
+    return f
+
+
+def coyuntura() -> dict:
+    """Último dato de los indicadores de coyuntura de España en una llamada (INE y Banco de España), cada uno con su
+    periodo, tipo de dato, serie y fuente, y la prima de riesgo calculada en el último mes común (bono español menos
+    alemán, en puntos básicos). Un indicador que falle trae error sin tumbar el resto."""
+    out: dict = {}
+    s = _sesion()
+    bde_codigos = [c for _, f, c, _, _ in INDICADORES if f == "bde"]
+    try:
+        bde = {x["serie"]: x for x in s.get(f"{BDE_API}/favoritas", params={"idioma": "es", "series": ",".join(bde_codigos)}).json()}
+    except Exception as exc:  # noqa: BLE001
+        bde = {"_error": str(exc)[:200]}
+    for clave, fuente, cod, desc, nota in INDICADORES:
+        try:
+            if fuente == "ine":
+                r = s.get(f"https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/{cod}", params={"nult": 2, "tip": "AM"}).json()
+                dato = ine_ultimo(r)
+                fuente_id = "ine-api-tempus"
+            else:
+                x = bde[cod]
+                if x.get("errNum"):
+                    raise KeyError(f"{cod}: {x.get('errNum')}")
+                dato = {"periodo": bde_periodo(x.get("fechaValor"), x.get("codFrecuencia")), "valor": x.get("valor")}
+                fuente_id = "bde-estadisticas"
+            out[clave] = dict(dato, descripcion=desc, serie=cod, fuente=fuente_id, **({"nota": nota} if nota else {}))
+        except Exception as exc:  # noqa: BLE001
+            out[clave] = {"error": f"{type(exc).__name__}: {str(exc)[:200]}", "serie": cod}
+    try:
+        series = s.get(f"{BDE_API}/listaSeries", params={"idioma": "es", "series": "D_G2B1I0ZP,D_1NBBO308", "rango": "30M"}).json()
+        v = {x["serie"]: dict(zip((f[:7] for f in x["fechas"]), x["valores"])) for x in series}
+        comun = max(set(v["D_G2B1I0ZP"]) & set(v["D_1NBBO308"]))
+        out["prima_riesgo"] = {"periodo": comun, "valor": round((v["D_G2B1I0ZP"][comun] - v["D_1NBBO308"][comun]) * 100),
+                               "descripcion": "Prima de riesgo frente a Alemania a 10 años (puntos básicos), medias mensuales",
+                               "nota": "calculada en el último mes con los dos datos; el alemán suele ir un mes por detrás",
+                               "fuente": "bde-estadisticas"}
+    except Exception as exc:  # noqa: BLE001
+        out["prima_riesgo"] = {"error": f"{type(exc).__name__}: {str(exc)[:200]}"}
+    return out
+
+
 if __name__ == "__main__":
     print(_json.dumps(descargar(sys.argv[1], 2000), ensure_ascii=False, indent=1, default=str))

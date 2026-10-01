@@ -370,6 +370,14 @@ def empresa_nif(nif: str, max_filas: int = 10) -> dict:
 
 
 @mcp.tool()
+def coyuntura() -> dict:
+    """Último dato de los indicadores de coyuntura de España en una llamada: IPC (variación anual y mensual, marcando si
+    es avance), paro EPA, PIB (variación trimestral y anual corregidas), paro registrado, Euríbor, dólar, deuda PDE,
+    bono a 10 años y prima de riesgo. Cada uno con periodo, serie y fuente (INE o Banco de España)."""
+    return _datos(_consulta().coyuntura)
+
+
+@mcp.tool()
 def perfil_municipio(municipio: str) -> dict:
     """Un municipio en una llamada (nombre, código INE, SIGPAC, DIR3 o NIF): sus códigos en cada sistema, población del
     padrón, renta neta media, paro registrado y contratos del año por mes (SEPE) y criminalidad acumulada (Interior,

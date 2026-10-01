@@ -26,6 +26,7 @@ import arcgis  # noqa: E402
 import bdns  # noqa: E402
 import boe  # noqa: E402
 import ckan  # noqa: E402
+import consulta  # noqa: E402
 import datacomex  # noqa: E402
 import ine_tempus  # noqa: E402
 import ogc  # noqa: E402
@@ -271,6 +272,15 @@ def sepe_csv_secreto_y_fusiones():
     assert None in abengibre.values()  # «<5» es secreto, no cero
     assert sepe.municipio("15902", datos=filas)[-1]["total_paro_registrado"] == 141  # 46 + 95, no el 0 de 15902
     assert sepe.municipio("36902", datos=filas)[-1]["total_paro_registrado"] == 169  # sin fila propia: 35 + 134
+
+
+@test
+def coyuntura_avance_y_periodos():
+    u = consulta.ine_ultimo(js("ine-datos-serie-IPC290750.json"))
+    assert u == {"periodo": "2026-09", "valor": 4.9, "tipo": "avance"}, u  # el último mes del IPC es avance
+    assert consulta.bde_periodo("2026-04-01T08:15:00Z", "Q") == "2026T2"
+    assert consulta.bde_periodo("2026-09-01T08:15:00Z", "M") == "2026-09"
+    assert consulta.bde_periodo("2026-09-30T08:15:00Z", "D") == "2026-09-30"
 
 
 def respuesta(cuerpo: bytes, tipo: str = "application/json", estado: int = 200, url: str = "https://x.gob.es/a"):

@@ -16,7 +16,7 @@ from mcp.client.stdio import stdio_client
 ROOT = Path(__file__).resolve().parent.parent
 SERVER = ROOT / "scripts" / "mcp_catalogo.py"
 TOOLS = {"buscar_fuentes", "ficha", "buscar_recetas", "receta", "necesidad", "identificador", "ruta_muerta", "sectores", "codigos", "municipio", "descargar", "tabla_pcaxis", "boe_sumario",
-         "subvenciones_nif", "empresa_nif", "ckan_buscar", "ckan_filas", "socrata_filas", "almacen_sql", "perfil_municipio"}
+         "subvenciones_nif", "empresa_nif", "ckan_buscar", "ckan_filas", "socrata_filas", "almacen_sql", "perfil_municipio", "coyuntura"}
 
 
 def payload(result):
@@ -101,6 +101,9 @@ async def main() -> None:
             print(f"empresa_nif('Q1132001G'): {emp['nombre']}, {emp['subvenciones']['concesiones']['total']} concesiones, {emp['aei']['total']} ayudas AEI")
             bloq = payload(await session.call_tool("descargar", {"url": "http://localhost:8080/"}))
             assert "error" in bloq, bloq
+            co = payload(await session.call_tool("coyuntura", {}))
+            assert co["ipc_variacion_anual"]["tipo"] in ("avance", "definitivo") and co["euribor_12m"]["valor"] > 0, co
+            print(f"coyuntura(): IPC {co['ipc_variacion_anual']['periodo']} {co['ipc_variacion_anual']['valor']} ({co['ipc_variacion_anual']['tipo']}), prima {co['prima_riesgo'].get('valor')} pb")
             pm = payload(await session.call_tool("perfil_municipio", {"municipio": "02001"}))
             assert pm["municipio"]["nombre"] == "Abengibre" and pm["poblacion"]["habitantes"] > 0 and pm["paro_registrado"]["mes"], pm
             print(f"perfil_municipio('02001'): {pm['poblacion']['habitantes']:.0f} habitantes, paro {pm['paro_registrado']['mes']} {pm['paro_registrado']['total_paro_registrado']}")

@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 151 necesidades, 21 identificadores, 23 grupos de códigos, 99 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 153 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
 
 ## Recetas por intención
 
@@ -612,6 +612,8 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **Estadística oficial**
 - Cualquier estadística oficial del INE (IPC, EPA, PIB, padrón, natalidad, empresas) → `ine-api-tempus`
+- Último dato de coyuntura de España (IPC, paro EPA y registrado, PIB, Euríbor, bono a 10 años, prima de riesgo) → `ine-api-tempus` (herramienta MCP coyuntura o consulta.coyuntura; el IPC del último mes suele ser avance y el PIB que se publica es el corregido; Euríbor y bonos en bde-estadisticas)
+- Todo lo básico de un municipio de una vez (códigos, padrón, renta, paro, contratos, criminalidad) → `ine-api-tempus` (herramienta MCP perfil_municipio o consulta.perfil_municipio; combina INE, SEPE, Interior y datos/municipios.csv)
 - Códigos INE de municipios, provincias y comunidades → `ine-codigos-territoriales`
 - Microdatos de encuestas (EPA, condiciones de vida, presupuestos familiares, censo) → `ine-microdatos`
 - Turismo (FRONTUR, EGATUR, ocupación hotelera) → `ine-api-tempus` (las operaciones son del INE; DATAESTUR (mincotur-industria-turismo) las reagrega con una API que no exigió clave y da 504 a menudo)
@@ -971,7 +973,11 @@ Valores que una API exige y no se adivinan (ids internos, códigos numéricos, i
 - 8741=Península · 8742=Canarias · 8743=Baleares
 
 **bde-series** · `bde-estadisticas` · series={code} en favoritas y listaSeries; nombre y frecuencia comprobados en favoritas; lista completa en catalogo_{be|tc|ti|si}.csv (verificado 2026-10-01)
-- D_1NBAF472=Euríbor a un año (mensual) · DTCCBCEUSDEUR.B=Dólares estadounidenses por euro (diaria) · DTNPDE2010_P0000P_PS_APU=Deuda PDE del total de AAPP en % del PIB (trimestral) · D_1JA0D000=Paro registrado (mensual desde 1933; MAX solo da las 1000 últimas)
+- D_1NBAF472=Euríbor a un año (mensual) · DTCCBCEUSDEUR.B=Dólares estadounidenses por euro (diaria) · DTNPDE2010_P0000P_PS_APU=Deuda PDE del total de AAPP en % del PIB (trimestral) · D_1JA0D000=Paro registrado (mensual desde 1933; MAX solo da las 1000 últimas) · D_G2B1I0ZP=Bonos y obligaciones del Estado a 10 años, rendimiento (mensual; 3,63 % en 2026-08) · D_1NBBO308=Deuda pública de Alemania a 10 años, rendimiento (mensual, un mes por detrás (2026-07 el 01/10/2026))
+
+**ine-series-coyuntura** · `ine-api-tempus` · DATOS_SERIE/{code}?nult=2&tip=AM (T3_TipoDato dice si es avance, provisional o definitivo); cambian con cada cambio de base (verificado 2026-10-01)
+- nota: consulta.coyuntura y la herramienta MCP coyuntura los usan; las series de una tabla salen con DATOS_TABLA/{id_tabla}?nult=1
+- IPC290750=IPC general, variación anual (tabla 76134; 4,9 en 2026M09 (avance)) · IPC290752=IPC general, variación mensual (tabla 76134) · IPC290751=IPC general, índice (base 2025) · EPA452434=Tasa de paro EPA, ambos sexos, total nacional (tabla 14506; 9,87 en 2026T2) · CNTR6653=PIB, variación trimestral, corregida de estacionalidad y calendario (tabla 67822; 0,6847 en 2026T2) · CNTR6654=PIB, variación anual, corregida de estacionalidad y calendario (tabla 67822; 2,6374 en 2026T2)
 
 **madrid-distritos** · `ayuntamiento-madrid-datos-abiertos` · COD_DISTRITO como texto en filters del datastore y cod_distrito en la API dinámica; en eDatos del Instituto, 28079_D{2 dígitos} (verificado 2026-10-01)
 - nota: lista con datastore_search?resource_id=200076-2-padron-csv&fields=COD_DISTRITO,DESC_DISTRITO&distinct=true

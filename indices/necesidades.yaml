@@ -67,6 +67,12 @@
   source: hacienda-central-informacion
 - need: Cualquier estadística oficial del INE (IPC, EPA, PIB, padrón, natalidad, empresas)
   source: ine-api-tempus
+- need: Último dato de coyuntura de España (IPC, paro EPA y registrado, PIB, Euríbor, bono a 10 años, prima de riesgo)
+  source: ine-api-tempus
+  note: herramienta MCP coyuntura o consulta.coyuntura; el IPC del último mes suele ser avance y el PIB que se publica es el corregido; Euríbor y bonos en bde-estadisticas
+- need: Todo lo básico de un municipio de una vez (códigos, padrón, renta, paro, contratos, criminalidad)
+  source: ine-api-tempus
+  note: herramienta MCP perfil_municipio o consulta.perfil_municipio; combina INE, SEPE, Interior y datos/municipios.csv
 - need: Códigos INE de municipios, provincias y comunidades
   source: ine-codigos-territoriales
 - need: Microdatos de encuestas (EPA, condiciones de vida, presupuestos familiares, censo)

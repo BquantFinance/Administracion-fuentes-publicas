@@ -79,6 +79,8 @@ añadir a la configuración del cliente `"env": {"EXTRA_CA_BUNDLE": "/ruta/ca-de
 - `tabla_pcaxis(tabla, filtro=None, max_filas=200)`: tablas del INE (id o Tabla.htm), Interior, Educación y Cultura en
   filas con números convertidos; filtro por texto en cualquier campo (08019, un nombre, un periodo).
 - `boe_sumario(fecha, diario="boe", seccion=None, texto=None)`: disposiciones del día del BOE o del BORME.
+- `coyuntura()`: último IPC (marcando si es avance), paro EPA, PIB corregido, paro registrado, Euríbor, dólar, deuda PDE,
+  bono a 10 años y prima de riesgo, con periodo, serie y fuente (INE o Banco de España).
 - `perfil_municipio(municipio)`: un municipio en una llamada: códigos en cada sistema, padrón, renta neta media, paro
   registrado y contratos del año por mes (SEPE) y criminalidad acumulada (Interior, más de 20.000 habitantes).
 - `subvenciones_nif(nif)`: concesiones, ayudas de Estado, minimis y grandes beneficiarios de un NIF en la BDNS.

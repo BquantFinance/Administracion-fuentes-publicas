@@ -2582,9 +2582,11 @@
     "No hay endpoint de búsqueda; los códigos salen de los catálogos CSV. Algunos llevan # o %, que van como %23 y %25; sin escapar, # trunca el código (errNum 404) y % da un 404 en HTML.",
     "Los catálogos escriben el fichero del cuadro en mayúsculas (BE0101.csv) pero la URL real va en minúsculas (be0101.csv); en mayúsculas responde 302 a app.bde.es/pmk/id y acaba en 404 HTML.",
     "catalogo_be.csv tiene filas con comillas sin escapar en Notas (18 a 23 campos) y pd.read_csv falla en la línea 13682; leer con csv.reader y cortar a 17 campos, porque on_bad_lines pierde filas.",
-    "catalogo_pb.csv (encuesta de préstamos bancarios) está congelado, con Last-Modified 2023-03-01, datos hasta DIC 2021 y códigos que la API no reconoce (errNum 404)."
+    "catalogo_pb.csv (encuesta de préstamos bancarios) está congelado, con Last-Modified 2023-03-01, datos hasta DIC 2021 y códigos que la API no reconoce (errNum 404).",
+    "favoritas fecha cada periodo por su primer día (2026-04-01 con codFrecuencia Q es 2026T2) y D_1JA0D000 trae unidad «m pers.» pero el valor son personas (2.355.918 en agosto de 2026, como suma el SEPE)."
    ],
    "tips": [
+    "Prima de riesgo, D_G2B1I0ZP menos D_1NBBO308 en el último mes común (julio de 2026, 3,534 - 3,07 = 46 puntos básicos); el alemán va un mes por detrás.",
     "Flujo típico. Buscar el código en catalogo_*.csv por la descripción (un código se repite en varios cuadros, 15.693 filas para 12.833 códigos) y pedir listaSeries con rango=MAX o año a año.",
     "Códigos verificados. D_1NBAF472 euríbor a un año mensual, DTCCBCEUSDEUR.B USD/EUR diario, DTNPDE2010_P0000P_PS_APU deuda PDE sobre PIB trimestral.",
     "Una serie diaria completa sale en una sola petición del CSV de su cuadro (tc_1_1.csv, 1,9 MB, desde 1999) en lugar de una llamada a la API por año.",
@@ -4261,7 +4263,9 @@
    ],
    "summary": "Acceso programático a las 112 operaciones estadísticas del INE: metadatos (operaciones, tablas, variables, valores) y datos de tablas y series (IPC, EPA, PIB, padrón, natalidad, empresas). JSON y CSV, sin autenticación.",
    "alerts": [
-    "En DATOS_TABLA nult cuenta periodos de la tabla, publicados o no: 24077 ya trae 2026M09 vacío; pedir nult=2 y quedarse con el último Valor no nulo (2026M08, 104,638), o usar DATOS_SERIE, que con nult=1 da 2026M08."
+    "En DATOS_TABLA nult cuenta periodos de la tabla, publicados o no: 24077 ya trae 2026M09 vacío; pedir nult=2 y quedarse con el último Valor no nulo (2026M08, 104,638), o usar DATOS_SERIE, que con nult=1 da 2026M08.",
+    "El último dato puede ser avance y se revisa: IPC290750 da 4,9 en 2026M09 con FK_TipoDato 3 (avance; T3_TipoDato con tip=AM) y 4,3 en 2026M08 definitivo (1); pedir tip=AM y decir el tipo.",
+    "PIB, usar las series corregidas de estacionalidad y calendario: 2026T2 da 0,68 % trimestral en CNTR6653 y 4,79 % en la sin corregir CNTR6722 (tabla 67822); la que se publica es la corregida."
    ],
    "access": [
     "api-rest"
@@ -11322,6 +11326,16 @@
     "source": "ine-api-tempus"
    },
    {
+    "need": "Último dato de coyuntura de España (IPC, paro EPA y registrado, PIB, Euríbor, bono a 10 años, prima de riesgo)",
+    "source": "ine-api-tempus",
+    "note": "herramienta MCP coyuntura o consulta.coyuntura; el IPC del último mes suele ser avance y el PIB que se publica es el corregido; Euríbor y bonos en bde-estadisticas"
+   },
+   {
+    "need": "Todo lo básico de un municipio de una vez (códigos, padrón, renta, paro, contratos, criminalidad)",
+    "source": "ine-api-tempus",
+    "note": "herramienta MCP perfil_municipio o consulta.perfil_municipio; combina INE, SEPE, Interior y datos/municipios.csv"
+   },
+   {
     "need": "Códigos INE de municipios, provincias y comunidades",
     "source": "ine-codigos-territoriales"
    },
@@ -14662,6 +14676,54 @@
       "code": "D_1JA0D000",
       "name": "Paro registrado",
       "note": "mensual desde 1933; MAX solo da las 1000 últimas"
+     },
+     {
+      "code": "D_G2B1I0ZP",
+      "name": "Bonos y obligaciones del Estado a 10 años, rendimiento",
+      "note": "mensual; 3,63 % en 2026-08"
+     },
+     {
+      "code": "D_1NBBO308",
+      "name": "Deuda pública de Alemania a 10 años, rendimiento",
+      "note": "mensual, un mes por detrás (2026-07 el 01/10/2026)"
+     }
+    ]
+   },
+   "ine-series-coyuntura": {
+    "source": "ine-api-tempus",
+    "use": "DATOS_SERIE/{code}?nult=2&tip=AM (T3_TipoDato dice si es avance, provisional o definitivo); cambian con cada cambio de base",
+    "note": "consulta.coyuntura y la herramienta MCP coyuntura los usan; las series de una tabla salen con DATOS_TABLA/{id_tabla}?nult=1",
+    "verified": "2026-10-01",
+    "entries": [
+     {
+      "code": "IPC290750",
+      "name": "IPC general, variación anual",
+      "note": "tabla 76134; 4,9 en 2026M09 (avance)"
+     },
+     {
+      "code": "IPC290752",
+      "name": "IPC general, variación mensual",
+      "note": "tabla 76134"
+     },
+     {
+      "code": "IPC290751",
+      "name": "IPC general, índice",
+      "note": "base 2025"
+     },
+     {
+      "code": "EPA452434",
+      "name": "Tasa de paro EPA, ambos sexos, total nacional",
+      "note": "tabla 14506; 9,87 en 2026T2"
+     },
+     {
+      "code": "CNTR6653",
+      "name": "PIB, variación trimestral, corregida de estacionalidad y calendario",
+      "note": "tabla 67822; 0,6847 en 2026T2"
+     },
+     {
+      "code": "CNTR6654",
+      "name": "PIB, variación anual, corregida de estacionalidad y calendario",
+      "note": "tabla 67822; 2,6374 en 2026T2"
      }
     ]
    },

@@ -356,6 +356,21 @@ bde-series:
     - {code: "DTCCBCEUSDEUR.B", name: "Dólares estadounidenses por euro", note: "diaria"}
     - {code: "DTNPDE2010_P0000P_PS_APU", name: "Deuda PDE del total de AAPP en % del PIB", note: "trimestral"}
     - {code: "D_1JA0D000", name: "Paro registrado", note: "mensual desde 1933; MAX solo da las 1000 últimas"}
+    - {code: "D_G2B1I0ZP", name: "Bonos y obligaciones del Estado a 10 años, rendimiento", note: "mensual; 3,63 % en 2026-08"}
+    - {code: "D_1NBBO308", name: "Deuda pública de Alemania a 10 años, rendimiento", note: "mensual, un mes por detrás (2026-07 el 01/10/2026)"}
+
+ine-series-coyuntura:
+  source: ine-api-tempus
+  use: "DATOS_SERIE/{code}?nult=2&tip=AM (T3_TipoDato dice si es avance, provisional o definitivo); cambian con cada cambio de base"
+  note: "consulta.coyuntura y la herramienta MCP coyuntura los usan; las series de una tabla salen con DATOS_TABLA/{id_tabla}?nult=1"
+  verified: "2026-10-01"
+  entries:
+    - {code: "IPC290750", name: "IPC general, variación anual", note: "tabla 76134; 4,9 en 2026M09 (avance)"}
+    - {code: "IPC290752", name: "IPC general, variación mensual", note: "tabla 76134"}
+    - {code: "IPC290751", name: "IPC general, índice", note: "base 2025"}
+    - {code: "EPA452434", name: "Tasa de paro EPA, ambos sexos, total nacional", note: "tabla 14506; 9,87 en 2026T2"}
+    - {code: "CNTR6653", name: "PIB, variación trimestral, corregida de estacionalidad y calendario", note: "tabla 67822; 0,6847 en 2026T2"}
+    - {code: "CNTR6654", name: "PIB, variación anual, corregida de estacionalidad y calendario", note: "tabla 67822; 2,6374 en 2026T2"}
 
 madrid-distritos:
   source: ayuntamiento-madrid-datos-abiertos
