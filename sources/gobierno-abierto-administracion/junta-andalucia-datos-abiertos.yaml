@@ -10,7 +10,7 @@ summary: >-
   OpenAPI (BOJA desde 1979, RPT, agenda, subvenciones), sin autenticación.
 alerts:
   - datastore_active true no garantiza la tabla; 6 de 173 recursos dieron 404 Resource not found y las plantillas orgánicas tienen 1000 filas en el datastore frente a 36260 en el CSV. Contrastar total con el fichero.
-  - Se pierden ceros a la izquierda; el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine de la API v0 llega como entero (44001) o texto ('04001') según el registro.
+  - "Se pierden ceros a la izquierda: el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine llega como 44001 o '04001'; normalizar con str(x).zfill(5) antes de cruzar."
 access: [api-rest, download]
 auth: none
 formats: [json, csv, xls, xlsx, ods, kml, rdf, txt]

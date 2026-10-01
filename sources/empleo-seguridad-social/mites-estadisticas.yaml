@@ -10,8 +10,8 @@ summary: >-
   y mediación, con avances mensuales y monográficas anuales en xlsx y xls, más REGCON, el registro de convenios,
   acuerdos y planes de igualdad con búsqueda pública y exportación a Excel.
 alerts:
-  - Los avances mensuales son acumulados desde enero (Avance enero - julio 2026) frente al mismo periodo del año anterior; restar meses para obtener el dato de un mes.
-  - REGCON no necesita consulta_token_value_id (lo rellena el JavaScript con la hora en ms), pero ?pagina=N sin la cookie de la búsqueda devuelve en silencio el registro entero (177.915).
+  - "CCT_MM_AAAA.xls es acumulado desde enero y revisa meses previos: el mes suelto es su fila menos la anterior en la hoja CCT-1.1 del último fichero (agosto de 2026, 686 - 562 = 124 convenios); buscar la hoja por nombre."
+  - REGCON pagina con ?pagina=N solo con la cookie de la búsqueda (curl -c y -b en las dos llamadas); sin ella devuelve en silencio el registro entero (177.915 trámites en vez de los 1.415 de hosteleria).
 access: [download, portal]
 auth: none
 formats: [xlsx, xls, pdf, html]

@@ -10,7 +10,7 @@ summary: >-
   financieras) por API JSON, por CSV de cada cuadro del Boletín Estadístico y por ZIP de capítulo. Los códigos
   de serie se localizan en catálogos CSV.
 alerts:
-  - listaSeries con rango=MAX devuelve como mucho las 1000 observaciones más recientes, sin aviso; el paro registrado (1118 desde 1933) llega desde 1943 aunque fechaInicio diga 1933. Completar con rango=AAAA.
+  - "rango=MAX da como mucho las 1.000 observaciones más recientes: el paro registrado D_1JA0D000 (1.118 desde 1933-07) llega solo desde 1943-05; pedir los años previos con rango=1933 a rango=1943, uno por llamada."
 access: [api-rest, download]
 auth: none
 formats: [json, csv, xlsx, zip]

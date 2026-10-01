@@ -9,7 +9,7 @@ summary: >-
   Acceso programático a las 112 operaciones estadísticas del INE: metadatos (operaciones, tablas, variables,
   valores) y datos de tablas y series (IPC, EPA, PIB, padrón, natalidad, empresas). JSON y CSV, sin autenticación.
 alerts:
-  - En DATOS_TABLA nult cuenta periodos de la tabla; 24077 ya incluye 2026M09 (avance del IPC) sin dato del índice y nult=1 da Data vacío, mientras DATOS_SERIE cuenta datos y nult=1 da 2026M08.
+  - "En DATOS_TABLA nult cuenta periodos de la tabla, publicados o no: 24077 ya trae 2026M09 vacío; pedir nult=2 y quedarse con el último Valor no nulo (2026M08, 104,638), o usar DATOS_SERIE, que con nult=1 da 2026M08."
 access: [api-rest]
 auth: none
 formats: [json, csv]

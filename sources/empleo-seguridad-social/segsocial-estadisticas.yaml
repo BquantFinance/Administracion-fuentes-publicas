@@ -10,7 +10,7 @@ summary: >-
   largo con URL fija; pensiones contributivas por clase e importe; nómina del Ingreso Mínimo Vital; bases de
   cotización; Muestra Continua de Vidas Laborales bajo solicitud.
 alerts:
-  - En MUNCNAE los afiliados de 1 a 4 son el texto «<5» (56 % de las filas) y COD MUNICIPIO pierde el cero inicial; rellenar a cinco dígitos y no sumar «<5» como cero.
+  - "En MUNCNAE el 56 % de las filas son «<5» (1 a 4): sumar sin ellas subestima; dar intervalo con cada «<5» entre 1 y 4 (Abengibre agosto 2026, 332 sin ellas y 354 a 420 con sus 22). COD MUNICIPIO va sin cero inicial."
 access: [download, portal]
 auth: none
 formats: [xlsx, pdf]

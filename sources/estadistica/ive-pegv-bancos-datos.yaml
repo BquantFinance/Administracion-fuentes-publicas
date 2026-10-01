@@ -10,7 +10,7 @@ summary: >-
   superficies de cultivo, indicadores demográficos, industria) con descarga estática por código de consulta en
   CSV, xlsx y PC-Axis. El INE no da la escala comarcal.
 alerts:
-  - El CSV omite las celdas confidenciales desde 2023 (la fila desaparece) y xlsxestados las marca c; antes de 2023 el guion era secreto estadístico y desde 2023 significa no aplicable.
+  - El CSV omite las celdas confidenciales desde 2023 (la fila desaparece, no sale a cero); pedir xlsxestados, que las marca c, para distinguirlas de un dato ausente. Antes de 2023 el guion era secreto; luego, no aplica.
 access: [download, portal]
 auth: none
 formats: [csv, xlsx, xls, px]

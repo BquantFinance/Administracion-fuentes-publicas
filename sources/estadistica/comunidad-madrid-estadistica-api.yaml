@@ -9,7 +9,7 @@ summary: >-
   Madrid (PIB municipal, contabilidad trimestral, nacimientos y defunciones por municipio, barrio o zona de salud,
   afiliación). JSON o XML, exportación a CSV, sin clave.
 alerts:
-  - limit por encima de 1000 se recorta a 1000 sin aviso; paginar con offset hasta total.
+  - "limit por encima de 1.000 se recorta a 1.000 sin aviso (datasets.json con limit=5000 da 1.000 de 2.592): paginar offset de 1.000 en 1.000 hasta total o seguir nextLink."
 access: [api-rest]
 auth: none
 formats: [json, xml, csv, zip]

@@ -10,7 +10,7 @@ summary: >-
   de suministrador, precios, garantías de origen, bono social), precios provinciales de carburantes,
   telecomunicaciones, audiovisual, transporte, postal y comercio electrónico.
 alerts:
-  - datastore_search recorta limit a 32000 sin error (result.limit dice el aplicado) y _links.next empieza por //api/3/, que urljoin toma como host; paginar con offset sobre el host o usar el dump.
+  - "datastore_search recorta limit a 32.000 sin error (limit=50000 en ds_1915_1 da 32.000 de 75.553; result.limit dice el aplicado): paginar con offset sobre el host, no con _links.next, o usar /datastore/dump/{id}."
 access: [api-rest, download, portal]
 auth: none
 formats: [csv, json, xml]

@@ -10,7 +10,7 @@ summary: >-
   series desde 2001, paro y contratos de todos los municipios con código INE en un xls por mes, y desglose por
   división CNAE, sexo y edad de capitales y municipios de más de 20.000.
 alerts:
-  - Los valores de 1 a 4 llegan como texto «<5» (secreto estadístico) mezclados con enteros, ceros y celdas vacías; convertir antes de sumar y no tratar «<5» como cero.
+  - "«<5» es secreto (1 a 4), no cero: un sexo sale restando el otro del TOTAL (Abengibre agosto 2026, hombres 18 - 13 = 5) y la provincia, de su fila de total (Albacete 20.710, no los 20.698 de sumar municipios)."
 access: [download, portal]
 auth: none
 formats: [xls, pdf, html, rss]

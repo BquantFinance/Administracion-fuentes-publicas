@@ -10,7 +10,7 @@ summary: >-
   trimestrales y anuales desde 1995), ejecución mensual del presupuesto del Estado en caja, cuentas anuales de las
   AAPP e inventario de entes públicos (INVENTE) con API REST en JSON.
 alerts:
-  - Los xlsx mensuales (M_) y trimestrales (T_) traen valores acumulados desde enero; el dato del mes o del trimestre es la diferencia con el periodo anterior.
+  - "Los xlsx M_ y T_ son acumulados desde enero: el mes suelto es su columna menos la anterior (Administración Central 2026, total de ingresos de julio 199.738 - 170.655 = 29.083 millones); en T_, igual con el trimestre."
 access: [download, api-rest, portal]
 auth: none
 formats: [xlsx, xls, pdf, html, json]

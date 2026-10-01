@@ -10,7 +10,7 @@ summary: >-
   estratégicos y subvenciones a partidos políticos de todas las Administraciones (Estado, CCAA, EELL). API REST
   JSON paginada sin autenticación y exportación a CSV y xlsx.
 alerts:
-  - La exportación pagina como la búsqueda; sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso. Pasar page y pageSize (tope 10000).
+  - La exportación sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso; pedir page=0&pageSize=10000 (tope) y seguir con page=1, 2... hasta una página con menos filas.
 access: [api-rest, download, portal]
 auth: none
 formats: [json, csv, xlsx]

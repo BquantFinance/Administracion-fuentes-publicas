@@ -9,7 +9,7 @@ summary: >-
   registros, GTFS del Consorcio, elecciones autonómicas) y 2086 tablas del Instituto de Estadística (bancos Almudena
   municipal, Baco y Desvan). API JSON, datastore y DCAT sin clave.
 alerts:
-  - "El datastore no siempre refleja el CSV: padron_por_sexo tenía 5000 de 18718 filas (hasta 2022), el mensual de calidad del aire 1000 de 5880 y el diario 0 de 180; comparar total con el fichero."
+  - "El datastore no siempre refleja el CSV: padron_por_sexo tiene 5.000 de 18.718 filas y acaba en 2022 (Alcalá de Henares 2025, 203.208 habitantes, solo está en el CSV); comparar total con el fichero y leer el CSV."
 access: [api-rest, download]
 auth: none
 formats: [json, csv, zip, ttl, rdf]

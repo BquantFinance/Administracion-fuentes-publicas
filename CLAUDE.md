@@ -26,6 +26,8 @@ Cada línea que no ahorre una búsqueda, una prueba fallida o una hora de depura
    organismos, URLs que cambian, datos que parecen cero y son secreto estadístico. Una frase por trampa.
    Las trampas silenciosas (datos incompletos, distintos o a cero sin error) van en `alerts`, tras `summary`, como
    mucho tres por ficha y sin repetirse en `gotchas`: la evaluación del 2026-10-01 mostró que entre las demás se pierden.
+   Cada alerta dice la operación exacta (fichero, fila, parámetro o código) y un ejemplo con números comprobados: una
+   alerta que solo describe la trampa no cambió el resultado de los agentes; la explícita, sí.
 4. **`tips` solo si acelera.** Patrón de uso, librería concreta, cruce típico con otra fuente. Máximo seis.
 5. **Ejemplos copiables y respuesta descrita.** Cada endpoint principal lleva un `example` que funciona al
    pegarlo y un `returns` con la forma de la respuesta vista en esa llamada (campos clave, tipos, formato de fecha y
@@ -199,8 +201,10 @@ Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
 - Enfoque acordado con el propietario el 2026-10-01: lo que acelera a quien desarrolla con agentes, a devs, a gente que
   trastea y a startups; que el agente obtenga el dato, no solo sepa dónde está. Hecho ese día: clientes genéricos,
   alertas, tabla de municipios, herramientas MCP que traen datos, plugin de Claude Code con skill y ejemplos.
-- Siguiente trabajo, en este orden: (1) reescribir las 35 alertas con la operación exacta y un ejemplo numérico, que es
-  lo que hizo funcionar la de Interior (tanda 3); (2) perfil de empresa por NIF (BDNS ya, contratos de PLACSP, deudores
+- Hecho el 2026-10-01 (segunda sesión): 17 alertas reescritas con la operación exacta y un ejemplo numérico comprobado
+  ese día (IGAE, Trabajo, SEPE, Seguridad Social, BdE, GBIF, IGN, INE, CNMC, BDNS, Comunidad de Madrid, FACe, IVE,
+  Junta); las demás ya lo decían. En Trabajo, el fichero de cada mes revisa los anteriores (julio 563 o 562 convenios).
+- Siguiente trabajo, en este orden: (2) perfil de empresa por NIF (BDNS ya, contratos de PLACSP, deudores
   de la AEAT, concursos del BOE y del Registro Público Concursal, BORME por denominación; la lista de deudores no se
   localizó aún en la sede el 2026-10-01); (3) guía de reutilización comercial y datos personales por fuente, con las
   normas leídas en el BOE; (4) histórico y sincronización de las fuentes clave (desde cuándo, cómo bajarlo todo, cuánto

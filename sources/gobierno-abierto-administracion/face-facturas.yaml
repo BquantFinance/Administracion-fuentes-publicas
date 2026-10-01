@@ -10,7 +10,7 @@ summary: >-
   contable, órgano gestor y unidad tramitadora (DIR3 y NIF) de las Administraciones adheridas, y servicios SOAP
   con certificado para presentar y consultar facturas.
 alerts:
-  - fulltext distingue mayúsculas y tildes (ayuntamiento de madrid da 0) y busca subcadenas (Ayuntamiento de Madrid trae también Madridanos y Madridejos); filtrar después por administration.code.
+  - fulltext distingue mayúsculas y tildes (ayuntamiento de madrid da 0) y busca subcadenas (trae Madridanos y Madridejos); quedarse con administration.code L01280796, que da las 99 unidades del Ayuntamiento de Madrid.
 access: [api-rest, api-soap, download]
 auth: none
 formats: [json, csv, xml]

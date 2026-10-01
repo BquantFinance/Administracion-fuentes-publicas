@@ -10,7 +10,7 @@ summary: >-
   Antártida y mundiales aparte), tablas HTML de N días (magnitud 1,5 o más o sentidos) y catálogo desde 1370 con
   búsqueda y descarga en CSV, reproducibles por script imitando el navegador.
 alerts:
-  - El catálogo solo filtra si se replica el navegador; un POST con solo los campos con prefijo devolvió los valores por defecto (2008-2016, magnitud 0-8, 61.369 eventos) sin avisar.
+  - El catálogo solo filtra con GET a searchTerremoto con todos los parámetros (latMin a longMax, fechas dd/mm/aaaa, selMagnitud=Y, magMin, magMax, selIntensidad=N, selProf=N, fases=no); magnitud 4+ en 2026, 31 terremotos.
 access: [download, portal, scraping]
 auth: none
 formats: [geojson, html, csv, txt, kml, zip]
@@ -43,6 +43,7 @@ endpoints:
 quirks: [js-rendered, session-required, url-drift]
 ids: []
 gotchas:
+  - Un POST con solo los campos con prefijo del portlet devolvió los valores por defecto (2008-2016, magnitud 0-8, 61.369 eventos) sin avisar; usar el GET de searchTerremoto con todos los parámetros.
   - No hay API ni FDSN (www.ign.es/fdsnws da 404) y el RSS y el KML antiguos de /resources/sismologia/tproximos/ responden 404 (el directorio, 403); la vía estable es todos_visualizadores.js.
   - todos_visualizadores.js no es JSON; cada una de sus cuatro variables va tras «var nombre =» y acaba en «;», así que hay que extraerlas por separado (raw_decode desde cada var).
   - En el GeoJSON mag, depth e intensidad son texto; tmundiales usa fecha con barras (2026/09/24 07:40:59) y tproximos_canarias trajo justo 999 eventos el 01/10/2026, posible tope.
