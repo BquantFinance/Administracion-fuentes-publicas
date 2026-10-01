@@ -3136,7 +3136,7 @@ related: educacion-estadisticas-ruct, ine-microdatos
 ## interior-criminalidad
 Ministerio del Interior – Portal Estadístico de Criminalidad (balances y series anuales) | Secretaría de Estado de Seguridad
 summary: Balances trimestrales acumulados de infracciones penales por tipología (CCAA, provincia, isla y municipio) desde 2016, con comparación interanual, y series anuales 2010-2025 de hechos conocidos, esclarecidos, detenciones y victimizaciones por CCAA y provincia; PC-Axis con descarga CSV, px y xlsx.
-!! Los balances son acumulados desde enero (el del segundo trimestre es enero-junio) frente al mismo periodo del año anterior y su variación %; el trimestre suelto sale restando, y 2022 compara también con 2019.
+!! Los balances son acumulados desde enero; abril-junio es 09006 (enero-junio) menos 09003 (enero-marzo) en la fila III. TOTAL INFRACCIONES PENALES (Barcelona 2026, 75.461 - 37.913 = 37.548).
 access: download, portal | auth: none | formats: csv, px, xlsx, html | update: quarterly | status: active | verified: 2026-10-01
 coverage: Balances 2016-1 a 2026-2 (acumulados desde enero); series anuales 2010-2025
 license: Reutilización libre con cita de la fuente
@@ -3157,6 +3157,7 @@ docs_url: https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistic
   devuelve: CSV largo Provincias;Tipología penal;periodo;Total, UTF-8 con BOM, 1,96 MB y 38.720 filas (55 ámbitos, con En el extranjero y Desconocida, x 44 tipologías x 16 años de 2025 a 2010 en orden descendente); provincias solo por nombre
 quirks: latin1, js-rendered, static-html, errors-html-or-xml, url-drift
 ids: ine-municipio
+! Cada balance compara con el mismo periodo del año anterior y da su variación % (2022 compara también con 2019); las filas de variación no son datos.
 ! Todo el año en curso cuelga de /DatosBalanceAct/l0/ (09001 a 09003 el primer trimestre, 09004 a 09006 el segundo) y los años cerrados de /DatosBalanceAnt/l0/ con números irregulares (69001 en 2016-1, 1509012 en 2025-4).
 ! El CSV llega en UTF-8 con BOM aunque Content-Type diga ISO-8859-15, así que resp.text o latin-1 dan «autÃ³nomas»; decodificar con utf-8-sig. El px sí va en ISO-8859-15.
 ! Desde 2024 el municipio lleva delante su código INE (08019 Barcelona); antes era «- Municipio de Almería» (2016-2020) o «-Municipio de Almería» (2021-2023). Provincias e islas van solo por nombre.

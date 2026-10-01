@@ -10,7 +10,7 @@ summary: >-
   desde 2016, con comparación interanual, y series anuales 2010-2025 de hechos conocidos, esclarecidos,
   detenciones y victimizaciones por CCAA y provincia; PC-Axis con descarga CSV, px y xlsx.
 alerts:
-  - Los balances son acumulados desde enero (el del segundo trimestre es enero-junio) frente al mismo periodo del año anterior y su variación %; el trimestre suelto sale restando, y 2022 compara también con 2019.
+  - Los balances son acumulados desde enero; abril-junio es 09006 (enero-junio) menos 09003 (enero-marzo) en la fila III. TOTAL INFRACCIONES PENALES (Barcelona 2026, 75.461 - 37.913 = 37.548).
 access: [download, portal]
 auth: none
 formats: [csv, px, xlsx, html]
@@ -42,6 +42,7 @@ endpoints:
 quirks: [latin1, js-rendered, static-html, errors-html-or-xml, url-drift]
 ids: [ine-municipio]
 gotchas:
+  - Cada balance compara con el mismo periodo del año anterior y da su variación % (2022 compara también con 2019); las filas de variación no son datos.
   - Todo el año en curso cuelga de /DatosBalanceAct/l0/ (09001 a 09003 el primer trimestre, 09004 a 09006 el segundo) y los años cerrados de /DatosBalanceAnt/l0/ con números irregulares (69001 en 2016-1, 1509012 en 2025-4).
   - El CSV llega en UTF-8 con BOM aunque Content-Type diga ISO-8859-15, así que resp.text o latin-1 dan «autÃ³nomas»; decodificar con utf-8-sig. El px sí va en ISO-8859-15.
   - Desde 2024 el municipio lleva delante su código INE (08019 Barcelona); antes era «- Municipio de Almería» (2016-2020) o «-Municipio de Almería» (2021-2023). Provincias e islas van solo por nombre.

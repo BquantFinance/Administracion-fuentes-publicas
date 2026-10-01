@@ -702,7 +702,11 @@
     - source: interior-criminalidad
       do: "CSV con jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09006.px?nocab=1 (municipios; 09005 provincias, 09004 CCAA); cabecera Geografía;Tipología penal;Periodos:;Total, UTF-8 con BOM aunque la cabecera diga ISO-8859-15, miles con punto y decimales con coma; desde 2024 el municipio lleva delante su código INE y los balances son acumulados desde enero"
       example: curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09006.px?nocab=1"
-  output: CSV con periodo actual, anterior y variación por tipología
+    - source: interior-criminalidad
+      do: "El balance es acumulado desde enero; un trimestre suelto es el balance menos el anterior del mismo año (09006 menos 09003 para abril-junio), en la misma Geografía y Tipología penal"
+      example: curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09003.px?nocab=1"
+      note: Barcelona 2026, III. TOTAL INFRACCIONES PENALES, 75.461 (enero-junio) - 37.913 (enero-marzo) = 37.548
+  output: CSV con periodo actual, anterior y variación por tipología; el trimestre suelto, por diferencia
   checks:
     - url: https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09006.px?nocab=1
       contains: Periodos

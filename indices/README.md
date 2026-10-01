@@ -443,7 +443,11 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
    ```
    curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09006.px?nocab=1"
    ```
-- salida: CSV con periodo actual, anterior y variación por tipología
+3. `interior-criminalidad`: El balance es acumulado desde enero; un trimestre suelto es el balance menos el anterior del mismo año (09006 menos 09003 para abril-junio), en la misma Geografía y Tipología penal
+   ```
+   curl -s "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/09003.px?nocab=1"
+   ```
+- salida: CSV con periodo actual, anterior y variación por tipología; el trimestre suelto, por diferencia
 
 **actos-mercantiles-borme** · Constituciones, nombramientos, ceses y disoluciones de sociedades publicados en el BORME
 - entrada: boe-id
