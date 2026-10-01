@@ -106,7 +106,8 @@ Barcelona. Más comunidades, entidades locales, Cortes, Poder Judicial o UE solo
 - **Publicación**: releases v0.1.0 a v0.3.0 y entrada `io.github.BquantFinance/catalogo-fuentes-publicas` en el registro
   oficial de MCP. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` (y en
   los dos ficheros del plugin) y crear la release vX.Y.Z desde la web; `publicar-mcp.yml` empaqueta, adjunta y publica.
-  v0.4.0 publicada el 2026-10-01 (registro oficial, sha256 del .mcpb coincide).
+  v0.4.0 publicada el 2026-10-01 (registro oficial, sha256 del .mcpb coincide). 0.5.0 (respuestas compactas) subida en
+  esos ficheros; falta crear la release v0.5.0 desde la web.
 - **CI**: `ci.yml` (validate, build al día y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC,
   manual y al cambiar el flujo: recetas, ejemplos de fichas, cargadores, ejemplos y enlaces desde la IP de GitHub;
   comenta en el issue de verificación si algo falla). Secreto `AEMET_KEY` en el repositorio.
