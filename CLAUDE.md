@@ -46,9 +46,13 @@ antes de darlo por bueno. Mejor pocas piezas que funcionan que muchas a medias.
 9. **No borrar fichas.** Una fuente muerta pasa a `status: deprecated` con la sustituta en `gotchas`.
 10. **Rendimientos decrecientes.** Mejor 50 fichas exactas que 500 aproximadas; un sector sin API y con datos que ya da
     el INE, una ficha o ninguna.
-11. **Superficie pequeña.** Antes de una herramienta MCP nueva, ver si cabe en una existente (`buscar` ya cubre fichas,
-    recetas, necesidades, productos e identificadores). Antes de un fichero nuevo, ver si cabe en uno existente. Las
-    herramientas cuestan tokens en cada turno del agente que las tiene cargadas (14 el 2026-10-01).
+11. **Superficie pequeña y respuestas compactas.** Antes de una herramienta MCP nueva, ver si cabe en una existente
+    (`buscar` cubre fichas, recetas, necesidades, productos e identificadores; `ficha(id)` da el detalle de todos). Las
+    definiciones se pagan en cada turno (13 herramientas, unos 1.550 tokens el 2026-10-01) y las respuestas en cada
+    llamada: JSON sin sangría ni copia estructurada, tablas en columnas, sin campos que repiten lo ya sabido y textos
+    largos cortados. `test_mcp_catalogo.py` falla si se pasan los presupuestos de tamaño. El contenido sigue en
+    castellano: en prosa el inglés ahorraba un 8 a 15 % de tokens, menos que el formato, y las fichas citan literales
+    de la fuente que no se traducen.
 
 ## Flujo de trabajo
 
@@ -102,8 +106,7 @@ Barcelona. Más comunidades, entidades locales, Cortes, Poder Judicial o UE solo
 - **Publicación**: releases v0.1.0 a v0.3.0 y entrada `io.github.BquantFinance/catalogo-fuentes-publicas` en el registro
   oficial de MCP. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` (y en
   los dos ficheros del plugin) y crear la release vX.Y.Z desde la web; `publicar-mcp.yml` empaqueta, adjunta y publica.
-  La versión 0.4.0 (MCP de 14 herramientas con `buscar`, productos) está subida en esos ficheros; falta crear la
-  release v0.4.0 desde la web.
+  v0.4.0 publicada el 2026-10-01 (registro oficial, sha256 del .mcpb coincide).
 - **CI**: `ci.yml` (validate, build al día y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC,
   manual y al cambiar el flujo: recetas, ejemplos de fichas, cargadores, ejemplos y enlaces desde la IP de GitHub;
   comenta en el issue de verificación si algo falla). Secreto `AEMET_KEY` en el repositorio.

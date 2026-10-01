@@ -29,7 +29,7 @@ def herramientas_mcp() -> list[dict]:
     tree = ast.parse((ROOT / "scripts" / "mcp_catalogo.py").read_text(encoding="utf-8"))
     out = []
     for n in tree.body:
-        if isinstance(n, ast.FunctionDef) and any(ast.unparse(d).startswith("mcp.tool") for d in n.decorator_list):
+        if isinstance(n, ast.FunctionDef) and any(ast.unparse(d) in ("herramienta", "mcp.tool()") for d in n.decorator_list):
             args = n.args.args
             defaults = [None] * (len(args) - len(n.args.defaults)) + list(n.args.defaults)
             firma = ", ".join(a.arg + (f"={ast.unparse(d)}" if d is not None else "") for a, d in zip(args, defaults))

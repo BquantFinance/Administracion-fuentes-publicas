@@ -10,7 +10,7 @@ Catálogo verificado con llamadas reales: https://github.com/BquantFinance/Admin
 ## Flujo
 
 1. Localiza. Con el servidor MCP `catalogo-fuentes-publicas`, `buscar(texto)` devuelve a la vez fichas, recetas,
-   necesidades, productos que se pueden construir e identificadores; después `ficha(id)` o `receta(id)`. Sin MCP:
+   necesidades, productos que se pueden construir e identificadores; el detalle de cualquiera, con `ficha(id)`. Sin MCP:
    `curl -s https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/llms-min.txt` y la
    ficha en `.../main/sources/<sector>/<id>.yaml`.
 2. Lee primero `alerts` de la ficha: trampas silenciosas que dan una cifra incompleta o distinta sin error. Aplica la

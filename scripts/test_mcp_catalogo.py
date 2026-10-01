@@ -15,8 +15,18 @@ from mcp.client.stdio import stdio_client
 
 ROOT = Path(__file__).resolve().parent.parent
 SERVER = ROOT / "scripts" / "mcp_catalogo.py"
-TOOLS = {"buscar", "ficha", "receta", "codigos", "descargar", "tabla_pcaxis", "boe_sumario", "empresa_nif", "perfil_municipio",
+TOOLS = {"buscar", "ficha", "codigos", "descargar", "tabla_pcaxis", "boe_sumario", "empresa_nif", "perfil_municipio",
          "coyuntura", "ckan_buscar", "ckan_filas", "socrata_filas", "almacen_sql"}
+
+# Presupuestos en caracteres (unos 3,5 por token): lo que el agente paga en cada turno o en cada llamada típica.
+PRESUPUESTO = {"definiciones": 6500, "buscar": 7000, "empresa_nif": 9000, "perfil_municipio": 4000, "tabla_pcaxis": 4000}
+
+
+def medir(nombre: str, result) -> None:
+    texto = "".join(c.text for c in result.content if hasattr(c, "text"))
+    assert "\n  " not in texto, f"{nombre} devuelve JSON con sangría"
+    if nombre in PRESUPUESTO:
+        assert len(texto) < PRESUPUESTO[nombre], f"{nombre} ocupa {len(texto)} caracteres (presupuesto {PRESUPUESTO[nombre]})"
 
 
 def payload(result):
@@ -37,12 +47,18 @@ async def main() -> None:
     async with stdio_client(params) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
-            names = {t.name for t in (await session.list_tools()).tools}
+            lista = (await session.list_tools()).tools
+            names = {t.name for t in lista}
+            definiciones = sum(len(t.description or "") + len(json.dumps(t.inputSchema, ensure_ascii=False)) for t in lista)
+            assert definiciones < PRESUPUESTO["definiciones"], f"las definiciones ocupan {definiciones} caracteres"
+            print(f"definiciones: {definiciones} caracteres (presupuesto {PRESUPUESTO['definiciones']})")
             assert TOOLS <= names, f"faltan herramientas: {TOOLS - names}"
             print(f"herramientas: {', '.join(sorted(names))}")
 
             assert names == TOOLS, f"herramientas distintas: sobran {names - TOOLS}, faltan {TOOLS - names}"
-            b = payload(await session.call_tool("buscar", {"consulta": "paro municipio"}))
+            res = await session.call_tool("buscar", {"consulta": "paro municipio"})
+            medir("buscar", res)
+            b = payload(res)
             fuentes = b["fichas"]
             assert fuentes and fuentes[0]["id"] == "sepe-estadisticas", [f["id"] for f in fuentes]
             base = {"id", "name", "sector", "access", "auth", "status", "verified", "summary"}
@@ -68,9 +84,15 @@ async def main() -> None:
 
             recetas = payload(await session.call_tool("buscar", {"consulta": "IPC último dato"}))["recetas"]
             assert recetas and recetas[0]["id"] == "ipc-ultimo-dato", [r["id"] for r in recetas]
-            r = payload(await session.call_tool("receta", {"id": recetas[0]["id"]}))
-            assert r["steps"] and "checks" not in r and {"intent", "inputs", "steps", "output", "verified"} <= set(r)
-            print(f"receta('{r['id']}'): {len(r['steps'])} pasos, verified {r['verified']}")
+            r = payload(await session.call_tool("ficha", {"id": recetas[0]["id"]}))
+            assert r["tipo"] == "receta" and r["steps"] and "checks" not in r and {"intent", "inputs", "steps", "output", "verified"} <= set(r)
+            print(f"ficha('{r['id']}') de una receta: {len(r['steps'])} pasos, verified {r['verified']}")
+            pr = payload(await session.call_tool("ficha", {"id": "radar-licitaciones"}))
+            assert pr["tipo"] == "producto" and pr["trampa"] and pr["fuentes"], pr
+            idf = payload(await session.call_tool("ficha", {"id": "ine-municipio"}))
+            assert idf["tipo"] == "identificador" and idf["regex"] and idf["joins"], idf
+            px2 = payload(await session.call_tool("tabla_pcaxis", {"tabla": "24077", "max_filas": 3}))
+            assert isinstance(px2["filas"][0], list) and len(px2["filas"][0]) == len(px2["columnas"]), px2  # filas en columnas
 
             grupos = payload(await session.call_tool("codigos", {}))
             prov = payload(await session.call_tool("codigos", {"grupo": "ine-provincias"}))
@@ -84,9 +106,13 @@ async def main() -> None:
             print(f"descargar(ruta muerta): sustituta {rm['rutas_muertas'][0]['new']}")
             d = payload(await session.call_tool("descargar", {"url": "https://www.boe.es/datosabiertos/api/boe/sumario/20240102", "max_caracteres": 200}))
             assert d["estado"] == 200 and d["formato"] == "json" and d["fichas"][0]["id"].startswith("boe"), d
-            px = payload(await session.call_tool("tabla_pcaxis", {"tabla": "24077", "max_filas": 2}))
-            assert px["columnas"][-1] == "Total" and px["filas"], px
-            emp = payload(await session.call_tool("empresa_nif", {"nif": "Q1132001G", "max_filas": 1}))
+            res = await session.call_tool("tabla_pcaxis", {"tabla": "24077", "max_filas": 50})
+            medir("tabla_pcaxis", res)
+            px = payload(res)
+            assert px["columnas"][-1] == "Total" and px["filas"] and px["filas"][0][-1] is None, px  # 2026M09 aún sin dato
+            res = await session.call_tool("empresa_nif", {"nif": "Q1132001G", "max_filas": 5})
+            medir("empresa_nif", res)
+            emp = payload(res)
             assert emp["sector_publico"]["codigoDir3"] == "U00500001" and emp["aei"]["total"] > 0, emp.get("error", emp.keys())
             print(f"empresa_nif('Q1132001G'): {emp['nombre']}, {emp['subvenciones']['concesiones']['total']} concesiones, {emp['aei']['total']} ayudas AEI")
             bloq = payload(await session.call_tool("descargar", {"url": "http://localhost:8080/"}))
@@ -94,7 +120,9 @@ async def main() -> None:
             co = payload(await session.call_tool("coyuntura", {}))
             assert co["ipc_variacion_anual"]["tipo"] in ("avance", "definitivo") and co["euribor_12m"]["valor"] > 0, co
             print(f"coyuntura(): IPC {co['ipc_variacion_anual']['periodo']} {co['ipc_variacion_anual']['valor']} ({co['ipc_variacion_anual']['tipo']}), prima {co['prima_riesgo'].get('valor')} pb")
-            pm = payload(await session.call_tool("perfil_municipio", {"municipio": "02001"}))
+            res = await session.call_tool("perfil_municipio", {"municipio": "02001"})
+            medir("perfil_municipio", res)
+            pm = payload(res)
             assert pm["municipio"]["nombre"] == "Abengibre" and pm["poblacion"]["habitantes"] > 0 and pm["paro_registrado"]["mes"], pm
             print(f"perfil_municipio('02001'): {pm['poblacion']['habitantes']:.0f} habitantes, paro {pm['paro_registrado']['mes']} {pm['paro_registrado']['total_paro_registrado']}")
             alm = payload(await session.call_tool("almacen_sql", {"consulta": "select 1 as uno"}))

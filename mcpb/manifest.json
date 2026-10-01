@@ -37,23 +37,19 @@
   "tools": [
     {
       "name": "buscar",
-      "description": "Busca en todo el catálogo a la vez: fichas (con sus alerts), recetas que cruzan fuentes, necesidades habituales con la ficha que las resuelve y la nota que evita el desvío típico, productos que se pueden construir con sus piezas, e identificadores (formato, regex y cruces)."
+      "description": "Busca a la vez fichas (resumen y alerts), recetas que cruzan fuentes, necesidades con la ficha que las resuelve, productos que se pueden construir e identificadores."
     },
     {
       "name": "ficha",
-      "description": "Ficha completa de una fuente (alerts primero, endpoints con ejemplo y respuesta, sync, quirks, ids, gotchas, tips, related)."
-    },
-    {
-      "name": "receta",
-      "description": "Receta completa: intent, inputs, steps (source, do, example), output, note y verified."
+      "description": "Detalle de cualquier id de buscar: fuente (alerts primero, endpoints con ejemplo y respuesta, sync, gotchas), receta (pasos), producto (piezas, frescura, licencia, trampa) o identificador (regex, cruces)."
     },
     {
       "name": "codigos",
-      "description": "Códigos que una API exige como parámetro y no se adivinan (Id de municipio y provincia del INE para tv, países de DataComex, estación de AEMET por capital, productos de carburantes, rangos del BOE)."
+      "description": "Códigos que una API exige y no se adivinan (Id del INE para tv, países de DataComex, estaciones de AEMET, productos de carburantes, rangos del BOE)."
     },
     {
       "name": "descargar",
-      "description": "Descarga una URL pública con las reglas del catálogo (CA de FNMT, User-Agent de navegador, reintentos, gzip sin anunciar, UTF-8 o Latin-1 reales) y la resume: columnas y primeras filas de un CSV, claves de un JSON, hojas de un xlsx, ficheros de un ZIP."
+      "description": "Descarga una URL pública resolviendo certificados FNMT, User-Agent, reintentos, gzip y codificación, y la resume (CSV, JSON, xlsx o ZIP)."
     },
     {
       "name": "tabla_pcaxis",
@@ -65,19 +61,19 @@
     },
     {
       "name": "empresa_nif",
-      "description": "Lo público de una empresa o entidad por NIF sin certificado: si es sector público (Invente, con DIR3), subvenciones, ayudas de Estado, minimis y grandes beneficiarios (BDNS, con totales), ayudas de la AEI y prohibiciones de contratar vigentes (por denominación)."
+      "description": "Lo público de una empresa o entidad por NIF: si es sector público (con DIR3), subvenciones, ayudas de Estado y minimis con totales (BDNS), ayudas de la AEI y prohibiciones de contratar; con almacén local, contratos adjudicados y actos del BORME."
     },
     {
       "name": "coyuntura",
-      "description": "Último dato de los indicadores de coyuntura de España en una llamada: IPC (variación anual y mensual, marcando si es avance), paro EPA, PIB (variación trimestral y anual corregidas), paro registrado, Euríbor, dólar, deuda PDE, bono a 10 años y prima de riesgo."
+      "description": "Último dato de coyuntura de España con periodo, serie y fuente: IPC (marcando si es avance), paro EPA, PIB corregido, paro registrado, Euríbor, dólar, deuda PDE, bono a 10 años y prima de riesgo."
     },
     {
       "name": "perfil_municipio",
-      "description": "Un municipio en una llamada (nombre, código INE, SIGPAC, DIR3 o NIF): sus códigos en cada sistema (INE con dígito de control, SIGPAC y Catastro, que numeran distinto, DIR3 y NIF del ayuntamiento, NUTS3, Id del INE Tempus y coordenadas), población del padrón, renta neta media, paro registrado y contratos del año por mes (SEPE) y criminalidad acumulada (Interior, más de 20.000 habitantes)."
+      "description": "Un municipio (nombre, código INE, SIGPAC, DIR3 o NIF) en una llamada: sus códigos en cada sistema (SIGPAC y Catastro numeran distinto que el INE), padrón, renta media, paro y contratos del año por mes y criminalidad."
     },
     {
       "name": "almacen_sql",
-      "description": "SQL de solo lectura (DuckDB) sobre el almacén local en Parquet, si existe (FUENTES_ALMACEN o ./almacen): tablas boe, borme, bdns, placsp, placsp_adjudicaciones y carburantes, y vistas placsp_ultimo y adjudicaciones_ultimo (último estado de cada expediente)."
+      "description": "SQL de solo lectura (DuckDB) sobre el almacén local en Parquet si existe: tablas boe, borme, bdns, placsp, placsp_adjudicaciones y carburantes, y vistas placsp_ultimo y adjudicaciones_ultimo (último estado)."
     },
     {
       "name": "ckan_buscar",

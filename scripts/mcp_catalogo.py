@@ -6,6 +6,8 @@ Arranque: python scripts/mcp_catalogo.py (desde el repo) o mcp-catalogo tras ins
 Prueba real: python scripts/test_mcp_catalogo.py.
 """
 import difflib
+import functools
+import inspect
 import json
 import re
 import sys
@@ -55,8 +57,8 @@ STOPWORDS = {
 }
 INSTRUCTIONS = (
     "Datos públicos de España para construir productos. buscar(texto) mira a la vez fichas, recetas, necesidades, "
-    "productos e identificadores; ficha(id) da endpoints, ejemplos y trampas verificadas (alerts primero: cambian la "
-    "cifra sin dar error); receta(id) encadena fuentes. Datos ya resueltos: perfil_municipio, coyuntura, empresa_nif, "
+    "productos e identificadores y devuelve un índice ligero; ficha(id) da el detalle de cualquiera de ellos (de una "
+    "fuente: endpoints, ejemplos y trampas verificadas, alerts primero porque cambian la cifra sin dar error). Datos ya resueltos: perfil_municipio, coyuntura, empresa_nif, "
     "boe_sumario, tabla_pcaxis, ckan_buscar, ckan_filas, socrata_filas, almacen_sql y descargar(url) para cualquier "
     "otra URL pública. Lee catalogo://reglas antes de programar contra una fuente."
 )
@@ -181,6 +183,58 @@ RECETA_FIELDS = {
 mcp = FastMCP("catalogo-fuentes-publicas", instructions=INSTRUCTIONS)
 
 
+def _columnas(r):
+    """Filas como listas bajo columnas, en vez de un dict por fila que repite los nombres (la mitad de tokens), a
+    cualquier nivel: también las tablas anidadas de empresa_nif o perfil_municipio."""
+    if isinstance(r, list):
+        return [_columnas(x) for x in r]
+    if not isinstance(r, dict):
+        return r
+    r = {k: _columnas(v) for k, v in r.items()}
+    filas = r.get("filas")
+    if isinstance(filas, list) and filas and all(isinstance(f, dict) for f in filas):
+        cols = list(r.get("columnas") or dict.fromkeys(k for f in filas for k in f))
+        r["columnas"], r["filas"] = cols, [[f.get(c) for c in cols] for f in filas]
+    return r
+
+
+def herramienta(fn):
+    """Registra la herramienta y devuelve JSON compacto (sin sangría ni espacios) con las filas en columnas: la
+    librería serializa con sangría y eso solo eran tokens."""
+    @functools.wraps(fn)
+    def envoltura(*args, **kwargs):
+        return json.dumps(_columnas(fn(*args, **kwargs)), ensure_ascii=False, separators=(",", ":"), default=str)
+    envoltura.__signature__ = inspect.signature(fn).replace(return_annotation=str)
+    envoltura.__annotations__ = {**fn.__annotations__, "return": str}
+    descripcion = " ".join((fn.__doc__ or "").split())  # sin la sangría de la docstring
+    try:
+        registrar = mcp.tool(description=descripcion, structured_output=False)  # sin copia estructurada duplicada
+    except TypeError:  # versiones sin el parámetro
+        registrar = mcp.tool(description=descripcion)
+    registrar(envoltura)
+    try:  # esquema sin title por parámetro ni anyOf para los opcionales: lo mismo en la mitad de tokens
+        tool = mcp._tool_manager._tools[fn.__name__]
+        tool.parameters = _esquema_compacto(tool.parameters)
+    except (AttributeError, KeyError):
+        pass
+    return envoltura
+
+
+def _esquema_compacto(s):
+    if isinstance(s, list):
+        return [_esquema_compacto(x) for x in s]
+    if not isinstance(s, dict):
+        return s
+    s = {k: _esquema_compacto(v) for k, v in s.items() if k != "title"}
+    tipos = s.get("anyOf")
+    if isinstance(tipos, list) and len(tipos) == 2 and {"type": "null"} in tipos:
+        otro = next(x for x in tipos if x != {"type": "null"})
+        if set(otro) == {"type"}:
+            del s["anyOf"]
+            s["type"] = [otro["type"], "null"]
+    return s
+
+
 def _fichas(consulta: str, sector: str | None, limite: int) -> list[dict]:
     items = SOURCES
     if sector:
@@ -194,39 +248,42 @@ def _fichas(consulta: str, sector: str | None, limite: int) -> list[dict]:
     ]
 
 
-@mcp.tool()
+@herramienta
 def buscar(consulta: str, sector: str | None = None, limite: int = 5) -> dict:
-    """Busca en todo el catálogo a la vez: fichas (con sus alerts), recetas que cruzan fuentes, necesidades habituales
-    con la ficha que las resuelve y la nota que evita el desvío típico, productos que se pueden construir con sus piezas,
-    e identificadores (formato, regex y cruces). Después, ficha(id) o receta(id). sector filtra las fichas."""
+    """Busca a la vez fichas (resumen y alerts), recetas que cruzan fuentes, necesidades con la ficha que las resuelve,
+    productos que se pueden construir e identificadores. Devuelve un índice ligero; el detalle, con ficha(id)."""
     out = {
         "fichas": _fichas(consulta, sector, limite),
         "recetas": [{"id": r["id"], "intent": r["intent"], "sources": list(dict.fromkeys(st["source"] for st in r["steps"])),
                      "verified": r.get("verified")} for r in rank(consulta, RECETAS, lambda r: RECETA_FIELDS[r["id"]], 3)],
         "necesidades": [{"need": n["need"], "source": n.get("source"), "note": n.get("note")}
                         for n in rank(consulta, NECESIDADES, lambda n: (norm(n["need"]), norm([n.get("source"), n.get("note")])), 3)],
-        "productos": rank(consulta, PRODUCTOS, lambda p: (norm([p["id"], p["producto"]]), norm([p.get("cliente"), p["fuentes"], p.get("piezas")])), 3),
-        "identificadores": [{"id": k, **v} for k, v in rank(consulta, list(IDENTIFICADORES.items()),
-                                                             lambda kv: (norm(kv[0]), norm([kv[1].get("format"), kv[1].get("issuer")])), 2)],
+        "productos": [{"id": p["id"], "producto": p["producto"], "fuentes": p["fuentes"]} for p in
+                      rank(consulta, PRODUCTOS, lambda p: (norm([p["id"], p["producto"]]), norm([p.get("cliente"), p["fuentes"], p.get("piezas")])), 3)],
+        "identificadores": [{"id": k, "format": v.get("format"), "example": v.get("example")} for k, v in
+                            rank(consulta, list(IDENTIFICADORES.items()), lambda kv: (norm(kv[0]), norm([kv[1].get("format"), kv[1].get("issuer")])), 2)],
     }
     return {k: v for k, v in out.items() if v} or {"nota": "nada casa; probar con otras palabras o leer catalogo://llms.txt"}
 
 
-@mcp.tool()
+PRODUCTO_BY_ID = {p["id"]: p for p in PRODUCTOS}
+
+
+@herramienta
 def ficha(id: str) -> dict:
-    """Ficha completa de una fuente (alerts primero, endpoints con ejemplo y respuesta, sync, quirks, ids, gotchas, tips, related). Si el id no existe, devuelve hasta 5 ids parecidos."""
+    """Detalle de cualquier id de buscar: fuente (alerts primero, endpoints con ejemplo y respuesta, sync, gotchas),
+    receta (pasos), producto (piezas, frescura, licencia, trampa) o identificador (regex, cruces). Si no existe, ids
+    parecidos."""
     if id in BY_ID:
         s = BY_ID[id]
         return {"alerts": s["alerts"], **s} if s.get("alerts") else s
-    return {"error": f"no existe la ficha {id}", "sugerencias": parecidos(id, BY_ID)}
-
-
-@mcp.tool()
-def receta(id: str) -> dict:
-    """Receta completa: intent, inputs, steps (source, do, example), output, note y verified. Si el id no existe, devuelve ids parecidos."""
     if id in RECETA_BY_ID:
-        return {k: v for k, v in RECETA_BY_ID[id].items() if k != "checks"}
-    return {"error": f"no existe la receta {id}", "sugerencias": parecidos(id, RECETA_BY_ID)}
+        return {"tipo": "receta", **{k: v for k, v in RECETA_BY_ID[id].items() if k != "checks"}}
+    if id in PRODUCTO_BY_ID:
+        return {"tipo": "producto", **PRODUCTO_BY_ID[id]}
+    if id in IDENTIFICADORES:
+        return {"tipo": "identificador", "id": id, **IDENTIFICADORES[id]}
+    return {"error": f"no existe {id}", "sugerencias": parecidos(id, [*BY_ID, *RECETA_BY_ID, *PRODUCTO_BY_ID, *IDENTIFICADORES])}
 
 
 def rutas_muertas(url: str) -> list[dict]:
@@ -238,9 +295,10 @@ def rutas_muertas(url: str) -> list[dict]:
     return [{k: d.get(k) for k in ("old", "status", "new", "source", "note", "checked")} for d in exact + prefix]
 
 
-@mcp.tool()
+@herramienta
 def codigos(grupo: str | None = None) -> dict | list[dict]:
-    """Códigos que una API exige como parámetro y no se adivinan (Id de municipio y provincia del INE para tv, países de DataComex, estación de AEMET por capital, productos de carburantes, rangos del BOE). Sin grupo, lista los grupos con fuente y uso; con grupo, sus entradas {code, name, note}."""
+    """Códigos que una API exige y no se adivinan (Id del INE para tv, países de DataComex, estaciones de AEMET,
+    productos de carburantes, rangos del BOE). Sin grupo, la lista de grupos; con grupo, sus entradas."""
     if grupo is None:
         return [
             {"grupo": k, "source": g["source"], "use": g["use"], "entries": len(g["entries"]), "verified": g["verified"]}
@@ -278,13 +336,11 @@ def _datos(fn, *args, **kwargs) -> dict:
         return {"error": f"{tipo}: {str(exc)[:400]}", "pista": pista}
 
 
-@mcp.tool()
+@herramienta
 def descargar(url: str, max_caracteres: int = 20000, desde: int = 0) -> dict:
-    """Descarga una URL pública con las reglas del catálogo (CA de FNMT, User-Agent de navegador, reintentos, gzip sin
-    anunciar, UTF-8 o Latin-1 reales) y la resume: columnas y primeras filas de un CSV, claves de un JSON, hojas de un
-    xlsx, ficheros de un ZIP. Detecta páginas de bloqueo de WAF. Si el host es de una ficha, añade su id y sus alerts, y
-    si la URL figura en rutas muertas, su sustituta. Solo hosts públicos y hasta 25 MB. Úsala cuando el fetch propio
-    falle con un .gob.es o para ver qué devuelve una URL antes de programar."""
+    """Descarga una URL pública resolviendo certificados FNMT, User-Agent, reintentos, gzip y codificación, y la resume
+    (CSV, JSON, xlsx o ZIP). Avisa de bloqueos de WAF, añade las alerts de la ficha del host y la sustituta si la URL
+    está muerta. Hasta 25 MB. Para cuando tu fetch falle con un .gob.es o para ver qué devuelve una URL."""
     r = _datos(_consulta().descargar, url, max_caracteres, desde)
     host = urlparse(r.get("url") or url).hostname or ""
     ids = FICHAS_POR_HOST.get(host, [])
@@ -296,7 +352,7 @@ def descargar(url: str, max_caracteres: int = 20000, desde: int = 0) -> dict:
     return r
 
 
-@mcp.tool()
+@herramienta
 def tabla_pcaxis(tabla: str, filtro: str | None = None, max_filas: int = 200) -> dict:
     """Tabla PC-Axis en filas con números ya convertidos (None es dato no disponible o secreto, no cero): id de tabla
     del INE (24077), URL Tabla.htm del INE, Interior, Educación o Cultura, o URL del fichero. filtro deja las filas con
@@ -304,7 +360,7 @@ def tabla_pcaxis(tabla: str, filtro: str | None = None, max_filas: int = 200) ->
     return _datos(_consulta().tabla_pcaxis, tabla, filtro, max_filas)
 
 
-@mcp.tool()
+@herramienta
 def boe_sumario(fecha: str, diario: str = "boe", seccion: str | None = None, texto: str | None = None,
                 max_items: int = 200) -> dict:
     """Disposiciones de un día del BOE (diario=boe) o del BORME (diario=borme); fecha AAAA-MM-DD. Filtra por código de
@@ -312,41 +368,70 @@ def boe_sumario(fecha: str, diario: str = "boe", seccion: str | None = None, tex
     return _datos(_consulta().boe_sumario, fecha, diario, seccion, texto, max_items)
 
 
-@mcp.tool()
-def empresa_nif(nif: str, max_filas: int = 10) -> dict:
-    """Lo público de una empresa o entidad por NIF sin certificado: si es sector público (Invente, con DIR3),
-    subvenciones, ayudas de Estado, minimis y grandes beneficiarios (BDNS, con totales), ayudas de la AEI y prohibiciones
-    de contratar vigentes (por denominación). Con almacén local, también contratos adjudicados y actos del BORME (clave almacen); no_cubierto dice
-    dónde mirar lo demás."""
-    return _datos(_consulta().empresa_nif, nif, max_filas)
+CAMPOS_BDNS = ("fechaConcesion", "importe", "ayudaEquivalente", "instrumento", "numeroConvocatoria", "convocatoria",
+               "convocante", "nivel2", "nivel3", "reglamento", "objetivo", "ejercicio", "ayudaETotal")
 
 
-@mcp.tool()
+CAMPOS_AEI = ("Año", "Convocatoria", "Referencia", "Título", "€ Conced.")
+CORTE = {"convocante": 80, "reglamento": 60, "objetivo": 80}  # instrumento solo si no es la subvención de siempre
+
+
+def _corto(v, n: int = 120):
+    return v[: n - 1].rstrip() + "…" if isinstance(v, str) and len(v) > n and not v.startswith("http") else v
+
+
+def _empresa_compacta(r: dict) -> dict:
+    """Las filas de la BDNS y de la AEI repiten el NIF y el nombre ya conocidos y traen ids internos y URL: se quedan
+    los campos que sirven para decidir, con los textos cortados a 120 caracteres (numeroConvocatoria o Referencia
+    llevan al resto) y la AEI de lo más reciente a lo más antiguo. Del almacén, solo la cobertura de sus tablas."""
+    for col in (r.get("subvenciones") or {}).values():
+        if isinstance(col, dict) and isinstance(col.get("filas"), list):
+            col["filas"] = [{k: _corto(v.strip() if isinstance(v, str) else v, CORTE.get(k, 120)) for k, v in f.items()
+                             if k in CAMPOS_BDNS and not (k == "instrumento" and str(v).startswith("SUBVENCIÓN y ENTREGA"))}
+                            for f in col["filas"]]
+    aei = r.get("aei")
+    if isinstance(aei, dict) and isinstance(aei.get("filas"), list):
+        filas = sorted(aei["filas"], key=lambda f: str(f.get("Año", "")), reverse=True)
+        aei["filas"] = [{k: _corto(f.get(k), 100) for k in CAMPOS_AEI} for f in filas]
+    alm = r.get("almacen")
+    if isinstance(alm, dict):
+        if isinstance(alm.get("cobertura"), dict):
+            alm["cobertura"] = {k: v for k, v in alm["cobertura"].items() if k in ("placsp", "placsp_adjudicaciones", "borme", "bdns")}
+        for f in ((alm.get("contratos") or {}).get("recientes") or []):
+            f["objeto"] = _corto(f.get("objeto"), 100)
+    return r
+
+
+@herramienta
+def empresa_nif(nif: str, max_filas: int = 5) -> dict:
+    """Lo público de una empresa o entidad por NIF: si es sector público (con DIR3), subvenciones, ayudas de Estado y
+    minimis con totales (BDNS), ayudas de la AEI y prohibiciones de contratar; con almacén local, contratos adjudicados
+    y actos del BORME. no_cubierto dice dónde mirar lo demás."""
+    return _empresa_compacta(_datos(_consulta().empresa_nif, nif, max_filas))
+
+
+@herramienta
 def coyuntura() -> dict:
-    """Último dato de los indicadores de coyuntura de España en una llamada: IPC (variación anual y mensual, marcando si
-    es avance), paro EPA, PIB (variación trimestral y anual corregidas), paro registrado, Euríbor, dólar, deuda PDE,
-    bono a 10 años y prima de riesgo. Cada uno con periodo, serie y fuente (INE o Banco de España)."""
+    """Último dato de coyuntura de España con periodo, serie y fuente: IPC (marcando si es avance), paro EPA, PIB
+    corregido, paro registrado, Euríbor, dólar, deuda PDE, bono a 10 años y prima de riesgo."""
     return _datos(_consulta().coyuntura)
 
 
-@mcp.tool()
+@herramienta
 def perfil_municipio(municipio: str, solo_codigos: bool = False) -> dict:
-    """Un municipio en una llamada (nombre, código INE, SIGPAC, DIR3 o NIF): sus códigos en cada sistema (INE con dígito
-    de control, SIGPAC y Catastro, que numeran distinto, DIR3 y NIF del ayuntamiento, NUTS3, Id del INE Tempus y
-    coordenadas), población del padrón, renta neta media, paro registrado y contratos del año por mes (SEPE) y
-    criminalidad acumulada (Interior, más de 20.000 habitantes). solo_codigos=True devuelve solo los códigos de hasta
-    5 candidatos, sin red. Cada bloque trae su fuente; uno que falle no tumba los demás."""
+    """Un municipio (nombre, código INE, SIGPAC, DIR3 o NIF) en una llamada: sus códigos en cada sistema (SIGPAC y
+    Catastro numeran distinto que el INE), padrón, renta media, paro y contratos del año por mes y criminalidad.
+    solo_codigos=True da solo los códigos de hasta 5 candidatos, sin red."""
     if solo_codigos:
         return {"candidatos": _consulta().buscar_municipio(municipio, 5)}
     return _datos(_consulta().perfil_municipio, municipio)
 
 
-@mcp.tool()
+@herramienta
 def almacen_sql(consulta: str, limite: int = 100) -> dict:
-    """SQL de solo lectura (DuckDB) sobre el almacén local en Parquet, si existe (FUENTES_ALMACEN o ./almacen): tablas
-    boe, borme, bdns, placsp, placsp_adjudicaciones y carburantes, y vistas placsp_ultimo y adjudicaciones_ultimo
-    (último estado de cada expediente). Devuelve columnas, filas y cobertura (solo está lo cargado). Sin almacén, dice
-    cómo crearlo; empresa_nif lo usa solo para contratos y BORME."""
+    """SQL de solo lectura (DuckDB) sobre el almacén local en Parquet si existe: tablas boe, borme, bdns, placsp,
+    placsp_adjudicaciones y carburantes, y vistas placsp_ultimo y adjudicaciones_ultimo (último estado). Devuelve
+    columnas, filas y cobertura; sin almacén, cómo crearlo."""
     def _ejecutar():
         try:
             from .clientes import almacen
@@ -360,21 +445,21 @@ def almacen_sql(consulta: str, limite: int = 100) -> dict:
     return _datos(_ejecutar)
 
 
-@mcp.tool()
+@herramienta
 def ckan_buscar(portal: str, texto: str, limite: int = 10) -> dict:
     """Conjuntos de un portal CKAN con sus recursos (id, formato, si tiene datastore, url de descarga). portal:
     comunidad-madrid, madrid, barcelona, gva, andalucia, cnmc, renfe o la URL de su /api/3/action."""
     return _datos(_consulta().ckan_buscar, portal, texto, limite)
 
 
-@mcp.tool()
+@herramienta
 def ckan_filas(portal: str, recurso: str, filtros: dict | None = None, limite: int = 100) -> dict:
     """Filas del datastore de un recurso CKAN con filtros por igualdad ({"Territorio": "Madrid"}), paginando sin el
     tope silencioso del portal. Devuelve total_datastore: compáralo con el fichero antes de dar un total."""
     return _datos(_consulta().ckan_filas, portal, recurso, filtros, limite)
 
 
-@mcp.tool()
+@herramienta
 def socrata_filas(conjunto: str, where: str | None = None, select: str | None = None, order: str | None = None,
                   limite: int = 100) -> dict:
     """Filas de un conjunto de la Generalitat de Catalunya (analisi.transparenciacatalunya.cat, id como gn9e-3qhr) con

@@ -329,7 +329,7 @@ def empresa_nif(nif: str, max_filas: int = 10) -> dict:
         nombre = aei[0].get("Entidad")
     out["nombre"] = nombre
     out["aei"] = {"total": len(aei), "importe_total": round(sum(_numero_es(f.get("€ Conced.", "")) for f in aei), 2),
-                  "filas": aei[:max_filas]}
+                  "filas": sorted(aei, key=lambda f: f.get("Año") or "", reverse=True)[:max_filas]}  # el CSV va del más antiguo
     prohibiciones = []
     if nombre:
         clave = normalizar_nombre(nombre)
