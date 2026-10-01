@@ -970,6 +970,7 @@ related: placsp-datos-abiertos
 ## placsp-datos-abiertos
 Plataforma de Contratación del Sector Público – Sindicación ATOM (CODICE) | Dirección General del Patrimonio del Estado
 summary: Todas las licitaciones, adjudicaciones y contratos menores publicados en la Plataforma (Estado y perfiles alojados) y los agregados de plataformas autonómicas, como feeds ATOM diarios con el documento CODICE (XML basado en UBL) de cada expediente, y ZIP anuales y mensuales del histórico.
+!! Con la IP rechazada por el WAF, atom y ZIP dan 200 con un HTML de 187 bytes que un parser XML lee como feed vacío; el 2026-10-01 desde GitHub placsp.py salió con código 0 y «0 expedientes». Comprobar que la raíz es feed.
 access: feed, download | auth: none | formats: atom, xml, zip, xlsx | update: daily | status: active | verified: 2026-10-01
 coverage: 2012- (agregadas desde 2016, menores desde 2018)
 sync.since: 2012 en el 643; agregadas (1044) desde 2016 y menores (1143) desde 2018

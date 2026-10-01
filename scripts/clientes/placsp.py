@@ -108,8 +108,11 @@ def parse_entry(entry) -> dict:
 def parse_feed(contenido: bytes) -> tuple[list[dict], str | None]:
     """Entradas de una página, de la más reciente a la más antigua, y URL de la página anterior (link rel=next).
 
-    Las anulaciones no son entry: llegan como at:deleted-entry (ref = id de la entrada, when, comment type ANULADA)."""
+    Las anulaciones no son entry: llegan como at:deleted-entry (ref = id de la entrada, when, comment type ANULADA).
+    Una página de bloqueo del WAF (200 con HTML) se parsea como XML sin entradas: si la raíz no es un feed, ValueError."""
     root = ET.fromstring(contenido)
+    if root.tag != "{%s}feed" % NS["a"]:
+        raise ValueError(f"PLACSP no devolvió un feed Atom: {contenido[:120]!r}")
     out = [parse_entry(e) for e in root.findall("a:entry", NS)]
     for d in root.findall("at:deleted-entry", NS):
         c = d.find("at:comment", NS)

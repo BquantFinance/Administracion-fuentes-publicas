@@ -30,6 +30,9 @@ def main(dias: int = 1, cpv: str = "") -> None:
         filtro += " AND list_any_value(list_filter(p.cpv, c -> starts_with(c, ?))) IS NOT NULL"
         params.append(cpv)
     con = almacen.conectar(alm.dir)
+    if not con.execute("SELECT count(*) FROM duckdb_views() WHERE view_name = 'adjudicaciones_ultimo'").fetchone()[0]:
+        print(f"Sin adjudicaciones cargadas en {alm.dir}")
+        return
     base = f"FROM adjudicaciones_ultimo a JOIN placsp_ultimo p USING (id, updated) WHERE {filtro}"
     n, total = con.execute(f"SELECT count(*), sum(a.importe_sin_iva) {base}", params).fetchone()
     print(f"{n} adjudicaciones desde {desde}" + (f" con CPV {cpv}*" if cpv else "") + f", {total or 0:,.0f} € sin IVA")

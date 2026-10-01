@@ -198,6 +198,12 @@ def saiku_cellset():
 
 @test
 def placsp_feed_y_anulaciones():
+    try:
+        placsp.parse_feed(b"<html><title>Error</title><body>The Web Application Firewall has denied</body></html>")
+    except ValueError as e:
+        assert "no devolvió un feed" in str(e)
+    else:
+        raise AssertionError("página del WAF tomada por un feed vacío")
     entradas, siguiente = placsp.parse_feed((M / "placsp-feed-643.atom").read_bytes())
     assert siguiente and siguiente.endswith(".atom") and "_2026" in siguiente
     anuladas = [e for e in entradas if e.get("deleted")]
@@ -312,6 +318,8 @@ def sesion_texto_bloqueos_y_gzip():
     assert sesion.bloqueo(respuesta("<h1>Acceso denegado</h1>".encode(), "text/html", 403))[1] is True
     assert sesion.bloqueo(respuesta("<p>Acceso denegado a la sede</p>".encode(), "text/html", 200)) is None
     assert sesion.bloqueo(respuesta(b'{"x": "Access Denied"}', "application/json", 403)) is None
+    waf = b"<html><title>Error</title><body>The Web Application Firewall has denied your transaction due to a violation of policy.<P>"
+    assert "PLACSP" in sesion.bloqueo(respuesta(waf, "text/html; charset=UTF-8", 200))[0]  # 200, no 403
 
 
 @test

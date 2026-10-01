@@ -9,6 +9,8 @@ summary: >-
   Todas las licitaciones, adjudicaciones y contratos menores publicados en la Plataforma (Estado y perfiles
   alojados) y los agregados de plataformas autonómicas, como feeds ATOM diarios con el documento CODICE (XML
   basado en UBL) de cada expediente, y ZIP anuales y mensuales del histórico.
+alerts:
+  - "Con la IP rechazada por el WAF, atom y ZIP dan 200 con un HTML de 187 bytes que un parser XML lee como feed vacío; el 2026-10-01 desde GitHub placsp.py salió con código 0 y «0 expedientes». Comprobar que la raíz es feed."
 access: [feed, download]
 auth: none
 formats: [atom, xml, zip, xlsx]

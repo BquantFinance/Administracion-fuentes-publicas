@@ -98,10 +98,13 @@ Barcelona. Más comunidades, entidades locales, Cortes, Poder Judicial o UE solo
   mitma-opendata-movilidad. 43 recetas, 12 productos.
 - **Hosts que rechazan IP de centros de datos**: Catastro, REData, www.ree.es, ESIOS, datos.gob.es, BNE, FEGA, OEPM,
   movilidad-opendata.mitma.es, geoserver.iepnb.es, sivira.isciii.es, analisis.cis.es y www.inmujer.es; intermitentes
-  Seguridad Social, renfe, DATAESTUR, indicadores.fecyt.es e IECA; desde GitHub, MINETUR y Catastro. Se re-verifican
-  desde una IP residencial (pendiente). Verificación desde GitHub del 2026-10-01 sobre 42998e7: recetas 88 de 93
-  (Catastro, MINETUR, DGT y un corte de GBIF), ejemplos de fichas 368 de 380 (429 de AEMET, 504 de DATAESTUR),
-  cargadores y ejemplos bien salvo adjudicaciones.py, que pasaba de 10 minutos (ahora con 0, solo hoy).
+  Seguridad Social, renfe, DATAESTUR, indicadores.fecyt.es e IECA; desde GitHub, MINETUR y Catastro. PLACSP
+  (contrataciondelestado.es y contrataciondelsectorpublico.gob.es) responde desde el 2026-10-01 hacia las 17:00 UTC, a
+  esta IP y a la de GitHub, 200 con la página de su WAF en atom y ZIP; a las 16:57 servía el feed. Se re-verifican
+  desde una IP residencial (pendiente). Verificación desde GitHub del 2026-10-01: sobre 42998e7, recetas 88 de 93
+  (Catastro, MINETUR, DGT y un corte de GBIF) y ejemplos de fichas 368 de 380 (429 de AEMET, 504 de DATAESTUR); sobre
+  5b79d2d, recetas 91 de 93 (MINETUR) y ejemplos 367 de 380 (CIMA con un 500 y un timeout, 10 de 10 al repetir; DATAESTUR), y los cargadores
+  de PLACSP daban 0 sin error por el WAF (ahora lanzan Bloqueado).
 - **Evaluación** (`evals/`): con Haiku y trampas silenciosas, acierto 3 de 21 sin catálogo, 10 con ficheros y 13 con
   MCP, con un 30 % y un 43 % menos de tokens de entrada. Sin medir aún: productos, `perfil_municipio`, `coyuntura`,
   `empresa_nif`, almacén.
