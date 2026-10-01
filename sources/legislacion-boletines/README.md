@@ -8,7 +8,7 @@ Sector `legislacion-boletines` · 5 fuentes · índice generado por `scripts/bui
 - Texto consolidado, vigencia y versiones de una norma → `boe-api-legislacion-consolidada` (incluye normas autonómicas; los boletines autonómicos no están en el catálogo)
 - URI estable de una norma para citar o enlazar → `boe-eli`
 - Vigilar novedades del BOE, BORME, ayudas o licitaciones sin programar contra la API → `boe-feeds` (RSS en ISO-8859-1)
-- Actos societarios inscritos en el Registro Mercantil → `borme-api-sumario` (sin búsqueda por empresa; recorrer días y provincias)
+- Actos societarios inscritos en el Registro Mercantil → `borme-api-sumario` (sin búsqueda por empresa; recorrer días y provincias, o cargarlo en el almacén local y buscar por denominación (guides/almacen.md))
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|

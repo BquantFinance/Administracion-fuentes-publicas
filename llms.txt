@@ -82,7 +82,7 @@ Datos incompletos, distintos o a cero sin ningún error; están en `alerts` de c
 - Texto consolidado, vigencia y versiones de una norma → boe-api-legislacion-consolidada (incluye normas autonómicas; los boletines autonómicos no están en el catálogo)
 - URI estable de una norma para citar o enlazar → boe-eli
 - Vigilar novedades del BOE, BORME, ayudas o licitaciones sin programar contra la API → boe-feeds (RSS en ISO-8859-1)
-- Actos societarios inscritos en el Registro Mercantil → borme-api-sumario (sin búsqueda por empresa; recorrer días y provincias)
+- Actos societarios inscritos en el Registro Mercantil → borme-api-sumario (sin búsqueda por empresa; recorrer días y provincias, o cargarlo en el almacén local y buscar por denominación (guides/almacen.md))
 - Euríbor, tipos de interés y de cambio, crédito, balanza de pagos → bde-estadisticas (listaSeries con rango=MAX corta en las 1000 observaciones más recientes sin aviso; completar con rango=AAAA)
 - Deuda pública por Administración (Protocolo de Déficit Excesivo) → bde-estadisticas (capítulo SB_DEUAAPP; airef-datos solo da la ratio total sobre PIB por informe, no por Administración)
 - Subastas del Tesoro y deuda del Estado por instrumento y tenedor → tesoro-estadisticas (año en curso en 11.xlsx e históricos anuales; el HTML de subastas mezcla decimales con coma y con punto)
@@ -108,7 +108,8 @@ Datos incompletos, distintos o a cero sin ningún error; están en `alerts` de c
 - Renta por sección censal (Atlas de distribución de renta) → ine-api-tempus (operación del INE; localizar la tabla con TABLAS_OPERACION, no verificada en esta sesión)
 - Empresas activas por actividad y tamaño (DIRCE) → ine-api-tempus
 - Licitaciones, adjudicaciones y contratos menores de todas las Administraciones → placsp-datos-abiertos
-- Todo lo público de una empresa o entidad por su NIF (ayudas, si es sector público, prohibiciones de contratar) → bdns-api (herramienta empresa_nif del MCP o consulta.empresa_nif (BDNS, AEI, Invente y prohibiciones por denominación); contratos y BORME no tienen consulta por NIF)
+- Contratos adjudicados a una empresa por su NIF, o quién gana los contratos de un órgano → placsp-datos-abiertos (sin búsqueda por NIF en la plataforma; almacén local con la tabla placsp_adjudicaciones (guides/almacen.md, herramienta almacen_sql))
+- Todo lo público de una empresa o entidad por su NIF (ayudas, si es sector público, prohibiciones de contratar) → bdns-api (herramienta empresa_nif del MCP o consulta.empresa_nif (BDNS, AEI, Invente y prohibiciones por denominación); contratos y BORME salen solo del almacén local (guides/almacen.md))
 - Deudores con Hacienda de más de 600.000 € (lista del artículo 95 bis LGT) → ninguna (la AEAT la publica en su sede en junio y por ley deja de ser accesible a los tres meses y no debe indexarse; el 01/10/2026 la de 2026 ya daba 404)
 - Concursos de acreedores de una empresa por NIF → ninguna (publicidadconcursal.es busca por NIF pero exige resolver un CAPTCHA (no automatizable); los edictos de los juzgados de lo mercantil salen en la sección IV del BOE, sin búsqueda por NIF en la API)
 - Convocatorias y concesiones de subvenciones, ayudas de Estado, minimis, grandes beneficiarios → bdns-api
@@ -143,6 +144,7 @@ Datos incompletos, distintos o a cero sin ningún error; están en `alerts` de c
 - Presencia de especies (ocurrencias, datasets de biodiversidad) → gbif-es
 - Emisiones de gases de efecto invernadero y contaminantes atmosféricos por sector (inventario nacional) → miteco-inventario-emisiones (por categoría IPCC; por instalación en miteco-prtr)
 - Precios de carburantes por gasolinera → minetur-precios-carburantes
+- Serie diaria de precios de una gasolinera o de un municipio → minetur-precios-carburantes (histórico día a día desde 2007 (EstacionesTerrestresHist, 12 MB al día el nacional); el almacén local lo guarda por estación y día (guides/almacen.md))
 - Comercializadoras, cambios de suministrador, bono social, garantías de origen → cnmc-data
 - Consumo de productos petrolíferos y gas por provincia, balances energéticos → miteco-energia-estadisticas (series de CORES en xlsx; el ministerio publica PDF)
 - Demanda, generación por tecnología, PVPC y precio spot horarios → ree-redata (WAF intermitente; reintentar; ESIOS exige token)

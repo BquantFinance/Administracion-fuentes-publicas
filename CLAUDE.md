@@ -186,9 +186,9 @@ Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
   sesión, idéntica a `main` al cierre. `claude/magical-volta-cjszgk` y `claude/eager-albattani-9me81y` son antiguas y
   se pueden borrar.
 - Publicación: release v0.1.0 y entrada `io.github.BquantFinance/catalogo-fuentes-publicas` en el registro oficial de
-  MCP. Release v0.2.0 publicada (alertas, municipio, clientes). Versión 0.3.0 (herramientas MCP que traen datos, plugin
-  de Claude Code con skill, ejemplos) subida en server.json, pyproject.toml, mcpb/manifest.json y los dos ficheros del
-  plugin; falta crear la release v0.3.0 desde la web. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` y crear la release
+  MCP. Release v0.2.0 publicada (alertas, municipio, clientes). Release v0.3.0 publicada el 2026-10-01 sobre 4862750
+  (herramientas MCP que traen datos, plugin de Claude Code con skill, ejemplos, reutilización, sync y almacén local): el
+  registro oficial la da como última y el sha256 del .mcpb coincide. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` y crear la release
   vX.Y.Z desde la web de GitHub; `publicar-mcp.yml` hace el resto.
 - CI: `ci.yml` (validate, build y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC, manual y al
   cambiar el propio flujo; recetas, ejemplos, cargadores y enlaces desde la IP de GitHub; comenta en el issue de
@@ -224,7 +224,7 @@ Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
   ni publica releases de datos, y `almacen/` está en `.gitignore`. Parquet por tabla y mes con BOE, BORME (tipo de acto
   y texto solo de los actos sin nombres), BDNS por fecha de alta, PLACSP con adjudicaciones (NIF y nombre fuera si es
   persona física) y carburantes; `empresa_nif` añade contratos y BORME si hay almacén.
-- Siguiente trabajo: lo que indique el propietario. Del propietario: release v0.3.0, ronda desde una IP residencial, token de DataComex y más comunidades cuando lo decida.
+- Siguiente trabajo: lo que indique el propietario. Del propietario: ronda desde una IP residencial, token de DataComex y más comunidades cuando lo decida.
 
 ## Lo que no se hace
 

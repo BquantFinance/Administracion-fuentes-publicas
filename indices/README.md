@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 149 necesidades, 21 identificadores, 23 grupos de códigos, 99 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 151 necesidades, 21 identificadores, 23 grupos de códigos, 99 rutas muertas.
 
 ## Recetas por intención
 
@@ -587,7 +587,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Texto consolidado, vigencia y versiones de una norma → `boe-api-legislacion-consolidada` (incluye normas autonómicas; los boletines autonómicos no están en el catálogo)
 - URI estable de una norma para citar o enlazar → `boe-eli`
 - Vigilar novedades del BOE, BORME, ayudas o licitaciones sin programar contra la API → `boe-feeds` (RSS en ISO-8859-1)
-- Actos societarios inscritos en el Registro Mercantil → `borme-api-sumario` (sin búsqueda por empresa; recorrer días y provincias)
+- Actos societarios inscritos en el Registro Mercantil → `borme-api-sumario` (sin búsqueda por empresa; recorrer días y provincias, o cargarlo en el almacén local y buscar por denominación (guides/almacen.md))
 
 **Economía, finanzas y mercados**
 - Euríbor, tipos de interés y de cambio, crédito, balanza de pagos → `bde-estadisticas` (listaSeries con rango=MAX corta en las 1000 observaciones más recientes sin aviso; completar con rango=AAAA)
@@ -633,7 +633,8 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **Contratación pública y subvenciones**
 - Licitaciones, adjudicaciones y contratos menores de todas las Administraciones → `placsp-datos-abiertos`
-- Todo lo público de una empresa o entidad por su NIF (ayudas, si es sector público, prohibiciones de contratar) → `bdns-api` (herramienta empresa_nif del MCP o consulta.empresa_nif (BDNS, AEI, Invente y prohibiciones por denominación); contratos y BORME no tienen consulta por NIF)
+- Contratos adjudicados a una empresa por su NIF, o quién gana los contratos de un órgano → `placsp-datos-abiertos` (sin búsqueda por NIF en la plataforma; almacén local con la tabla placsp_adjudicaciones (guides/almacen.md, herramienta almacen_sql))
+- Todo lo público de una empresa o entidad por su NIF (ayudas, si es sector público, prohibiciones de contratar) → `bdns-api` (herramienta empresa_nif del MCP o consulta.empresa_nif (BDNS, AEI, Invente y prohibiciones por denominación); contratos y BORME salen solo del almacén local (guides/almacen.md))
 - Convocatorias y concesiones de subvenciones, ayudas de Estado, minimis, grandes beneficiarios → `bdns-api`
 - Empresas clasificadas para contratar (ROLECE) → `hacienda-registro-licitadores` (solo con certificado electrónico)
 - Prohibiciones de contratar vigentes → `hacienda-registro-licitadores` (XML público del visor del ROLECE; el NIF va oculto, cruzar por nombre)
@@ -690,6 +691,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **Energía**
 - Precios de carburantes por gasolinera → `minetur-precios-carburantes`
+- Serie diaria de precios de una gasolinera o de un municipio → `minetur-precios-carburantes` (histórico día a día desde 2007 (EstacionesTerrestresHist, 12 MB al día el nacional); el almacén local lo guarda por estación y día (guides/almacen.md))
 - Comercializadoras, cambios de suministrador, bono social, garantías de origen → `cnmc-data`
 - Consumo de productos petrolíferos y gas por provincia, balances energéticos → `miteco-energia-estadisticas` (series de CORES en xlsx; el ministerio publica PDF)
 - Demanda, generación por tecnología, PVPC y precio spot horarios → `ree-redata` (WAF intermitente; reintentar; ESIOS exige token)

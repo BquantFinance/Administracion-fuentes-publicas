@@ -5,6 +5,7 @@ Sector `energia` · 5 fuentes · índice generado por `scripts/build.py`, no edi
 ## Dónde está cada cosa
 
 - Precios de carburantes por gasolinera → `minetur-precios-carburantes`
+- Serie diaria de precios de una gasolinera o de un municipio → `minetur-precios-carburantes` (histórico día a día desde 2007 (EstacionesTerrestresHist, 12 MB al día el nacional); el almacén local lo guarda por estación y día (guides/almacen.md))
 - Comercializadoras, cambios de suministrador, bono social, garantías de origen → `cnmc-data`
 - Consumo de productos petrolíferos y gas por provincia, balances energéticos → `miteco-energia-estadisticas` (series de CORES en xlsx; el ministerio publica PDF)
 - Demanda, generación por tecnología, PVPC y precio spot horarios → `ree-redata` (WAF intermitente; reintentar; ESIOS exige token)

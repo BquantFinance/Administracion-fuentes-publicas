@@ -16,7 +16,7 @@
   note: RSS en ISO-8859-1
 - need: Actos societarios inscritos en el Registro Mercantil
   source: borme-api-sumario
-  note: sin búsqueda por empresa; recorrer días y provincias
+  note: sin búsqueda por empresa; recorrer días y provincias, o cargarlo en el almacén local y buscar por denominación (guides/almacen.md)
 - need: Euríbor, tipos de interés y de cambio, crédito, balanza de pagos
   source: bde-estadisticas
   note: listaSeries con rango=MAX corta en las 1000 observaciones más recientes sin aviso; completar con rango=AAAA
@@ -81,9 +81,12 @@
   source: ine-api-tempus
 - need: Licitaciones, adjudicaciones y contratos menores de todas las Administraciones
   source: placsp-datos-abiertos
+- need: Contratos adjudicados a una empresa por su NIF, o quién gana los contratos de un órgano
+  source: placsp-datos-abiertos
+  note: sin búsqueda por NIF en la plataforma; almacén local con la tabla placsp_adjudicaciones (guides/almacen.md, herramienta almacen_sql)
 - need: Todo lo público de una empresa o entidad por su NIF (ayudas, si es sector público, prohibiciones de contratar)
   source: bdns-api
-  note: herramienta empresa_nif del MCP o consulta.empresa_nif (BDNS, AEI, Invente y prohibiciones por denominación); contratos y BORME no tienen consulta por NIF
+  note: herramienta empresa_nif del MCP o consulta.empresa_nif (BDNS, AEI, Invente y prohibiciones por denominación); contratos y BORME salen solo del almacén local (guides/almacen.md)
 - need: Deudores con Hacienda de más de 600.000 € (lista del artículo 95 bis LGT)
   source: null
   note: la AEAT la publica en su sede en junio y por ley deja de ser accesible a los tres meses y no debe indexarse; el 01/10/2026 la de 2026 ya daba 404
@@ -176,6 +179,9 @@
   note: por categoría IPCC; por instalación en miteco-prtr
 - need: Precios de carburantes por gasolinera
   source: minetur-precios-carburantes
+- need: Serie diaria de precios de una gasolinera o de un municipio
+  source: minetur-precios-carburantes
+  note: histórico día a día desde 2007 (EstacionesTerrestresHist, 12 MB al día el nacional); el almacén local lo guarda por estación y día (guides/almacen.md)
 - need: Comercializadoras, cambios de suministrador, bono social, garantías de origen
   source: cnmc-data
 - need: Consumo de productos petrolíferos y gas por provincia, balances energéticos
