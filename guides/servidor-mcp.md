@@ -53,45 +53,26 @@ Configuración para Claude Code (`.mcp.json` en el proyecto o `~/.claude.json`) 
 }
 ```
 
-Herramientas (respuestas JSON compactas; búsqueda por palabras sin acentos ni mayúsculas):
+Herramientas (lista generada por `scripts/build.py` desde `scripts/mcp_catalogo.py`; respuestas JSON compactas y
+búsqueda sin acentos ni mayúsculas). Las que traen datos usan la red; detrás de un proxy que intercepta TLS, añadir a
+la configuración del cliente `"env": {"EXTRA_CA_BUNDLE": "/ruta/ca-del-proxy.pem"}`.
 
-- `buscar_fuentes(consulta, sector=None, limite=8)`: fichas que casan; devuelve id, name, sector, access, auth, status, verified, summary.
-- `ficha(id)`: ficha completa (endpoints con ejemplo, quirks, ids, gotchas, tips); si el id no existe, hasta 5 parecidos.
-- `buscar_recetas(consulta, limite=5)`: recetas por intención con las fichas que encadenan.
-- `receta(id)`: intent, inputs, steps (source, do, example), output, note, verified.
-- `necesidad(consulta, limite=5)`: entradas de "dónde está cada cosa" (need, source, note).
-- `identificador(id)`: format, regex, example, issuer, gotcha, joins, used_by de un identificador del vocabulario.
-- `ruta_muerta(url)`: busca la URL exacta o por prefijo en rutas muertas; devuelve status, sustituta, ficha y fecha.
-- `codigos(grupo=None)`: códigos que son parámetros (INE, DataComex, AEMET, carburantes, BOE); sin grupo lista los grupos, con grupo sus entradas.
-- `municipio(consulta, limite=5)`: los códigos de un municipio en cada sistema (INE con dígito de control, SIGPAC y
-  Catastro, DIR3 y NIF del ayuntamiento, CCAA, provincia, NUTS3 y coordenadas de su capital) desde `datos/municipios.csv`;
-  acepta código INE, SIGPAC (28:900), DIR3, NIF o nombre.
-- `sectores()`: sectores con título y número de fichas.
-
-Herramientas que traen datos (con red; usan `scripts/clientes/consulta.py`). Detrás de un proxy que intercepta TLS,
-añadir a la configuración del cliente `"env": {"EXTRA_CA_BUNDLE": "/ruta/ca-del-proxy.pem"}`; el resto lo resuelve el servidor.
-
-
-- `descargar(url, max_caracteres=20000, desde=0)`: cualquier URL pública con las CA de FNMT, User-Agent de navegador,
-  reintentos, gzip sin anunciar y la codificación real; resume CSV (columnas, filas, primeras), JSON (claves), xlsx
-  (hojas y primeras filas) y ZIP (ficheros), detecta páginas de bloqueo y, si el host es de una ficha, añade su id y
-  sus alerts. Solo hosts públicos (rechaza localhost, redes privadas y metadatos de nube) y hasta 25 MB.
-- `tabla_pcaxis(tabla, filtro=None, max_filas=200)`: tablas del INE (id o Tabla.htm), Interior, Educación y Cultura en
-  filas con números convertidos; filtro por texto en cualquier campo (08019, un nombre, un periodo).
-- `boe_sumario(fecha, diario="boe", seccion=None, texto=None)`: disposiciones del día del BOE o del BORME.
-- `coyuntura()`: último IPC (marcando si es avance), paro EPA, PIB corregido, paro registrado, Euríbor, dólar, deuda PDE,
-  bono a 10 años y prima de riesgo, con periodo, serie y fuente (INE o Banco de España).
-- `perfil_municipio(municipio)`: un municipio en una llamada: códigos en cada sistema, padrón, renta neta media, paro
-  registrado y contratos del año por mes (SEPE) y criminalidad acumulada (Interior, más de 20.000 habitantes).
-- `subvenciones_nif(nif)`: concesiones, ayudas de Estado, minimis y grandes beneficiarios de un NIF en la BDNS.
-- `empresa_nif(nif)`: perfil público de un NIF: si es sector público (Invente, con DIR3), BDNS, ayudas de la AEI y
-  prohibiciones de contratar vigentes; con almacén local, también contratos adjudicados y actos del BORME; `no_cubierto`
-  dice dónde está lo demás.
-- `almacen_sql(consulta, limite=100)`: SQL de solo lectura sobre el almacén local en Parquet (BOE, BORME, BDNS, PLACSP y
-  carburantes) si existe; necesita el extra `[almacen]` (duckdb) y una carga previa (`guides/almacen.md`).
-- `ckan_buscar(portal, texto)` y `ckan_filas(portal, recurso, filtros=None, limite=100)`: portales CKAN (comunidad-madrid,
-  madrid, barcelona, gva, andalucia, cnmc, renfe o la URL de su API), paginando sin topes y con el total del datastore.
-- `socrata_filas(conjunto, where=None, select=None, order=None, limite=100)`: datos de la Generalitat de Catalunya.
+<!-- AUTO:herramientas -->
+- `buscar(consulta, sector=None, limite=5)`: Busca en todo el catálogo a la vez: fichas (con sus alerts), recetas que cruzan fuentes, necesidades habituales con la ficha que las resuelve y la nota que evita el desvío típico, productos que se pueden construir con sus piezas, e identificadores (formato, regex y cruces). Después, ficha(id) o receta(id). sector filtra las fichas.
+- `ficha(id)`: Ficha completa de una fuente (alerts primero, endpoints con ejemplo y respuesta, sync, quirks, ids, gotchas, tips, related). Si el id no existe, devuelve hasta 5 ids parecidos.
+- `receta(id)`: Receta completa: intent, inputs, steps (source, do, example), output, note y verified. Si el id no existe, devuelve ids parecidos.
+- `codigos(grupo=None)`: Códigos que una API exige como parámetro y no se adivinan (Id de municipio y provincia del INE para tv, países de DataComex, estación de AEMET por capital, productos de carburantes, rangos del BOE). Sin grupo, lista los grupos con fuente y uso; con grupo, sus entradas {code, name, note}.
+- `descargar(url, max_caracteres=20000, desde=0)`: Descarga una URL pública con las reglas del catálogo (CA de FNMT, User-Agent de navegador, reintentos, gzip sin anunciar, UTF-8 o Latin-1 reales) y la resume: columnas y primeras filas de un CSV, claves de un JSON, hojas de un xlsx, ficheros de un ZIP. Detecta páginas de bloqueo de WAF. Si el host es de una ficha, añade su id y sus alerts, y si la URL figura en rutas muertas, su sustituta. Solo hosts públicos y hasta 25 MB. Úsala cuando el fetch propio falle con un .gob.es o para ver qué devuelve una URL antes de programar.
+- `tabla_pcaxis(tabla, filtro=None, max_filas=200)`: Tabla PC-Axis en filas con números ya convertidos (None es dato no disponible o secreto, no cero): id de tabla del INE (24077), URL Tabla.htm del INE, Interior, Educación o Cultura, o URL del fichero. filtro deja las filas con ese texto en algún campo (código INE como 08019, nombre, periodo).
+- `boe_sumario(fecha, diario='boe', seccion=None, texto=None, max_items=200)`: Disposiciones de un día del BOE (diario=boe) o del BORME (diario=borme); fecha AAAA-MM-DD. Filtra por código de sección (1, 2A, 2B, 3, 4, 5A) y por texto en el título. Domingos y festivos no hay boletín.
+- `empresa_nif(nif, max_filas=10)`: Lo público de una empresa o entidad por NIF sin certificado: si es sector público (Invente, con DIR3), subvenciones, ayudas de Estado, minimis y grandes beneficiarios (BDNS, con totales), ayudas de la AEI y prohibiciones de contratar vigentes (por denominación). Con almacén local, también contratos adjudicados y actos del BORME (clave almacen); no_cubierto dice dónde mirar lo demás.
+- `coyuntura()`: Último dato de los indicadores de coyuntura de España en una llamada: IPC (variación anual y mensual, marcando si es avance), paro EPA, PIB (variación trimestral y anual corregidas), paro registrado, Euríbor, dólar, deuda PDE, bono a 10 años y prima de riesgo. Cada uno con periodo, serie y fuente (INE o Banco de España).
+- `perfil_municipio(municipio, solo_codigos=False)`: Un municipio en una llamada (nombre, código INE, SIGPAC, DIR3 o NIF): sus códigos en cada sistema (INE con dígito de control, SIGPAC y Catastro, que numeran distinto, DIR3 y NIF del ayuntamiento, NUTS3, Id del INE Tempus y coordenadas), población del padrón, renta neta media, paro registrado y contratos del año por mes (SEPE) y criminalidad acumulada (Interior, más de 20.000 habitantes). solo_codigos=True devuelve solo los códigos de hasta 5 candidatos, sin red. Cada bloque trae su fuente; uno que falle no tumba los demás.
+- `almacen_sql(consulta, limite=100)`: SQL de solo lectura (DuckDB) sobre el almacén local en Parquet, si existe (FUENTES_ALMACEN o ./almacen): tablas boe, borme, bdns, placsp, placsp_adjudicaciones y carburantes, y vistas placsp_ultimo y adjudicaciones_ultimo (último estado de cada expediente). Devuelve columnas, filas y cobertura (solo está lo cargado). Sin almacén, dice cómo crearlo; empresa_nif lo usa solo para contratos y BORME.
+- `ckan_buscar(portal, texto, limite=10)`: Conjuntos de un portal CKAN con sus recursos (id, formato, si tiene datastore, url de descarga). portal: comunidad-madrid, madrid, barcelona, gva, andalucia, cnmc, renfe o la URL de su /api/3/action.
+- `ckan_filas(portal, recurso, filtros=None, limite=100)`: Filas del datastore de un recurso CKAN con filtros por igualdad ({"Territorio": "Madrid"}), paginando sin el tope silencioso del portal. Devuelve total_datastore: compáralo con el fichero antes de dar un total.
+- `socrata_filas(conjunto, where=None, select=None, order=None, limite=100)`: Filas de un conjunto de la Generalitat de Catalunya (analisi.transparenciacatalunya.cat, id como gn9e-3qhr) con SoQL; números ya convertidos. Los nombres de campo van sin caracteres no ASCII (estaci por Estació).
+<!-- /AUTO:herramientas -->
 
 Recursos: `catalogo://llms.txt` (el fichero entero) y `catalogo://reglas` (solo las reglas rápidas antes de programar).
 

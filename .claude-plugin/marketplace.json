@@ -10,7 +10,7 @@
       "name": "fuentes-publicas",
       "source": "./plugins/fuentes-publicas",
       "description": "Skill y servidor MCP del catálogo de fuentes públicas de España: dónde está cada dato, sus trampas y herramientas que lo traen ya resuelto",
-      "version": "0.3.0"
+      "version": "0.4.0"
     }
   ]
 }

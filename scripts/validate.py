@@ -179,6 +179,31 @@ def validate_indices(ids: set[str], vocab: dict) -> list[str]:
             errors.append(f"{w}: source null exige note")
         _str(errors, w, n, "note", 300, required=False)
 
+    # productos
+    receta_ids = {r.get("id") for r in idx["recetas"]}
+    pids: set[str] = set()
+    for p in idx["productos"]:
+        pid = p.get("id", "?")
+        w = f"indices/productos.yaml [{pid}]"
+        if not isinstance(pid, str) or not ID_RE.match(pid):
+            errors.append(f"{w}: id inválido")
+        if pid in pids:
+            errors.append(f"{w}: id duplicado")
+        pids.add(pid)
+        for k, n in (("producto", 160), ("cliente", 160), ("piezas", 300), ("frescura", 200), ("licencia", 200), ("trampa", 240)):
+            _str(errors, w, p, k, n)
+        _str(errors, w, p, "volumen", 200, required=False)
+        if not p.get("fuentes"):
+            errors.append(f"{w}: sin fuentes")
+        for s in p.get("fuentes") or []:
+            if s not in ids:
+                errors.append(f"{w}: fuente '{s}' no es una ficha")
+        for r in p.get("recetas") or []:
+            if r not in receta_ids:
+                errors.append(f"{w}: receta '{r}' no existe")
+        if not (isinstance(p.get("verified"), str) and DATE_RE.match(p["verified"])):
+            errors.append(f"{w}: verified debe ser AAAA-MM-DD (solo entran productos con piezas probadas)")
+
     # codigos
     for key, g in (idx["codigos"] or {}).items():
         w = f"indices/codigos.yaml [{key}]"

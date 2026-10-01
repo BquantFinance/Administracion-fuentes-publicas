@@ -38,7 +38,7 @@ def die(msg: str) -> None:
     sys.exit(1)
 
 INDICES = ROOT / "indices"
-INDEX_FILES = ("recetas", "rutas-muertas", "identificadores", "necesidades", "codigos")
+INDEX_FILES = ("productos", "recetas", "rutas-muertas", "identificadores", "necesidades", "codigos")
 
 
 def load_indices() -> dict:

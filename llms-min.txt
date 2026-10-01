@@ -1,27 +1,19 @@
 # Administración fuentes públicas (España)
 
-> Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.
+> Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. Contenido en castellano, claves en inglés.
 
-Fuentes: 95 · Recetas: 43 · Alcance actual: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Entrada ligera; la completa es llms.txt · Generado: 2026-10-01
+Fuentes: 95 · Productos: 12 · Recetas: 43 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Entrada ligera; la completa es llms.txt · Generado: 2026-10-01
 
-## Cómo usar este repo
+## Empieza aquí
 
-- Todo el catálogo (fichas e índices) en un fichero: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/catalog.json
-- Todas las fichas en texto compacto: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/llms-full.txt
-- Entrada ligera (reglas, fichas por sector y punteros, unos 7 KB): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/llms-min.txt
-- Una ficha: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/<sector>/<id>.yaml
-- Índices para agentes (recetas paso a paso, identificadores con regex y cruces, rutas muertas con sustituta): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/README.md
-- Los 8.132 municipios con su código en cada sistema (INE con dígito de control, Id interno del INE Tempus para tv=19, SIGPAC y Catastro, DIR3 y NIF del ayuntamiento, CCAA, NUTS3 y coordenadas de la capital): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/datos/municipios.csv, o la herramienta municipio del servidor MCP. El código de municipio de SIGPAC y Catastro no es el del INE en más de la mitad de los municipios.
-- Códigos que son parámetros (Id de municipio, provincia y CCAA del INE para tv, países de DataComex, estaciones de AEMET por capital, productos de carburantes, rangos y secciones del BOE): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/codigos.yaml
-- Servidor MCP (uvx --from git+https://github.com/BquantFinance/Administracion-fuentes-publicas mcp-catalogo) para cargar solo la ficha, receta o necesidad que haga falta y traer datos ya resueltos: descargar(url) con certificados FNMT, codificación y bloqueos, tabla_pcaxis, boe_sumario, subvenciones_nif, empresa_nif, ckan_filas, socrata_filas, municipio, perfil_municipio, coyuntura, almacen_sql (https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/servidor-mcp.md)
-- Almacén local en Parquet y DuckDB, sin datos en el repo: python scripts/clientes/almacen.py sync baja BOE, BORME, BDNS, PLACSP con adjudicaciones y carburantes y los pone al día; da contratos por NIF del adjudicatario, BORME por denominación y series por gasolinera, sin identificar a personas físicas (https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/almacen.md)
-- Código Python que ya resuelve las trampas: sesión HTTP con CA de FNMT, reintentos y detección de WAF; clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC que paginan sin topes silenciosos; cargadores de BOE, BDNS, AEMET, INE, PLACSP. En scripts/clientes/ (pip install "fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas" y from fuentes_publicas.clientes import ckan); ejemplos que funcionan en ejemplos/; plugin de Claude Code con skill y MCP: /plugin marketplace add BquantFinance/Administracion-fuentes-publicas.
-- Histórico y sincronización medidos (campo `sync` de la ficha: desde cuándo, cómo bajarlo todo, cuánto ocupa y cómo detectar lo nuevo): bdns-api, placsp-datos-abiertos, bde-estadisticas, sepe-estadisticas, minetur-precios-carburantes, ine-api-tempus, boe-api-legislacion-consolidada, boe-api-sumario, borme-api-sumario.
-- Licencias, cita literal, datos personales y datos que caducan (BDNS, PAC, deudores de la AEAT): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/reutilizacion.md
-- Cada endpoint principal lleva `returns` (forma de la respuesta vista en una llamada real: campos, tipos, fechas, decimales, paginación) y `example` (llamada copiable).
-- Esquema de ficha: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json
-- Vocabulario (sectores, acceso, auth, formatos, quirks, ids): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml
-- `verified: null` significa que la ficha se redactó a partir de documentación oficial pero aún no se ha probado el endpoint.
+- Con MCP: uvx --from git+https://github.com/BquantFinance/Administracion-fuentes-publicas mcp-catalogo. buscar(texto) mira a la vez fichas, recetas, necesidades, productos e identificadores; ficha(id) da endpoints, ejemplos y trampas. Herramientas: buscar, ficha, receta, codigos, descargar, tabla_pcaxis, boe_sumario, empresa_nif, coyuntura, perfil_municipio, almacen_sql, ckan_buscar, ckan_filas, socrata_filas (https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/servidor-mcp.md).
+- Sin MCP: este fichero para orientarse y la ficha entera antes de llamar: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/<sector>/<id>.yaml (alerts primero, endpoints con example y returns, sync, quirks, gotchas). Todo junto en https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/catalog.json o en texto en https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/llms-full.txt.
+- Código: pip install "fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas". scripts/clientes trae la sesión HTTP con las CA de FNMT y detección de WAF, clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC sin topes silenciosos, cargadores de BOE, BDNS, INE, SEPE y PLACSP, y el almacén local en Parquet (almacen.py). Proyectos que funcionan en ejemplos/.
+- Recursos: municipios con su código en cada sistema (https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/datos/municipios.csv), códigos que son parámetros (https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/codigos.yaml), licencias y datos personales (https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/reutilizacion.md), almacén local (https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/almacen.md), cliente HTTP (https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/cliente-http.md).
+
+## Qué se puede construir hoy
+
+radar-licitaciones, inteligencia-competidores, radar-ayudas, kyb-proveedores, leads-sociedades-nuevas, informe-ubicacion, comparador-carburantes, monitor-regulatorio, panel-macro, precio-electricidad, buscador-medicamentos, agritech-parcelas (detalle en https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/productos.yaml).
 
 ## Reglas rápidas antes de programar contra una fuente
 
@@ -36,11 +28,9 @@ Fuentes: 95 · Recetas: 43 · Alcance actual: Administración General del Estado
 
 ## Fichas con trampas silenciosas
 
-Antes de dar una cifra de estas fuentes, lee `alerts` en su ficha (datos incompletos, distintos o a cero sin error): aemps-cima-api, ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, bde-estadisticas, bdns-api, cnig-centro-descargas, cnmc-data, comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, datacomex, face-facturas, gbif-es, gencat-dades-obertes, gva-dadesobertes-api, idee-servicios, idescat-api, igae-ejecucion-presupuestaria, ign-sismologia, ine-api-tempus, ine-cartografia-censal, interior-criminalidad, ive-pegv-bancos-datos, junta-andalucia-datos-abiertos, mapa-sigpac, mites-estadisticas, puertos-estado-datos, segsocial-estadisticas, sepe-estadisticas.
+Lee sus alerts antes de dar una cifra: aemps-cima-api, ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, bde-estadisticas, bdns-api, cnig-centro-descargas, cnmc-data, comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, datacomex, face-facturas, gbif-es, gencat-dades-obertes, gva-dadesobertes-api, idee-servicios, idescat-api, igae-ejecucion-presupuestaria, ign-sismologia, ine-api-tempus, ine-cartografia-censal, interior-criminalidad, ive-pegv-bancos-datos, junta-andalucia-datos-abiertos, mapa-sigpac, mites-estadisticas, puertos-estado-datos, segsocial-estadisticas, sepe-estadisticas.
 
 ## Fichas por sector
-
-Cada id es sources/<sector>/<id>.yaml; léela entera antes de llamar (alerts, endpoints con example y returns, quirks, gotchas).
 
 - Legislación y boletines oficiales: boe-api-legislacion-consolidada, boe-api-sumario, boe-eli, boe-feeds, borme-api-sumario
 - Economía, finanzas y mercados: airef-datos, bde-estadisticas, cnmv-registros, ico-datos, tesoro-estadisticas
@@ -65,11 +55,3 @@ Cada id es sources/<sector>/<id>.yaml; léela entera antes de llamar (alerts, en
 - Vivienda y urbanismo: mivau-precios-vivienda-alquiler
 - Telecomunicaciones y sociedad digital: mtdfp-cobertura-banda-ancha
 - Consumo y seguridad alimentaria: aesan-alertas-registros
-
-## Índices
-
-- Necesidad a fuente (una línea por pregunta habitual): https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/necesidades.yaml
-- Recetas que cruzan fuentes: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/recetas.yaml
-- Códigos que son parámetros: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/codigos.yaml
-- Rutas muertas con sustituta: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/rutas-muertas.yaml
-- Identificadores con regex y cruces: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/identificadores.yaml

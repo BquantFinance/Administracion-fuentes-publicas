@@ -5,7 +5,6 @@ Un agente carga solo lo que necesita (una ficha, una receta, una necesidad) en v
 Arranque: python scripts/mcp_catalogo.py (desde el repo) o mcp-catalogo tras instalarlo con pip o uvx; si no hay catalog.json local lo descarga de GitHub y lo cachea en ~/.cache/fuentes-publicas.
 Prueba real: python scripts/test_mcp_catalogo.py.
 """
-import csv
 import difflib
 import json
 import re
@@ -55,13 +54,11 @@ STOPWORDS = {
     "se", "sin", "su", "sus", "un", "una", "y",
 }
 INSTRUCTIONS = (
-    "Catálogo de fuentes de datos de la Administración pública española. Flujo: necesidad o buscar_fuentes "
-    "para localizar la fuente, ficha para endpoints, quirks y gotchas verificados (alerts primero: trampas silenciosas "
-    "que cambian la cifra sin dar error); buscar_recetas y receta para "
-    "procedimientos que cruzan fuentes; identificador para cruzar datos; municipio para los códigos INE, SIGPAC o "
-    "Catastro, DIR3, NUTS3 y coordenadas de un municipio; descargar, tabla_pcaxis, boe_sumario, subvenciones_nif, "
-    "empresa_nif, ckan_buscar, ckan_filas y socrata_filas traen los datos ya resueltos (certificados, codificación, paginación); ruta_muerta antes de dar por perdida "
-    "una URL. Lee el recurso catalogo://reglas antes de programar contra una fuente."
+    "Datos públicos de España para construir productos. buscar(texto) mira a la vez fichas, recetas, necesidades, "
+    "productos e identificadores; ficha(id) da endpoints, ejemplos y trampas verificadas (alerts primero: cambian la "
+    "cifra sin dar error); receta(id) encadena fuentes. Datos ya resueltos: perfil_municipio, coyuntura, empresa_nif, "
+    "boe_sumario, tabla_pcaxis, ckan_buscar, ckan_filas, socrata_filas, almacen_sql y descargar(url) para cualquier "
+    "otra URL pública. Lee catalogo://reglas antes de programar contra una fuente."
 )
 
 
@@ -82,6 +79,7 @@ NECESIDADES = IDX["necesidades"]
 IDENTIFICADORES = IDX["identificadores"]
 RUTAS_MUERTAS = IDX["rutas_muertas"]
 CODIGOS = IDX.get("codigos") or {}
+PRODUCTOS = IDX.get("productos") or []
 SECTORES = CATALOG["sectors"]
 
 
@@ -183,44 +181,44 @@ RECETA_FIELDS = {
 mcp = FastMCP("catalogo-fuentes-publicas", instructions=INSTRUCTIONS)
 
 
-@mcp.tool()
-def buscar_fuentes(consulta: str, sector: str | None = None, limite: int = 8) -> list[dict]:
-    """Busca fichas por palabras (id, nombre, etiquetas, sector, resumen, organismo). Devuelve id, name, sector, access, auth, status, verified, summary y, si las hay, alerts (trampas silenciosas); después pide la ficha completa con ficha(id)."""
+def _fichas(consulta: str, sector: str | None, limite: int) -> list[dict]:
     items = SOURCES
     if sector:
         if sector not in SECTORES:
             raise ValueError(f"sector desconocido: {sector}; válidos: {', '.join(SECTORES)}")
         items = [s for s in SOURCES if s["sector"] == sector]
-    hits = rank(consulta, items, lambda s: SOURCE_FIELDS[s["id"]], limite)
     return [
         {**{k: s.get(k) for k in ("id", "name", "sector", "access", "auth", "status", "verified", "summary")},
          **({"alerts": s["alerts"]} if s.get("alerts") else {})}
-        for s in hits
+        for s in rank(consulta, items, lambda s: SOURCE_FIELDS[s["id"]], limite)
     ]
+
+
+@mcp.tool()
+def buscar(consulta: str, sector: str | None = None, limite: int = 5) -> dict:
+    """Busca en todo el catálogo a la vez: fichas (con sus alerts), recetas que cruzan fuentes, necesidades habituales
+    con la ficha que las resuelve y la nota que evita el desvío típico, productos que se pueden construir con sus piezas,
+    e identificadores (formato, regex y cruces). Después, ficha(id) o receta(id). sector filtra las fichas."""
+    out = {
+        "fichas": _fichas(consulta, sector, limite),
+        "recetas": [{"id": r["id"], "intent": r["intent"], "sources": list(dict.fromkeys(st["source"] for st in r["steps"])),
+                     "verified": r.get("verified")} for r in rank(consulta, RECETAS, lambda r: RECETA_FIELDS[r["id"]], 3)],
+        "necesidades": [{"need": n["need"], "source": n.get("source"), "note": n.get("note")}
+                        for n in rank(consulta, NECESIDADES, lambda n: (norm(n["need"]), norm([n.get("source"), n.get("note")])), 3)],
+        "productos": rank(consulta, PRODUCTOS, lambda p: (norm([p["id"], p["producto"]]), norm([p.get("cliente"), p["fuentes"], p.get("piezas")])), 3),
+        "identificadores": [{"id": k, **v} for k, v in rank(consulta, list(IDENTIFICADORES.items()),
+                                                             lambda kv: (norm(kv[0]), norm([kv[1].get("format"), kv[1].get("issuer")])), 2)],
+    }
+    return {k: v for k, v in out.items() if v} or {"nota": "nada casa; probar con otras palabras o leer catalogo://llms.txt"}
 
 
 @mcp.tool()
 def ficha(id: str) -> dict:
-    """Ficha completa de una fuente (alerts primero, endpoints con ejemplo, quirks, ids, gotchas, tips, related). Si el id no existe, devuelve hasta 5 ids parecidos."""
+    """Ficha completa de una fuente (alerts primero, endpoints con ejemplo y respuesta, sync, quirks, ids, gotchas, tips, related). Si el id no existe, devuelve hasta 5 ids parecidos."""
     if id in BY_ID:
         s = BY_ID[id]
         return {"alerts": s["alerts"], **s} if s.get("alerts") else s
     return {"error": f"no existe la ficha {id}", "sugerencias": parecidos(id, BY_ID)}
-
-
-@mcp.tool()
-def buscar_recetas(consulta: str, limite: int = 5) -> list[dict]:
-    """Busca recetas por intención (procedimientos verificados que encadenan fichas). Devuelve id, intent, sources y verified; los pasos se piden con receta(id)."""
-    hits = rank(consulta, RECETAS, lambda r: RECETA_FIELDS[r["id"]], limite)
-    return [
-        {
-            "id": r["id"],
-            "intent": r["intent"],
-            "sources": list(dict.fromkeys(st["source"] for st in r["steps"])),
-            "verified": r.get("verified"),
-        }
-        for r in hits
-    ]
 
 
 @mcp.tool()
@@ -231,37 +229,13 @@ def receta(id: str) -> dict:
     return {"error": f"no existe la receta {id}", "sugerencias": parecidos(id, RECETA_BY_ID)}
 
 
-@mcp.tool()
-def necesidad(consulta: str, limite: int = 5) -> list[dict]:
-    """Dónde está cada cosa: necesidades habituales con la ficha que las resuelve y la nota que evita el desvío típico. source null significa que no hay fuente en el catálogo."""
-    hits = rank(consulta, NECESIDADES, lambda n: (norm(n["need"]), norm([n.get("source"), n.get("note")])), limite)
-    return [{"need": n["need"], "source": n.get("source"), "note": n.get("note")} for n in hits]
-
-
-@mcp.tool()
-def identificador(id: str) -> dict:
-    """Entrada del índice de identificadores (ine-municipio, nif, dir3, cpv, boe-id...): format, regex, example, issuer, gotcha, joins y used_by. Si no existe, devuelve claves parecidas."""
-    if id in IDENTIFICADORES:
-        return {"id": id, **IDENTIFICADORES[id]}
-    return {"error": f"no existe el identificador {id}", "sugerencias": parecidos(id, IDENTIFICADORES)}
-
-
-@mcp.tool()
-def ruta_muerta(url: str) -> dict:
-    """Comprueba si una URL figura en rutas muertas, exacta o por prefijo en ambos sentidos. Devuelve old, status, new (sustituta o null), source, note y checked."""
+def rutas_muertas(url: str) -> list[dict]:
+    """Rutas muertas que casan con la URL, exacta o por prefijo en ambos sentidos."""
     wanted = url.strip().rstrip("/")
     exact = [d for d in RUTAS_MUERTAS if d["old"].rstrip("/") == wanted]
-    prefix = [
-        d for d in RUTAS_MUERTAS
-        if d not in exact and (d["old"].rstrip("/").startswith(wanted) or wanted.startswith(d["old"].rstrip("/")))
-    ]
-    rutas = [
-        {k: d.get(k) for k in ("old", "status", "new", "source", "note", "checked")}
-        for d in exact + prefix
-    ]
-    if not rutas:
-        return {"url": url, "rutas": [], "nota": f"no figura en rutas-muertas ({len(RUTAS_MUERTAS)} entradas); no implica que funcione"}
-    return {"url": url, "rutas": rutas}
+    prefix = [d for d in RUTAS_MUERTAS if d not in exact
+              and (d["old"].rstrip("/").startswith(wanted) or wanted.startswith(d["old"].rstrip("/")))]
+    return [{k: d.get(k) for k in ("old", "status", "new", "source", "note", "checked")} for d in exact + prefix]
 
 
 @mcp.tool()
@@ -275,25 +249,6 @@ def codigos(grupo: str | None = None) -> dict | list[dict]:
     if grupo in CODIGOS:
         return CODIGOS[grupo]
     return {"error": f"no existe el grupo {grupo}", "sugerencias": parecidos(grupo, CODIGOS)}
-
-
-_MUNICIPIOS: list[dict] = []
-
-
-def municipios() -> list[dict]:
-    """datos/municipios.csv, cargado la primera vez que se pide (lo descarga si no hay copia local)."""
-    if not _MUNICIPIOS:
-        with locate("datos/municipios.csv").open(encoding="utf-8", newline="") as fh:
-            _MUNICIPIOS.extend(csv.DictReader(fh))
-    return _MUNICIPIOS
-
-
-@mcp.tool()
-def municipio(consulta: str, limite: int = 5) -> list[dict]:
-    """Códigos de un municipio en cada sistema: INE (5 dígitos y dígito de control), SIGPAC y Catastro (las capitales
-    son 900: Madrid 28:900, no 28079), DIR3 y NIF del ayuntamiento, CCAA, provincia, NUTS3, Id del INE Tempus (el
-    que exige tv=19:Id) y coordenadas de su núcleo capital. Acepta código INE (28079 o 280796), SIGPAC (28:900), DIR3 (L01280796), NIF (P2807900B) o nombre."""
-    return _consulta().buscar_municipio(consulta, limite, municipios())
 
 
 def _consulta():
@@ -327,13 +282,17 @@ def _datos(fn, *args, **kwargs) -> dict:
 def descargar(url: str, max_caracteres: int = 20000, desde: int = 0) -> dict:
     """Descarga una URL pública con las reglas del catálogo (CA de FNMT, User-Agent de navegador, reintentos, gzip sin
     anunciar, UTF-8 o Latin-1 reales) y la resume: columnas y primeras filas de un CSV, claves de un JSON, hojas de un
-    xlsx, ficheros de un ZIP. Detecta páginas de bloqueo de WAF. Si el host es de una ficha, añade su id y sus alerts.
-    Úsala cuando el fetch propio falle con un .gob.es o para ver qué devuelve una URL antes de programar."""
+    xlsx, ficheros de un ZIP. Detecta páginas de bloqueo de WAF. Si el host es de una ficha, añade su id y sus alerts, y
+    si la URL figura en rutas muertas, su sustituta. Solo hosts públicos y hasta 25 MB. Úsala cuando el fetch propio
+    falle con un .gob.es o para ver qué devuelve una URL antes de programar."""
     r = _datos(_consulta().descargar, url, max_caracteres, desde)
     host = urlparse(r.get("url") or url).hostname or ""
     ids = FICHAS_POR_HOST.get(host, [])
     if ids:
         r["fichas"] = [{"id": i, **({"alerts": BY_ID[i]["alerts"]} if BY_ID[i].get("alerts") else {})} for i in ids]
+    muertas = rutas_muertas(url)
+    if muertas:
+        r["rutas_muertas"] = muertas  # URL que un agente recuerda y ya no vale: sustituta en new
     return r
 
 
@@ -354,17 +313,10 @@ def boe_sumario(fecha: str, diario: str = "boe", seccion: str | None = None, tex
 
 
 @mcp.tool()
-def subvenciones_nif(nif: str, max_filas: int = 20) -> dict:
-    """Subvenciones, ayudas de Estado, minimis y grandes beneficiarios de un NIF en la BDNS, con totales y las más
-    recientes."""
-    return _datos(_consulta().subvenciones_nif, nif, max_filas)
-
-
-@mcp.tool()
 def empresa_nif(nif: str, max_filas: int = 10) -> dict:
     """Lo público de una empresa o entidad por NIF sin certificado: si es sector público (Invente, con DIR3),
-    subvenciones, ayudas de Estado y minimis (BDNS), ayudas de la AEI y prohibiciones de contratar vigentes (por
-    denominación). Con almacén local, también contratos adjudicados y actos del BORME (clave almacen); no_cubierto dice
+    subvenciones, ayudas de Estado, minimis y grandes beneficiarios (BDNS, con totales), ayudas de la AEI y prohibiciones
+    de contratar vigentes (por denominación). Con almacén local, también contratos adjudicados y actos del BORME (clave almacen); no_cubierto dice
     dónde mirar lo demás."""
     return _datos(_consulta().empresa_nif, nif, max_filas)
 
@@ -378,10 +330,14 @@ def coyuntura() -> dict:
 
 
 @mcp.tool()
-def perfil_municipio(municipio: str) -> dict:
-    """Un municipio en una llamada (nombre, código INE, SIGPAC, DIR3 o NIF): sus códigos en cada sistema, población del
-    padrón, renta neta media, paro registrado y contratos del año por mes (SEPE) y criminalidad acumulada (Interior,
-    solo más de 20.000 habitantes). Cada bloque trae su fuente; uno que falle no tumba los demás."""
+def perfil_municipio(municipio: str, solo_codigos: bool = False) -> dict:
+    """Un municipio en una llamada (nombre, código INE, SIGPAC, DIR3 o NIF): sus códigos en cada sistema (INE con dígito
+    de control, SIGPAC y Catastro, que numeran distinto, DIR3 y NIF del ayuntamiento, NUTS3, Id del INE Tempus y
+    coordenadas), población del padrón, renta neta media, paro registrado y contratos del año por mes (SEPE) y
+    criminalidad acumulada (Interior, más de 20.000 habitantes). solo_codigos=True devuelve solo los códigos de hasta
+    5 candidatos, sin red. Cada bloque trae su fuente; uno que falle no tumba los demás."""
+    if solo_codigos:
+        return {"candidatos": _consulta().buscar_municipio(municipio, 5)}
     return _datos(_consulta().perfil_municipio, municipio)
 
 
@@ -424,15 +380,6 @@ def socrata_filas(conjunto: str, where: str | None = None, select: str | None = 
     """Filas de un conjunto de la Generalitat de Catalunya (analisi.transparenciacatalunya.cat, id como gn9e-3qhr) con
     SoQL; números ya convertidos. Los nombres de campo van sin caracteres no ASCII (estaci por Estació)."""
     return _datos(_consulta().socrata_filas, conjunto, where, select, order, limite)
-
-
-@mcp.tool()
-def sectores() -> list[dict]:
-    """Sectores del catálogo con su título y número de fichas; el id sirve como filtro en buscar_fuentes."""
-    counts = {}
-    for s in SOURCES:
-        counts[s["sector"]] = counts.get(s["sector"], 0) + 1
-    return [{"id": k, "name": v, "sources": counts.get(k, 0)} for k, v in SECTORES.items()]
 
 
 def read_llms() -> str:

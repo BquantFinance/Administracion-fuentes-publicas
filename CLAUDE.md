@@ -1,241 +1,126 @@
 # Instrucciones para agentes que trabajan en este repo
 
-## Qué es esto
+## Objetivo
 
-Un catálogo de fuentes de datos de la Administración pública española, escrito para que lo consuman agentes de IA
-y desarrolladores que construyen encima. No es documentación divulgativa. Es un mapa operativo: qué hay, dónde
-está, cómo se llama, qué devuelve, qué falla.
+Una aceleradora de startups de datos públicos (decisión del propietario, 2026-10-01): que un fundador, un desarrollador
+o su agente pase de la idea a un producto sobre datos públicos españoles lo antes posible. Eso pide cuatro cosas, y todo
+lo que entra en el repo sirve a alguna:
 
-## Objetivo que manda sobre todo lo demás
+1. Encontrar el dato: fichas exactas, `buscar` en el MCP, índices.
+2. Traerlo resuelto: clientes, herramientas MCP que devuelven datos, almacén local, ejemplos que funcionan.
+3. Saber si se puede vender: licencia de cada fuente, `guides/reutilizacion.md`.
+4. Mantenerlo al día: campo `sync` de las fichas, filtros por fecha de alta, descarga condicional.
 
-Máxima utilidad para construir, investigar y desarrollar sobre datos públicos, con el mínimo de tokens.
-Cada línea que no ahorre una búsqueda, una prueba fallida o una hora de depuración a quien la lea, sobra.
+`indices/productos.yaml` dice qué se puede construir hoy y con qué piezas; es la portada del README. Criterio para
+añadir algo: ahorra tiempo o errores a quien construye, y si es una herramienta o un índice nuevo, se mide (evals/)
+antes de darlo por bueno. Mejor pocas piezas que funcionan que muchas a medias.
 
 ## Reglas de contenido
 
-1. **Solo lo esencial.** Una fuente entra si un builder la usaría. Un dato entra en la ficha si cambia cómo se
-   programa contra la fuente. Historia del organismo, adjetivos, contexto institucional: fuera.
-2. **Verificar antes de escribir.** Toda URL, endpoint, parámetro y formato se prueba con una llamada real
-   antes de afirmarse. Si responde, `verified` lleva la fecha de hoy. Si no se puede probar, `verified: null`
-   y se dice por qué en `gotchas`. Nunca inventar endpoints ni parámetros plausibles. Un intento fallido de
-   automatizar no demuestra que no se pueda: se escribe «no localizado» o «no conseguido», con lo probado y la
-   fecha, nunca «no existe» o «no es posible», salvo que lo diga la documentación oficial o el propio servidor
-   (404, 410, 401).
-3. **Las trampas son el valor.** `gotchas` recoge lo que la documentación oficial no dice: cabeceras
-   obligatorias, codificaciones, decimales con coma, límites no documentados, ids que no coinciden entre
-   organismos, URLs que cambian, datos que parecen cero y son secreto estadístico. Una frase por trampa.
-   Las trampas silenciosas (datos incompletos, distintos o a cero sin error) van en `alerts`, tras `summary`, como
-   mucho tres por ficha y sin repetirse en `gotchas`: la evaluación del 2026-10-01 mostró que entre las demás se pierden.
-   Cada alerta dice la operación exacta (fichero, fila, parámetro o código) y un ejemplo con números comprobados: una
-   alerta que solo describe la trampa no cambió el resultado de los agentes; la explícita, sí.
-4. **`tips` solo si acelera.** Patrón de uso, librería concreta, cruce típico con otra fuente. Máximo seis. Lo de
-   histórico y sincronización va en `sync` (since, full, size, new), solo con medidas propias y la muestra dicha si la
-   cifra es estimada.
-5. **Ejemplos copiables y respuesta descrita.** Cada endpoint principal lleva un `example` que funciona al
-   pegarlo y un `returns` con la forma de la respuesta vista en esa llamada (campos clave, tipos, formato de fecha y
-   decimal, paginación), nunca copiada de la documentación. Con claves, usar variable de entorno (`$AEMET_KEY`),
-   nunca una clave real.
-6. **Vocabulario cerrado.** Sector, acceso, auth, periodicidad, formatos, estado, quirks e ids salen de `schema/vocab.yaml`.
-   Si falta un valor, se añade al vocabulario en el mismo commit, no se improvisa.
-7. **Castellano en valores, inglés en claves.** Sin markdown dentro de los valores. Sin dos puntos seguidos de
-   espacio en valores sin comillas, porque rompe el YAML.
-8. **Fuente única de verdad.** Solo se editan `sources/**/*.yaml`, `indices/*.yaml`, `guides/*.md`, `schema/`,
-   `scripts/`, `evals/`, `ejemplos/`, `plugins/` y `.claude-plugin/` (`datos/municipios.csv` lo genera `python scripts/municipios.py`, con red; `validate.py` lo comprueba), más los ficheros de distribución del servidor MCP (`pyproject.toml`, `server.json`, `glama.json`,
-   `Dockerfile`, `mcpb/`) y `.github/`. `catalog.json`, `llms.txt`, `llms-full.txt`, `indices/README.md`, los `README.md` de sector y la
-   tabla del README raíz se regeneran con `python scripts/build.py` y se suben en el mismo commit.
+1. **Solo lo esencial.** Una fuente entra si alguien construiría sobre ella. Un dato entra en la ficha si cambia cómo
+   se programa contra la fuente. Historia del organismo, adjetivos y contexto institucional, fuera.
+2. **Verificar antes de escribir.** Toda URL, endpoint, parámetro, formato y cifra se prueba con una llamada real. Si
+   responde, `verified` lleva la fecha; si no se puede probar, `verified: null` y el motivo en `gotchas`. Nunca inventar
+   endpoints ni parámetros plausibles. Un intento fallido se escribe «no localizado» o «no conseguido», con lo probado
+   y la fecha; «no existe» solo si lo dice la documentación oficial o el servidor (404, 410, 401).
+3. **Las trampas son el valor.** `gotchas`, una frase por trampa: cabeceras, codificaciones, decimales con coma, límites
+   no documentados, ids que no coinciden, URLs que cambian. Las trampas silenciosas (datos incompletos, distintos o a
+   cero sin error) van en `alerts`, como mucho tres por ficha y sin repetirse en `gotchas`, y cada una dice la operación
+   exacta con un ejemplo de números comprobados: la evaluación del 2026-10-01 mostró que una alerta que solo describe
+   no cambia el resultado y la explícita sí.
+4. **`tips` solo si acelera**, como mucho seis. Histórico y sincronización van en `sync` (since, full, size, new), solo
+   con medidas propias y la muestra dicha si la cifra es estimada.
+5. **Ejemplos copiables y respuesta descrita.** Cada endpoint principal lleva `example` que funciona al pegarlo y
+   `returns` con la forma vista en esa llamada. Con claves, variable de entorno (`$AEMET_KEY`), nunca la clave.
+6. **Vocabulario cerrado** (`schema/vocab.yaml`) para sector, acceso, auth, periodicidad, formatos, estado, quirks e ids;
+   si falta un valor, se añade en el mismo commit.
+7. **Castellano en valores, inglés en claves.** Sin markdown dentro de los valores ni dos puntos seguidos de espacio en
+   valores sin comillas.
+8. **Fuente única de verdad.** Se editan `sources/**/*.yaml`, `indices/*.yaml`, `guides/*.md`, `schema/`, `scripts/`,
+   `evals/`, `ejemplos/`, `plugins/`, `.claude-plugin/`, `.github/`, la cabecera del README y los ficheros de
+   distribución (`pyproject.toml`, `server.json`, `glama.json`, `Dockerfile`, `mcpb/`). `python scripts/build.py`
+   regenera y se sube en el mismo commit: `catalog.json`, `llms-min.txt`, `llms.txt`, `llms-full.txt`,
+   `indices/README.md`, los README de sector, las tablas AUTO del README, la lista de herramientas de
+   `guides/servidor-mcp.md` y de `mcpb/manifest.json` (sacadas de las docstrings de `scripts/mcp_catalogo.py`).
+   `datos/municipios.csv` lo genera `python scripts/municipios.py`.
 9. **No borrar fichas.** Una fuente muerta pasa a `status: deprecated` con la sustituta en `gotchas`.
-10. **Rendimientos decrecientes.** Si un sector solo tiene portales sin API y datos que ya da el INE, una
-    ficha o ninguna. Mejor 50 fichas exactas que 500 aproximadas.
+10. **Rendimientos decrecientes.** Mejor 50 fichas exactas que 500 aproximadas; un sector sin API y con datos que ya da
+    el INE, una ficha o ninguna.
+11. **Superficie pequeña.** Antes de una herramienta MCP nueva, ver si cabe en una existente (`buscar` ya cubre fichas,
+    recetas, necesidades, productos e identificadores). Antes de un fichero nuevo, ver si cabe en uno existente. Las
+    herramientas cuestan tokens en cada turno del agente que las tiene cargadas (14 el 2026-10-01).
 
 ## Flujo de trabajo
 
 ```bash
 pip install -r scripts/requirements.txt
-python scripts/validate.py        # esquema, vocabulario, ids, referencias
+python scripts/validate.py        # esquema, vocabulario, ids, referencias (sale con 1 si falla; no encadenar con | tail)
 python scripts/build.py           # regenera todo lo derivado
-python scripts/check_links.py     # informe de URLs (necesita red)
-python scripts/check_recetas.py   # batería de regresión de las recetas (necesita red; --report, --fail)
-python scripts/check_ejemplos.py  # ejecuta el example de cada endpoint de las fichas (necesita red; --only, --muestra, --report, --fail)
-python scripts/test_clientes.py   # parsers y clientes de scripts/clientes contra las muestras reales, sin red (corre en CI)
-python scripts/municipios.py      # regenera datos/municipios.csv (INE, SIGPAC, DIR3, IGN; necesita red, un minuto)
-python scripts/fnmt_bundle.py     # genera ca-age.pem (certifi + CA de FNMT) para los hosts con cadena incompleta
-python scripts/clientes/almacen.py sync --fuentes placsp --desde AAAA-MM-DD   # almacén local en Parquet (duckdb, red; guides/almacen.md)
-python scripts/mcp_catalogo.py    # servidor MCP por stdio sobre catalog.json (guides/servidor-mcp.md); prueba real con test_mcp_catalogo.py, fuera de CI
+python scripts/test_clientes.py   # parsers y clientes contra muestras reales, sin red (CI)
+python scripts/test_mcp_catalogo.py  # el servidor MCP por stdio llamando a todas las herramientas (red; fuera de CI)
+python scripts/check_recetas.py   # comprobaciones de las recetas (red; --only, --report, --fail)
+python scripts/check_ejemplos.py  # example de cada endpoint de las fichas (red; --only, --report, --fail)
+python scripts/check_links.py     # informe de URLs (red)
+python scripts/municipios.py      # regenera datos/municipios.csv (red, un par de minutos)
+python scripts/fnmt_bundle.py     # ca-age.pem con las CA de FNMT para los hosts con cadena incompleta
 ```
 
-Antes de cada commit: validate y build limpios. Commits pequeños por sector o por lote verificado.
-Sin subagentes salvo petición expresa: el trabajo es secuencial y de precisión.
+Antes de cada commit, validate y build limpios. Commits pequeños por lote verificado, en castellano. Sin subagentes
+salvo petición expresa o para evaluaciones.
 
-## Índices agregados (`indices/`)
+## Índices (`indices/`)
 
-Cinco ficheros que responden a lo que una ficha sola no responde; `validate.py` comprueba que solo citan ids
-de fichas y del vocabulario, y `build.py` los vuelca en `indices/README.md`, `llms.txt` y `catalog.json`.
+`validate.py` comprueba que solo citan ids de fichas, recetas y vocabulario.
 
-- `recetas.yaml`: procedimiento por intención que encadena fichas. Entra una receta si cruza dos o más fuentes
-  o si la vía directa esconde una trampa. Cada paso cita una ficha; cada receta lleva al menos un `check`
-  (URL, cabeceras, texto esperado) que `check_recetas.py` ejecuta como regresión. `verified` con fecha solo si
-  todos los pasos se probaron; si no, `null` y `note` con lo que falta.
-- `necesidades.yaml`: una línea por necesidad habitual con la ficha que la resuelve y la nota que evita el
-  desvío típico (FRONTUR es del INE, la EPA no es del SEPE). `source: null` con nota cuando no hay fuente.
-- `identificadores.yaml`: una entrada por valor del vocabulario `ids`, con formato, regex, ejemplo, emisor y
-  los cruces verificados hacia otras fuentes.
-- `rutas-muertas.yaml`: URL antigua que un agente puede recordar, estado observado, sustituta y fecha. Se
-  añade una ruta cuando se comprueba que ha muerto, nunca por suposición.
-- `codigos.yaml`: valores que una API exige como parámetro y no se adivinan (Id de municipio o provincia del INE
-  para `tv`, países de DataComex, estación de AEMET por capital, productos de carburantes, rangos del BOE). Solo
-  los de uso frecuente, obtenidos con una llamada real (`verified` obligatorio) y con la llamada que da la lista
-  completa en `use`.
+- `productos.yaml`: qué se puede construir hoy, para quién, con qué fichas, recetas y código, frescura, volumen medido,
+  licencia y la trampa principal. Solo productos cuyas piezas existen y funcionan.
+- `recetas.yaml`: procedimiento que cruza dos o más fuentes o esquiva una trampa; cada paso cita una ficha y cada
+  receta lleva al menos un `check` que `check_recetas.py` ejecuta.
+- `necesidades.yaml`: una línea por necesidad habitual con la ficha que la resuelve y la nota que evita el desvío.
+- `identificadores.yaml`: formato, regex, ejemplo, emisor y cruces verificados de cada id del vocabulario.
+- `rutas-muertas.yaml`: URL antigua comprobada como muerta, estado, sustituta y fecha.
+- `codigos.yaml`: valores que una API exige y no se adivinan, obtenidos con una llamada real.
 
-## Orden de prioridad
+## Alcance
 
-Top-down por impacto: primero las fuentes con API y datos únicos de uso masivo (BOE, INE, AEAT, contratación,
-subvenciones, catastro, meteorología, medicamentos), después las de descarga estructurada, al final los portales
-sin API. Dentro de cada sector, la misma lógica.
+AGE con organismos independientes (BdE, CNMV, CNMC, AIReF) y empresas públicas con datos únicos (Aena, Puertos);
+Madrid, Cataluña, Andalucía y Comunitat Valenciana (portal e instituto de estadística) y los ayuntamientos de Madrid y
+Barcelona. Más comunidades, entidades locales, Cortes, Poder Judicial o UE solo cuando lo indique el propietario.
 
-Alcance actual: Administración General del Estado, incluidos organismos independientes adscritos (BdE, CNMV,
-CNMC, AIReF) y empresas públicas cuando publican datos únicos (Aena, Puertos del Estado). Desde el 2026-10-01, por
-indicación del propietario, también Madrid, Cataluña, Andalucía y Comunitat Valenciana (portal de datos abiertos e
-instituto de estadística, level ccaa) y los portales de datos de los ayuntamientos de Madrid y Barcelona (level local).
-Fases siguientes, solo cuando el propietario lo indique: resto de comunidades y entidades locales, Cortes y Poder
-Judicial, UE.
+## Estado (2026-10-01)
 
-## Estado de verificación
+- **Catálogo**: 95 fichas, 88 verificadas el 2026-10-01. En 2026-09-30 siguen datacomex (sin token), ree-redata y
+  datos-gob-es-api (Incapsula) y bne-datos (Cloudflare); en `null`, fega-beneficiarios-pac, oepm-invenes y
+  mitma-opendata-movilidad. 43 recetas, 12 productos.
+- **Hosts que rechazan IP de centros de datos**: Catastro, REData, www.ree.es, ESIOS, datos.gob.es, BNE, FEGA, OEPM,
+  movilidad-opendata.mitma.es, geoserver.iepnb.es, sivira.isciii.es, analisis.cis.es y www.inmujer.es; intermitentes
+  Seguridad Social, renfe, DATAESTUR, indicadores.fecyt.es e IECA; desde GitHub, MINETUR y Catastro. Se re-verifican
+  desde una IP residencial (pendiente).
+- **Evaluación** (`evals/`): con Haiku y trampas silenciosas, acierto 3 de 21 sin catálogo, 10 con ficheros y 13 con
+  MCP, con un 30 % y un 43 % menos de tokens de entrada. Sin medir aún: productos, `perfil_municipio`, `coyuntura`,
+  `empresa_nif`, almacén.
+- **Publicación**: releases v0.1.0 a v0.3.0 y entrada `io.github.BquantFinance/catalogo-fuentes-publicas` en el registro
+  oficial de MCP. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` (y en
+  los dos ficheros del plugin) y crear la release vX.Y.Z desde la web; `publicar-mcp.yml` empaqueta, adjunta y publica.
+  La versión 0.4.0 (MCP de 14 herramientas con `buscar`, productos) está subida en esos ficheros; falta crear la
+  release v0.4.0 desde la web.
+- **CI**: `ci.yml` (validate, build al día y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC,
+  manual y al cambiar el flujo: recetas, ejemplos de fichas, cargadores, ejemplos y enlaces desde la IP de GitHub;
+  comenta en el issue de verificación si algo falla). Secreto `AEMET_KEY` en el repositorio.
+- **Credenciales fuera del repo**: cuenta de DataComex con el correo del propietario y clave de AEMET (secreto de
+  GitHub); ESIOS sin token. Nunca en fichas ni commits.
+- **Ramas**: `main` por defecto; `claude/vibrant-bell-jwqfvl` de trabajo, igual que main.
 
-Auditoría a fondo el 2026-10-01, ficha a ficha y con llamadas reales (agentes por sector que corrigieron fichas y
-propusieron cambios en los índices; la sesión principal revisó cada diff, repitió las llamadas dudosas e integró). De
-las 95 fichas, 88 llevan `verified` 2026-10-01; datacomex (sin token en el entorno), ree-redata y datos-gob-es-api
-(Incapsula) y bne-datos (Cloudflare) siguen en 2026-09-30, y fega-beneficiarios-pac, oepm-invenes y
-mitma-opendata-movilidad en `null`. Recetas: 43; desde el entorno el 2026-10-01, 88 de 92 comprobaciones ok (Catastro
-sin respuesta tras el proxy, las dos de AEMET omitidas por falta de clave y una de tamaño de la IGAE, que responde a
-veces por trozos sin Content-Length; `check_recetas.py` lee ya hasta min_bytes en ese caso). Desde GitHub Actions
-(`verificacion.yml`, ejecución del 2026-10-01 sobre 8cc6308): 87 de 89 comprobaciones de recetas ok (MINETUR cortó la
-conexión dos veces), ejemplos de las fichas 213 ok de 228 (los fallos eran del analizador de opciones de curl,
-corregido después, la exportación de Saiku que necesita sesión, el CKAN de MITECO en despliegue, un 429 de AEMET y dos
-cortes de Catastro) y los seis cargadores de `scripts/clientes/` correctos, AEMET incluido con el secreto. Ejecución
-manual del mismo día sobre 1db65b2: 92 de 92 recetas, 367 de 379 ejemplos (DATAESTUR 504, DGT lenta, Catastro y dos
-ejemplos que leen la cookie de otro paso, que `check_ejemplos.py` ya omite) y los seis cargadores.
+## Siguiente
 
-Hosts que rechazan o cortan IP de centros de datos (2026-10-01): desde el entorno de agentes, Catastro (403 y error del
-proxy), REData, www.ree.es, ESIOS y datos.gob.es (Incapsula), BNE (Cloudflare), FEGA (reset), OEPM (F5),
-movilidad-opendata.mitma.es (403), geoserver.iepnb.es (403), sivira.isciii.es, analisis.cis.es y www.inmujer.es
-(CONNECT rechazado); con fallos intermitentes, Seguridad Social (Akamai, 403 en la mitad), renfe (TLS), DATAESTUR (504),
-indicadores.fecyt.es (TLS) e IECA (reset). Desde GitHub: MINETUR carburantes y Catastro (reset), y antes www.dgt.es y el
-nomenclátor de Sanidad (timeout). Del 2026-09-30 siguen pendientes OPI de inclusion.gob.es (Akamai), ENAIRE (F5),
-infoelectoral, DGSFP e Instituciones Penitenciarias. Todos se re-verifican desde una IP residencial. ESIOS sigue
-pendiente de token. Las verificaciones se hacen con el bundle FNMT y el User-Agent de navegador que describe
-`guides/cliente-http.md`. `verificacion.yml` (cron semanal, ejecución manual y push que cambie el propio flujo) ejecuta
-recetas, ejemplos de las fichas (`check_ejemplos.py`), cargadores y enlaces, y comenta en el issue de verificación.
-
-## Siguientes pasos, por orden de retorno (2026-10-01)
-
-Diagnóstico honesto tras la primera evaluación (`evals/resultados-2026-09-30.md`): en tareas fáciles con un modelo
-potente el catálogo no cambia el acierto; ahorra la mitad de llamadas y evita las fallidas. Las cifras de tokens de
-las dos primeras tandas medían el contexto final de cada agente, no el consumo (corregido el 2026-10-01 en `evals/`).
-El valor está concentrado en las trampas no deducibles, las rutas muertas y los códigos internos, y solo vale si las
-fichas son exactas: la auditoría del 2026-10-01 encontró errores en fichas marcadas como verificadas (exportación de
-la BDNS que se queda en 50 filas, BOE en festivos, municipio de SIGPAC que es el del Catastro y no el del INE, CSV de
-los portales PC-Axis en UTF-8 y no en Latin-1, descargas que se daban por inexistentes y existen). Orden acordado con
-el propietario el 2026-10-01: dejarlo presentable antes de medir (correcciones y auditoría, registros MCP,
-verificación, comunidades autónomas) y las evaluaciones al final; todo eso quedó hecho ese día salvo las evaluaciones.
-
-1. **Medir donde importa.** Hecho el 2026-10-01 (`evals/resultados-2026-10-01.md`): tareas difíciles con el modelo por
-   defecto y con Sonnet, y entrada ligera. Mismo acierto; con catálogo, la mitad de llamadas y casi ninguna fallida.
-   Hecho también el 2026-10-01 (`evals/resultados-2026-10-01-tanda3.md`): Haiku, siete trampas silenciosas, condición
-   MCP, tres repeticiones y tokens bien medidos. Sin catálogo 3 de 21, con ficheros 10, con MCP 13; tokens de entrada
-   un 30 % y un 43 % menos. Con las alertas, las tres trampas que seguían fallando pasan de 5 a 18 de 18, siempre que la
-   alerta diga la operación exacta con un ejemplo numérico. Pendiente: modelo mayor y más repeticiones si se quiere.
-2. **Distribución antes que más fichas.** Hecho el 2026-10-01 lo instalable: `pipx install git+...` o `uvx` dan el
-   comando `mcp-catalogo`, que descarga `catalog.json` si no hay copia local (`guides/servidor-mcp.md`). Preparado el
-   mismo día el alta en registros: `server.json` (io.github.BquantFinance/catalogo-fuentes-publicas, validado con
-   mcp-publisher), `.github/workflows/publicar-mcp.yml` (al subir una etiqueta vX.Y.Z empaqueta `mcpb/`, lo adjunta a
-   una release de GitHub y publica en el registro oficial por OIDC; sin PyPI, que exige 2FA al propietario), `glama.json`,
-   `Dockerfile`, alias `fuentes-publicas-mcp`, LICENSE con el texto completo de CC0 (GitHub no detectaba el resumen) y
-   bloque de Cursor con botón en la guía. Publicado el 2026-10-01 con la release v0.1.0 (creada desde la web, porque el
-   proxy del entorno de agentes no deja subir etiquetas): la entrada del registro oficial está activa y el sha256 del
-   .mcpb coincide. Pendiente del propietario: Claim en Glama, imagen de vista previa del repositorio
-   (`.github/assets/vista-previa-github.png`) y, si se quiere, cuenta en Smithery y PyPI.
-3. **Entrada ligera.** Hecho el 2026-10-01: `build.py` genera `llms-min.txt` (7 KB) y la segunda tanda lo midió.
-4. **Código listo, no solo descripciones.** Hecho el 2026-10-01: `scripts/clientes/` con BOE y BORME (`boe.py`), BDNS
-   (`bdns.py`), AEMET, INE Tempus, DataComex, PLACSP y Saiku, probados con llamadas reales; `scripts/clientes/muestras/`
-   con respuestas reales recortadas y `python scripts/test_clientes.py`, sin red, en CI; `verificacion.yml` ejecuta los
-   cargadores contra los servidores cada semana; el 2026-10-01 pasaron los seis desde GitHub, AEMET con el secreto
-   (`aemet.py 16078`). Hecho también el 2026-10-01: `sesion.py` (sesión HTTP común con FNMT, User-Agent, reintentos y
-   excepción `Bloqueado` ante WAF; `_http.py` queda como compatibilidad y `fnmt_bundle.py` la usa) y clientes genéricos
-   `ckan`, `socrata`, `pcaxis`, `arcgis` y `ogc` que paginan sin topes silenciosos, con muestras, pruebas sin red y extra
-   de instalación `[clientes]`. Hecho también ese día: campo `alerts` (35 trampas silenciosas movidas desde gotchas
-   en 28 fichas; el MCP las devuelve lo primero) y `datos/municipios.csv` con `scripts/municipios.py` (8.132 municipios
-   con INE, SIGPAC, DIR3, NIF, NUTS3 y coordenadas; SIGPAC y Catastro numeran distinto que el INE en 4.448 además de
-   las 41 capitales con 900) y la herramienta MCP `municipio`. Pendiente: muestras de ObtenerDatos de DataComex y del
-   fichero de datos de AEMET (necesitan credenciales) y cargador de Catastro (desde una IP residencial).
-5. **Cobertura con demanda real.** Hecho el 2026-10-01: portal de datos e instituto de estadística de Madrid,
-   Cataluña (Idescat), Andalucía (IECA) y Comunitat Valenciana (IVE), y portales de los ayuntamientos de Madrid y
-   Barcelona (10 fichas, con sus necesidades y códigos). Siguientes comunidades por tamaño solo cuando el propietario lo
-   indique.
-6. **Mantenimiento con dueño.** Una sesión mensual que corra `verificacion.yml`, arregle lo roto y pase la ronda desde
-   una IP residencial para los hosts que bloquean centros de datos (lista en «Estado de verificación»). Sin esto, el
-   catálogo caduca; un catálogo con errores es peor que ninguno. Hecho el 2026-10-01: auditoría completa de las 95
-   fichas y comprobador de ejemplos (`check_ejemplos.py`) en la verificación semanal. Pendiente: la ronda residencial.
-7. **Trampas de la comunidad.** Hecho el 2026-10-01: plantilla de issue «trampa nueva» (`.github/ISSUE_TEMPLATE/trampa.yml`).
-   Cada trampa confirmada entra en la ficha con fecha.
-
-Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
-
-## Estado al cierre de la sesión del 2026-10-01 (para retomar)
-
-- Ramas: `main` es la rama por defecto y contiene todo; `claude/vibrant-bell-jwqfvl` es la rama de trabajo de esta
-  sesión, idéntica a `main` al cierre. `claude/magical-volta-cjszgk` y `claude/eager-albattani-9me81y` son antiguas y
-  se pueden borrar.
-- Publicación: release v0.1.0 y entrada `io.github.BquantFinance/catalogo-fuentes-publicas` en el registro oficial de
-  MCP. Release v0.2.0 publicada (alertas, municipio, clientes). Release v0.3.0 publicada el 2026-10-01 sobre 4862750
-  (herramientas MCP que traen datos, plugin de Claude Code con skill, ejemplos, reutilización, sync y almacén local): el
-  registro oficial la da como última y el sha256 del .mcpb coincide. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` y crear la release
-  vX.Y.Z desde la web de GitHub; `publicar-mcp.yml` hace el resto.
-- CI: `ci.yml` (validate, build y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC, manual y al
-  cambiar el propio flujo; recetas, ejemplos, cargadores y enlaces desde la IP de GitHub; comenta en el issue de
-  verificación si algo falla). La clave `AEMET_KEY` está como secreto del repositorio.
-- Credenciales fuera del repo: cuenta de DataComex con el correo del propietario (API probada el 2026-09-30); clave de
-  AEMET (secreto de GitHub). ESIOS sin token. Nada de esto se escribe en fichas ni commits.
-- Evaluación: `evals/tareas.yaml` (24 tareas), `evals/resultados-2026-09-30.md`, `evals/resultados-2026-10-01.md`,
-  `evals/resultados-2026-10-01-tanda3.md` y
-  `evals/consumo.py`, que suma el consumo real por turno desde las transcripciones de los subagentes. No hay ejecutor
-  en el repo.
-- Imagen y apoyo: logo en `.github/assets/` (claro, oscuro, símbolo y vista previa) y Ko-fi del propietario en
-  `.github/FUNDING.yml` y en el README.
-- Enfoque acordado con el propietario el 2026-10-01: lo que acelera a quien desarrolla con agentes, a devs, a gente que
-  trastea y a startups; que el agente obtenga el dato, no solo sepa dónde está. Hecho ese día: clientes genéricos,
-  alertas, tabla de municipios, herramientas MCP que traen datos, plugin de Claude Code con skill y ejemplos.
-- Hecho el 2026-10-01 (segunda sesión): 17 alertas reescritas con la operación exacta y un ejemplo numérico comprobado
-  ese día (IGAE, Trabajo, SEPE, Seguridad Social, BdE, GBIF, IGN, INE, CNMC, BDNS, Comunidad de Madrid, FACe, IVE,
-  Junta); las demás ya lo decían. En Trabajo, el fichero de cada mes revisa los anteriores (julio 563 o 562 convenios).
-- Hecho el 2026-10-01 (segunda sesión): perfil de empresa por NIF (`consulta.empresa_nif`, herramienta MCP y
-  `ejemplos/empresa_nif.py`) con Invente, BDNS, AEI y prohibiciones de contratar por denominación. La lista de deudores
-  de la AEAT deja de ser accesible a los tres meses por ley (art. 95 bis LGT; la de 2026 daba 404 el 01/10) y el
-  Registro Público Concursal exige CAPTCHA: anotados en necesidades, sin automatizar. Contratos y BORME por NIF o
-  denominación necesitan el almacén (punto 5).
-- Hecho el 2026-10-01 (segunda sesión): `guides/reutilizacion.md` con la Ley 37/2007, el RD 1495/2011, el RD 130/2019,
-  el TRLCI y el art. 95 bis LGT leídos en la API del BOE y el art. 98.4 del Reglamento (UE) 2021/2116; cita literal
-  de BOE, AEMET e INE; licencias NC y SA medidas (GBIF, CNMC, Junta). Las concesiones de la BDNS caducan a los cuatro
-  años y las de personas físicas al año siguiente (2021 da 0): cobertura y alerta corregidas en la ficha.
-- Hecho el 2026-10-01 (segunda sesión): campo `sync` medido en nueve fichas (BOE, BORME, legislación consolidada,
-  BDNS, PLACSP, INE Tempus, carburantes, Banco de España, SEPE). La BDNS filtra por fecha de alta con fechaRegInicio y
-  fechaRegFin (fin exclusivo, sin documentar), lo único que no pierde las concesiones dadas de alta tarde.
-- Hecho el 2026-10-01 (segunda sesión): almacén local (`scripts/clientes/almacen.py`, `guides/almacen.md`, herramienta
-  MCP `almacen_sql`, `ejemplos/adjudicaciones.py`). Por decisión del propietario, solo el script: el repo no aloja datos
-  ni publica releases de datos, y `almacen/` está en `.gitignore`. Parquet por tabla y mes con BOE, BORME (tipo de acto
-  y texto solo de los actos sin nombres), BDNS por fecha de alta, PLACSP con adjudicaciones (NIF y nombre fuera si es
-  persona física) y carburantes; `empresa_nif` añade contratos y BORME si hay almacén.
-- Hecho el 2026-10-01 (segunda sesión): CSV de datos abiertos del SEPE (paro, contratos y demandantes de todos los
-  municipios por año desde 2006, windows-1252 con Content-Type UTF-8, 304 por ETag) en la ficha, con alerta: Oza-Cesuras
-  y Cerdedo-Cotobade van con sus códigos previos a la fusión. `scripts/clientes/sepe.py` y `consulta.perfil_municipio`
-  (herramienta MCP `perfil_municipio`: códigos, padrón, renta, paro, contratos y criminalidad en una llamada).
-- Hecho el 2026-10-01 (segunda sesión): `consulta.coyuntura` y herramienta MCP `coyuntura` (IPC con avance marcado, paro
-  EPA, PIB corregido, paro registrado, Euríbor, dólar, deuda PDE, bonos y prima de riesgo calculada); códigos en
-  `indices/codigos.yaml` (ine-series-coyuntura) y alertas del INE de avance y PIB sin corregir.
-- Siguiente trabajo: lo que indique el propietario. Del propietario: ronda desde una IP residencial, token de DataComex y más comunidades cuando lo decida.
+1. Medir lo nuevo con una tanda pequeña (productos, `perfil_municipio`, `coyuntura`, `empresa_nif`, almacén): con y
+   sin las piezas; lo que no ahorre tiempo o errores, se quita.
+2. Ronda desde una IP residencial para los hosts bloqueados (necesita al propietario).
+3. Productos nuevos solo con piezas que ya funcionen; fuentes nuevas solo si desbloquean un producto.
 
 ## Lo que no se hace
 
-- No se añaden agregadores privados, servicios de pago ni datos de terceros sobre datos públicos.
-- No se escriben guías largas. Una guía transversal entra solo si condensa algo que afecta a muchas fuentes
-  (identificadores, codificaciones, autenticación con certificado).
-- No se genera prosa de relleno en README ni en fichas para que "parezca completo".
+- Datos alojados en el repo ni releases de datos: el almacén es local y `almacen/` está en `.gitignore`.
+- Agregadores privados, servicios de pago o datos de terceros sobre datos públicos.
+- Guías largas: una guía entra solo si condensa algo que afecta a muchas fuentes.
+- Prosa de relleno en README o fichas para que parezca completo.

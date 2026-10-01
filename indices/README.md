@@ -1,6 +1,106 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 43 recetas, 153 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 12 productos, 43 recetas, 153 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
+
+## Productos que se pueden construir hoy
+
+Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras medidas, licencia y la trampa que más cuesta.
+
+**radar-licitaciones** · Avisos de licitaciones nuevas por CPV, provincia u órgano de contratación
+- para: pymes y consultoras que licitan con la Administración
+- fichas: placsp-datos-abiertos, dir3-directorio · recetas: licitaciones-nuevas, organismo-a-dir3-y-nif
+- piezas: ejemplos/licitaciones.py (solo lo nuevo por CPV y palabra); almacen.py sync --fuentes placsp para histórico y búsquedas
+- frescura: diaria; el feed 643 se regenera hacia las 20:15 y lo publicado hoy solo está en el buscador del portal · volumen: feed 643, 2,2 GB al año en ZIP (150 a 300 MB al mes)
+- licencia: libre con cita de la fuente
+- trampa: una entrada por cada cambio de estado; quedarse con la de updated máximo por id y leer las anulaciones (deleted-entry)
+
+**inteligencia-competidores** · Quién gana los contratos de un sector u órgano, a qué importe y contra cuántas ofertas
+- para: empresas que licitan, analistas de contratación pública, periodistas
+- fichas: placsp-datos-abiertos · recetas: empresa-nif-a-ayudas-y-contratos
+- piezas: almacen.py (tabla placsp_adjudicaciones y vista adjudicaciones_ultimo); ejemplos/adjudicaciones.py; herramienta almacen_sql
+- frescura: diaria · volumen: un mes de contratos menores (feed 1143), 28.091 entradas cargadas en 40 s; día y medio de los tres feeds, 8.434 en 2,5 minutos
+- licencia: libre con cita; adjudicatarios personas físicas sin NIF ni nombre en el almacén
+- trampa: una fila por lote y adjudicatario; el NIF llega con guiones, en minúscula o enmascarado y el feed no se puede consultar por NIF
+
+**radar-ayudas** · Convocatorias de subvenciones nuevas que encajan con el perfil de una empresa (sector, región, tipo de beneficiario)
+- para: pymes, gestorías y consultoras de financiación pública
+- fichas: bdns-api, boe-api-sumario · recetas: subvenciones-convocatorias-recientes
+- piezas: scripts/clientes/bdns.py (convocatorias y concesiones paginadas, altas por fecha de alta); ejemplos/boe_hoy.py subvención
+- frescura: diaria; las concesiones se dan de alta con meses de retraso (filtrar por fechaRegInicio, no por fecha de concesión) · volumen: 655.000 convocatorias desde 2014; 30 millones de concesiones vivas, unos 11 GB en CSV
+- licencia: con las restricciones del aviso legal de la BDNS; datos de personas físicas solo para control, archivo, investigación o estadística
+- trampa: la exportación sin pageSize devuelve 50 filas aunque haya miles, sin aviso
+
+**kyb-proveedores** · Ficha de riesgo de un proveedor o cliente por NIF (ayudas, contratos, actos mercantiles, prohibiciones de contratar)
+- para: departamentos de compras, fintech de crédito, compliance
+- fichas: bdns-api, placsp-datos-abiertos, borme-api-sumario, hacienda-registro-licitadores · recetas: empresa-nif-a-ayudas-y-contratos, actos-mercantiles-borme
+- piezas: herramienta empresa_nif y ejemplos/empresa_nif.py; con almacén local añade contratos adjudicados y actos del BORME
+- frescura: diaria
+- licencia: BDNS con fines limitados para personas físicas; BORME con RGPD (guides/reutilizacion.md)
+- trampa: el BORME no trae NIF y se cruza por denominación; la lista de deudores de la AEAT solo es accesible tres meses y el Registro Público Concursal exige CAPTCHA
+
+**leads-sociedades-nuevas** · Sociedades recién constituidas por provincia y objeto social, con capital y domicilio
+- para: proveedores B2B (asesorías, bancos, software de gestión, seguros)
+- fichas: borme-api-sumario · recetas: actos-mercantiles-borme
+- piezas: almacen.py sync --fuentes borme (actos Constitución con objeto, domicilio y capital en detalle)
+- frescura: diaria, de lunes a viernes · volumen: 2025, 249 sumarios y unos 300 MB de XML de la sección A; un día, 1.785 empresas en 100 KB de Parquet
+- licencia: libre con cita; administradores y socios son datos personales y el almacén no los guarda
+- trampa: sin NIF ni CNAE; el objeto social es texto libre y la denominación cambia con los actos
+
+**informe-ubicacion** · Informe de una localización (población, renta, paro, alquiler, criminalidad) para inmobiliarias, retail y franquicias
+- para: inmobiliarias, cadenas de retail y franquicias, proptech
+- fichas: ine-api-tempus, sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler, catastro-ovc · recetas: poblacion-renta-alquiler-por-municipio, criminalidad-municipio, paro-registrado-por-municipio
+- piezas: herramienta perfil_municipio y ejemplos/mi_municipio.py; datos/municipios.csv para pasar entre códigos
+- frescura: paro mensual, padrón anual, renta con dos años de retraso (2023), criminalidad trimestral
+- licencia: libre con cita
+- trampa: SIGPAC y Catastro numeran los municipios distinto que el INE; la criminalidad es acumulada desde enero y solo de municipios de más de 20.000 habitantes
+
+**comparador-carburantes** · Gasolineras más baratas cerca y evolución de precios por estación para conductores y flotas
+- para: apps de movilidad, gestores de flotas, comparadores
+- fichas: minetur-precios-carburantes · recetas: precio-carburantes-municipio
+- piezas: ejemplos/carburante_cerca.py; almacen.py sync --fuentes carburantes para la serie diaria por estación
+- frescura: cada media hora; histórico diario desde 2007 · volumen: 12,4 MB al día el nacional (11.502 estaciones); todo el histórico, unos 72 GB de JSON
+- licencia: libre con cita
+- trampa: precios y coordenadas con coma decimal y vacío si la estación no vende el producto; IDMunicipio es propio, no el del INE
+
+**monitor-regulatorio** · Avisos de normas nuevas o modificadas por materia y del texto vigente de un artículo
+- para: despachos, compliance, legaltech
+- fichas: boe-api-sumario, boe-api-legislacion-consolidada, boe-eli · recetas: boe-sumario-y-texto-consolidado, buscar-norma-por-titulo
+- piezas: ejemplos/boe_hoy.py; scripts/clientes/boe.py (normas actualizadas ayer y versión vigente de un bloque)
+- frescura: diaria; 43 normas consolidadas actualizadas el 30/09/2026 · volumen: 12.421 normas consolidadas, unos 1,4 GB de XML
+- licencia: libre con la cita literal del BOE; el texto consolidado debe decir que es meramente informativo
+- trampa: from y to filtran por fecha de actualización del consolidado, no por publicación
+
+**panel-macro** · Panel de coyuntura (IPC, paro, PIB, Euríbor, prima de riesgo) para fintech, medios y asesores
+- para: fintech, medios, asesores financieros
+- fichas: ine-api-tempus, bde-estadisticas · recetas: ipc-ultimo-dato, series-banco-de-espana
+- piezas: herramienta coyuntura (consulta.coyuntura); los 90 ZIP del Banco de España con descarga condicional para series completas
+- frescura: IPC y paro mensuales, PIB trimestral, Euríbor mensual, dólar diario · volumen: 53 MB todos los ZIP del Banco de España
+- licencia: libre con cita (Fuente INE con su web)
+- trampa: el IPC del último mes es avance y se revisa; el PIB que se publica es el corregido de estacionalidad (0,68 % frente a 4,79 % sin corregir en 2026T2)
+
+**precio-electricidad** · Precio de la electricidad por cuarto de hora para apps de ahorro, domótica y recarga de vehículos
+- para: apps de consumo, domótica, puntos de recarga
+- fichas: omie-mercado · recetas: precio-electricidad-horario
+- piezas: ficha omie-mercado (ficheros marginalpdbc por día y ZIP anual)
+- frescura: diaria; el precio del día siguiente sale hacia las 13:50 (el del 02/10/2026 ya estaba el 01/10 a las 18:10)
+- licencia: la ficha no recoge licencia; revisar el aviso legal de OMIE antes de vender
+- trampa: 96 periodos cuarto-horarios desde el 01/10/2025 (92 y 100 los días de cambio de hora) y 24 antes; no fijar 96 al parsear
+
+**buscador-medicamentos** · Buscador de medicamentos con presentaciones, prospecto y problemas de suministro
+- para: farmacias, healthtech, apps de pacientes
+- fichas: aemps-cima-api · recetas: medicamento-por-cn-o-nombre, medicamento-precio-financiado
+- piezas: ficha aemps-cima-api (API REST JSON sin clave)
+- frescura: diaria
+- licencia: libre con cita
+- trampa: practiv1 busca por subcadena (ibuprofeno trae dexibuprofeno); para un principio exacto, idpractiv1
+
+**agritech-parcelas** · Información de una parcela agrícola por coordenadas (uso, superficie, Red Natura, zonas vulnerables a nitratos)
+- para: agritech, cooperativas, aseguradoras agrarias
+- fichas: mapa-sigpac, catastro-ovc · recetas: parcela-a-red-natura-y-nitratos, coordenadas-a-referencia-catastral
+- piezas: scripts/clientes/ogc.py (recintos por bbox siguiendo next); consultas SIGPAC por punto de la ficha
+- frescura: anual, con la campaña de la PAC
+- licencia: CC BY 4.0
+- trampa: el municipio de SIGPAC es el del Catastro, no el del INE (capitales 900); traducir con datos/municipios.csv
 
 ## Recetas por intención
 

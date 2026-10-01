@@ -7,10 +7,13 @@ Salidas (no editar a mano):
   indices/README.md          recetas, dónde está cada cosa, identificadores y rutas muertas
   llms.txt                   mapa del repo para agentes
   llms-full.txt              todas las fichas en texto compacto
-  README.md                  tabla de sectores entre marcadores AUTO
+  README.md                  tablas de productos y sectores entre marcadores AUTO
+  guides/servidor-mcp.md     lista de herramientas entre marcadores AUTO, sacada de scripts/mcp_catalogo.py
+  mcpb/manifest.json         lista de herramientas del paquete MCPB, de la misma fuente
 """
 from __future__ import annotations
 
+import ast
 import json
 import re
 from collections import defaultdict
@@ -19,6 +22,29 @@ from datetime import date
 from common import REPO_RAW, ROOT, load_indices, load_sources, load_vocab
 
 REPO_URL = "https://github.com/BquantFinance/Administracion-fuentes-publicas"
+
+
+def herramientas_mcp() -> list[dict]:
+    """Nombre, firma y descripción de cada @mcp.tool() de scripts/mcp_catalogo.py, leídos sin importar el servidor."""
+    tree = ast.parse((ROOT / "scripts" / "mcp_catalogo.py").read_text(encoding="utf-8"))
+    out = []
+    for n in tree.body:
+        if isinstance(n, ast.FunctionDef) and any(ast.unparse(d).startswith("mcp.tool") for d in n.decorator_list):
+            args = n.args.args
+            defaults = [None] * (len(args) - len(n.args.defaults)) + list(n.args.defaults)
+            firma = ", ".join(a.arg + (f"={ast.unparse(d)}" if d is not None else "") for a, d in zip(args, defaults))
+            doc = " ".join((ast.get_docstring(n) or "").split())
+            primera = doc.split(". ")[0].rstrip(".") + "."
+            out.append({"name": n.name, "firma": f"{n.name}({firma})", "doc": doc, "resumen": primera})
+    return out
+
+
+def auto(texto: str, marca: str, contenido: str) -> str:
+    """Sustituye lo que hay entre <!-- AUTO:marca --> y <!-- /AUTO:marca -->."""
+    patron = rf"(<!-- AUTO:{marca} -->).*?(<!-- /AUTO:{marca} -->)"
+    if not re.search(patron, texto, flags=re.S):
+        raise SystemExit(f"falta el marcador AUTO:{marca}")
+    return re.sub(patron, lambda m: f"{m.group(1)}\n{contenido}\n{m.group(2)}", texto, flags=re.S)
 
 
 def clean(s: dict) -> dict:
@@ -112,9 +138,20 @@ def render_indices_readme(idx: dict, sector_of: dict[str, str], vocab: dict, use
     lines = [
         "# Índices para agentes",
         "",
-        f"Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. {len(recetas)} recetas, "
+        f"Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. {len(idx['productos'])} productos, {len(recetas)} recetas, "
         f"{len(needs)} necesidades, {len(idents)} identificadores, {len(codigos)} grupos de códigos, {len(dead)} rutas muertas.",
         "",
+        "## Productos que se pueden construir hoy",
+        "",
+        "Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras medidas, licencia y la trampa que más cuesta.",
+        "",
+    ]
+    for p in idx["productos"]:
+        lines += [f"**{p['id']}** · {p['producto']}", f"- para: {p['cliente']}", f"- fichas: {', '.join(p['fuentes'])}"
+                  + (f" · recetas: {', '.join(p['recetas'])}" if p.get("recetas") else ""), f"- piezas: {p['piezas']}",
+                  f"- frescura: {p['frescura']}" + (f" · volumen: {p['volumen']}" if p.get("volumen") else ""),
+                  f"- licencia: {p['licencia']}", f"- trampa: {p['trampa']}", ""]
+    lines += [
         "## Recetas por intención",
         "",
         "Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.py` ejecuta las comprobaciones "
@@ -241,6 +278,7 @@ def main() -> None:
         "sectors": {k: v for k, v in vocab["sector"].items() if k in by_sector},
         "sources": [clean(s) for s in sources],
         "indices": {
+            "productos": idx["productos"],
             "recetas": idx["recetas"],
             "necesidades": idx["necesidades"],
             "identificadores": identificadores,
@@ -284,36 +322,46 @@ def main() -> None:
         readme,
         flags=re.S,
     )
+    prod = ["| producto | para quién | fichas | piezas |", "|---|---|---|---|"]
+    for p in idx["productos"]:
+        prod.append(f"| **{p['id']}** · {cell(p['producto'])} | {cell(p['cliente'])} | {', '.join(p['fuentes'])} | {cell(p['piezas'])} |")
+    readme = auto(readme, "productos", "\n".join(prod))
     readme_path.write_text(readme, encoding="utf-8")
+
+    tools = herramientas_mcp()
+    guia = ROOT / "guides" / "servidor-mcp.md"
+    guia.write_text(auto(guia.read_text(encoding="utf-8"), "herramientas",
+                         "\n".join(f"- `{h['firma']}`: {h['doc']}" for h in tools)), encoding="utf-8")
+    man_path = ROOT / "mcpb" / "manifest.json"
+    man = json.loads(man_path.read_text(encoding="utf-8"))
+    man["tools"] = [{"name": h["name"], "description": h["resumen"]} for h in tools]
+    man_path.write_text(json.dumps(man, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     # llms.txt
     llms = [
         "# Administración fuentes públicas (España)",
         "",
-        "> Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes: "
-        "APIs, descargas, feeds, servicios geográficos y registros. Una ficha YAML por fuente con URL base, "
-        "endpoints, autenticación, formatos, periodicidad y trampas conocidas. Contenido en castellano, claves en inglés.",
+        "> Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, "
+        "qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. "
+        "Contenido en castellano, claves en inglés.",
         "",
-        f"Fuentes: {len(sources)} · Recetas: {len(idx['recetas'])} · Alcance actual: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Generado: {date.today().isoformat()}",
+        f"Fuentes: {len(sources)} · Productos: {len(idx['productos'])} · Recetas: {len(idx['recetas'])} · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Generado: {date.today().isoformat()}",
         "",
-        "## Cómo usar este repo",
+        "## Empieza aquí",
         "",
-        f"- Todo el catálogo (fichas e índices) en un fichero: {REPO_RAW}/catalog.json",
-        f"- Todas las fichas en texto compacto: {REPO_RAW}/llms-full.txt",
-        f"- Entrada ligera (reglas, fichas por sector y punteros, unos 7 KB): {REPO_RAW}/llms-min.txt",
-        f"- Una ficha: {REPO_RAW}/sources/<sector>/<id>.yaml",
-        f"- Índices para agentes (recetas paso a paso, identificadores con regex y cruces, rutas muertas con sustituta): {REPO_RAW}/indices/README.md",
-        f"- Los 8.132 municipios con su código en cada sistema (INE con dígito de control, Id interno del INE Tempus para tv=19, SIGPAC y Catastro, DIR3 y NIF del ayuntamiento, CCAA, NUTS3 y coordenadas de la capital): {REPO_RAW}/datos/municipios.csv, o la herramienta municipio del servidor MCP. El código de municipio de SIGPAC y Catastro no es el del INE en más de la mitad de los municipios.",
-        f"- Códigos que son parámetros (Id de municipio, provincia y CCAA del INE para tv, países de DataComex, estaciones de AEMET por capital, productos de carburantes, rangos y secciones del BOE): {REPO_RAW}/indices/codigos.yaml",
-        f"- Servidor MCP (uvx --from git+https://github.com/BquantFinance/Administracion-fuentes-publicas mcp-catalogo) para cargar solo la ficha, receta o necesidad que haga falta y traer datos ya resueltos: descargar(url) con certificados FNMT, codificación y bloqueos, tabla_pcaxis, boe_sumario, subvenciones_nif, empresa_nif, ckan_filas, socrata_filas, municipio, perfil_municipio, coyuntura, almacen_sql ({REPO_RAW}/guides/servidor-mcp.md)",
-        f"- Almacén local en Parquet y DuckDB, sin datos en el repo: python scripts/clientes/almacen.py sync baja BOE, BORME, BDNS, PLACSP con adjudicaciones y carburantes y los pone al día; da contratos por NIF del adjudicatario, BORME por denominación y series por gasolinera, sin identificar a personas físicas ({REPO_RAW}/guides/almacen.md)",
-        "- Código Python que ya resuelve las trampas: sesión HTTP con CA de FNMT, reintentos y detección de WAF; clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC que paginan sin topes silenciosos; cargadores de BOE, BDNS, AEMET, INE, PLACSP. En scripts/clientes/ (pip install \"fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas\" y from fuentes_publicas.clientes import ckan); ejemplos que funcionan en ejemplos/; plugin de Claude Code con skill y MCP: /plugin marketplace add BquantFinance/Administracion-fuentes-publicas.",
-        "- Histórico y sincronización medidos (campo `sync` de la ficha: desde cuándo, cómo bajarlo todo, cuánto ocupa y cómo detectar lo nuevo): " + ", ".join(s["id"] for s in sources if s.get("sync")) + ".",
-        f"- Licencias, cita literal, datos personales y datos que caducan (BDNS, PAC, deudores de la AEAT): {REPO_RAW}/guides/reutilizacion.md",
-        "- Cada endpoint principal lleva `returns` (forma de la respuesta vista en una llamada real: campos, tipos, fechas, decimales, paginación) y `example` (llamada copiable).",
-        f"- Esquema de ficha: {REPO_RAW}/schema/source.schema.json",
-        f"- Vocabulario (sectores, acceso, auth, formatos, quirks, ids): {REPO_RAW}/schema/vocab.yaml",
-        "- `verified: null` significa que la ficha se redactó a partir de documentación oficial pero aún no se ha probado el endpoint.",
+        f"- Con MCP: uvx --from git+{REPO_URL} mcp-catalogo. buscar(texto) mira a la vez fichas, recetas, necesidades, productos e identificadores; ficha(id) da endpoints, ejemplos y trampas. Herramientas: " + ", ".join(h["name"] for h in tools) + f" ({REPO_RAW}/guides/servidor-mcp.md).",
+        f"- Sin MCP: este fichero para orientarse y la ficha entera antes de llamar: {REPO_RAW}/sources/<sector>/<id>.yaml (alerts primero, endpoints con example y returns, sync, quirks, gotchas). Todo junto en {REPO_RAW}/catalog.json o en texto en {REPO_RAW}/llms-full.txt.",
+        f"- Código: pip install \"fuentes-publicas-mcp @ git+{REPO_URL}\". scripts/clientes trae la sesión HTTP con las CA de FNMT y detección de WAF, clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC sin topes silenciosos, cargadores de BOE, BDNS, INE, SEPE y PLACSP, y el almacén local en Parquet (almacen.py). Proyectos que funcionan en ejemplos/.",
+        f"- Recursos: municipios con su código en cada sistema ({REPO_RAW}/datos/municipios.csv), códigos que son parámetros ({REPO_RAW}/indices/codigos.yaml), licencias y datos personales ({REPO_RAW}/guides/reutilizacion.md), almacén local ({REPO_RAW}/guides/almacen.md), cliente HTTP ({REPO_RAW}/guides/cliente-http.md).",
+        "",
+        "## Qué se puede construir hoy",
+        "",
+        f"Detalle (frescura, volumen, licencia, trampa) en {REPO_RAW}/indices/productos.yaml.",
+        "",
+    ]
+    for p in idx["productos"]:
+        llms.append(f"- {p['id']}: {p['producto']} → {', '.join(p['fuentes'])} · {p['piezas']}")
+    llms += [
         "",
         "## Reglas rápidas antes de programar contra una fuente",
         "",
@@ -364,19 +412,20 @@ def main() -> None:
     llms += ["", "## Optional", "", f"- [Contribuir]({REPO_RAW}/CONTRIBUTING.md)", f"- [Plantilla de ficha]({REPO_RAW}/templates/source.yaml)", ""]
     (ROOT / "llms.txt").write_text("\n".join(llms), encoding="utf-8")
 
-    # llms-min.txt: entrada ligera (reglas, fichas por sector y punteros), sin necesidades ni recetas
-    mini = llms[: llms.index("## Trampas silenciosas")]
-    con_alertas = [s["id"] for s in sorted(sources, key=lambda x: x["id"]) if s.get("alerts")]
-    mini += ["## Fichas con trampas silenciosas", "", "Antes de dar una cifra de estas fuentes, lee `alerts` en su ficha (datos incompletos, distintos o a cero sin error): " + ", ".join(con_alertas) + ".", ""]
+    # llms-min.txt: entrada ligera (empezar, productos por id, reglas, fichas con alertas y fichas por sector)
+    corte = llms.index("## Qué se puede construir hoy")
+    mini = llms[:corte]
     mini[4] = mini[4].replace("Generado:", "Entrada ligera; la completa es llms.txt · Generado:")
-    mini += ["## Fichas por sector", "", "Cada id es sources/<sector>/<id>.yaml; léela entera antes de llamar (alerts, endpoints con example y returns, quirks, gotchas).", ""]
+    mini += ["## Qué se puede construir hoy", "", ", ".join(p["id"] for p in idx["productos"]) + f" (detalle en {REPO_RAW}/indices/productos.yaml).", ""]
+    mini += llms[llms.index("## Reglas rápidas antes de programar contra una fuente"): llms.index("## Trampas silenciosas")]
+    con_alertas = [s["id"] for s in sorted(sources, key=lambda x: x["id"]) if s.get("alerts")]
+    mini += ["## Fichas con trampas silenciosas", "", "Lee sus alerts antes de dar una cifra: " + ", ".join(con_alertas) + ".", ""]
+    mini += ["## Fichas por sector", ""]
     for sector, title in vocab["sector"].items():
         items = by_sector.get(sector)
         if items:
             mini.append(f"- {title}: " + ", ".join(s["id"] for s in items))
-    mini += ["", "## Índices", "", f"- Necesidad a fuente (una línea por pregunta habitual): {REPO_RAW}/indices/necesidades.yaml",
-             f"- Recetas que cruzan fuentes: {REPO_RAW}/indices/recetas.yaml", f"- Códigos que son parámetros: {REPO_RAW}/indices/codigos.yaml",
-             f"- Rutas muertas con sustituta: {REPO_RAW}/indices/rutas-muertas.yaml", f"- Identificadores con regex y cruces: {REPO_RAW}/indices/identificadores.yaml", ""]
+    mini.append("")
     (ROOT / "llms-min.txt").write_text("\n".join(mini), encoding="utf-8")
 
     # llms-full.txt
@@ -393,7 +442,7 @@ def main() -> None:
     (ROOT / "llms-full.txt").write_text("\n".join(full), encoding="utf-8")
 
     print(
-        f"build OK: {len(sources)} fuentes, {len(by_sector)} sectores, {len(idx['recetas'])} recetas, "
+        f"build OK: {len(sources)} fuentes, {len(by_sector)} sectores, {len(idx['productos'])} productos, {len(idx['recetas'])} recetas, "
         f"{len(idx['necesidades'])} necesidades, {len(idx['codigos'])} grupos de códigos, {len(idx['rutas-muertas'])} rutas muertas"
     )
 

@@ -9,33 +9,48 @@
 
 [![CI](https://github.com/BquantFinance/Administracion-fuentes-publicas/actions/workflows/ci.yml/badge.svg)](https://github.com/BquantFinance/Administracion-fuentes-publicas/actions/workflows/ci.yml) [![Licencia CC0](https://img.shields.io/badge/licencia-CC0%201.0-blue)](LICENSE) [![Apoya en Ko-fi](https://img.shields.io/badge/Ko--fi-apoya%20el%20proyecto-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/gsnchez)
 
-*Spanish public-sector data sources, catalogued for AI agents and developers: verified endpoints, response shapes, pitfalls, and recipes. Start at `llms.txt`.*
+*Spanish public data, ready to build products on: where each dataset lives, how to call it, what it returns and the traps that change the numbers, verified with real calls; plus code that fetches it already solved. Start at `llms-min.txt` or the MCP server.*
 
-Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes de IA: qué hay, dónde está, cómo se llama, qué devuelve y qué falla. Cada endpoint se prueba con una llamada real y cada trampa lleva la fecha en que se comprobó.
+Datos públicos de España listos para construir productos. Para cada fuente: dónde está, cómo pedirla, qué devuelve y qué falla, comprobado con llamadas reales, y código que ya trae el dato resuelto. Pensado para startups, desarrolladores y agentes de IA.
 
 ## Empieza aquí
 
-- **Agente con MCP** (Claude, Cursor y cualquier cliente MCP): `uvx --from git+https://github.com/BquantFinance/Administracion-fuentes-publicas mcp-catalogo`, o [![Instalar en Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/link/mcp/install?name=catalogo-fuentes-publicas&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJnaXQraHR0cHM6Ly9naXRodWIuY29tL0JxdWFudEZpbmFuY2UvQWRtaW5pc3RyYWNpb24tZnVlbnRlcy1wdWJsaWNhcyIsIm1jcC1jYXRhbG9nbyJdfQ%3D%3D). Carga solo la ficha que hace falta y trae datos ya resueltos: `descargar(url)` con certificados FNMT, codificación y bloqueos, tablas PC-Axis, BOE, perfil de una empresa por NIF, CKAN y Socrata, un municipio entero en una llamada (padrón, renta, paro, contratos y criminalidad) y los indicadores de coyuntura (IPC, paro, PIB, Euríbor, prima de riesgo) ([guía](guides/servidor-mcp.md)).
-- **Claude Code**: `/plugin marketplace add BquantFinance/Administracion-fuentes-publicas` y `/plugin install fuentes-publicas@fuentes-publicas` instalan la skill y el servidor MCP de una vez. La skill sola, en [`plugins/fuentes-publicas/skills/fuentes-publicas/`](plugins/fuentes-publicas/skills/fuentes-publicas/SKILL.md) (copiar a `~/.claude/skills/`).
-- **Agente sin MCP**: [`llms-min.txt`](llms-min.txt) (7 KB) o [`llms.txt`](llms.txt); todo el catálogo en [`catalog.json`](catalog.json) o [`llms-full.txt`](llms-full.txt).
-- **Ejemplos que funcionan**: [`ejemplos/`](ejemplos/) (carburante más barato cerca, BOE del día, licitaciones nuevas por CPV, ficha de un municipio, subvenciones y perfil público de una empresa por NIF).
-- **Almacén local**: `python scripts/clientes/almacen.py sync --fuentes boe,borme,bdns,placsp,carburantes --desde 2026-09-01` baja esas fuentes a Parquet en tu carpeta y luego se pone al día solo; después, SQL con DuckDB para lo que las APIs no permiten: contratos por NIF del adjudicatario, BORME por denominación, precios por gasolinera y día ([guía](guides/almacen.md)). El repo no aloja datos.
-- **Código**: [`scripts/clientes/`](scripts/clientes/), en Python: una sesión HTTP que ya trae las CA de FNMT, User-Agent de navegador, reintentos y detección de bloqueos de WAF; clientes para CKAN, Socrata, PC-Axis, ArcGIS REST y OGC API que paginan sin topes silenciosos; y cargadores de BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex y Saiku. Probados contra respuestas reales.
+- **Con un agente (MCP)**: `uvx --from git+https://github.com/BquantFinance/Administracion-fuentes-publicas mcp-catalogo`, [![Instalar en Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/link/mcp/install?name=catalogo-fuentes-publicas&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJnaXQraHR0cHM6Ly9naXRodWIuY29tL0JxdWFudEZpbmFuY2UvQWRtaW5pc3RyYWNpb24tZnVlbnRlcy1wdWJsaWNhcyIsIm1jcC1jYXRhbG9nbyJdfQ%3D%3D), o en Claude Code `/plugin marketplace add BquantFinance/Administracion-fuentes-publicas` y `/plugin install fuentes-publicas@fuentes-publicas`. `buscar` encuentra la fuente, `ficha` da endpoints y trampas, y `perfil_municipio`, `coyuntura`, `empresa_nif` y el resto traen el dato ([herramientas](guides/servidor-mcp.md)).
+- **Con código**: `pip install "fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas"`. Clientes que ya resuelven certificados, codificaciones y paginación ([scripts/clientes](scripts/clientes/)), un almacén local en Parquet para lo que las APIs no dejan consultar ([guía](guides/almacen.md)) y [ejemplos](ejemplos/) que funcionan.
+- **Leyendo**: [`llms-min.txt`](llms-min.txt) para orientarse y la ficha de cada fuente en [`sources/`](sources/).
+
+## Qué puedes construir hoy
+
+Cada producto con piezas que ya funcionan; frescura, volumen medido, licencia y la trampa que más cuesta en [indices/productos.yaml](indices/productos.yaml). Antes de vender: [licencias, cita y datos personales](guides/reutilizacion.md).
+
+<!-- AUTO:productos -->
+| producto | para quién | fichas | piezas |
+|---|---|---|---|
+| **radar-licitaciones** · Avisos de licitaciones nuevas por CPV, provincia u órgano de contratación | pymes y consultoras que licitan con la Administración | placsp-datos-abiertos, dir3-directorio | ejemplos/licitaciones.py (solo lo nuevo por CPV y palabra); almacen.py sync --fuentes placsp para histórico y búsquedas |
+| **inteligencia-competidores** · Quién gana los contratos de un sector u órgano, a qué importe y contra cuántas ofertas | empresas que licitan, analistas de contratación pública, periodistas | placsp-datos-abiertos | almacen.py (tabla placsp_adjudicaciones y vista adjudicaciones_ultimo); ejemplos/adjudicaciones.py; herramienta almacen_sql |
+| **radar-ayudas** · Convocatorias de subvenciones nuevas que encajan con el perfil de una empresa (sector, región, tipo de beneficiario) | pymes, gestorías y consultoras de financiación pública | bdns-api, boe-api-sumario | scripts/clientes/bdns.py (convocatorias y concesiones paginadas, altas por fecha de alta); ejemplos/boe_hoy.py subvención |
+| **kyb-proveedores** · Ficha de riesgo de un proveedor o cliente por NIF (ayudas, contratos, actos mercantiles, prohibiciones de contratar) | departamentos de compras, fintech de crédito, compliance | bdns-api, placsp-datos-abiertos, borme-api-sumario, hacienda-registro-licitadores | herramienta empresa_nif y ejemplos/empresa_nif.py; con almacén local añade contratos adjudicados y actos del BORME |
+| **leads-sociedades-nuevas** · Sociedades recién constituidas por provincia y objeto social, con capital y domicilio | proveedores B2B (asesorías, bancos, software de gestión, seguros) | borme-api-sumario | almacen.py sync --fuentes borme (actos Constitución con objeto, domicilio y capital en detalle) |
+| **informe-ubicacion** · Informe de una localización (población, renta, paro, alquiler, criminalidad) para inmobiliarias, retail y franquicias | inmobiliarias, cadenas de retail y franquicias, proptech | ine-api-tempus, sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler, catastro-ovc | herramienta perfil_municipio y ejemplos/mi_municipio.py; datos/municipios.csv para pasar entre códigos |
+| **comparador-carburantes** · Gasolineras más baratas cerca y evolución de precios por estación para conductores y flotas | apps de movilidad, gestores de flotas, comparadores | minetur-precios-carburantes | ejemplos/carburante_cerca.py; almacen.py sync --fuentes carburantes para la serie diaria por estación |
+| **monitor-regulatorio** · Avisos de normas nuevas o modificadas por materia y del texto vigente de un artículo | despachos, compliance, legaltech | boe-api-sumario, boe-api-legislacion-consolidada, boe-eli | ejemplos/boe_hoy.py; scripts/clientes/boe.py (normas actualizadas ayer y versión vigente de un bloque) |
+| **panel-macro** · Panel de coyuntura (IPC, paro, PIB, Euríbor, prima de riesgo) para fintech, medios y asesores | fintech, medios, asesores financieros | ine-api-tempus, bde-estadisticas | herramienta coyuntura (consulta.coyuntura); los 90 ZIP del Banco de España con descarga condicional para series completas |
+| **precio-electricidad** · Precio de la electricidad por cuarto de hora para apps de ahorro, domótica y recarga de vehículos | apps de consumo, domótica, puntos de recarga | omie-mercado | ficha omie-mercado (ficheros marginalpdbc por día y ZIP anual) |
+| **buscador-medicamentos** · Buscador de medicamentos con presentaciones, prospecto y problemas de suministro | farmacias, healthtech, apps de pacientes | aemps-cima-api | ficha aemps-cima-api (API REST JSON sin clave) |
+| **agritech-parcelas** · Información de una parcela agrícola por coordenadas (uso, superficie, Red Natura, zonas vulnerables a nitratos) | agritech, cooperativas, aseguradoras agrarias | mapa-sigpac, catastro-ovc | scripts/clientes/ogc.py (recintos por bbox siguiendo next); consultas SIGPAC por punto de la ficha |
+<!-- /AUTO:productos -->
 
 ## Lo que no dice la documentación oficial
 
-Algunos ejemplos, verificados con llamadas reales:
+Algunos ejemplos, comprobados con llamadas reales:
 
-- La API del BOE responde 400 si no envías `Accept: application/json`, y la forma del sumario cambia según el día.
-- La exportación de la BDNS devuelve 50 filas aunque haya miles si no pasas `pageSize`, y no avisa.
-- Para filtrar un municipio, el INE no quiere su código (`02001`) sino un Id interno (`6124`).
+- La exportación de la BDNS devuelve 50 filas aunque haya miles si no pasas `pageSize`, y no avisa. Y para sincronizarla no sirve la fecha de concesión: las del 15/01/2025 se siguieron dando de alta hasta agosto de 2026 (el filtro bueno, `fechaRegInicio`, no está documentado).
+- Para filtrar un municipio, el INE no quiere su código (`02001`) sino un Id interno (`6124`). En SIGPAC y Catastro, Madrid es `28:900`, no `28079`, y otros 4.448 municipios cambian de número ([tabla de equivalencias](datos/municipios.csv)).
+- El IPC del último mes es un avance que se revisa, y el PIB que se publica es el corregido: 0,68 % trimestral en 2026T2 frente al 4,79 % de la serie sin corregir.
+- En el CSV del paro registrado del SEPE, Oza-Cesuras sale con 0 parados y Cerdedo-Cotobade no aparece: sus datos van con los códigos de antes de la fusión.
 - Muchos servidores `.gob.es` envían el certificado FNMT sin la intermedia: el navegador entra, `curl` y `requests` fallan ([arreglo](guides/cliente-http.md)).
-- AEMET responde en dos pasos, con el fichero en ISO-8859-15 y los errores dentro de un HTTP 200.
-- En SIGPAC el municipio es el código del Catastro, no el del INE: un punto de la Puerta del Sol devuelve `28:900`, no `28079`, y otros 4.448 municipios cambian de número. La traducción, con el Id interno que exige el INE Tempus, DIR3, NIF del ayuntamiento, NUTS3 y coordenadas, está en [`datos/municipios.csv`](datos/municipios.csv).
-- Los CSV de los portales PC-Axis de Educación, Cultura e Interior llegan en UTF-8 aunque la cabecera diga ISO-8859-15; leídos como Latin-1 salen «autÃ³noma».
-- Las concesiones de la BDNS caducan a los cuatro años y las de personas físicas al año siguiente: hoy no queda ninguna de 2021. Y 41,6 de los 95,8 millones de registros de GBIF en España son CC BY-NC, no aptos para un producto comercial ([licencias, cita literal y datos personales](guides/reutilizacion.md)).
-- Para sincronizar la BDNS no sirve filtrar por fecha de concesión: las del 15/01/2025 se siguieron dando de alta hasta agosto de 2026. El filtro por fecha de alta (`fechaRegInicio` y `fechaRegFin`, con el fin exclusivo) no está documentado. Las fichas clave traen `sync`: desde cuándo hay datos, cómo bajarlo todo, cuánto ocupa medido y cómo detectar lo nuevo.
-- En GBIF la encina ibérica es sobre todo *Quercus rotundifolia* (1,3 millones de registros en España); preguntar por *Quercus ilex*, que es lo que devuelve el buscador de nombres, da 21.322 sin ningún aviso.
+- Los CSV de los portales PC-Axis llegan en UTF-8 aunque la cabecera diga ISO-8859-15, y el del SEPE en Windows-1252 aunque diga UTF-8.
+- En GBIF la encina ibérica es sobre todo *Quercus rotundifolia* (1,3 millones de registros en España); preguntar por *Quercus ilex*, que es lo que devuelve el buscador de nombres, da 21.322 sin ningún aviso. Y 41,6 de sus 95,8 millones de registros en España son CC BY-NC.
 
 Fuentes catalogadas: <!-- AUTO:count -->95<!-- /AUTO:count -->. Alcance actual: Administración General del Estado y, desde octubre de 2026, las cuatro comunidades más pobladas (Madrid, Cataluña, Andalucía y Comunitat Valenciana) y los ayuntamientos de Madrid y Barcelona. Después: resto de comunidades y entidades locales, Cortes y Poder Judicial, Unión Europea.
 
@@ -87,9 +102,9 @@ sources/<sector>/README.md   índice del sector (generado)
 schema/source.schema.json    esquema de ficha
 schema/vocab.yaml            vocabulario controlado: sectores, acceso, auth, formatos
 catalog.json                 todo el catálogo (generado)
-llms.txt / llms-full.txt     entrada para agentes (generado)
-indices/*.yaml               recetas por intención, necesidades, identificadores, códigos que son parámetros, rutas muertas (fuente de verdad)
-indices/README.md            los cinco índices en texto (generado)
+llms-min.txt, llms.txt, llms-full.txt   entrada para agentes, de menos a más (generado)
+indices/*.yaml               productos, recetas por intención, necesidades, identificadores, códigos que son parámetros, rutas muertas (fuente de verdad)
+indices/README.md            los seis índices en texto (generado)
 ejemplos/                    proyectos pequeños que funcionan (carburante, BOE, licitaciones, municipio, subvenciones)
 plugins/, .claude-plugin/    plugin de Claude Code con la skill y el servidor MCP
 datos/municipios.csv         los 8.132 municipios con su código INE, Id del INE Tempus, SIGPAC y Catastro, DIR3, NIF, NUTS3 y coordenadas (scripts/municipios.py)
@@ -98,7 +113,7 @@ scripts/clientes/            sesión HTTP, clientes CKAN, Socrata, PC-Axis, ArcG
 scripts/clientes/muestras/   respuestas reales recortadas para probar los parsers sin red (python scripts/test_clientes.py)
 evals/                       24 tareas con respuesta esperada para medir lo que aporta el repo a un agente
 templates/source.yaml        plantilla de ficha
-guides/                      guías transversales (cliente HTTP, identificadores, servidor MCP, reutilización y datos personales)
+guides/                      guías transversales (cliente HTTP, identificadores, servidor MCP, reutilización y datos personales, almacén)
 ```
 
 ## Uso rápido
@@ -126,6 +141,7 @@ ckan.comparar("comunidad-madrid", rec)  # el datastore del padrón tiene 5.000 f
 
 Además de las fichas, `indices/` responde a las preguntas que se hacen antes de elegir una fuente:
 
+- **Productos**: qué se puede construir hoy, para quién y con qué piezas.
 - **Recetas por intención**: procedimientos verificados que encadenan fichas (de un NIF a sus subvenciones y contratos, de unas coordenadas a la referencia catastral, del sumario del BOE al texto consolidado). Cada receta lleva comprobaciones que `python scripts/check_recetas.py` ejecuta contra los servidores reales.
 - **Dónde está cada cosa**: necesidades habituales con la ficha que las resuelve y la nota que evita el desvío típico.
 - **Identificadores**: los códigos que cruzan datasets, con regex, ejemplo, emisor y vías verificadas de conversión.

@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "catalogo-fuentes-publicas",
   "display_name": "Catálogo de fuentes públicas de España",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Fuentes de datos públicos de España verificadas: endpoints, trampas, recetas, identificadores y códigos que exigen las APIs.",
   "author": {
     "name": "BquantFinance",
@@ -29,95 +29,67 @@
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/BquantFinance/Administracion-fuentes-publicas@v0.3.0",
+        "git+https://github.com/BquantFinance/Administracion-fuentes-publicas@v0.4.0",
         "mcp-catalogo"
       ]
     }
   },
   "tools": [
     {
-      "name": "buscar_fuentes",
-      "description": "Busca fichas por palabras y sector"
+      "name": "buscar",
+      "description": "Busca en todo el catálogo a la vez: fichas (con sus alerts), recetas que cruzan fuentes, necesidades habituales con la ficha que las resuelve y la nota que evita el desvío típico, productos que se pueden construir con sus piezas, e identificadores (formato, regex y cruces)."
     },
     {
       "name": "ficha",
-      "description": "Ficha completa de una fuente: endpoints, ejemplos, trampas"
-    },
-    {
-      "name": "buscar_recetas",
-      "description": "Busca procedimientos que cruzan fuentes"
+      "description": "Ficha completa de una fuente (alerts primero, endpoints con ejemplo y respuesta, sync, quirks, ids, gotchas, tips, related)."
     },
     {
       "name": "receta",
-      "description": "Pasos de una receta con ejemplos"
-    },
-    {
-      "name": "necesidad",
-      "description": "Qué fuente resuelve una necesidad habitual"
-    },
-    {
-      "name": "identificador",
-      "description": "Formato, regex y cruces de un identificador"
-    },
-    {
-      "name": "ruta_muerta",
-      "description": "Si una URL antigua ha muerto y su sustituta"
+      "description": "Receta completa: intent, inputs, steps (source, do, example), output, note y verified."
     },
     {
       "name": "codigos",
-      "description": "Códigos que las APIs exigen como parámetro"
-    },
-    {
-      "name": "municipio",
-      "description": "Códigos de un municipio en cada sistema: INE, SIGPAC y Catastro, DIR3 y NIF del ayuntamiento, CCAA, NUTS3 y coordenadas"
+      "description": "Códigos que una API exige como parámetro y no se adivinan (Id de municipio y provincia del INE para tv, países de DataComex, estación de AEMET por capital, productos de carburantes, rangos del BOE)."
     },
     {
       "name": "descargar",
-      "description": "Descarga cualquier URL pública con certificados FNMT, codificación y bloqueos resueltos, y la resume"
+      "description": "Descarga una URL pública con las reglas del catálogo (CA de FNMT, User-Agent de navegador, reintentos, gzip sin anunciar, UTF-8 o Latin-1 reales) y la resume: columnas y primeras filas de un CSV, claves de un JSON, hojas de un xlsx, ficheros de un ZIP."
     },
     {
       "name": "tabla_pcaxis",
-      "description": "Tablas PC-Axis del INE, Interior, Educación y Cultura en filas con números convertidos"
+      "description": "Tabla PC-Axis en filas con números ya convertidos (None es dato no disponible o secreto, no cero): id de tabla del INE (24077), URL Tabla.htm del INE, Interior, Educación o Cultura, o URL del fichero."
     },
     {
       "name": "boe_sumario",
-      "description": "Disposiciones de un día del BOE o del BORME, filtrables por sección y texto"
-    },
-    {
-      "name": "coyuntura",
-      "description": "Último IPC, paro EPA, PIB, paro registrado, Euríbor, dólar, deuda, bono a 10 años y prima de riesgo"
-    },
-    {
-      "name": "perfil_municipio",
-      "description": "Un municipio en una llamada: códigos, padrón, renta, paro registrado, contratos y criminalidad"
-    },
-    {
-      "name": "subvenciones_nif",
-      "description": "Subvenciones, ayudas de Estado y minimis de un NIF en la BDNS"
+      "description": "Disposiciones de un día del BOE (diario=boe) o del BORME (diario=borme); fecha AAAA-MM-DD."
     },
     {
       "name": "empresa_nif",
-      "description": "Lo público de una empresa o entidad por NIF: sector público, subvenciones, ayudas de la AEI, prohibiciones de contratar y, con almacén local, contratos y BORME"
+      "description": "Lo público de una empresa o entidad por NIF sin certificado: si es sector público (Invente, con DIR3), subvenciones, ayudas de Estado, minimis y grandes beneficiarios (BDNS, con totales), ayudas de la AEI y prohibiciones de contratar vigentes (por denominación)."
+    },
+    {
+      "name": "coyuntura",
+      "description": "Último dato de los indicadores de coyuntura de España en una llamada: IPC (variación anual y mensual, marcando si es avance), paro EPA, PIB (variación trimestral y anual corregidas), paro registrado, Euríbor, dólar, deuda PDE, bono a 10 años y prima de riesgo."
+    },
+    {
+      "name": "perfil_municipio",
+      "description": "Un municipio en una llamada (nombre, código INE, SIGPAC, DIR3 o NIF): sus códigos en cada sistema (INE con dígito de control, SIGPAC y Catastro, que numeran distinto, DIR3 y NIF del ayuntamiento, NUTS3, Id del INE Tempus y coordenadas), población del padrón, renta neta media, paro registrado y contratos del año por mes (SEPE) y criminalidad acumulada (Interior, más de 20.000 habitantes)."
     },
     {
       "name": "almacen_sql",
-      "description": "SQL de solo lectura sobre el almacén local en Parquet (BOE, BORME, BDNS, PLACSP, carburantes)"
+      "description": "SQL de solo lectura (DuckDB) sobre el almacén local en Parquet, si existe (FUENTES_ALMACEN o ./almacen): tablas boe, borme, bdns, placsp, placsp_adjudicaciones y carburantes, y vistas placsp_ultimo y adjudicaciones_ultimo (último estado de cada expediente)."
     },
     {
       "name": "ckan_buscar",
-      "description": "Conjuntos y recursos de los portales CKAN autonómicos, municipales y de la CNMC y Renfe"
+      "description": "Conjuntos de un portal CKAN con sus recursos (id, formato, si tiene datastore, url de descarga)."
     },
     {
       "name": "ckan_filas",
-      "description": "Filas de un datastore CKAN con filtros, sin topes silenciosos"
+      "description": "Filas del datastore de un recurso CKAN con filtros por igualdad ({\"Territorio\": \"Madrid\"}), paginando sin el tope silencioso del portal."
     },
     {
       "name": "socrata_filas",
-      "description": "Filas de un conjunto de datos de la Generalitat de Catalunya con SoQL"
-    },
-    {
-      "name": "sectores",
-      "description": "Sectores del catálogo con número de fichas"
+      "description": "Filas de un conjunto de la Generalitat de Catalunya (analisi.transparenciacatalunya.cat, id como gn9e-3qhr) con SoQL; números ya convertidos."
     }
   ],
   "compatibility": {

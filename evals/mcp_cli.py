@@ -8,7 +8,7 @@ Uso:
   python evals/mcp_cli.py                                   lista herramientas, parámetros y recursos
   python evals/mcp_cli.py HERRAMIENTA [clave=valor ...]     llama a la herramienta (los enteros se convierten)
   python evals/mcp_cli.py recurso NOMBRE                    lee catalogo://NOMBRE (llms.txt o reglas)
-Ejemplo: python evals/mcp_cli.py buscar_fuentes consulta="paro municipio" limite=5
+Ejemplo: python evals/mcp_cli.py buscar consulta="paro municipio" limite=5
 """
 import asyncio
 import json
