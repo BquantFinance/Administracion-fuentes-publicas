@@ -38,7 +38,7 @@ endpoints:
   - path: /concesiones/busqueda?page={n}&pageSize={n}
     desc: Concesiones con beneficiario, importe, ayuda equivalente, instrumento y convocatoria
     example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=50&numeroConvocatoria=931918"
-    params: "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa (concesión), fechaRegInicio y fechaRegFin (alta, fin exclusivo; también en minimis y ayudasestado), nifCif (NIF del beneficiario), beneficiario (idPersona interno, no el NIF)"
+    params: "numeroConvocatoria, fechaDesde y fechaHasta en dd/mm/aaaa (concesión), fechaRegInicio y fechaRegFin (alta, fin exclusivo), nifCif (NIF), beneficiario (idPersona, no el NIF)"
     returns: "content:[{id, codConcesion, fechaConcesion (AAAA-MM-DD), beneficiario (NIF y nombre en la misma cadena), idPersona, instrumento, importe y ayudaEquivalente (números), urlBR, numeroConvocatoria, convocatoria, nivel1, nivel2, nivel3, fechaAlta}]"
   - path: /{coleccion}/busqueda?page={n}&pageSize={n}
     desc: Mismo patrón para ayudasestado, minimis, grandesbeneficiarios, sanciones, planesestrategicos y partidospoliticos
