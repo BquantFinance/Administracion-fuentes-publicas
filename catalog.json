@@ -5215,11 +5215,15 @@
      "desc": "Mismo servicio en el entorno de pruebas"
     }
    ],
+   "quirks": [
+    "user-agent-browser"
+   ],
    "ids": [
     "dir3",
     "nif"
    ],
    "gotchas": [
+    "La API responde 403 al User-Agent por defecto de python-requests y 200 a curl o a uno de navegador (2026-10-01); con requests, fijar User-Agent.",
     "face.gob.es es desde el 27/02/2026 solo consulta histórica; el portal y la API viven en proveedores.face.gob.es. Las rutas /es/directorio/administraciones y /es/facturas/estadisticas de la ficha anterior ya no dan datos.",
     "Solo relations es público; statistics responde 401 y administrations, administraciones y nifs dan 404.",
     "page=0, limit=0 y limit mayor de 1000 devuelven 500 con cuerpo [] en vez de un objeto de error; relations.json da 404, el JSON se pide sin extensión.",
