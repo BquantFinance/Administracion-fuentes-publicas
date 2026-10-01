@@ -309,7 +309,8 @@ def _numero_es(v: str) -> float:
 def empresa_nif(nif: str, max_filas: int = 10) -> dict:
     """Lo que las fuentes públicas dicen de un NIF sin certificado: si es sector público (Invente), subvenciones,
     ayudas de Estado y minimis (BDNS), ayudas de la AEI y prohibiciones de contratar vigentes (por denominación, porque
-    el XML oculta el NIF). Contratos y actos del BORME no tienen consulta por NIF: ver no_cubierto."""
+    el XML oculta el NIF). Contratos y actos del BORME no tienen consulta por NIF: salen del almacén local si existe
+    (FUENTES_ALMACEN o ./almacen, clave almacen) y si no, no_cubierto dice cómo cargarlos."""
     import xml.etree.ElementTree as ET
     nif = nif.upper().strip()
     out: dict = {"nif": nif}
@@ -339,9 +340,22 @@ def empresa_nif(nif: str, max_filas: int = 10) -> dict:
                 prohibiciones.append({k: d.get(k) for k in ("denominacionSocial", "causaProhibicion", "ambitoProhibicion",
                                                             "autoridad", "fechaInicioProhibicion", "fechaFinProhibicion")})
     out["prohibiciones_contratar"] = prohibiciones
+    try:
+        from . import almacen
+    except ImportError:
+        import almacen
+    cargar = "cargarlo en el almacén local: python scripts/clientes/almacen.py sync --fuentes placsp,borme --desde AAAA-MM-DD (guides/almacen.md)"
+    d = almacen.existe()
+    if d:
+        try:
+            out["almacen"] = almacen.empresa(nif, d, nombre, max_filas)
+        except ImportError as exc:
+            out["almacen"] = {"error": str(exc)}
     out["no_cubierto"] = {
-        "contratos": "PLACSP no tiene búsqueda por NIF: filtrar adjudicatarios (cbc:ID schemeName NIF) en los ZIP mensuales (ficha placsp-datos-abiertos)",
-        "borme": "el BORME no trae NIF ni búsqueda: recorrer los BORME-A por denominación (ficha borme-api-sumario)",
+        "contratos": ("solo lo cargado en el almacén (almacen.cobertura)" if d else
+                      "PLACSP no tiene búsqueda por NIF: " + cargar),
+        "borme": ("solo lo cargado en el almacén, por denominación" if d else
+                  "el BORME no trae NIF ni búsqueda por denominación: " + cargar),
         "concursos": "publicidadconcursal.es busca por NIF, pero exige resolver un CAPTCHA",
         "deudores_aeat": "la lista del art. 95 bis LGT (deudas de más de 600.000 €) solo es accesible tres meses tras publicarse, en junio",
     }

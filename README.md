@@ -19,6 +19,7 @@ Catálogo de fuentes de datos de la Administración pública española para desa
 - **Claude Code**: `/plugin marketplace add BquantFinance/Administracion-fuentes-publicas` y `/plugin install fuentes-publicas@fuentes-publicas` instalan la skill y el servidor MCP de una vez. La skill sola, en [`plugins/fuentes-publicas/skills/fuentes-publicas/`](plugins/fuentes-publicas/skills/fuentes-publicas/SKILL.md) (copiar a `~/.claude/skills/`).
 - **Agente sin MCP**: [`llms-min.txt`](llms-min.txt) (7 KB) o [`llms.txt`](llms.txt); todo el catálogo en [`catalog.json`](catalog.json) o [`llms-full.txt`](llms-full.txt).
 - **Ejemplos que funcionan**: [`ejemplos/`](ejemplos/) (carburante más barato cerca, BOE del día, licitaciones nuevas por CPV, ficha de un municipio, subvenciones y perfil público de una empresa por NIF).
+- **Almacén local**: `python scripts/clientes/almacen.py sync --fuentes boe,borme,bdns,placsp,carburantes --desde 2026-09-01` baja esas fuentes a Parquet en tu carpeta y luego se pone al día solo; después, SQL con DuckDB para lo que las APIs no permiten: contratos por NIF del adjudicatario, BORME por denominación, precios por gasolinera y día ([guía](guides/almacen.md)). El repo no aloja datos.
 - **Código**: [`scripts/clientes/`](scripts/clientes/), en Python: una sesión HTTP que ya trae las CA de FNMT, User-Agent de navegador, reintentos y detección de bloqueos de WAF; clientes para CKAN, Socrata, PC-Axis, ArcGIS REST y OGC API que paginan sin topes silenciosos; y cargadores de BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex y Saiku. Probados contra respuestas reales.
 
 ## Lo que no dice la documentación oficial
@@ -93,7 +94,7 @@ ejemplos/                    proyectos pequeños que funcionan (carburante, BOE,
 plugins/, .claude-plugin/    plugin de Claude Code con la skill y el servidor MCP
 datos/municipios.csv         los 8.132 municipios con su código INE, Id del INE Tempus, SIGPAC y Catastro, DIR3, NIF, NUTS3 y coordenadas (scripts/municipios.py)
 scripts/                     validate.py, build.py, check_links.py, check_recetas.py, check_ejemplos.py, fnmt_bundle.py, mcp_catalogo.py (servidor MCP local)
-scripts/clientes/            sesión HTTP, clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC, y cargadores (BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex, Saiku)
+scripts/clientes/            sesión HTTP, clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC, cargadores (BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex, Saiku) y almacén local en Parquet
 scripts/clientes/muestras/   respuestas reales recortadas para probar los parsers sin red (python scripts/test_clientes.py)
 evals/                       24 tareas con respuesta esperada para medir lo que aporta el repo a un agente
 templates/source.yaml        plantilla de ficha

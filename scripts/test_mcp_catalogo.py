@@ -16,7 +16,7 @@ from mcp.client.stdio import stdio_client
 ROOT = Path(__file__).resolve().parent.parent
 SERVER = ROOT / "scripts" / "mcp_catalogo.py"
 TOOLS = {"buscar_fuentes", "ficha", "buscar_recetas", "receta", "necesidad", "identificador", "ruta_muerta", "sectores", "codigos", "municipio", "descargar", "tabla_pcaxis", "boe_sumario",
-         "subvenciones_nif", "empresa_nif", "ckan_buscar", "ckan_filas", "socrata_filas"}
+         "subvenciones_nif", "empresa_nif", "ckan_buscar", "ckan_filas", "socrata_filas", "almacen_sql"}
 
 
 def payload(result):
@@ -101,6 +101,9 @@ async def main() -> None:
             print(f"empresa_nif('Q1132001G'): {emp['nombre']}, {emp['subvenciones']['concesiones']['total']} concesiones, {emp['aei']['total']} ayudas AEI")
             bloq = payload(await session.call_tool("descargar", {"url": "http://localhost:8080/"}))
             assert "error" in bloq, bloq
+            alm = payload(await session.call_tool("almacen_sql", {"consulta": "select 1 as uno"}))
+            assert alm.get("filas") == [[1]] or "almacén" in alm.get("error", ""), alm  # con o sin almacén local
+            print(f"almacen_sql: {alm.get('filas') or alm['error']}")
             print(f"descargar: {d['formato']} con fichas {[f['id'] for f in d['fichas']][:2]}; tabla_pcaxis 24077: {px['filas'][0]}")
             secs = payload(await session.call_tool("sectores", {}))
             assert sum(s["sources"] for s in secs) == catalog["count"]

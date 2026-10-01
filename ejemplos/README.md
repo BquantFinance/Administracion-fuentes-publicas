@@ -13,6 +13,7 @@ también desde cualquier sitio.
 | `python ejemplos/mi_municipio.py "Alcalá de Henares"` | códigos, padrón, renta y criminalidad de un municipio | INE, Interior, municipios |
 | `python ejemplos/subvenciones_empresa.py Q1132001G` | ayudas de una empresa o entidad por NIF, por año y concedente | BDNS |
 | `python ejemplos/empresa_nif.py A02066116` | perfil público de un NIF: sector público, BDNS, AEI y prohibiciones de contratar | Invente, BDNS, AEI, ROLECE |
+| `python ejemplos/adjudicaciones.py 3 72` | mayores adjudicaciones de los últimos días y quién más suma, en el almacén local (duckdb) | PLACSP |
 
 Salida de `mi_municipio.py "Alcalá de Henares"` el 2026-10-01:
 

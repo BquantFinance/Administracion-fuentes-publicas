@@ -78,6 +78,7 @@ jobs:
           ejecutar ejemplos/subvenciones_empresa.py Q1132001G
           ejecutar ejemplos/empresa_nif.py A02066116
           ejecutar ejemplos/licitaciones.py 45
+          ejecutar ejemplos/adjudicaciones.py 1
           if [ -n "$AEMET_KEY" ]; then ejecutar scripts/clientes/aemet.py 16078; else echo "AEMET sin clave: omitido" >> cargadores-report.md; fi
           cat cargadores-report.md
           echo "exit=$fallos" >> "$GITHUB_OUTPUT"

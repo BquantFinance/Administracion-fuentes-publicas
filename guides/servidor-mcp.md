@@ -81,7 +81,10 @@ añadir a la configuración del cliente `"env": {"EXTRA_CA_BUNDLE": "/ruta/ca-de
 - `boe_sumario(fecha, diario="boe", seccion=None, texto=None)`: disposiciones del día del BOE o del BORME.
 - `subvenciones_nif(nif)`: concesiones, ayudas de Estado, minimis y grandes beneficiarios de un NIF en la BDNS.
 - `empresa_nif(nif)`: perfil público de un NIF: si es sector público (Invente, con DIR3), BDNS, ayudas de la AEI y
-  prohibiciones de contratar vigentes; `no_cubierto` dice dónde están contratos, BORME, concursos y deudores.
+  prohibiciones de contratar vigentes; con almacén local, también contratos adjudicados y actos del BORME; `no_cubierto`
+  dice dónde está lo demás.
+- `almacen_sql(consulta, limite=100)`: SQL de solo lectura sobre el almacén local en Parquet (BOE, BORME, BDNS, PLACSP y
+  carburantes) si existe; necesita el extra `[almacen]` (duckdb) y una carga previa (`guides/almacen.md`).
 - `ckan_buscar(portal, texto)` y `ckan_filas(portal, recurso, filtros=None, limite=100)`: portales CKAN (comunidad-madrid,
   madrid, barcelona, gva, andalucia, cnmc, renfe o la URL de su API), paginando sin topes y con el total del datastore.
 - `socrata_filas(conjunto, where=None, select=None, order=None, limite=100)`: datos de la Generalitat de Catalunya.

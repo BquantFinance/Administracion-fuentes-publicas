@@ -10,3 +10,6 @@ build/
 *.egg-info/
 dist/
 __pycache__/
+
+# almacén local de datos (scripts/clientes/almacen.py): nunca al repo
+almacen/

@@ -5,6 +5,7 @@ Uso: python scripts/clientes/placsp.py [paginas]
 from __future__ import annotations
 
 import os
+import re
 import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
@@ -32,12 +33,54 @@ def _t(el, path: str):
     return n.text.strip() if n is not None and n.text else None
 
 
+def _ids(party) -> dict:
+    """IDs de una parte por schemeName (DIR3, NIF, ID_PLATAFORMA, ID_OC_PLAT, OTROS)."""
+    if party is None:
+        return {}
+    return {i.get("schemeName"): i.text.strip() for i in party.findall("cac:PartyIdentification/cbc:ID", NS) if i.text}
+
+
+def nif_normal(nif: str | None) -> str | None:
+    """El NIF del adjudicatario llega a veces con guion, puntos, espacios o en minúscula: B-12345678 -> B12345678."""
+    return re.sub(r"[\s.\-]", "", nif).upper() or None if nif else None
+
+
+def es_persona_fisica(nif: str | None) -> bool:
+    """DNI o NIE (12345678Z, X1234567L) o NIF enmascarado (***1234**)."""
+    return bool(nif) and ("*" in nif or bool(re.fullmatch(r"\d{8}[A-Z]|[XYZ]\d{7}[A-Z]", nif)))
+
+
+def adjudicaciones(cfs) -> list[dict]:
+    """Una fila por TenderResult y adjudicatario: lote, resultado, fecha, ofertas, pyme, NIF, nombre e importes (sin IVA
+    TaxExclusiveAmount, con IVA PayableAmount). Una UTE puede traer varios WinningParty en el mismo resultado."""
+    out = []
+    for tr in cfs.findall("cac:TenderResult", NS):
+        base = {
+            "lote": _t(tr, "cac:AwardedTenderedProject/cbc:ProcurementProjectLotID"),
+            "resultado": _t(tr, "cbc:ResultCode"),
+            "fecha_adjudicacion": _t(tr, "cbc:AwardDate"),
+            "ofertas": _t(tr, "cbc:ReceivedTenderQuantity"),
+            "pyme": _t(tr, "cbc:SMEAwardedIndicator"),
+            "importe_sin_iva": _t(tr, "cac:AwardedTenderedProject/cac:LegalMonetaryTotal/cbc:TaxExclusiveAmount"),
+            "importe_total": _t(tr, "cac:AwardedTenderedProject/cac:LegalMonetaryTotal/cbc:PayableAmount"),
+        }
+        ganadores = tr.findall("cac:WinningParty", NS) or [None]
+        for wp in ganadores:
+            ident = wp.find("cac:PartyIdentification/cbc:ID", NS) if wp is not None else None
+            out.append(dict(base, nif=nif_normal(ident.text) if ident is not None and ident.text else None,
+                            nif_esquema=ident.get("schemeName") if ident is not None else None,
+                            nombre=_t(wp, "cac:PartyName/cbc:Name") if wp is not None else None))
+    return out
+
+
 def parse_entry(entry) -> dict:
-    """Campos clave del CODICE de una entrada: expediente, estado, órgano (DIR3), objeto, importes, CPV, NUTS, plazo."""
+    """Campos clave del CODICE de una entrada: expediente, estado, órgano (DIR3 y NIF), objeto, importes, valor estimado,
+    procedimiento, CPV, NUTS, plazo y adjudicaciones."""
     cfs = entry.find("ext:ContractFolderStatus", NS)
     if cfs is None:
         return {"id": _t(entry, "a:id"), "title": _t(entry, "a:title"), "updated": _t(entry, "a:updated"), "deleted": True}
     party = cfs.find("ext:LocatedContractingParty/cac:Party", NS)
+    ids = _ids(party)
     return {
         "id": _t(entry, "a:id"),
         "updated": _t(entry, "a:updated"),
@@ -45,15 +88,20 @@ def parse_entry(entry) -> dict:
         "expediente": _t(cfs, "cbc:ContractFolderID"),
         "estado": _t(cfs, "extb:ContractFolderStatusCode"),
         "organo": _t(party, "cac:PartyName/cbc:Name") if party is not None else None,
-        "organo_dir3": _t(party, "cac:PartyIdentification/cbc:ID") if party is not None else None,
+        "organo_dir3": ids.get("DIR3") or (next(iter(ids.values())) if ids else None),
+        "organo_nif": nif_normal(ids.get("NIF")),
+        "organo_plataforma": ids.get("ID_PLATAFORMA") or ids.get("ID_OC_PLAT"),
         "objeto": _t(cfs, "cac:ProcurementProject/cbc:Name"),
         "tipo": _t(cfs, "cac:ProcurementProject/cbc:TypeCode"),
+        "procedimiento": _t(cfs, "cac:TenderingProcess/cbc:ProcedureCode"),
         "importe_sin_iva": _t(cfs, "cac:ProcurementProject/cac:BudgetAmount/cbc:TaxExclusiveAmount"),
         "importe_total": _t(cfs, "cac:ProcurementProject/cac:BudgetAmount/cbc:TotalAmount"),
+        "valor_estimado": _t(cfs, "cac:ProcurementProject/cac:BudgetAmount/cbc:EstimatedOverallContractAmount"),
         "cpv": [c.text for c in cfs.findall("cac:ProcurementProject/cac:RequiredCommodityClassification/cbc:ItemClassificationCode", NS)],
         "nuts": _t(cfs, "cac:ProcurementProject/cac:RealizedLocation/cbc:CountrySubentityCode"),
         "plazo_presentacion": _t(cfs, "cac:TenderingProcess/cac:TenderSubmissionDeadlinePeriod/cbc:EndDate"),
         "fecha_publicacion": _t(cfs, "ext:ValidNoticeInfo/ext:AdditionalPublicationStatus/ext:AdditionalPublicationDocumentReference/cbc:IssueDate"),
+        "adjudicaciones": adjudicaciones(cfs),
     }
 
 

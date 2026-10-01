@@ -33,6 +33,15 @@ def main(nif: str) -> None:
     print(f"  AEI: {e['aei']['total']} ayudas, {eur(e['aei']['importe_total'])}")
     print(f"  Prohibiciones de contratar vigentes: {len(e['prohibiciones_contratar'])}"
           + "".join(f"\n    {p['autoridad']} hasta {p['fechaFinProhibicion']}: {p['causaProhibicion'][:70]}" for p in e["prohibiciones_contratar"]))
+    a = e.get("almacen")
+    if a and "contratos" in a:
+        c = a["contratos"]
+        print(f"  Almacén local: {c['n']} contratos adjudicados ({eur(c['importe_sin_iva'] or 0)} sin IVA)"
+              + "".join(f"\n    {r['fecha_adjudicacion']} {eur(r['importe_sin_iva'] or 0):>14}  {(r['organo'] or '')[:30]} | {(r['objeto'] or '')[:50]}" for r in c["recientes"][:3]))
+        if a.get("borme"):
+            actos = a["borme"]["actos"]
+            print(f"  BORME ({a['borme']['denominacion_buscada']}): "
+                  + ("; ".join(f"{b['fecha']} {', '.join(b['actos'])}" for b in actos[:5]) if actos else "sin actos en lo cargado"))
     print("  Sin consulta por NIF:")
     for k, v in e["no_cubierto"].items():
         print(f"    {k}: {v}")

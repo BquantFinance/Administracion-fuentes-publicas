@@ -59,6 +59,7 @@ python scripts/check_ejemplos.py  # ejecuta el example de cada endpoint de las f
 python scripts/test_clientes.py   # parsers y clientes de scripts/clientes contra las muestras reales, sin red (corre en CI)
 python scripts/municipios.py      # regenera datos/municipios.csv (INE, SIGPAC, DIR3, IGN; necesita red, un minuto)
 python scripts/fnmt_bundle.py     # genera ca-age.pem (certifi + CA de FNMT) para los hosts con cadena incompleta
+python scripts/clientes/almacen.py sync --fuentes placsp --desde AAAA-MM-DD   # almacén local en Parquet (duckdb, red; guides/almacen.md)
 python scripts/mcp_catalogo.py    # servidor MCP por stdio sobre catalog.json (guides/servidor-mcp.md); prueba real con test_mcp_catalogo.py, fuera de CI
 ```
 
@@ -218,8 +219,12 @@ Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
 - Hecho el 2026-10-01 (segunda sesión): campo `sync` medido en nueve fichas (BOE, BORME, legislación consolidada,
   BDNS, PLACSP, INE Tempus, carburantes, Banco de España, SEPE). La BDNS filtra por fecha de alta con fechaRegInicio y
   fechaRegFin (fin exclusivo, sin documentar), lo único que no pierde las concesiones dadas de alta tarde.
-- Siguiente trabajo, en este orden: (5) almacén en Parquet o DuckDB con GitHub Actions listo para clonar. Del
-  propietario: release v0.3.0, ronda desde una IP residencial, token de DataComex y más comunidades cuando lo decida.
+- Hecho el 2026-10-01 (segunda sesión): almacén local (`scripts/clientes/almacen.py`, `guides/almacen.md`, herramienta
+  MCP `almacen_sql`, `ejemplos/adjudicaciones.py`). Por decisión del propietario, solo el script: el repo no aloja datos
+  ni publica releases de datos, y `almacen/` está en `.gitignore`. Parquet por tabla y mes con BOE, BORME (tipo de acto
+  y texto solo de los actos sin nombres), BDNS por fecha de alta, PLACSP con adjudicaciones (NIF y nombre fuera si es
+  persona física) y carburantes; `empresa_nif` añade contratos y BORME si hay almacén.
+- Siguiente trabajo: lo que indique el propietario. Del propietario: release v0.3.0, ronda desde una IP residencial, token de DataComex y más comunidades cuando lo decida.
 
 ## Lo que no se hace
 

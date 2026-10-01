@@ -13,6 +13,7 @@ dependencies = ["mcp>=1.0", "pyyaml>=6.0", "requests>=2.31", "certifi>=2024.2", 
 
 [project.optional-dependencies]
 clientes = []  # compatibilidad: los clientes ya van en la instalación base
+almacen = ["duckdb>=1.1"]  # scripts/clientes/almacen.py, herramienta almacen_sql
 
 [project.urls]
 Repository = "https://github.com/BquantFinance/Administracion-fuentes-publicas"
@@ -21,6 +22,7 @@ Documentation = "https://github.com/BquantFinance/Administracion-fuentes-publica
 [project.scripts]
 mcp-catalogo = "fuentes_publicas.mcp_catalogo:main"
 fuentes-publicas-mcp = "fuentes_publicas.mcp_catalogo:main"
+fuentes-almacen = "fuentes_publicas.clientes.almacen:main"
 
 [tool.setuptools]
 packages = ["fuentes_publicas", "fuentes_publicas.clientes"]

@@ -89,7 +89,11 @@
     },
     {
       "name": "empresa_nif",
-      "description": "Lo público de una empresa o entidad por NIF: sector público, subvenciones, ayudas de la AEI y prohibiciones de contratar"
+      "description": "Lo público de una empresa o entidad por NIF: sector público, subvenciones, ayudas de la AEI, prohibiciones de contratar y, con almacén local, contratos y BORME"
+    },
+    {
+      "name": "almacen_sql",
+      "description": "SQL de solo lectura sobre el almacén local en Parquet (BOE, BORME, BDNS, PLACSP, carburantes)"
     },
     {
       "name": "ckan_buscar",

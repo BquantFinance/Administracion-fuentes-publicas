@@ -364,8 +364,28 @@ def subvenciones_nif(nif: str, max_filas: int = 20) -> dict:
 def empresa_nif(nif: str, max_filas: int = 10) -> dict:
     """Lo público de una empresa o entidad por NIF sin certificado: si es sector público (Invente, con DIR3),
     subvenciones, ayudas de Estado y minimis (BDNS), ayudas de la AEI y prohibiciones de contratar vigentes (por
-    denominación). no_cubierto dice dónde mirar contratos, BORME, concursos y deudores."""
+    denominación). Con almacén local, también contratos adjudicados y actos del BORME (clave almacen); no_cubierto dice
+    dónde mirar lo demás."""
     return _datos(_consulta().empresa_nif, nif, max_filas)
+
+
+@mcp.tool()
+def almacen_sql(consulta: str, limite: int = 100) -> dict:
+    """SQL de solo lectura (DuckDB) sobre el almacén local en Parquet, si existe (FUENTES_ALMACEN o ./almacen): tablas
+    boe, borme, bdns, placsp, placsp_adjudicaciones y carburantes, y vistas placsp_ultimo y adjudicaciones_ultimo
+    (último estado de cada expediente). Devuelve columnas, filas y cobertura (solo está lo cargado). Sin almacén, dice
+    cómo crearlo; empresa_nif lo usa solo para contratos y BORME."""
+    def _ejecutar():
+        try:
+            from .clientes import almacen
+        except ImportError:
+            from clientes import almacen
+        d = almacen.existe()
+        if not d:
+            return {"error": "no hay almacén local", "pista": "python scripts/clientes/almacen.py sync --fuentes boe,borme,bdns,placsp "
+                    "--desde AAAA-MM-DD (guides/almacen.md); FUENTES_ALMACEN apunta a otra carpeta"}
+        return dict(almacen.sql(consulta, d, limite), cobertura=almacen.cobertura(d))
+    return _datos(_ejecutar)
 
 
 @mcp.tool()

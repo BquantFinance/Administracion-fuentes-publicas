@@ -16,7 +16,8 @@ Catálogo verificado con llamadas reales: https://github.com/BquantFinance/Admin
    (acumulados desde enero, topes de filas sin aviso, datastores recortados, taxones o códigos que no son el esperado).
    Aplica la operación que indican antes de responder.
 3. Trae el dato. Con MCP: `descargar(url)` (certificados FNMT, codificación, bloqueos y resumen del CSV, JSON, xlsx o
-   ZIP), `tabla_pcaxis`, `boe_sumario`, `subvenciones_nif`, `empresa_nif`, `ckan_buscar`, `ckan_filas`, `socrata_filas`, `municipio`.
+   ZIP), `tabla_pcaxis`, `boe_sumario`, `subvenciones_nif`, `empresa_nif`, `ckan_buscar`, `ckan_filas`, `socrata_filas`, `municipio`, y `almacen_sql` si el usuario tiene
+   almacén local (contratos por NIF, BORME por denominación, series de carburantes; `guides/almacen.md`).
    En Python, los mismos clientes (abajo). Con curl, el `example` de cada endpoint de la ficha.
 4. Si cruzas fuentes, busca una receta (`buscar_recetas` o `.../main/indices/recetas.yaml`) y el identificador común
    (`identificador(id)`): suelen encadenar dos o tres fichas con un paso que no es obvio.
@@ -28,7 +29,7 @@ pip install "fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Adminis
 ```
 
 ```python
-from fuentes_publicas.clientes import consulta, ckan, socrata, pcaxis, arcgis, ogc, boe, bdns, ine_tempus, placsp
+from fuentes_publicas.clientes import consulta, ckan, socrata, pcaxis, arcgis, ogc, boe, bdns, ine_tempus, placsp, almacen
 from fuentes_publicas.clientes.sesion import sesion, texto   # requests.Session con todo lo de abajo resuelto
 
 consulta.descargar(url)                      # dict: estado, formato, resumen, texto
@@ -37,6 +38,8 @@ pcaxis.tabla(24077)                          # tablas PC-Axis (INE, Interior, Ed
 list(ckan.filas("cnmc", resource_id))        # todas las filas aunque el portal recorte limit
 list(socrata.filas("gn9e-3qhr"))             # Generalitat: todas, no las 1.000 por defecto
 ine_tempus.id_municipio("28079")             # el INE filtra por Id interno (tv=19:Id), no por el código
+# almacén local en Parquet (pip install duckdb; cargar con fuentes-almacen sync --fuentes placsp --desde AAAA-MM-DD)
+almacen.sql("select nif, nombre, sum(importe_sin_iva) from adjudicaciones_ultimo group by all order by 3 desc limit 5")
 ```
 
 Ejemplos que funcionan, en `ejemplos/` del repo: carburante más barato cerca, BOE del día filtrado, licitaciones nuevas

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import sys
+import tempfile
 import traceback
 import xml.etree.ElementTree as ET
 from datetime import date
@@ -20,6 +21,7 @@ M = DIR / "muestras"
 sys.path.insert(0, str(DIR))
 
 import aemet  # noqa: E402
+import almacen  # noqa: E402
 import arcgis  # noqa: E402
 import bdns  # noqa: E402
 import boe  # noqa: E402
@@ -204,6 +206,58 @@ def placsp_feed_y_anulaciones():
     assert obra["importe_sin_iva"] == "98030.3" and obra["organo_dir3"]
     fechas = [e["updated"] for e in entradas]
     assert fechas == sorted(fechas, reverse=True)
+
+
+@test
+def placsp_adjudicaciones_y_organo():
+    entradas, _ = placsp.parse_feed((M / "placsp-feed-643.atom").read_bytes())
+    obra = next(e for e in entradas if not e.get("deleted") and e["cpv"][0].startswith("45"))
+    assert obra["organo_nif"] == "P2807900B" and obra["organo_dir3"] == "LA0000765" and obra["valor_estimado"] == "98030.3"
+    adj = obra["adjudicaciones"][0]
+    assert adj["nif"] == "A27178789" and adj["importe_total"] == "118616.66" and adj["fecha_adjudicacion"] == "2026-09-30"
+    assert placsp.nif_normal(" b-12.345.678 ") == "B12345678"
+    assert placsp.es_persona_fisica("***1234**") and placsp.es_persona_fisica("X1234567L") and not placsp.es_persona_fisica("B12345678")
+
+
+@test
+def almacen_filas_sin_datos_personales():
+    entradas, _ = placsp.parse_feed((M / "placsp-feed-643.atom").read_bytes())
+    t = almacen.filas_placsp(entradas, "643")
+    assert all(f["updated"] and "+" not in f["updated"] for f in t["placsp"])  # UTC sin zona
+    assert any(a["nif"] == "A27178789" and a["importe_sin_iva"] == 98030.3 for a in t["placsp_adjudicaciones"])
+    f = almacen.fila_bdns({"idConcesion": 1, "beneficiario": "***5550** NOMBRE APELLIDO", "fechaRegistro": "2026-09-29",
+                           "ayudaEquivalente": 7200, "idPersona": 5}, "minimis")
+    assert f["persona_fisica"] and f["nif"] is None and f["beneficiario"] is None and f["id_persona"] is None
+    assert f["fecha_alta"] == "2026-09-29" and f["ayuda_equivalente"] == 7200.0
+    emp = boe.parse_borme_a(xml("borme-A-2026-189-28.xml"))
+    filas = [almacen.fila_borme(e, "2026-09-30", "BORME-A-2026-189-28", "MADRID") for e in emp]
+    con_nombres = [a["texto"] for e in emp for a in e["actos"] if a["tipo"] not in almacen.ACTOS_CON_TEXTO and a["texto"]]
+    assert con_nombres and not any(x in (f["detalle"] or "") for x in con_nombres for f in filas)
+    assert all(f["actos"] for f in filas)
+
+
+@test
+def almacen_volcado_y_solo_lectura():
+    try:
+        import duckdb  # noqa: F401
+    except ImportError:
+        print("      (sin duckdb: se omite)")
+        return
+    with tempfile.TemporaryDirectory() as d:
+        alm = almacen.Almacen(d)
+        alm.añadir({"boe": [{"fecha": "2026-09-30", "identificador": "BOE-A-2026-1", "titulo": "viejo"}]})
+        alm.volcar()
+        alm.añadir({"boe": [{"fecha": "2026-09-30", "identificador": "BOE-A-2026-1", "titulo": "nuevo"},
+                            {"fecha": "2026-10-01", "identificador": "BOE-A-2026-2", "titulo": "x"}]})
+        alm.volcar()
+        r = almacen.sql("select identificador, titulo from boe order by 1", d)
+        assert r["filas"] == [["BOE-A-2026-1", "nuevo"], ["BOE-A-2026-2", "x"]]
+        assert sorted(p.name for p in Path(d, "boe").glob("*.parquet")) == ["2026-09.parquet", "2026-10.parquet"]
+        try:
+            almacen.sql("select * from read_csv('/etc/passwd')", d)
+            raise AssertionError("leyó fuera del almacén")
+        except duckdb.Error as exc:
+            assert "disabled" in str(exc)
 
 
 def respuesta(cuerpo: bytes, tipo: str = "application/json", estado: int = 200, url: str = "https://x.gob.es/a"):
