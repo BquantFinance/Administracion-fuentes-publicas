@@ -1,10 +1,26 @@
 # Administración fuentes públicas
 
+[![CI](https://github.com/BquantFinance/Administracion-fuentes-publicas/actions/workflows/ci.yml/badge.svg)](https://github.com/BquantFinance/Administracion-fuentes-publicas/actions/workflows/ci.yml) [![Licencia CC0](https://img.shields.io/badge/licencia-CC0%201.0-blue)](LICENSE)
+
 *Spanish public-sector data sources, catalogued for AI agents and developers: verified endpoints, response shapes, pitfalls, and recipes. Start at `llms.txt`.*
 
-Catálogo de fuentes de datos de la Administración pública española, pensado para desarrolladores y agentes de IA que construyen sobre datos públicos: APIs, descargas, feeds, servicios geográficos y registros.
+Catálogo de fuentes de datos de la Administración pública española para desarrolladores y agentes de IA: qué hay, dónde está, cómo se llama, qué devuelve y qué falla. Cada endpoint se prueba con una llamada real y cada trampa lleva la fecha en que se comprobó.
 
-**Para agentes:** empieza por [`llms.txt`](llms.txt). Todo el catálogo cabe en [`catalog.json`](catalog.json) o en [`llms-full.txt`](llms-full.txt).
+## Empieza aquí
+
+- **Agente con MCP** (Claude, Cursor y cualquier cliente MCP): `uvx --from git+https://github.com/BquantFinance/Administracion-fuentes-publicas mcp-catalogo`, o [![Instalar en Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/link/mcp/install?name=catalogo-fuentes-publicas&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJnaXQraHR0cHM6Ly9naXRodWIuY29tL0JxdWFudEZpbmFuY2UvQWRtaW5pc3RyYWNpb24tZnVlbnRlcy1wdWJsaWNhcyIsIm1jcC1jYXRhbG9nbyJdfQ%3D%3D). Carga solo la ficha que hace falta ([guía](guides/servidor-mcp.md)).
+- **Agente sin MCP**: [`llms-min.txt`](llms-min.txt) (7 KB) o [`llms.txt`](llms.txt); todo el catálogo en [`catalog.json`](catalog.json) o [`llms-full.txt`](llms-full.txt).
+- **Código**: cargadores en Python que ya resuelven las trampas en [`scripts/clientes/`](scripts/clientes/) (BOE y BORME, BDNS, AEMET, INE, PLACSP, DataComex, Saiku), probados contra respuestas reales.
+
+## Lo que no dice la documentación oficial
+
+Algunos ejemplos, verificados con llamadas reales:
+
+- La API del BOE responde 400 si no envías `Accept: application/json`, y la forma del sumario cambia según el día.
+- La exportación de la BDNS devuelve 50 filas aunque haya miles si no pasas `pageSize`, y no avisa.
+- Para filtrar un municipio, el INE no quiere su código (`02001`) sino un Id interno (`6124`).
+- Muchos servidores `.gob.es` envían el certificado FNMT sin la intermedia: el navegador entra, `curl` y `requests` fallan ([arreglo](guides/cliente-http.md)).
+- AEMET responde en dos pasos, con el fichero en ISO-8859-15 y los errores dentro de un HTTP 200.
 
 Fuentes catalogadas: <!-- AUTO:count -->85<!-- /AUTO:count -->. Alcance actual: Administración General del Estado. Después: comunidades autónomas, entidades locales, Cortes y Poder Judicial, Unión Europea.
 
