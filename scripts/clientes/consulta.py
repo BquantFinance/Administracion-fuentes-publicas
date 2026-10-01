@@ -362,5 +362,67 @@ def empresa_nif(nif: str, max_filas: int = 10) -> dict:
     return out
 
 
+CRIMINALIDAD = "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/{}.px?nocab=1"
+
+
+def perfil_municipio(municipio: str) -> dict:
+    """Un municipio en una llamada: códigos en cada sistema (INE, SIGPAC y Catastro, DIR3, NIF, NUTS3, coordenadas),
+    población del padrón, renta neta media por persona, paro registrado y contratos del año por mes y criminalidad. Cada
+    bloque falla por separado (clave error) sin tumbar el resto. None en una cifra es secreto o sin dato, no cero."""
+    try:
+        from . import ine_tempus, sepe
+    except ImportError:
+        import ine_tempus
+        import sepe
+    cand = buscar_municipio(municipio, 1)
+    if not cand:
+        return {"error": f"no encuentro el municipio {municipio!r}", "pista": "nombre, código INE (28079), SIGPAC (28:900), DIR3 o NIF"}
+    m = cand[0]
+    out: dict = {"municipio": m}
+
+    def bloque(clave, fn):
+        try:
+            out[clave] = fn()
+        except Exception as exc:  # noqa: BLE001
+            out[clave] = {"error": f"{type(exc).__name__}: {str(exc)[:200]}"}
+
+    mid = int(m["ine_tempus_id"]) if m.get("ine_tempus_id") else ine_tempus.id_municipio(m["ine"])
+
+    def poblacion():
+        fecha, v = ine_tempus.ultimo_valor(ine_tempus.datos_tabla(29005, tv={19: mid}, nult=2)[0])
+        return {"padron_a": fecha, "habitantes": v, "fuente": "ine-api-tempus, tabla 29005"}
+
+    def renta():
+        fecha, v = ine_tempus.ultimo_valor(ine_tempus.datos_tabla(30824, tv={19: mid, 482: 284048}, nult=1)[0])
+        return {"anio": fecha[:4], "renta_neta_media_por_persona": v, "fuente": "ine-api-tempus, Atlas de renta, tabla 30824"}
+
+    def empleo(conjunto):
+        serie = sepe.municipio(m["ine"], conjunto)
+        total = next(k for k in serie[-1] if k.startswith("total"))
+        return {"mes": serie[-1]["mes"], total: serie[-1][total], "serie": {f["mes"]: f[total] for f in serie},
+                "ultimo_desglose": serie[-1], "fuente": "sepe-estadisticas, CSV de datos abiertos"}
+
+    def criminalidad():
+        for fichero in ("09009", "09006", "09003"):  # del trimestre más reciente al primero; el que aún no existe redirige
+            try:
+                t = tabla_pcaxis(CRIMINALIDAD.format(fichero), f"{m['ine']} ", 200)
+            except Exception:  # noqa: BLE001
+                continue
+            tot = [r for r in t["filas"] if "TOTAL INFRACCIONES" in str(r.get("Tipología penal")) and not str(r.get("Periodos:")).startswith("Vari")]
+            if tot:
+                return {"infracciones_penales": {r["Periodos:"]: r["Total"] for r in tot},
+                        "nota": "acumulado desde enero, no trimestral; balance de Interior", "fuente": "interior-criminalidad"}
+        return {"nota": "Interior solo publica municipios de más de 20.000 habitantes"}
+
+    bloque("poblacion", poblacion)
+    bloque("renta", renta)
+    bloque("paro_registrado", lambda: empleo("paro"))
+    bloque("contratos", lambda: empleo("contratos"))
+    bloque("criminalidad", criminalidad)
+    out["notas"] = ["paro registrado (SEPE) no es el desempleo de la EPA (INE)",
+                    "None en paro o contratos es «<5», secreto estadístico de 1 a 4"]
+    return out
+
+
 if __name__ == "__main__":
     print(_json.dumps(descargar(sys.argv[1], 2000), ensure_ascii=False, indent=1, default=str))

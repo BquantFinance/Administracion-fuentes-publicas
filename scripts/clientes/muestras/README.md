@@ -48,5 +48,6 @@ sirven los servidores; los de PC-Axis en UTF-8 con BOM.
 | arcgis-igme-capa.json | descripción de la capa del catálogo sísmico del IGME (objectIdField null, sin paginación) |
 | arcgis-igme-sin-paginacion.json | query con resultOffset en esa capa (error con HTTP 200) |
 | ogc-sigpac-recintos-tope.json | recintos SIGPAC con limit=1000 (llegan 250; dos features guardadas) |
+| sepe-paro-municipios-2026.csv | CSV de datos abiertos del SEPE, título y cabecera más julio y agosto de siete municipios (windows-1252, «<5», códigos de antes de las fusiones) |
 
 Faltan, porque necesitan credenciales: el fichero de datos de AEMET (ISO-8859-15) y ObtenerDatos de DataComex.

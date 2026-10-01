@@ -79,6 +79,8 @@ añadir a la configuración del cliente `"env": {"EXTRA_CA_BUNDLE": "/ruta/ca-de
 - `tabla_pcaxis(tabla, filtro=None, max_filas=200)`: tablas del INE (id o Tabla.htm), Interior, Educación y Cultura en
   filas con números convertidos; filtro por texto en cualquier campo (08019, un nombre, un periodo).
 - `boe_sumario(fecha, diario="boe", seccion=None, texto=None)`: disposiciones del día del BOE o del BORME.
+- `perfil_municipio(municipio)`: un municipio en una llamada: códigos en cada sistema, padrón, renta neta media, paro
+  registrado y contratos del año por mes (SEPE) y criminalidad acumulada (Interior, más de 20.000 habitantes).
 - `subvenciones_nif(nif)`: concesiones, ayudas de Estado, minimis y grandes beneficiarios de un NIF en la BDNS.
 - `empresa_nif(nif)`: perfil público de un NIF: si es sector público (Invente, con DIR3), BDNS, ayudas de la AEI y
   prohibiciones de contratar vigentes; con almacén local, también contratos adjudicados y actos del BORME; `no_cubierto`

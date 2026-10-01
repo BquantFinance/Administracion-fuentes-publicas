@@ -16,7 +16,7 @@ from mcp.client.stdio import stdio_client
 ROOT = Path(__file__).resolve().parent.parent
 SERVER = ROOT / "scripts" / "mcp_catalogo.py"
 TOOLS = {"buscar_fuentes", "ficha", "buscar_recetas", "receta", "necesidad", "identificador", "ruta_muerta", "sectores", "codigos", "municipio", "descargar", "tabla_pcaxis", "boe_sumario",
-         "subvenciones_nif", "empresa_nif", "ckan_buscar", "ckan_filas", "socrata_filas", "almacen_sql"}
+         "subvenciones_nif", "empresa_nif", "ckan_buscar", "ckan_filas", "socrata_filas", "almacen_sql", "perfil_municipio"}
 
 
 def payload(result):
@@ -101,6 +101,9 @@ async def main() -> None:
             print(f"empresa_nif('Q1132001G'): {emp['nombre']}, {emp['subvenciones']['concesiones']['total']} concesiones, {emp['aei']['total']} ayudas AEI")
             bloq = payload(await session.call_tool("descargar", {"url": "http://localhost:8080/"}))
             assert "error" in bloq, bloq
+            pm = payload(await session.call_tool("perfil_municipio", {"municipio": "02001"}))
+            assert pm["municipio"]["nombre"] == "Abengibre" and pm["poblacion"]["habitantes"] > 0 and pm["paro_registrado"]["mes"], pm
+            print(f"perfil_municipio('02001'): {pm['poblacion']['habitantes']:.0f} habitantes, paro {pm['paro_registrado']['mes']} {pm['paro_registrado']['total_paro_registrado']}")
             alm = payload(await session.call_tool("almacen_sql", {"consulta": "select 1 as uno"}))
             assert alm.get("filas") == [[1]] or "almacén" in alm.get("error", ""), alm  # con o sin almacén local
             print(f"almacen_sql: {alm.get('filas') or alm['error']}")

@@ -370,6 +370,14 @@ def empresa_nif(nif: str, max_filas: int = 10) -> dict:
 
 
 @mcp.tool()
+def perfil_municipio(municipio: str) -> dict:
+    """Un municipio en una llamada (nombre, código INE, SIGPAC, DIR3 o NIF): sus códigos en cada sistema, población del
+    padrón, renta neta media, paro registrado y contratos del año por mes (SEPE) y criminalidad acumulada (Interior,
+    solo más de 20.000 habitantes). Cada bloque trae su fuente; uno que falle no tumba los demás."""
+    return _datos(_consulta().perfil_municipio, municipio)
+
+
+@mcp.tool()
 def almacen_sql(consulta: str, limite: int = 100) -> dict:
     """SQL de solo lectura (DuckDB) sobre el almacén local en Parquet, si existe (FUENTES_ALMACEN o ./almacen): tablas
     boe, borme, bdns, placsp, placsp_adjudicaciones y carburantes, y vistas placsp_ultimo y adjudicaciones_ultimo

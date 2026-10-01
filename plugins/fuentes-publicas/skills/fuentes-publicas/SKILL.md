@@ -16,7 +16,7 @@ Catálogo verificado con llamadas reales: https://github.com/BquantFinance/Admin
    (acumulados desde enero, topes de filas sin aviso, datastores recortados, taxones o códigos que no son el esperado).
    Aplica la operación que indican antes de responder.
 3. Trae el dato. Con MCP: `descargar(url)` (certificados FNMT, codificación, bloqueos y resumen del CSV, JSON, xlsx o
-   ZIP), `tabla_pcaxis`, `boe_sumario`, `subvenciones_nif`, `empresa_nif`, `ckan_buscar`, `ckan_filas`, `socrata_filas`, `municipio`, y `almacen_sql` si el usuario tiene
+   ZIP), `tabla_pcaxis`, `boe_sumario`, `subvenciones_nif`, `empresa_nif`, `ckan_buscar`, `ckan_filas`, `socrata_filas`, `municipio`, `perfil_municipio` (padrón, renta, paro, contratos y criminalidad en una llamada), y `almacen_sql` si el usuario tiene
    almacén local (contratos por NIF, BORME por denominación, series de carburantes; `guides/almacen.md`).
    En Python, los mismos clientes (abajo). Con curl, el `example` de cada endpoint de la ficha.
 4. Si cruzas fuentes, busca una receta (`buscar_recetas` o `.../main/indices/recetas.yaml`) y el identificador común

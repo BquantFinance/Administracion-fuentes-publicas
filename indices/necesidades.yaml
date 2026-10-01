@@ -103,7 +103,7 @@
   note: solo con certificado electrónico
 - need: Paro registrado, demandantes y contratos por municipio
   source: sepe-estadisticas
-  note: ESTADISTICA_MUNICIPIOS.xls con código INE en municipios/{AAAA}/{mes}.html; municipios-20-45 es otra tabla
+  note: CSV anual de datos abiertos con todos los municipios y meses desde 2006 (Paro, Contratos, Dtes_empleo); Oza-Cesuras y Cerdedo-Cotobade van con sus códigos anteriores a la fusión
 - need: Tasa de paro, ocupados y activos (EPA)
   source: ine-api-tempus
   note: la EPA es del INE, no del SEPE

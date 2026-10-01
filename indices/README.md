@@ -217,9 +217,9 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **paro-registrado-por-municipio** · Paro registrado y demandantes por municipio, sexo, edad y actividad de un mes
 - entrada: ine-municipio
-1. `sepe-estadisticas`: La página del mes municipios/{AAAA}/{mes}.html ({mes}-{AAAA}.html hasta 2019) enlaza ESTADISTICA_MUNICIPIOS.xls, paro y contratos de todos los municipios con código INE (28001.0) por provincia, sexo, edad y sector; el enlace lleva un jcr:{uuid} nuevo cada mes
+1. `sepe-estadisticas`: CSV anual de datos abiertos {Paro|Contratos|Dtes_empleo}_por_municipios_{AAAA}_csv.csv con todos los municipios y meses del año por sexo, edad y sector; leer en windows-1252, saltar la línea de título y tratar «<5» como secreto; Oza-Cesuras (15902) y Cerdedo-Cotobade (36902) se suman de sus códigos previos a la fusión (scripts/clientes/sepe.py)
    ```
-   curl -s -A "Mozilla/5.0" "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios/2026/agosto.html" | grep -o '/HomeSepe/dam/jcr:[^"]*ESTADISTICA_MUNICIPIOS.xls'
+   curl -s -A "Mozilla/5.0" "https://sede.sepe.gob.es/es/portaltrabaja/resources/sede/datos_abiertos/datos/Paro_por_municipios_2026_csv.csv" | iconv -f WINDOWS-1252 -t UTF-8 | grep ';28005;'
    ```
 2. `sepe-estadisticas`: Leer con pandas engine=calamine (xlrd falla en parte de los ficheros); «<5» es texto; el desglose por actividad (CNAE) solo existe para capitales y municipios de más de 20.000 habitantes (Municipios_acteco y Muniacteco_20-45)
    ```
@@ -230,7 +230,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
    curl -sO -A "Mozilla/5.0" "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/evolparoseries.xls"
    ```
 4. `ine-codigos-territoriales`: Nombres y provincia oficiales del municipio con el diccionario anual; en los ficheros por actividad, sin código, cruzar por nombre
-- salida: xls con paro y contratos por municipio y código INE
+- salida: CSV con paro, contratos o demandantes por municipio y código INE, y xls por actividad
 
 **afiliacion-y-pensiones** · Afiliados a la Seguridad Social por régimen, provincia, CNAE o municipio, y pensiones del mes
 - entrada: cnae, ine-municipio
@@ -640,7 +640,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Prohibiciones de contratar vigentes → `hacienda-registro-licitadores` (XML público del visor del ROLECE; el NIF va oculto, cruzar por nombre)
 
 **Empleo y Seguridad Social**
-- Paro registrado, demandantes y contratos por municipio → `sepe-estadisticas` (ESTADISTICA_MUNICIPIOS.xls con código INE en municipios/{AAAA}/{mes}.html; municipios-20-45 es otra tabla)
+- Paro registrado, demandantes y contratos por municipio → `sepe-estadisticas` (CSV anual de datos abiertos con todos los municipios y meses desde 2006 (Paro, Contratos, Dtes_empleo); Oza-Cesuras y Cerdedo-Cotobade van con sus códigos anteriores a la fusión)
 - Afiliación a la Seguridad Social por régimen, actividad, provincia y municipio → `segsocial-estadisticas` (municipal en MUNCNAE{MM}{AA}.xlsx con URL fija; «<5» como texto y municipio sin cero inicial)
 - Pensiones contributivas e Ingreso Mínimo Vital → `segsocial-estadisticas` (el IMV tiene sección propia con nóminas por CCAA y provincia; no está en otras prestaciones (EST45))
 - Muestra Continua de Vidas Laborales → `segsocial-estadisticas` (no se descarga; se solicita bajo convenio)

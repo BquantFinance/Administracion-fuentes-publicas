@@ -1,0 +1,16 @@
+;;;;PARO REGISTRADO POR MUNICIPIOS DESGLOSADO POR SEXO, TRAMOS DE EDAD Y SECTOR DE LA ACTIVIDAD ECONÓMICA;;;;;;;;;;;;;;;
+Código mes ;mes;Código de CA;Comunidad Autónoma;Codigo Provincia;Provincia;Codigo Municipio; Municipio;total Paro Registrado;Paro hombre edad < 25;Paro hombre edad 25 -45 ;Paro hombre edad >=45;Paro mujer edad < 25;Paro mujer edad 25 -45 ;Paro mujer edad >=45;Paro Agricultura;Paro Industria;Paro Construcción;Paro Servicios;Paro Sin empleo Anterior
+202607;Julio de 2026;8;Castilla - La Mancha;2;Albacete;02001;Abengibre;24;<5;<5;5;<5;5;10;<5;<5;0;17;<5
+202607;Julio de 2026;12;Galicia;15;Coruña, A;15026;Cesuras;45;0;<5;15;<5;10;14;<5;6;<5;33;<5
+202607;Julio de 2026;12;Galicia;15;Coruña, A;15063;Oza dos Ríos;91;<5;15;24;<5;15;34;<5;6;8;67;9
+202607;Julio de 2026;12;Galicia;15;Coruña, A;15902;Oza-Cesuras;0;0;0;0;0;0;0;0;0;0;0;0
+202607;Julio de 2026;12;Galicia;36;Pontevedra;36011;Cerdedo;35;<5;<5;14;<5;7;8;<5;<5;6;18;5
+202607;Julio de 2026;12;Galicia;36;Pontevedra;36012;Cotobade;134;<5;10;31;0;37;54;5;13;10;102;<5
+202607;Julio de 2026;13;Madrid, Comunidad de;28;Madrid;28005;Alcalá de Henares;8914;330;1226;1929;287;1903;3239;33;868;659;6614;740
+202608;Agosto de 2026;8;Castilla - La Mancha;2;Albacete;02001;Abengibre;18;0;<5;<5;0;5;8;<5;<5;0;13;0
+202608;Agosto de 2026;12;Galicia;15;Coruña, A;15026;Cesuras;46;<5;6;15;<5;8;14;<5;7;<5;33;<5
+202608;Agosto de 2026;12;Galicia;15;Coruña, A;15063;Oza dos Ríos;95;<5;14;25;<5;17;34;<5;9;8;69;8
+202608;Agosto de 2026;12;Galicia;15;Coruña, A;15902;Oza-Cesuras;0;0;0;0;0;0;0;0;0;0;0;0
+202608;Agosto de 2026;12;Galicia;36;Pontevedra;36011;Cerdedo;35;<5;<5;15;0;8;7;<5;<5;6;18;5
+202608;Agosto de 2026;12;Galicia;36;Pontevedra;36012;Cotobade;134;<5;10;32;<5;35;53;5;12;10;104;<5
+202608;Agosto de 2026;13;Madrid, Comunidad de;28;Madrid;28005;Alcalá de Henares;9107;355;1271;1967;310;1919;3285;29;883;665;6773;757

@@ -300,8 +300,8 @@
   inputs: [ine-municipio]
   steps:
     - source: sepe-estadisticas
-      do: "La página del mes municipios/{AAAA}/{mes}.html ({mes}-{AAAA}.html hasta 2019) enlaza ESTADISTICA_MUNICIPIOS.xls, paro y contratos de todos los municipios con código INE (28001.0) por provincia, sexo, edad y sector; el enlace lleva un jcr:{uuid} nuevo cada mes"
-      example: curl -s -A "Mozilla/5.0" "https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios/2026/agosto.html" | grep -o '/HomeSepe/dam/jcr:[^"]*ESTADISTICA_MUNICIPIOS.xls'
+      do: "CSV anual de datos abiertos {Paro|Contratos|Dtes_empleo}_por_municipios_{AAAA}_csv.csv con todos los municipios y meses del año por sexo, edad y sector; leer en windows-1252, saltar la línea de título y tratar «<5» como secreto; Oza-Cesuras (15902) y Cerdedo-Cotobade (36902) se suman de sus códigos previos a la fusión (scripts/clientes/sepe.py)"
+      example: curl -s -A "Mozilla/5.0" "https://sede.sepe.gob.es/es/portaltrabaja/resources/sede/datos_abiertos/datos/Paro_por_municipios_2026_csv.csv" | iconv -f WINDOWS-1252 -t UTF-8 | grep ';28005;'
     - source: sepe-estadisticas
       do: "Leer con pandas engine=calamine (xlrd falla en parte de los ficheros); «<5» es texto; el desglose por actividad (CNAE) solo existe para capitales y municipios de más de 20.000 habitantes (Municipios_acteco y Muniacteco_20-45)"
       example: curl -sO -A "Mozilla/5.0" "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_estadisticos/municipios_20_45/2026/agosto_2026/Muniacteco_20-45_ANDALUCIA.xls"
@@ -310,8 +310,11 @@
       example: curl -sO -A "Mozilla/5.0" "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/evolparoseries.xls"
     - source: ine-codigos-territoriales
       do: "Nombres y provincia oficiales del municipio con el diccionario anual; en los ficheros por actividad, sin código, cruzar por nombre"
-  output: xls con paro y contratos por municipio y código INE
+  output: CSV con paro, contratos o demandantes por municipio y código INE, y xls por actividad
   checks:
+    - url: https://sede.sepe.gob.es/es/portaltrabaja/resources/sede/datos_abiertos/datos/Paro_por_municipios_2026_csv.csv
+      contains: Codigo Municipio
+      read_bytes: 4096
     - url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos/municipios/2026/agosto.html
       contains: ESTADISTICA_MUNICIPIOS.xls
       read_bytes: 200000

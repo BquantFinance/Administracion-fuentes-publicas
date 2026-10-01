@@ -70,6 +70,7 @@ jobs:
           ejecutar scripts/clientes/ckan.py
           ejecutar scripts/clientes/socrata.py
           ejecutar scripts/clientes/pcaxis.py
+          ejecutar scripts/clientes/sepe.py 15902
           ejecutar scripts/clientes/arcgis.py
           ejecutar scripts/clientes/ogc.py
           ejecutar ejemplos/carburante_cerca.py "Alcalá de Henares" gasoleo 8

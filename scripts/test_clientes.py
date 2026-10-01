@@ -32,6 +32,7 @@ import ogc  # noqa: E402
 import pcaxis  # noqa: E402
 import placsp  # noqa: E402
 import saiku  # noqa: E402
+import sepe  # noqa: E402
 import sesion  # noqa: E402
 import socrata  # noqa: E402
 
@@ -258,6 +259,18 @@ def almacen_volcado_y_solo_lectura():
             raise AssertionError("leyó fuera del almacén")
         except duckdb.Error as exc:
             assert "disabled" in str(exc)
+
+
+@test
+def sepe_csv_secreto_y_fusiones():
+    filas = sepe.leer((M / "sepe-paro-municipios-2026.csv").read_bytes())  # windows-1252 con línea de título
+    alcala = sepe.municipio("28005", datos=filas)
+    assert [f["mes"] for f in alcala] == ["2026-07", "2026-08"] and alcala[-1]["total_paro_registrado"] == 9107
+    assert alcala[-1]["municipio"] == "Alcalá de Henares" and "paro_hombre_edad_menor_25" in alcala[-1]
+    abengibre = sepe.municipio("02001", datos=filas)[-1]
+    assert None in abengibre.values()  # «<5» es secreto, no cero
+    assert sepe.municipio("15902", datos=filas)[-1]["total_paro_registrado"] == 141  # 46 + 95, no el 0 de 15902
+    assert sepe.municipio("36902", datos=filas)[-1]["total_paro_registrado"] == 169  # sin fila propia: 35 + 134
 
 
 def respuesta(cuerpo: bytes, tipo: str = "application/json", estado: int = 200, url: str = "https://x.gob.es/a"):

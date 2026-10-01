@@ -6,25 +6,30 @@ level: age
 sector: empleo-seguridad-social
 tags: [sepe, paro-registrado, contratos, prestaciones, demandantes, municipios, ocupaciones, cnae]
 summary: >-
-  Paro registrado, demandantes, contratos y prestaciones por desempleo, mensuales: avances en xls con URL fija y
-  series desde 2001, paro y contratos de todos los municipios con código INE en un xls por mes, y desglose por
-  división CNAE, sexo y edad de capitales y municipios de más de 20.000.
+  Paro registrado, contratos, demandantes y prestaciones, mensuales: todos los municipios con código INE en un CSV
+  anual desde 2006, avances en xls con URL fija y series desde 2001, y desglose por CNAE, sexo y edad de capitales y
+  municipios de más de 20.000.
 alerts:
   - "«<5» es secreto (1 a 4), no cero: un sexo sale restando el otro del TOTAL (Abengibre agosto 2026, hombres 18 - 13 = 5) y la provincia, de su fila de total (Albacete 20.710, no los 20.698 de sumar municipios)."
+  - En el CSV, Oza-Cesuras (15902) sale con 0 y Cerdedo-Cotobade (36902) sin fila; su dato va en los códigos previos a la fusión. Agosto 2026, 15026 + 15063 = 46 + 95 = 141 parados; 36011 + 36012 = 35 + 134 = 169.
 access: [download, portal]
 auth: none
-formats: [xls, pdf, html, rss]
+formats: [csv, xls, pdf, html, rss]
 update: monthly
-coverage: "Todos los municipios desde mayo de 2005; por actividad, capitales y más de 45.000 habitantes desde 2009 y de 20.000 a 45.000 desde 2017; series nacionales desde enero de 2001"
+coverage: "Todos los municipios desde mayo de 2005 en xls y enero de 2006 en CSV; por actividad, capitales y más de 45.000 habitantes desde 2009 y de 20.000 a 45.000 desde 2017; series nacionales desde enero de 2001"
 sync:
-  since: "Mayo de 2005 en el paro por municipio"
-  full: "Página municipios/{AAAA}/{mes}.html (hasta 2019, {mes}-{AAAA}.html) y su ESTADISTICA_MUNICIPIOS.xls, unos 257 meses."
-  size: "De 2,9 a 3,9 MB por mes en xls, unos 0,85 GB en total."
-  new: "La página del mes siguiente da 404 hasta que se publica (la de septiembre de 2026 daba 404 el 01/10); el RSS no trae fecha."
+  since: "Enero de 2006 en los CSV de datos abiertos (el de 2005 da 404); mayo de 2005 en el xls mensual"
+  full: "Un CSV por año y conjunto (Paro, Contratos, Dtes_empleo), 21 por conjunto de 2006 a 2026; scripts/clientes/sepe.py los lee y cachea."
+  size: "De 9,7 a 10,1 MB un año entero de paro (2006, 2007, 2015) y 6,7 MB el de 2026 con ocho meses; unos 200 MB por conjunto."
+  new: "El CSV del año en curso se reescribe al publicar cada mes (Last-Modified 07/09/2026 con agosto) y responde 304 a If-None-Match; la página xls del mes siguiente da 404 hasta que sale."
 license: Reutilización libre con cita de la fuente
 base_url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas.html
 docs_url: https://www.sepe.es/HomeSepe/que-es-el-sepe/estadisticas/datos-estadisticos.html
 endpoints:
+  - path: https://sede.sepe.gob.es/es/portaltrabaja/resources/sede/datos_abiertos/datos/{Paro|Contratos|Dtes_empleo}_por_municipios_{AAAA}_csv.csv
+    desc: Paro registrado, contratos o demandantes de empleo de todos los municipios y todos los meses del año, por sexo, edad y sector (o tipo de contrato)
+    example: curl -s -A "Mozilla/5.0" "https://sede.sepe.gob.es/es/portaltrabaja/resources/sede/datos_abiertos/datos/Paro_por_municipios_2026_csv.csv" | iconv -f WINDOWS-1252 -t UTF-8 | head -3
+    returns: "CSV ; con CRLF en windows-1252 aunque Content-Type diga UTF-8; línea de título y cabecera en la segunda (Código mes, Codigo Municipio, total Paro Registrado...) con espacios sobrantes; mes AAAAMM, municipio de 5 dígitos con ceros, enteros sin miles y «<5» como texto; 8.135 municipios por mes"
   - path: https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/{carpeta}/{tabla}.xls
     desc: Avance mensual con URL fija; carpeta empleo (evolparo, evolparoseries, evolparoseries2001, paroprovsector), contratos (serie_contratos), paro_prov
     example: curl -sO -A "Mozilla/5.0" "https://www.sepe.es/SiteSepe/contenidos/que_es_el_sepe/estadisticas/datos_avance/xls/empleo/evolparoseries.xls"
@@ -44,7 +49,7 @@ endpoints:
     desc: RSS de cada página de estadísticas; un único item con el enlace a la página, sin fecha ni ficheros
     example: curl -s -A "Mozilla/5.0" "https://www.sepe.es/HomeSepe/rssgen/RSSServlet?namePage=municipios.html&param1=HomeSepe"
     returns: "RSS 2.0 en UTF-8 con un solo item (title, link, description, category, guid) y sin pubDate; un namePage desconocido responde 302 sin cuerpo"
-quirks: [static-html, overwritten-in-place, url-drift]
+quirks: [latin1, static-html, overwritten-in-place, url-drift]
 ids: [ine-municipio, cnae]
 gotchas:
   - HEAD devuelve 403 en los ficheros; usar GET, que admite Range.
@@ -57,7 +62,7 @@ gotchas:
   - Los xls de avance se sobreescriben cada mes en la misma URL; guardar copia fechada para el histórico de publicaciones.
   - Paro registrado no es lo mismo que desempleo EPA (INE); no comparar niveles.
 tips:
-  - "Paro por municipio con código INE: GET de municipios/{AAAA}/{mes}.html, enlace a ESTADISTICA_MUNICIPIOS.xls y pd.read_excel(f, sheet_name=None, header=None, engine='calamine'); filas con código numérico en la columna 0."
+  - Paro, contratos o demandantes de un municipio con código INE, del CSV anual de datos abiertos, sin leer xls; scripts/clientes/sepe.py municipio('28005') da la serie del año y suma los códigos fusionados.
 related: [ine-api-tempus, segsocial-estadisticas, ine-codigos-territoriales, mites-estadisticas]
 status: active
 verified: "2026-10-01"

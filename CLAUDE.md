@@ -224,6 +224,10 @@ Marcar aquí lo hecho con fecha para que la siguiente sesión no lo repita.
   ni publica releases de datos, y `almacen/` está en `.gitignore`. Parquet por tabla y mes con BOE, BORME (tipo de acto
   y texto solo de los actos sin nombres), BDNS por fecha de alta, PLACSP con adjudicaciones (NIF y nombre fuera si es
   persona física) y carburantes; `empresa_nif` añade contratos y BORME si hay almacén.
+- Hecho el 2026-10-01 (segunda sesión): CSV de datos abiertos del SEPE (paro, contratos y demandantes de todos los
+  municipios por año desde 2006, windows-1252 con Content-Type UTF-8, 304 por ETag) en la ficha, con alerta: Oza-Cesuras
+  y Cerdedo-Cotobade van con sus códigos previos a la fusión. `scripts/clientes/sepe.py` y `consulta.perfil_municipio`
+  (herramienta MCP `perfil_municipio`: códigos, padrón, renta, paro, contratos y criminalidad en una llamada).
 - Siguiente trabajo: lo que indique el propietario. Del propietario: ronda desde una IP residencial, token de DataComex y más comunidades cuando lo decida.
 
 ## Lo que no se hace
