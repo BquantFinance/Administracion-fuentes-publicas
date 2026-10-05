@@ -54,7 +54,7 @@ Algunos ejemplos, comprobados con llamadas reales:
 - Los CSV de los portales PC-Axis llegan en UTF-8 aunque la cabecera diga ISO-8859-15, y el del SEPE en Windows-1252 aunque diga UTF-8.
 - En GBIF la encina ibérica es sobre todo *Quercus rotundifolia* (1,3 millones de registros en España); preguntar por *Quercus ilex*, que es lo que devuelve el buscador de nombres, da 21.322 sin ningún aviso. Y 41,6 de sus 95,8 millones de registros en España son CC BY-NC.
 
-Fuentes catalogadas: <!-- AUTO:count -->99<!-- /AUTO:count -->. Alcance actual: Administración General del Estado y, desde octubre de 2026, las cuatro comunidades más pobladas (Madrid, Cataluña, Andalucía y Comunitat Valenciana) y los ayuntamientos de Madrid y Barcelona. Después: resto de comunidades y entidades locales, Cortes y Poder Judicial, Unión Europea.
+Fuentes catalogadas: <!-- AUTO:count -->102<!-- /AUTO:count -->. Alcance actual: Administración General del Estado y, desde octubre de 2026, las cuatro comunidades más pobladas (Madrid, Cataluña, Andalucía y Comunitat Valenciana) y los ayuntamientos de Madrid y Barcelona. Después: resto de comunidades y entidades locales, Cortes y Poder Judicial, Unión Europea.
 
 ## Principios
 
@@ -69,14 +69,14 @@ Fuentes catalogadas: <!-- AUTO:count -->99<!-- /AUTO:count -->. Alcance actual: 
 <!-- AUTO:sectors -->
 | sector | descripción | fuentes |
 |---|---|---|
-| [legislacion-boletines](sources/legislacion-boletines/README.md) | Legislación y boletines oficiales | 5 |
+| [legislacion-boletines](sources/legislacion-boletines/README.md) | Legislación y boletines oficiales | 6 |
 | [economia-finanzas](sources/economia-finanzas/README.md) | Economía, finanzas y mercados | 5 |
 | [hacienda-presupuestos](sources/hacienda-presupuestos/README.md) | Hacienda, tributos y presupuestos | 6 |
 | [estadistica](sources/estadistica/README.md) | Estadística oficial | 7 |
 | [contratacion-subvenciones](sources/contratacion-subvenciones/README.md) | Contratación pública y subvenciones | 3 |
 | [empleo-seguridad-social](sources/empleo-seguridad-social/README.md) | Empleo y Seguridad Social | 3 |
-| [gobierno-abierto-administracion](sources/gobierno-abierto-administracion/README.md) | Gobierno abierto, transparencia y organización administrativa | 11 |
-| [territorio-cartografia](sources/territorio-cartografia/README.md) | Territorio, catastro y cartografía | 4 |
+| [gobierno-abierto-administracion](sources/gobierno-abierto-administracion/README.md) | Gobierno abierto, transparencia y organización administrativa | 12 |
+| [territorio-cartografia](sources/territorio-cartografia/README.md) | Territorio, catastro y cartografía | 5 |
 | [meteorologia-clima](sources/meteorologia-clima/README.md) | Meteorología y clima | 2 |
 | [medio-ambiente-agua-biodiversidad](sources/medio-ambiente-agua-biodiversidad/README.md) | Medio ambiente, agua y biodiversidad | 5 |
 | [energia](sources/energia/README.md) | Energía | 5 |

@@ -5,7 +5,7 @@
  "repo": "https://github.com/BquantFinance/Administracion-fuentes-publicas",
  "schema": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json",
  "vocab": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml",
- "count": 99,
+ "count": 102,
  "sectors": {
   "legislacion-boletines": "Legislación y boletines oficiales",
   "economia-finanzas": "Economía, finanzas y mercados",
@@ -5683,6 +5683,89 @@
    "verified": "2026-10-01"
   },
   {
+   "id": "jcyl-datos-abiertos",
+   "name": "Junta de Castilla y León – Portal de datos abiertos",
+   "org": "Junta de Castilla y León",
+   "level": "ccaa",
+   "sector": "gobierno-abierto-administracion",
+   "tags": [
+    "datos-abiertos",
+    "catalogo",
+    "castilla-y-leon",
+    "descargas",
+    "sector-publico",
+    "sie",
+    "estadistica"
+   ],
+   "summary": "Catálogo de datos abiertos de la Junta de Castilla y León: 840 conjuntos descargables por URL directa (.csv, .xls, .json) y CSV del catálogo completo regenerado a diario. Sin API; la estadística autonómica (SIE, app SAS) tampoco.",
+   "alerts": [
+    "El sufijo .json miente: curl .../1285085634877.json da 200 con un XLSX real (Content-Type spreadsheetml, 5.270 B con firma PK), no JSON; usar .csv o .xls del mismo id.",
+    "169 de los 840 conjuntos (20 %) llevan Licencia IGCYL-NC (no comercial) en la columna Licencia del CSV del catálogo (1284166186527.csv); filtrarlos antes de cualquier uso comercial."
+   ],
+   "access": [
+    "download",
+    "portal"
+   ],
+   "auth": "none",
+   "formats": [
+    "csv",
+    "xls",
+    "json",
+    "xml",
+    "shp",
+    "kml",
+    "rdf"
+   ],
+   "update": "daily",
+   "license": "CC-BY en 671 de 840 conjuntos; IGCYL-NC (no comercial) en 169 (columna Licencia del CSV del catálogo)",
+   "base_url": "https://datosabiertos.jcyl.es",
+   "docs_url": "https://datosabiertos.jcyl.es/web/es/catalogo-datos/terminos.html",
+   "endpoints": [
+    {
+     "path": "/web/jcyl/risp/es/ciencia-tecnologia/general/1284166186527.csv",
+     "desc": "Catálogo completo de los 840 conjuntos con 15 columnas (título, sector, organismo, licencia, formatos)",
+     "example": "curl -s \"https://datosabiertos.jcyl.es/web/jcyl/risp/es/ciencia-tecnologia/general/1284166186527.csv\"",
+     "returns": "CSV ISO-8859-15 con ; de 715 KB; primera línea 'Fichero actualizado a fecha: ...' antes de la cabecera; regenerado a diario (03:28)"
+    },
+    {
+     "path": "/web/jcyl/set/es/{sector}/{subcategoria}/{id}",
+     "desc": "Página de detalle de un conjunto con sus distribuciones y formato de descarga",
+     "example": "curl -s \"https://datosabiertos.jcyl.es/web/jcyl/set/es/ciencia-tecnologia/general/1284166186527\""
+    },
+    {
+     "path": "/web/jcyl/risp/es/{categoria}/{slug}/{id}.{csv|xls|json}",
+     "desc": "Descarga directa de una distribución; el id numérico sale del detalle del conjunto",
+     "example": "curl -s \"https://datosabiertos.jcyl.es/web/jcyl/risp/es/sector-publico/ingresos-tasas-bocyl/1285085634877.csv\"",
+     "returns": "CSV UTF-8 con ; de 7 KB; el mismo id existe con .xls y .json"
+    }
+   ],
+   "rate_limit": "No documentado",
+   "quirks": [
+    "static-html",
+    "latin1"
+   ],
+   "ids": [],
+   "gotchas": [
+    "El CSV del catálogo lleva una línea previa a la cabecera con la fecha de generación; los lectores ingenuos la toman como cabecera.",
+    "La página de listado no enumera los conjuntos: enlaza al CSV del catálogo y al buscador; el inventario programático es ese CSV, no el HTML.",
+    "El SIE (estadistica.jcyl.es) es una app SAS: /sie/ solo redirige por onLoad al broker /sie/sas/broker?_PROGRAM=mddbpgm.v2.indexv2.scl&_SERVICE=saswebl; sin JavaScript no se llega.",
+    "En el SIE el export .csv de una consulta responde con un frameset HTML, no el CSV; los módulos están en /sie/v2/{modulo}v2index.html y las tablas en frames con JS de época."
+   ],
+   "tips": [
+    "Inventario en una llamada con el CSV del catálogo: sector y organismo permiten filtrar; la columna Licencia separa CC-BY (671) de IGCYL-NC (169, no comercial).",
+    "Para series estadísticas municipales ir a ine-api-tempus; del SIE solo el padrón municipal 1986-1995 escapa a la serie del INE (que empieza en 1996)."
+   ],
+   "related": [
+    "datos-gob-es-api",
+    "ine-codigos-territoriales",
+    "ine-api-tempus",
+    "placsp-datos-abiertos",
+    "bocyl-rss"
+   ],
+   "status": "active",
+   "verified": "2026-10-05"
+  },
+  {
    "id": "junta-andalucia-datos-abiertos",
    "name": "Junta de Andalucía – Portal de datos abiertos (API CKAN y API v0 con BOJA)",
    "org": "Junta de Andalucía",
@@ -6694,6 +6777,67 @@
    ],
    "status": "active",
    "verified": "2026-10-01"
+  },
+  {
+   "id": "bocyl-rss",
+   "name": "BOCYL – RSS por sección y boletín diario",
+   "org": "Junta de Castilla y León",
+   "level": "ccaa",
+   "sector": "legislacion-boletines",
+   "tags": [
+    "boletines",
+    "castilla-y-leon",
+    "rss",
+    "sumario",
+    "disposiciones"
+   ],
+   "summary": "Feeds RSS 2.0 del Boletín Oficial de Castilla y León por sección (I a V): un item por edición diaria que enlaza a la página del boletín con el sumario y los PDF de cada disposición. No hay API de sumario estructurado tipo BOE.",
+   "access": [
+    "feed",
+    "portal"
+   ],
+   "auth": "none",
+   "formats": [
+    "xml",
+    "html",
+    "pdf"
+   ],
+   "update": "daily",
+   "license": "Sin licencia específica publicada",
+   "base_url": "https://bocyl.jcyl.es",
+   "docs_url": "https://bocyl.jcyl.es/indiceRss.do",
+   "endpoints": [
+    {
+     "path": "/rss.do?seccion={I|II|III|IV|V}",
+     "desc": "RSS de una sección con las últimas ediciones diarias; un item por boletín del día",
+     "example": "curl -s \"https://bocyl.jcyl.es/rss.do?seccion=I\"",
+     "returns": "<rss version=2.0><channel><title>BOCYL: I. COMUNIDAD DE CASTILLA Y LEÓN</title>… <item><title>Boletín del día 02/10/2026 edición 192</title><link>https://bocyl.jcyl.es/boletin.do?fechaBoletin=02/10/2026&amp;edicion=192</link>…"
+    },
+    {
+     "path": "/boletin.do?fechaBoletin={dd/mm/aaaa}&edicion={n}",
+     "desc": "Página del boletín de un día con el sumario y enlaces a los PDF de cada disposición",
+     "example": "curl -s \"https://bocyl.jcyl.es/boletin.do?fechaBoletin=01/10/2026&edicion=191\"",
+     "returns": "HTML de 80 KB con enlaces a PDF del patrón /boletines/aaaa/mm/dd/pdf/BOCYL-S-ddmmaaaa-ed.pdf (sumario) y BOCYL-D-ddmmaaaa-n.pdf (disposición)"
+    }
+   ],
+   "rate_limit": "No documentado",
+   "quirks": [
+    "url-drift"
+   ],
+   "ids": [],
+   "gotchas": [
+    "El dominio histórico con tilde (boletínoficialcyl.jcyl.es, en punycode xn--boletnoficialcyl-dsb.jcyl.es) ya no resuelve (NXDOMAIN el 2026-10-02); el vigente es bocyl.jcyl.es.",
+    "indiceRss.do no es el feed sino la página HTML de suscripción; los feeds reales son rss.do?seccion=I a V.",
+    "La fecha va en formato español dd/mm/aaaa en la query (fechaBoletin=01/10/2026), no ISO."
+   ],
+   "related": [
+    "boe-api-sumario",
+    "boe-feeds",
+    "jcyl-datos-abiertos",
+    "junta-andalucia-datos-abiertos"
+   ],
+   "status": "active",
+   "verified": "2026-10-05"
   },
   {
    "id": "boe-api-legislacion-consolidada",
@@ -8793,6 +8937,84 @@
     "idee-servicios",
     "catastro-ovc",
     "ine-codigos-territoriales"
+   ],
+   "status": "active",
+   "verified": "2026-10-05"
+  },
+  {
+   "id": "idecyl-servicios",
+   "name": "IDECyL – Catálogo GeoNetwork y servicios ArcGIS REST de Castilla y León",
+   "org": "Junta de Castilla y León (IDECyL)",
+   "level": "ccaa",
+   "sector": "territorio-cartografia",
+   "tags": [
+    "cartografia",
+    "ide",
+    "geonetwork",
+    "csw",
+    "arcgis",
+    "castilla-y-leon",
+    "wms",
+    "recintos"
+   ],
+   "summary": "IDE de Castilla y León: catálogo GeoNetwork 3.8.2 con 197 recursos (163 datasets, 31 servicios) consultable por CSW INSPIRE y feed RSS de novedades, más un directorio ArcGIS REST con MapServers de recintos agrícolas anuales (ayg) y visores PGIS (cyt). Sin clave.",
+   "access": [
+    "ogc",
+    "api-rest",
+    "feed",
+    "portal"
+   ],
+   "auth": "none",
+   "formats": [
+    "xml",
+    "json"
+   ],
+   "update": "irregular",
+   "license": "Sin licencia visible en el portal",
+   "base_url": "https://idecyl.jcyl.es/geonetwork",
+   "docs_url": "https://idecyl.jcyl.es/geonetwork/doc/api/index.html",
+   "endpoints": [
+    {
+     "path": "/srv/eng/csw?SERVICE=CSW&REQUEST=GetCapabilities",
+     "desc": "CSW 2.0.2 con perfiles INSPIRE; base para buscar metadatos de los 197 recursos",
+     "example": "curl -s \"https://idecyl.jcyl.es/geonetwork/srv/eng/csw?SERVICE=CSW&REQUEST=GetCapabilities\"",
+     "returns": "XML csw:Capabilities con operaciones GetRecords/GetRecordById y ows:ServiceIdentification de IDECyL"
+    },
+    {
+     "path": "/srv/eng/rss.search?sortBy=changeDate&georss=simplepoint",
+     "desc": "RSS 2.0 de novedades del catálogo con GeoRSS simplepoint",
+     "example": "curl -s \"https://idecyl.jcyl.es/geonetwork/srv/eng/rss.search?sortBy=changeDate&georss=simplepoint\"",
+     "returns": "RSS con título IDECyL (Junta de Castilla y León) y los metadatos más recientes"
+    },
+    {
+     "path": "https://idecyl.jcyl.es/arcgis/rest/services?f=json",
+     "desc": "Directorio ArcGIS REST con las carpetas por consejería y el servicio Geometry",
+     "example": "curl -s \"https://idecyl.jcyl.es/arcgis/rest/services?f=json\"",
+     "returns": "{\"currentVersion\" : 9.31,\"folders\":[\"ayg\",\"cyt\",\"edu\",\"eye\",\"fio\",\"fma\",\"hac\",\"pre\",\"san\"],\"services\":[{\"name\" : \"Geometry\", \"type\" : \"GeometryServer\"}]}"
+    },
+    {
+     "path": "https://idecyl.jcyl.es/arcgis/rest/services/ayg?f=json",
+     "desc": "Servicios de Agricultura y Ganadería con los recintos agrícolas por año",
+     "example": "curl -s \"https://idecyl.jcyl.es/arcgis/rest/services/ayg?f=json\"",
+     "returns": "{\"folders\":[],\"services\":[{\"name\" : \"ayg/recintos2010\", \"type\" : \"MapServer\"},… 8 servicios recintos2010 en adelante]}"
+    }
+   ],
+   "rate_limit": "No documentado",
+   "quirks": [
+    "js-rendered"
+   ],
+   "ids": [],
+   "gotchas": [
+    "El ArcGIS REST es un Server 9.31 de 2007 y 7 de las 9 carpetas del directorio (edu, eye, fio, fma, hac, pre, san) existen pero devuelven 0 servicios.",
+    "El buscador JSON interno q devuelve count 0 aunque el catálogo tenga coincidencias visibles en la web; usar CSW.",
+    "El visor de idecyl.jcyl.es no sirve contenido sin JavaScript; las vías programáticas son el CSW, el RSS y el directorio ArcGIS."
+   ],
+   "related": [
+    "mapa-sigpac",
+    "cnig-centro-descargas",
+    "idee-servicios",
+    "catastro-ovc",
+    "ieo-datos-oceanograficos"
    ],
    "status": "active",
    "verified": "2026-10-05"

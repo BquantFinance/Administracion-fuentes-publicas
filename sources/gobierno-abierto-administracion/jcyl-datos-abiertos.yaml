@@ -1,0 +1,46 @@
+id: jcyl-datos-abiertos
+name: Junta de Castilla y León – Portal de datos abiertos
+org: Junta de Castilla y León
+level: ccaa
+sector: gobierno-abierto-administracion
+tags: [datos-abiertos, catalogo, castilla-y-leon, descargas, sector-publico, sie, estadistica]
+summary: >-
+  Catálogo de datos abiertos de la Junta de Castilla y León: 840 conjuntos descargables por URL directa
+  (.csv, .xls, .json) y CSV del catálogo completo regenerado a diario. Sin API; la estadística autonómica
+  (SIE, app SAS) tampoco.
+alerts:
+  - "El sufijo .json miente: curl .../1285085634877.json da 200 con un XLSX real (Content-Type spreadsheetml, 5.270 B con firma PK), no JSON; usar .csv o .xls del mismo id."
+  - "169 de los 840 conjuntos (20 %) llevan Licencia IGCYL-NC (no comercial) en la columna Licencia del CSV del catálogo (1284166186527.csv); filtrarlos antes de cualquier uso comercial."
+access: [download, portal]
+auth: none
+formats: [csv, xls, json, xml, shp, kml, rdf]
+update: daily
+license: CC-BY en 671 de 840 conjuntos; IGCYL-NC (no comercial) en 169 (columna Licencia del CSV del catálogo)
+base_url: https://datosabiertos.jcyl.es
+docs_url: https://datosabiertos.jcyl.es/web/es/catalogo-datos/terminos.html
+endpoints:
+  - path: /web/jcyl/risp/es/ciencia-tecnologia/general/1284166186527.csv
+    desc: Catálogo completo de los 840 conjuntos con 15 columnas (título, sector, organismo, licencia, formatos)
+    example: curl -s "https://datosabiertos.jcyl.es/web/jcyl/risp/es/ciencia-tecnologia/general/1284166186527.csv"
+    returns: "CSV ISO-8859-15 con ; de 715 KB; primera línea 'Fichero actualizado a fecha: ...' antes de la cabecera; regenerado a diario (03:28)"
+  - path: /web/jcyl/set/es/{sector}/{subcategoria}/{id}
+    desc: Página de detalle de un conjunto con sus distribuciones y formato de descarga
+    example: curl -s "https://datosabiertos.jcyl.es/web/jcyl/set/es/ciencia-tecnologia/general/1284166186527"
+  - path: /web/jcyl/risp/es/{categoria}/{slug}/{id}.{csv|xls|json}
+    desc: Descarga directa de una distribución; el id numérico sale del detalle del conjunto
+    example: curl -s "https://datosabiertos.jcyl.es/web/jcyl/risp/es/sector-publico/ingresos-tasas-bocyl/1285085634877.csv"
+    returns: "CSV UTF-8 con ; de 7 KB; el mismo id existe con .xls y .json"
+rate_limit: No documentado
+quirks: [static-html, latin1]
+ids: []
+gotchas:
+  - "El CSV del catálogo lleva una línea previa a la cabecera con la fecha de generación; los lectores ingenuos la toman como cabecera."
+  - "La página de listado no enumera los conjuntos: enlaza al CSV del catálogo y al buscador; el inventario programático es ese CSV, no el HTML."
+  - "El SIE (estadistica.jcyl.es) es una app SAS: /sie/ solo redirige por onLoad al broker /sie/sas/broker?_PROGRAM=mddbpgm.v2.indexv2.scl&_SERVICE=saswebl; sin JavaScript no se llega."
+  - "En el SIE el export .csv de una consulta responde con un frameset HTML, no el CSV; los módulos están en /sie/v2/{modulo}v2index.html y las tablas en frames con JS de época."
+tips:
+  - "Inventario en una llamada con el CSV del catálogo: sector y organismo permiten filtrar; la columna Licencia separa CC-BY (671) de IGCYL-NC (169, no comercial)."
+  - "Para series estadísticas municipales ir a ine-api-tempus; del SIE solo el padrón municipal 1986-1995 escapa a la serie del INE (que empieza en 1996)."
+related: [datos-gob-es-api, ine-codigos-territoriales, ine-api-tempus, placsp-datos-abiertos, bocyl-rss]
+status: active
+verified: "2026-10-05"

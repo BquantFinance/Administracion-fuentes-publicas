@@ -1,0 +1,36 @@
+id: bocyl-rss
+name: BOCYL – RSS por sección y boletín diario
+org: Junta de Castilla y León
+level: ccaa
+sector: legislacion-boletines
+tags: [boletines, castilla-y-leon, rss, sumario, disposiciones]
+summary: >-
+  Feeds RSS 2.0 del Boletín Oficial de Castilla y León por sección (I a V): un item por edición diaria
+  que enlaza a la página del boletín con el sumario y los PDF de cada disposición. No hay API de sumario
+  estructurado tipo BOE.
+access: [feed, portal]
+auth: none
+formats: [xml, html, pdf]
+update: daily
+license: Sin licencia específica publicada
+base_url: https://bocyl.jcyl.es
+docs_url: https://bocyl.jcyl.es/indiceRss.do
+endpoints:
+  - path: /rss.do?seccion={I|II|III|IV|V}
+    desc: RSS de una sección con las últimas ediciones diarias; un item por boletín del día
+    example: curl -s "https://bocyl.jcyl.es/rss.do?seccion=I"
+    returns: "<rss version=2.0><channel><title>BOCYL: I. COMUNIDAD DE CASTILLA Y LEÓN</title>… <item><title>Boletín del día 02/10/2026 edición 192</title><link>https://bocyl.jcyl.es/boletin.do?fechaBoletin=02/10/2026&amp;edicion=192</link>…"
+  - path: /boletin.do?fechaBoletin={dd/mm/aaaa}&edicion={n}
+    desc: Página del boletín de un día con el sumario y enlaces a los PDF de cada disposición
+    example: curl -s "https://bocyl.jcyl.es/boletin.do?fechaBoletin=01/10/2026&edicion=191"
+    returns: "HTML de 80 KB con enlaces a PDF del patrón /boletines/aaaa/mm/dd/pdf/BOCYL-S-ddmmaaaa-ed.pdf (sumario) y BOCYL-D-ddmmaaaa-n.pdf (disposición)"
+rate_limit: No documentado
+quirks: [url-drift]
+ids: []
+gotchas:
+  - El dominio histórico con tilde (boletínoficialcyl.jcyl.es, en punycode xn--boletnoficialcyl-dsb.jcyl.es) ya no resuelve (NXDOMAIN el 2026-10-02); el vigente es bocyl.jcyl.es.
+  - indiceRss.do no es el feed sino la página HTML de suscripción; los feeds reales son rss.do?seccion=I a V.
+  - La fecha va en formato español dd/mm/aaaa en la query (fechaBoletin=01/10/2026), no ISO.
+related: [boe-api-sumario, boe-feeds, jcyl-datos-abiertos, junta-andalucia-datos-abiertos]
+status: active
+verified: "2026-10-05"

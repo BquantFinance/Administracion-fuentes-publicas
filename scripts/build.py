@@ -345,7 +345,7 @@ def main() -> None:
         "qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. "
         "Contenido en castellano, claves en inglés.",
         "",
-        f"Fuentes: {len(sources)} · Productos: {len(idx['productos'])} · Recetas: {len(idx['recetas'])} · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Generado: {date.today().isoformat()}",
+        f"Fuentes: {len(sources)} · Productos: {len(idx['productos'])} · Recetas: {len(idx['recetas'])} · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana, Castilla y León y los ayuntamientos de Madrid y Barcelona · Generado: {date.today().isoformat()}",
         "",
         "## Empieza aquí",
         "",
