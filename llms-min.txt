@@ -42,7 +42,7 @@ Con * las que traen code: módulo, llamada y herramienta que ya las resuelven.
 - Empleo y Seguridad Social: mites-estadisticas, segsocial-estadisticas, sepe-estadisticas*
 - Gobierno abierto, transparencia y organización administrativa: ayuntamiento-barcelona-datos-abiertos*, ayuntamiento-madrid-datos-abiertos*, comunidad-madrid-datos-abiertos*, datos-gob-es-api, dir3-directorio, face-facturas, gencat-dades-obertes*, gva-dadesobertes-api*, jcyl-datos-abiertos, junta-andalucia-datos-abiertos*, pag-administracion-gob-es, transparencia-portal
 - Territorio, catastro y cartografía: catastro-ovc, cnig-centro-descargas*, idecyl-servicios, idee-servicios*, ine-cartografia-censal*
-- Meteorología y clima: aemet-opendata, aemet-otros-servicios
+- Meteorología y clima: aemet-opendata*, aemet-otros-servicios
 - Medio ambiente, agua y biodiversidad: miteco-banco-datos-naturaleza, miteco-calidad-aire, miteco-inventario-emisiones, miteco-prtr, miteco-saih-boletin-hidrologico
 - Energía: cnmc-data*, minetur-precios-carburantes*, miteco-energia-estadisticas, omie-mercado, ree-redata
 - Sanidad y medicamentos: aemps-cima-api, aemps-otros-registros, centros-sanitarios-ccaa*, isciii-cne, sanidad-nomenclator-facturacion, sanidad-portal-estadistico

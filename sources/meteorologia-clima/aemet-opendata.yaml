@@ -9,6 +9,11 @@ summary: >-
   API REST con clave gratuita (JWT): predicciones por municipio, provincia y comunidad, observación de estaciones,
   climatología diaria, mensual, normales y extremos, avisos CAP, radar, rayos, radiación, ozono, satélite y
   maestro de municipios. 64 rutas en la especificación OpenAPI 3.0.1.
+code:
+  module: fuentes_publicas.clientes.aemet
+  use:
+    - "aemet.prediccion_diaria('16078'): días [{fecha, temperatura{maxima, minima}, probPrecipitacion[]}]; AEMET_KEY en el entorno; ante 429 espera 62 s"
+    - "aemet.get('/observacion/convencional/todas'): JSON del fichero de datos (dos pasos) decodificado de ISO-8859-15; 404 y 429 llegan dentro del JSON con HTTP 200"
 access: [api-rest]
 auth: api-key
 formats: [json, xml, csv, png]
