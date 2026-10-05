@@ -9,7 +9,7 @@ Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras med
 **radar-licitaciones** · Avisos de licitaciones nuevas por CPV, provincia u órgano de contratación
 - para: pymes y consultoras que licitan con la Administración
 - fichas: placsp-datos-abiertos, dir3-directorio · recetas: licitaciones-nuevas, organismo-a-dir3-y-nif
-- piezas: ejemplos/licitaciones.py (solo lo nuevo por CPV y palabra); almacen.py sync --fuentes placsp para histórico y búsquedas
+- piezas: fuentes-radar con ejemplos/radar/ (aviso diario en GitHub Actions: issue, RSS y JSON; CPV, NUTS, importe y palabras); almacen.py sync --fuentes placsp para histórico y búsquedas
 - frescura: diaria; el feed 643 se regenera hacia las 20:15 y lo publicado hoy solo está en el buscador del portal · volumen: feed 643, 2,2 GB al año en ZIP (150 a 300 MB al mes)
 - licencia: libre con cita de la fuente
 - trampa: una entrada por cada cambio de estado; quedarse con la de updated máximo por id y leer las anulaciones (deleted-entry)
@@ -25,7 +25,7 @@ Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras med
 **radar-ayudas** · Convocatorias de subvenciones nuevas que encajan con el perfil de una empresa (sector, región, tipo de beneficiario)
 - para: pymes, gestorías y consultoras de financiación pública
 - fichas: bdns-api, boe-api-sumario · recetas: subvenciones-convocatorias-recientes
-- piezas: scripts/clientes/bdns.py (convocatorias y concesiones paginadas, altas por fecha de alta); ejemplos/boe_hoy.py subvención
+- piezas: fuentes-radar con ejemplos/radar/ (convocatorias nuevas por palabras y nivel, aviso diario); scripts/clientes/bdns.py (convocatorias y concesiones paginadas, altas por fecha de alta)
 - frescura: diaria; las concesiones se dan de alta con meses de retraso (filtrar por fechaRegInicio, no por fecha de concesión) · volumen: 655.000 convocatorias desde 2014; 30 millones de concesiones vivas, unos 11 GB en CSV
 - licencia: con las restricciones del aviso legal de la BDNS; datos de personas físicas solo para control, archivo, investigación o estadística
 - trampa: la exportación sin pageSize devuelve 50 filas aunque haya miles, sin aviso
@@ -41,7 +41,7 @@ Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras med
 **leads-sociedades-nuevas** · Sociedades recién constituidas por provincia y objeto social, con capital y domicilio
 - para: proveedores B2B (asesorías, bancos, software de gestión, seguros)
 - fichas: borme-api-sumario · recetas: actos-mercantiles-borme
-- piezas: almacen.py sync --fuentes borme (actos Constitución con objeto, domicilio y capital en detalle)
+- piezas: fuentes-radar con ejemplos/radar/ (constituciones por provincia, objeto social y capital, aviso diario); almacen.py sync --fuentes borme para el histórico; empresa_nif con la denominación para el NIF
 - frescura: diaria, de lunes a viernes · volumen: 2025, 249 sumarios y unos 300 MB de XML de la sección A; un día, 1.785 empresas en 100 KB de Parquet
 - licencia: libre con cita; administradores y socios son datos personales y el almacén no los guarda
 - trampa: sin NIF ni CNAE (el NIF sale por denominación con empresa_nif cuando la sociedad ha recibido alguna ayuda o contrato); el objeto social es texto libre y la denominación cambia con los actos
@@ -65,7 +65,7 @@ Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras med
 **monitor-regulatorio** · Avisos de normas nuevas o modificadas por materia y del texto vigente de un artículo
 - para: despachos, compliance, legaltech
 - fichas: boe-api-sumario, boe-api-legislacion-consolidada, boe-eli · recetas: boe-sumario-y-texto-consolidado, buscar-norma-por-titulo
-- piezas: ejemplos/boe_hoy.py; scripts/clientes/boe.py (normas actualizadas ayer y versión vigente de un bloque)
+- piezas: fuentes-radar con ejemplos/radar/ (BOE por sección, departamento y palabras, aviso diario); scripts/clientes/boe.py (normas actualizadas ayer y versión vigente de un bloque)
 - frescura: diaria; 43 normas consolidadas actualizadas el 30/09/2026 · volumen: 12.421 normas consolidadas, unos 1,4 GB de XML
 - licencia: libre con la cita literal del BOE; el texto consolidado debe decir que es meramente informativo
 - trampa: from y to filtran por fecha de actualización del consolidado, no por publicación

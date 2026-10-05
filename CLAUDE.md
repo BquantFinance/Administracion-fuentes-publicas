@@ -120,7 +120,9 @@ Judicial o UE, solo cuando lo indique el propietario.
   v0.4.0 y v0.5.0 (respuestas compactas) publicadas el 2026-10-01 (registro oficial, sha256 del .mcpb coincide). 0.6.0
   publicada el 2026-10-05 con la etiqueta `0.6.0`, sin v, sobre 92b68dc (registro, sha256 e instalación desde la etiqueta
   comprobados); un primer intento sobre 46911a0 falló porque los ficheros seguían en 0.5.0: la versión se sube en main
-  antes de crear la release, que usa el código de la etiqueta.
+  antes de crear la release, que usa el código de la etiqueta. 0.7.0 (radar, directorio NIF y nombre, SIGPAC en
+  ubicaciones, PR 5 de seguridad) subida en esos ficheros el 2026-10-05; falta crear la release v0.7.0, con v, que la
+  plantilla ejemplos/radar/radar-workflow.yml instala.
 - **CI**: `ci.yml` (validate, build al día y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC,
   manual y al cambiar el flujo: recetas, ejemplos de fichas, cargadores, ejemplos y enlaces desde la IP de GitHub;
   comenta en el issue de verificación si algo falla). Secreto `AEMET_KEY` en el repositorio.

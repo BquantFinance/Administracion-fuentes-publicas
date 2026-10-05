@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fuentes-publicas-mcp"
-version = "0.6.0"
+version = "0.7.0"
 description = "Servidor MCP del catálogo de fuentes de datos de la Administración pública española"
 readme = "guides/servidor-mcp.md"
 license = "CC0-1.0"
@@ -23,6 +23,7 @@ Documentation = "https://github.com/BquantFinance/Administracion-fuentes-publica
 mcp-catalogo = "fuentes_publicas.mcp_catalogo:main"
 fuentes-publicas-mcp = "fuentes_publicas.mcp_catalogo:main"
 fuentes-almacen = "fuentes_publicas.clientes.almacen:main"
+fuentes-radar = "fuentes_publicas.clientes.radar:main"
 
 [tool.setuptools]
 packages = ["fuentes_publicas", "fuentes_publicas.clientes"]

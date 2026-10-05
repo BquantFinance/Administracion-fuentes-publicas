@@ -34,6 +34,7 @@ import ine_tempus  # noqa: E402
 import ogc  # noqa: E402
 import pcaxis  # noqa: E402
 import placsp  # noqa: E402
+import radar  # noqa: E402
 import saiku  # noqa: E402
 import sepe  # noqa: E402
 import sesion  # noqa: E402
@@ -534,6 +535,38 @@ def bdns_terceros_directorio_nif_nombre():
     assert uca["id_persona"] == 5958646 and uca["nombres"] == ["UNIVERSIDAD DE CADIZ", "UNIVERSIDAD DE CÁDIZ"]  # 4 filas, espacios fuera
     assert r["personas_fisicas_omitidas"] == 1 and len(r["empresas"]) == 4 and not r["tope"]
     assert bdns.parse_terceros([{"id": i, "descripcion": f"B{i:08d} - X"} for i in range(150)])["tope"]
+
+
+@test
+def radar_filtros_y_salidas():
+    import json as _j
+    import tempfile
+    import xml.etree.ElementTree as ET
+    e, _ = placsp.parse_feed((M / "placsp-feed-643.atom").read_bytes())
+    assert radar.filtrar_licitaciones(e, {}) == []  # por defecto solo en plazo (PUB) y las dos de la muestra están resueltas
+    todas = radar.filtrar_licitaciones(e, {"estados": ["*"]})
+    assert len(todas) == 2 and todas[0]["importe"] == 98030.3  # sin la anulación; ordenadas por importe
+    assert [x["importe"] for x in radar.filtrar_licitaciones(e, {"estados": ["*"], "cpv": ["45"], "nuts": ["ES3"]})] == [98030.3]
+    assert radar.filtrar_licitaciones(e, {"estados": ["*"], "importe_min": 100000}) == []
+    s = js("boe-sumario-20260930.json")["data"]["sumario"]
+    assert len(radar.filtrar_boe(list(boe.items(s)), {"secciones": ["1"]})) == 3
+    convs = js("bdns-convocatorias-busqueda.json")["content"]
+    assert [c["detalle"].split()[0] for c in radar.filtrar_ayudas(convs, {"nivel": ["estado"]})] == ["ESTADO"]
+    assert radar.filtrar_ayudas(convs, {"palabras": ["sica"]})[0]["id"] == str(convs[0]["numeroConvocatoria"])
+    emp = boe.parse_borme_a(ET.fromstring((M / "borme-A-2026-189-28.xml").read_bytes()))
+    xs = [{"documento": "BORME-A-2026-189-28", "provincia": "MADRID", "fecha": "2026-09-30", "empresa": x} for x in emp]
+    socs = radar.filtrar_sociedades(xs, {})
+    assert len(socs) == 1 and socs[0]["titulo"] == "MA5 MAMEY SL" and socs[0]["importe"] == 3000.0
+    assert "Nombramientos" not in socs[0]["detalle"]  # solo el acto de constitución, sin personas
+    assert radar.casa("Subvenciones a pymes", ["subvención"]) and not radar.casa("Ayudas a pymes", ["subvención"])
+    feed = radar.rss(todas, "x")
+    assert len(ET.fromstring(feed.encode()).findall(".//item")) == 2
+    with tempfile.TemporaryDirectory() as d:  # segunda pasada sin nada nuevo: el estado recuerda lo visto
+        import unittest.mock as um
+        with um.patch.object(radar, "recoger", lambda *a, **k: todas):
+            r1 = radar.ejecutar({"licitaciones": {}}, Path(d, "e.json"), Path(d), 3)
+            r2 = radar.ejecutar({"licitaciones": {}}, Path(d, "e.json"), Path(d), 3)
+        assert r1["nuevos"] == 2 and r2["nuevos"] == 0 and _j.loads(Path(d, "ultimo.json").read_text())["nuevos"] == 0
 
 
 def main() -> int:

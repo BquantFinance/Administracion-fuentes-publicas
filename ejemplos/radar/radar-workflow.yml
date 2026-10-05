@@ -1,0 +1,47 @@
+# Radar de datos públicos en tu propio repositorio, sin servidores ni coste:
+#   1. Copia este fichero a .github/workflows/radar.yml y radar.yaml a la raíz de tu repositorio; ajusta los filtros.
+#   2. Actions -> radar -> Run workflow para la primera pasada (o espera al cron de las 06:41 UTC).
+# Cada mañana abre un issue con solo lo nuevo y deja en radar/ el estado (lo ya visto), ultimo.json y feed.xml (RSS;
+# con GitHub Pages, o en https://raw.githubusercontent.com/<usuario>/<repo>/main/radar/feed.xml).
+name: radar
+
+on:
+  schedule:
+    - cron: "41 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write   # guardar radar/estado.json y feed.xml
+  issues: write     # abrir el aviso
+
+concurrency:
+  group: radar
+  cancel-in-progress: false
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar el cliente (fijado a una versión publicada)
+        run: pip install "fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas@v0.7.0"
+      - name: Radar
+        run: fuentes-radar radar.yaml --estado radar/estado.json --salida radar
+      - name: Aviso con lo nuevo
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          n=$(python -c "import json; print(json.load(open('radar/ultimo.json'))['nuevos'])")
+          if [ "$n" -gt 0 ]; then
+            gh issue create --title "Radar $(date -u +%F): $n novedades" --body-file radar/ultimo.md
+          fi
+      - name: Guardar estado y RSS
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add radar
+          git commit -m "radar $(date -u +%F)" && git push || echo "sin cambios"

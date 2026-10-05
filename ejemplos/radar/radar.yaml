@@ -1,0 +1,23 @@
+# Qué vigilar. Cada bloque es opcional: borra el que no uses. Dentro de un bloque, los campos se combinan (y) y los
+# valores de una lista son alternativas (o). Las palabras se buscan sin tildes ni mayúsculas.
+titulo: Radar de ejemplo
+
+licitaciones:              # PLACSP: feed 643 (Estado y perfiles alojados) y 1044 (plataformas autonómicas)
+  cpv: ["72", "48"]        # prefijos CPV: 72 servicios TI, 48 software
+  palabras: ["software", "ciberseguridad", "datos", "plataforma"]   # en el objeto o el órgano
+  # nuts: ["ES30"]         # prefijo NUTS del lugar de ejecución (ES30 Comunidad de Madrid)
+  # importe_min: 50000     # sin IVA
+  # estados: ["PUB"]       # PUB en plazo (por defecto), EV evaluación, ADJ adjudicada, RES resuelta; ["*"] todos
+
+ayudas:                    # BDNS: convocatorias registradas
+  palabras: ["digitalización", "inteligencia artificial", "pyme"]
+  # nivel: ["ESTADO", "AUTONOMICA"]   # ESTADO, AUTONOMICA, LOCAL, OTROS
+
+boe:                       # sumario diario del BOE
+  secciones: ["1", "3"]    # 1 disposiciones generales, 3 otras disposiciones (ayudas, convenios)
+  palabras: ["datos abiertos", "inteligencia artificial", "subvención"]
+
+sociedades:                # BORME, sección A: constituciones (solo el acto; sin administradores ni socios)
+  provincias: ["28", "08"] # código INE de provincia o nombre (MADRID)
+  palabras: ["software", "inteligencia artificial", "datos"]   # en el objeto social
+  # capital_min: 3000

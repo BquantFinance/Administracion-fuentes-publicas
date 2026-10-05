@@ -81,6 +81,7 @@ jobs:
           ejecutar ejemplos/empresa_nif.py A02066116
           ejecutar ejemplos/licitaciones.py 45
           ejecutar ejemplos/adjudicaciones.py 0   # solo hoy: con 1 la cadena del 643 (15 MB por página) pasaba de los 10 minutos desde GitHub
+          ejecutar scripts/clientes/radar.py ejemplos/radar/radar.yaml --estado /tmp/radar/estado.json --salida /tmp/radar   # lo que corre la plantilla del radar
           if [ -n "$AEMET_KEY" ]; then ejecutar scripts/clientes/aemet.py 16078; else echo "AEMET sin clave: omitido" >> cargadores-report.md; fi
           cat cargadores-report.md
           echo "exit=$fallos" >> "$GITHUB_OUTPUT"
