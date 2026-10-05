@@ -152,8 +152,10 @@ Judicial o UE, solo cuando lo indique el propietario.
 2. Ronda desde una IP residencial para los hosts bloqueados (necesita al propietario): `python
    scripts/ronda_residencial.py` desde casa deja `ronda-residencial.md` (ejemplos de 18 fichas, recetas que las citan y
    carburantes, sin IP ni claves); con él se fechan los `verified` o se anota en `gotchas` lo que falle también desde casa.
-3. PyPI (necesita al propietario: alta del publicador de confianza en pypi.org): con el paquete allí, `uvx` lo arranca
-   sin git y el registro de MCP admite la entrada pypi además del .mcpb.
+3. PyPI: `publicar-pypi.yml` construye fuentes-publicas-mcp (nombre libre; wheel y sdist pasan twine check el
+   2026-10-05) y lo sube con OIDC, apagado hasta que el propietario dé de alta el publicador pendiente en pypi.org
+   (proyecto fuentes-publicas-mcp, flujo publicar-pypi.yml, entorno pypi) y cree la variable PYPI=si; luego Run workflow
+   sube la versión de main, cada release la suya, y server.json puede llevar la entrada pypi.
 4. Necesidades sin ficha: `buscar` sin resultados enlaza la plantilla `nueva-fuente` (2026-10-05); revisar qué se pide.
 5. Issues abiertos: 3 (importe inflado de PLACSP en una tarea de evaluación; falta localizar el expediente en el
    histórico) y 4 (fuentes de la comunidad, a la espera de su PR).
