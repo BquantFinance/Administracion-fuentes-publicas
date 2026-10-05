@@ -680,6 +680,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--hasta", help="AAAA-MM-DD; por defecto, ayer")
     s.add_argument("--minutos", type=float, default=0, help="tope de tiempo; 0 sin tope")
     s.add_argument("--paginas", type=int, default=0, help="tope de páginas por feed de PLACSP; 0 sin tope")
+    s.add_argument("--feeds", default="643,1044,1143", help="feeds de PLACSP; solo 643 (perfiles alojados) pesa un tercio")
     z = sub.add_parser("zip-placsp", help="carga ZIP mensuales o anuales de PLACSP")
     z.add_argument("periodo", nargs="+", help="AAAAMM (2025 y 2026) o AAAA")
     z.add_argument("--feeds", default="643,1044,1143")
@@ -702,7 +703,7 @@ def main(argv: list[str] | None = None) -> int:
         alm = Almacen(a.dir)
         for f in [x.strip() for x in a.fuentes.split(",") if x.strip()]:
             if f == "placsp":
-                n = alm.sync_placsp(desde, fin, max_paginas=a.paginas or None)
+                n = alm.sync_placsp(desde, fin, {k: FEEDS[k] for k in a.feeds.split(",")}, max_paginas=a.paginas or None)
             elif f in POR_DIA:
                 n = alm.sync_dias(f, desde, hasta, fin)
             else:
