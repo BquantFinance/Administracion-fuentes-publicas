@@ -9,6 +9,11 @@ summary: >-
   Registro de empresas inscritas para contratar con el sector público y su clasificación. La consulta por empresa
   exige certificado; sin él solo hay el XML de prohibiciones de contratar vigentes, los esquemas XSD del
   certificado, el visor de certificados ROLECE y DEUC y el generador del DEUC.
+code:
+  module: fuentes_publicas.clientes.consulta
+  use:
+    - "consulta.empresa_nif('B87601571')['prohibiciones_contratar']: prohibiciones vigentes de la empresa, casadas por denominación normalizada (el XML no trae el NIF)"
+  mcp: [empresa_nif]
 access: [portal, download]
 auth: certificate
 formats: [html, xml, pdf, zip]

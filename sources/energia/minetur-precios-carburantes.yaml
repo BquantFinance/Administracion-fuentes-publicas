@@ -9,6 +9,11 @@ summary: >-
   Precios vigentes de todos los carburantes en 11.484 estaciones terrestres y 149 postes marítimos, con
   coordenadas, dirección, horario, rótulo y margen, actualizados cada media hora, e histórico diario desde 2007.
   JSON o XML sin autenticación, filtros por CCAA, provincia, municipio y producto.
+code:
+  module: fuentes_publicas.clientes.almacen
+  use:
+    - "fuentes-almacen sync --fuentes carburantes --desde 2026-10-03: tabla carburantes, una fila por estación y día (11.475 el 03/10) con la coma decimal convertida"
+  mcp: [almacen_sql]
 access: [api-rest]
 auth: none
 formats: [json, xml]

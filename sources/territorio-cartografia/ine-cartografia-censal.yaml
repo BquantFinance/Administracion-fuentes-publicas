@@ -11,6 +11,10 @@ summary: >-
   callejero del Censo Electoral con sus variaciones semestrales.
 alerts:
   - Cada colección anual de la API mezcla secciones (TIPO SECCIONADO, 36554 en 2025) y distritos (TIPO DISTRITO, CSEC 000, 10457); filtrar TIPO='SECCIONADO', porque TIPO='SECCION' devuelve 0 sin error.
+code:
+  module: fuentes_publicas.clientes.ogc
+  use:
+    - "ogc.entidades(url_items, filter=\"CUMUN='28079' AND TIPO='SECCIONADO'\"): las 2.462 secciones de Madrid de Secciones_2025 en GeoJSON siguiendo next"
 access: [download, ogc, api-rest]
 auth: none
 formats: [shp, zip, pdf, txt, geojson, gml]

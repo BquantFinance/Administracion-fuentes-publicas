@@ -9,6 +9,11 @@ summary: >-
   Mapa geológico continuo GEODE 1:50.000, MAGNA 50 vectorial y decenas de capas más (puntos de agua, minería,
   movimientos del terreno, fallas activas, geoquímica, catálogo sísmico IGN-UPM) consultables por ArcGIS REST (JSON
   y GeoJSON) y WMS, más las hojas MAGNA 50 en imagen, PDF y memoria.
+code:
+  module: fuentes_publicas.clientes.arcgis
+  use:
+    - "arcgis.entidades(url_capa, where=\"PROVINCIA='MADRID'\"): los 5.747 puntos de agua de Madrid paginando por OID, aunque cada consulta dé 1.000"
+    - "arcgis.entidades(url_capa): en capas sin paginación (terremotos, MAGNA 50) pide los objectIds y los consulta por POST en lotes; 6.609 de 6.609 terremotos"
 access: [api-rest, ogc, download, portal]
 auth: none
 formats: [json, geojson, xml, pdf, jpg, zip]

@@ -459,6 +459,15 @@
     "referencias-proyecto"
    ],
    "summary": "Todas las ayudas concedidas por la AEI desde 2008 (130.388 filas) en CSV con año de convocatoria, convocatoria, referencia, género del IP, área, título, CIF y entidad, CCAA, provincia e importe, filtrable por URL y con resumen del proyecto, más el buscador de convocatorias y sus resoluciones en PDF.",
+   "code": {
+    "module": "fuentes_publicas.clientes.consulta",
+    "use": [
+     "consulta.empresa_nif('Q1132001G')['aei']: las 970 ayudas de la AEI al NIF con el importe total (coma decimal convertida), de la más reciente a la más antigua"
+    ],
+    "mcp": [
+     "empresa_nif"
+    ]
+   },
    "access": [
     "download",
     "portal"
@@ -922,6 +931,13 @@
     "arcgis-rest"
    ],
    "summary": "Mapa geológico continuo GEODE 1:50.000, MAGNA 50 vectorial y decenas de capas más (puntos de agua, minería, movimientos del terreno, fallas activas, geoquímica, catálogo sísmico IGN-UPM) consultables por ArcGIS REST (JSON y GeoJSON) y WMS, más las hojas MAGNA 50 en imagen, PDF y memoria.",
+   "code": {
+    "module": "fuentes_publicas.clientes.arcgis",
+    "use": [
+     "arcgis.entidades(url_capa, where=\"PROVINCIA='MADRID'\"): los 5.747 puntos de agua de Madrid paginando por OID, aunque cada consulta dé 1.000",
+     "arcgis.entidades(url_capa): en capas sin paginación (terremotos, MAGNA 50) pide los objectIds y los consulta por POST en lotes; 6.609 de 6.609 terremotos"
+    ]
+   },
    "access": [
     "api-rest",
     "ogc",
@@ -1141,6 +1157,12 @@
    "alerts": [
     "pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.datacomex",
+    "use": [
+     "datacomex.catalogo('ObtenerPaises'): los 292 países con el código de Aduanas de 3 cifras que exige pa (un ISO como FR da vacío), sin token"
+    ]
+   },
    "access": [
     "api-rest",
     "portal",
@@ -1700,6 +1722,15 @@
     "prohibiciones-contratar"
    ],
    "summary": "Registro de empresas inscritas para contratar con el sector público y su clasificación. La consulta por empresa exige certificado; sin él solo hay el XML de prohibiciones de contratar vigentes, los esquemas XSD del certificado, el visor de certificados ROLECE y DEUC y el generador del DEUC.",
+   "code": {
+    "module": "fuentes_publicas.clientes.consulta",
+    "use": [
+     "consulta.empresa_nif('B87601571')['prohibiciones_contratar']: prohibiciones vigentes de la empresa, casadas por denominación normalizada (el XML no trae el NIF)"
+    ],
+    "mcp": [
+     "empresa_nif"
+    ]
+   },
    "access": [
     "portal",
     "download"
@@ -1969,6 +2000,16 @@
     "anuario"
    ],
    "summary": "Sistema PC-Axis (el mismo software que INEbase) con las estadísticas culturales: empleo cultural, bibliotecas, museos, cine, comercio exterior, bono cultural, fundaciones y asuntos taurinos; cada tabla se descarga en CSV, px o xlsx con URL deducible. Más el Anuario en PDF.",
+   "code": {
+    "module": "fuentes_publicas.clientes.pcaxis",
+    "use": [
+     "pcaxis.tablas_de_indice(url_indice): las URL csv_bdsc de las tablas de un índice CulturaDynPx (/t1/p1f/M_Anuales/), con el &amp; ya limpio",
+     "pcaxis.tabla(url): una tabla en filas (156 en T1FM1001) con coma decimal y punto de miles convertidos, leída en UTF-8 aunque diga ISO-8859-15"
+    ],
+    "mcp": [
+     "tabla_pcaxis"
+    ]
+   },
    "access": [
     "download",
     "portal"
@@ -2181,6 +2222,12 @@
     "boletines"
    ],
    "summary": "Portal OLAP (Saiku 2.5) con 17 cubos consultables sin clave por API REST: feminicidios desde 2003, menores, llamadas al 016, ATENPRO, VioGén, denuncias, órdenes de protección y ayudas, por CCAA, provincia, año y mes, con exportación CSV y xlsx. Boletines mensuales en PDF y DERA en xlsx.",
+   "code": {
+    "module": "fuentes_publicas.clientes.saiku",
+    "use": [
+     "saiku.Saiku().consulta('040 Servicio 016', mdx): el cellset en filas, cabecera primero, tras fijar con discover la cookie sin la que se pierde la consulta"
+    ]
+   },
    "access": [
     "api-rest",
     "download",
@@ -2263,7 +2310,7 @@
     "VioGén (cubo 090, casos activos y protección policial) y denuncias (110) proceden del Ministerio del Interior; la criminalidad general está en interior-criminalidad."
    ],
    "tips": [
-    "Flujo en cuatro llamadas con el mismo tarro (discover, POST query, POST result, GET export), implementado en scripts/clientes/saiku.py; un CrossJoin de año por CCAA en feminicidios dio 331 filas en 31 ms.",
+    "Flujo en cuatro llamadas con el mismo tarro (discover, POST query, POST result, GET export); un CrossJoin de año por CCAA en feminicidios dio 331 filas en 31 ms.",
     "pd.read_csv(io.BytesIO(r.content)) lee el CSV directo; en el JSON, cellset[0] son cabeceras y cellset[1:] filas con c['value'].",
     "El cubo 010 tiene 14 dimensiones (edad y nacionalidad de víctima y agresor, suicidio, relación, convivencia, denuncia previa) y las medidas feminicidios y huérfanos menores."
    ],
@@ -3037,6 +3084,16 @@
     "pc-axis"
    ],
    "summary": "Estadísticas de enseñanza no universitaria en EDUCAbase (PC-Axis idéntico al del INE, con descarga CSV, px y xlsx por tabla), estadísticas universitarias SIIU en xlsx (matriculados y egresados por titulación 2015-2024), y RUCT y Registro Estatal de Centros Docentes con exportación xls sin sesión.",
+   "code": {
+    "module": "fuentes_publicas.clientes.pcaxis",
+    "use": [
+     "pcaxis.tablas_de_indice(url_indice): las URL csv_bdsc de las tablas de un índice EducaDynPx (13 en adultos 2024-2025), con el &amp; ya limpio",
+     "pcaxis.tabla(url): una tabla en filas (9.072 en adul_01) con los números convertidos, leída en UTF-8 aunque la cabecera diga ISO-8859-15"
+    ],
+    "mcp": [
+     "tabla_pcaxis"
+    ]
+   },
    "access": [
     "download",
     "portal"
@@ -3674,6 +3731,15 @@
     "postes-maritimos"
    ],
    "summary": "Precios vigentes de todos los carburantes en 11.484 estaciones terrestres y 149 postes marítimos, con coordenadas, dirección, horario, rótulo y margen, actualizados cada media hora, e histórico diario desde 2007. JSON o XML sin autenticación, filtros por CCAA, provincia, municipio y producto.",
+   "code": {
+    "module": "fuentes_publicas.clientes.almacen",
+    "use": [
+     "fuentes-almacen sync --fuentes carburantes --desde 2026-10-03: tabla carburantes, una fila por estación y día (11.475 el 03/10) con la coma decimal convertida"
+    ],
+    "mcp": [
+     "almacen_sql"
+    ]
+   },
    "access": [
     "api-rest"
    ],
@@ -8850,6 +8916,12 @@
     "arcgis"
    ],
    "summary": "Dos xlsx con la fracción de hogares o viviendas con cobertura por tecnología (FTTH, HFC, inalámbrico, 4G, 5G) y velocidad (30 Mbps a 1 Gbps) por municipio (código INE), provincia y CCAA de 2013 a 2025 y por entidad singular hasta 2020, capas ArcGIS consultables del último año e informes en PDF.",
+   "code": {
+    "module": "fuentes_publicas.clientes.arcgis",
+    "use": [
+     "arcgis.entidades(arcgis.COBERTURA_FTTH): las 8.132 filas de cobertura FTTH por municipio paginando por OID; una consulta sola se queda en 2.000 sin error"
+    ]
+   },
    "access": [
     "download",
     "api-rest"
@@ -9281,6 +9353,13 @@
     "En WMS 1.3.0 con CRS=EPSG:4258 el BBOX va en orden lat,lon; en orden lon,lat responde 200 con una imagen en blanco de 2 KB, sin error.",
     "En los WFS de servicios.idee.es, numberMatched repite numberReturned mientras quedan páginas (count=5 da 5; hits da 1381 en el mismo bbox); el total solo sale con resultType=hits y el final, cuando falta next."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ogc",
+    "use": [
+     "ogc.entidades('https://api-features.idee.es/collections/address/items', bbox=bbox): todas las entidades siguiendo next (349 portales en un bbox de Madrid)",
+     "ogc.colecciones('https://api-features.idee.es'): id y título de sus 38 colecciones (address, roadlink, watercourse...)"
+    ]
+   },
    "access": [
     "ogc",
     "api-rest",
@@ -9441,6 +9520,12 @@
    "alerts": [
     "Cada colección anual de la API mezcla secciones (TIPO SECCIONADO, 36554 en 2025) y distritos (TIPO DISTRITO, CSEC 000, 10457); filtrar TIPO='SECCIONADO', porque TIPO='SECCION' devuelve 0 sin error."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ogc",
+    "use": [
+     "ogc.entidades(url_items, filter=\"CUMUN='28079' AND TIPO='SECCIONADO'\"): las 2.462 secciones de Madrid de Secciones_2025 en GeoJSON siguiendo next"
+    ]
+   },
    "access": [
     "download",
     "ogc",

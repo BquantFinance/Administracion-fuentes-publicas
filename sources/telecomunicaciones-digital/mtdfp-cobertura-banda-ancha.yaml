@@ -9,6 +9,10 @@ summary: >-
   Dos xlsx con la fracción de hogares o viviendas con cobertura por tecnología (FTTH, HFC, inalámbrico, 4G,
   5G) y velocidad (30 Mbps a 1 Gbps) por municipio (código INE), provincia y CCAA de 2013 a 2025 y por entidad
   singular hasta 2020, capas ArcGIS consultables del último año e informes en PDF.
+code:
+  module: fuentes_publicas.clientes.arcgis
+  use:
+    - "arcgis.entidades(arcgis.COBERTURA_FTTH): las 8.132 filas de cobertura FTTH por municipio paginando por OID; una consulta sola se queda en 2.000 sin error"
 access: [download, api-rest]
 auth: none
 formats: [xlsx, json, geojson, pdf, html]

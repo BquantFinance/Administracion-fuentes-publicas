@@ -977,6 +977,7 @@ related: placsp-datos-abiertos, dir3-directorio, boe-api-sumario
 ## hacienda-registro-licitadores
 ROLECSP – Registro Oficial de Licitadores y Empresas Clasificadas del Sector Público | Dirección General del Patrimonio del Estado
 summary: Registro de empresas inscritas para contratar con el sector público y su clasificación. La consulta por empresa exige certificado; sin él solo hay el XML de prohibiciones de contratar vigentes, los esquemas XSD del certificado, el visor de certificados ROLECE y DEUC y el generador del DEUC.
+code: fuentes_publicas.clientes.consulta | consulta.empresa_nif('B87601571')['prohibiciones_contratar']: prohibiciones vigentes de la empresa, casadas por denominación normalizada (el XML no trae el NIF) | mcp: empresa_nif
 access: portal, download | auth: certificate | formats: html, xml, pdf, zip | update: daily | status: degraded | verified: 2026-10-01
 license: Consulta restringida; incluye datos personales de administradores y apoderados
 base_url: https://registrodelicitadores.gob.es/rolece/public/inicio.action
@@ -1749,6 +1750,7 @@ IDEE – Catálogos CSW y servicios INSPIRE del IGN (WFS, WMS, WMTS, WCS) | Cons
 summary: Catálogo CSW INSPIRE y CODSI y servicios del Sistema Cartográfico Nacional: WFS en GML y API Features en GeoJSON de hidrografía, transportes, ocupación del suelo y direcciones, WMS, WMTS y WCS del MDT, y límites, NGBE y núcleos de población del IGN en www.ign.es y api-features.ign.es.
 !! En WMS 1.3.0 con CRS=EPSG:4258 el BBOX va en orden lat,lon; en orden lon,lat responde 200 con una imagen en blanco de 2 KB, sin error.
 !! En los WFS de servicios.idee.es, numberMatched repite numberReturned mientras quedan páginas (count=5 da 5; hits da 1381 en el mismo bbox); el total solo sale con resultType=hits y el final, cuando falta next.
+code: fuentes_publicas.clientes.ogc | ogc.entidades('https://api-features.idee.es/collections/address/items', bbox=bbox): todas las entidades siguiendo next (349 portales en un bbox de Madrid) | ogc.colecciones('https://api-features.idee.es'): id y título de sus 38 colecciones (address, roadlink, watercourse...)
 access: ogc, api-rest, portal | auth: none | formats: xml, json, gml, geojson, png, jpg, geotiff | update: irregular | status: active | verified: 2026-10-01
 coverage: Servicios vigentes; ocupación del suelo procede de SIOSE AR 2017; NGBE con fechas de versión 2018-2025
 license: Metadatos libres; datos del IGN CC BY 4.0 con cita; cada servicio ajeno con su licencia
@@ -1807,6 +1809,7 @@ related: cnig-centro-descargas, catastro-ovc, ine-codigos-territoriales, miteco-
 INE – Cartografía de secciones censales y callejero del Censo Electoral | Instituto Nacional de Estadística
 summary: Shapefile anual a 1 de enero de las secciones censales (36.669 en 2026, ETRS89 UTM 30) con códigos de sección, distrito, municipio, provincia, comunidad y NUTS desde 2001, las mismas geometrías en GeoJSON por API OGC y el callejero del Censo Electoral con sus variaciones semestrales.
 !! Cada colección anual de la API mezcla secciones (TIPO SECCIONADO, 36554 en 2025) y distritos (TIPO DISTRITO, CSEC 000, 10457); filtrar TIPO='SECCIONADO', porque TIPO='SECCION' devuelve 0 sin error.
+code: fuentes_publicas.clientes.ogc | ogc.entidades(url_items, filter="CUMUN='28079' AND TIPO='SECCIONADO'"): las 2.462 secciones de Madrid de Secciones_2025 en GeoJSON siguiendo next
 access: download, ogc, api-rest | auth: none | formats: shp, zip, pdf, txt, geojson, gml | update: annual | status: active | verified: 2026-10-01
 coverage: Seccionado 2001 y 2003-2026 (2002 da 404); en la API, 2007-2026 y censos 2001 y 2011; callejero nacional de julio desde 2001 y de enero desde 2011; variaciones desde 2011
 license: Reutilización libre con cita de la fuente (licencia INE compatible CC BY 4.0)
@@ -2126,6 +2129,7 @@ related: minetur-precios-carburantes, miteco-energia-estadisticas, ree-redata, o
 ## minetur-precios-carburantes
 Geoportal de gasolineras – API REST de precios de carburantes | Secretaría de Estado de Energía
 summary: Precios vigentes de todos los carburantes en 11.484 estaciones terrestres y 149 postes marítimos, con coordenadas, dirección, horario, rótulo y margen, actualizados cada media hora, e histórico diario desde 2007. JSON o XML sin autenticación, filtros por CCAA, provincia, municipio y producto.
+code: fuentes_publicas.clientes.almacen | fuentes-almacen sync --fuentes carburantes --desde 2026-10-03: tabla carburantes, una fila por estación y día (11.475 el 03/10) con la coma decimal convertida | mcp: almacen_sql
 access: api-rest | auth: none | formats: json, xml | update: realtime | status: active | verified: 2026-10-01
 coverage: Histórico diario desde 01-01-2007 (límite que da el servidor) hasta ayer; vigente cada media hora
 sync.since: 2007-01-01 en el histórico diario (antes 400)
@@ -2520,6 +2524,7 @@ related: isciii-cne, aemps-cima-api, ine-api-tempus
 ## aei-convocatorias
 AEI – Ayudas concedidas (CSV completo) y convocatorias de I+D+i | Agencia Estatal de Investigación (AEI)
 summary: Todas las ayudas concedidas por la AEI desde 2008 (130.388 filas) en CSV con año de convocatoria, convocatoria, referencia, género del IP, área, título, CIF y entidad, CCAA, provincia e importe, filtrable por URL y con resumen del proyecto, más el buscador de convocatorias y sus resoluciones en PDF.
+code: fuentes_publicas.clientes.consulta | consulta.empresa_nif('Q1132001G')['aei']: las 970 ayudas de la AEI al NIF con el importe total (coma decimal convertida), de la más reciente a la más antigua | mcp: empresa_nif
 access: download, portal | auth: none | formats: csv, html, pdf | update: irregular | status: active | verified: 2026-10-01
 coverage: 2008-2026
 license: Reutilización libre con cita de la fuente
@@ -2692,6 +2697,7 @@ related: gbif-es, csic-digital, puertos-estado-datos, igme-geologia
 ## igme-geologia
 IGME-CSIC – Cartografía geológica, bases de datos geocientíficas y servicios ArcGIS | Instituto Geológico y Minero de España (IGME-CSIC)
 summary: Mapa geológico continuo GEODE 1:50.000, MAGNA 50 vectorial y decenas de capas más (puntos de agua, minería, movimientos del terreno, fallas activas, geoquímica, catálogo sísmico IGN-UPM) consultables por ArcGIS REST (JSON y GeoJSON) y WMS, más las hojas MAGNA 50 en imagen, PDF y memoria.
+code: fuentes_publicas.clientes.arcgis | arcgis.entidades(url_capa, where="PROVINCIA='MADRID'"): los 5.747 puntos de agua de Madrid paginando por OID, aunque cada consulta dé 1.000 | arcgis.entidades(url_capa): en capas sin paginación (terremotos, MAGNA 50) pide los objectIds y los consulta por POST en lotes; 6.609 de 6.609 terremotos
 access: api-rest, ogc, download, portal | auth: none | formats: json, geojson, xml, pdf, jpg, zip | update: irregular | status: active | verified: 2026-10-01
 coverage: Hojas MAGNA 50 de toda España (1.114); catálogo sísmico IGN-UPM de 1048 a 2011; bases de datos actualizadas de forma irregular
 license: Reutilización libre con cita de la fuente
@@ -3147,6 +3153,7 @@ related: dgt-datex-trafico, puertos-estado-datos, mitma-opendata-movilidad
 DataComex – Estadísticas de comercio exterior de España (portal y API con token) | Secretaría de Estado de Comercio
 summary: Exportaciones e importaciones de Aduanas por producto TARIC (2 a 8 dígitos), país y provincia, mensuales y anuales desde 1995, en JSON por API con token gratuito (usuario y contraseña) y en el portal de consulta con cuadros de mando. Definitivos hasta 2023 y provisionales después.
 !! pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error.
+code: fuentes_publicas.clientes.datacomex | datacomex.catalogo('ObtenerPaises'): los 292 países con el código de Aduanas de 3 cifras que exige pa (un ISO como FR da vacío), sin token
 access: api-rest, portal, download | auth: registration | formats: json, csv, xlsx, html | update: monthly | status: active | verified: 2026-09-30
 coverage: Anual y mensual desde 1995; definitivos hasta 2023, provisionales en adelante (julio de 2026 el 01/10/2026)
 license: Reutilización libre con cita de la fuente
@@ -3293,6 +3300,7 @@ related: educacion-estadisticas-ruct, gencat-dades-obertes, comunidad-madrid-dat
 ## educacion-estadisticas-ruct
 Educación y Universidades – EDUCAbase (PC-Axis), SIIU, RUCT y registro de centros | Subdirección General de Estadística y Estudios y Secretaría General de Universidades
 summary: Estadísticas de enseñanza no universitaria en EDUCAbase (PC-Axis idéntico al del INE, con descarga CSV, px y xlsx por tabla), estadísticas universitarias SIIU en xlsx (matriculados y egresados por titulación 2015-2024), y RUCT y Registro Estatal de Centros Docentes con exportación xls sin sesión.
+code: fuentes_publicas.clientes.pcaxis | pcaxis.tablas_de_indice(url_indice): las URL csv_bdsc de las tablas de un índice EducaDynPx (13 en adultos 2024-2025), con el &amp; ya limpio | pcaxis.tabla(url): una tabla en filas (9.072 en adul_01) con los números convertidos, leída en UTF-8 aunque la cabecera diga ISO-8859-15 | mcp: tabla_pcaxis
 access: download, portal | auth: none | formats: csv, px, xlsx, xls, html | update: annual | status: active | verified: 2026-10-01
 coverage: EDUCAbase desde el curso 1999-2000 (avance 2025-2026); SIIU 2015-
 license: Reutilización libre con cita de la fuente
@@ -3428,6 +3436,7 @@ related: csic-digital
 ## cultura-culturabase
 Ministerio de Cultura – CULTURAbase y estadísticas culturales | División de Estadística y Estudios, Secretaría General Técnica
 summary: Sistema PC-Axis (el mismo software que INEbase) con las estadísticas culturales: empleo cultural, bibliotecas, museos, cine, comercio exterior, bono cultural, fundaciones y asuntos taurinos; cada tabla se descarga en CSV, px o xlsx con URL deducible. Más el Anuario en PDF.
+code: fuentes_publicas.clientes.pcaxis | pcaxis.tablas_de_indice(url_indice): las URL csv_bdsc de las tablas de un índice CulturaDynPx (/t1/p1f/M_Anuales/), con el &amp; ya limpio | pcaxis.tabla(url): una tabla en filas (156 en T1FM1001) con coma decimal y punto de miles convertidos, leída en UTF-8 aunque diga ISO-8859-15 | mcp: tabla_pcaxis
 access: download, portal | auth: none | formats: csv, px, xlsx, pdf, html | update: annual | status: active | verified: 2026-10-01
 coverage: Según estadística; empleo cultural desde 2008 en varias bases (la vigente, CNAE 2025, hasta 2026-2T), bibliotecas por ediciones (2005, 2020), Anuario 2005-2025
 license: Reutilización libre con cita de la fuente
@@ -3503,6 +3512,7 @@ related: ine-microdatos, ine-api-tempus, ine-codigos-territoriales
 ## igualdad-estadisticas-violencia-genero
 Ministerio de Igualdad – Portal estadístico de violencia de género (Saiku) y boletines | Delegación del Gobierno contra la Violencia de Género (DGVG)
 summary: Portal OLAP (Saiku 2.5) con 17 cubos consultables sin clave por API REST: feminicidios desde 2003, menores, llamadas al 016, ATENPRO, VioGén, denuncias, órdenes de protección y ayudas, por CCAA, provincia, año y mes, con exportación CSV y xlsx. Boletines mensuales en PDF y DERA en xlsx.
+code: fuentes_publicas.clientes.saiku | saiku.Saiku().consulta('040 Servicio 016', mdx): el cellset en filas, cabecera primero, tras fijar con discover la cookie sin la que se pierde la consulta
 access: api-rest, download, portal | auth: none | formats: json, csv, xlsx, pdf, html | update: monthly | status: active | verified: 2026-10-01
 coverage: Feminicidios desde 2003 (hasta septiembre de 2026 el 01/10/2026), 016 desde 2007 (hasta agosto de 2026), boletines mensuales desde 2012; el resto según cubo
 base_url: https://estadisticasviolenciagenero.igualdad.gob.es
@@ -3536,7 +3546,7 @@ quirks: session-required, errors-html-or-xml, static-html, url-drift
 ! Territorios por nombre (Comunidad autónoma, Provincia) sin código INE; en feminicidios el nivel territorial es el lugar del asesinato (As).
 ! wp-json de violenciagenero.igualdad.gob.es está restringido (401 rest_login_required); los PDF de víctimas llevan la fecha de actualización en el nombre y cambian, rascar la página.
 ! VioGén (cubo 090, casos activos y protección policial) y denuncias (110) proceden del Ministerio del Interior; la criminalidad general está en interior-criminalidad.
-+ Flujo en cuatro llamadas con el mismo tarro (discover, POST query, POST result, GET export), implementado en scripts/clientes/saiku.py; un CrossJoin de año por CCAA en feminicidios dio 331 filas en 31 ms.
++ Flujo en cuatro llamadas con el mismo tarro (discover, POST query, POST result, GET export); un CrossJoin de año por CCAA en feminicidios dio 331 filas en 31 ms.
 + pd.read_csv(io.BytesIO(r.content)) lee el CSV directo; en el JSON, cellset[0] son cabeceras y cellset[1:] filas con c['value'].
 + El cubo 010 tiene 14 dimensiones (edad y nacionalidad de víctima y agresor, suicidio, relación, convivencia, denuncia previa) y las medidas feminicidios y huérfanos menores.
 related: interior-criminalidad, ine-api-tempus, mites-estadisticas
@@ -3746,6 +3756,7 @@ related: ine-api-tempus, gencat-dades-obertes, comunidad-madrid-datos-abiertos, 
 ## mtdfp-cobertura-banda-ancha
 SETELECO – Cobertura de banda ancha por municipio, provincia y CCAA | Secretaría de Estado de Telecomunicaciones e Infraestructuras Digitales
 summary: Dos xlsx con la fracción de hogares o viviendas con cobertura por tecnología (FTTH, HFC, inalámbrico, 4G, 5G) y velocidad (30 Mbps a 1 Gbps) por municipio (código INE), provincia y CCAA de 2013 a 2025 y por entidad singular hasta 2020, capas ArcGIS consultables del último año e informes en PDF.
+code: fuentes_publicas.clientes.arcgis | arcgis.entidades(arcgis.COBERTURA_FTTH): las 8.132 filas de cobertura FTTH por municipio paginando por OID; una consulta sola se queda en 2.000 sin error
 access: download, api-rest | auth: none | formats: xlsx, json, geojson, pdf, html | update: annual | status: active | verified: 2026-10-01
 coverage: Diciembre de 2013 a 2015 y junio de 2016 a 2025 (2016 solo FTTH, LTE y velocidades)
 base_url: https://digital.gob.es/telecomunicaciones-infraestructuras-digitales/areas-interes/banda-ancha/informacion-cobertura
