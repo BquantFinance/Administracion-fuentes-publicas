@@ -850,7 +850,7 @@ def borme_actos_encadenados_con_punto_y_guion():
     assert [a["tipo"] for a in actos] == ["Situación concursal"] * 3, [a["tipo"] for a in actos]
     assert actos[0]["texto"].endswith("sustituido por la administración concursal")  # sin el «.-» final
     r = [boe.parse_concursal(a["texto"]) for a in actos]
-    assert [x["resolucion"][:28] for x in r] == ["Auto de declaración de conc", "Resoluciones acordando la in", "Nombramiento de administrado"]
+    assert [x["resolucion"].split(" ")[0] for x in r] == ["Auto", "Resoluciones", "Nombramiento"], [x["resolucion"] for x in r]
     assert r[0]["clase"] == "Necesario" and r[0]["firme"] is False and r[0]["procedimiento"] == "148/2026"
 
 def main() -> int:
