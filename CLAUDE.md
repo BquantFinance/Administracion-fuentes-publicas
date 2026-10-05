@@ -154,7 +154,11 @@ Judicial o UE, solo cuando lo indique el propietario.
   `pip install ...@v0.8.0` da fuentes-radar y perfil_municipio con cerca. La plantilla del radar instala @v0.8.0. v0.9.0
   (fecha_publicacion de PLACSP, placsp_ultimo con anuladas, avisos del almacén, BDNS en mantenimiento, Castilla y León)
   publicada el 2026-10-05 sobre 08fa35c: registro en 0.9.0, sha256 del .mcpb coincide y `pip install ...@v0.9.0` da
-  los cuatro comandos y las correcciones; la plantilla del radar instala @v0.9.0. Sin PyPI (propietario, 2026-10-05).
+  los cuatro comandos y las correcciones. v0.10.0 (placsp.publicadas, sync --feeds, pistas de feed, ckan.comparar con
+  sobran, code en 38 fichas) publicada el 2026-10-05 sobre c4d6117, tras un primer intento sobre 35be5d5 que falló en la
+  comprobación de versión (ficheros en 0.9.0): registro en 0.10.0, sha256 del .mcpb coincide (605f434f…) y `pip install
+  ...@v0.10.0` da los cuatro comandos, publicadas, sobran y sync --feeds; la plantilla del radar instala @v0.10.0. Sin
+  PyPI (propietario, 2026-10-05).
 - **CI**: `ci.yml` (validate, build al día y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC,
   manual y al cambiar el flujo: recetas, ejemplos de fichas, cargadores, ejemplos, forma de las fuentes, cifras de control
   (`scripts/cifras.yaml`: una cifra que deja de cuadrar falla aunque la URL responda) y enlaces desde la IP de GitHub;
@@ -166,9 +170,7 @@ Judicial o UE, solo cuando lo indique el propietario.
 ## Siguiente
 
 1. Medido todo lo que había (tandas 4 a 7, se queda todo). Medir cada pieza nueva antes de darla por buena; la tarea
-   del importe con la coma perdida (issue 3) está en tareas.yaml sin ejecutar. Release v0.10.0 pendiente: la 0.9.0 no
-   tiene `placsp.publicadas`, `sync --feeds`, las pistas de `feed` ni `ckan.comparar` con `sobran`, y las fichas ya los
-   citan en `code`.
+   del importe con la coma perdida (issue 3) está en tareas.yaml sin ejecutar.
 2. Ronda desde una IP residencial para los hosts bloqueados (necesita al propietario): `python
    scripts/ronda_residencial.py` desde casa deja `ronda-residencial.md` (ejemplos de 18 fichas, recetas que las citan y
    carburantes, sin IP ni claves); con él se fechan los `verified` o se anota en `gotchas` lo que falle también desde casa.
