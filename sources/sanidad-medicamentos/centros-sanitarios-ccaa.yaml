@@ -11,6 +11,11 @@ summary: >-
 alerts:
   - "Madrid (centros_servicios_establecimientos_sanitarios): una fila por centro y especialidad, 45.961 filas para 15.867 centros (Hospital general, 3.801 filas para 59). Contar centro_nro_registro distintos."
   - "Equipaments de Catalunya (8gmd-gz7i): 70 equipamientos con latitud y longitud 0 y categoria con varias separadas por «||» en 3.214; descartar el 0 y filtrar con categoria like '%Salut|Centres sanitaris|1.%'."
+code:
+  module: fuentes_publicas.clientes.cerca
+  use:
+    - "cerca.cargar_salud('mad'): 506 hospitales, centros de salud y consultorios, uno por centro y no por especialidad, con lat y lon desde UTM; también 'cat' y 'gva'"
+  mcp: [perfil_municipio]
 access: [api-rest, ogc]
 auth: none
 formats: [json, csv, gml]
@@ -38,12 +43,10 @@ ids: [ine-municipio, nif]
 gotchas:
   - "Madrid no da el nombre del centro (tipo y dirección) y escribe «Dato personal» en el NIF de 6.413 centros (consultas y clínicas de personas físicas)."
   - "Madrid: datastore_search_sql da 500 con tildes en un literal («Consultorio de atención primaria»); filtrar con filters en JSON, que sí las admite (7.317 filas de los seis tipos de primaria y hospitales)."
-  - "Madrid y la Comunitat Valenciana dan UTM ETRS89 huso 30 (localizacion_coordenada_x/y y x_coord/y_coord); scripts/clientes/cerca.py las pasa a latitud y longitud."
+  - "Madrid y la Comunitat Valenciana dan UTM ETRS89 huso 30 (localizacion_coordenada_x/y y x_coord/y_coord), no latitud y longitud."
   - "La capa CentrosSanitarios.CentrosEspecialidades de la GVA devolvió un CSV vacío el 2026-10-05; centros de salud y hospitales sí."
   - "Andalucía, no conseguido el 2026-10-05: ise:eq_02_salud del WFS del Inventario de Sedes y Equipamientos (ideandalucia.es/services/ise/wfs) cortó a los 48 s con 25 KB; sin otro conjunto con coordenadas localizado."
   - "Equipaments de Catalunya: cpostal y codi_municipi pierden el cero inicial (8612, 81326 es 081326, INE 08132 con dígito de control)."
-tips:
-  - "perfil_municipio con una dirección o «lat,lon» da centros de salud, consultorios y hospitales a menos de 1 km con los tres más cercanos."
 related: [sanidad-portal-estadistico, gencat-dades-obertes, comunidad-madrid-datos-abiertos, gva-dadesobertes-api, junta-andalucia-datos-abiertos]
 status: active
 verified: "2026-10-05"

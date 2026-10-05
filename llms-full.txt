@@ -1671,6 +1671,7 @@ IGN/CNIG – Centro de Descargas, servicios OGC y geocoder CartoCiudad | Institu
 summary: Producción del IGN (ortofotos PNOA, modelos del terreno, LiDAR, mapas, límites municipales oficiales, SIOSE) en un Centro de Descargas protegido por reCAPTCHA, más servicios WMS, WMTS y WFS INSPIRE sin restricción y el geocoder CartoCiudad, que devuelve el código INE.
 !! El geocoder ignora el municipio de q («calle mayor 1, getafe» dio Corera, La Rioja); municipio_filter con el nombre INE entero y el artículo delante («A Coruña», «Alacant/Alicante»; «Alicante» da 0) y filtrar muniCode.
 !! state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido.
+code: fuentes_publicas.clientes.consulta | consulta.ubicar('calle Alcalá 50, Madrid'): CP, coordenadas, INE y referencia catastral del portal; filtra el municipio, que el geocoder ignora en el texto | consulta.ubicar('calle mayor 1, getafe'): exacta=false y aviso si la calle hallada no es la pedida (da CALLE LAGO MAYARA 1), con otros candidatos | mcp: perfil_municipio
 access: ogc, api-rest, download, portal | auth: none | formats: shp, gpkg, geotiff, laz, gml, geojson, json, png | update: irregular | status: active | verified: 2026-10-05
 coverage: PNOA desde 2004; cartografía histórica desde el siglo XIX; límites vigentes e históricos 2023 y 2024
 license: CC BY 4.0 (licencia de uso IGN, con cita)
@@ -2371,6 +2372,7 @@ Centros sanitarios con coordenadas – Cataluña, Madrid y Comunitat Valenciana 
 summary: Centros de salud, consultorios y hospitales con coordenadas: equipamientos de Cataluña, registro de centros sanitarios de Madrid (todos los tipos, por especialidad) y capas del Sistema Valenciano de Salud. El Catálogo Nacional de Hospitales no trae coordenadas.
 !! Madrid (centros_servicios_establecimientos_sanitarios): una fila por centro y especialidad, 45.961 filas para 15.867 centros (Hospital general, 3.801 filas para 59). Contar centro_nro_registro distintos.
 !! Equipaments de Catalunya (8gmd-gz7i): 70 equipamientos con latitud y longitud 0 y categoria con varias separadas por «||» en 3.214; descartar el 0 y filtrar con categoria like '%Salut|Centres sanitaris|1.%'.
+code: fuentes_publicas.clientes.cerca | cerca.cargar_salud('mad'): 506 hospitales, centros de salud y consultorios, uno por centro y no por especialidad, con lat y lon desde UTM; también 'cat' y 'gva' | mcp: perfil_municipio
 access: api-rest, ogc | auth: none | formats: json, csv, gml | update: daily | status: active | verified: 2026-10-05
 coverage: Cataluña 730 CAP y consultorios y 70 hospitales (8gmd-gz7i, al día); Madrid 15.867 centros de todos los tipos; Comunitat Valenciana 248 centros de salud y 35 hospitales; Andalucía no conseguido
 license: Llicència oberta d'ús d'informació – Catalunya (cita); CC BY en Madrid y la Comunitat Valenciana
@@ -2390,11 +2392,10 @@ quirks: user-agent-browser
 ids: ine-municipio, nif
 ! Madrid no da el nombre del centro (tipo y dirección) y escribe «Dato personal» en el NIF de 6.413 centros (consultas y clínicas de personas físicas).
 ! Madrid: datastore_search_sql da 500 con tildes en un literal («Consultorio de atención primaria»); filtrar con filters en JSON, que sí las admite (7.317 filas de los seis tipos de primaria y hospitales).
-! Madrid y la Comunitat Valenciana dan UTM ETRS89 huso 30 (localizacion_coordenada_x/y y x_coord/y_coord); scripts/clientes/cerca.py las pasa a latitud y longitud.
+! Madrid y la Comunitat Valenciana dan UTM ETRS89 huso 30 (localizacion_coordenada_x/y y x_coord/y_coord), no latitud y longitud.
 ! La capa CentrosSanitarios.CentrosEspecialidades de la GVA devolvió un CSV vacío el 2026-10-05; centros de salud y hospitales sí.
 ! Andalucía, no conseguido el 2026-10-05: ise:eq_02_salud del WFS del Inventario de Sedes y Equipamientos (ideandalucia.es/services/ise/wfs) cortó a los 48 s con 25 KB; sin otro conjunto con coordenadas localizado.
 ! Equipaments de Catalunya: cpostal y codi_municipi pierden el cero inicial (8612, 81326 es 081326, INE 08132 con dígito de control).
-+ perfil_municipio con una dirección o «lat,lon» da centros de salud, consultorios y hospitales a menos de 1 km con los tres más cercanos.
 related: sanidad-portal-estadistico, gencat-dades-obertes, comunidad-madrid-datos-abiertos, gva-dadesobertes-api, junta-andalucia-datos-abiertos
 
 ## isciii-cne
@@ -2855,6 +2856,7 @@ related: mapa-estadisticas-agrarias, puertos-estado-datos
 SIGPAC – Recintos agrícolas por OGC API, consultas REST, WMS, teselas y GeoPackage (FEGA) | Fondo Español de Garantía Agraria (FEGA) y MAPA
 summary: Recintos SIGPAC de toda España (uso, superficie, pendiente, regadío, altitud) con OGC API Features, consultas REST por coordenadas o códigos (referencia catastral, Red Natura, nitratos), WMS, teselas vectoriales, listas de códigos y GeoPackage por provincia y campaña. Sin clave, licencia CC BY 4.0.
 !! El municipio es el código del Catastro, no el del INE; las capitales son 900 (Madrid 28:900, INE 28079) y otros 4.448 municipios cambian de número (Tórtoles 05246 es 5:247); traducir con datos/municipios.csv.
+code: fuentes_publicas.clientes.ogc | ogc.entidades(ogc.SIGPAC + '/collections/recintos/items', bbox='-4.10,39.80,-4.00,39.90'): los 4.938 recintos siguiendo next (limit se corta a 250) | consulta.ubicar('39.85,-4.05'): recinto SIGPAC del punto, uso, superficie y referencia catastral de la parcela, con el municipio INE (no el del Catastro) | mcp: perfil_municipio
 access: api-rest, ogc, download, portal | auth: none | formats: json, geojson, gpkg, zip, xml, protobuf, pdf | update: annual | status: active | verified: 2026-10-01
 coverage: Campañas 2025 y 2026 en descarga; campaña en uso en los servicios
 license: CC BY 4.0
@@ -2944,6 +2946,7 @@ DGT – NAP de tráfico y ficheros DATEX II (incidencias, detectores, cámaras, 
 summary: Ficheros DATEX II públicos sin clave: incidencias en tiempo real (versión 3.7, cada minuto) y 1.952 cámaras en el NAP; en infocar.dgt.es, medidas de unos 5.560 detectores cada minuto, radares, tramos, 47 zonas de bajas emisiones, puntos de recarga eléctrica e incidencias de Cataluña y País Vasco.
 !! electrolineras.xml da la potencia en vatios (maxPowerAtSocket 22000.0 son 22 kW) y postcode sin el cero inicial en 3.370 de 12.038 emplazamientos (7011 es 07011): dividir entre 1000 y rellenar a cinco cifras.
 !! Un emplazamiento (energyInfrastructureSite) tiene varios puntos (refillPoint): a 1 km de Torres Quevedo 42, Alicante, hay 5 emplazamientos y 17 puntos. Contar sitios si se piden emplazamientos.
+code: fuentes_publicas.clientes.cerca | cerca.cercanos(cerca.cargar_recarga(), 38.3452, -0.4810, 1000): 15 emplazamientos de recarga a menos de 1 km con kW (el fichero da vatios), puntos y conectores | mcp: perfil_municipio
 access: download | auth: none | formats: xml, rdf | update: realtime | status: active | verified: 2026-10-05
 coverage: Situación actual; sin histórico
 license: Licencia gratuita con condiciones en el aviso legal de la DGT
@@ -2972,9 +2975,9 @@ quirks: url-drift, static-html
 ! Las incidencias de la DGT apenas cubren Cataluña (11 puntos el 1-10-2026) y nada del País Vasco; usar los ficheros sct y dt-gv del mismo servidor.
 ! En detectores el index de measuredValue no fija la magnitud (el 0 es velocidad o flujo según el punto); leer xsi:type. Velocidad 0.0 llega siempre con vehicleFlow 0, sin vehículos, no es atasco.
 ! Municipio, provincia y comunidad de las incidencias van por nombre (Ontígola, Toledo), sin código INE; para cruzar con otras fuentes usar las coordenadas.
-! Recarga sin disponibilidad en tiempo real (no hay estado por punto) y con fac:lastUpdated de 2023 en 596 emplazamientos; scripts/clientes/cerca.py lo lee en 4 s y da los cercanos a un punto.
+! Recarga sin disponibilidad en tiempo real (no hay estado por punto) y con fac:lastUpdated de 2023 en 596 emplazamientos.
 ! 877 emplazamientos de electrolineras.xml comparten coordenadas con otro (356 puntos) y fac:name es a menudo un código del operador (C6E06BCC22ZMPMAKWJ): mostrar la dirección, no el nombre.
-+ Recarga cerca de una dirección: perfil_municipio con la dirección (bloque cerca) la geocodifica con CartoCiudad y da los de 1 km en una llamada; Nominatim pone «Torres Quevedo 42 Alicante» en Elche.
++ Para la recarga cerca de una dirección, geocodificar con CartoCiudad (perfil_municipio lo hace): Nominatim pone «Torres Quevedo 42 Alicante» en Elche.
 + Pedir gzip (curl --compressed; requests lo hace solo) reduce detectores de 18,7 MB a 255 KB, incidencias de 6,8 MB a 208 KB, cámaras a 95 KB y radares a 62 KB.
 + lxml.etree.iterparse sobre el XML de detectores buscando siteMeasurements: measurementSiteReference (GUID_DET_nnnnnn) enlaza con PredefinedLocationsPublication/detectores para las coordenadas.
 related: dgt-estadisticas
@@ -3249,6 +3252,7 @@ summary: Centros docentes no universitarios con coordenadas, titularidad y ense�
 !! Cataluña (kvmv-ahh4): geo_1 pierde el punto decimal ([1929887, 414736]) y within_circle(geo_1, 41.388, 2.1592, 500) da 0 sin error; con coordenades_geo_x/y hay 14 a menos de 500 m. Usar esos dos campos.
 !! Cataluña repite cada centro en cada curso: 32.680 filas para 5.434 centros en 2025/2026. Filtrar curs (el último con $select=max(curs)) antes de contar o de buscar cercanos.
 !! Madrid (centros_educativos): 7.757 filas y solo 3.906 en ALTA; 3.552 son BAJA, 193 INACTIVO y 76 ANULACIÓN. Filtrar SITUACIÓN = ALTA o se cuentan casi el doble de colegios.
+code: fuentes_publicas.clientes.cerca | cerca.cargar_colegios('cat'): los 5.434 centros del último curso con coordenadas buenas (no geo_1); 'mad' solo de alta (3.851), 'gva' y 'and' con coma resuelta | cerca.cercanos(cerca.cargar_colegios('mad'), 40.4818, -3.3635, 1000): cuántos hay a menos de 1 km (28) y los tres más cercanos con su distancia | mcp: perfil_municipio
 access: api-rest, download | auth: none | formats: json, csv | update: irregular | status: active | verified: 2026-10-05
 coverage: Cataluña por curso desde 2020/2021 (kvmv-ahh4, 2025/2026 publicado el 2025-10-17); Madrid 2026-05; Comunitat Valenciana 2026-10-04; Andalucía por curso, el último 2024/2025 (2026-08-11)
 license: Llicència oberta d'ús d'informació – Catalunya (cita); CC BY en Madrid y la Comunitat Valenciana; CC BY 4.0 en Andalucía
@@ -3276,7 +3280,6 @@ ids: ine-municipio, nif
 ! El recurso de Andalucía cambia cada curso (el nombre lleva «Curso 2024/2025»): elegir el último en package_show, no fijar el id.
 ! Cataluña: codi_municipi es el INE de 5 cifras y codi_municipi_6 lleva el dígito de control; la Comunitat Valenciana no da código de municipio, solo localidad y provincia en mayúsculas.
 ! Los cuatro directorios dan teléfono y correo del centro (datos de la institución, no personales) y ningún dato de alumnos; las plazas y el alumnado van en otros conjuntos.
-+ perfil_municipio con una dirección o «lat,lon» da los colegios a menos de 1 km con los tres más cercanos (scripts/clientes/cerca.py).
 related: educacion-estadisticas-ruct, gencat-dades-obertes, comunidad-madrid-datos-abiertos, gva-dadesobertes-api, junta-andalucia-datos-abiertos, cnig-centro-descargas
 
 ## educacion-estadisticas-ruct
@@ -3601,6 +3604,7 @@ summary: Certificados de eficiencia energética de los registros de Cataluña, M
 !! Madrid: el datastore se corta sin error en 1.000 filas para 2026 y 2025 (los ficheros tienen 125.523 y 110.650) y en 2.000 para 2024; datastore_search_sql da count 1000. Descargar el CSV o el ZIP.
 !! Cataluña (j6ii-t3w2) mezcla catalán y castellano en las categorías: motiu = 'Compravenda' da 583.662 y deja fuera 110.339 'Compraventa'; us_edifici igual. Agrupar las dos lenguas antes de contar.
 !! Los CSV del IVACE (med-eficiencia-energetica-edificis-ivace, 340.582 en Valencia) se quedaron en abril de 2024: registros de 2014 a 2023 y nada después. El WFS 26_GCEE del ICV sí trae 2025 (984.839 certificados).
+code: fuentes_publicas.clientes.consulta | consulta.certificados_energeticos('9723410DF2892D', '08'): el último certificado de cada inmueble (8) y el reparto de letras; Cataluña y C. Valenciana | consulta.perfil_municipio('carrer Aragó 201, Barcelona'): lo mismo desde una dirección, con la referencia catastral del portal por CartoCiudad | mcp: perfil_municipio
 access: api-rest, ogc, download | auth: none | formats: json, csv, gml, xml, zip, 7z | update: monthly | status: active | verified: 2026-10-05
 coverage: Cataluña desde 2016-10 (data_entrada) a diario; Madrid por año de registro, 2026 mensual; Comunitat Valenciana WFS al día y CSV hasta 2023; Andalucía 2016 a 2026 (Huelva, agosto de 2026)
 sync.since: Cataluña 2016-10-04; Andalucía 2016; Comunitat Valenciana con certificados vigentes y algunos caducados desde 2023
@@ -3634,7 +3638,6 @@ ids: referencia-catastral, ine-municipio
 ! Andalucía: package_show da URLs en gdc-pdpopendata-ckan.paas.junta-andalucia.es, que rechazó la conexión desde la nube el 2026-10-05; la misma ruta bajo www.juntadeandalucia.es/datosabiertos/portal descarga.
 ! Andalucía: el XML de una provincia no cabe en memoria con un parser DOM (505 MB en Huelva): leer con iterparse; Municipio llega con espacios finales («Huelva »).
 ! Ningún registro da el titular; Andalucía deja en DatosDelCertificador solo la fecha. La validez es de 10 años, 5 si la letra es G (E2025VV020502, G, hasta 2030).
-+ perfil_municipio con una dirección de Cataluña o la Comunitat Valenciana da los certificados de su parcela, el último por inmueble, en una llamada.
 + Para el reparto de letras de un municipio catalán, $select=qualificaci_de_consum_d,count(*) con $group y codi_poblacio en Socrata, sin descargar nada.
 related: catastro-ovc, cnig-centro-descargas, gencat-dades-obertes, comunidad-madrid-datos-abiertos, gva-dadesobertes-api, junta-andalucia-datos-abiertos
 
@@ -3644,6 +3647,7 @@ summary: Transacciones de vivienda, valor tasado, parque, vivienda libre y prote
 !! Normalizando tildes y artículos, 79 de los 8.131 municipios de 34010210 no casan por nombre con el INE (Palma sale «Palma de Mallorca», Toral de los Vados «Villadecanes»); mivau.indice casa los 8.131.
 !! 35103500 pone la provincia en una sola fila del grupo y no siempre la primera: rellenar hacia abajo deja 7 de 306 municipios en otra (Almuñécar en Córdoba, Illescas en Guadalajara). Casar por nombre, no por provincia.
 !! 34010210 pone el año en una fila y el trimestre en otra (1º a 4º); la última columna es 2026-T2 (*), provisional: Palma 1.152, y la anterior 2026-T1, 1.080. Leer las dos filas de cabecera, no contar columnas.
+code: fuentes_publicas.clientes.mivau | mivau.indice(mivau.compraventas(), consulta.municipios()): transacciones por trimestre de cada código INE (8.131 de 8.131) en una tabla que solo trae nombres | mivau.valor_tasado(): €/m² y tasaciones del último trimestre (la última hoja) en los 306 municipios de más de 25.000 habitantes; «n.r» da None, no cero | mcp: perfil_municipio
 access: download, portal | auth: none | formats: xls, xlsx, geojson, shp, zip, pdf, html | update: quarterly | status: active | verified: 2026-10-05
 coverage: Valor tasado desde 1995 y transacciones desde 2004, trimestrales hasta 2026-2; SERPAVI anual 2011-2024 (Navarra desde 2021, Gipuzkoa desde 2022, Álava y Bizkaia solo 2024)
 license: Reutilización libre con cita de la fuente
@@ -3676,7 +3680,6 @@ ids: ine-municipio, ine-provincia, ccaa, seccion-censal
 ! En el GeoJSON municipal CUMUN es entero (1001) y el código bueno es CodINE; en el de distritos CUMUN es texto (01001) y los nombres van en LITMUN y LITPRO, no en NMUN y NPRO.
 ! Las transacciones son escrituras ante notario remitidas por ANCERT (Consejo General del Notariado) y el valor tasado sale de las sociedades de tasación de la AEV, según las metodologías en PDF.
 + pd.read_excel(url, engine='calamine', header=None, skiprows=13) sobre 34010210.XLS da los 8.131 municipios con datos de 2004 a 2026; descartar las 60 filas de CCAA y provincia, que no tienen valores.
-+ perfil_municipio da por código INE las transacciones de los últimos cinco trimestres y el valor tasado del último (receta compraventa-vivienda-municipio).
 + Para alquiler por sección censal, la hoja Secciones censales del xlsx de SERPAVI se cruza por CUSEC con ine-cartografia-censal o con el shapefile SECC_CE_20210101_INE_WM.zip de la misma página.
 related: catastro-ovc, ine-api-tempus, ine-codigos-territoriales, ine-cartografia-censal, mitma-boletin-estadistico-online
 
@@ -3686,6 +3689,7 @@ summary: Viviendas de uso turístico inscritas en los registros de Cataluña, Ma
 !! Registro e INE no miden lo mismo (licencias frente a anuncios en plataformas): en 2026 Barcelona 10.651 inscritas y 8.231 en el INE, Madrid 4.865 y 10.836, Torrevieja 10.220 y 3.887. Dar las dos cifras con su fuente.
 !! Cataluña (t2h3-cgys): total_places viene vacío en 79.567 de 104.502 HUT y referencia_cadastral en 87.762; sumar plazas da 8.196 en Barcelona para 10.651 viviendas. Contar viviendas, no sumar plazas.
 !! Madrid (alojamientos_turisticos): alojamiento_tipo llega cortado y con espacio, «VIVIENDAS DE USO TU »; filtrar = 'VIVIENDAS DE USO TURISTICO' da 0 en vez de 6.246. Usar LIKE 'VIVIENDAS DE USO TU%'.
+code: fuentes_publicas.clientes.consulta | consulta.perfil_municipio('Benidorm')['viviendas_turisticas']: las del INE (anuncios) y las del registro de su comunidad, por vivienda y no por plazas | mcp: perfil_municipio
 access: api-rest, download | auth: none | formats: json, csv | update: daily | status: active | verified: 2026-10-05
 coverage: Registros vigentes (solo altas); INE VTE 2025 y 2026 por municipio
 sync.since: registros, situación actual sin histórico de bajas; INE VTE desde 2020 en las tablas de comunidad

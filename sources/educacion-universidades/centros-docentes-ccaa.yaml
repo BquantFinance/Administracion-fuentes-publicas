@@ -11,6 +11,12 @@ alerts:
   - "Cataluña (kvmv-ahh4): geo_1 pierde el punto decimal ([1929887, 414736]) y within_circle(geo_1, 41.388, 2.1592, 500) da 0 sin error; con coordenades_geo_x/y hay 14 a menos de 500 m. Usar esos dos campos."
   - "Cataluña repite cada centro en cada curso: 32.680 filas para 5.434 centros en 2025/2026. Filtrar curs (el último con $select=max(curs)) antes de contar o de buscar cercanos."
   - "Madrid (centros_educativos): 7.757 filas y solo 3.906 en ALTA; 3.552 son BAJA, 193 INACTIVO y 76 ANULACIÓN. Filtrar SITUACIÓN = ALTA o se cuentan casi el doble de colegios."
+code:
+  module: fuentes_publicas.clientes.cerca
+  use:
+    - "cerca.cargar_colegios('cat'): los 5.434 centros del último curso con coordenadas buenas (no geo_1); 'mad' solo de alta (3.851), 'gva' y 'and' con coma resuelta"
+    - "cerca.cercanos(cerca.cargar_colegios('mad'), 40.4818, -3.3635, 1000): cuántos hay a menos de 1 km (28) y los tres más cercanos con su distancia"
+  mcp: [perfil_municipio]
 access: [api-rest, download]
 auth: none
 formats: [json, csv]
@@ -47,8 +53,6 @@ gotchas:
   - "El recurso de Andalucía cambia cada curso (el nombre lleva «Curso 2024/2025»): elegir el último en package_show, no fijar el id."
   - "Cataluña: codi_municipi es el INE de 5 cifras y codi_municipi_6 lleva el dígito de control; la Comunitat Valenciana no da código de municipio, solo localidad y provincia en mayúsculas."
   - "Los cuatro directorios dan teléfono y correo del centro (datos de la institución, no personales) y ningún dato de alumnos; las plazas y el alumnado van en otros conjuntos."
-tips:
-  - "perfil_municipio con una dirección o «lat,lon» da los colegios a menos de 1 km con los tres más cercanos (scripts/clientes/cerca.py)."
 related: [educacion-estadisticas-ruct, gencat-dades-obertes, comunidad-madrid-datos-abiertos, gva-dadesobertes-api, junta-andalucia-datos-abiertos, cnig-centro-descargas]
 status: active
 verified: "2026-10-05"

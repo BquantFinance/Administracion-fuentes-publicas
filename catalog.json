@@ -324,6 +324,16 @@
    "alerts": [
     "El municipio es el código del Catastro, no el del INE; las capitales son 900 (Madrid 28:900, INE 28079) y otros 4.448 municipios cambian de número (Tórtoles 05246 es 5:247); traducir con datos/municipios.csv."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ogc",
+    "use": [
+     "ogc.entidades(ogc.SIGPAC + '/collections/recintos/items', bbox='-4.10,39.80,-4.00,39.90'): los 4.938 recintos siguiendo next (limit se corta a 250)",
+     "consulta.ubicar('39.85,-4.05'): recinto SIGPAC del punto, uso, superficie y referencia catastral de la parcela, con el municipio INE (no el del Catastro)"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "api-rest",
     "ogc",
@@ -2928,6 +2938,16 @@
     "Cataluña repite cada centro en cada curso: 32.680 filas para 5.434 centros en 2025/2026. Filtrar curs (el último con $select=max(curs)) antes de contar o de buscar cercanos.",
     "Madrid (centros_educativos): 7.757 filas y solo 3.906 en ALTA; 3.552 son BAJA, 193 INACTIVO y 76 ANULACIÓN. Filtrar SITUACIÓN = ALTA o se cuentan casi el doble de colegios."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.cerca",
+    "use": [
+     "cerca.cargar_colegios('cat'): los 5.434 centros del último curso con coordenadas buenas (no geo_1); 'mad' solo de alta (3.851), 'gva' y 'and' con coma resuelta",
+     "cerca.cercanos(cerca.cargar_colegios('mad'), 40.4818, -3.3635, 1000): cuántos hay a menos de 1 km (28) y los tres más cercanos con su distancia"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -2985,9 +3005,6 @@
     "El recurso de Andalucía cambia cada curso (el nombre lleva «Curso 2024/2025»): elegir el último en package_show, no fijar el id.",
     "Cataluña: codi_municipi es el INE de 5 cifras y codi_municipi_6 lleva el dígito de control; la Comunitat Valenciana no da código de municipio, solo localidad y provincia en mayúsculas.",
     "Los cuatro directorios dan teléfono y correo del centro (datos de la institución, no personales) y ningún dato de alumnos; las plazas y el alumnado van en otros conjuntos."
-   ],
-   "tips": [
-    "perfil_municipio con una dirección o «lat,lon» da los colegios a menos de 1 km con los tres más cercanos (scripts/clientes/cerca.py)."
    ],
    "related": [
     "educacion-estadisticas-ruct",
@@ -8363,6 +8380,15 @@
     "Madrid (centros_servicios_establecimientos_sanitarios): una fila por centro y especialidad, 45.961 filas para 15.867 centros (Hospital general, 3.801 filas para 59). Contar centro_nro_registro distintos.",
     "Equipaments de Catalunya (8gmd-gz7i): 70 equipamientos con latitud y longitud 0 y categoria con varias separadas por «||» en 3.214; descartar el 0 y filtrar con categoria like '%Salut|Centres sanitaris|1.%'."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.cerca",
+    "use": [
+     "cerca.cargar_salud('mad'): 506 hospitales, centros de salud y consultorios, uno por centro y no por especialidad, con lat y lon desde UTM; también 'cat' y 'gva'"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "api-rest",
     "ogc"
@@ -8409,13 +8435,10 @@
    "gotchas": [
     "Madrid no da el nombre del centro (tipo y dirección) y escribe «Dato personal» en el NIF de 6.413 centros (consultas y clínicas de personas físicas).",
     "Madrid: datastore_search_sql da 500 con tildes en un literal («Consultorio de atención primaria»); filtrar con filters en JSON, que sí las admite (7.317 filas de los seis tipos de primaria y hospitales).",
-    "Madrid y la Comunitat Valenciana dan UTM ETRS89 huso 30 (localizacion_coordenada_x/y y x_coord/y_coord); scripts/clientes/cerca.py las pasa a latitud y longitud.",
+    "Madrid y la Comunitat Valenciana dan UTM ETRS89 huso 30 (localizacion_coordenada_x/y y x_coord/y_coord), no latitud y longitud.",
     "La capa CentrosSanitarios.CentrosEspecialidades de la GVA devolvió un CSV vacío el 2026-10-05; centros de salud y hospitales sí.",
     "Andalucía, no conseguido el 2026-10-05: ise:eq_02_salud del WFS del Inventario de Sedes y Equipamientos (ideandalucia.es/services/ise/wfs) cortó a los 48 s con 25 KB; sin otro conjunto con coordenadas localizado.",
     "Equipaments de Catalunya: cpostal y codi_municipi pierden el cero inicial (8612, 81326 es 081326, INE 08132 con dígito de control)."
-   ],
-   "tips": [
-    "perfil_municipio con una dirección o «lat,lon» da centros de salud, consultorios y hospitales a menos de 1 km con los tres más cercanos."
    ],
    "related": [
     "sanidad-portal-estadistico",
@@ -8969,6 +8992,16 @@
     "El geocoder ignora el municipio de q («calle mayor 1, getafe» dio Corera, La Rioja); municipio_filter con el nombre INE entero y el artículo delante («A Coruña», «Alacant/Alicante»; «Alicante» da 0) y filtrar muniCode.",
     "state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.consulta",
+    "use": [
+     "consulta.ubicar('calle Alcalá 50, Madrid'): CP, coordenadas, INE y referencia catastral del portal; filtra el municipio, que el geocoder ignora en el texto",
+     "consulta.ubicar('calle mayor 1, getafe'): exacta=false y aviso si la calle hallada no es la pedida (da CALLE LAGO MAYARA 1), con otros candidatos"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "ogc",
     "api-rest",
@@ -9544,6 +9577,15 @@
     "electrolineras.xml da la potencia en vatios (maxPowerAtSocket 22000.0 son 22 kW) y postcode sin el cero inicial en 3.370 de 12.038 emplazamientos (7011 es 07011): dividir entre 1000 y rellenar a cinco cifras.",
     "Un emplazamiento (energyInfrastructureSite) tiene varios puntos (refillPoint): a 1 km de Torres Quevedo 42, Alicante, hay 5 emplazamientos y 17 puntos. Contar sitios si se piden emplazamientos."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.cerca",
+    "use": [
+     "cerca.cercanos(cerca.cargar_recarga(), 38.3452, -0.4810, 1000): 15 emplazamientos de recarga a menos de 1 km con kW (el fichero da vatios), puntos y conectores"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "download"
    ],
@@ -9611,11 +9653,11 @@
     "Las incidencias de la DGT apenas cubren Cataluña (11 puntos el 1-10-2026) y nada del País Vasco; usar los ficheros sct y dt-gv del mismo servidor.",
     "En detectores el index de measuredValue no fija la magnitud (el 0 es velocidad o flujo según el punto); leer xsi:type. Velocidad 0.0 llega siempre con vehicleFlow 0, sin vehículos, no es atasco.",
     "Municipio, provincia y comunidad de las incidencias van por nombre (Ontígola, Toledo), sin código INE; para cruzar con otras fuentes usar las coordenadas.",
-    "Recarga sin disponibilidad en tiempo real (no hay estado por punto) y con fac:lastUpdated de 2023 en 596 emplazamientos; scripts/clientes/cerca.py lo lee en 4 s y da los cercanos a un punto.",
+    "Recarga sin disponibilidad en tiempo real (no hay estado por punto) y con fac:lastUpdated de 2023 en 596 emplazamientos.",
     "877 emplazamientos de electrolineras.xml comparten coordenadas con otro (356 puntos) y fac:name es a menudo un código del operador (C6E06BCC22ZMPMAKWJ): mostrar la dirección, no el nombre."
    ],
    "tips": [
-    "Recarga cerca de una dirección: perfil_municipio con la dirección (bloque cerca) la geocodifica con CartoCiudad y da los de 1 km en una llamada; Nominatim pone «Torres Quevedo 42 Alicante» en Elche.",
+    "Para la recarga cerca de una dirección, geocodificar con CartoCiudad (perfil_municipio lo hace): Nominatim pone «Torres Quevedo 42 Alicante» en Elche.",
     "Pedir gzip (curl --compressed; requests lo hace solo) reduce detectores de 18,7 MB a 255 KB, incidencias de 6,8 MB a 208 KB, cámaras a 95 KB y radares a 62 KB.",
     "lxml.etree.iterparse sobre el XML de detectores buscando siteMeasurements: measurementSiteReference (GUID_DET_nnnnnn) enlaza con PredefinedLocationsPublication/detectores para las coordenadas."
    ],
@@ -10095,6 +10137,16 @@
     "Cataluña (j6ii-t3w2) mezcla catalán y castellano en las categorías: motiu = 'Compravenda' da 583.662 y deja fuera 110.339 'Compraventa'; us_edifici igual. Agrupar las dos lenguas antes de contar.",
     "Los CSV del IVACE (med-eficiencia-energetica-edificis-ivace, 340.582 en Valencia) se quedaron en abril de 2024: registros de 2014 a 2023 y nada después. El WFS 26_GCEE del ICV sí trae 2025 (984.839 certificados)."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.consulta",
+    "use": [
+     "consulta.certificados_energeticos('9723410DF2892D', '08'): el último certificado de cada inmueble (8) y el reparto de letras; Cataluña y C. Valenciana",
+     "consulta.perfil_municipio('carrer Aragó 201, Barcelona'): lo mismo desde una dirección, con la referencia catastral del portal por CartoCiudad"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "api-rest",
     "ogc",
@@ -10169,7 +10221,6 @@
     "Ningún registro da el titular; Andalucía deja en DatosDelCertificador solo la fecha. La validez es de 10 años, 5 si la letra es G (E2025VV020502, G, hasta 2030)."
    ],
    "tips": [
-    "perfil_municipio con una dirección de Cataluña o la Comunitat Valenciana da los certificados de su parcela, el último por inmueble, en una llamada.",
     "Para el reparto de letras de un municipio catalán, $select=qualificaci_de_consum_d,count(*) con $group y codi_poblacio en Socrata, sin descargar nada."
    ],
    "related": [
@@ -10207,6 +10258,16 @@
     "35103500 pone la provincia en una sola fila del grupo y no siempre la primera: rellenar hacia abajo deja 7 de 306 municipios en otra (Almuñécar en Córdoba, Illescas en Guadalajara). Casar por nombre, no por provincia.",
     "34010210 pone el año en una fila y el trimestre en otra (1º a 4º); la última columna es 2026-T2 (*), provisional: Palma 1.152, y la anterior 2026-T1, 1.080. Leer las dos filas de cabecera, no contar columnas."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.mivau",
+    "use": [
+     "mivau.indice(mivau.compraventas(), consulta.municipios()): transacciones por trimestre de cada código INE (8.131 de 8.131) en una tabla que solo trae nombres",
+     "mivau.valor_tasado(): €/m² y tasaciones del último trimestre (la última hoja) en los 306 municipios de más de 25.000 habitantes; «n.r» da None, no cero"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "download",
     "portal"
@@ -10287,7 +10348,6 @@
    ],
    "tips": [
     "pd.read_excel(url, engine='calamine', header=None, skiprows=13) sobre 34010210.XLS da los 8.131 municipios con datos de 2004 a 2026; descartar las 60 filas de CCAA y provincia, que no tienen valores.",
-    "perfil_municipio da por código INE las transacciones de los últimos cinco trimestres y el valor tasado del último (receta compraventa-vivienda-municipio).",
     "Para alquiler por sección censal, la hoja Secciones censales del xlsx de SERPAVI se cruza por CUSEC con ine-cartografia-censal o con el shapefile SECC_CE_20210101_INE_WM.zip de la misma página."
    ],
    "related": [
@@ -10324,6 +10384,15 @@
     "Cataluña (t2h3-cgys): total_places viene vacío en 79.567 de 104.502 HUT y referencia_cadastral en 87.762; sumar plazas da 8.196 en Barcelona para 10.651 viviendas. Contar viviendas, no sumar plazas.",
     "Madrid (alojamientos_turisticos): alojamiento_tipo llega cortado y con espacio, «VIVIENDAS DE USO TU »; filtrar = 'VIVIENDAS DE USO TURISTICO' da 0 en vez de 6.246. Usar LIKE 'VIVIENDAS DE USO TU%'."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.consulta",
+    "use": [
+     "consulta.perfil_municipio('Benidorm')['viviendas_turisticas']: las del INE (anuncios) y las del registro de su comunidad, por vivienda y no por plazas"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "api-rest",
     "download"

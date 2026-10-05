@@ -12,6 +12,12 @@ alerts:
   - "Madrid: el datastore se corta sin error en 1.000 filas para 2026 y 2025 (los ficheros tienen 125.523 y 110.650) y en 2.000 para 2024; datastore_search_sql da count 1000. Descargar el CSV o el ZIP."
   - "Cataluña (j6ii-t3w2) mezcla catalán y castellano en las categorías: motiu = 'Compravenda' da 583.662 y deja fuera 110.339 'Compraventa'; us_edifici igual. Agrupar las dos lenguas antes de contar."
   - "Los CSV del IVACE (med-eficiencia-energetica-edificis-ivace, 340.582 en Valencia) se quedaron en abril de 2024: registros de 2014 a 2023 y nada después. El WFS 26_GCEE del ICV sí trae 2025 (984.839 certificados)."
+code:
+  module: fuentes_publicas.clientes.consulta
+  use:
+    - "consulta.certificados_energeticos('9723410DF2892D', '08'): el último certificado de cada inmueble (8) y el reparto de letras; Cataluña y C. Valenciana"
+    - "consulta.perfil_municipio('carrer Aragó 201, Barcelona'): lo mismo desde una dirección, con la referencia catastral del portal por CartoCiudad"
+  mcp: [perfil_municipio]
 access: [api-rest, ogc, download]
 auth: none
 formats: [json, csv, gml, xml, zip, 7z]
@@ -56,7 +62,6 @@ gotchas:
   - "Andalucía: el XML de una provincia no cabe en memoria con un parser DOM (505 MB en Huelva): leer con iterparse; Municipio llega con espacios finales («Huelva »)."
   - "Ningún registro da el titular; Andalucía deja en DatosDelCertificador solo la fecha. La validez es de 10 años, 5 si la letra es G (E2025VV020502, G, hasta 2030)."
 tips:
-  - "perfil_municipio con una dirección de Cataluña o la Comunitat Valenciana da los certificados de su parcela, el último por inmueble, en una llamada."
   - "Para el reparto de letras de un municipio catalán, $select=qualificaci_de_consum_d,count(*) con $group y codi_poblacio en Socrata, sin descargar nada."
 related: [catastro-ovc, cnig-centro-descargas, gencat-dades-obertes, comunidad-madrid-datos-abiertos, gva-dadesobertes-api, junta-andalucia-datos-abiertos]
 status: active

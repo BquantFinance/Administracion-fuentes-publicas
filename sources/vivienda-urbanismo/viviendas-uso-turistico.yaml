@@ -12,6 +12,11 @@ alerts:
   - "Registro e INE no miden lo mismo (licencias frente a anuncios en plataformas): en 2026 Barcelona 10.651 inscritas y 8.231 en el INE, Madrid 4.865 y 10.836, Torrevieja 10.220 y 3.887. Dar las dos cifras con su fuente."
   - "Cataluña (t2h3-cgys): total_places viene vacío en 79.567 de 104.502 HUT y referencia_cadastral en 87.762; sumar plazas da 8.196 en Barcelona para 10.651 viviendas. Contar viviendas, no sumar plazas."
   - "Madrid (alojamientos_turisticos): alojamiento_tipo llega cortado y con espacio, «VIVIENDAS DE USO TU »; filtrar = 'VIVIENDAS DE USO TURISTICO' da 0 en vez de 6.246. Usar LIKE 'VIVIENDAS DE USO TU%'."
+code:
+  module: fuentes_publicas.clientes.consulta
+  use:
+    - "consulta.perfil_municipio('Benidorm')['viviendas_turisticas']: las del INE (anuncios) y las del registro de su comunidad, por vivienda y no por plazas"
+  mcp: [perfil_municipio]
 access: [api-rest, download]
 auth: none
 formats: [json, csv]
