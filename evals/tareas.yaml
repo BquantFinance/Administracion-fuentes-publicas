@@ -359,3 +359,15 @@
     url: https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom
     contains: "ValidNoticeInfo"
   trap: "Una entrada por cambio de estado; la publicación es el primer DOC_CN, no updated ni el primer ValidNoticeInfo (que daba 274 con 147 ya adjudicadas); las anulaciones van en deleted-entry"
+
+# Propuesta del issue 3 (elCanosail), comprobada el 2026-10-05 contra la página del feed y el registro de errores de
+# BquantFinance/licitaciones-espana (calidad/errores_fuente.csv). Sin ejecutar todavía.
+
+- id: placsp-importe-coma-perdida
+  ask: "¿Por qué importe se adjudicó a CONSTRUCCIONES URDINBERRI, S.L. la obra del expediente 01/2024 de la Entidad Pública Empresarial de Vivienda Donostiako Etxegintza (entrada 15091104 del feed de plataformas agregadas de la PLACSP)?"
+  expected: "2.357.531,67 € sin IVA (2.593.284,83 € con el 10 % de IVA en la plataforma de Euskadi, anuncio expjaso522774); el feed publica 2.357.531.666 €, la coma decimal perdida: 936 veces el presupuesto de 2.518.819,27 € sin IVA"
+  sources: [placsp-datos-abiertos]
+  check:
+    url: https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores_20250312_040050.atom
+    contains: "PlataformasAgregadasSinMenores/15091104"
+  trap: "El TaxExclusiveAmount de la adjudicación es 2357531666 y no hay importe con IVA; sin comparar con el presupuesto se reportan 2.357 millones"
