@@ -24,8 +24,8 @@ de `code`, se corrigió la línea y se repitió (C+, C++), cada versión en su f
 Referencias (sexta tanda): T17, 174 constituciones en Valencia y ACTIVOS E INVERSIONES MV con 24.448.370 €; T18, 37.420
 concesiones por 395.511.451,37 € y la DG de Fondos Europeos con 166.215.950,19 €; T19, 126 licitaciones de obras con su
 anuncio de licitación el 01/10, una anulada, 125 vigentes por 395.669.253,39 € (comprobado de nuevo el 2026-10-05 con
-`fuentes-almacen sync --fuentes placsp --feeds 643 --desde 2026-10-01` y la consulta de la ficha: 126, 125 y
-395.669.253,39). Una repetición de T19 S quedó fuera: encontró en el scratchpad un Parquet de la sexta tanda y contó
+`fuentes-almacen sync --fuentes placsp --feeds 643 --desde 2026-10-01`, 13 páginas en 10 min 26 s desde esta nube, y la
+consulta de la ficha: 126, 125 y 395.669.253,39; con los tres feeds el mismo sync pasó de 15 min). Una repetición de T19 S quedó fuera: encontró en el scratchpad un Parquet de la sexta tanda y contó
 sobre él (los almacenes de pruebas se sacaron del alcance de los agentes para el resto).
 
 ## Conclusiones
