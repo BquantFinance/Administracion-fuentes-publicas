@@ -2,7 +2,7 @@
 
 > Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. Contenido en castellano, claves en inglés.
 
-Fuentes: 95 · Productos: 12 · Recetas: 43 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Generado: 2026-10-01
+Fuentes: 95 · Productos: 12 · Recetas: 43 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Generado: 2026-10-05
 
 ## Empieza aquí
 
@@ -51,6 +51,7 @@ Datos incompletos, distintos o a cero sin ningún error; están en `alerts` de c
 - bde-estadisticas: rango=MAX da como mucho las 1.000 observaciones más recientes: el paro registrado D_1JA0D000 (1.118 desde 1933-07) llega solo desde 1943-05; pedir los años previos con rango=1933 a rango=1943, uno por llamada.
 - bdns-api: La exportación sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso; pedir page=0&pageSize=10000 (tope) y seguir con page=1, 2... hasta una página con menos filas.
 - bdns-api: Las concesiones caducan a los 4 años naturales y las de personas físicas tras el siguiente (RD 130/2019 art. 7.8); hoy fechaDesde=01/01/2021&fechaHasta=31/12/2021 da totalElements 0. Para series, copia propia.
+- cnig-centro-descargas: El geocoder ignora el municipio escrito en q («calle mayor 1, getafe» dio un portal de Corera, La Rioja); pasarlo en municipio_filter («A Coruña», no «Coruña, A») y descartar los candidatos de otro muniCode.
 - cnig-centro-descargas: state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido.
 - cnmc-data: datastore_search recorta limit a 32.000 sin error (limit=50000 en ds_1915_1 da 32.000 de 75.553; result.limit dice el aplicado): paginar con offset sobre el host, no con _links.next, o usar /datastore/dump/{id}.
 - comunidad-madrid-datos-abiertos: El datastore no siempre refleja el CSV: padron_por_sexo tiene 5.000 de 18.718 filas y acaba en 2022 (Alcalá de Henares 2025, 203.208 habitantes, solo está en el CSV); comparar total con el fichero y leer el CSV.
@@ -141,7 +142,7 @@ Datos incompletos, distintos o a cero sin ningún error; están en `alerts` de c
 - Datos de un inmueble o parcela por referencia catastral, dirección o coordenadas → catastro-ovc (bloqueo por IP tras ráfagas de unas 15 peticiones)
 - Parcelario, edificios y direcciones vectoriales por municipio (INSPIRE) → catastro-ovc
 - Ortofotos PNOA, modelos del terreno, LiDAR y límites municipales → cnig-centro-descargas (descargas con reCAPTCHA; WMS, WMTS y WFS sin restricción)
-- Geocodificar una dirección y obtener su código INE → cnig-centro-descargas (geocoder CartoCiudad; find ignora municipio_filter y no avisa si el portal no existe, elegir antes con candidates)
+- Geocodificar una dirección y obtener su código INE, código postal o referencia catastral del portal → cnig-centro-descargas (geocoder CartoCiudad, desde la nube (el Catastro no); ignora el municipio escrito en q y devuelve la calle más parecida sin aviso; perfil_municipio con la dirección (consulta.ubicar) pasa municipio_filter y marca exacta)
 - Geometría de secciones censales, distritos y municipios por año → ine-cartografia-censal (shapefile anual o API OGC del INE con filtro CQL; límites municipales del IGN sin reCAPTCHA en api-features.ign.es (idee-servicios))
 - Localizar cualquier servicio WMS, WFS o CSW de una Administración → idee-servicios
 - Recintos agrícolas, usos del suelo y referencia catastral rústica → mapa-sigpac

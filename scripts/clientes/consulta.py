@@ -389,8 +389,106 @@ def empresa_nif(nif: str, max_filas: int = 10) -> dict:
 CRIMINALIDAD = "https://estadisticasdecriminalidad.ses.mir.es/sec/jaxiPx/files/_px/es/csv_bdsc/DatosBalanceAct/l0/{}.px?nocab=1"
 
 
+GEOCODER = "https://www.cartociudad.es/geocoder/api/geocoder"
+_COORDS = r"^\s*(-?\d{1,3}(?:\.\d+)?)\s*[,; ]\s*(-?\d{1,3}(?:\.\d+)?)\s*$"
+_TIPOS_VIA = {"calle", "c", "cl", "avenida", "av", "avda", "avinguda", "plaza", "pl", "placa", "paseo", "pº", "po",
+              "carrer", "carretera", "ctra", "camino", "ronda", "travesia", "glorieta", "de", "del", "la", "el", "los",
+              "las", "y", "s", "n", "sn", "num", "no", "rua", "do", "da", "dos", "das", "d", "l", "dels", "en", "na",
+              "o", "a", "kalea", "etorbidea"}
+
+
+_VIAS = {"CALLE": {"calle", "c", "cl", "carrer", "rua", "kalea"}, "AVENIDA": {"avenida", "av", "avda", "avinguda", "etorbidea"},
+         "PLAZA": {"plaza", "pl", "placa", "praza", "plazuela"}, "PASEO": {"paseo", "po", "passeig", "pasealekua"},
+         "CARRETERA": {"carretera", "ctra"}, "CAMINO": {"camino", "cami"}, "RONDA": {"ronda"}, "TRAVESIA": {"travesia"}}
+
+
+def _via(s: str) -> str | None:
+    import unicodedata
+    w = unicodedata.normalize("NFKD", (s or "").strip().split(" ")[0]).encode("ascii", "ignore").decode().lower().strip(".")
+    return next((k for k, v in _VIAS.items() if w in v or w == k.lower()), None)
+
+
+def es_ubicacion(texto: str) -> bool:
+    """«lat,lon» o una dirección (letras, un número y un espacio o una coma); no un código INE, SIGPAC, DIR3 o NIF."""
+    import re
+    t = (texto or "").strip()
+    return bool(re.match(_COORDS, t)) or bool(re.search(r"[^\W\d_]{3}", t) and re.search(r"\d", t) and re.search(r"[ ,]", t))
+
+
+def _palabras(s: str) -> set[str]:
+    import unicodedata
+    s = unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode().lower()
+    return {w for w in "".join(c if c.isalnum() else " " for c in s).split() if not w.isdigit() and w not in _TIPOS_VIA}
+
+
+def _punto(c: dict) -> dict:
+    return {"direccion": c.get("address"), "tipo": c.get("type"), "cp": c.get("postalCode"), "lat": c.get("lat"),
+            "lon": c.get("lng"), "ine": c.get("muniCode"), "municipio": c.get("muni"), "provincia": c.get("province"),
+            "ref_catastral": c.get("refCatastral")}
+
+
+def ubicar(texto: str) -> dict:
+    """Dirección («calle Alcalá 50, Madrid») o coordenadas («40.4185,-3.696», en cualquier orden) a municipio INE,
+    código postal, coordenadas y referencia catastral del portal, con el geocoder de CartoCiudad (cnig-centro-descargas),
+    que responde desde la nube a diferencia del Catastro. Dos trampas resueltas: el geocoder ignora el municipio escrito en
+    el texto («calle mayor 1, getafe» da un portal de Corera, La Rioja) y por eso se pasa en municipio_filter y se
+    descartan los de otro código INE; y devuelve la calle más parecida sin avisar («calle mayor 1» en Getafe da «CALLE LAGO
+    MAYARA 1»), así que exacta dice si la calle encontrada tiene todas las palabras de la pedida y el mismo número."""
+    import re
+    s = _sesion()
+    m = re.match(_COORDS, texto or "")
+    if m:
+        a, b = float(m.group(1)), float(m.group(2))
+        lat, lon = (a, b) if 27 <= a <= 44.5 else (b, a)  # España: latitud 27 a 44, longitud -19 a 5
+        r = s.get(f"{GEOCODER}/reverseGeocode", params={"lon": lon, "lat": lat}, timeout=30)
+        if r.status_code == 204 or not r.content.strip():
+            return {"error": f"sin dirección en {lat},{lon} (mar o fuera de España)"}
+        return {"consulta": {"lat": lat, "lon": lon}, **_punto(r.json()), "exacta": None,
+                "nota": "portal más cercano al punto", "fuente": "cnig-centro-descargas (CartoCiudad reverseGeocode)"}
+    calle, _, muni_txt = (texto or "").rpartition(",") if "," in (texto or "") else (texto, "", "")
+    muni = buscar_municipio(muni_txt.strip(), 1) if muni_txt.strip() else []
+    if muni_txt.strip() and not muni:
+        calle = texto  # la parte tras la coma no era un municipio (piso, letra): se busca todo
+    q = (calle if muni else texto).strip()
+    numero = (re.findall(r"\b(\d+)\b", q) or [None])[-1]
+    pedidas = _palabras(q)
+    filtro = {}
+    if muni:
+        nombre = muni[0]["nombre"].split("/")[0]
+        base, _, art = nombre.rpartition(", ")
+        filtro["municipio_filter"] = f"{art} {base}" if base and len(art) <= 3 else nombre  # «Coruña, A» -> «A Coruña»
+
+    def candidatos(consulta: str) -> list[dict]:
+        r = s.get(f"{GEOCODER}/candidates", params={"q": consulta, "limit": 5, **filtro}, timeout=30)
+        cs = r.json() if r.content.strip() else []
+        return [c for c in cs if not muni or c.get("muniCode") == muni[0]["ine"]]
+
+    via = _via(q)
+
+    def exacto(c: dict) -> bool:
+        encontrada = c.get("address", "").split(",")[0]
+        return (pedidas <= _palabras(encontrada) and (numero is None or str(c.get("portalNumber")) == numero)
+                and (via is None or via == (_via(c.get("tip_via") or "") or _via(encontrada)) or
+                     {via, c.get("tip_via")} <= {"CALLE", "RUA"}))
+
+    cands = candidatos(q)
+    if not any(exacto(c) for c in cands) and pedidas:  # «rua do vilar 1» no da RUA VILAR 1; «vilar 1» sí
+        cands += candidatos(" ".join(sorted(pedidas)) + (f" {numero}" if numero else ""))
+    if not cands:
+        return {"error": f"CartoCiudad no encuentra {texto!r}" + ("" if muni else "; añade el municipio tras una coma"),
+                "fuente": "cnig-centro-descargas"}
+    elegido = next((c for c in cands if exacto(c)), None)
+    out = {**_punto(elegido or cands[0]), "exacta": elegido is not None, "fuente": "cnig-centro-descargas (CartoCiudad)"}
+    if not muni:
+        out["aviso"] = "sin municipio tras una coma el geocoder elige entre toda España"
+    if elegido is None:
+        out["aviso"] = "la calle encontrada no es la pedida: revisar el nombre"
+        out["otros"] = list(dict.fromkeys(c.get("address") for c in cands[1:]))[:3]
+    return out
+
+
 def perfil_municipio(municipio: str) -> dict:
-    """Un municipio en una llamada: códigos en cada sistema (INE, SIGPAC y Catastro, DIR3, NIF, NUTS3, coordenadas),
+    """Un municipio (o el de una dirección o unas coordenadas, con ubicar) en una llamada: códigos en cada sistema (INE, SIGPAC y Catastro, DIR3, NIF, NUTS3, coordenadas),
     población del padrón, renta neta media por persona, paro registrado y contratos del año por mes y criminalidad. Cada
     bloque falla por separado (clave error) sin tumbar el resto. None en una cifra es secreto o sin dato, no cero."""
     try:
@@ -398,11 +496,17 @@ def perfil_municipio(municipio: str) -> dict:
     except ImportError:
         import ine_tempus
         import sepe
+    ubicacion = None
+    if es_ubicacion(municipio):  # ningún municipio lleva cifras; la búsqueda aproximada encontraba uno en la dirección
+        ubicacion = ubicar(municipio)
+        if ubicacion.get("error"):
+            return ubicacion
+        municipio = ubicacion["ine"]
     cand = buscar_municipio(municipio, 1)
     if not cand:
         return {"error": f"no encuentro el municipio {municipio!r}", "pista": "nombre, código INE (28079), SIGPAC (28:900), DIR3 o NIF"}
     m = cand[0]
-    out: dict = {"municipio": m}
+    out: dict = {"municipio": m, **({"ubicacion": ubicacion} if ubicacion else {})}
 
     def bloque(clave, fn):
         try:
@@ -444,7 +548,8 @@ def perfil_municipio(municipio: str) -> dict:
         futuros = {k: ex.submit(bloque, k, f) for k, f in tareas.items()}
     for k in tareas:
         futuros[k].result()
-    out = {"municipio": out["municipio"], **{k: out[k] for k in tareas}}  # orden fijo, no el de llegada
+    out = {"municipio": out["municipio"], **({"ubicacion": ubicacion} if ubicacion else {}),
+           **{k: out[k] for k in tareas}}  # orden fijo, no el de llegada
     out["notas"] = ["paro registrado (SEPE) no es el desempleo de la EPA (INE)",
                     "None en paro o contratos es «<5», secreto estadístico de 1 a 4"]
     return out

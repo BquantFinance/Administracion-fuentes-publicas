@@ -409,6 +409,17 @@ def ogc_next_y_tope():
         ogc.json, ogc._S = original, None
 
 
+@test
+def ubicar_reconoce_direcciones_y_vias():
+    for d in ("calle Alcalá 50, Madrid", "40.4185,-3.696", "-3.9, 40.3", "Rúa do Vilar 1, Santiago de Compostela"):
+        assert consulta.es_ubicacion(d), d
+    for m in ("Alcalá de Henares", "28079", "280796", "28:900", "L01280796", "P2800500G", "Coruña, A"):
+        assert not consulta.es_ubicacion(m), m
+    assert consulta._via("Carrer de Pelai 12") == consulta._via("CALLE") == "CALLE"
+    assert consulta._via("Avda. de la Paz 3") == "AVENIDA" and consulta._via("Plaza Mayor 1") == "PLAZA"
+    assert consulta._palabras("Rúa do Vilar 1") == {"vilar"}  # partículas y número fuera
+
+
 def main() -> int:
     fallos = 0
     for t in TESTS:

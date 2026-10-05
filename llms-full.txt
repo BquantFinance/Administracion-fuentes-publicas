@@ -2,7 +2,7 @@
 
 > Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. Contenido en castellano, claves en inglés.
 
-Fuentes: 95 · Generado: 2026-10-01 · Formato: un bloque por fuente; '!!' marca trampas silenciosas (datos incompletos o distintos sin error); '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
+Fuentes: 95 · Generado: 2026-10-05 · Formato: un bloque por fuente; '!!' marca trampas silenciosas (datos incompletos o distintos sin error); '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
 
 # SECTOR legislacion-boletines: Legislación y boletines oficiales
 
@@ -1597,6 +1597,7 @@ related: ine-codigos-territoriales, cnig-centro-descargas, idee-servicios
 ## cnig-centro-descargas
 IGN/CNIG – Centro de Descargas, servicios OGC y geocoder CartoCiudad | Instituto Geográfico Nacional y Centro Nacional de Información Geográfica
 summary: Producción del IGN (ortofotos PNOA, modelos del terreno, LiDAR, mapas, límites municipales oficiales, SIOSE) en un Centro de Descargas protegido por reCAPTCHA, más servicios WMS, WMTS y WFS INSPIRE sin restricción y el geocoder CartoCiudad, que devuelve el código INE.
+!! El geocoder ignora el municipio escrito en q («calle mayor 1, getafe» dio un portal de Corera, La Rioja); pasarlo en municipio_filter («A Coruña», no «Coruña, A») y descartar los candidatos de otro muniCode.
 !! state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido.
 access: ogc, api-rest, download, portal | auth: none | formats: shp, gpkg, geotiff, laz, gml, geojson, json, png | update: irregular | status: active | verified: 2026-10-01
 coverage: PNOA desde 2004; cartografía histórica desde el siglo XIX; límites vigentes e históricos 2023 y 2024

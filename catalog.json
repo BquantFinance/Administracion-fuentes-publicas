@@ -1,7 +1,7 @@
 {
  "name": "Administración fuentes públicas",
  "description": "Catálogo de fuentes de datos de la Administración pública española, optimizado para agentes.",
- "generated": "2026-10-01",
+ "generated": "2026-10-05",
  "repo": "https://github.com/BquantFinance/Administracion-fuentes-publicas",
  "schema": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json",
  "vocab": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml",
@@ -8498,6 +8498,7 @@
    ],
    "summary": "Producción del IGN (ortofotos PNOA, modelos del terreno, LiDAR, mapas, límites municipales oficiales, SIOSE) en un Centro de Descargas protegido por reCAPTCHA, más servicios WMS, WMTS y WFS INSPIRE sin restricción y el geocoder CartoCiudad, que devuelve el código INE.",
    "alerts": [
+    "El geocoder ignora el municipio escrito en q («calle mayor 1, getafe» dio un portal de Corera, La Rioja); pasarlo en municipio_filter («A Coruña», no «Coruña, A») y descartar los candidatos de otro muniCode.",
     "state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido."
    ],
    "access": [
@@ -11694,9 +11695,9 @@
     "note": "descargas con reCAPTCHA; WMS, WMTS y WFS sin restricción"
    },
    {
-    "need": "Geocodificar una dirección y obtener su código INE",
+    "need": "Geocodificar una dirección y obtener su código INE, código postal o referencia catastral del portal",
     "source": "cnig-centro-descargas",
-    "note": "geocoder CartoCiudad; find ignora municipio_filter y no avisa si el portal no existe, elegir antes con candidates"
+    "note": "geocoder CartoCiudad, desde la nube (el Catastro no); ignora el municipio escrito en q y devuelve la calle más parecida sin aviso; perfil_municipio con la dirección (consulta.ubicar) pasa municipio_filter y marca exacta"
    },
    {
     "need": "Geometría de secciones censales, distritos y municipios por año",

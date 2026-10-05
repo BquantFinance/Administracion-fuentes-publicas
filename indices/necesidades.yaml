@@ -149,9 +149,9 @@
 - need: Ortofotos PNOA, modelos del terreno, LiDAR y límites municipales
   source: cnig-centro-descargas
   note: descargas con reCAPTCHA; WMS, WMTS y WFS sin restricción
-- need: Geocodificar una dirección y obtener su código INE
+- need: Geocodificar una dirección y obtener su código INE, código postal o referencia catastral del portal
   source: cnig-centro-descargas
-  note: geocoder CartoCiudad; find ignora municipio_filter y no avisa si el portal no existe, elegir antes con candidates
+  note: "geocoder CartoCiudad, desde la nube (el Catastro no); ignora el municipio escrito en q y devuelve la calle más parecida sin aviso; perfil_municipio con la dirección (consulta.ubicar) pasa municipio_filter y marca exacta"
 - need: Geometría de secciones censales, distritos y municipios por año
   source: ine-cartografia-censal
   note: shapefile anual o API OGC del INE con filtro CQL; límites municipales del IGN sin reCAPTCHA en api-features.ign.es (idee-servicios)

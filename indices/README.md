@@ -771,7 +771,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Datos de un inmueble o parcela por referencia catastral, dirección o coordenadas → `catastro-ovc` (bloqueo por IP tras ráfagas de unas 15 peticiones)
 - Parcelario, edificios y direcciones vectoriales por municipio (INSPIRE) → `catastro-ovc`
 - Ortofotos PNOA, modelos del terreno, LiDAR y límites municipales → `cnig-centro-descargas` (descargas con reCAPTCHA; WMS, WMTS y WFS sin restricción)
-- Geocodificar una dirección y obtener su código INE → `cnig-centro-descargas` (geocoder CartoCiudad; find ignora municipio_filter y no avisa si el portal no existe, elegir antes con candidates)
+- Geocodificar una dirección y obtener su código INE, código postal o referencia catastral del portal → `cnig-centro-descargas` (geocoder CartoCiudad, desde la nube (el Catastro no); ignora el municipio escrito en q y devuelve la calle más parecida sin aviso; perfil_municipio con la dirección (consulta.ubicar) pasa municipio_filter y marca exacta)
 - Geometría de secciones censales, distritos y municipios por año → `ine-cartografia-censal` (shapefile anual o API OGC del INE con filtro CQL; límites municipales del IGN sin reCAPTCHA en api-features.ign.es (idee-servicios))
 - Localizar cualquier servicio WMS, WFS o CSW de una Administración → `idee-servicios`
 - Carreteras y ferrocarril oficiales en vectorial → `idee-servicios` (GeoJSON en api-features.idee.es (roadlink, railwaylink); el WFS transportes de servicios.idee.es solo da GML)

@@ -10,6 +10,7 @@ summary: >-
   en un Centro de Descargas protegido por reCAPTCHA, más servicios WMS, WMTS y WFS INSPIRE sin restricción y
   el geocoder CartoCiudad, que devuelve el código INE.
 alerts:
+  - "El geocoder ignora el municipio escrito en q («calle mayor 1, getafe» dio un portal de Corera, La Rioja); pasarlo en municipio_filter («A Coruña», no «Coruña, A») y descartar los candidatos de otro muniCode."
   - state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido.
 access: [ogc, api-rest, download, portal]
 auth: none
