@@ -83,7 +83,7 @@ Prueba real sin CI: `python scripts/test_mcp_catalogo.py` arranca el servidor po
   una release `vX.Y.Z` en GitHub (con la misma versión en `server.json`), `.github/workflows/publicar-mcp.yml` empaqueta `mcpb/` como
   `.mcpb` fijado a esa etiqueta, lo adjunta a una release de GitHub y publica la entrada en el registro por OIDC de GitHub:
   sin secretos ni cuentas externas. El registro admite paquetes MCPB alojados en releases de GitHub y exige su sha256, que
-  el workflow calcula. PyPI es opcional (`uvx fuentes-publicas-mcp`, más corto) y exige al propietario una cuenta con 2FA.
+  el workflow calcula. Sin PyPI (decisión del propietario, 2026-10-05): se instala desde la etiqueta de GitHub.
 - Glama: indexa el registro oficial; `glama.json` declara al mantenedor y `Dockerfile` construye la imagen que prueba.
 - Smithery: el mismo `.mcpb` de la release (`npx -y @anthropic-ai/mcpb pack mcpb` en local); publicar exige cuenta en Smithery.
 

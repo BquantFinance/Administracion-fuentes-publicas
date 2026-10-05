@@ -142,10 +142,10 @@ Judicial o UE, solo cuando lo indique el propietario.
   `fuentes-radar` comprobados. v0.8.0 (concursos, viviendas turísticas, compraventa, certificados energéticos, cerca y
   radar con fallos aislados por fuente) publicada el 2026-10-05 sobre 2ed6e10, tras un primer intento sobre 9bb74be que
   falló en la comprobación de versión (ficheros en 0.7.0): registro en 0.8.0, sha256 del .mcpb coincide y
-  `pip install ...@v0.8.0` da fuentes-radar y perfil_municipio con cerca. La plantilla del radar instala @v0.8.0. La 0.9.0
+  `pip install ...@v0.8.0` da fuentes-radar y perfil_municipio con cerca. La plantilla del radar instala @v0.8.0. v0.9.0
   (fecha_publicacion de PLACSP, placsp_ultimo con anuladas, avisos del almacén, BDNS en mantenimiento, Castilla y León)
-  está en los ficheros de distribución desde el 2026-10-05; falta crear la release v0.9.0 desde la web y, publicada,
-  subir la plantilla del radar a @v0.9.0.
+  publicada el 2026-10-05 sobre 08fa35c: registro en 0.9.0, sha256 del .mcpb coincide y `pip install ...@v0.9.0` da
+  los cuatro comandos y las correcciones; la plantilla del radar instala @v0.9.0. Sin PyPI (propietario, 2026-10-05).
 - **CI**: `ci.yml` (validate, build al día y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC,
   manual y al cambiar el flujo: recetas, ejemplos de fichas, cargadores, ejemplos, forma de las fuentes y enlaces desde
   la IP de GitHub; comenta en el issue de verificación si algo falla). Secreto `AEMET_KEY` en el repositorio.
@@ -160,13 +160,9 @@ Judicial o UE, solo cuando lo indique el propietario.
 2. Ronda desde una IP residencial para los hosts bloqueados (necesita al propietario): `python
    scripts/ronda_residencial.py` desde casa deja `ronda-residencial.md` (ejemplos de 18 fichas, recetas que las citan y
    carburantes, sin IP ni claves); con él se fechan los `verified` o se anota en `gotchas` lo que falle también desde casa.
-3. PyPI: `publicar-pypi.yml` construye fuentes-publicas-mcp (nombre libre; wheel y sdist pasan twine check el
-   2026-10-05) y lo sube con OIDC, apagado hasta que el propietario dé de alta el publicador pendiente en pypi.org
-   (proyecto fuentes-publicas-mcp, flujo publicar-pypi.yml, entorno pypi) y cree la variable PYPI=si; luego Run workflow
-   sube la versión de main, cada release la suya, y server.json puede llevar la entrada pypi.
-4. Necesidades sin ficha: `buscar` sin resultados enlaza la plantilla `nueva-fuente` (2026-10-05); revisar qué se pide.
-5. Issues abiertos: 4 (fuentes de la comunidad, a la espera de su PR). El 3 y el 6 se cerraron el 2026-10-05.
-6. Productos nuevos solo con piezas que ya funcionen; fuentes nuevas solo si desbloquean un producto. Un cliente
+3. Necesidades sin ficha: `buscar` sin resultados enlaza la plantilla `nueva-fuente` (2026-10-05); revisar qué se pide.
+4. Issues abiertos: 4 (fuentes de la comunidad, a la espera de su PR). El 3 y el 6 se cerraron el 2026-10-05.
+5. Productos nuevos solo con piezas que ya funcionen; fuentes nuevas solo si desbloquean un producto. Un cliente
    Opendatasoft solo si una segunda fuente lo usa (hoy solo la Junta de Castilla y León).
 
 ## Lo que no se hace

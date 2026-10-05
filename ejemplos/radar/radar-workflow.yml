@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Instalar el cliente (fijado a una versión publicada)
-        run: pip install "fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas@v0.8.0"
+        run: pip install "fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas@v0.9.0"
       - name: Radar
         run: fuentes-radar radar.yaml --estado radar/estado.json --salida radar
       - name: Aviso con lo nuevo (y con las fuentes que fallaron, que se reintentan al día siguiente)
