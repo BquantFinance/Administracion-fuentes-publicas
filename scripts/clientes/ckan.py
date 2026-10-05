@@ -171,6 +171,8 @@ if __name__ == "__main__":
         else:
             p = paquete("comunidad-madrid", "padron_por_sexo")
             csv_ = next(r for r in p["resources"] if r["format"].upper() == "CSV")
+            if not csv_.get("datastore_active"):  # el 04/10/2026 la actualización lo sacó del datastore (404)
+                sys.exit(print(p["title"], "| sin datastore (datastore_active false): leer el CSV", csv_["url"]))
             c = comparar("comunidad-madrid", csv_)
             n = sum(1 for _ in filas("comunidad-madrid", csv_["id"], por_pagina=2000))
             print(p["title"], "| datastore", c["datastore"], "filas (leídas paginando:", n, ") | CSV", c["fichero"],

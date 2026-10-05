@@ -1223,8 +1223,8 @@ related: comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, dato
 ## comunidad-madrid-datos-abiertos
 Comunidad de Madrid – Catálogo de datos abiertos (API CKAN) | Comunidad de Madrid
 summary: CKAN 2.9 con 177 conjuntos de las consejerías (calidad del aire diaria, polen, centros educativos, farmacias, registros, GTFS del Consorcio, elecciones autonómicas) y 2086 tablas del Instituto de Estadística (bancos Almudena municipal, Baco y Desvan). API JSON, datastore y DCAT sin clave.
-!! El datastore no siempre refleja el CSV: padron_por_sexo tiene 5.000 de 18.718 filas y acaba en 2022 (Alcalá de Henares 2025, 203.208 habitantes, solo está en el CSV); comparar total con el fichero y leer el CSV.
-access: api-rest, download | auth: none | formats: json, csv, zip, ttl, rdf | update: daily | status: active | verified: 2026-10-01
+!! El datastore no refleja el CSV: padron_por_sexo tenía el 01/10 5.000 de 18.718 filas (hasta 2022) y desde la actualización del 04/10 da 404; el 2025 solo está en el CSV. Mirar datastore_active y leer el CSV.
+access: api-rest, download | auth: none | formats: json, csv, zip, ttl, rdf | update: daily | status: active | verified: 2026-10-05
 coverage: Según conjunto; padrón municipal por sexo desde 1985, calidad del aire del día y del mes en curso
 license: CC BY 4.0 en cada conjunto (license_id cc-by)
 base_url: https://datos.comunidad.madrid/api/3/action

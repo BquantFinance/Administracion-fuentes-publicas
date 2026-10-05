@@ -106,7 +106,10 @@ Judicial o UE, solo cuando lo indique el propietario.
   desde una IP residencial (pendiente). Verificación desde GitHub del 2026-10-01: sobre 42998e7, recetas 88 de 93
   (Catastro, MINETUR, DGT y un corte de GBIF) y ejemplos de fichas 368 de 380 (429 de AEMET, 504 de DATAESTUR); sobre
   5b79d2d, recetas 91 de 93 (MINETUR) y ejemplos 367 de 380 (CIMA con un 500 y un timeout, 10 de 10 al repetir; DATAESTUR), y los cargadores
-  de PLACSP daban 0 sin error por el WAF (ahora lanzan Bloqueado).
+  de PLACSP daban 0 sin error por el WAF (ahora lanzan Bloqueado). El 2026-10-05, a mano sobre f4bfeab (el cron de los
+  lunes 06:17 no se disparó; sin ninguna ejecución schedule hasta entonces): recetas 92 de 93 (429 de AEMET), ejemplos
+  364 de 380 (timeouts del IECA y cortes de la Junta de Andalucía) y cargadores bien salvo ckan.py, porque la Comunidad
+  de Madrid sacó padron_por_sexo del datastore el 04/10 (corregido).
 - **Evaluación** (`evals/`): con Haiku y trampas silenciosas, acierto 3 de 21 sin catálogo, 10 con ficheros y 13 con
   MCP, con un 30 % y un 43 % menos de tokens de entrada. Cuarta tanda (2026-10-05): con `perfil_municipio`, `coyuntura`
   y `empresa_nif`, 8 de 8 frente a 4 de 8 sin ellas, un 75 % menos de tokens y un tercio del tiempo. Sin medir aún:

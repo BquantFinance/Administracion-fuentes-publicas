@@ -9,7 +9,7 @@ summary: >-
   registros, GTFS del Consorcio, elecciones autonómicas) y 2086 tablas del Instituto de Estadística (bancos Almudena
   municipal, Baco y Desvan). API JSON, datastore y DCAT sin clave.
 alerts:
-  - "El datastore no siempre refleja el CSV: padron_por_sexo tiene 5.000 de 18.718 filas y acaba en 2022 (Alcalá de Henares 2025, 203.208 habitantes, solo está en el CSV); comparar total con el fichero y leer el CSV."
+  - "El datastore no refleja el CSV: padron_por_sexo tenía el 01/10 5.000 de 18.718 filas (hasta 2022) y desde la actualización del 04/10 da 404; el 2025 solo está en el CSV. Mirar datastore_active y leer el CSV."
 access: [api-rest, download]
 auth: none
 formats: [json, csv, zip, ttl, rdf]
@@ -61,4 +61,4 @@ tips:
   - Para series propias del Instituto con código INE de 5 dígitos y filtros por dimensión, comunidad-madrid-estadistica-api; para la ciudad de Madrid, ayuntamiento-madrid-datos-abiertos.
 related: [comunidad-madrid-estadistica-api, ayuntamiento-madrid-datos-abiertos, datos-gob-es-api, ine-codigos-territoriales, miteco-calidad-aire]
 status: active
-verified: "2026-10-01"
+verified: "2026-10-05"
