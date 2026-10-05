@@ -18,7 +18,8 @@ de `code`, se corrigió la línea y se repitió (C+, C++), cada versión en su f
 | T18 | S | 2/2 | 11 | 587.608 | 156 | 0 de 2 | |
 | T19 | C | 0/2 | 22 | 1.447.556 | 531 | 1 de 2 | `placsp.entradas(max_paginas=30)` filtrando por `updated`: 530 publicadas y 1.238 M€; ZIP a mano por PublicationDate sin quedarse con la última versión: 479 y 445 M€ |
 | T19 | C+ (línea con la fecha) | 0/2 | 18,5 | 1.097.935 | 569 | 2 de 2 | los dos filtraron bien por `fecha_publicacion`, pero `entradas(max_paginas=30)` son 450 MB y pasó de los 120 s del Bash; siguieron a mano con las cinco instantáneas del 01/10: 93 y 92 |
-| T19 | C++ (almacén primero) | PENDIENTE | | | | | |
+| T19 | C++ (almacén primero, `sync --feeds 643` y la consulta SQL) | 0/2 | 26 | 1.651.706 | 420 | 1 de 2 | ninguno montó el almacén (10 min desde esta nube); uno fue al ZIP de octubre pero solo a las instantáneas del 01/10 (91), el otro al feed a mano por PublicationDate sin última versión ni bajas (130) |
+| T19 | C+++ (`placsp.publicadas` primero) | PENDIENTE | | | | | |
 | T19 | S | 0/2 | 24,5 | 1.420.888 | 302 | 1 de 2 | feed filtrado por `updated`: 93; `fuentes-almacen sync` por su cuenta y cuenta sobre las tres sindicaciones juntas: 163 (37 del 1044) |
 
 Referencias (sexta tanda): T17, 174 constituciones en Valencia y ACTIVOS E INVERSIONES MV con 24.448.370 €; T18, 37.420
