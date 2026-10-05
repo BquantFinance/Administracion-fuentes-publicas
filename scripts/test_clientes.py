@@ -782,6 +782,65 @@ def formas_de_las_fuentes():
     assert all(base.get(x["id"]) for x in sondas), [x["id"] for x in sondas if not base.get(x["id"])]
 
 
+@test
+def cifras_de_control():
+    # check_cifras.py sin red: la ejecución del fragmento se sustituye por valores fijos o excepciones
+    import ast
+    import yaml
+    sys.path.insert(0, str(DIR.parent))
+    import check_cifras as cc
+    assert cc.evaluar("x = 6\ny = [x * i for i in range(3)]\nsum(y) + x") == 24  # el valor es la última expresión
+    try:
+        cc.evaluar("x = 1")
+        raise AssertionError("sin expresión final el valor sería None y cuadraría con esperado null")
+    except ValueError:
+        pass
+    valores, ejecutar, cifras = {}, cc.ejecutar, cc.CIFRAS
+
+    def falso(codigo, timeout):
+        if isinstance(valores[codigo], Exception):
+            raise valores[codigo]
+        return valores[codigo]
+
+    def estado(valor, esperado, tipo="exacto"):
+        valores["v"] = valor
+        return cc.comprobar({"id": "x", "python": "v", "esperado": esperado, "tipo": tipo})["estado"]
+    cc.ejecutar = falso
+    try:
+        assert estado(753.0, 753) == "ok"  # el INE da 753.0 y el YAML dice 753
+        assert estado("753", 753) == "cambio"  # el parser dejó de convertir: texto donde había número
+        assert estado(None, 753) == "cambio"  # sin la fila, el fragmento da None en vez de lanzar
+        assert estado(None, None) == "ok" and estado(0, None) == "cambio"  # «<5» es secreto: leído como 0 es un cambio
+        assert estado("2357531666", "2357531666") == "ok" and estado(True, 1) == "cambio"  # un booleano no es un número
+        assert [estado(v, 3, "minimo") for v in (3, 5, 2, None, "4")] == ["ok", "ok", "cambio", "cambio", "cambio"]
+        assert estado(ConnectionError("sin red"), 753) == "error"  # la red se informa y no cuenta como cambio
+        with tempfile.TemporaryDirectory() as d:  # main sale con 1 solo si alguna cifra no cuadra
+            cc.CIFRAS = Path(d, "cifras.yaml")
+            cc.CIFRAS.write_text('- {id: a, ficha: x, python: a, esperado: 1, tipo: exacto}\n'
+                                 '- {id: b, ficha: x, python: b, esperado: 2, tipo: exacto, segunda_via: CSV crudo}\n',
+                                 encoding="utf-8")
+            valores.update(a=1, b=TimeoutError("más de 180 s"))
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                assert cc.main([]) == 0, out.getvalue()  # un error de red solo no hace fallar la verificación
+            valores["b"] = 3
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                assert cc.main(["--report"]) == 1 and "| b | x |  | cambio | 3 | 2 |" in out.getvalue(), out.getvalue()
+            assert "- b: CSV crudo" in out.getvalue()  # el informe dice cómo confirmar la cifra antes de tocarla
+    finally:
+        cc.ejecutar, cc.CIFRAS = ejecutar, cifras
+    # Cada cifra cita una ficha que existe, tiene todos los campos y un fragmento de hasta 6 líneas que acaba en el valor
+    fichas = {f.stem for f in (DIR.parent.parent / "sources").rglob("*.yaml")}
+    campos = {"id", "ficha", "usa", "python", "esperado", "tipo", "por_que_estable", "segunda_via", "comprobado"}
+    todas = yaml.safe_load(cc.CIFRAS.read_text(encoding="utf-8"))
+    assert len({c["id"] for c in todas}) == len(todas)
+    for c in todas:
+        arbol = ast.parse(c["python"])
+        assert campos <= set(c) and c["ficha"] in fichas and c["tipo"] in ("exacto", "minimo"), c["id"]
+        assert len(c["python"].strip().splitlines()) <= 6 and isinstance(arbol.body[-1], ast.Expr), c["id"]
+        assert {a.name for n in ast.walk(arbol) if isinstance(n, ast.Import) for a in n.names} <= {
+            p.stem for p in DIR.glob("*.py")} | set(sys.stdlib_module_names), c["id"]  # un import mal escrito sería error cada lunes
+
+
 def main() -> int:
     fallos = 0
     for t in TESTS:

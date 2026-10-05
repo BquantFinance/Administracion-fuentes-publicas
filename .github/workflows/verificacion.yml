@@ -93,6 +93,13 @@ jobs:
           python scripts/check_formas.py --report > formas-report.md
           echo "exit=$?" >> "$GITHUB_OUTPUT"
           cat formas-report.md
+      - name: Cifras de control (datos pasados que no cambian)
+        id: cifras
+        run: |
+          set +e
+          python scripts/check_cifras.py --report > cifras-report.md
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+          cat cifras-report.md
       - name: Informe de enlaces de las fichas
         run: python scripts/check_links.py > link-report.md || true
       - uses: actions/upload-artifact@v4
@@ -103,14 +110,15 @@ jobs:
             ejemplos-report.md
             cargadores-report.md
             formas-report.md
+            cifras-report.md
             link-report.md
       - name: Abrir o actualizar el issue si hay fallos
-        if: steps.recetas.outputs.exit != '0' || steps.ejemplos.outputs.exit != '0' || steps.cargadores.outputs.exit != '0' || steps.formas.outputs.exit != '0'
+        if: steps.recetas.outputs.exit != '0' || steps.ejemplos.outputs.exit != '0' || steps.cargadores.outputs.exit != '0' || steps.formas.outputs.exit != '0' || steps.cifras.outputs.exit != '0'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           titulo="Verificación semanal: comprobaciones de recetas con fail o error"
-          cuerpo="$(cat recetas-report.md formas-report.md cargadores-report.md ejemplos-report.md | head -c 60000)"
+          cuerpo="$(cat recetas-report.md formas-report.md cifras-report.md cargadores-report.md ejemplos-report.md | head -c 60000)"
           num=$(gh issue list --state open --search "\"$titulo\" in:title" --json number --jq '.[0].number')
           if [ -n "$num" ]; then
             gh issue comment "$num" --body "$cuerpo"

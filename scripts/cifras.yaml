@@ -1,0 +1,318 @@
+# Cifras de control: datos pasados que no cambian, leídos con los clientes de scripts/clientes y confirmados por otra vía.
+# check_cifras.py ejecuta cada fragmento python en un proceso aparte (hasta 6 líneas; la última expresión es el valor; los
+# módulos de scripts/clientes se importan por su nombre) y lo compara con esperado según tipo: exacto (números como
+# números, textos y null tal cual; null es secreto o sin dato, no cero) o minimo (número igual o mayor). Si el dato falta,
+# el fragmento devuelve None o un texto en vez de lanzar, para que cuente como cambio y no como error de red. timeout en
+# segundos, 180 si no se pone. Nunca se cambia esperado a lo que salga sin confirmarlo antes por la segunda vía.
+
+- id: borme-46-20260928-constituciones
+  ficha: borme-api-sumario
+  usa: radar (sociedades) y almacén (BORME A por provincia)
+  python: |
+    import boe
+    emp = boe.borme_empresas("BORME-A-2026-187-46")
+    sum(1 for e in emp if any(a["tipo"] == "Constitución" for a in e["actos"]))
+  esperado: 32
+  tipo: exacto
+  por_que_estable: BORME A de Valencia del 28/09/2026, ya publicado; las correcciones salen en boletines posteriores
+  segunda_via: XML crudo de diario_borme/xml.php con curl, 132 empresas y 32 «Constitución.» (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: borme-46-20261001-sociedades
+  ficha: borme-api-sumario
+  usa: radar (filtrar_sociedades) y producto leads-sociedades-nuevas
+  python: |
+    import boe, radar
+    xs = [{"documento": "BORME-A-2026-190-46", "empresa": e} for e in boe.borme_empresas("BORME-A-2026-190-46")]
+    len(radar.filtrar_sociedades(xs, {}))
+  esperado: 79
+  tipo: exacto
+  por_que_estable: BORME A de Valencia del 01/10/2026, ya publicado
+  segunda_via: XML crudo con curl, 247 empresas y 79 «Constitución.» (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: borme-46-20261001-capital-max
+  ficha: borme-api-sumario
+  usa: radar (capital_min de sociedades)
+  python: |
+    import boe, radar
+    xs = [{"documento": "BORME-A-2026-190-46", "empresa": e} for e in boe.borme_empresas("BORME-A-2026-190-46")]
+    max((s["importe"] or 0) for s in radar.filtrar_sociedades(xs, {}))
+  esperado: 24448370.0
+  tipo: exacto
+  por_que_estable: BORME A de Valencia del 01/10/2026, ya publicado; es el capital de ACTIVOS E INVERSIONES MV SOCIEDAD LIMITADA
+  segunda_via: "XML crudo con curl, «Capital: 24.448.370,00 Euros» en su acto de constitución, el mayor de los 79 (2026-10-05)"
+  comprobado: "2026-10-05"
+
+- id: borme-28-20260930-concursos
+  ficha: borme-api-sumario
+  usa: radar (concursos) y almacén (detalle del acto concursal)
+  python: |
+    import boe, radar
+    xs = [{"documento": "BORME-A-2026-189-28", "empresa": e} for e in boe.borme_empresas("BORME-A-2026-189-28")]
+    len(radar.filtrar_concursos(xs, {"resoluciones": ["declaración de concurso"]}))
+  esperado: 3
+  tipo: exacto
+  por_que_estable: BORME A de Madrid del 30/09/2026, ya publicado
+  segunda_via: XML crudo con curl, 621 empresas y 3 «Auto de declaración de concurso» (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: boe-20260930-items
+  ficha: boe-api-sumario
+  usa: boe_sumario (MCP), radar (BOE), almacén y ejemplos/boe_hoy.py
+  python: |
+    import boe
+    len(list(boe.items(boe.sumario("20260930"))))
+  esperado: 213
+  tipo: exacto
+  por_que_estable: sumario del BOE del 30/09/2026 con su número extraordinario, ya publicado
+  segunda_via: sumario en XML con curl (Accept application/xml), 213 item, 121 BOE-A y 92 BOE-B (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: boe-c1978-a135-vigente
+  ficha: boe-api-legislacion-consolidada
+  usa: producto monitor-regulatorio (versión vigente de un bloque)
+  python: |
+    import boe
+    v = boe.version_vigente(boe.bloque("BOE-A-1978-31229", "a135"), "20261001") or {}
+    v.get("id_norma")
+  esperado: BOE-A-2011-15210
+  tipo: exacto
+  por_que_estable: versión vigente a una fecha fija (01/10/2026), no a la de hoy; una reforma posterior no la cambia
+  segunda_via: bloque a135 en XML con curl, versiones BOE-A-1978-31229 y BOE-A-2011-15210 con vigencia 20110927 (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: bdns-altas-20260929
+  ficha: bdns-api
+  usa: almacén (bdns.altas, por fecha de alta con fin exclusivo)
+  python: |
+    import bdns
+    bdns.pagina("concesiones", 0, 1, fechaRegInicio="29/09/2026", fechaRegFin="30/09/2026")["totalElements"]
+  esperado: 19275
+  tipo: exacto
+  por_que_estable: altas de un día pasado; una baja posterior en la BDNS la cambiaría y saldría como cambio
+  segunda_via: API con curl, 37.420 del 28/09 al 01/10 menos 5.407 del 28/09 y 12.738 del 30/09, y 29/09 a 29/09 da 0 (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: bdns-terceros-uca
+  ficha: bdns-api
+  usa: empresa_nif por nombre y radar (concursos de empresas vigiladas por NIF)
+  python: |
+    import bdns
+    r = bdns.terceros("universidad de cadiz")
+    next((e["nif"] for e in r["empresas"] if "UNIVERSIDAD DE CADIZ" in e["nombres"]), None)
+  esperado: Q1132001G
+  tipo: exacto
+  por_que_estable: NIF de una universidad pública, que no cambia
+  segunda_via: API terceros con curl, cuatro filas Q1132001G - UNIVERSIDAD DE CADIZ o CÁDIZ con espacios distintos (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: placsp-643-instantanea
+  ficha: placsp-datos-abiertos
+  usa: radar (licitaciones), almacén y ejemplos/licitaciones.py
+  python: |
+    import placsp
+    u = "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_20261001_201704.atom"
+    len(list(placsp.entradas(u, 1)))
+  esperado: 500
+  tipo: exacto
+  timeout: 300
+  por_que_estable: página archivada del feed 643 con URL fija (fecha y hora en el nombre), que no se reescribe
+  segunda_via: atom crudo con curl (14 MB), 497 entry y 3 at:deleted-entry (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: placsp-643-obras-20261001
+  ficha: placsp-datos-abiertos
+  usa: radar (licitaciones con CPV 45) y ejemplos/licitaciones.py (fecha_publicacion)
+  python: |
+    import placsp
+    u = "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_20261001_201704.atom"
+    es = list(placsp.entradas(u, 1))
+    sum(1 for e in es if e.get("fecha_publicacion") == "2026-10-01" and any(c.startswith("45") for c in e.get("cpv") or []))
+  esperado: 30
+  tipo: exacto
+  timeout: 300
+  por_que_estable: misma página archivada; con la fecha del primer anuncio en vez de la del de licitación salían 64
+  segunda_via: expresiones regulares sobre el atom crudo, entradas con su primer DOC_CN el 2026-10-01 y algún CPV 45 (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: placsp-1044-coma-perdida
+  ficha: placsp-datos-abiertos
+  usa: ejemplos/adjudicaciones.py y almacén (placsp_adjudicaciones)
+  python: |
+    import placsp
+    u = "https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores_20250312_040050.atom"
+    e = next((x for x in placsp.entradas(u, 1) if x["id"].endswith("/15091104")), {})
+    next((a["importe_sin_iva"] for a in e.get("adjudicaciones", [])), None)
+  esperado: "2357531666"
+  tipo: exacto
+  timeout: 300
+  por_que_estable: página archivada del feed 1044 con URL fija; el importe es un error de la fuente (coma perdida) y se lee tal cual
+  segunda_via: atom crudo con curl, TaxExclusiveAmount 2357531666 sin PayableAmount frente a un presupuesto de 2518819.27; la plataforma de Euskadi da 2.357.531,67 € (issue 3) (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: sepe-15902-202608
+  ficha: sepe-estadisticas
+  usa: perfil_municipio (paro registrado, fusión de Oza-Cesuras)
+  python: |
+    import sepe
+    f = next((x for x in sepe.municipio("15902", "paro", 2026) if x["mes"] == "2026-08"), {})
+    f.get("total_paro_registrado")
+  esperado: 141
+  tipo: exacto
+  por_que_estable: agosto de 2026, mes ya publicado del CSV anual (la URL se reescribe cada mes al añadir el siguiente)
+  segunda_via: CSV crudo con curl e iconv, la fila 15902 de 202608 a ceros y su paro en Cesuras (46) y Oza dos Ríos (95) (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: sepe-28005-202608
+  ficha: sepe-estadisticas
+  usa: perfil_municipio (paro registrado)
+  python: |
+    import sepe
+    f = next((x for x in sepe.municipio("28005", "paro", 2026) if x["mes"] == "2026-08"), {})
+    f.get("total_paro_registrado")
+  esperado: 9107
+  tipo: exacto
+  por_que_estable: agosto de 2026, mes ya publicado del CSV anual
+  segunda_via: CSV crudo con curl e iconv, fila 28005 Alcalá de Henares de 202608 con 9107 (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: sepe-02001-202608-secreto
+  ficha: sepe-estadisticas
+  usa: perfil_municipio (desglose del paro; None es «<5», no cero)
+  python: |
+    import sepe
+    f = next((x for x in sepe.municipio("02001", "paro", 2026) if x["mes"] == "2026-08"), None)
+    f["paro_hombre_edad_25_45"] if f else "sin fila"
+  esperado: null
+  tipo: exacto
+  por_que_estable: agosto de 2026, mes ya publicado del CSV anual
+  segunda_via: CSV crudo con curl e iconv, fila 02001 Abengibre de 202608 con total 18 y «<5» en hombres de 25 a 45 (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: ine-padron-02001-2025
+  ficha: ine-api-tempus
+  usa: perfil_municipio (población)
+  python: |
+    import ine_tempus as it
+    s = it.datos_tabla(29005, tv={19: it.id_municipio("02001")}, nult=10)[0]
+    next((d["Valor"] for d in s["Data"] if d["Fecha"].startswith("2025-01-01")), None)
+  esperado: 753
+  tipo: exacto
+  por_que_estable: padrón a 1 de enero de 2025, marcado Definitivo en Tempus (T3_TipoDato)
+  segunda_via: tabla 2855 (cifras oficiales de Albacete) en CSV de jaxiT3 con curl, 02001 Abengibre Total 2025 753 (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: ine-renta-02001-2023
+  ficha: ine-api-tempus
+  usa: perfil_municipio (renta neta media por persona)
+  python: |
+    import ine_tempus as it
+    s = it.datos_tabla(30824, tv={19: it.id_municipio("02001"), 482: 284048}, nult=10)[0]
+    next((d["Valor"] for d in s["Data"] if d["Fecha"].startswith("2023-01-01")), None)
+  esperado: 14105
+  tipo: exacto
+  por_que_estable: Atlas de distribución de renta de 2023, marcado Definitivo en Tempus
+  segunda_via: tabla 30656 (Atlas, Albacete) en CSV de jaxiT3 con curl, renta neta media por persona de 2023 14.105 (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: ipc-general-202608
+  ficha: ine-api-tempus
+  usa: tabla_pcaxis (MCP) y criminalidad de perfil_municipio (mismo lector de pcaxis.py)
+  python: |
+    import pcaxis
+    next((f["Total"] for f in pcaxis.tabla(24077) if f["Periodo"] == "2026M08"), None)
+  esperado: 104.638
+  tipo: exacto
+  por_que_estable: índice general del IPC de agosto de 2026 (base 2025), marcado Definitivo; un cambio de base reescalaría la tabla
+  segunda_via: API Tempus DATOS_TABLA/24077 con curl, serie IPC290751 de 2026-08 con 104.638 (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: mivau-palma-2026t1
+  ficha: mivau-precios-vivienda-alquiler
+  usa: perfil_municipio (compraventa de vivienda)
+  python: |
+    import consulta, mivau
+    c = mivau.compraventas()
+    (mivau.indice(c, consulta.municipios()).get("07040") or {}).get("2026-T1")
+  esperado: 1080
+  tipo: exacto
+  por_que_estable: primer trimestre de 2026, sin el asterisco de provisional, que el 2026-10-05 solo lleva 2026-T2
+  segunda_via: XLS 34010210 leído con xlrd sin mivau.py, fila Palma de Mallorca y columna 1º de 2026 con 1080 (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: saiku-016-2024
+  ficha: igualdad-estadisticas-violencia-genero
+  usa: cargador saiku.py (llamadas pertinentes al 016, no Seguridad Social)
+  python: |
+    import saiku
+    mdx = "SELECT NON EMPTY {[Measures].[Llamadas pertinentes]} ON COLUMNS, NON EMPTY {[02 Estructura temporal - Año].[Año].[Año].Members} ON ROWS FROM [040 Servicio 016]"
+    dict((f[0], f[1]) for f in saiku.Saiku().consulta("040 Servicio 016", mdx)[1:]).get("2024")
+  esperado: "106196"
+  tipo: exacto
+  por_que_estable: año 2024 cerrado; Saiku da las cifras como texto
+  segunda_via: boletines estadísticos mensuales de diciembre de 2024 y de 2023 en PDF, 1.351.515 menos 1.245.319 llamadas pertinentes acumuladas (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: arcgis-ftth-2025
+  ficha: mtdfp-cobertura-banda-ancha
+  usa: cargador arcgis.py (paginación más allá de maxRecordCount, 2.000)
+  python: |
+    import arcgis
+    fs = arcgis.entidades(arcgis.COBERTURA_FTTH, out_fields="cod_munici")
+    len({f["attributes"]["cod_munici"] for f in fs})
+  esperado: 8132
+  tipo: exacto
+  por_que_estable: capa de la cobertura FTTH de 2025, edición cerrada con una entidad por municipio
+  segunda_via: consulta REST con returnCountOnly y curl, count 8132, las mismas filas que datos/municipios.csv (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: ubicar-alcala-50
+  ficha: cnig-centro-descargas
+  usa: perfil_municipio con dirección (ubicar)
+  python: |
+    import consulta
+    u = consulta.ubicar("calle Alcalá 50, Madrid")
+    u.get("ine") if u.get("exacta") else u.get("aviso") or u.get("error")
+  esperado: "28079"
+  tipo: exacto
+  por_que_estable: un portal que no se mueve; exacta exige que la calle y el número encontrados sean los pedidos
+  segunda_via: geocoder/find de CartoCiudad con curl, muniCode 28079, CP 28014 y referencia catastral 1446401VK4714E (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: cee-gva-6021705YJ2762A
+  ficha: certificados-eficiencia-energetica
+  usa: perfil_municipio con dirección (certificados_energeticos)
+  python: |
+    import consulta
+    consulta.certificados_energeticos("6021705YJ2762A", "46").get("inmuebles")
+  esperado: 3
+  tipo: minimo
+  por_que_estable: certificados ya registrados; el WFS solo guarda los vigentes (ninguno anterior a 2026 en una muestra de 2.000) y el primero de estos caduca el 2028-08-27
+  segunda_via: GML crudo del WFS 26_GCEE con requests y expresiones regulares, 4 certificados de 3 inmuebles, todos con letra E (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: cnmc-carburantes-2023
+  ficha: cnmc-data
+  usa: ckan_filas (MCP) y cargador ckan.py (tope silencioso de 32.000 filas)
+  python: |
+    import ckan
+    sum(1 for _ in ckan.filas("cnmc", "b5a89db0-239f-4c8a-bd98-6575858359ae"))
+  esperado: 75553
+  tipo: exacto
+  por_que_estable: precios diarios provinciales de 2023, año cerrado (del 2023-01-01 al 2023-12-31)
+  segunda_via: fichero ds_1915_1.csv del mismo paquete con requests y volcado datastore/dump con curl, 75.553 filas cada uno (2026-10-05)
+  comprobado: "2026-10-05"
+
+- id: socrata-embalses-2026s1
+  ficha: gencat-dades-obertes
+  usa: cargador socrata.py (filas, con $limit y orden :id)
+  python: |
+    import socrata
+    w = "dia between '2026-01-01T00:00:00' and '2026-06-30T00:00:00'"
+    sum(1 for _ in socrata.filas("gn9e-3qhr", where=w))
+  esperado: 1629
+  tipo: exacto
+  por_que_estable: primer semestre de 2026 de un conjunto diario, 9 embalses por 181 días
+  segunda_via: API con curl, 1.629 filas con $limit (1.000 sin él) y 1.629 en el CSV (2026-10-05)
+  comprobado: "2026-10-05"
