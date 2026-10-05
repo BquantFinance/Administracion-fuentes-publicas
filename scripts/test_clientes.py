@@ -267,6 +267,21 @@ def bdns_mantenimiento_con_200_no_es_pagina_vacia():
 
 
 @test
+def placsp_publicadas_ultima_version_y_anuladas():
+    """Séptima tanda: contar las instantáneas de un día da de menos; publicadas junta todas, deja la última versión de
+    cada id y marca las anuladas por el deleted-entry posterior."""
+    e = [x for x in placsp.parse_feed((M / "placsp-sin-dir3-y-prorroga.atom").read_bytes())[0] if x.get("fecha_publicacion") == "2026-10-02"][0]
+    vieja = dict(e, estado="PUB", updated="2026-10-02T10:00:00.000+02:00")
+    nueva = dict(e, estado="EV", updated="2026-10-03T09:00:00.000+02:00")
+    otra = dict(e, id="otra", fecha_publicacion="2026-10-01")
+    baja = {"id": e["id"], "updated": "2026-10-04T08:00:00.000+02:00", "deleted": True, "motivo": "ANULADA"}
+    r = placsp.publicadas("2026-10-02", entradas=iter([vieja, otra, baja, nueva]))
+    assert [x["id"] for x in r] == [e["id"]] and r[0]["estado"] == "EV" and r[0]["anulada"] and r[0]["anulada_el"] == baja["updated"]
+    r = placsp.publicadas("2026-10-02", entradas=iter([dict(baja, updated="2026-10-01T08:00:00.000+02:00"), nueva]))
+    assert not r[0]["anulada"] and r[0]["anulada_el"] is None  # una baja anterior a la última versión no anula
+
+
+@test
 def placsp_fecha_de_publicacion_es_la_del_anuncio_de_licitacion():
     # Entrada real del 643 (2026-10-01): DOC_CAN_ADJ del 01/10 delante del DOC_CN del 18/08
     entradas, _ = placsp.parse_feed((M / "placsp-entry-dos-anuncios.atom").read_bytes())

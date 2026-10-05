@@ -7,7 +7,9 @@ from __future__ import annotations
 import os
 import re
 import sys
+import tempfile
 import xml.etree.ElementTree as ET
+import zipfile
 from datetime import datetime, timezone
 from typing import Iterator
 
@@ -17,7 +19,12 @@ except ImportError:
     sys.path.insert(0, os.path.dirname(__file__))
     from _http import session
 
-FEED = "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom"
+FEEDS = {
+    "643": "https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3",
+    "1044": "https://contrataciondelestado.es/sindicacion/sindicacion_1044/PlataformasAgregadasSinMenores",
+    "1143": "https://contrataciondelestado.es/sindicacion/sindicacion_1143/contratosMenoresPerfilesContratantes",
+}
+FEED = FEEDS["643"] + ".atom"
 NS = {
     "a": "http://www.w3.org/2005/Atom",
     "cbc": "urn:dgpe:names:draft:codice:schema:xsd:CommonBasicComponents-2",
@@ -147,6 +154,49 @@ def entradas(url: str = FEED, max_paginas: int = 1) -> Iterator[dict]:
         yield from pagina
         if not url:
             return
+
+
+def zip_mes(periodo: str, feed: str = "643") -> Iterator[dict]:
+    """Entradas de todas las instantáneas del ZIP mensual de un feed (AAAAMM, solo 2025 y 2026; el del mes en curso se
+    regenera cada noche). Se baja entero a un temporal (sin Content-Length ni Range) y un periodo o feed inexistente da
+    200 con HTML: ValueError."""
+    s = session(accept="application/zip, */*;q=0.8")
+    with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as fh:
+        with s.get(f"{FEEDS[feed]}_{periodo}.zip", stream=True, timeout=900, verify=s.verify) as r:
+            for trozo in r.iter_content(1 << 20):
+                fh.write(trozo)
+        ruta = fh.name
+    try:
+        with open(ruta, "rb") as fh:
+            if fh.read(2) != b"PK":
+                raise ValueError(f"PLACSP no devolvió un ZIP para {feed} {periodo} (¿periodo inexistente o WAF?)")
+        with zipfile.ZipFile(ruta) as z:
+            for miembro in z.namelist():
+                yield from parse_feed(z.read(miembro))[0]
+    finally:
+        os.unlink(ruta)
+
+
+def publicadas(fecha: str, feed: str = "643", entradas: Iterator[dict] | None = None) -> list[dict]:
+    """Licitaciones cuyo anuncio de licitación (DOC_CN) es de esa fecha (AAAA-MM-DD): la última versión de cada id en todas
+    las instantáneas del ZIP de ese mes (una publicada el día D sigue cambiando en las de los días siguientes; contar solo
+    las instantáneas del día da de menos), con anulada y anulada_el. Séptima tanda de evaluación: 126 obras el 01/10/2026,
+    una anulada, frente a 91 a 93 contando las instantáneas del día."""
+    ultimo: dict[str, dict] = {}
+    bajas: dict[str, dict] = {}
+    for e in entradas if entradas is not None else zip_mes(fecha[:7].replace("-", ""), feed):
+        destino = bajas if e.get("deleted") else ultimo
+        if e["id"] not in destino or datetime.fromisoformat(e["updated"]) > datetime.fromisoformat(destino[e["id"]]["updated"]):
+            destino[e["id"]] = e
+    out = []
+    for i, e in ultimo.items():
+        if e.get("fecha_publicacion") != fecha:
+            continue
+        b = bajas.get(i)
+        e["anulada"] = bool(b and datetime.fromisoformat(b["updated"]) >= datetime.fromisoformat(e["updated"]))
+        e["anulada_el"] = b["updated"] if e["anulada"] else None
+        out.append(e)
+    return out
 
 
 if __name__ == "__main__":

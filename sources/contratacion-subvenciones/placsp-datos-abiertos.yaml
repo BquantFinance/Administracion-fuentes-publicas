@@ -16,8 +16,8 @@ alerts:
 code:
   module: fuentes_publicas.clientes.placsp
   use:
-    - "fuentes-almacen sync --fuentes placsp --feeds 643 --desde 2026-10-01: días atrás (3 páginas de 15 MB por día); feed 643 alojados, 1044 agregadas, 1143 menores"
-    - "fuentes-almacen sql \"SELECT count(*) FROM placsp_ultimo WHERE feed='643' AND fecha_publicacion=DATE '2026-10-01'\": una fila por id con anulada; da 477"
+    - "placsp.publicadas('2026-10-01'): las 477 licitaciones con anuncio de licitación ese día (126 de obras, 1 anulada) del ZIP del mes en 23 s; última versión por id"
+    - "fuentes-almacen sync --fuentes placsp --feeds 643 --desde 2026-10-01: Parquet con placsp_ultimo (feed, fecha_publicacion, anulada); 3 páginas de 15 MB por día"
     - "placsp.entradas(max_paginas=2): lo último del feed (15 MB y unas 3 páginas por día): estado, CPV y fecha_publicacion; un día va por ella, no por updated"
   mcp: [almacen_sql, empresa_nif]
 access: [feed, download]
