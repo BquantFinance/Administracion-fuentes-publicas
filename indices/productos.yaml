@@ -149,6 +149,18 @@
   piezas: "perfil_municipio (bloque viviendas_turisticas: INE en toda España y registro en Cataluña, Madrid y Comunitat Valenciana); los listados con dirección y referencia catastral de Socrata y CKAN; ubicar para cruzar por referencia catastral"
   frescura: "registros diarios (Cataluña y Madrid el 2026-10-05, GVA el 04/10); INE anual"
   volumen: "Cataluña 104.502 viviendas, Comunitat Valenciana 90.091, Andalucía 153.506 (CSV de 68 MB), Madrid 6.246"
-  licencia: "CC BY 4.0 en los cuatro registros; INE con cita"
+  licencia: "libre con cita: licencia abierta de la Generalitat en Cataluña, CC BY en Madrid y la Comunitat Valenciana, CC BY 4.0 en Andalucía; INE con cita"
   trampa: "registro e INE no miden lo mismo (Barcelona 10.651 inscritas y 8.231 anunciadas); en Cataluña faltan plazas en el 76 % y referencia catastral en el 84 %"
+  verified: "2026-10-05"
+
+- id: eficiencia-energetica-edificios
+  producto: Etiqueta energética de un edificio y reparto de letras por municipio para rehabilitación, hipotecas verdes y proptech
+  cliente: empresas de rehabilitación y ESE, bancos (financiación verde), proptech, administradores de fincas
+  fuentes: [certificados-eficiencia-energetica, cnig-centro-descargas, catastro-ovc]
+  recetas: [certificado-energetico-direccion]
+  piezas: "perfil_municipio con una dirección (bloque certificados_energeticos: el último certificado por inmueble de la parcela en Cataluña y la Comunitat Valenciana); Socrata con $group para el reparto por municipio en Cataluña; CSV y 7z en Madrid y Andalucía"
+  frescura: "Cataluña diaria (hasta el 2026-10-03), Madrid mensual, WFS valenciano al día, Andalucía con la descarga de agosto de 2026"
+  volumen: "Cataluña 1.343.261 certificados; WFS valenciano 984.839; Madrid 125.523 en 2026 y 110.650 en 2025; Huelva 67.226 (XML de 505 MB)"
+  licencia: "libre con cita: licencia abierta de la Generalitat en Cataluña, CC BY en Madrid y la Comunitat Valenciana, CC BY 4.0 en Andalucía"
+  trampa: "un inmueble acumula certificados (contar el último por referencia); el datastore de Madrid se corta en 1.000 filas; los CSV del IVACE terminan en 2023"
   verified: "2026-10-05"

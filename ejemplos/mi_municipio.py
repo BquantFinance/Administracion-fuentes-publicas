@@ -3,7 +3,8 @@
 registrado y contratos del año, criminalidad y compraventa de vivienda (consulta.perfil_municipio; fichas ine-api-tempus,
 sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler y datos/municipios.csv). La herramienta MCP perfil_municipio devuelve lo mismo en JSON.
 
-Uso: python ejemplos/mi_municipio.py "Alcalá de Henares"      (nombre, código INE o código SIGPAC como 28:900)
+Uso: python ejemplos/mi_municipio.py "Alcalá de Henares"      (nombre, código INE, SIGPAC como 28:900 o una dirección
+     como "calle Torres Quevedo 42, Alicante", que añade los certificados energéticos de la parcela)
 
 Trampas que resuelve: el INE no filtra por el código de municipio sino por un Id interno (tv=19:Id); con nult=1 el
 último periodo puede venir vacío; SIGPAC y Catastro numeran distinto que el INE; el CSV del SEPE llega en windows-1252,
@@ -50,6 +51,12 @@ def main(q: str) -> None:
     vt = cv.get("valor_tasado")
     print(f"  Valor tasado ({vt['trimestre']}): {n(vt['euros_m2'])} €/m² con {n(vt['tasaciones'])} tasaciones" if vt
           else f"  Valor tasado: {cv.get('nota') or cv.get('error')}")
+    cee = p.get("certificados_energeticos")  # solo con una dirección
+    if cee and "inmuebles" in cee:
+        print(f"  Certificados energéticos de la parcela {cee['parcela']}: {cee['inmuebles']} inmuebles, letras de consumo "
+              + ", ".join(f"{k} {v}" for k, v in cee["consumo_por_letra"].items()))
+    elif cee:
+        print(f"  Certificados energéticos: {cee.get('nota') or cee.get('error')}")
 
 
 if __name__ == "__main__":

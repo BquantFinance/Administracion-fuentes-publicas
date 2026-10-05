@@ -1,0 +1,63 @@
+id: certificados-eficiencia-energetica
+name: Certificados de eficiencia energética de edificios – registros autonómicos
+org: ICAEN (Generalitat de Catalunya), Comunidad de Madrid, Generalitat Valenciana (ICV e IVACE) y Junta de Andalucía
+level: ccaa
+sector: vivienda-urbanismo
+tags: [vivienda, eficiencia-energetica, certificado-energetico, cee, etiqueta-energetica, catastro, proptech, rehabilitacion, emisiones]
+summary: >-
+  Certificados de eficiencia energética de los registros de Cataluña, Madrid, Comunitat Valenciana y Andalucía:
+  referencia catastral, letra y valor de energía primaria no renovable y de emisiones, uso y fecha. Por parcela en
+  Cataluña y la Comunitat Valenciana; Madrid y Andalucía, en descarga.
+alerts:
+  - "Madrid: el datastore se corta sin error en 1.000 filas para 2026 y 2025 (los ficheros tienen 125.523 y 110.650) y en 2.000 para 2024; datastore_search_sql da count 1000. Descargar el CSV o el ZIP."
+  - "Cataluña (j6ii-t3w2) mezcla catalán y castellano en las categorías: motiu = 'Compravenda' da 583.662 y deja fuera 110.339 'Compraventa'; us_edifici igual. Agrupar las dos lenguas antes de contar."
+  - "Los CSV del IVACE (med-eficiencia-energetica-edificis-ivace, 340.582 en Valencia) se quedaron en abril de 2024: registros de 2014 a 2023 y nada después. El WFS 26_GCEE del ICV sí trae 2025 (984.839 certificados)."
+access: [api-rest, ogc, download]
+auth: none
+formats: [json, csv, gml, xml, zip, 7z]
+update: monthly
+coverage: "Cataluña desde 2016-10 (data_entrada) a diario; Madrid por año de registro, 2026 mensual; Comunitat Valenciana WFS al día y CSV hasta 2023; Andalucía 2016 a 2026 (Huelva, agosto de 2026)"
+sync:
+  since: "Cataluña 2016-10-04; Andalucía 2016; Comunitat Valenciana con certificados vigentes y algunos caducados desde 2023"
+  full: "Cataluña 1.343.261 filas (Socrata); Madrid CSV 2026 de 86 MB (125.523), ZIP 2024 de 20 MB, 2025 de 18 MB y anterior a 2024 de 137 MB; WFS valenciano 984.839; Andalucía un 7z por provincia (Huelva 11 MB que da un XML de 505 MB con 67.226)"
+  size: "medido el 2026-10-05"
+  new: "Cataluña por data_entrada; Madrid, el CSV del año en curso se rehace cada mes; Comunitat Valenciana por codigo (E{año}...) o validohasta; Andalucía, descarga completa"
+license: "Llicència oberta d'ús d'informació – Catalunya (cita); CC BY en Madrid y la Comunitat Valenciana; CC BY 4.0 en Andalucía"
+base_url: https://analisi.transparenciacatalunya.cat/resource/j6ii-t3w2.json
+docs_url: https://datos.comunidad.madrid/catalogo/dataset/registro_certificados_eficiencia_energetica
+endpoints:
+  - path: https://analisi.transparenciacatalunya.cat/resource/j6ii-t3w2.json?$where={filtro}&$select={campos}
+    desc: Certificats d'eficiència energètica d'edificis del ICAEN (Socrata), uno por fila con referencia catastral de 20 caracteres y código INE
+    example: curl -sG "https://analisi.transparenciacatalunya.cat/resource/j6ii-t3w2.json" --data-urlencode '$select=referencia_cadastral,data_entrada,qualificaci_de_consum_d,energia_prim_ria_no_renovable' --data-urlencode '$where=starts_with(referencia_cadastral, "9723410DF2892D")'
+    returns: "[{num_cas, adre_a, numero, codi_postal, codi_poblacio (INE de 5 cifras), referencia_cadastral, us_edifici, qualificaci_de_consum_d A a G, energia_prim_ria_no_renovable y emissions_de_co2 como texto, motiu_de_la_certificacio, data_entrada ISO}]; la parcela 9723410DF2892D da 8"
+  - path: https://datos.comunidad.madrid/dataset/971ee067-8ec1-47a1-a973-f1f3704d5d20/resource/4e42b49c-bb6b-485a-a7b7-8f760f356855/download/registro_certificados_eficiencia_energetica_2026.csv
+    desc: Registro de certificados de la Comunidad de Madrid, CSV del año en curso (mensual); 2024, 2025 y anteriores en ZIP en el mismo conjunto
+    example: curl -sS -A "Mozilla/5.0" -o cee_madrid_2026.csv "https://datos.comunidad.madrid/dataset/971ee067-8ec1-47a1-a973-f1f3704d5d20/resource/4e42b49c-bb6b-485a-a7b7-8f760f356855/download/registro_certificados_eficiencia_energetica_2026.csv"
+    returns: "CSV UTF-8 con BOM separado por ; de 86 MB y 125.523 filas, 86 columnas: edif_refcat (20 o 14), edif_muni, edif_tipo, edif_fecha dd/mm/aaaa, cal_norenovglobal y cal_co2global (A a G), final_global, norenov_global"
+  - path: https://terramapas.icv.gva.es/26_GCEE?service=WFS&version=1.1.0&request=GetFeature&typeName=ms:CEEEdificios&filter={filtro}
+    desc: WFS del registro de certificados de la Generalitat Valenciana (ICV), un elemento por certificado con la geometría de la parcela
+    example: curl -sG "https://terramapas.icv.gva.es/26_GCEE" --data-urlencode "service=WFS" --data-urlencode "version=1.1.0" --data-urlencode "request=GetFeature" --data-urlencode "typeName=ms:CEEEdificios" --data-urlencode "propertyName=codigo,ref_referencia,validohasta,cer_concalificacion" --data-urlencode 'filter=<Filter xmlns="http://www.opengis.net/ogc"><PropertyIsEqualTo><PropertyName>ref_parcela</PropertyName><Literal>0283612YH2408C</Literal></PropertyIsEqualTo></Filter>'
+    returns: "GML 3.1 (EPSG:25830) con ms:CEEEdificios: codigo E2024VY061517, ref_referencia (20), ref_parcela (14), cod_ine_mun, validohasta dd/mm/aaaa, cer_concalificacion y cer_contotal (kWh/m²), cer_emicalificacion y cer_emitotal, url_castellano de la etiqueta, n_certificados de la parcela; 5 en 0283612YH2408C"
+  - path: https://www.juntadeandalucia.es/datosabiertos/portal/dataset/cb915b9d-f849-421e-99e3-61acec4aaff8/resource/{id}/download/{provincia}.7z
+    desc: Registro de certificados energéticos de Andalucía, un 7z por provincia con un único XML del modelo del Real Decreto 390/2021
+    example: curl -sS -A "Mozilla/5.0" -o huelva.7z "https://www.juntadeandalucia.es/datosabiertos/portal/dataset/cb915b9d-f849-421e-99e3-61acec4aaff8/resource/f6868585-1536-432b-b59b-a6fd2ff8b0ac/download/huelva.7z"
+    returns: "7z de 11 MB con HUELVA/HUELVA.xml de 505 MB: <DatosEnergeticos> con 67.226 <DatosEnergeticosDelEdificio> (DatosDelCertificador/Fecha, IdentificacionEdificio con ReferenciaCatastral y Municipio, Calificacion/EnergiaPrimariaNoRenovable/Global y EmisionesCO2/Global)"
+rate_limit: No documentado; el WFS valenciano cortó la conexión una vez el 2026-10-05
+quirks: [datastore-incomplete, user-agent-browser, connection-reset-intermittent, overwritten-in-place]
+ids: [referencia-catastral, ine-municipio]
+gotchas:
+  - "Un inmueble acumula certificados (renovación, nueva venta): Cataluña tiene 1.343.261 para 1.167.611 referencias distintas y Huelva 67.226 para 53.188; para el parque, el último por referencia."
+  - "Madrid escribe 99999999.99 como «sin dato» en potencias y rendimientos (calefac_rendim en 62.354 de 125.523 filas de 2026); filtrarlo antes de promediar."
+  - "Madrid: el fichero de un año es el de registro, no el de la fecha del certificado (el de 2026 trae 41.585 de 2025); edif_muni no es código y llega como Madrid, MADRID o madrid."
+  - "Madrid: el CSV de 2026 es UTF-8 con BOM; el de 2025 (en el ZIP) mezcla latin-1 en la cabecera (edif_a\\xf1o) y UTF-8 en filas (MARAGATERÍA): decodificar línea a línea, primero UTF-8."
+  - "La referencia catastral es de 20 caracteres (inmueble) o de 14 (edificio o parcela) y a veces malformada (Cataluña, 973 vacías y 21.884 de 14); cruzar con Catastro por los 14 primeros."
+  - "El WFS valenciano incluye caducados (validohasta de 2023 y 2024) y no trae fecha de registro: el año va en codigo (E2025...) y la validez es de 10 años, 5 si la letra es G (E2025VV020502, G, hasta 2030)."
+  - "Andalucía: package_show da URLs en gdc-pdpopendata-ckan.paas.junta-andalucia.es, que rechazó la conexión desde la nube el 2026-10-05; la misma ruta bajo www.juntadeandalucia.es/datosabiertos/portal descarga."
+  - "Andalucía: el XML de una provincia no cabe en memoria con un parser DOM (505 MB en Huelva): leer con iterparse; Municipio llega con espacios finales («Huelva »)."
+  - "Ningún registro da el titular; Andalucía deja en DatosDelCertificador solo la fecha."
+tips:
+  - "perfil_municipio con una dirección de Cataluña o la Comunitat Valenciana da los certificados de su parcela, el último por inmueble, en una llamada."
+  - "Para el reparto de letras de un municipio catalán, $select=qualificaci_de_consum_d,count(*) con $group y codi_poblacio en Socrata, sin descargar nada."
+related: [catastro-ovc, cnig-centro-descargas, gencat-dades-obertes, comunidad-madrid-datos-abiertos, gva-dadesobertes-api, junta-andalucia-datos-abiertos]
+status: active
+verified: "2026-10-05"

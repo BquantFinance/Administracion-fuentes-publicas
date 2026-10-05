@@ -992,3 +992,24 @@
       contains: sedal/35103500.XLS
       read_bytes: 100000
   verified: "2026-10-05"
+
+- id: certificado-energetico-direccion
+  intent: Etiqueta energética de los inmuebles de un edificio a partir de su dirección
+  inputs: [referencia-catastral]
+  steps:
+    - source: cnig-centro-descargas
+      do: "Dirección a referencia catastral de 14 caracteres con el geocoder de CartoCiudad (candidates con municipio_filter con el nombre INE entero: «Alacant/Alicante»); perfil_municipio con la dirección lo hace y sigue"
+      example: curl -sG "https://www.cartociudad.es/geocoder/api/geocoder/candidates" --data-urlencode "q=calle Torres Quevedo 42" --data-urlencode "municipio_filter=Alacant/Alicante" --data-urlencode "limit=1"
+    - source: certificados-eficiencia-energetica
+      do: "Cataluña: Socrata j6ii-t3w2 con starts_with(referencia_cadastral, \"{14}\") ordenado por data_entrada; Comunitat Valenciana: WFS 26_GCEE con PropertyIsEqualTo sobre ref_parcela; quedarse con el último certificado de cada referencia de 20"
+      example: curl -sG "https://analisi.transparenciacatalunya.cat/resource/j6ii-t3w2.json" --data-urlencode '$select=referencia_cadastral,data_entrada,qualificaci_de_consum_d' --data-urlencode '$where=starts_with(referencia_cadastral, "9723410DF2892D")'
+    - source: certificados-eficiencia-energetica
+      do: "Madrid y Andalucía no tienen consulta por parcela que sirva (el datastore de Madrid se corta en 1.000 filas): descargar el CSV o el 7z y filtrar edif_refcat o ReferenciaCatastral por los 14 primeros caracteres"
+  output: "Por inmueble (referencia de 20), letra y kWh/m² de energía primaria no renovable, letra y kg CO2/m², y fecha o caducidad del certificado vigente"
+  checks:
+    - url: "https://analisi.transparenciacatalunya.cat/resource/j6ii-t3w2.json?$select=count(*)&$where=starts_with(referencia_cadastral,%20%229723410DF2892D%22)"
+      contains: count
+    - url: "https://terramapas.icv.gva.es/26_GCEE?service=WFS&version=1.1.0&request=GetFeature&typeName=ms:CEEEdificios&maxFeatures=1&propertyName=ref_parcela"
+      contains: ref_parcela
+  verified: "2026-10-05"
+

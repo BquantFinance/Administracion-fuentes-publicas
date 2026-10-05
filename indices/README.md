@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 13 productos, 45 recetas, 155 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 14 productos, 46 recetas, 156 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
 
 ## Productos que se pueden construir hoy
 
@@ -107,8 +107,16 @@ Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras med
 - fichas: viviendas-uso-turistico, ine-api-tempus, cnig-centro-descargas · recetas: viviendas-turisticas-municipio
 - piezas: perfil_municipio (bloque viviendas_turisticas: INE en toda España y registro en Cataluña, Madrid y Comunitat Valenciana); los listados con dirección y referencia catastral de Socrata y CKAN; ubicar para cruzar por referencia catastral
 - frescura: registros diarios (Cataluña y Madrid el 2026-10-05, GVA el 04/10); INE anual · volumen: Cataluña 104.502 viviendas, Comunitat Valenciana 90.091, Andalucía 153.506 (CSV de 68 MB), Madrid 6.246
-- licencia: CC BY 4.0 en los cuatro registros; INE con cita
+- licencia: libre con cita: licencia abierta de la Generalitat en Cataluña, CC BY en Madrid y la Comunitat Valenciana, CC BY 4.0 en Andalucía; INE con cita
 - trampa: registro e INE no miden lo mismo (Barcelona 10.651 inscritas y 8.231 anunciadas); en Cataluña faltan plazas en el 76 % y referencia catastral en el 84 %
+
+**eficiencia-energetica-edificios** · Etiqueta energética de un edificio y reparto de letras por municipio para rehabilitación, hipotecas verdes y proptech
+- para: empresas de rehabilitación y ESE, bancos (financiación verde), proptech, administradores de fincas
+- fichas: certificados-eficiencia-energetica, cnig-centro-descargas, catastro-ovc · recetas: certificado-energetico-direccion
+- piezas: perfil_municipio con una dirección (bloque certificados_energeticos: el último certificado por inmueble de la parcela en Cataluña y la Comunitat Valenciana); Socrata con $group para el reparto por municipio en Cataluña; CSV y 7z en Madrid y Andalucía
+- frescura: Cataluña diaria (hasta el 2026-10-03), Madrid mensual, WFS valenciano al día, Andalucía con la descarga de agosto de 2026 · volumen: Cataluña 1.343.261 certificados; WFS valenciano 984.839; Madrid 125.523 en 2026 y 110.650 en 2025; Huelva 67.226 (XML de 505 MB)
+- licencia: libre con cita: licencia abierta de la Generalitat en Cataluña, CC BY en Madrid y la Comunitat Valenciana, CC BY 4.0 en Andalucía
+- trampa: un inmueble acumula certificados (contar el último por referencia); el datastore de Madrid se corta en 1.000 filas; los CSV del IVACE terminan en 2023
 
 ## Recetas por intención
 
@@ -161,6 +169,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 | `poblacion-renta-alquiler-por-municipio` | Población, renta media y precio del alquiler de un municipio con las tablas concretas del INE | ine-api-tempus, ine-cartografia-censal | 2026-09-30 |
 | `viviendas-turisticas-municipio` | Viviendas turísticas de un municipio, inscritas en el registro y anunciadas en plataformas, con su dirección | viviendas-uso-turistico, cnig-centro-descargas | 2026-10-05 |
 | `compraventa-vivienda-municipio` | Compraventas de vivienda por trimestre y valor tasado en €/m² de un municipio, con su código INE | mivau-precios-vivienda-alquiler, ine-codigos-territoriales | 2026-10-05 |
+| `certificado-energetico-direccion` | Etiqueta energética de los inmuebles de un edificio a partir de su dirección | cnig-centro-descargas, certificados-eficiencia-energetica | 2026-10-05 |
 
 ### Pasos
 
@@ -716,6 +725,19 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 3. `ine-codigos-territoriales`: Casar cada fila con el código INE por nombre dentro de su provincia: mivau.indice (scripts/clientes/mivau.py) casa 8.131 de 8.131 y 306 de 306 con nombres antiguos (Palma de Mallorca, Villadecanes), en otra lengua y con erratas; perfil_municipio lo hace en una llamada
 - salida: Por código INE, transacciones de los últimos trimestres y €/m² tasados con el número de tasaciones del último trimestre
 
+**certificado-energetico-direccion** · Etiqueta energética de los inmuebles de un edificio a partir de su dirección
+- entrada: referencia-catastral
+1. `cnig-centro-descargas`: Dirección a referencia catastral de 14 caracteres con el geocoder de CartoCiudad (candidates con municipio_filter con el nombre INE entero: «Alacant/Alicante»); perfil_municipio con la dirección lo hace y sigue
+   ```
+   curl -sG "https://www.cartociudad.es/geocoder/api/geocoder/candidates" --data-urlencode "q=calle Torres Quevedo 42" --data-urlencode "municipio_filter=Alacant/Alicante" --data-urlencode "limit=1"
+   ```
+2. `certificados-eficiencia-energetica`: Cataluña: Socrata j6ii-t3w2 con starts_with(referencia_cadastral, "{14}") ordenado por data_entrada; Comunitat Valenciana: WFS 26_GCEE con PropertyIsEqualTo sobre ref_parcela; quedarse con el último certificado de cada referencia de 20
+   ```
+   curl -sG "https://analisi.transparenciacatalunya.cat/resource/j6ii-t3w2.json" --data-urlencode '$select=referencia_cadastral,data_entrada,qualificaci_de_consum_d' --data-urlencode '$where=starts_with(referencia_cadastral, "9723410DF2892D")'
+   ```
+3. `certificados-eficiencia-energetica`: Madrid y Andalucía no tienen consulta por parcela que sirva (el datastore de Madrid se corta en 1.000 filas): descargar el CSV o el 7z y filtrar edif_refcat o ReferenciaCatastral por los 14 primeros caracteres
+- salida: Por inmueble (referencia de 20), letra y kWh/m² de energía primaria no renovable, letra y kg CO2/m², y fecha o caducidad del certificado vigente
+
 ## Dónde está cada cosa
 
 **Legislación y boletines oficiales**
@@ -905,6 +927,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 **Vivienda y urbanismo**
 - Precios de vivienda, transacciones, alquiler (SERPAVI) y suelo → `mivau-precios-vivienda-alquiler` (por municipio, perfil_municipio da las transacciones de los últimos cinco trimestres y el valor tasado (más de 25.000 habitantes) con el código INE ya casado; las tablas solo traen nombres)
 - Viviendas turísticas (de uso turístico) de un municipio o una calle, con licencia o anunciadas → `viviendas-uso-turistico` (registros de Cataluña, Madrid, Andalucía y Comunitat Valenciana más el INE (VTE) en todos los municipios; registro e INE dan cifras distintas (Madrid 4.865 inscritas y 10.836 anunciadas); perfil_municipio trae las dos)
+- Certificado y etiqueta energética de un edificio o vivienda, letras por municipio → `certificados-eficiencia-energetica` (por parcela en Cataluña y la Comunitat Valenciana (perfil_municipio con la dirección); Madrid y Andalucía solo en descarga y el datastore de Madrid se corta en 1.000 filas)
 
 **Telecomunicaciones y sociedad digital**
 - Cobertura de fibra, HFC y 5G por municipio → `mtdfp-cobertura-banda-ancha` (fracciones 0-1 por hogares o por viviendas, no comparables entre bases; la CNMC da líneas, no cobertura)
@@ -925,13 +948,13 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 | id | formato | regex | ejemplo | emisor | lo usan |
 |---|---|---|---|---|---|
-| ine-municipio | 5 dígitos, provincia (2) + municipio (3); algunos ficheros añaden un sexto dígito de control | `^\d{5}$` | 28079 | ine-codigos-territoriales | cis-estudios, segsocial-estadisticas, sepe-estadisticas, comunidad-madrid-estadistica-api, idescat-api, ieca-api-badea, ine-codigos-territoriales, ive-pegv-bancos-datos, ayuntamiento-madrid-datos-abiertos, comunidad-madrid-datos-abiertos, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, hacienda-ovef, interior-criminalidad, miteco-calidad-aire, aemet-opendata, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas, mitma-opendata-movilidad, mivau-precios-vivienda-alquiler, viviendas-uso-turistico |
+| ine-municipio | 5 dígitos, provincia (2) + municipio (3); algunos ficheros añaden un sexto dígito de control | `^\d{5}$` | 28079 | ine-codigos-territoriales | cis-estudios, segsocial-estadisticas, sepe-estadisticas, comunidad-madrid-estadistica-api, idescat-api, ieca-api-badea, ine-codigos-territoriales, ive-pegv-bancos-datos, ayuntamiento-madrid-datos-abiertos, comunidad-madrid-datos-abiertos, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, hacienda-ovef, interior-criminalidad, miteco-calidad-aire, aemet-opendata, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas, mitma-opendata-movilidad, certificados-eficiencia-energetica, mivau-precios-vivienda-alquiler, viviendas-uso-turistico |
 | ine-provincia | 2 dígitos, 01 a 52 | `^(0[1-9]|[1-4]\d|5[0-2])$` | 28 | ine-codigos-territoriales | mapa-sigpac, datacomex, cis-estudios, segsocial-estadisticas, minetur-precios-carburantes, miteco-energia-estadisticas, idescat-api, ieca-api-badea, ine-codigos-territoriales, ine-microdatos, dir3-directorio, gva-dadesobertes-api, aeat-estadisticas, hacienda-ovef, miteco-calidad-aire, aemps-otros-registros, isciii-cne, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas, mivau-precios-vivienda-alquiler |
 | ine-entidad-singular | 11 dígitos, municipio INE (5) + entidad colectiva (2) + entidad singular (2) + núcleo o diseminado (2) | `^\d{11}$` | 01001000100 | ine-codigos-territoriales | ine-codigos-territoriales, mtdfp-cobertura-banda-ancha, idee-servicios |
 | ccaa | 2 dígitos, 01 Andalucía a 19 Melilla, en el orden del INE | `^(0[1-9]|1\d)$` | 13 | ine-codigos-territoriales | educacion-estadisticas-ruct, ine-codigos-territoriales, ine-microdatos, aeat-estadisticas, aemps-otros-registros, isciii-cne, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, mivau-precios-vivienda-alquiler |
 | nuts | ES más 1 a 3 caracteres (ES1, ES11, ES111) | `^ES[1-7]\d{0,2}$` | ES300 | — | placsp-datos-abiertos, comunidad-madrid-estadistica-api, mtdfp-cobertura-banda-ancha, idee-servicios, ine-cartografia-censal |
 | seccion-censal | 10 dígitos, municipio (5) + distrito (2) + sección (3) | `^\d{10}$` | 2807901001 | ine-cartografia-censal | idescat-api, ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, ine-cartografia-censal, mivau-precios-vivienda-alquiler |
-| referencia-catastral | 14 caracteres alfanuméricos (parcela) o 20 (inmueble, con 4 dígitos y 2 letras de control) | `^[0-9A-Z]{14}(\d{4}[A-Z]{2})?$` | 9872023VH5797S0001WX | catastro-ovc | mapa-sigpac, gva-dadesobertes-api, catastro-ovc, cnig-centro-descargas, viviendas-uso-turistico |
+| referencia-catastral | 14 caracteres alfanuméricos (parcela) o 20 (inmueble, con 4 dígitos y 2 letras de control) | `^[0-9A-Z]{14}(\d{4}[A-Z]{2})?$` | 9872023VH5797S0001WX | catastro-ovc | mapa-sigpac, gva-dadesobertes-api, catastro-ovc, cnig-centro-descargas, certificados-eficiencia-energetica, viviendas-uso-turistico |
 | referencia-sigpac | provincia:municipio:agregado:zona:polígono:parcela:recinto, números separados por dos puntos | `^\d{1,2}:\d{1,3}:\d+:\d+:\d+:\d+:\d+$` | 28:15:0:0:3:9000:6 | mapa-sigpac | mapa-sigpac |
 | idema | 4 o 5 caracteres alfanuméricos | `^[0-9A-Z]{4,5}$` | 3195 | aemet-opendata | aemet-opendata |
 | nif | DNI (8 dígitos y letra), NIE (X, Y o Z, 7 dígitos y letra) o NIF de persona jurídica (letra, 7 dígitos y control) | `^(\d{8}[A-Z]|[XYZ]\d{7}[A-Z]|[A-HJ-NP-SUVW]\d{7}[0-9A-J])$` | Q1132001G | — | fega-beneficiarios-pac, aei-convocatorias, bdns-api, placsp-datos-abiertos, ayuntamiento-barcelona-datos-abiertos, dir3-directorio, face-facturas, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, igae-ejecucion-presupuestaria, viviendas-uso-turistico |
@@ -1001,6 +1024,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - vía `catastro-ovc`: coordenadas a referencia con Consulta_RCCOOR; datos del inmueble con Consulta_DNPRC
 - vía `mapa-sigpac`: parcela SIGPAC a referencia catastral de 14 caracteres con refcatparcela
 - vía `cnig-centro-descargas`: refCatastral de 14 caracteres en los portales del geocoder de CartoCiudad
+- vía `certificados-eficiencia-energetica`: referencia de 20 caracteres de cada certificado energético; por parcela con los 14 primeros (ref_parcela en el WFS valenciano)
 
 **referencia-sigpac**
 - trampa: la provincia es la del INE, pero el municipio es el del Catastro (capitales 900, Madrid 28:900 frente al INE 28079, y otros 4.448 con número distinto); polígono y parcela coinciden con Catastro en rústica

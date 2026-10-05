@@ -636,6 +636,19 @@ def mivau_compraventas_y_valor_tasado():
     assert mivau.clave("Línea de la Concepción (La)") == mivau.clave("Línea de la Concepción, La") == "la linea de la concepcion"
 
 
+@test
+def certificados_energeticos_por_parcela():
+    # Respuestas reales del 2026-10-05: Socrata del ICAEN (Aragó 201, Barcelona) y WFS valenciano (calle Colón 10, València)
+    cat = consulta.cee_resumen("9723410DF2892D", consulta.cee_cataluna(js("icaen-cee-parcela.json")), "icaen")
+    assert cat["certificados"] == 8 and cat["inmuebles"] == 8 and cat["consumo_por_letra"] == {"E": 6, "F": 1, "G": 1}
+    assert cat["recientes"][0]["fecha"] == "2026-08-27" and cat["recientes"][0]["kwh_m2_anio"] == 191.1
+    filas = consulta.cee_valencia((M / "gva-cee-wfs-parcela.xml").read_bytes())
+    gva = consulta.cee_resumen("6021705YJ2762A", filas, "gva")
+    assert len(filas) == 4 and gva["inmuebles"] == 3 and gva["consumo_por_letra"] == {"E": 3}  # un piso con dos certificados
+    assert gva["recientes"][0]["valido_hasta"] == "2030-10-18" and gva["recientes"][0]["registro"].startswith("E2020")
+    assert consulta.certificados_energeticos("05900570129", "01")["nota"].startswith("hace falta")  # catastro foral, sin red
+
+
 def main() -> int:
     fallos = 0
     for t in TESTS:

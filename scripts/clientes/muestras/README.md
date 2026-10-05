@@ -51,6 +51,8 @@ sirven los servidores; los de PC-Axis en UTF-8 con BOM.
 | ogc-sigpac-recintos-tope.json | recintos SIGPAC con limit=1000 (llegan 250; dos features guardadas) |
 | sepe-paro-municipios-2026.csv | CSV de datos abiertos del SEPE, título y cabecera más julio y agosto de siete municipios (windows-1252, «<5», códigos de antes de las fusiones) |
 | ine-datos-serie-IPC290750.json | DATOS_SERIE del IPC general, variación anual, nult=2 y tip=AM: 2026M08 definitivo y 2026M09 avance |
+| bdns-terceros-universidad-de-cadiz.json | terceros?ambito=C&busqueda=universidad de cadiz del 2026-10-05: directorio NIF y nombre con variantes |
+| icaen-cee-parcela.json | certificados energéticos del ICAEN (Socrata j6ii-t3w2) de la parcela 9723410DF2892D (calle Aragó 201, Barcelona) del 2026-10-05, cifras como texto |
+| gva-cee-wfs-parcela.xml | WFS 26_GCEE del ICV filtrado por ref_parcela 6021705YJ2762A (calle Colón 10, València) del 2026-10-05: cuatro certificados de tres inmuebles |
 
 Faltan, porque necesitan credenciales: el fichero de datos de AEMET (ISO-8859-15) y ObtenerDatos de DataComex.
-| bdns-terceros-universidad-de-cadiz.json | terceros?ambito=C&busqueda=universidad de cadiz del 2026-10-05: directorio NIF y nombre con variantes |

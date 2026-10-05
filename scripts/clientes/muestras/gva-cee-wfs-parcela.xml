@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding="UTF-8" ?>
+<wfs:FeatureCollection
+   xmlns:ms="http://mapserver.gis.umn.edu/mapserver"
+   xmlns:gml="http://www.opengis.net/gml"
+   xmlns:wfs="http://www.opengis.net/wfs"
+   xmlns:ogc="http://www.opengis.net/ogc"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://mapserver.gis.umn.edu/mapserver https://terramapas.icv.gva.es/26_GCEE?SERVICE=WFS&amp;VERSION=1.1.0&amp;REQUEST=DescribeFeatureType&amp;TYPENAME=ms:CEEEdificios&amp;OUTPUTFORMAT=text/xml;%20subtype=gml/3.1.1  http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
+      <gml:boundedBy>
+      	<gml:Envelope srsName="EPSG:25830">
+      		<gml:lowerCorner>725884.497752 4371922.024498</gml:lowerCorner>
+      		<gml:upperCorner>725912.487752 4371950.404498</gml:upperCorner>
+      	</gml:Envelope>
+      </gml:boundedBy>
+    <gml:featureMember>
+      <ms:CEEEdificios gml:id="CEEEdificios.697130">
+        <ms:codigo>E2020VX013673</ms:codigo>
+        <ms:cer_emicalificacion>E</ms:cer_emicalificacion>
+        <ms:cer_emitotal>33.1</ms:cer_emitotal>
+        <ms:cer_concalificacion>E</ms:cer_concalificacion>
+        <ms:cer_contotal>159.61</ms:cer_contotal>
+        <ms:validohasta>27/02/2030</ms:validohasta>
+        <ms:ref_referencia>6021705YJ2762A0007EM</ms:ref_referencia>
+        <ms:url_castellano>https://sgcee.aven.es/sigenervs/informes/Etiqueta.aspx?id=642008&amp;idc=642008&amp;tpc=2&amp;ref=6021705YJ2762A0007EM</ms:url_castellano>
+      </ms:CEEEdificios>
+    </gml:featureMember>
+    <gml:featureMember>
+      <ms:CEEEdificios gml:id="CEEEdificios.697418">
+        <ms:codigo>E2020VE052320</ms:codigo>
+        <ms:cer_emicalificacion>E</ms:cer_emicalificacion>
+        <ms:cer_emitotal>19.45</ms:cer_emitotal>
+        <ms:cer_concalificacion>E</ms:cer_concalificacion>
+        <ms:cer_contotal>94.41</ms:cer_contotal>
+        <ms:validohasta>18/10/2030</ms:validohasta>
+        <ms:ref_referencia>6021705YJ2762A0012TW</ms:ref_referencia>
+        <ms:url_castellano>https://sgcee.aven.es/sigenervs/informes/Etiqueta.aspx?id=688233&amp;idc=688233&amp;tpc=2&amp;ref=6021705YJ2762A0012TW</ms:url_castellano>
+      </ms:CEEEdificios>
+    </gml:featureMember>
+    <gml:featureMember>
+      <ms:CEEEdificios gml:id="CEEEdificios.696655">
+        <ms:codigo>E2018VC060915</ms:codigo>
+        <ms:cer_emicalificacion>D</ms:cer_emicalificacion>
+        <ms:cer_emitotal>16.56</ms:cer_emitotal>
+        <ms:cer_concalificacion>E</ms:cer_concalificacion>
+        <ms:cer_contotal>82.32</ms:cer_contotal>
+        <ms:validohasta>27/08/2028</ms:validohasta>
+        <ms:ref_referencia>6021705YJ2762A0007EM</ms:ref_referencia>
+        <ms:url_castellano>https://sgcee.aven.es/sigenervs/informes/Etiqueta.aspx?id=488488&amp;idc=488488&amp;tpc=2&amp;ref=6021705YJ2762A0007EM</ms:url_castellano>
+      </ms:CEEEdificios>
+    </gml:featureMember>
+    <gml:featureMember>
+      <ms:CEEEdificios gml:id="CEEEdificios.696682">
+        <ms:codigo>E2018VR060920</ms:codigo>
+        <ms:cer_emicalificacion>D</ms:cer_emicalificacion>
+        <ms:cer_emitotal>16.98</ms:cer_emitotal>
+        <ms:cer_concalificacion>E</ms:cer_concalificacion>
+        <ms:cer_contotal>83.99</ms:cer_contotal>
+        <ms:validohasta>27/08/2028</ms:validohasta>
+        <ms:ref_referencia>6021705YJ2762A0008RQ</ms:ref_referencia>
+        <ms:url_castellano>https://sgcee.aven.es/sigenervs/informes/Etiqueta.aspx?id=488493&amp;idc=488493&amp;tpc=2&amp;ref=6021705YJ2762A0008RQ</ms:url_castellano>
+      </ms:CEEEdificios>
+    </gml:featureMember>
+</wfs:FeatureCollection>
+

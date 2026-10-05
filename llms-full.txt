@@ -2,7 +2,7 @@
 
 > Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. Contenido en castellano, claves en inglés.
 
-Fuentes: 96 · Generado: 2026-10-05 · Formato: un bloque por fuente; '!!' marca trampas silenciosas (datos incompletos o distintos sin error); '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
+Fuentes: 97 · Generado: 2026-10-05 · Formato: un bloque por fuente; '!!' marca trampas silenciosas (datos incompletos o distintos sin error); '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
 
 # SECTOR legislacion-boletines: Legislación y boletines oficiales
 
@@ -1605,9 +1605,9 @@ related: ine-codigos-territoriales, cnig-centro-descargas, idee-servicios
 ## cnig-centro-descargas
 IGN/CNIG – Centro de Descargas, servicios OGC y geocoder CartoCiudad | Instituto Geográfico Nacional y Centro Nacional de Información Geográfica
 summary: Producción del IGN (ortofotos PNOA, modelos del terreno, LiDAR, mapas, límites municipales oficiales, SIOSE) en un Centro de Descargas protegido por reCAPTCHA, más servicios WMS, WMTS y WFS INSPIRE sin restricción y el geocoder CartoCiudad, que devuelve el código INE.
-!! El geocoder ignora el municipio escrito en q («calle mayor 1, getafe» dio un portal de Corera, La Rioja); pasarlo en municipio_filter («A Coruña», no «Coruña, A») y descartar los candidatos de otro muniCode.
+!! El geocoder ignora el municipio de q («calle mayor 1, getafe» dio Corera, La Rioja); municipio_filter con el nombre INE entero y el artículo delante («A Coruña», «Alacant/Alicante»; «Alicante» da 0) y filtrar muniCode.
 !! state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido.
-access: ogc, api-rest, download, portal | auth: none | formats: shp, gpkg, geotiff, laz, gml, geojson, json, png | update: irregular | status: active | verified: 2026-10-01
+access: ogc, api-rest, download, portal | auth: none | formats: shp, gpkg, geotiff, laz, gml, geojson, json, png | update: irregular | status: active | verified: 2026-10-05
 coverage: PNOA desde 2004; cartografía histórica desde el siglo XIX; límites vigentes e históricos 2023 y 2024
 license: CC BY 4.0 (licencia de uso IGN, con cita)
 base_url: https://centrodedescargas.cnig.es/CentroDescargas/
@@ -1640,6 +1640,7 @@ ids: ine-municipio, ine-provincia, ccaa, referencia-catastral
 ! Sistema de referencia oficial ETRS89 (EPSG:4258 geográficas, 25829 a 25831 UTM); Canarias REGCAN95 (32628).
 ! find ignora municipio_filter y toma el primer candidato (Calle Alcala 50 con municipio_filter=Madrid devolvió un portal de Ceuta); poner el municipio en q o filtrar con candidates.
 ! Con outputformat=geojson, find redondea la geometría a 4 decimales (unos 10 m) y renombra countryCode a countrycode; usar lat y lng de properties.
+! Algunos portales solo salen con el municipio también en q: «calle Aragó 200» con municipio_filter=Barcelona da [] y «calle Aragó 200, Barcelona» da CALLE D"ARAGO 201 (comillas dobles por apóstrofo).
 + Límites sin reCAPTCHA en api-features.ign.es/collections/administrativeunit/items?nationalcode= (GeoJSON con nameunit y NUTS, en idee-servicios); en fichero, LILIM (shapefile 157 MB, GML 63 MB, GeoPackage 2023 y 2024).
 + Parámetros del geocoder (limit, no_process, municipio_filter, provincia_filter, cod_postal_filter, outputformat) en https://www.idee.es/resources/documentos/Cartociudad/CartoCiudad_ServiciosWeb.pdf.
 + Las direcciones de CartoCiudad se descargan también en GeoJSON por API Features (api-features.idee.es/collections/address, en idee-servicios).
@@ -3431,6 +3432,49 @@ related: ine-api-tempus, sepe-estadisticas, segsocial-estadisticas, igualdad-est
 
 # SECTOR vivienda-urbanismo: Vivienda y urbanismo
 
+## certificados-eficiencia-energetica
+Certificados de eficiencia energética de edificios – registros autonómicos | ICAEN (Generalitat de Catalunya), Comunidad de Madrid, Generalitat Valenciana (ICV e IVACE) y Junta de Andalucía
+summary: Certificados de eficiencia energética de los registros de Cataluña, Madrid, Comunitat Valenciana y Andalucía: referencia catastral, letra y valor de energía primaria no renovable y de emisiones, uso y fecha. Por parcela en Cataluña y la Comunitat Valenciana; Madrid y Andalucía, en descarga.
+!! Madrid: el datastore se corta sin error en 1.000 filas para 2026 y 2025 (los ficheros tienen 125.523 y 110.650) y en 2.000 para 2024; datastore_search_sql da count 1000. Descargar el CSV o el ZIP.
+!! Cataluña (j6ii-t3w2) mezcla catalán y castellano en las categorías: motiu = 'Compravenda' da 583.662 y deja fuera 110.339 'Compraventa'; us_edifici igual. Agrupar las dos lenguas antes de contar.
+!! Los CSV del IVACE (med-eficiencia-energetica-edificis-ivace, 340.582 en Valencia) se quedaron en abril de 2024: registros de 2014 a 2023 y nada después. El WFS 26_GCEE del ICV sí trae 2025 (984.839 certificados).
+access: api-rest, ogc, download | auth: none | formats: json, csv, gml, xml, zip, 7z | update: monthly | status: active | verified: 2026-10-05
+coverage: Cataluña desde 2016-10 (data_entrada) a diario; Madrid por año de registro, 2026 mensual; Comunitat Valenciana WFS al día y CSV hasta 2023; Andalucía 2016 a 2026 (Huelva, agosto de 2026)
+sync.since: Cataluña 2016-10-04; Andalucía 2016; Comunitat Valenciana con certificados vigentes y algunos caducados desde 2023
+sync.full: Cataluña 1.343.261 filas (Socrata); Madrid CSV 2026 de 86 MB (125.523), ZIP 2024 de 20 MB, 2025 de 18 MB y anterior a 2024 de 137 MB; WFS valenciano 984.839; Andalucía un 7z por provincia (Huelva 11 MB que da un XML de 505 MB con 67.226)
+sync.size: medido el 2026-10-05
+sync.new: Cataluña por data_entrada; Madrid, el CSV del año en curso se rehace cada mes; Comunitat Valenciana por codigo (E{año}...) o validohasta; Andalucía, descarga completa
+license: Llicència oberta d'ús d'informació – Catalunya (cita); CC BY en Madrid y la Comunitat Valenciana; CC BY 4.0 en Andalucía
+base_url: https://analisi.transparenciacatalunya.cat/resource/j6ii-t3w2.json
+docs_url: https://datos.comunidad.madrid/catalogo/dataset/registro_certificados_eficiencia_energetica
+- https://analisi.transparenciacatalunya.cat/resource/j6ii-t3w2.json?$where={filtro}&$select={campos} :: Certificats d'eficiència energètica d'edificis del ICAEN (Socrata), uno por fila con referencia catastral de 20 caracteres y código INE
+  ej: curl -sG "https://analisi.transparenciacatalunya.cat/resource/j6ii-t3w2.json" --data-urlencode '$select=referencia_cadastral,data_entrada,qualificaci_de_consum_d,energia_prim_ria_no_renovable' --data-urlencode '$where=starts_with(referencia_cadastral, "9723410DF2892D")'
+  devuelve: [{num_cas, adre_a, numero, codi_postal, codi_poblacio (INE de 5 cifras), referencia_cadastral, us_edifici, qualificaci_de_consum_d A a G, energia_prim_ria_no_renovable y emissions_de_co2 como texto, motiu_de_la_certificacio, data_entrada ISO}]; la parcela 9723410DF2892D da 8
+- https://datos.comunidad.madrid/dataset/971ee067-8ec1-47a1-a973-f1f3704d5d20/resource/4e42b49c-bb6b-485a-a7b7-8f760f356855/download/registro_certificados_eficiencia_energetica_2026.csv :: Registro de certificados de la Comunidad de Madrid, CSV del año en curso (mensual); 2024, 2025 y anteriores en ZIP en el mismo conjunto
+  ej: curl -sS -A "Mozilla/5.0" -o cee_madrid_2026.csv "https://datos.comunidad.madrid/dataset/971ee067-8ec1-47a1-a973-f1f3704d5d20/resource/4e42b49c-bb6b-485a-a7b7-8f760f356855/download/registro_certificados_eficiencia_energetica_2026.csv"
+  devuelve: CSV UTF-8 con BOM separado por ; de 86 MB y 125.523 filas, 86 columnas: edif_refcat (20 o 14), edif_muni, edif_tipo, edif_fecha dd/mm/aaaa, cal_norenovglobal y cal_co2global (A a G), final_global, norenov_global
+- https://terramapas.icv.gva.es/26_GCEE?service=WFS&version=1.1.0&request=GetFeature&typeName=ms:CEEEdificios&filter={filtro} :: WFS del registro de certificados de la Generalitat Valenciana (ICV), un elemento por certificado con la geometría de la parcela
+  ej: curl -sG "https://terramapas.icv.gva.es/26_GCEE" --data-urlencode "service=WFS" --data-urlencode "version=1.1.0" --data-urlencode "request=GetFeature" --data-urlencode "typeName=ms:CEEEdificios" --data-urlencode "propertyName=codigo,ref_referencia,validohasta,cer_concalificacion" --data-urlencode 'filter=<Filter xmlns="http://www.opengis.net/ogc"><PropertyIsEqualTo><PropertyName>ref_parcela</PropertyName><Literal>0283612YH2408C</Literal></PropertyIsEqualTo></Filter>'
+  devuelve: GML 3.1 (EPSG:25830) con ms:CEEEdificios: codigo E2024VY061517, ref_referencia (20), ref_parcela (14), cod_ine_mun, validohasta dd/mm/aaaa, cer_concalificacion y cer_contotal (kWh/m²), cer_emicalificacion y cer_emitotal, url_castellano de la etiqueta, n_certificados de la parcela; 5 en 0283612YH2408C
+- https://www.juntadeandalucia.es/datosabiertos/portal/dataset/cb915b9d-f849-421e-99e3-61acec4aaff8/resource/{id}/download/{provincia}.7z :: Registro de certificados energéticos de Andalucía, un 7z por provincia con un único XML del modelo del Real Decreto 390/2021
+  ej: curl -sS -A "Mozilla/5.0" -o huelva.7z "https://www.juntadeandalucia.es/datosabiertos/portal/dataset/cb915b9d-f849-421e-99e3-61acec4aaff8/resource/f6868585-1536-432b-b59b-a6fd2ff8b0ac/download/huelva.7z"
+  devuelve: 7z de 11 MB con HUELVA/HUELVA.xml de 505 MB: <DatosEnergeticos> con 67.226 <DatosEnergeticosDelEdificio> (DatosDelCertificador/Fecha, IdentificacionEdificio con ReferenciaCatastral y Municipio, Calificacion/EnergiaPrimariaNoRenovable/Global y EmisionesCO2/Global)
+rate_limit: No documentado; el WFS valenciano cortó la conexión una vez el 2026-10-05
+quirks: datastore-incomplete, user-agent-browser, connection-reset-intermittent, overwritten-in-place
+ids: referencia-catastral, ine-municipio
+! Un inmueble acumula certificados (renovación, nueva venta): Cataluña tiene 1.343.261 para 1.167.611 referencias distintas y Huelva 67.226 para 53.188; para el parque, el último por referencia.
+! Madrid escribe 99999999.99 como «sin dato» en potencias y rendimientos (calefac_rendim en 62.354 de 125.523 filas de 2026); filtrarlo antes de promediar.
+! Madrid: el fichero de un año es el de registro, no el de la fecha del certificado (el de 2026 trae 41.585 de 2025); edif_muni no es código y llega como Madrid, MADRID o madrid.
+! Madrid: el CSV de 2026 es UTF-8 con BOM; el de 2025 (en el ZIP) mezcla latin-1 en la cabecera (edif_a\xf1o) y UTF-8 en filas (MARAGATERÍA): decodificar línea a línea, primero UTF-8.
+! La referencia catastral es de 20 caracteres (inmueble) o de 14 (edificio o parcela) y a veces malformada (Cataluña, 973 vacías y 21.884 de 14); cruzar con Catastro por los 14 primeros.
+! El WFS valenciano incluye caducados (validohasta de 2023 y 2024) y no trae fecha de registro: el año va en codigo (E2025...) y la validez es de 10 años, 5 si la letra es G (E2025VV020502, G, hasta 2030).
+! Andalucía: package_show da URLs en gdc-pdpopendata-ckan.paas.junta-andalucia.es, que rechazó la conexión desde la nube el 2026-10-05; la misma ruta bajo www.juntadeandalucia.es/datosabiertos/portal descarga.
+! Andalucía: el XML de una provincia no cabe en memoria con un parser DOM (505 MB en Huelva): leer con iterparse; Municipio llega con espacios finales («Huelva »).
+! Ningún registro da el titular; Andalucía deja en DatosDelCertificador solo la fecha.
++ perfil_municipio con una dirección de Cataluña o la Comunitat Valenciana da los certificados de su parcela, el último por inmueble, en una llamada.
++ Para el reparto de letras de un municipio catalán, $select=qualificaci_de_consum_d,count(*) con $group y codi_poblacio en Socrata, sin descargar nada.
+related: catastro-ovc, cnig-centro-descargas, gencat-dades-obertes, comunidad-madrid-datos-abiertos, gva-dadesobertes-api, junta-andalucia-datos-abiertos
+
 ## mivau-precios-vivienda-alquiler
 Ministerio de Vivienda – Estadísticas de vivienda (Boletín Online en XLS) y SERPAVI | Dirección General de Vivienda y Suelo
 summary: Transacciones de vivienda, valor tasado, parque, vivienda libre y protegida y suelo urbano en XLS trimestrales del Boletín Estadístico Online, y SERPAVI, alquiler de vivienda habitual de fuentes tributarias 2011-2024 por CCAA, provincia, municipio, distrito y sección censal en xlsx y GeoJSON.
@@ -3484,7 +3528,7 @@ sync.since: registros, situación actual sin histórico de bajas; INE VTE desde 
 sync.full: Cataluña t2h3-cgys.csv (112.696 filas); Madrid datastore alojamientos_turisticos (8.701); GVA lista-de-viviendas-turisticas.csv (15 MB, 90.091); Andalucía dataset-openrta.csv (68 MB, 175.443)
 sync.size: medido el 2026-10-05; Andalucía baja a unos 170 KB/s y cortó dos veces la conexión
 sync.new: Cataluña y GVA por fecha (fecha_alta en GVA); Madrid y Andalucía sin fecha de alta en el fichero: comparar signatura o registration_code con la copia anterior
-license: CC BY 4.0 en los cuatro portales (cita de la fuente); INE con cita
+license: Llicència oberta d'ús d'informació – Catalunya (cita); CC BY en Madrid y la Comunitat Valenciana; CC BY 4.0 en Andalucía; INE con cita
 base_url: https://analisi.transparenciacatalunya.cat/resource/t2h3-cgys.json
 docs_url: https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/VTE
 - https://analisi.transparenciacatalunya.cat/resource/t2h3-cgys.json?$where={filtro}&$select={campos} :: Registre de Turisme de Catalunya (Socrata), todos los establecimientos en alta; tipus_establiment «Habitatges d'ús turístic»

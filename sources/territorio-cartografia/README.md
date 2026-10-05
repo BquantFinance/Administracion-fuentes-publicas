@@ -19,7 +19,7 @@ Sector `territorio-cartografia` · 4 fuentes · índice generado por `scripts/bu
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [catastro-ovc](catastro-ovc.yaml) | Catastro – Servicios web de la Oficina Virtual (OVC) e INSPIRE | api-rest, ogc, download | none | json, xml, gml, zip, png | daily | latin1, waf-temporary-ban | 2026-10-01 |
-| [cnig-centro-descargas](cnig-centro-descargas.yaml) | IGN/CNIG – Centro de Descargas, servicios OGC y geocoder CartoCiudad | ogc, api-rest, download, portal | none | shp, gpkg, geotiff, laz, gml, geojson, json, png | irregular | captcha-required, js-rendered, static-html, errors-html-or-xml, soft-errors-200 | 2026-10-01 |
+| [cnig-centro-descargas](cnig-centro-descargas.yaml) | IGN/CNIG – Centro de Descargas, servicios OGC y geocoder CartoCiudad | ogc, api-rest, download, portal | none | shp, gpkg, geotiff, laz, gml, geojson, json, png | irregular | captcha-required, js-rendered, static-html, errors-html-or-xml, soft-errors-200 | 2026-10-05 |
 | [idee-servicios](idee-servicios.yaml) | IDEE – Catálogos CSW y servicios INSPIRE del IGN (WFS, WMS, WMTS, WCS) | ogc, api-rest, portal | none | xml, json, gml, geojson, png, jpg, geotiff | irregular | static-html, errors-html-or-xml | 2026-10-01 |
 | [ine-cartografia-censal](ine-cartografia-censal.yaml) | INE – Cartografía de secciones censales y callejero del Censo Electoral | download, ogc, api-rest | none | shp, zip, pdf, txt, geojson, gml | annual | static-html, latin1 | 2026-10-01 |
 

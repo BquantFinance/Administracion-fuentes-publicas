@@ -95,11 +95,12 @@ Judicial o UE, solo cuando lo indique el propietario.
 
 ## Estado (2026-10-01)
 
-- **Catálogo**: 96 fichas, 89 verificadas entre el 2026-10-01 y el 2026-10-05. En 2026-09-30 siguen datacomex (sin
+- **Catálogo**: 97 fichas, 90 verificadas entre el 2026-10-01 y el 2026-10-05. En 2026-09-30 siguen datacomex (sin
   token), ree-redata y datos-gob-es-api (Incapsula) y bne-datos (Cloudflare); en `null`, fega-beneficiarios-pac,
-  oepm-invenes y mitma-opendata-movilidad. 45 recetas, 13 productos. Desde el 2026-10-05, concursos de acreedores
-  (BORME) en empresa_nif y el radar, y viviendas turísticas y compraventa de vivienda (mivau.indice casa por nombre las
-  8.131 filas sin código INE) en perfil_municipio.
+  oepm-invenes y mitma-opendata-movilidad. 46 recetas, 14 productos. Desde el 2026-10-05, concursos de acreedores
+  (BORME) en empresa_nif y el radar; en perfil_municipio, viviendas turísticas, compraventa de vivienda (mivau.indice
+  casa por nombre las 8.131 filas sin código INE) y, con una dirección, certificados energéticos de la parcela
+  (Cataluña y Comunitat Valenciana). ubicar manda a CartoCiudad el nombre INE entero («Alacant/Alicante»).
 - **Hosts que rechazan IP de centros de datos**: Catastro, REData, www.ree.es, ESIOS, datos.gob.es, BNE, FEGA, OEPM,
   movilidad-opendata.mitma.es, geoserver.iepnb.es, sivira.isciii.es, analisis.cis.es y www.inmujer.es; intermitentes
   Seguridad Social, renfe, DATAESTUR, indicadores.fecyt.es e IECA; desde GitHub, MINETUR y Catastro. PLACSP
@@ -111,7 +112,8 @@ Judicial o UE, solo cuando lo indique el propietario.
   de PLACSP daban 0 sin error por el WAF (ahora lanzan Bloqueado). El 2026-10-05, a mano sobre f4bfeab (el cron de los
   lunes 06:17 no se disparó; sin ninguna ejecución schedule hasta entonces): recetas 92 de 93 (429 de AEMET), ejemplos
   364 de 380 (timeouts del IECA y cortes de la Junta de Andalucía) y cargadores bien salvo ckan.py, porque la Comunidad
-  de Madrid sacó padron_por_sexo del datastore el 04/10 (corregido).
+  de Madrid sacó padron_por_sexo del datastore el 04/10 (corregido). Sobre f9bcc8a (push del 2026-10-05): recetas 91 de 93 (cortes de
+  MINETUR), ejemplos 369 de 381 y todos los cargadores, el radar incluido, desde la IP de GitHub.
 - **Evaluación** (`evals/`): con Haiku y trampas silenciosas, acierto 3 de 21 sin catálogo, 10 con ficheros y 13 con
   MCP, con un 30 % y un 43 % menos de tokens de entrada. Cuarta tanda (2026-10-05): con `perfil_municipio`, `coyuntura`
   y `empresa_nif`, 8 de 8 frente a 4 de 8 sin ellas, un 75 % menos de tokens y un tercio del tiempo. Sin medir aún:

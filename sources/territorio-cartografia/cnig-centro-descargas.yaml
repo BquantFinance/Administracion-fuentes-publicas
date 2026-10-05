@@ -10,7 +10,7 @@ summary: >-
   en un Centro de Descargas protegido por reCAPTCHA, más servicios WMS, WMTS y WFS INSPIRE sin restricción y
   el geocoder CartoCiudad, que devuelve el código INE.
 alerts:
-  - "El geocoder ignora el municipio escrito en q («calle mayor 1, getafe» dio un portal de Corera, La Rioja); pasarlo en municipio_filter («A Coruña», no «Coruña, A») y descartar los candidatos de otro muniCode."
+  - "El geocoder ignora el municipio de q («calle mayor 1, getafe» dio Corera, La Rioja); municipio_filter con el nombre INE entero y el artículo delante («A Coruña», «Alacant/Alicante»; «Alicante» da 0) y filtrar muniCode."
   - state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido.
 access: [ogc, api-rest, download, portal]
 auth: none
@@ -57,6 +57,7 @@ gotchas:
   - Sistema de referencia oficial ETRS89 (EPSG:4258 geográficas, 25829 a 25831 UTM); Canarias REGCAN95 (32628).
   - find ignora municipio_filter y toma el primer candidato (Calle Alcala 50 con municipio_filter=Madrid devolvió un portal de Ceuta); poner el municipio en q o filtrar con candidates.
   - Con outputformat=geojson, find redondea la geometría a 4 decimales (unos 10 m) y renombra countryCode a countrycode; usar lat y lng de properties.
+  - 'Algunos portales solo salen con el municipio también en q: «calle Aragó 200» con municipio_filter=Barcelona da [] y «calle Aragó 200, Barcelona» da CALLE D"ARAGO 201 (comillas dobles por apóstrofo).'
 tips:
   - Límites sin reCAPTCHA en api-features.ign.es/collections/administrativeunit/items?nationalcode= (GeoJSON con nameunit y NUTS, en idee-servicios); en fichero, LILIM (shapefile 157 MB, GML 63 MB, GeoPackage 2023 y 2024).
   - Parámetros del geocoder (limit, no_process, municipio_filter, provincia_filter, cod_postal_filter, outputformat) en https://www.idee.es/resources/documentos/Cartociudad/CartoCiudad_ServiciosWeb.pdf.
@@ -64,4 +65,4 @@ tips:
   - Para solo el código INE de un municipio, candidates?q={nombre}&limit=1 (464 bytes) en vez de find, que trae el polígono (268 KB para Alcalá de Henares).
 related: [idee-servicios, catastro-ovc, ine-codigos-territoriales]
 status: active
-verified: "2026-10-01"
+verified: "2026-10-05"

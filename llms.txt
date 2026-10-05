@@ -2,7 +2,7 @@
 
 > Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. Contenido en castellano, claves en inglés.
 
-Fuentes: 96 · Productos: 13 · Recetas: 45 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Generado: 2026-10-05
+Fuentes: 97 · Productos: 14 · Recetas: 46 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Generado: 2026-10-05
 
 ## Empieza aquí
 
@@ -28,6 +28,7 @@ Detalle (frescura, volumen, licencia, trampa) en https://raw.githubusercontent.c
 - buscador-medicamentos: Buscador de medicamentos con presentaciones, prospecto y problemas de suministro → aemps-cima-api · ficha aemps-cima-api (API REST JSON sin clave)
 - agritech-parcelas: Información de una parcela agrícola por coordenadas (uso, superficie, Red Natura, zonas vulnerables a nitratos) → mapa-sigpac, catastro-ovc · perfil_municipio con «lat,lon» (recinto, uso, superficie y referencia catastral de la parcela, municipio INE); scripts/clientes/ogc.py (recintos por bbox siguiendo next)
 - viviendas-turisticas: Mapa y censo de viviendas turísticas por municipio, barrio o calle, con licencia frente a anuncios en plataformas → viviendas-uso-turistico, ine-api-tempus, cnig-centro-descargas · perfil_municipio (bloque viviendas_turisticas: INE en toda España y registro en Cataluña, Madrid y Comunitat Valenciana); los listados con dirección y referencia catastral de Socrata y CKAN; ubicar para cruzar por referencia catastral
+- eficiencia-energetica-edificios: Etiqueta energética de un edificio y reparto de letras por municipio para rehabilitación, hipotecas verdes y proptech → certificados-eficiencia-energetica, cnig-centro-descargas, catastro-ovc · perfil_municipio con una dirección (bloque certificados_energeticos: el último certificado por inmueble de la parcela en Cataluña y la Comunitat Valenciana); Socrata con $group para el reparto por municipio en Cataluña; CSV y 7z en Madrid y Andalucía
 
 ## Reglas rápidas antes de programar contra una fuente
 
@@ -54,7 +55,10 @@ Datos incompletos, distintos o a cero sin ningún error; están en `alerts` de c
 - bdns-api: La exportación sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso; pedir page=0&pageSize=10000 (tope) y seguir con page=1, 2... hasta una página con menos filas.
 - bdns-api: Las concesiones caducan a los 4 años naturales y las de personas físicas tras el siguiente (RD 130/2019 art. 7.8); hoy fechaDesde=01/01/2021&fechaHasta=31/12/2021 da totalElements 0. Para series, copia propia.
 - borme-api-sumario: Situación concursal llega con meses de retraso y mezcla resoluciones viejas (el BORME del 02/10/2026 trae una declaración del 11/05/2026 y revocaciones de 2022): usar la fecha de resolución y la última por procedimiento.
-- cnig-centro-descargas: El geocoder ignora el municipio escrito en q («calle mayor 1, getafe» dio un portal de Corera, La Rioja); pasarlo en municipio_filter («A Coruña», no «Coruña, A») y descartar los candidatos de otro muniCode.
+- certificados-eficiencia-energetica: Madrid: el datastore se corta sin error en 1.000 filas para 2026 y 2025 (los ficheros tienen 125.523 y 110.650) y en 2.000 para 2024; datastore_search_sql da count 1000. Descargar el CSV o el ZIP.
+- certificados-eficiencia-energetica: Cataluña (j6ii-t3w2) mezcla catalán y castellano en las categorías: motiu = 'Compravenda' da 583.662 y deja fuera 110.339 'Compraventa'; us_edifici igual. Agrupar las dos lenguas antes de contar.
+- certificados-eficiencia-energetica: Los CSV del IVACE (med-eficiencia-energetica-edificis-ivace, 340.582 en Valencia) se quedaron en abril de 2024: registros de 2014 a 2023 y nada después. El WFS 26_GCEE del ICV sí trae 2025 (984.839 certificados).
+- cnig-centro-descargas: El geocoder ignora el municipio de q («calle mayor 1, getafe» dio Corera, La Rioja); municipio_filter con el nombre INE entero y el artículo delante («A Coruña», «Alacant/Alicante»; «Alicante» da 0) y filtrar muniCode.
 - cnig-centro-descargas: state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido.
 - cnmc-data: datastore_search recorta limit a 32.000 sin error (limit=50000 en ds_1915_1 da 32.000 de 75.553; result.limit dice el aplicado): paginar con offset sobre el host, no con _links.next, o usar /datastore/dump/{id}.
 - comunidad-madrid-datos-abiertos: El datastore no refleja el CSV: padron_por_sexo tenía el 01/10 5.000 de 18.718 filas (hasta 2022) y desde la actualización del 04/10 da 404; el 2025 solo está en el CSV. Mirar datastore_active y leer el CSV.
@@ -252,6 +256,7 @@ Datos incompletos, distintos o a cero sin ningún error; están en `alerts` de c
 - Prohibiciones de contratar vigentes → hacienda-registro-licitadores (XML público del visor del ROLECE; el NIF va oculto, cruzar por nombre)
 - NIF de una empresa a partir de su nombre, o el nombre de un NIF (también para cruzar el BORME, que no trae NIF) → bdns-api (terceros?ambito=C&busqueda={nombre} (sin documentar) cubre a quien ha recibido alguna ayuda; empresa_nif con un nombre lo usa y añade los adjudicatarios del almacén; tope silencioso de 150 filas)
 - Viviendas turísticas (de uso turístico) de un municipio o una calle, con licencia o anunciadas → viviendas-uso-turistico (registros de Cataluña, Madrid, Andalucía y Comunitat Valenciana más el INE (VTE) en todos los municipios; registro e INE dan cifras distintas (Madrid 4.865 inscritas y 10.836 anunciadas); perfil_municipio trae las dos)
+- Certificado y etiqueta energética de un edificio o vivienda, letras por municipio → certificados-eficiencia-energetica (por parcela en Cataluña y la Comunitat Valenciana (perfil_municipio con la dirección); Madrid y Andalucía solo en descarga y el datastore de Madrid se corta en 1.000 filas)
 
 ## Recetas por intención
 
@@ -302,6 +307,7 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 - poblacion-renta-alquiler-por-municipio: Población, renta media y precio del alquiler de un municipio con las tablas concretas del INE → ine-api-tempus, ine-cartografia-censal
 - viviendas-turisticas-municipio: Viviendas turísticas de un municipio, inscritas en el registro y anunciadas en plataformas, con su dirección → viviendas-uso-turistico, cnig-centro-descargas
 - compraventa-vivienda-municipio: Compraventas de vivienda por trimestre y valor tasado en €/m² de un municipio, con su código INE → mivau-precios-vivienda-alquiler, ine-codigos-territoriales
+- certificado-energetico-direccion: Etiqueta energética de los inmuebles de un edificio a partir de su dirección → cnig-centro-descargas, certificados-eficiencia-energetica
 
 ## Sectores
 
@@ -325,7 +331,7 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 - [Justicia, interior y seguridad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/justicia-interior-seguridad/README.md): interior-criminalidad
 - [Cultura y patrimonio](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/cultura-patrimonio/README.md): bne-datos, cultura-culturabase
 - [Demografía, migraciones y sociedad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/demografia-migraciones-sociedad/README.md): cis-estudios, igualdad-estadisticas-violencia-genero, imserso-dependencia, inmujeres-mujeres-cifras
-- [Vivienda y urbanismo](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/vivienda-urbanismo/README.md): mivau-precios-vivienda-alquiler, viviendas-uso-turistico
+- [Vivienda y urbanismo](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/vivienda-urbanismo/README.md): certificados-eficiencia-energetica, mivau-precios-vivienda-alquiler, viviendas-uso-turistico
 - [Telecomunicaciones y sociedad digital](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/telecomunicaciones-digital/README.md): mtdfp-cobertura-banda-ancha
 - [Consumo y seguridad alimentaria](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/consumo-seguridad-alimentaria/README.md): aesan-alertas-registros
 

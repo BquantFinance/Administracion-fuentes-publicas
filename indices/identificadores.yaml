@@ -119,6 +119,8 @@ referencia-catastral:
       how: parcela SIGPAC a referencia catastral de 14 caracteres con refcatparcela
     - via: cnig-centro-descargas
       how: refCatastral de 14 caracteres en los portales del geocoder de CartoCiudad
+    - via: certificados-eficiencia-energetica
+      how: referencia de 20 caracteres de cada certificado energético; por parcela con los 14 primeros (ref_parcela en el WFS valenciano)
 referencia-sigpac:
   format: provincia:municipio:agregado:zona:polígono:parcela:recinto, números separados por dos puntos
   regex: '^\d{1,2}:\d{1,3}:\d+:\d+:\d+:\d+:\d+$'

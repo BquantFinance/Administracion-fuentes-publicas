@@ -554,15 +554,20 @@ def ubicar(texto: str) -> dict:
     numero = (re.findall(r"\b(\d+)\b", q) or [None])[-1]
     pedidas = _palabras(q)
     filtro = {}
-    if muni:
-        nombre = muni[0]["nombre"].split("/")[0]
-        base, _, art = nombre.rpartition(", ")
-        filtro["municipio_filter"] = f"{art} {base}" if base and len(art) <= 3 else nombre  # «Coruña, A» -> «A Coruña»
+    if muni:  # CartoCiudad nombra como el INE, en las dos lenguas y con el artículo delante: «Alacant/Alicante», «A Coruña»
+        partes = [x.rpartition(", ") for x in muni[0]["nombre"].split("/")]
+        filtro["municipio_filter"] = "/".join(f"{art} {base}" if base and len(art) <= 3 else base + _ + art
+                                              for base, _, art in partes)
 
     def candidatos(consulta: str) -> list[dict]:
-        r = s.get(f"{GEOCODER}/candidates", params={"q": consulta, "limit": 5, **filtro}, timeout=30)
-        cs = r.json() if r.content.strip() else []
-        return [c for c in cs if not muni or c.get("muniCode") == muni[0]["ine"]]
+        cs = []  # si no hay nada, con el municipio también en el texto («calle Aragó 200» solo sale así) y luego sin filtro
+        intentos = [(consulta, filtro), (f"{consulta}, {muni_txt.strip()}", filtro), (consulta, {})] if filtro else [(consulta, {})]
+        for q_, f in intentos:
+            r = s.get(f"{GEOCODER}/candidates", params={"q": q_, "limit": 5 if f else 20, **f}, timeout=30)
+            cs = [c for c in (r.json() if r.content.strip() else []) if not muni or c.get("muniCode") == muni[0]["ine"]]
+            if cs:
+                break
+        return cs
 
     via = _via(q)
 
@@ -646,6 +651,84 @@ def viviendas_turisticas(m: dict, mid: int | None = None) -> dict:
     return out
 
 
+CEE_CAT = "https://analisi.transparenciacatalunya.cat/resource/j6ii-t3w2.json"  # certificados energéticos del ICAEN
+CEE_GVA = "https://terramapas.icv.gva.es/26_GCEE"  # WFS del registro de certificados de la Generalitat Valenciana
+_CEE_CAMPOS_GVA = ("codigo", "ref_referencia", "validohasta", "cer_concalificacion", "cer_contotal", "cer_emicalificacion",
+                   "cer_emitotal", "url_castellano")
+
+
+def _float(v) -> float | None:
+    try:
+        return float(str(v).replace(",", "."))
+    except (TypeError, ValueError):
+        return None
+
+
+def cee_cataluna(filas: list[dict]) -> list[dict]:
+    """Filas de Socrata j6ii-t3w2 a certificados con las claves comunes (cifras como texto en origen)."""
+    return [{"ref": x.get("referencia_cadastral"), "fecha": (x.get("data_entrada") or "")[:10],
+             "consumo": x.get("qualificaci_de_consum_d"), "kwh_m2_anio": _float(x.get("energia_prim_ria_no_renovable")),
+             "emisiones": x.get("qualificacio_d_emissions"), "kgco2_m2_anio": _float(x.get("emissions_de_co2")),
+             "uso": x.get("us_edifici")} for x in filas]
+
+
+def cee_valencia(gml: bytes) -> list[dict]:
+    """Respuesta GML del WFS 26_GCEE a certificados con las claves comunes, del que caduca más tarde al que antes (no
+    hay fecha de registro; caduca a los 10 años, 5 si la letra es G)."""
+    import xml.etree.ElementTree as ET
+    ns, out = "{http://mapserver.gis.umn.edu/mapserver}", []
+    for e in ET.fromstring(gml).iter(f"{ns}CEEEdificios"):
+        x = {k: (e.findtext(ns + k) or "").strip() for k in _CEE_CAMPOS_GVA}
+        d, mes, a = (x["validohasta"].split("/") + ["", "", ""])[:3]
+        out.append({"ref": x["ref_referencia"], "registro": x["codigo"], "valido_hasta": f"{a}-{mes}-{d}",
+                    "consumo": x["cer_concalificacion"], "kwh_m2_anio": _float(x["cer_contotal"]),
+                    "emisiones": x["cer_emicalificacion"], "kgco2_m2_anio": _float(x["cer_emitotal"]),
+                    "etiqueta": x["url_castellano"]})
+    return sorted(out, key=lambda f: f["valido_hasta"], reverse=True)
+
+
+def cee_resumen(rc: str, filas: list[dict], fuente: str) -> dict:
+    """Un inmueble repite certificado al renovarlo o venderse otra vez: de cada referencia cuenta el primero (las filas
+    llegan de la más reciente a la más antigua) y reparte las letras de consumo entre esos."""
+    ultimo: dict = {}
+    for f in filas:
+        ultimo.setdefault(f["ref"], f)
+    letras: dict = {}
+    for f in ultimo.values():
+        letras[f["consumo"] or "sin letra"] = letras.get(f["consumo"] or "sin letra", 0) + 1
+    return {"parcela": rc, "certificados": len(filas), "inmuebles": len(ultimo),
+            "consumo_por_letra": dict(sorted(letras.items())), "recientes": list(ultimo.values())[:5], "fuente": fuente}
+
+
+def certificados_energeticos(ref_catastral: str, cpro: str) -> dict:
+    """Certificados de eficiencia energética de una parcela catastral (los 14 primeros caracteres de la referencia, la que
+    da ubicar para un portal) en Cataluña (ICAEN, Socrata) y la Comunitat Valenciana (WFS del ICV): por inmueble, el
+    certificado más reciente con sus letras de consumo de energía primaria no renovable y de emisiones. Madrid y Andalucía
+    solo publican descargas completas."""
+    import re
+    rc = (ref_catastral or "").strip().upper()[:14]
+    if not re.fullmatch(r"[0-9A-Z]{14}", rc):
+        return {"nota": "hace falta la referencia catastral de 14 caracteres (Álava, Bizkaia, Gipuzkoa y Navarra tienen catastro foral)"}
+    s = _sesion()
+    if cpro in ("08", "17", "25", "43"):
+        r = s.get(CEE_CAT, timeout=60, params={
+            "$select": "referencia_cadastral,data_entrada,qualificaci_de_consum_d,energia_prim_ria_no_renovable,"
+                       "qualificacio_d_emissions,emissions_de_co2,us_edifici",
+            "$where": f"starts_with(referencia_cadastral, '{rc}')", "$order": "data_entrada DESC", "$limit": 1000})
+        r.raise_for_status()
+        return cee_resumen(rc, cee_cataluna(r.json()), "certificados-eficiencia-energetica, ICAEN (Socrata j6ii-t3w2)")
+    if cpro in ("03", "12", "46"):
+        filtro = ('<Filter xmlns="http://www.opengis.net/ogc"><PropertyIsEqualTo><PropertyName>ref_parcela</PropertyName>'
+                  f"<Literal>{rc}</Literal></PropertyIsEqualTo></Filter>")
+        r = s.get(CEE_GVA, timeout=60, params={"service": "WFS", "version": "1.1.0", "request": "GetFeature",
+                                               "typeName": "ms:CEEEdificios", "maxFeatures": 1000, "filter": filtro,
+                                               "propertyName": ",".join(_CEE_CAMPOS_GVA)})
+        r.raise_for_status()
+        return cee_resumen(rc, cee_valencia(r.content),
+                           "certificados-eficiencia-energetica, registro de la Generalitat Valenciana (WFS 26_GCEE)")
+    return {"nota": "por parcela solo Cataluña y Comunitat Valenciana; Madrid y Andalucía publican descargas completas "
+                    "(ficha certificados-eficiencia-energetica)"}
+
 def compraventa_vivienda(m: dict) -> dict:
     """Transacciones de vivienda (escrituras ante notario) de un municipio (fila de municipios()) en los últimos cinco
     trimestres, el último provisional, y valor tasado medio en €/m² del último trimestre, solo en los 306 municipios de
@@ -678,7 +761,8 @@ def compraventa_vivienda(m: dict) -> dict:
 def perfil_municipio(municipio: str) -> dict:
     """Un municipio (o el de una dirección o unas coordenadas, con ubicar) en una llamada: códigos en cada sistema (INE, SIGPAC y Catastro, DIR3, NIF, NUTS3, coordenadas),
     población del padrón, renta neta media por persona, paro registrado y contratos del año por mes, criminalidad,
-    viviendas turísticas y compraventa de vivienda (transacciones y valor tasado). Cada
+    viviendas turísticas y compraventa de vivienda (transacciones y valor tasado); con una dirección, además los
+    certificados energéticos de la parcela (Cataluña y Comunitat Valenciana). Cada
     bloque falla por separado (clave error) sin tumbar el resto. None en una cifra es secreto o sin dato, no cero."""
     try:
         from . import ine_tempus, sepe
@@ -734,6 +818,8 @@ def perfil_municipio(municipio: str) -> dict:
     tareas = {"poblacion": poblacion, "renta": renta, "paro_registrado": lambda: empleo("paro"),
               "contratos": lambda: empleo("contratos"), "criminalidad": criminalidad,
               "viviendas_turisticas": lambda: viviendas_turisticas(m, mid), "compraventa": lambda: compraventa_vivienda(m)}
+    if ubicacion and ubicacion.get("ref_catastral"):  # con una dirección, los certificados energéticos de su parcela
+        tareas["certificados_energeticos"] = lambda: certificados_energeticos(ubicacion["ref_catastral"], m["cpro"])
     with ThreadPoolExecutor(len(tareas)) as ex:  # bloques independientes: el perfil tarda lo que el más lento
         futuros = {k: ex.submit(bloque, k, f) for k, f in tareas.items()}
     for k in tareas:

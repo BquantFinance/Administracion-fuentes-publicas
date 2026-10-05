@@ -22,7 +22,7 @@ sync:
   full: "Cataluña t2h3-cgys.csv (112.696 filas); Madrid datastore alojamientos_turisticos (8.701); GVA lista-de-viviendas-turisticas.csv (15 MB, 90.091); Andalucía dataset-openrta.csv (68 MB, 175.443)"
   size: "medido el 2026-10-05; Andalucía baja a unos 170 KB/s y cortó dos veces la conexión"
   new: "Cataluña y GVA por fecha (fecha_alta en GVA); Madrid y Andalucía sin fecha de alta en el fichero: comparar signatura o registration_code con la copia anterior"
-license: CC BY 4.0 en los cuatro portales (cita de la fuente); INE con cita
+license: "Llicència oberta d'ús d'informació – Catalunya (cita); CC BY en Madrid y la Comunitat Valenciana; CC BY 4.0 en Andalucía; INE con cita"
 base_url: https://analisi.transparenciacatalunya.cat/resource/t2h3-cgys.json
 docs_url: https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/VTE
 endpoints:

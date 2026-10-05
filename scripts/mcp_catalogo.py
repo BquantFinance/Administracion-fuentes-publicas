@@ -436,7 +436,7 @@ def perfil_municipio(municipio: str | list[str], solo_codigos: bool = False) -> 
     y valor tasado de vivienda; con dirección
     o coordenadas, además ubicacion (CP, coordenadas y
     referencia catastral del portal; exacta=false si la calle hallada no es la pedida; en el campo, recinto SIGPAC, uso y
-    referencia de la parcela). solo_codigos=True da solo los códigos y la ubicación. Con una lista de hasta 20, en una llamada."""
+    referencia de la parcela) y, en Cataluña y la Comunitat Valenciana, los certificados energéticos del edificio. solo_codigos=True da solo los códigos y la ubicación. Con una lista de hasta 20, en una llamada."""
     c = _consulta()
     if solo_codigos and isinstance(municipio, str) and c.es_ubicacion(municipio):
         u = c.ubicar(municipio)

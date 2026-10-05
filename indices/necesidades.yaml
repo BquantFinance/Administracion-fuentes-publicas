@@ -433,3 +433,6 @@
 - need: Viviendas turísticas (de uso turístico) de un municipio o una calle, con licencia o anunciadas
   source: viviendas-uso-turistico
   note: "registros de Cataluña, Madrid, Andalucía y Comunitat Valenciana más el INE (VTE) en todos los municipios; registro e INE dan cifras distintas (Madrid 4.865 inscritas y 10.836 anunciadas); perfil_municipio trae las dos"
+- need: Certificado y etiqueta energética de un edificio o vivienda, letras por municipio
+  source: certificados-eficiencia-energetica
+  note: "por parcela en Cataluña y la Comunitat Valenciana (perfil_municipio con la dirección); Madrid y Andalucía solo en descarga y el datastore de Madrid se corta en 1.000 filas"
