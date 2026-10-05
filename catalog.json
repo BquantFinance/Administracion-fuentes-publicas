@@ -1811,7 +1811,7 @@
    "code": {
     "module": "fuentes_publicas.clientes.placsp",
     "use": [
-     "placsp.entradas(max_paginas=1): un dict por entry (estado, órgano con DIR3 y NIF, importes en texto, CPV, adjudicaciones por lote) y las bajas con deleted",
+     "placsp.entradas(max_paginas=30): entradas con estado, CPV, importes y fecha_publicacion (primer anuncio); un día va por ella, no por updated; una fila por id",
      "placsp.parse_feed(contenido): (entradas, URL rel=next) de un .atom o de cada fichero de los ZIP; la página del WAF da error, no un feed vacío",
      "fuentes-almacen sync --fuentes placsp --desde 2026-10-04: Parquet con placsp_ultimo (una fila por id, con anulada) y adjudicaciones_ultimo"
     ],
@@ -6019,7 +6019,8 @@
    "summary": "Catálogo CKAN 2.10 de la Junta de Andalucía (832 conjuntos de 72 organismos, 260 del IECA): presupuestos, tesorería, educación, medio ambiente, cultura. API JSON con datastore en 173 recursos y una API v0 aparte con OpenAPI (BOJA desde 1979, RPT, agenda, subvenciones), sin autenticación.",
    "alerts": [
     "datastore_active true no garantiza la tabla; 6 de 173 recursos dieron 404 Resource not found y las plantillas orgánicas tienen 1000 filas en el datastore frente a 36260 en el CSV. Contrastar total con el fichero.",
-    "Se pierden ceros a la izquierda: el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine llega como 44001 o '04001'; normalizar con str(x).zfill(5) antes de cruzar."
+    "Se pierden ceros a la izquierda: el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine llega como 44001 o '04001'; normalizar con str(x).zfill(5) antes de cruzar.",
+    "datastore_search del censo de instalaciones deportivas (8e8e1b8f) trae cada fila dos veces: total 65526 frente a 32763 en el CSV, _id 1 a 65526; contar sobre el CSV o quitar duplicados sin _id."
    ],
    "code": {
     "module": "fuentes_publicas.clientes.ckan",
