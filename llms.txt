@@ -2,7 +2,7 @@
 
 > Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. Contenido en castellano, claves en inglés.
 
-Fuentes: 99 · Productos: 14 · Recetas: 47 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Generado: 2026-10-05
+Fuentes: 102 · Productos: 14 · Recetas: 47 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Generado: 2026-10-05
 
 ## Empieza aquí
 
@@ -88,6 +88,8 @@ Datos incompletos, distintos o a cero sin ningún error; están en `alerts` de c
 - ine-cartografia-censal: Cada colección anual de la API mezcla secciones (TIPO SECCIONADO, 36554 en 2025) y distritos (TIPO DISTRITO, CSEC 000, 10457); filtrar TIPO='SECCIONADO', porque TIPO='SECCION' devuelve 0 sin error.
 - interior-criminalidad: Los balances son acumulados desde enero; abril-junio es 09006 (enero-junio) menos 09003 (enero-marzo) en la fila III. TOTAL INFRACCIONES PENALES (Barcelona 2026, 75.461 - 37.913 = 37.548).
 - ive-pegv-bancos-datos: El CSV omite las celdas confidenciales desde 2023 (la fila desaparece, no sale a cero); pedir xlsxestados, que las marca c, para distinguirlas de un dato ausente. Antes de 2023 el guion era secreto; luego, no aplica.
+- jcyl-datos-abiertos: El sufijo .json miente: curl .../1285085634877.json da 200 con un XLSX real (Content-Type spreadsheetml, 5.270 B con firma PK), no JSON; usar .csv o .xls del mismo id.
+- jcyl-datos-abiertos: 169 de los 840 conjuntos (20 %) llevan Licencia IGCYL-NC (no comercial) en la columna Licencia del CSV del catálogo (1284166186527.csv); filtrarlos antes de cualquier uso comercial.
 - junta-andalucia-datos-abiertos: datastore_active true no garantiza la tabla; 6 de 173 recursos dieron 404 Resource not found y las plantillas orgánicas tienen 1000 filas en el datastore frente a 36260 en el CSV. Contrastar total con el fichero.
 - junta-andalucia-datos-abiertos: Se pierden ceros a la izquierda: el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine llega como 44001 o '04001'; normalizar con str(x).zfill(5) antes de cruzar.
 - mapa-sigpac: El municipio es el código del Catastro, no el del INE; las capitales son 900 (Madrid 28:900, INE 28079) y otros 4.448 municipios cambian de número (Tórtoles 05246 es 5:247); traducir con datos/municipios.csv.
@@ -323,14 +325,14 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 
 ## Sectores
 
-- [Legislación y boletines oficiales](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/legislacion-boletines/README.md): boe-api-legislacion-consolidada, boe-api-sumario, boe-eli, boe-feeds, borme-api-sumario
+- [Legislación y boletines oficiales](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/legislacion-boletines/README.md): bocyl-rss, boe-api-legislacion-consolidada, boe-api-sumario, boe-eli, boe-feeds, borme-api-sumario
 - [Economía, finanzas y mercados](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/economia-finanzas/README.md): airef-datos, bde-estadisticas, cnmv-registros, ico-datos, tesoro-estadisticas
 - [Hacienda, tributos y presupuestos](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/hacienda-presupuestos/README.md): aeat-estadisticas, aeat-servicios-web, hacienda-central-informacion, hacienda-ovef, igae-ejecucion-presupuestaria, sepg-presupuestos-generales-estado
 - [Estadística oficial](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/estadistica/README.md): comunidad-madrid-estadistica-api, idescat-api, ieca-api-badea, ine-api-tempus, ine-codigos-territoriales, ine-microdatos, ive-pegv-bancos-datos
 - [Contratación pública y subvenciones](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/contratacion-subvenciones/README.md): bdns-api, hacienda-registro-licitadores, placsp-datos-abiertos
 - [Empleo y Seguridad Social](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/empleo-seguridad-social/README.md): mites-estadisticas, segsocial-estadisticas, sepe-estadisticas
-- [Gobierno abierto, transparencia y organización administrativa](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/gobierno-abierto-administracion/README.md): ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, comunidad-madrid-datos-abiertos, datos-gob-es-api, dir3-directorio, face-facturas, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, pag-administracion-gob-es, transparencia-portal
-- [Territorio, catastro y cartografía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/territorio-cartografia/README.md): catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal
+- [Gobierno abierto, transparencia y organización administrativa](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/gobierno-abierto-administracion/README.md): ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, comunidad-madrid-datos-abiertos, datos-gob-es-api, dir3-directorio, face-facturas, gencat-dades-obertes, gva-dadesobertes-api, jcyl-datos-abiertos, junta-andalucia-datos-abiertos, pag-administracion-gob-es, transparencia-portal
+- [Territorio, catastro y cartografía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/territorio-cartografia/README.md): catastro-ovc, cnig-centro-descargas, idecyl-servicios, idee-servicios, ine-cartografia-censal
 - [Meteorología y clima](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/meteorologia-clima/README.md): aemet-opendata, aemet-otros-servicios
 - [Medio ambiente, agua y biodiversidad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/medio-ambiente-agua-biodiversidad/README.md): miteco-banco-datos-naturaleza, miteco-calidad-aire, miteco-inventario-emisiones, miteco-prtr, miteco-saih-boletin-hidrologico
 - [Energía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/energia/README.md): cnmc-data, minetur-precios-carburantes, miteco-energia-estadisticas, omie-mercado, ree-redata

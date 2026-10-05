@@ -1,0 +1,44 @@
+id: idecyl-servicios
+name: IDECyL – Catálogo GeoNetwork y servicios ArcGIS REST de Castilla y León
+org: Junta de Castilla y León (IDECyL)
+level: ccaa
+sector: territorio-cartografia
+tags: [cartografia, ide, geonetwork, csw, arcgis, castilla-y-leon, wms, recintos]
+summary: >-
+  IDE de Castilla y León: catálogo GeoNetwork 3.8.2 con 197 recursos (163 datasets, 31 servicios) consultable
+  por CSW INSPIRE y feed RSS de novedades, más un directorio ArcGIS REST con MapServers de recintos agrícolas
+  anuales (ayg) y visores PGIS (cyt). Sin clave.
+access: [ogc, api-rest, feed, portal]
+auth: none
+formats: [xml, json]
+update: irregular
+license: Sin licencia visible en el portal
+base_url: https://idecyl.jcyl.es/geonetwork
+docs_url: https://idecyl.jcyl.es/geonetwork/doc/api/index.html
+endpoints:
+  - path: /srv/eng/csw?SERVICE=CSW&REQUEST=GetCapabilities
+    desc: CSW 2.0.2 con perfiles INSPIRE; base para buscar metadatos de los 197 recursos
+    example: curl -s "https://idecyl.jcyl.es/geonetwork/srv/eng/csw?SERVICE=CSW&REQUEST=GetCapabilities"
+    returns: "XML csw:Capabilities con operaciones GetRecords/GetRecordById y ows:ServiceIdentification de IDECyL"
+  - path: /srv/eng/rss.search?sortBy=changeDate&georss=simplepoint
+    desc: RSS 2.0 de novedades del catálogo con GeoRSS simplepoint
+    example: curl -s "https://idecyl.jcyl.es/geonetwork/srv/eng/rss.search?sortBy=changeDate&georss=simplepoint"
+    returns: "RSS con título IDECyL (Junta de Castilla y León) y los metadatos más recientes"
+  - path: https://idecyl.jcyl.es/arcgis/rest/services?f=json
+    desc: Directorio ArcGIS REST con las carpetas por consejería y el servicio Geometry
+    example: curl -s "https://idecyl.jcyl.es/arcgis/rest/services?f=json"
+    returns: "{\"currentVersion\" : 9.31,\"folders\":[\"ayg\",\"cyt\",\"edu\",\"eye\",\"fio\",\"fma\",\"hac\",\"pre\",\"san\"],\"services\":[{\"name\" : \"Geometry\", \"type\" : \"GeometryServer\"}]}"
+  - path: https://idecyl.jcyl.es/arcgis/rest/services/ayg?f=json
+    desc: Servicios de Agricultura y Ganadería con los recintos agrícolas por año
+    example: curl -s "https://idecyl.jcyl.es/arcgis/rest/services/ayg?f=json"
+    returns: "{\"folders\":[],\"services\":[{\"name\" : \"ayg/recintos2010\", \"type\" : \"MapServer\"},… 8 servicios recintos2010 en adelante]}"
+rate_limit: No documentado
+quirks: [js-rendered]
+ids: []
+gotchas:
+  - "El ArcGIS REST es un Server 9.31 de 2007 y 7 de las 9 carpetas del directorio (edu, eye, fio, fma, hac, pre, san) existen pero devuelven 0 servicios."
+  - "El buscador JSON interno q devuelve count 0 aunque el catálogo tenga coincidencias visibles en la web; usar CSW."
+  - "El visor de idecyl.jcyl.es no sirve contenido sin JavaScript; las vías programáticas son el CSW, el RSS y el directorio ArcGIS."
+related: [mapa-sigpac, cnig-centro-descargas, idee-servicios, catastro-ovc, ieo-datos-oceanograficos]
+status: active
+verified: "2026-10-05"
