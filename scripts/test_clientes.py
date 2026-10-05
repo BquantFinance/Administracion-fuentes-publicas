@@ -320,6 +320,14 @@ def almacen_volcado_y_solo_lectura():
                                                 "fechaConcesion": "2026-09-28", "fechaRegistro": "2026-09-29"}, "concesiones")]})
         alm.volcar()
         assert almacen.sql("select count(*) from bdns", d)["filas"] == [[1]]
+        alm.añadir({"placsp": [  # A con dos versiones y anulada después; B vigente
+            {"feed": "643", "id": "A", "updated": "2026-10-01 10:00:00", "borrado": False, "estado": "PUB", "importe_sin_iva": 100.0},
+            {"feed": "643", "id": "A", "updated": "2026-10-01 12:00:00", "borrado": False, "estado": "PUB", "importe_sin_iva": 110.0},
+            {"feed": "643", "id": "A", "updated": "2026-10-02 09:00:00", "borrado": True, "motivo": "ANULADA"},
+            {"feed": "643", "id": "B", "updated": "2026-10-01 11:00:00", "borrado": False, "estado": "PUB", "importe_sin_iva": 50.0}]})
+        alm.volcar()
+        u = almacen.sql("select id, importe_sin_iva, anulada, motivo_baja from placsp_ultimo order by id", d)["filas"]
+        assert u == [["A", 110.0, True, "ANULADA"], ["B", 50.0, False, None]], u
         r = almacen.sql("select * from range(5);", d, 3)  # truncado con el total, y no truncado si caben justas
         assert r["truncado"] and r["filas_totales"] == 5 and len(r["filas"]) == 3
         assert not almacen.sql("select * from range(3)", d, 3)["truncado"]

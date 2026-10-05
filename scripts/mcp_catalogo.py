@@ -509,8 +509,9 @@ def perfil_municipio(municipio: str | list[str], solo_codigos: bool = False) -> 
 @herramienta
 def almacen_sql(consulta: str, limite: int = 100) -> dict:
     """SQL de solo lectura (DuckDB) sobre el almacén local en Parquet si existe: tablas boe, borme, bdns, placsp,
-    placsp_adjudicaciones y carburantes, y vistas placsp_ultimo y adjudicaciones_ultimo (último estado); borme.actos es
-    lista (list_contains(actos, 'Constitución')). Devuelve columnas, filas y cobertura; sin almacén, cómo crearlo."""
+    placsp_adjudicaciones y carburantes (PLACSP con una fila por versión), y vistas placsp_ultimo (una por id, con
+    anulada) y adjudicaciones_ultimo; borme.actos es lista (list_contains(actos, 'Constitución')). Devuelve columnas,
+    filas y cobertura; sin almacén, cómo crearlo."""
     def _ejecutar():
         try:
             from .clientes import almacen
@@ -520,7 +521,12 @@ def almacen_sql(consulta: str, limite: int = 100) -> dict:
         if not d:
             return {"error": "no hay almacén local", "pista": "python scripts/clientes/almacen.py sync --fuentes boe,borme,bdns,placsp "
                     "--desde AAAA-MM-DD (guides/almacen.md); FUENTES_ALMACEN apunta a otra carpeta"}
-        return dict(almacen.sql(consulta, d, limite), cobertura=almacen.cobertura(d))
+        r = dict(almacen.sql(consulta, d, limite), cobertura=almacen.cobertura(d))
+        if re.search(r"\bplacsp(_adjudicaciones)?\b", consulta, re.I):  # sexta tanda: sumaban versiones y anuladas
+            r["pista"] = ("placsp y placsp_adjudicaciones tienen una fila por versión (cada cambio de estado) y las bajas como "
+                          "filas borrado: para contar o sumar expedientes, placsp_ultimo (una por id, con anulada y anulada_el) "
+                          "y adjudicaciones_ultimo")
+        return r
     return _datos(_ejecutar)
 
 

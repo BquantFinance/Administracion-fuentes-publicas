@@ -12,7 +12,8 @@ identificar a nadie. Del BORME se guarda el tipo de cada acto y solo el texto de
 
 Tablas: boe (un item del sumario por fila), borme (una empresa de la sección A por fila), bdns (concesiones, minimis y
 ayudas de Estado por fecha de alta; en minimis el importe va en ayuda_equivalente), placsp y placsp_adjudicaciones (una
-fila por versión de cada expediente y por adjudicatario, updated en UTC; vistas placsp_ultimo y adjudicaciones_ultimo (con
+fila por versión de cada expediente y por adjudicatario, updated en UTC; vistas placsp_ultimo (última versión no anulada,
+con anulada y anulada_el) y adjudicaciones_ultimo (con
 adjudicatarios e importe_compartido: en acuerdos marco el importe del lote se repite en cada adjudicatario) con
 el último estado) y carburantes (precio por estación y día).
 
@@ -482,8 +483,15 @@ def conectar(dir: str | os.PathLike | None = None, solo_lectura: bool = True):
     for t in presentes:
         con.execute(f"CREATE VIEW {t} AS SELECT * FROM read_parquet({_lit(d / t / '*.parquet')}, union_by_name=true)")
     if "placsp" in presentes:
-        con.execute("CREATE VIEW placsp_ultimo AS SELECT * FROM placsp "
-                    "QUALIFY row_number() OVER (PARTITION BY id ORDER BY updated DESC) = 1")
+        # Última versión no anulada de cada expediente, con anulada y anulada_el: antes la última fila de una anulada era
+        # la de baja (campos vacíos) y desaparecía de cualquier filtro en vez de contar como anulada (sexta tanda)
+        con.execute("CREATE VIEW placsp_ultimo AS WITH v AS (SELECT * FROM placsp WHERE NOT coalesce(borrado, false) "
+                    "QUALIFY row_number() OVER (PARTITION BY id ORDER BY updated DESC) = 1), "
+                    "b AS (SELECT id, max(updated) AS baja, arg_max(motivo, updated) AS motivo_baja FROM placsp "
+                    "WHERE borrado GROUP BY id) "
+                    "SELECT v.*, coalesce(b.baja >= v.updated, false) AS anulada, "
+                    "CASE WHEN b.baja >= v.updated THEN b.baja END AS anulada_el, "
+                    "CASE WHEN b.baja >= v.updated THEN b.motivo_baja END AS motivo_baja FROM v LEFT JOIN b USING (id)")
     if "placsp_adjudicaciones" in presentes:
         # acuerdos marco: el importe del lote se repite en cada adjudicatario (agosto de 2026, feed 1044: 521 de 574 lotes
         # con varios; sumar por fila daba 33.302 M€ frente a 9.709 M€ contando cada lote una vez)
@@ -607,7 +615,7 @@ def empresa(nif: str, dir: str | os.PathLike | None = None, nombre: str | None =
         nombre = nombre or next((r["nombre"] for r in filas("SELECT nombre FROM adjudicaciones_ultimo WHERE nif = ? AND nombre IS NOT NULL LIMIT 1", nif)), None)
     if "placsp_ultimo" in vistas:
         out["como_organo"] = filas("""SELECT count(*) AS expedientes, round(sum(importe_sin_iva), 2) AS importe_sin_iva
-                                      FROM placsp_ultimo WHERE organo_nif = ? AND NOT borrado""", nif)[0]
+                                      FROM placsp_ultimo WHERE organo_nif = ? AND NOT anulada""", nif)[0]
     if "bdns" in vistas:
         out["subvenciones"] = filas("""SELECT coleccion, count(*) AS n, round(sum(importe), 2) AS importe,
                                        round(sum(ayuda_equivalente), 2) AS ayuda_equivalente, max(fecha_concesion) AS ultima
