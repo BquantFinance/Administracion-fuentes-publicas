@@ -2,7 +2,7 @@
 
 > Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. Contenido en castellano, claves en inglés.
 
-Fuentes: 102 · Productos: 14 · Recetas: 47 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Entrada ligera; la completa es llms.txt · Generado: 2026-10-05
+Fuentes: 102 · Productos: 14 · Recetas: 47 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana, Castilla y León y los ayuntamientos de Madrid y Barcelona · Entrada ligera; la completa es llms.txt · Generado: 2026-10-05
 
 ## Empieza aquí
 
