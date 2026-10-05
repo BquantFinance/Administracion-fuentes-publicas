@@ -263,3 +263,51 @@
     url: "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=50&nifCif=B86566304"
     contains: "B86566304"
   trap: "La BDNS separa concesiones, ayudas de Estado y minimis en tres búsquedas; las prohibiciones de contratar están en otra fuente"
+
+# Quinta tanda (2026-10-05): bloques nuevos de perfil_municipio (compraventa, certificados energéticos, cerca y
+# viviendas turísticas), medidos frente al mismo MCP sin ellos (EVAL_SIN=perfil_municipio.bloque en mcp_cli.py).
+
+- id: compraventa-palma
+  ask: "¿Cuántas compraventas de vivienda hubo en Palma (Illes Balears) en el segundo trimestre de 2026 y cuál es el valor tasado medio de la vivienda libre en euros por metro cuadrado en el último trimestre publicado?"
+  expected: "1.152 transacciones en 2026-T2 (provisional; 1.080 en 2026-T1), tabla 34010210 del Ministerio de Vivienda; 3.814,5 €/m² en 2026-T2 con 1.274 tasaciones, tabla 35103500"
+  sources: [mivau-precios-vivienda-alquiler]
+  check:
+    url: https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden=35000000
+    contains: sedal/35103500.XLS
+  trap: "Las tablas no traen código INE y escriben «Palma de Mallorca»; buscar «Palma» no casa o casa con Palma del Río, La Palma d'Ebre o Palma de Gandía"
+
+- id: certificados-edificio
+  ask: "¿Cuántas viviendas del edificio de la calle Colón 10 de València tienen certificado de eficiencia energética registrado y qué letra de consumo tiene cada una en su certificado más reciente?"
+  expected: "3 viviendas (4 certificados, uno de ellas repetido), las tres con letra E de consumo de energía primaria no renovable; parcela catastral 6021705YJ2762A, WFS 26_GCEE de la Generalitat Valenciana"
+  sources: [certificados-eficiencia-energetica, cnig-centro-descargas]
+  check:
+    url: "https://terramapas.icv.gva.es/26_GCEE?service=WFS&version=1.1.0&request=GetFeature&typeName=ms:CEEEdificios&maxFeatures=1&propertyName=ref_parcela"
+    contains: ref_parcela
+  trap: "Hay 4 certificados para 3 viviendas: contar certificados da 4; los CSV del IVACE terminan en 2023"
+
+- id: colegios-cerca-madrid
+  ask: "¿Cuántos centros educativos en funcionamiento hay a menos de 1 km de la calle Alcalá 50 de Madrid y cuál es el más cercano?"
+  expected: "11 en alta a menos de 1 km (directorio de centros educativos de la Comunidad de Madrid); el más cercano, el CPR INF-PRI La Merced, a unos 600 m"
+  sources: [centros-docentes-ccaa, cnig-centro-descargas]
+  check:
+    url: "https://datos.comunidad.madrid/api/3/action/datastore_search?resource_id=28d60557-1d73-4281-ab08-6cfd3b2f5f83&limit=1"
+    contains: "SITUACI"
+  trap: "El directorio mezcla bajas: sin filtrar SITUACIÓN salen 29 (17 de baja); las coordenadas son UTM huso 30"
+
+- id: recarga-cerca-alicante
+  ask: "¿Cuántos emplazamientos de recarga de vehículo eléctrico hay a menos de 1 km de la calle Torres Quevedo 42 de Alicante, y qué operador y potencia máxima en kW tiene el más cercano?"
+  expected: "5 emplazamientos; el más cercano, en Doctor Ayela 7 a unos 180 m, de Iberdrola Clientes, con 2 puntos de 22 kW"
+  sources: [dgt-datex-trafico, cnig-centro-descargas]
+  check:
+    url: https://infocar.dgt.es/datex2/v3/miterd/EnergyInfrastructureTablePublication/electrolineras.xml
+    contains: energyInfrastructureSite
+  trap: "La potencia va en vatios (22000.0) y el fichero pesa 83 MB; «Alicante» en municipio_filter de CartoCiudad da 0 (es Alacant/Alicante)"
+
+- id: viviendas-turisticas-madrid
+  ask: "¿Cuántas viviendas de uso turístico tiene el municipio de Madrid según el registro de la Comunidad de Madrid y cuántas según el INE?"
+  expected: "4.865 inscritas en el registro (alojamientos_turisticos, alojamiento_tipo LIKE 'VIVIENDAS DE USO TU%') y 10.836 viviendas turísticas del INE (VTE 2026, tabla 39363); no miden lo mismo"
+  sources: [viviendas-uso-turistico]
+  check:
+    url: https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/39363?tv=19:887&nult=1
+    contains: Viviendas turísticas
+  trap: "El tipo llega cortado («VIVIENDAS DE USO TU »): el filtro exacto da 0; el conjunto de declaraciones mensuales (1.156) no es el registro"

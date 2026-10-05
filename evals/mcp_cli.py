@@ -9,7 +9,8 @@ Uso:
   python evals/mcp_cli.py HERRAMIENTA [clave=valor ...]     llama a la herramienta (los enteros se convierten)
   python evals/mcp_cli.py recurso NOMBRE                    lee catalogo://NOMBRE (llms.txt o reglas)
 Ejemplo: python evals/mcp_cli.py buscar consulta="paro municipio" limite=5
-EVAL_SIN=h1,h2 oculta esas herramientas (condición sin las piezas que se miden; cuarta tanda).
+EVAL_SIN=h1,h2 oculta esas herramientas (condición sin las piezas que se miden; cuarta tanda) y EVAL_SIN=h.bloque quita ese
+bloque de la respuesta de h (perfil_municipio.cerca; quinta tanda).
 """
 import asyncio
 import json
@@ -22,7 +23,30 @@ from mcp.client.stdio import stdio_client
 
 ROOT = Path(__file__).resolve().parent.parent
 SERVER = ROOT / "scripts" / "mcp_catalogo.py"
-SIN = {h for h in os.environ.get("EVAL_SIN", "").split(",") if h}
+SIN = {h for h in os.environ.get("EVAL_SIN", "").split(",") if h and "." not in h}
+BLOQUES: dict[str, set] = {}
+for _h in os.environ.get("EVAL_SIN", "").split(","):
+    if "." in _h:
+        BLOQUES.setdefault(_h.split(".")[0], set()).add(_h.split(".", 1)[1])
+
+
+def sin_bloques(herramienta: str, texto: str) -> str:
+    """Quita de la respuesta JSON los bloques ocultos (también dentro de perfiles, en las llamadas con lista)."""
+    quitar = BLOQUES.get(herramienta)
+    if not quitar:
+        return texto
+    try:
+        d = json.loads(texto)
+    except ValueError:
+        return texto
+
+    def limpia(x):
+        if isinstance(x, dict):
+            return {k: limpia(v) for k, v in x.items() if k not in quitar}
+        if isinstance(x, list):
+            return [limpia(v) for v in x]
+        return x
+    return json.dumps(limpia(d), ensure_ascii=False, separators=(",", ":"))
 
 
 def argumentos(pares: list[str]) -> dict:
@@ -42,7 +66,8 @@ async def main(argv: list[str]) -> None:
             await session.initialize()
             if not argv:
                 tools = [t for t in (await session.list_tools()).tools if t.name not in SIN]
-                print(json.dumps([{"herramienta": t.name, "descripcion": t.description,
+                print(json.dumps([{"herramienta": t.name, "descripcion": t.description + (
+                                   f" (En esta sesión no devuelve: {', '.join(sorted(BLOQUES[t.name]))}.)" if t.name in BLOQUES else ""),
                                    "parametros": t.inputSchema.get("properties", {})} for t in tools],
                                  ensure_ascii=False, indent=1))
                 print(json.dumps({"recursos": [str(r.uri) for r in (await session.list_resources()).resources]},
@@ -53,7 +78,7 @@ async def main(argv: list[str]) -> None:
                 print("\n".join(c.text for c in res.contents))
                 return
             result = await session.call_tool(argv[0], argumentos(argv[1:]))
-            print("\n".join(c.text for c in result.content if getattr(c, "text", None)))
+            print(sin_bloques(argv[0], "\n".join(c.text for c in result.content if getattr(c, "text", None))))
 
 
 if __name__ == "__main__":
