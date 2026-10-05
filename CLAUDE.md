@@ -101,8 +101,8 @@ Judicial o UE, solo cuando lo indique el propietario.
 ## Estado (2026-10-01)
 
 - **Catálogo**: 102 fichas, 95 verificadas entre el 2026-10-01 y el 2026-10-05; las tres de Castilla y León llegaron por
-  la comunidad (PR 13, issue 6) y el portal ganó al revisarlo su API Opendatasoft (442 de 840 conjuntos). 37 llevan
-  `code` con las llamadas ejecutadas el 2026-10-05 (aemet-opendata no: sin clave no se pudo ejecutar).
+  la comunidad (PR 13, issue 6) y el portal ganó al revisarlo su API Opendatasoft (442 de 840 conjuntos). 38 llevan
+  `code` con las llamadas ejecutadas el 2026-10-05 (aemet-opendata con la llamada que hizo el flujo semanal con el secreto).
   En 2026-09-30 siguen datacomex (sin token), ree-redata y datos-gob-es-api (Incapsula) y bne-datos (Cloudflare); en
   `null`, fega-beneficiarios-pac, oepm-invenes y mitma-opendata-movilidad. 47 recetas, 14 productos. Desde el 2026-10-05, concursos de acreedores
   (BORME) en empresa_nif y el radar; en perfil_municipio, viviendas turísticas, compraventa de vivienda (mivau.indice
