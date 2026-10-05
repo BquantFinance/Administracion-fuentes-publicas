@@ -5,15 +5,16 @@ level: ccaa
 sector: gobierno-abierto-administracion
 tags: [datos-abiertos, catalogo, castilla-y-leon, descargas, sector-publico, sie, estadistica]
 summary: >-
-  Catálogo de datos abiertos de la Junta de Castilla y León: 840 conjuntos descargables por URL directa
-  (.csv, .xls, .json) y CSV del catálogo completo regenerado a diario. Sin API; la estadística autonómica
-  (SIE, app SAS) tampoco.
+  Catálogo de datos abiertos de la Junta de Castilla y León: 840 conjuntos en un CSV regenerado a diario, 442 de
+  ellos en una API Opendatasoft (Explore v2.1) con registros filtrables y exportación completa. La estadística
+  autonómica (SIE, app SAS) no tiene API.
 alerts:
-  - "El sufijo .json miente: curl .../1285085634877.json da 200 con un XLSX real (Content-Type spreadsheetml, 5.270 B con firma PK), no JSON; usar .csv o .xls del mismo id."
-  - "169 de los 840 conjuntos (20 %) llevan Licencia IGCYL-NC (no comercial) en la columna Licencia del CSV del catálogo (1284166186527.csv); filtrarlos antes de cualquier uso comercial."
-access: [download, portal]
+  - "Extensiones cruzadas: con -L, .../1285085634877.json da un XLSX (5.270 B, firma PK) y .xls da JSON (20.252 B); para datos, .csv del mismo id o exports/csv de la API."
+  - "169 de los 840 conjuntos llevan IGCYL-NC (no comercial) en la columna Licencia del CSV del catálogo (1284166186527.csv), la API solo marca 2; filtrar por el CSV antes de vender."
+  - "records sin order_by no sale por fecha: limit=2 en ingresos-tasas-bocyl dio 2026-02 y 2025-11 con 2026-07 publicado; para el último dato, order_by=fecha desc."
+access: [api-rest, download, portal]
 auth: none
-formats: [csv, xls, json, xml, shp, kml, rdf]
+formats: [csv, xls, xlsx, json, geojson, xml, shp, kml, rdf]
 update: daily
 license: CC-BY en 671 de 840 conjuntos; IGCYL-NC (no comercial) en 169 (columna Licencia del CSV del catálogo)
 base_url: https://datosabiertos.jcyl.es
@@ -27,19 +28,33 @@ endpoints:
     desc: Página de detalle de un conjunto con sus distribuciones y formato de descarga
     example: curl -s "https://datosabiertos.jcyl.es/web/jcyl/set/es/ciencia-tecnologia/general/1284166186527"
   - path: /web/jcyl/risp/es/{categoria}/{slug}/{id}.{csv|xls|json}
-    desc: Descarga directa de una distribución; el id numérico sale del detalle del conjunto
-    example: curl -s "https://datosabiertos.jcyl.es/web/jcyl/risp/es/sector-publico/ingresos-tasas-bocyl/1285085634877.csv"
-    returns: "CSV UTF-8 con ; de 7 KB; el mismo id existe con .xls y .json"
+    desc: Descarga directa de una distribución; redirige (302) a la API, a www.jcyl.es o a transparencia.jcyl.es según el conjunto
+    example: curl -sL "https://datosabiertos.jcyl.es/web/jcyl/risp/es/sector-publico/ingresos-tasas-bocyl/1285085634877.csv"
+    returns: "302 a analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/ingresos-tasas-bocyl/exports//csv; con -L, CSV UTF-8 con BOM y ; de 7 KB"
+  - path: https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets?select=dataset_id,records_count
+    desc: Catálogo de la API (442 conjuntos) con dataset_id, título y número de filas; limit hasta 100
+    example: curl -s "https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets?limit=3&order_by=records_count%20desc&select=dataset_id,records_count"
+    returns: '{"total_count": 442, "results": [{"dataset_id": "estadisticas-web-ubicaciones", "records_count": 3310834}, {"dataset_id": "urgencias-hospitalarias-atendidas", "records_count": 2237282}, ...]}'
+  - path: https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/{dataset_id}/records
+    desc: Registros JSON con where, select, order_by y group_by; limit hasta 100 y offset + limit hasta 10.000
+    example: curl -s "https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/ingresos-tasas-bocyl/records?limit=3&order_by=fecha%20desc"
+    returns: '{"total_count": 91, "results": [{"ano": "2026", "mes": "07", "fecha": "2026-07", "anuncios": 97, "importe": 103793.89, ...}]}'
+  - path: https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/{dataset_id}/exports/{csv|json|xlsx|geojson}
+    desc: El conjunto entero sin el tope de 10.000 filas de records; admite where y select
+    example: curl -s "https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/ingresos-tasas-bocyl/exports/csv"
+    returns: "CSV UTF-8 con BOM y ; (ano;mes;fecha;anuncios;importe;...), 91 filas y cabecera"
 rate_limit: No documentado
 quirks: [static-html, latin1]
 ids: []
 gotchas:
   - "El CSV del catálogo lleva una línea previa a la cabecera con la fecha de generación; los lectores ingenuos la toman como cabecera."
   - "La página de listado no enumera los conjuntos: enlaza al CSV del catálogo y al buscador; el inventario programático es ese CSV, no el HTML."
+  - "El dataset_id de la API no es el slug del portal; sale de la redirección de la descarga (porcentaje-test-coronavirus-provincias va a porcentaje-de-test-de-coronavirus-realizados-a-profesionales-por-provincias)."
+  - "records con offset + limit por encima de 10.000 da 400 InvalidRESTParameterError; para conjuntos grandes (urgencias-hospitalarias-atendidas, 2.237.282 filas) usar exports."
   - "El SIE (estadistica.jcyl.es) es una app SAS: /sie/ solo redirige por onLoad al broker /sie/sas/broker?_PROGRAM=mddbpgm.v2.indexv2.scl&_SERVICE=saswebl; sin JavaScript no se llega."
   - "En el SIE el export .csv de una consulta responde con un frameset HTML, no el CSV; los módulos están en /sie/v2/{modulo}v2index.html y las tablas en frames con JS de época."
 tips:
-  - "Inventario en una llamada con el CSV del catálogo: sector y organismo permiten filtrar; la columna Licencia separa CC-BY (671) de IGCYL-NC (169, no comercial)."
+  - "Inventario en una llamada con el CSV del catálogo (sector, organismo, licencia, enlace); los 169 IGCYL-NC son casi todos cartografía SHP de cartografia.jcyl.es."
   - "Para series estadísticas municipales ir a ine-api-tempus; del SIE solo el padrón municipal 1986-1995 escapa a la serie del INE (que empieza en 1996)."
 related: [datos-gob-es-api, ine-codigos-territoriales, ine-api-tempus, placsp-datos-abiertos, bocyl-rss]
 status: active

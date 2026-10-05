@@ -20,7 +20,7 @@ Sector `legislacion-boletines` · 6 fuentes · índice generado por `scripts/bui
 | [boe-feeds](boe-feeds.yaml) | BOE y BORME – Feeds RSS | feed | none | rss, xml | daily | latin1 | 2026-10-01 |
 | [borme-api-sumario](borme-api-sumario.yaml) | BORME – API de sumarios y actos mercantiles | api-rest, download | none | json, xml, pdf, html | daily | accept-header-required, json-object-or-list, errors-html-or-xml, no-weekend-data | 2026-10-05 |
 
-- **bocyl-rss**: Feeds RSS 2.0 del Boletín Oficial de Castilla y León por sección (I a V): un item por edición diaria que enlaza a la página del boletín con el sumario y los PDF de cada disposición. No hay API de sumario estructurado tipo BOE.
+- **bocyl-rss**: Feeds RSS 2.0 del Boletín Oficial de Castilla y León por sección (I a V): un item por edición diaria que enlaza a la página del boletín con el sumario y los PDF de cada disposición. Sin API de sumario estructurado como la del BOE (no localizada el 2026-10-05).
 - **boe-api-legislacion-consolidada**: Textos consolidados de normas estatales y autonómicas por bloques (artículos, disposiciones) con todas las versiones de cada bloque, metadatos, análisis (materias, referencias) y vigencia. Listado filtrable por fecha de actualización, búsqueda por título y tablas auxiliares de códigos.
 - **boe-api-sumario**: Sumario diario del BOE en JSON o XML: todas las disposiciones y anuncios publicados cada día con identificador, título, sección, departamento, epígrafe y URLs de PDF, HTML y XML del texto completo de cada uno.
 - **boe-eli**: URIs estables ELI para normas publicadas en el BOE, que resuelven a la página HTML de la norma con metadatos RDFa de la ontología eli embebidos, interoperables con EUR-Lex y otros boletines europeos.

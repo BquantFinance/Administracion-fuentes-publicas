@@ -6,8 +6,8 @@ sector: legislacion-boletines
 tags: [boletines, castilla-y-leon, rss, sumario, disposiciones]
 summary: >-
   Feeds RSS 2.0 del Boletín Oficial de Castilla y León por sección (I a V): un item por edición diaria
-  que enlaza a la página del boletín con el sumario y los PDF de cada disposición. No hay API de sumario
-  estructurado tipo BOE.
+  que enlaza a la página del boletín con el sumario y los PDF de cada disposición. Sin API de sumario
+  estructurado como la del BOE (no localizada el 2026-10-05).
 access: [feed, portal]
 auth: none
 formats: [xml, html, pdf]
