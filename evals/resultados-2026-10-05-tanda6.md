@@ -22,7 +22,7 @@ T20 producto-avisos-licitaciones y T21 producto-riesgo-proveedores.
 | T18 | B | 2/2 | 13 | 704.951 | 159 | (uno con el importe 294.628 € corto, 0,07 %) |
 | T19 | M, vista anterior | 0/2 | 19 | 998.621 | 107 | consultaron la tabla por versiones: 126 bien, «todas vigentes», 767 y 398,7 M€ |
 | T19 | M final | 0/2 | 21,5 | 1.129.549 | 125 | uno con vigentes e importe exactos pero 125 publicadas (eran 126); otro sumó con UNNEST (767 M€) |
-| T19 | B | 0/2 | 18,5 | 1.054.619 | 368 | filtraron el feed por updated: 521 y 530 publicadas, 1.344 y 979 M€ |
+| T19 | B | 0/2 | 18,5 | 1.092.602 | 393 | filtraron el feed por updated: 521 y 530 publicadas, 1.344 y 979 M€ |
 | T20 | M | 2/2 | 8,5 | 413.337 | 52 | |
 | T20 | B | 0/2 | 14 | 762.878 | 110 | no encuentran la pieza (fuentes-radar): «no hay producto hecho»; uno inventa que el id ATOM cambia por estado |
 | T21 | M | 2/2 | 10 | 500.535 | 74 | |
