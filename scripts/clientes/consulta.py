@@ -218,16 +218,21 @@ def boe_sumario(fecha: str, diario: str = "boe", seccion: str | None = None, tex
 
 def subvenciones_nif(nif: str, max_filas: int = 20) -> dict:
     """Concesiones, ayudas de Estado, minimis y grandes beneficiarios de un NIF en la BDNS, con totales y las más
-    recientes. El NIF va en nifCif; beneficiario trae NIF y nombre juntos."""
+    recientes. El NIF va en nifCif; beneficiario trae NIF y nombre juntos. El importe total se suma sobre todas las filas
+    (hasta 1.000), no sobre las max_filas que se devuelven: con 5 de 9 a la vista, los agentes sumaban las 5."""
     out = {"nif": nif.upper()}
     for col, orden in (("concesiones", "fechaConcesion"), ("ayudasestado", "fechaConcesion"), ("minimis", "fechaConcesion"),
                        ("grandesbeneficiarios", None)):
-        o = bdns.pagina(col, 0, min(max_filas, 1000), nifCif=nif.upper(), **({"order": orden, "direccion": "desc"} if orden else {}))
+        o = bdns.pagina(col, 0, 1000, nifCif=nif.upper(), **({"order": orden, "direccion": "desc"} if orden else {}))
         filas = o.get("content", [])
-        out[col] = {"total": o.get("totalElements", len(filas)), "filas": filas[:max_filas]}
+        total = o.get("totalElements", len(filas))
+        out[col] = {"total": total, "filas": filas[:max_filas]}
         importes = [f.get("importe") or f.get("ayudaETotal") or 0 for f in filas]
-        if o.get("totalElements", 0) <= len(filas):
+        if total <= len(filas):
             out[col]["importe_total"] = round(sum(x for x in importes if isinstance(x, (int, float))), 2)
+        else:
+            out[col]["importe_total"] = None
+            out[col]["nota"] = f"más de {len(filas)} filas: total sin sumar; usar bdns.py o la exportación"
     return out
 
 
