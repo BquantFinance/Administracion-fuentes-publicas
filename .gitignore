@@ -13,3 +13,4 @@ __pycache__/
 
 # almacén local de datos (scripts/clientes/almacen.py): nunca al repo
 almacen/
+ronda-residencial.md

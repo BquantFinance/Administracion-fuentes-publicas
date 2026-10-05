@@ -66,6 +66,7 @@ python scripts/check_recetas.py   # comprobaciones de las recetas (red; --only, 
 python scripts/check_ejemplos.py  # example de cada endpoint de las fichas (red; --only, --report, --fail)
 python scripts/check_links.py     # informe de URLs (red)
 python scripts/check_formas.py    # campos que desaparecen de 25 fuentes de los clientes (red; --report, --actualizar ids tras comprobar)
+python scripts/ronda_residencial.py  # desde casa: fichas de hosts que rechazan la nube (red; deja ronda-residencial.md)
 python scripts/municipios.py      # regenera datos/municipios.csv (red, un par de minutos)
 python scripts/fnmt_bundle.py     # ca-age.pem con las CA de FNMT para los hosts con cadena incompleta
 ```
@@ -96,9 +97,10 @@ Judicial o UE, solo cuando lo indique el propietario.
 
 ## Estado (2026-10-01)
 
-- **Catálogo**: 99 fichas, 92 verificadas entre el 2026-10-01 y el 2026-10-05. En 2026-09-30 siguen datacomex (sin
-  token), ree-redata y datos-gob-es-api (Incapsula) y bne-datos (Cloudflare); en `null`, fega-beneficiarios-pac,
-  oepm-invenes y mitma-opendata-movilidad. 47 recetas, 14 productos. Desde el 2026-10-05, concursos de acreedores
+- **Catálogo**: 102 fichas, 95 verificadas entre el 2026-10-01 y el 2026-10-05; las tres de Castilla y León llegaron por
+  la comunidad (PR 13, issue 6) y el portal ganó al revisarlo su API Opendatasoft (442 de 840 conjuntos).
+  En 2026-09-30 siguen datacomex (sin token), ree-redata y datos-gob-es-api (Incapsula) y bne-datos (Cloudflare); en
+  `null`, fega-beneficiarios-pac, oepm-invenes y mitma-opendata-movilidad. 47 recetas, 14 productos. Desde el 2026-10-05, concursos de acreedores
   (BORME) en empresa_nif y el radar; en perfil_municipio, viviendas turísticas, compraventa de vivienda (mivau.indice
   casa por nombre las 8.131 filas sin código INE) y, con una dirección, certificados energéticos de la parcela
   (Cataluña y Comunitat Valenciana) y el bloque cerca (scripts/clientes/cerca.py: recarga en toda España, colegios en
@@ -147,8 +149,16 @@ Judicial o UE, solo cuando lo indique el propietario.
 
 1. Medir lo que falta (productos y almacén) con y sin las piezas; lo que no ahorre tiempo o errores, se quita. Hecho el
    2026-10-05 para `perfil_municipio`, `coyuntura` y `empresa_nif` (se quedan).
-2. Ronda desde una IP residencial para los hosts bloqueados (necesita al propietario).
-3. Productos nuevos solo con piezas que ya funcionen; fuentes nuevas solo si desbloquean un producto.
+2. Ronda desde una IP residencial para los hosts bloqueados (necesita al propietario): `python
+   scripts/ronda_residencial.py` desde casa deja `ronda-residencial.md` (ejemplos de 18 fichas, recetas que las citan y
+   carburantes, sin IP ni claves); con él se fechan los `verified` o se anota en `gotchas` lo que falle también desde casa.
+3. PyPI (necesita al propietario: alta del publicador de confianza en pypi.org): con el paquete allí, `uvx` lo arranca
+   sin git y el registro de MCP admite la entrada pypi además del .mcpb.
+4. Necesidades sin ficha: `buscar` sin resultados enlaza la plantilla `nueva-fuente` (2026-10-05); revisar qué se pide.
+5. Issues abiertos: 3 (importe inflado de PLACSP en una tarea de evaluación; falta localizar el expediente en el
+   histórico) y 4 (fuentes de la comunidad, a la espera de su PR).
+6. Productos nuevos solo con piezas que ya funcionen; fuentes nuevas solo si desbloquean un producto. Un cliente
+   Opendatasoft solo si una segunda fuente lo usa (hoy solo la Junta de Castilla y León).
 
 ## Lo que no se hace
 

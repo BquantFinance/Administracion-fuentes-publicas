@@ -255,6 +255,10 @@ def _fichas(consulta: str, sector: str | None, limite: int) -> list[dict]:
     ]
 
 
+NADA = ("nada casa; probar con otras palabras o leer catalogo://llms.txt. Si la fuente falta, pedirla en "
+        "https://github.com/BquantFinance/Administracion-fuentes-publicas/issues/new?template=nueva-fuente.yml")
+
+
 @herramienta
 def buscar(consulta: str, sector: str | None = None, limite: int = 5) -> dict:
     """Busca a la vez fichas (resumen y alerts), recetas que cruzan fuentes, necesidades con la ficha que las resuelve,
@@ -270,7 +274,7 @@ def buscar(consulta: str, sector: str | None = None, limite: int = 5) -> dict:
         "identificadores": [{"id": k, "format": v.get("format"), "example": v.get("example")} for k, v in
                             rank(consulta, list(IDENTIFICADORES.items()), lambda kv: (norm(kv[0]), norm([kv[1].get("format"), kv[1].get("issuer")])), 2)],
     }
-    return {k: v for k, v in out.items() if v} or {"nota": "nada casa; probar con otras palabras o leer catalogo://llms.txt"}
+    return {k: v for k, v in out.items() if v} or {"nota": NADA}
 
 
 PRODUCTO_BY_ID = {p["id"]: p for p in PRODUCTOS}
