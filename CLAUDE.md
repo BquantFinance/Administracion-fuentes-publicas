@@ -120,12 +120,17 @@ Judicial o UE, solo cuando lo indique el propietario.
   de Madrid sacó padron_por_sexo del datastore el 04/10 (corregido). Sobre f9bcc8a (push del 2026-10-05): recetas 91 de 93 (cortes de
   MINETUR), ejemplos 369 de 381 y todos los cargadores, el radar incluido, desde la IP de GitHub. Sobre 9bb74be:
   recetas 104 de 104, ejemplos 388 de 398 sin ningún fallo (9 omitidos) y cargadores bien, mi_municipio con dirección
-  (certificados y cerca) incluido, salvo carburante_cerca.py (corte de MINETUR desde GitHub, intermitente).
+  (certificados y cerca) incluido, salvo carburante_cerca.py (corte de MINETUR desde GitHub, intermitente). Sobre 251a2b5
+  (con forma de las fuentes): recetas 102 de 104 (MINETUR), ejemplos 383 de 398 (429 de AEMET y la CNMV sin respuesta en
+  60 s desde GitHub en sus 4 ejemplos, que desde el contenedor responden en 1 s), formas 25 de 25 y cargadores bien.
 - **Evaluación** (`evals/`): con Haiku y trampas silenciosas, acierto 3 de 21 sin catálogo, 10 con ficheros y 13 con
   MCP, con un 30 % y un 43 % menos de tokens de entrada. Cuarta tanda (2026-10-05): con `perfil_municipio`, `coyuntura`
   y `empresa_nif`, 8 de 8 frente a 4 de 8 sin ellas, un 75 % menos de tokens y un tercio del tiempo. Quinta tanda
   (2026-10-05): bloques compraventa, certificados energéticos, cerca y viviendas turísticas, 9 de 10 frente a 7 de 10,
-  un 59 % menos de tokens y un 60 % menos de tiempo (se quedan). Sin medir aún: productos y almacén.
+  un 59 % menos de tokens y un 60 % menos de tiempo (se quedan). Sexta tanda (2026-10-05): productos 4 de 4 frente a 2
+  de 4 (se queda); almacén, 4 de 4 en BORME y BDNS como sin él pero con un 36 % menos de tokens y menos de la mitad de
+  tiempo, solo tras avisar desde buscar, boe_sumario y los errores SQL (se queda), y 0 de 4 con y sin él en licitaciones
+  de obras de un día; siete fallos de código corregidos, entre ellos fecha_publicacion de PLACSP.
 - **Publicación**: releases v0.1.0 a v0.3.0 y entrada `io.github.BquantFinance/catalogo-fuentes-publicas` en el registro
   oficial de MCP. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` (y en
   los dos ficheros del plugin) y crear la release vX.Y.Z desde la web; `publicar-mcp.yml` empaqueta, adjunta y publica.
@@ -147,8 +152,8 @@ Judicial o UE, solo cuando lo indique el propietario.
 
 ## Siguiente
 
-1. Medir lo que falta (productos y almacén) con y sin las piezas; lo que no ahorre tiempo o errores, se quita. Hecho el
-   2026-10-05 para `perfil_municipio`, `coyuntura` y `empresa_nif` (se quedan).
+1. Medido todo lo que había (tandas 4 a 6, se queda todo). Pendiente: repetir la tarea de licitaciones de obras de un
+   día con la vista placsp_ultimo nueva y la pista de UNNEST, y medir cada pieza nueva antes de darla por buena.
 2. Ronda desde una IP residencial para los hosts bloqueados (necesita al propietario): `python
    scripts/ronda_residencial.py` desde casa deja `ronda-residencial.md` (ejemplos de 18 fichas, recetas que las citan y
    carburantes, sin IP ni claves); con él se fechan los `verified` o se anota en `gotchas` lo que falle también desde casa.
