@@ -546,9 +546,13 @@ def sql(consulta: str, dir: str | os.PathLike | None = None, limite: int = 200) 
     con = conectar(dir)
     cur = con.execute(consulta)
     cols = [c[0] for c in cur.description] if cur.description else []
-    filas = cur.fetchmany(limite)
-    return {"columnas": cols, "filas": [[v if isinstance(v, (int, float, str, bool, list)) or v is None else str(v) for v in f]
-                                        for f in filas], "truncado": len(filas) == limite}
+    filas = cur.fetchmany(limite + 1)
+    out = {"columnas": cols, "filas": [[v if isinstance(v, (int, float, str, bool, list)) or v is None else str(v) for v in f]
+                                       for f in filas[:limite]], "truncado": len(filas) > limite}
+    if out["truncado"]:  # sexta tanda: un agente contó constituciones sobre 500 de 626 filas sin mirar truncado
+        out["filas_totales"] = con.execute(f"SELECT count(*) FROM ({consulta.strip().rstrip(';')})").fetchone()[0]
+        out["pista"] = "faltan filas: contar o sumar en el propio SQL (count, sum, group by) en vez de traerlas"
+    return out
 
 
 def _norm_nombre(s: str | None) -> str:

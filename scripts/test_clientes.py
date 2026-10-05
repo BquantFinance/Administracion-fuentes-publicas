@@ -310,6 +310,9 @@ def almacen_volcado_y_solo_lectura():
                                                 "fechaConcesion": "2026-09-28", "fechaRegistro": "2026-09-29"}, "concesiones")]})
         alm.volcar()
         assert almacen.sql("select count(*) from bdns", d)["filas"] == [[1]]
+        r = almacen.sql("select * from range(5);", d, 3)  # truncado con el total, y no truncado si caben justas
+        assert r["truncado"] and r["filas_totales"] == 5 and len(r["filas"]) == 3
+        assert not almacen.sql("select * from range(3)", d, 3)["truncado"]
         assert almacen.sql("select nif, nombre, ayudas from empresas", d)["filas"] == [["B12345678", "EJEMPLO SL", 1]]
 
 

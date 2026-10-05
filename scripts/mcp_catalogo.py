@@ -487,8 +487,8 @@ def perfil_municipio(municipio: str | list[str], solo_codigos: bool = False) -> 
 @herramienta
 def almacen_sql(consulta: str, limite: int = 100) -> dict:
     """SQL de solo lectura (DuckDB) sobre el almacén local en Parquet si existe: tablas boe, borme, bdns, placsp,
-    placsp_adjudicaciones y carburantes, y vistas placsp_ultimo y adjudicaciones_ultimo (último estado). Devuelve
-    columnas, filas y cobertura; sin almacén, cómo crearlo."""
+    placsp_adjudicaciones y carburantes, y vistas placsp_ultimo y adjudicaciones_ultimo (último estado); borme.actos es
+    lista (list_contains(actos, 'Constitución')). Devuelve columnas, filas y cobertura; sin almacén, cómo crearlo."""
     def _ejecutar():
         try:
             from .clientes import almacen

@@ -73,7 +73,7 @@
     },
     {
       "name": "almacen_sql",
-      "description": "SQL de solo lectura (DuckDB) sobre el almacén local en Parquet si existe: tablas boe, borme, bdns, placsp, placsp_adjudicaciones y carburantes, y vistas placsp_ultimo y adjudicaciones_ultimo (último estado)."
+      "description": "SQL de solo lectura (DuckDB) sobre el almacén local en Parquet si existe: tablas boe, borme, bdns, placsp, placsp_adjudicaciones y carburantes, y vistas placsp_ultimo y adjudicaciones_ultimo (último estado); borme.actos es lista (list_contains(actos, 'Constitución'))."
     },
     {
       "name": "ckan_buscar",
