@@ -443,7 +443,7 @@ def empresa_nif(nif: str, max_filas: int = 10) -> dict:
                       "PLACSP no tiene búsqueda por NIF: " + cargar),
         "borme": ("solo lo cargado en el almacén, por denominación" if d else
                   "el BORME no trae NIF ni búsqueda por denominación: " + cargar),
-        "concursos": "publicidadconcursal.es busca por NIF, pero exige resolver un CAPTCHA",
+        "concursos": "acto Situación concursal del BORME, por denominación: radar con concursos.empresas o almacén con borme (publicidadconcursal.es exige CAPTCHA)",
         "deudores_aeat": "la lista del art. 95 bis LGT (deudas de más de 600.000 €) solo es accesible tres meses tras publicarse, en junio",
     }
     return out

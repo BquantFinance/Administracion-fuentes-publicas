@@ -8,6 +8,8 @@ tags: [borme, registro-mercantil, empresas, sociedades, constituciones, nombrami
 summary: >-
   Sumario diario del Boletín Oficial del Registro Mercantil con los actos inscritos por provincia (constituciones,
   nombramientos, ceses, ampliaciones, disoluciones), otros actos y anuncios, con XML y PDF de cada documento.
+alerts:
+  - "Situación concursal llega con meses de retraso y mezcla resoluciones viejas (el BORME del 02/10/2026 trae una declaración del 11/05/2026 y revocaciones de 2022): usar la fecha de resolución y la última por procedimiento."
 access: [api-rest, download]
 auth: none
 formats: [json, xml, pdf, html]
@@ -51,4 +53,4 @@ tips:
   - scripts/clientes/boe.py (borme_empresas) separa número, denominación, registro, actos y datos registrales de cada empresa; un acto fuera de su lista queda con tipo None.
 related: [boe-api-sumario, boe-feeds]
 status: active
-verified: "2026-10-01"
+verified: "2026-10-05"

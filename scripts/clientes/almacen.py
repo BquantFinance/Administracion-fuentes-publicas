@@ -157,7 +157,12 @@ ACTOS_CON_TEXTO = {"Constitución", "Cambio de domicilio social", "Cambio de obj
 
 def fila_borme(empresa: dict, fecha: str, documento: str, provincia: str | None) -> dict:
     actos = [a["tipo"] or "Otros" for a in empresa["actos"]]
-    detalle = " | ".join(f"{a['tipo']}: {a['texto']}" for a in empresa["actos"] if a["tipo"] in ACTOS_CON_TEXTO and a["texto"])
+    partes = [f"{a['tipo']}: {a['texto']}" for a in empresa["actos"] if a["tipo"] in ACTOS_CON_TEXTO and a["texto"]]
+    for a in empresa["actos"]:  # el texto concursal lleva juez, administradores e inhabilitados: solo los campos
+        c = boe.parse_concursal(a["texto"]) if a["tipo"] == "Situación concursal" else None
+        if c:
+            partes.append("Situación concursal: " + ", ".join(f"{k} {v}" for k, v in c.items() if v is not None))
+    detalle = " | ".join(partes)
     capital = None
     for a in empresa["actos"]:
         if a["tipo"] in ("Ampliación de capital", "Reducción de capital"):
@@ -549,6 +554,7 @@ def sql(consulta: str, dir: str | os.PathLike | None = None, limite: int = 200) 
 def _norm_nombre(s: str | None) -> str:
     s = unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode().upper()
     s = re.sub(r"[^A-Z0-9 ]+", " ", s)
+    s = re.sub(r"\s+EN LIQUIDACION$", "", s.strip())  # el BORME añade «EN LIQUIDACION» a la denominación
     s = re.sub(r"\b(S ?L ?U?|S ?A ?U?|SOCIEDAD (LIMITADA|ANONIMA)( UNIPERSONAL)?|SLNE|S ?COOP|SCOOP|SLL|SAL|SLP)\s*$", "", s.strip())
     return re.sub(r"\s+", " ", s).strip()
 
@@ -594,8 +600,9 @@ def empresa(nif: str, dir: str | os.PathLike | None = None, nombre: str | None =
         palabra = max(clave.split(), key=len) if clave else ""
         candidatos = filas("""SELECT fecha, provincia, denominacion, actos, detalle, capital, datos_registrales FROM borme
                               WHERE strip_accents(upper(denominacion)) LIKE ? ORDER BY fecha DESC""", f"%{palabra}%") if palabra else []
-        out["borme"] = {"denominacion_buscada": nombre,
-                        "actos": [c for c in candidatos if _norm_nombre(c["denominacion"]) == clave][:max_filas]}
+        propios = [c for c in candidatos if _norm_nombre(c["denominacion"]) == clave]
+        out["borme"] = {"denominacion_buscada": nombre, "actos": propios[:max_filas],
+                        "concursos": [c for c in propios if "Situación concursal" in (c["actos"] or [])][:max_filas]}
     return out
 
 

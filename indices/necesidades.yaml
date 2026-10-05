@@ -97,8 +97,8 @@
   source: null
   note: la AEAT la publica en su sede en junio y por ley deja de ser accesible a los tres meses y no debe indexarse; el 01/10/2026 la de 2026 ya daba 404
 - need: Concursos de acreedores de una empresa por NIF
-  source: null
-  note: publicidadconcursal.es busca por NIF pero exige resolver un CAPTCHA (no automatizable); los edictos de los juzgados de lo mercantil salen en la sección IV del BOE, sin búsqueda por NIF en la API
+  source: borme-api-sumario
+  note: "acto Situación concursal del BORME A (unos 40 al día; parse_concursal quita juez, administradores e inhabilitados), por denominación: radar con concursos.empresas (admite NIF) o almacén con borme; publicidadconcursal.es exige CAPTCHA y la sección IV del BOE no trae concursos (0 de 60 el 03/10/2026)"
 - need: Convocatorias y concesiones de subvenciones, ayudas de Estado, minimis, grandes beneficiarios
   source: bdns-api
 - need: Beneficiarios de la PAC

@@ -234,6 +234,27 @@ def parse_borme_a(root: ET.Element) -> list[dict]:
     return out
 
 
+def parse_concursal(texto: str | None) -> dict | None:
+    """Acto «Situación concursal» del BORME a campos, sin los nombres que trae (juez, administradores concursales e
+    inhabilitados son datos personales): procedimiento, firme, fecha de la resolución (AAAA-MM-DD), resolución (Auto de
+    declaración de concurso, de apertura de la fase de liquidación, de conclusión, sentencia de calificación...), clase
+    (Voluntario o Necesario), calificación (Culpable o Fortuito) y juzgado."""
+    if not texto:
+        return None
+    m = re.search(r"Fecha de resolución (\d{1,2})/(\d{1,2})/(\d{4})\.\s*([^.]+)\.", texto)
+    proc = re.search(r"Procedimiento concursal ([^.\s]+)", texto)
+    juz = re.search(r"Juzgado:\s*(?:num\. \d+ )?(.*?)\.\s*(?:Juez|Resoluciones|Administrador|$)", texto)
+    clase = re.search(r"\b(Voluntario|Necesario)\b", texto)
+    calif = re.search(r"\b(Culpable|Fortuito)\b", texto)
+    firme = re.search(r"FIRME: (SI|SÍ|No)", texto, re.I)
+    return {"procedimiento": proc.group(1) if proc else None,
+            "fecha_resolucion": f"{m.group(3)}-{int(m.group(2)):02d}-{int(m.group(1)):02d}" if m else None,
+            "resolucion": m.group(4).strip() if m else None, "clase": clase.group(1) if clase else None,
+            "calificacion": calif.group(1) if calif else None,
+            "firme": None if not firme else firme.group(1).upper() in ("SI", "SÍ"),
+            "juzgado": juz.group(1).strip() if juz else None}
+
+
 def borme_empresas(identificador: str) -> list[dict]:
     """Empresas y actos de un BORME-A-AAAA-NNN-PP (PP provincia). El sufijo 99 es el índice alfabético del día, no una provincia."""
     r = _get("https://www.boe.es/diario_borme/xml.php", accept="application/xml", params={"id": identificador})

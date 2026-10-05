@@ -145,7 +145,8 @@ related: boe-api-sumario, borme-api-sumario
 ## borme-api-sumario
 BORME – API de sumarios y actos mercantiles | Agencia Estatal Boletín Oficial del Estado (AEBOE)
 summary: Sumario diario del Boletín Oficial del Registro Mercantil con los actos inscritos por provincia (constituciones, nombramientos, ceses, ampliaciones, disoluciones), otros actos y anuncios, con XML y PDF de cada documento.
-access: api-rest, download | auth: none | formats: json, xml, pdf, html | update: daily | status: active | verified: 2026-10-01
+!! Situación concursal llega con meses de retraso y mezcla resoluciones viejas (el BORME del 02/10/2026 trae una declaración del 11/05/2026 y revocaciones de 2022): usar la fecha de resolución y la última por procedimiento.
+access: api-rest, download | auth: none | formats: json, xml, pdf, html | update: daily | status: active | verified: 2026-10-05
 coverage: 2009-
 sync.since: 2009-01-02, primer sumario estructurado (2008-12-31 y anteriores dan 404)
 sync.full: Recorrer /borme/sumario/{AAAAMMDD} de lunes a viernes desde 20090102, unos 4.400 sumarios, y el url_xml de cada item de la sección A (una provincia por item; el 99 es el índice del día).

@@ -6971,6 +6971,9 @@
     "nombramientos"
    ],
    "summary": "Sumario diario del Boletín Oficial del Registro Mercantil con los actos inscritos por provincia (constituciones, nombramientos, ceses, ampliaciones, disoluciones), otros actos y anuncios, con XML y PDF de cada documento.",
+   "alerts": [
+    "Situación concursal llega con meses de retraso y mezcla resoluciones viejas (el BORME del 02/10/2026 trae una declaración del 11/05/2026 y revocaciones de 2022): usar la fecha de resolución y la última por procedimiento."
+   ],
    "access": [
     "api-rest",
     "download"
@@ -7044,7 +7047,7 @@
     "boe-feeds"
    ],
    "status": "active",
-   "verified": "2026-10-01"
+   "verified": "2026-10-05"
   },
   {
    "id": "miteco-banco-datos-naturaleza",
@@ -9714,7 +9717,7 @@
     "piezas": "herramienta empresa_nif (por NIF o por nombre, que resuelve el NIF con el directorio de la BDNS) y ejemplos/empresa_nif.py; con almacén local añade contratos adjudicados y actos del BORME",
     "frescura": "diaria",
     "licencia": "BDNS con fines limitados para personas físicas; BORME con RGPD (guides/reutilizacion.md)",
-    "trampa": "el BORME no trae NIF y se cruza por denominación; la lista de deudores de la AEAT solo es accesible tres meses y el Registro Público Concursal exige CAPTCHA",
+    "trampa": "el BORME no trae NIF y se cruza por denominación; los concursos salen en el BORME con meses de retraso (vigilar con el radar, bloque concursos); la lista de deudores de la AEAT solo es accesible tres meses",
     "verified": "2026-10-01"
    },
    {
@@ -11616,8 +11619,8 @@
    },
    {
     "need": "Concursos de acreedores de una empresa por NIF",
-    "source": null,
-    "note": "publicidadconcursal.es busca por NIF pero exige resolver un CAPTCHA (no automatizable); los edictos de los juzgados de lo mercantil salen en la sección IV del BOE, sin búsqueda por NIF en la API"
+    "source": "borme-api-sumario",
+    "note": "acto Situación concursal del BORME A (unos 40 al día; parse_concursal quita juez, administradores e inhabilitados), por denominación: radar con concursos.empresas (admite NIF) o almacén con borme; publicidadconcursal.es exige CAPTCHA y la sección IV del BOE no trae concursos (0 de 60 el 03/10/2026)"
    },
    {
     "need": "Convocatorias y concesiones de subvenciones, ayudas de Estado, minimis, grandes beneficiarios",

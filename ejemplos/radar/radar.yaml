@@ -21,3 +21,8 @@ sociedades:                # BORME, sección A: constituciones (solo el acto; si
   provincias: ["28", "08"] # código INE de provincia o nombre (MADRID)
   palabras: ["software", "inteligencia artificial", "datos"]   # en el objeto social
   # capital_min: 3000
+
+concursos:                 # BORME, acto Situación concursal (sin juez, administradores ni inhabilitados)
+  empresas: ["B86566304", "Book Your Stadium, S.L."]   # clientes o proveedores a vigilar, por NIF o denominación
+  # provincias: ["28"]     # sin empresas: todos los de esas provincias
+  # resoluciones: ["declaración", "liquidación"]

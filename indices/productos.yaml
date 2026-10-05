@@ -46,7 +46,7 @@
   piezas: "herramienta empresa_nif (por NIF o por nombre, que resuelve el NIF con el directorio de la BDNS) y ejemplos/empresa_nif.py; con almacén local añade contratos adjudicados y actos del BORME"
   frescura: "diaria"
   licencia: "BDNS con fines limitados para personas físicas; BORME con RGPD (guides/reutilizacion.md)"
-  trampa: "el BORME no trae NIF y se cruza por denominación; la lista de deudores de la AEAT solo es accesible tres meses y el Registro Público Concursal exige CAPTCHA"
+  trampa: "el BORME no trae NIF y se cruza por denominación; los concursos salen en el BORME con meses de retraso (vigilar con el radar, bloque concursos); la lista de deudores de la AEAT solo es accesible tres meses"
   verified: "2026-10-01"
 
 - id: leads-sociedades-nuevas

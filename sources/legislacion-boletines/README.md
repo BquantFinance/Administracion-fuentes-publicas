@@ -9,6 +9,7 @@ Sector `legislacion-boletines` · 5 fuentes · índice generado por `scripts/bui
 - URI estable de una norma para citar o enlazar → `boe-eli`
 - Vigilar novedades del BOE, BORME, ayudas o licitaciones sin programar contra la API → `boe-feeds` (RSS en ISO-8859-1)
 - Actos societarios inscritos en el Registro Mercantil → `borme-api-sumario` (sin búsqueda por empresa; recorrer días y provincias, o cargarlo en el almacén local y buscar por denominación (guides/almacen.md))
+- Concursos de acreedores de una empresa por NIF → `borme-api-sumario` (acto Situación concursal del BORME A (unos 40 al día; parse_concursal quita juez, administradores e inhabilitados), por denominación: radar con concursos.empresas (admite NIF) o almacén con borme; publicidadconcursal.es exige CAPTCHA y la sección IV del BOE no trae concursos (0 de 60 el 03/10/2026))
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
@@ -16,7 +17,7 @@ Sector `legislacion-boletines` · 5 fuentes · índice generado por `scripts/bui
 | [boe-api-sumario](boe-api-sumario.yaml) | BOE – API de sumarios | api-rest | none | json, xml, pdf, html | daily | accept-header-required, json-object-or-list, errors-html-or-xml, no-weekend-data, soft-errors-200 | 2026-10-01 |
 | [boe-eli](boe-eli.yaml) | ELI – Identificador Europeo de Legislación en el BOE | download | none | html, rdf | daily | soft-errors-200 | 2026-10-01 |
 | [boe-feeds](boe-feeds.yaml) | BOE y BORME – Feeds RSS | feed | none | rss, xml | daily | latin1 | 2026-10-01 |
-| [borme-api-sumario](borme-api-sumario.yaml) | BORME – API de sumarios y actos mercantiles | api-rest, download | none | json, xml, pdf, html | daily | accept-header-required, json-object-or-list, errors-html-or-xml, no-weekend-data | 2026-10-01 |
+| [borme-api-sumario](borme-api-sumario.yaml) | BORME – API de sumarios y actos mercantiles | api-rest, download | none | json, xml, pdf, html | daily | accept-header-required, json-object-or-list, errors-html-or-xml, no-weekend-data | 2026-10-05 |
 
 - **boe-api-legislacion-consolidada**: Textos consolidados de normas estatales y autonómicas por bloques (artículos, disposiciones) con todas las versiones de cada bloque, metadatos, análisis (materias, referencias) y vigencia. Listado filtrable por fecha de actualización, búsqueda por título y tablas auxiliares de códigos.
 - **boe-api-sumario**: Sumario diario del BOE en JSON o XML: todas las disposiciones y anuncios publicados cada día con identificador, título, sección, departamento, epígrafe y URLs de PDF, HTML y XML del texto completo de cada uno.

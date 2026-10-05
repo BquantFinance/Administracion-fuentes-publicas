@@ -569,6 +569,22 @@ def radar_filtros_y_salidas():
         assert r1["nuevos"] == 2 and r2["nuevos"] == 0 and _j.loads(Path(d, "ultimo.json").read_text())["nuevos"] == 0
 
 
+@test
+def borme_situacion_concursal_sin_personas():
+    import xml.etree.ElementTree as ET
+    emp = boe.parse_borme_a(ET.fromstring((M / "borme-A-2026-189-28.xml").read_bytes()))
+    actos = [boe.parse_concursal(a["texto"]) for e in emp for a in e["actos"] if a["tipo"] == "Situación concursal"]
+    assert [(a["resolucion"], a["fecha_resolucion"]) for a in actos] == [
+        ("Auto de declaración de concurso", "2026-01-12"), ("Auto de conclusión del concurso", "2026-07-28")]
+    assert actos[0]["clase"] == "Voluntario" and actos[0]["firme"] is True and actos[0]["procedimiento"] == "975/2025"
+    assert all("PICAZO" not in str(a) for a in actos)  # el juez y demás nombres fuera
+    fila = almacen.fila_borme(next(e for e in emp if any(a["tipo"] == "Situación concursal" for a in e["actos"])),
+                              "2026-09-30", "BORME-A-2026-189-28", "MADRID")
+    assert "Auto de conclusión del concurso" in fila["detalle"] and "PICAZO" not in fila["detalle"]
+    xs = [{"documento": "BORME-A-2026-189-28", "provincia": "MADRID", "fecha": "2026-09-30", "empresa": x} for x in emp]
+    assert len(radar.filtrar_concursos(xs, {})) == 2 and radar.filtrar_concursos(xs, {}, ["OTRA EMPRESA SL"]) == []
+
+
 def main() -> int:
     fallos = 0
     for t in TESTS:

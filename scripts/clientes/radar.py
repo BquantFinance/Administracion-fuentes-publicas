@@ -32,7 +32,7 @@ except ImportError:
     import placsp
     from almacen import FEEDS
 
-FUENTES = ("licitaciones", "ayudas", "boe", "sociedades")
+FUENTES = ("licitaciones", "ayudas", "boe", "sociedades", "concursos")
 MAX_VISTOS = 20000  # por fuente; los más antiguos se olvidan
 MAX_RSS = 200
 
@@ -138,6 +138,53 @@ def filtrar_sociedades(empresas: list[dict], cfg: dict) -> list[dict]:
     return out
 
 
+def _clave_empresa(s: str | None) -> str:
+    try:
+        from .almacen import _norm_nombre
+    except ImportError:
+        from almacen import _norm_nombre
+    return _norm_nombre(s)
+
+
+def filtrar_concursos(empresas: list[dict], cfg: dict, nombres: list[str] | None = None) -> list[dict]:
+    """Actos «Situación concursal» del BORME A ({provincia, documento, fecha, empresa}) de las empresas vigiladas (nombres
+    ya resueltos; sin lista, todas) y por palabras en la resolución (declaración, liquidación, conclusión, calificación).
+    Solo los campos de boe.parse_concursal: sin juez, administradores ni inhabilitados."""
+    claves = {_clave_empresa(n) for n in nombres or []}
+    resol = _lista(cfg, "resoluciones")
+    out = []
+    for x in empresas:
+        e = x["empresa"]
+        if claves and _clave_empresa(e["denominacion"]) not in claves:
+            continue
+        for a in e["actos"]:
+            c = boe.parse_concursal(a["texto"]) if a["tipo"] == "Situación concursal" else None
+            if not c or not casa(c.get("resolucion"), resol):
+                continue
+            out.append({"fuente": "concursos", "id": f"{x['documento']}#{e['numero']}#{c['procedimiento']}#{c['resolucion']}",
+                        "fecha": c.get("fecha_resolucion"), "titulo": e["denominacion"],
+                        "detalle": " · ".join(str(v) for v in (x.get("provincia"), c.get("resolucion"), c.get("clase"),
+                                              c.get("calificacion"), f"procedimiento {c.get('procedimiento')}",
+                                              f"resolución {c.get('fecha_resolucion')}", c.get("juzgado")) if v),
+                        "importe": None, "url": f"https://www.boe.es/diario_borme/txt.php?id={x['documento']}"})
+    return out
+
+
+def vigiladas(cfg: dict, log=print) -> list[str]:
+    """Nombres de las empresas de concursos.empresas; un NIF se traduce a sus nombres con el directorio de la BDNS."""
+    import re
+    nombres = []
+    for v in _lista(cfg, "empresas"):
+        if re.fullmatch(r"[A-Za-z]\d{7}[0-9A-Za-z]", v.strip()):
+            hallados = [n for e in bdns.terceros(v.strip().upper())["empresas"] for n in e["nombres"]]
+            if not hallados:
+                log(f"concursos: sin nombre para el NIF {v} en la BDNS; ponlo por su denominación")
+            nombres += hallados
+        else:
+            nombres.append(v)
+    return nombres
+
+
 def _dias(desde: date, hasta: date) -> list[date]:
     return [desde + timedelta(days=i) for i in range((hasta - desde).days + 1)]
 
@@ -158,15 +205,17 @@ def recoger(cfg: dict, desde: date, hasta: date, log=print) -> list[dict]:
                                  order="fechaRecepcion", direccion="desc"))
         out += filtrar_ayudas(convs, c)
         log(f"ayudas: {len(convs)} convocatorias desde {desde}")
-    for dia in _dias(desde, hasta) if ("boe" in cfg or "sociedades" in cfg) else []:
+    nombres = vigiladas(cfg["concursos"] or {}, log) if "concursos" in cfg else []
+    for dia in _dias(desde, hasta) if ("boe" in cfg or "sociedades" in cfg or "concursos" in cfg) else []:
         if "boe" in cfg:
             s = boe.sumario(dia)
             if s:
                 out += filtrar_boe(list(boe.items(s)), cfg["boe"] or {})
-        if "sociedades" in cfg:
-            c = cfg["sociedades"] or {}
+        if "sociedades" in cfg or "concursos" in cfg:
             s = boe.sumario(dia, "borme")
-            provincias = [norm(p) for p in _lista(c, "provincias")]
+            # una sola descarga por provincia para los dos bloques; si uno no filtra provincias, se bajan todas
+            prov = [_lista(cfg[b] or {}, "provincias") for b in ("sociedades", "concursos") if b in cfg]
+            provincias = [] if any(not p for p in prov) else [norm(x) for p in prov for x in p]
             empresas = []
             for it in boe.items(s) if s else []:
                 ident = it["identificador"]
@@ -176,7 +225,13 @@ def recoger(cfg: dict, desde: date, hasta: date, log=print) -> list[dict]:
                     continue
                 empresas += [{"documento": ident, "provincia": it.get("titulo"), "fecha": dia.isoformat(), "empresa": e}
                              for e in boe.borme_empresas(ident)]
-            out += filtrar_sociedades(empresas, c)
+            for b, f in (("sociedades", filtrar_sociedades), ("concursos", None)):
+                if b not in cfg:
+                    continue
+                c = cfg[b] or {}
+                propias = [x for x in empresas if not _lista(c, "provincias") or
+                           x["documento"].rsplit("-", 1)[1] in _lista(c, "provincias") or norm(x["provincia"]) in [norm(p) for p in _lista(c, "provincias")]]
+                out += f(propias, c) if f else filtrar_concursos(propias, c, nombres)
     return out
 
 

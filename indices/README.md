@@ -36,7 +36,7 @@ Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras med
 - piezas: herramienta empresa_nif (por NIF o por nombre, que resuelve el NIF con el directorio de la BDNS) y ejemplos/empresa_nif.py; con almacén local añade contratos adjudicados y actos del BORME
 - frescura: diaria
 - licencia: BDNS con fines limitados para personas físicas; BORME con RGPD (guides/reutilizacion.md)
-- trampa: el BORME no trae NIF y se cruza por denominación; la lista de deudores de la AEAT solo es accesible tres meses y el Registro Público Concursal exige CAPTCHA
+- trampa: el BORME no trae NIF y se cruza por denominación; los concursos salen en el BORME con meses de retraso (vigilar con el radar, bloque concursos); la lista de deudores de la AEAT solo es accesible tres meses
 
 **leads-sociedades-nuevas** · Sociedades recién constituidas por provincia y objeto social, con capital y domicilio
 - para: proveedores B2B (asesorías, bancos, software de gestión, seguros)
@@ -688,6 +688,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - URI estable de una norma para citar o enlazar → `boe-eli`
 - Vigilar novedades del BOE, BORME, ayudas o licitaciones sin programar contra la API → `boe-feeds` (RSS en ISO-8859-1)
 - Actos societarios inscritos en el Registro Mercantil → `borme-api-sumario` (sin búsqueda por empresa; recorrer días y provincias, o cargarlo en el almacén local y buscar por denominación (guides/almacen.md))
+- Concursos de acreedores de una empresa por NIF → `borme-api-sumario` (acto Situación concursal del BORME A (unos 40 al día; parse_concursal quita juez, administradores e inhabilitados), por denominación: radar con concursos.empresas (admite NIF) o almacén con borme; publicidadconcursal.es exige CAPTCHA y la sección IV del BOE no trae concursos (0 de 60 el 03/10/2026))
 
 **Economía, finanzas y mercados**
 - Euríbor, tipos de interés y de cambio, crédito, balanza de pagos → `bde-estadisticas` (listaSeries con rango=MAX corta en las 1000 observaciones más recientes sin aviso; completar con rango=AAAA)
@@ -878,7 +879,6 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Si una fuente se puede usar en un producto comercial, cómo citarla y qué hacer con sus datos personales → ninguna (guides/reutilizacion.md, con las normas leídas en el BOE; la licencia de cada fuente está en el campo license de su ficha)
 - Cotizaciones bursátiles y precios de mercado (BME, OMIE) → ninguna (BME es privado y queda fuera del alcance; el precio de la electricidad de OMIE está en omie-mercado)
 - Deudores con Hacienda de más de 600.000 € (lista del artículo 95 bis LGT) → ninguna (la AEAT la publica en su sede en junio y por ley deja de ser accesible a los tres meses y no debe indexarse; el 01/10/2026 la de 2026 ya daba 404)
-- Concursos de acreedores de una empresa por NIF → ninguna (publicidadconcursal.es busca por NIF pero exige resolver un CAPTCHA (no automatizable); los edictos de los juzgados de lo mercantil salen en la sección IV del BOE, sin búsqueda por NIF en la API)
 - Estadística judicial y sentencias → ninguna (Poder Judicial (CGPJ, CENDOJ) fuera del alcance actual)
 - Ayuda oficial al desarrollo y acción exterior → ninguna (sin fuente en el catálogo todavía)
 - Extranjeros con certificado de registro o tarjeta de residencia, autorizaciones y protección internacional → ninguna (Observatorio Permanente de la Inmigración en inclusion.gob.es; el host respondió 403 (Akamai) a IP de centro de datos el 2026-09-30; verificar desde otra red)

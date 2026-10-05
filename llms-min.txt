@@ -28,7 +28,7 @@ radar-licitaciones, inteligencia-competidores, radar-ayudas, kyb-proveedores, le
 
 ## Fichas con trampas silenciosas
 
-Lee sus alerts antes de dar una cifra: aemps-cima-api, ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, bde-estadisticas, bdns-api, cnig-centro-descargas, cnmc-data, comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, datacomex, face-facturas, gbif-es, gencat-dades-obertes, gva-dadesobertes-api, idee-servicios, idescat-api, igae-ejecucion-presupuestaria, ign-sismologia, ine-api-tempus, ine-cartografia-censal, interior-criminalidad, ive-pegv-bancos-datos, junta-andalucia-datos-abiertos, mapa-sigpac, mites-estadisticas, placsp-datos-abiertos, puertos-estado-datos, segsocial-estadisticas, sepe-estadisticas.
+Lee sus alerts antes de dar una cifra: aemps-cima-api, ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, bde-estadisticas, bdns-api, borme-api-sumario, cnig-centro-descargas, cnmc-data, comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, datacomex, face-facturas, gbif-es, gencat-dades-obertes, gva-dadesobertes-api, idee-servicios, idescat-api, igae-ejecucion-presupuestaria, ign-sismologia, ine-api-tempus, ine-cartografia-censal, interior-criminalidad, ive-pegv-bancos-datos, junta-andalucia-datos-abiertos, mapa-sigpac, mites-estadisticas, placsp-datos-abiertos, puertos-estado-datos, segsocial-estadisticas, sepe-estadisticas.
 
 ## Fichas por sector
 
