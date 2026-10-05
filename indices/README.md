@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 14 productos, 47 recetas, 159 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 14 productos, 47 recetas, 160 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
 
 ## Productos que se pueden construir hoy
 
@@ -810,6 +810,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **Contratación pública y subvenciones**
 - Licitaciones, adjudicaciones y contratos menores de todas las Administraciones → `placsp-datos-abiertos`
+- Licitaciones publicadas un día o en un periodo, con su número e importe → `placsp-datos-abiertos` (publicada es el primer DOC_CN de ValidNoticeInfo, no updated (126 obras el 01/10/2026 frente a 521); una fila por id, sin anuladas. Con almacén: SELECT count(*), sum(importe_sin_iva) FROM placsp_ultimo WHERE NOT anulada AND fecha_publicacion='2026-10-01' AND list_filter(cpv, x -> x LIKE '45%') <> [])
 - Contratos adjudicados a una empresa por su NIF, o quién gana los contratos de un órgano → `placsp-datos-abiertos` (sin búsqueda por NIF en la plataforma; almacén local con la tabla placsp_adjudicaciones (guides/almacen.md, herramienta almacen_sql))
 - Todo lo público de una empresa o entidad por su NIF (ayudas, si es sector público, prohibiciones de contratar) → `bdns-api` (herramienta empresa_nif del MCP o consulta.empresa_nif (BDNS, AEI, Invente y prohibiciones por denominación); contratos y BORME salen solo del almacén local (guides/almacen.md))
 - Convocatorias y concesiones de subvenciones, ayudas de Estado, minimis, grandes beneficiarios → `bdns-api`

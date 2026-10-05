@@ -12480,6 +12480,11 @@
     "source": "placsp-datos-abiertos"
    },
    {
+    "need": "Licitaciones publicadas un día o en un periodo, con su número e importe",
+    "source": "placsp-datos-abiertos",
+    "note": "publicada es el primer DOC_CN de ValidNoticeInfo, no updated (126 obras el 01/10/2026 frente a 521); una fila por id, sin anuladas. Con almacén: SELECT count(*), sum(importe_sin_iva) FROM placsp_ultimo WHERE NOT anulada AND fecha_publicacion='2026-10-01' AND list_filter(cpv, x -> x LIKE '45%') <> []"
+   },
+   {
     "need": "Contratos adjudicados a una empresa por su NIF, o quién gana los contratos de un órgano",
     "source": "placsp-datos-abiertos",
     "note": "sin búsqueda por NIF en la plataforma; almacén local con la tabla placsp_adjudicaciones (guides/almacen.md, herramienta almacen_sql)"
