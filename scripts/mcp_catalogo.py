@@ -522,7 +522,11 @@ def almacen_sql(consulta: str, limite: int = 100) -> dict:
             return {"error": "no hay almacén local", "pista": "python scripts/clientes/almacen.py sync --fuentes boe,borme,bdns,placsp "
                     "--desde AAAA-MM-DD (guides/almacen.md); FUENTES_ALMACEN apunta a otra carpeta"}
         r = dict(almacen.sql(consulta, d, limite), cobertura=almacen.cobertura(d))
-        if re.search(r"\bplacsp(_adjudicaciones)?\b", consulta, re.I):  # sexta tanda: sumaban versiones y anuladas
+        if re.search(r"\bunnest\b", consulta, re.I) and re.search(r"\b(sum|avg|count)\s*\(", consulta, re.I):
+            # sexta tanda: SUM con CROSS JOIN UNNEST(cpv) contó cada expediente una vez por código CPV (767 M€ por 395,7)
+            r["pista"] = ("UNNEST repite la fila por cada elemento de la lista y las sumas cuentan varias veces cada "
+                          "expediente: filtrar con list_filter(cpv, x -> x LIKE '45%') <> [] y agregar sin UNNEST")
+        elif re.search(r"\bplacsp(_adjudicaciones)?\b", consulta, re.I):  # sexta tanda: sumaban versiones y anuladas
             r["pista"] = ("placsp y placsp_adjudicaciones tienen una fila por versión (cada cambio de estado) y las bajas como "
                           "filas borrado: para contar o sumar expedientes, placsp_ultimo (una por id, con anulada y anulada_el) "
                           "y adjudicaciones_ultimo")
