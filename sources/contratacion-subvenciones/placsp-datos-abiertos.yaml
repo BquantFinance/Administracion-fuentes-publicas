@@ -16,9 +16,9 @@ alerts:
 code:
   module: fuentes_publicas.clientes.placsp
   use:
-    - "placsp.entradas(max_paginas=30): entradas con estado, CPV, importes y fecha_publicacion (primer anuncio); un día va por ella, no por updated; una fila por id"
-    - "placsp.parse_feed(contenido): (entradas, URL rel=next) de un .atom o de cada fichero de los ZIP; la página del WAF da error, no un feed vacío"
-    - "fuentes-almacen sync --fuentes placsp --desde 2026-10-04: Parquet de los tres feeds, columna feed (643 alojados, 1044 agregadas, 1143 menores) y placsp_ultimo"
+    - "fuentes-almacen sync --fuentes placsp --feeds 643 --desde 2026-10-01: días atrás (3 páginas de 15 MB por día); feed 643 alojados, 1044 agregadas, 1143 menores"
+    - "fuentes-almacen sql \"SELECT count(*) FROM placsp_ultimo WHERE feed='643' AND fecha_publicacion=DATE '2026-10-01'\": una fila por id con anulada; da 477"
+    - "placsp.entradas(max_paginas=2): lo último del feed (15 MB y unas 3 páginas por día): estado, CPV y fecha_publicacion; un día va por ella, no por updated"
   mcp: [almacen_sql, empresa_nif]
 access: [feed, download]
 auth: none
