@@ -115,7 +115,9 @@ Judicial o UE, solo cuando lo indique el propietario.
   lunes 06:17 no se disparó; sin ninguna ejecución schedule hasta entonces): recetas 92 de 93 (429 de AEMET), ejemplos
   364 de 380 (timeouts del IECA y cortes de la Junta de Andalucía) y cargadores bien salvo ckan.py, porque la Comunidad
   de Madrid sacó padron_por_sexo del datastore el 04/10 (corregido). Sobre f9bcc8a (push del 2026-10-05): recetas 91 de 93 (cortes de
-  MINETUR), ejemplos 369 de 381 y todos los cargadores, el radar incluido, desde la IP de GitHub.
+  MINETUR), ejemplos 369 de 381 y todos los cargadores, el radar incluido, desde la IP de GitHub. Sobre 9bb74be:
+  recetas 104 de 104, ejemplos 388 de 398 sin ningún fallo (9 omitidos) y cargadores bien, mi_municipio con dirección
+  (certificados y cerca) incluido, salvo carburante_cerca.py (corte de MINETUR desde GitHub, intermitente).
 - **Evaluación** (`evals/`): con Haiku y trampas silenciosas, acierto 3 de 21 sin catálogo, 10 con ficheros y 13 con
   MCP, con un 30 % y un 43 % menos de tokens de entrada. Cuarta tanda (2026-10-05): con `perfil_municipio`, `coyuntura`
   y `empresa_nif`, 8 de 8 frente a 4 de 8 sin ellas, un 75 % menos de tokens y un tercio del tiempo. Quinta tanda
