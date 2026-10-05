@@ -496,7 +496,7 @@ def conectar(dir: str | os.PathLike | None = None, solo_lectura: bool = True):
         partes.append("SELECT nif, nombre, 'contrato' AS fuente, coalesce(fecha_adjudicacion, fecha_contrato) AS fecha "
                       "FROM placsp_adjudicaciones WHERE nif IS NOT NULL AND nombre IS NOT NULL AND NOT coalesce(persona_fisica, false)")
     if "bdns" in presentes:
-        partes.append("SELECT nif, beneficiario, 'ayuda', fecha_concesion FROM bdns "
+        partes.append("SELECT nif, beneficiario AS nombre, 'ayuda' AS fuente, fecha_concesion AS fecha FROM bdns "
                       "WHERE nif IS NOT NULL AND beneficiario IS NOT NULL AND NOT coalesce(persona_fisica, false)")
     if partes:  # directorio NIF y nombre: el BORME no trae NIF y ninguna fuente abierta lo da por nombre
         con.execute("CREATE VIEW empresas AS SELECT nif, mode(nombre) AS nombre, list(DISTINCT nombre) AS nombres, "

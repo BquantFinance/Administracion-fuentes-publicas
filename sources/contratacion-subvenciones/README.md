@@ -14,7 +14,7 @@ Sector `contratacion-subvenciones` · 3 fuentes · índice generado por `scripts
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
-| [bdns-api](bdns-api.yaml) | BDNS – Base de Datos Nacional de Subvenciones (API REST) | api-rest, download, portal | none | json, csv, xlsx | daily | latin1, errors-html-or-xml | 2026-10-05 |
+| [bdns-api](bdns-api.yaml) | BDNS – Base de Datos Nacional de Subvenciones (API REST) | api-rest, download, portal | none | json, csv, xlsx | daily | latin1, errors-html-or-xml, soft-errors-200 | 2026-10-05 |
 | [hacienda-registro-licitadores](hacienda-registro-licitadores.yaml) | ROLECSP – Registro Oficial de Licitadores y Empresas Clasificadas del Sector Público | portal, download | certificate | html, xml, pdf, zip | daily | tls-chain-incomplete, latin1, overwritten-in-place, url-drift | 2026-10-01 |
 | [placsp-datos-abiertos](placsp-datos-abiertos.yaml) | Plataforma de Contratación del Sector Público – Sindicación ATOM (CODICE) | feed, download | none | atom, xml, zip, xlsx | daily | soft-errors-200, waf-temporary-ban | 2026-10-05 |
 

@@ -239,6 +239,32 @@ def placsp_adjudicaciones_y_organo():
     assert placsp.es_persona_fisica("***1234**") and placsp.es_persona_fisica("X1234567L") and not placsp.es_persona_fisica("B12345678")
 
 
+
+@test
+def bdns_mantenimiento_con_200_no_es_pagina_vacia():
+    # 2026-10-05: ayudasestado de un día respondió 200 con {codigo, error} y sin content tras 60 s
+    respuestas = [{"codigo": "ERR_MANTENIMIENTO_BBDD", "error": "Aplicación en Mantenimiento."},
+                  {"content": [{"id": 1}], "last": True}]
+
+    class R:
+        def __init__(self, d):
+            self.d = d
+
+        def json(self):
+            return self.d
+    viejo_get, viejo_sleep = bdns._get, bdns.time.sleep
+    bdns._get, bdns.time.sleep = (lambda ruta, params: R(respuestas.pop(0))), (lambda s: None)
+    try:
+        assert list(bdns.buscar("ayudasestado", fechaRegInicio="01/10/2026")) == [{"id": 1}]  # reintenta
+        respuestas[:] = [{"codigo": "OTRO", "error": "x"}]
+        try:
+            list(bdns.buscar("concesiones"))
+            raise AssertionError("no lanzó")
+        except RuntimeError as exc:
+            assert "OTRO" in str(exc)
+    finally:
+        bdns._get, bdns.time.sleep = viejo_get, viejo_sleep
+
 @test
 def almacen_filas_sin_datos_personales():
     entradas, _ = placsp.parse_feed((M / "placsp-feed-643.atom").read_bytes())
@@ -278,6 +304,13 @@ def almacen_volcado_y_solo_lectura():
             raise AssertionError("leyó fuera del almacén")
         except duckdb.Error as exc:
             assert "disabled" in str(exc)
+    with tempfile.TemporaryDirectory() as d:  # solo BDNS, sin PLACSP: la vista empresas rompía toda consulta (tanda 6)
+        alm = almacen.Almacen(d)
+        alm.añadir({"bdns": [almacen.fila_bdns({"idConcesion": 7, "beneficiario": "B12345678 EJEMPLO SL", "importe": 100,
+                                                "fechaConcesion": "2026-09-28", "fechaRegistro": "2026-09-29"}, "concesiones")]})
+        alm.volcar()
+        assert almacen.sql("select count(*) from bdns", d)["filas"] == [[1]]
+        assert almacen.sql("select nif, nombre, ayudas from empresas", d)["filas"] == [["B12345678", "EJEMPLO SL", 1]]
 
 
 @test

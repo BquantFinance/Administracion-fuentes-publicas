@@ -9,6 +9,7 @@ import io
 import os
 import re
 import sys
+import time
 from datetime import date, datetime, timedelta
 from typing import Iterator
 
@@ -50,7 +51,16 @@ def pagina(coleccion: str, page: int = 0, page_size: int = 1000, **filtros) -> d
     """Una página: {content, totalElements, totalPages, number, last, advertencia}. Filtros habituales: fechaDesde,
     fechaHasta, numeroConvocatoria, nifCif (concesiones, minimis, ayudasestado), beneficiario (idPersona, no NIF),
     tipoAdministracion (C estatal), descripcion, order, direccion."""
-    return _get(f"{coleccion}/busqueda", dict(_params(filtros), page=page, pageSize=min(page_size, TOPE))).json()
+    for intento in range(3):
+        o = _get(f"{coleccion}/busqueda", dict(_params(filtros), page=page, pageSize=min(page_size, TOPE))).json()
+        if "content" in o:
+            return o
+        # 200 con {codigo, error} y sin content: ERR_MANTENIMIENTO_BBDD tras 60 s en ayudasestado de un día (2026-10-05);
+        # leerlo como página vacía daría cero concesiones sin error
+        if o.get("codigo") != "ERR_MANTENIMIENTO_BBDD" or intento == 2:
+            raise RuntimeError(f"BDNS {coleccion} página {page}: {o.get('codigo')} {o.get('error') or o}")
+        time.sleep(10 * (intento + 1))
+    raise AssertionError("inalcanzable")
 
 
 def buscar(coleccion: str, page_size: int = TOPE, **filtros) -> Iterator[dict]:

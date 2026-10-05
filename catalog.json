@@ -1630,7 +1630,8 @@
    "rate_limit": "No documentado; pageSize se limita en silencio a 10000 (unos 9 MB y 7 s por página de concesiones en JSON). El aviso legal se reserva bloquear usos abusivos.",
    "quirks": [
     "latin1",
-    "errors-html-or-xml"
+    "errors-html-or-xml",
+    "soft-errors-200"
    ],
    "ids": [
     "bdns",
@@ -1645,7 +1646,8 @@
     "Lo que lleva datos personales solo se reutiliza para control público, archivo, investigación o estadística y anonimizado (RD 130/2019 art. 7.7); en un producto, quitar las filas con DNI enmascarado.",
     "La exportación exige vpd (GE es el portal general) o responde 400 \"No se ha informado el portal\"; el CSV llega en windows-1252, no en UTF-8.",
     "Por beneficiario se filtra con nifCif (verificado en concesiones, minimis, ayudasestado y grandesbeneficiarios) o con beneficiario=idPersona; beneficiario con un NIF da 400.",
-    "La documentación es un Swagger UI dentro de la aplicación Angular (docs_url); no hay URL estable del fichero OpenAPI. Un endpoint inexistente devuelve 404 con HTML de Tomcat."
+    "La documentación es un Swagger UI dentro de la aplicación Angular (docs_url); no hay URL estable del fichero OpenAPI. Un endpoint inexistente devuelve 404 con HTML de Tomcat.",
+    "Responde a veces 200 con codigo ERR_MANTENIMIENTO_BBDD (Aplicación en Mantenimiento) y sin content tras 60 s (ayudasestado de un día, 2026-10-05); leerlo como página vacía da 0 filas: comprobar content y reintentar."
    ],
    "tips": [
     "numeroConvocatoria (código BDNS) es el identificador estable y público; id es interno y significa cosas distintas en cada colección.",
