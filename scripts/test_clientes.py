@@ -221,6 +221,13 @@ def placsp_adjudicaciones_y_organo():
     entradas, _ = placsp.parse_feed((M / "placsp-feed-643.atom").read_bytes())
     obra = next(e for e in entradas if not e.get("deleted") and e["cpv"][0].startswith("45"))
     assert obra["organo_nif"] == "P2807900B" and obra["organo_dir3"] == "LA0000765" and obra["valor_estimado"] == "98030.3"
+    otras, _ = placsp.parse_feed((M / "placsp-sin-dir3-y-prorroga.atom").read_bytes())
+    sin = next(e for e in otras if e["id"].endswith("20611333"))
+    assert sin["organo_dir3"] is None and sin["organo_nif"] == "A81778243"  # antes devolvía el NIF como DIR3
+    pro = next(e for e in otras if e["modificaciones"])
+    assert pro["modificaciones"][0]["contrato"] == "2025-11" and pro["modificaciones"][0]["importe_final_sin_iva"] == "222791.62"
+    con_contrato = [a for e in entradas for a in e.get("adjudicaciones", []) if a.get("contrato")]
+    assert con_contrato and con_contrato[0]["contrato"] == "104/2026/01231_CB4_AM2938 L2" and con_contrato[0]["fecha_contrato"] == "2026-09-30"
     adj = obra["adjudicaciones"][0]
     assert adj["nif"] == "A27178789" and adj["importe_total"] == "118616.66" and adj["fecha_adjudicacion"] == "2026-09-30"
     assert placsp.nif_normal(" b-12.345.678 ") == "B12345678"

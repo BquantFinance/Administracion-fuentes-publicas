@@ -35,6 +35,7 @@ sirven los servidores; los de PC-Axis en UTF-8 con BOM.
 | datacomex-error-401.json | ObtenerDatos sin token, con Accept application/json |
 | saiku-flattened.json | query/q1/result/flattened del cubo 040 Servicio 016 |
 | placsp-feed-643.atom | página vigente del feed 643 (dos entradas y una anulación) |
+| placsp-sin-dir3-y-prorroga.atom | dos entradas del 643 del 2026-10-05: órgano sin DIR3 (NIF e ID_PLATAFORMA) y contrato con prórroga (ContractModification) |
 | ckan-cnmc-datastore-tope.json | datastore_search de la CNMC con limit=50000 (llegan 32.000; tres filas guardadas) |
 | ckan-error-404.json | package_show?id=no-existe-xyz en la Comunidad de Madrid |
 | ckan-renfe-fl-409.json | package_search?fl=name,title en Renfe (Validation Error) |

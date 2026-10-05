@@ -91,7 +91,8 @@ TABLAS: dict[str, Tabla] = {
     "placsp_adjudicaciones": Tabla({"feed": V, "id": V, "updated": "TIMESTAMP", "n": "INTEGER", "expediente": V,
                                     "organo_nif": V, "organo_dir3": V, "lote": V, "resultado": V, "fecha_adjudicacion": D,
                                     "ofertas": "INTEGER", "pyme": B, "persona_fisica": B, "nif": V, "nombre": V,
-                                    "importe_sin_iva": F, "importe_total": F}, ("id", "updated", "n"), "updated"),
+                                    "importe_sin_iva": F, "importe_total": F, "contrato": V, "fecha_contrato": D},
+                                   ("id", "updated", "n"), "updated"),
     "carburantes": Tabla({"fecha": D, "ideess": V, "rotulo": V, "direccion": V, "cp": V, "localidad": V, "municipio": V,
                           "id_municipio": V, "provincia": V, "id_provincia": V, "id_ccaa": V, "latitud": F, "longitud": F,
                           "margen": V, "horario": V, "tipo_venta": V, **{_snake(p): F for p in PRODUCTOS}},
@@ -259,7 +260,8 @@ def filas_placsp(entradas: list[dict], feed: str) -> dict[str, list[dict]]:
                         "ofertas": int(a["ofertas"]) if (a["ofertas"] or "").isdigit() else None,
                         "pyme": {"true": True, "false": False}.get((a["pyme"] or "").lower()), "persona_fisica": fisica,
                         "nif": None if fisica else a["nif"], "nombre": None if fisica else a["nombre"],
-                        "importe_sin_iva": _num(a["importe_sin_iva"]), "importe_total": _num(a["importe_total"])})
+                        "importe_sin_iva": _num(a["importe_sin_iva"]), "importe_total": _num(a["importe_total"]),
+                        "contrato": a.get("contrato"), "fecha_contrato": _fecha(a.get("fecha_contrato"))})
     return {"placsp": exp, "placsp_adjudicaciones": adj}
 
 

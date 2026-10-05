@@ -51,8 +51,9 @@ def es_persona_fisica(nif: str | None) -> bool:
 
 
 def adjudicaciones(cfs) -> list[dict]:
-    """Una fila por TenderResult y adjudicatario: lote, resultado, fecha, ofertas, pyme, NIF, nombre e importes (sin IVA
-    TaxExclusiveAmount, con IVA PayableAmount). Una UTE puede traer varios WinningParty en el mismo resultado."""
+    """Una fila por TenderResult (uno por lote) y adjudicatario: lote, resultado, fecha, ofertas, pyme, NIF, nombre,
+    importes (sin IVA TaxExclusiveAmount, con IVA PayableAmount) y contrato formalizado (id y fecha). Una UTE puede traer
+    varios WinningParty en el mismo resultado; la adjudicación del primer lote no es la del contrato entero."""
     out = []
     for tr in cfs.findall("cac:TenderResult", NS):
         base = {
@@ -63,6 +64,8 @@ def adjudicaciones(cfs) -> list[dict]:
             "pyme": _t(tr, "cbc:SMEAwardedIndicator"),
             "importe_sin_iva": _t(tr, "cac:AwardedTenderedProject/cac:LegalMonetaryTotal/cbc:TaxExclusiveAmount"),
             "importe_total": _t(tr, "cac:AwardedTenderedProject/cac:LegalMonetaryTotal/cbc:PayableAmount"),
+            "contrato": _t(tr, "cac:Contract/cbc:ID"),  # contrato formalizado, distinto del expediente
+            "fecha_contrato": _t(tr, "cac:Contract/cbc:IssueDate"),
         }
         ganadores = tr.findall("cac:WinningParty", NS) or [None]
         for wp in ganadores:
@@ -75,7 +78,7 @@ def adjudicaciones(cfs) -> list[dict]:
 
 def parse_entry(entry) -> dict:
     """Campos clave del CODICE de una entrada: expediente, estado, órgano (DIR3 y NIF), objeto, importes, valor estimado,
-    procedimiento, CPV, NUTS, plazo y adjudicaciones."""
+    procedimiento, CPV, NUTS, plazo, adjudicaciones por lote y modificaciones (prórrogas, modificados)."""
     cfs = entry.find("ext:ContractFolderStatus", NS)
     if cfs is None:
         return {"id": _t(entry, "a:id"), "title": _t(entry, "a:title"), "updated": _t(entry, "a:updated"), "deleted": True}
@@ -88,7 +91,7 @@ def parse_entry(entry) -> dict:
         "expediente": _t(cfs, "cbc:ContractFolderID"),
         "estado": _t(cfs, "extb:ContractFolderStatusCode"),
         "organo": _t(party, "cac:PartyName/cbc:Name") if party is not None else None,
-        "organo_dir3": ids.get("DIR3") or (next(iter(ids.values())) if ids else None),
+        "organo_dir3": ids.get("DIR3"),  # falta en el 29 % del 643: None, no el NIF ni el ID de plataforma (issue 10)
         "organo_nif": nif_normal(ids.get("NIF")),
         "organo_plataforma": ids.get("ID_PLATAFORMA") or ids.get("ID_OC_PLAT"),
         "objeto": _t(cfs, "cac:ProcurementProject/cbc:Name"),
@@ -102,6 +105,10 @@ def parse_entry(entry) -> dict:
         "plazo_presentacion": _t(cfs, "cac:TenderingProcess/cac:TenderSubmissionDeadlinePeriod/cbc:EndDate"),
         "fecha_publicacion": _t(cfs, "ext:ValidNoticeInfo/ext:AdditionalPublicationStatus/ext:AdditionalPublicationDocumentReference/cbc:IssueDate"),
         "adjudicaciones": adjudicaciones(cfs),
+        "modificaciones": [{"n": _t(m, "cbc:ID"), "contrato": _t(m, "cbc:ContractID"), "nota": _t(m, "cbc:Note"),
+                            "importe_sin_iva": _t(m, "cac:ContractModificationLegalMonetaryTotal/cbc:TaxExclusiveAmount"),
+                            "importe_final_sin_iva": _t(m, "cac:FinalLegalMonetaryTotal/cbc:TaxExclusiveAmount")}
+                           for m in cfs.findall("cac:ContractModification", NS)],  # prórrogas y modificados
     }
 
 

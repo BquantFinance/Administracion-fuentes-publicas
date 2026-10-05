@@ -10,6 +10,7 @@ summary: >-
   alojados) y los agregados de plataformas autonómicas, como feeds ATOM diarios con el documento CODICE (XML
   basado en UBL) de cada expediente, y ZIP anuales y mensuales del histórico.
 alerts:
+  - "La adjudicación va en un cac:TenderResult por lote con uno o varios WinningParty; el 2026-10-05, 38 de 198 entradas adjudicadas tenían varios lotes (SAS_CGIPC-2026-50002, 20 filas). Recorrerlos todos."
   - "Con la IP rechazada por el WAF, atom y ZIP dan 200 con un HTML de 187 bytes que un parser XML lee como feed vacío; el 2026-10-01 desde GitHub placsp.py salió con código 0 y «0 expedientes». Comprobar que la raíz es feed."
 access: [feed, download]
 auth: none
@@ -42,10 +43,10 @@ ids: [dir3, nif, cpv, nuts]
 gotchas:
   - La página vigente solo trae lo último; rel=next lleva a instantáneas de 500 entradas con la hora de la regeneración y un sufijo (_20260930_201747.atom, _20260930_201747_1.atom...); un día laborable ocupa unas 7 páginas.
   - Las bajas llegan como at:deleted-entry (ref = id de la entry, when, at:comment type ANULADA en el 643 y CERRADA en el 1044) delante y fuera de los entry; un parser que solo lee entry no las ve.
-  - Un expediente sale una vez por cambio de estado; deduplicar por el id de la entry (el prefijo cambia por feed) con updated mayor, no por ContractFolderID, que se repite entre órganos (1/2026 en dos el mismo día).
-  - cbc:TotalAmount lleva el IVA incluido y cbc:TaxExclusiveAmount va sin IVA; cbc:EstimatedOverallContractAmount es el valor estimado.
+  - Una entrada por cambio de estado; deduplicar por el id de la entry (prefijo distinto por feed) con updated mayor, no por ContractFolderID (se repite entre órganos), y aplicar luego los deleted-entry.
+  - TotalAmount lleva IVA y TaxExclusiveAmount no; EstimatedOverallContractAmount es el valor estimado con prórrogas previstas, no lo adjudicado; prórrogas y modificados reales en cac:ContractModification.
   - Espacios de nombres propios; cbc y cac en urn:dgpe:names:draft:codice:schema:xsd, extensiones cbc-place-ext y cac-place-ext en urn:dgpe:names:draft:codice-place-ext y at en http://purl.org/atompub/tombstones/1.0.
-  - El DIR3 del órgano falta en el 29 % de las entradas del 643 y tampoco está en OrganosContratacion.xlsx; el NIF del adjudicatario llega a veces con schemeName OTROS, con guion o en minúscula, o enmascarado (***1234**).
+  - "El DIR3 del órgano falta en el 29 % del 643 (116 de 452 el 2026-10-05), así que se elige el cbc:ID por schemeName; el NIF del adjudicatario llega con schemeName OTROS, guion, minúscula o enmascarado (***1234**)."
   - En el 1044 el órgano solo trae ID con schemeName ID_OC_PLAT (que contiene su NIF) y no hay TotalAmount; el link apunta a la plataforma de origen y el summary cambia de formato (coma decimal, sin Estado).
   - Ni ZIP ni atom responden a HEAD, Range se ignora y no hay Content-Length (el tamaño asoma en el ETag, en hexadecimal); un fichero inexistente da 200 con un HTML de 521 bytes, así que comprobar que empieza por PK.
   - "updated es la fecha del último cambio del expediente, no la de publicación; la fecha de cada anuncio va en ValidNoticeInfo/AdditionalPublicationStatus/AdditionalPublicationDocumentReference/IssueDate."
@@ -53,8 +54,8 @@ gotchas:
 tips:
   - Identificadores útiles en cada entry. cbc:ContractFolderID (expediente), cbc:ItemClassificationCode (CPV), cbc:ID del órgano con schemeName DIR3 (p. ej. L01120022), NIF o ID_PLATAFORMA y cbc:TypeCode (tipo de contrato).
   - OpenPLACSP, la herramienta oficial, pasa los feeds a hoja de cálculo.
-  - OrganosContratacion.xlsx y especificacion-sindicacion.pdf están en contrataciondelsectorpublico.gob.es/datosabiertos; el xlsx (23.453 órganos, cabecera en la fila 6) da por ID Plataforma el NIF, el DIR3 y la dependencia.
+  - contrataciondelsectorpublico.gob.es/datosabiertos/ lista OrganosContratacion en json (23.487 órganos el 2026-10-05 con idPlataforma, nif y dir3), csv (UTF-8, BOM y ;) y xlsx, más manifest.sha256.
   - contrataciondelsectorpublico.gob.es, el dominio que enlaza Hacienda, sirve los mismos feeds y ZIP que contrataciondelestado.es; los id y link del feed siguen usando el antiguo.
 related: [bdns-api, hacienda-registro-licitadores, dir3-directorio]
 status: active
-verified: "2026-10-01"
+verified: "2026-10-05"
