@@ -29,6 +29,10 @@ repeticiones y tokens medidos con `consumo.py`. Sin catálogo 3 de 21, con fiche
 30 % y un 43 % menos de tokens de entrada. Con el campo `alerts`, las tres trampas que seguían fallando pasan de 5 a 18
 de 18 cuando la alerta dice la operación exacta con un ejemplo numérico.
 
+Cuarta tanda (`resultados-2026-10-05-tanda4.md`): `perfil_municipio`, `coyuntura` y `empresa_nif` con Haiku, MCP completo
+frente al mismo MCP sin ellas (`EVAL_SIN` en `mcp_cli.py`). 8 de 8 frente a 4 de 8, un 75 % menos de tokens de entrada y
+un tercio del tiempo; encontró y corrigió un importe total de `empresa_nif` que faltaba con más de 5 concesiones.
+
 La columna tokens de las dos primeras tandas es el contexto final de cada agente que devuelve el arnés, no el consumo: cada turno
 reenvía el contexto entero, así que los tokens procesados crecen con el número de pasos, que el catálogo reduce en las
 tareas difíciles. La tercera tanda ya suma la entrada de cada turno desde la transcripción del agente (campo usage de

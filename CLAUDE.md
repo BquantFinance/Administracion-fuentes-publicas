@@ -106,8 +106,9 @@ Barcelona. Más comunidades, entidades locales, Cortes, Poder Judicial o UE solo
   5b79d2d, recetas 91 de 93 (MINETUR) y ejemplos 367 de 380 (CIMA con un 500 y un timeout, 10 de 10 al repetir; DATAESTUR), y los cargadores
   de PLACSP daban 0 sin error por el WAF (ahora lanzan Bloqueado).
 - **Evaluación** (`evals/`): con Haiku y trampas silenciosas, acierto 3 de 21 sin catálogo, 10 con ficheros y 13 con
-  MCP, con un 30 % y un 43 % menos de tokens de entrada. Sin medir aún: productos, `perfil_municipio`, `coyuntura`,
-  `empresa_nif`, almacén.
+  MCP, con un 30 % y un 43 % menos de tokens de entrada. Cuarta tanda (2026-10-05): con `perfil_municipio`, `coyuntura`
+  y `empresa_nif`, 8 de 8 frente a 4 de 8 sin ellas, un 75 % menos de tokens y un tercio del tiempo. Sin medir aún:
+  productos y almacén.
 - **Publicación**: releases v0.1.0 a v0.3.0 y entrada `io.github.BquantFinance/catalogo-fuentes-publicas` en el registro
   oficial de MCP. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` (y en
   los dos ficheros del plugin) y crear la release vX.Y.Z desde la web; `publicar-mcp.yml` empaqueta, adjunta y publica.
@@ -122,8 +123,8 @@ Barcelona. Más comunidades, entidades locales, Cortes, Poder Judicial o UE solo
 
 ## Siguiente
 
-1. Medir lo nuevo con una tanda pequeña (productos, `perfil_municipio`, `coyuntura`, `empresa_nif`, almacén): con y
-   sin las piezas; lo que no ahorre tiempo o errores, se quita.
+1. Medir lo que falta (productos y almacén) con y sin las piezas; lo que no ahorre tiempo o errores, se quita. Hecho el
+   2026-10-05 para `perfil_municipio`, `coyuntura` y `empresa_nif` (se quedan).
 2. Ronda desde una IP residencial para los hosts bloqueados (necesita al propietario).
 3. Productos nuevos solo con piezas que ya funcionen; fuentes nuevas solo si desbloquean un producto.
 
