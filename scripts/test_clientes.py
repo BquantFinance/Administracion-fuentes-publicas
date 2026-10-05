@@ -6,6 +6,8 @@ Cualquier intento de petición HTTP durante la prueba es un fallo: los parsers n
 """
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import sys
 import tempfile
@@ -327,6 +329,103 @@ def sesion_texto_bloqueos_y_gzip():
     assert sesion.bloqueo(respuesta(b'{"x": "Access Denied"}', "application/json", 403)) is None
     waf = b"<html><title>Error</title><body>The Web Application Firewall has denied your transaction due to a violation of policy.<P>"
     assert "PLACSP" in sesion.bloqueo(respuesta(waf, "text/html; charset=UTF-8", 200))[0]  # 200, no 403
+
+
+@test
+def bundle_fnmt_no_cachea_si_falla():
+    """Un primer arranque sin acceso a la sede de FNMT no debe dejar en caché, para siempre, un bundle sin sus CA."""
+    import os
+    import certifi
+    if (sesion.Path(sesion.__file__).resolve().parents[2] / "ca-age.pem").is_file() or os.environ.get("CA_BUNDLE"):
+        print("      (hay ca-age.pem o CA_BUNDLE: se omite)")
+        return
+    pem = sesion.PEM_RE.search(sesion.Path(certifi.where()).read_bytes()).group(0)
+    llamadas, responde = [], {"n": 0}
+
+    def get(url, **kw):
+        llamadas.append(url)
+        if len(llamadas) > responde["n"]:
+            raise requests.ConnectionError("sin red")
+        return respuesta(pem, "application/x-x509-ca-cert", url=url)
+
+    original, cache, cwd = requests.get, sesion.CACHE, os.getcwd()
+    with tempfile.TemporaryDirectory() as d:
+        sesion.CACHE, sesion._SIN_BUNDLE = sesion.Path(d), {}
+        sesion._VALIDOS.clear()
+        requests.get = get
+        os.chdir(d)  # sin ca-age.pem en el directorio actual
+        silencio = contextlib.redirect_stderr(io.StringIO())  # los avisos de certificados no bajados son esperados
+        silencio.__enter__()
+        try:
+            total = len(sesion.CERTS_FNMT + sesion.CERTS_EXTRA)
+            clave = sesion.hashlib.sha1("|".join(sesion._bundles_entorno()).encode()).hexdigest()[:8]
+            envenenado = sesion.CACHE / f"ca-age-{clave}.pem"
+            envenenado.write_text("solo certifi\n")  # lo que dejaban versiones anteriores al fallar la descarga
+            assert sesion.bundle() is True and not list(sesion.CACHE.iterdir())  # ninguno: nada en disco
+            n = len(llamadas)
+            assert sesion.bundle() is True and len(llamadas) == n  # no reintenta en cada sesión
+            sesion._SIN_BUNDLE, llamadas[:], responde["n"] = {}, [], 5
+            parcial = sesion.bundle()
+            assert parcial.endswith(".parcial.pem") and sesion.Path(parcial).read_text().count("# FNMT") == 5, parcial
+            assert sesion.bundle() == parcial  # se reutiliza mientras no caduque
+            os.utime(parcial, (0, 0))  # caducado: se rehace y, completo, queda para siempre
+            llamadas[:], responde["n"] = [], total
+            completo = sesion.bundle()
+            assert completo.endswith(".pem") and ".parcial" not in completo, completo
+            assert sesion.Path(completo).read_text().count("# FNMT") == total
+            assert not [p for p in sesion.CACHE.iterdir() if p.suffix in (".tmp", ".nuevo")]
+        finally:
+            silencio.__exit__(None, None, None)
+            requests.get, sesion.CACHE, sesion._SIN_BUNDLE = original, cache, {}
+            sesion._VALIDOS.clear()
+            os.chdir(cwd)
+
+
+@test
+def descargar_comprueba_cada_redireccion():
+    """Una URL pública que redirige a la red local o a los metadatos de la nube no debe seguirse."""
+    import socket
+    ips = {"publico.example": "93.184.215.14", "otro.example": "93.184.215.15", "interno.example": "10.0.0.5",
+           "127.0.0.1": "127.0.0.1", "169.254.169.254": "169.254.169.254", "mapeado.example": "::ffff:127.0.0.1",
+           "cgnat.example": "100.64.0.1"}
+    saltos = {"https://publico.example/a": "http://169.254.169.254/latest/meta-data/",
+              "https://publico.example/b": "/c", "https://publico.example/c": "https://otro.example/d",
+              "https://publico.example/e": "https://interno.example/", "https://publico.example/bucle": "/bucle"}
+    pedidas = []
+
+    class S(requests.Session):
+        def get(self, url, **kw):
+            assert kw.get("allow_redirects") is False, "requests no debe seguir redirecciones por su cuenta"
+            pedidas.append(url)
+            if url in saltos:
+                r = respuesta(b"", "text/html", 302, url)
+                r.headers["Location"] = saltos[url]
+            else:
+                r = respuesta(b'{"ok": 1}', url=url)
+            r.raw = io.BytesIO(r._content)  # stream=True lee de raw
+            return r
+
+    resolver = socket.getaddrinfo
+    socket.getaddrinfo = lambda host, *a, **k: [(None, None, None, "", (ips[host], 0))]
+    consulta._S = S()
+    try:
+        r = consulta.descargar("https://publico.example/b")
+        assert r["url"] == "https://otro.example/d" and r["resumen"]["claves"] == ["ok"], r
+        assert pedidas == ["https://publico.example/b", "https://publico.example/c", "https://otro.example/d"], pedidas
+        for url, motivo in (("https://publico.example/a", "169.254.169.254"), ("https://publico.example/e", "10.0.0.5"),
+                            ("https://mapeado.example/", "127.0.0.1"), ("https://cgnat.example/", "100.64.0.1"),
+                            ("https://publico.example/bucle", "redirecciones")):
+            pedidas.clear()
+            try:
+                consulta.descargar(url)
+            except ValueError as e:
+                assert motivo in str(e), (url, e)
+            else:
+                raise AssertionError(f"{url} debería rechazarse")
+            assert not any(p.startswith(("http://169.254", "https://interno", "https://mapeado", "https://cgnat"))
+                           for p in pedidas), pedidas
+    finally:
+        socket.getaddrinfo, consulta._S = resolver, None
 
 
 @test

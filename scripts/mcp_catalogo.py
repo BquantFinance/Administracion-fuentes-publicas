@@ -41,8 +41,15 @@ def locate(name: str) -> Path:
     try:
         cached.parent.mkdir(parents=True, exist_ok=True)
         req = urllib.request.Request(f"{REPO_RAW}/{name}", headers={"User-Agent": "fuentes-publicas-mcp"})
-        with urllib.request.urlopen(req, timeout=30) as r, cached.open("wb") as fh:
-            fh.write(r.read())
+        with urllib.request.urlopen(req, timeout=30) as r:
+            datos = r.read()
+        if name.endswith(".json"):
+            json.loads(datos)  # una descarga cortada o una página de error no sustituye a la copia buena
+        # se escribe aparte y se reemplaza: abrir la caché en "wb" antes de leer la dejaba a 0 bytes si la descarga
+        # fallaba, y el servidor no volvía a arrancar sin red justo cuando la copia hacía falta
+        tmp = cached.with_name(f"{cached.name}.{os.getpid()}.tmp")
+        tmp.write_bytes(datos)
+        os.replace(tmp, cached)
     except Exception as exc:  # noqa: BLE001
         if not cached.exists():
             sys.exit(f"ERROR: no hay {name} local (CATALOGO_DIR, directorio actual o raíz del repo) y no se pudo descargar de {REPO_RAW}: {exc}")
