@@ -255,6 +255,34 @@ def _fichas(consulta: str, sector: str | None, limite: int) -> list[dict]:
     ]
 
 
+# Palabras de la consulta que apuntan a una tabla del almacén local. En la sexta tanda los agentes con almacén cargado
+# bajaron y parsearon el BORME a mano (y fallaron) porque buscar no decía que ya estaba en local.
+ALMACEN_TEMAS = {"borme": ("borme", "sociedad", "constituc", "mercantil", "concurs"),
+                 "bdns": ("bdns", "subvenc", "ayuda", "concesi", "minimis"),
+                 "placsp": ("placsp", "licitac", "contrat", "adjudic"),
+                 "boe": ("boe", "disposic", "sumario"),
+                 "carburantes": ("carburant", "gasolin", "gasoleo", "combustib")}
+
+
+def _almacen_cargado(consulta: str) -> dict | None:
+    """Tablas del almacén local que tocan la consulta, con lo cargado: solo si hay almacén."""
+    try:
+        try:
+            from .clientes import almacen
+        except ImportError:
+            from clientes import almacen
+        d = almacen.existe()
+        if not d:
+            return None
+        q = norm(consulta)
+        cob = almacen.cobertura(d)
+        tablas = {t: c.get("dias_cargados") or c.get("meses") for t, c in cob.items()
+                  if any(k in q for k in ALMACEN_TEMAS.get(t, ()))}
+        return {"tablas": tablas, "usa": "almacen_sql (ya en local; sin bajar ni parsear)"} if tablas else None
+    except Exception:  # noqa: BLE001 - la pista nunca rompe buscar
+        return None
+
+
 NADA = ("nada casa; probar con otras palabras o leer catalogo://llms.txt. Si la fuente falta, pedirla en "
         "https://github.com/BquantFinance/Administracion-fuentes-publicas/issues/new?template=nueva-fuente.yml")
 
@@ -274,6 +302,7 @@ def buscar(consulta: str, sector: str | None = None, limite: int = 5) -> dict:
         "identificadores": [{"id": k, "format": v.get("format"), "example": v.get("example")} for k, v in
                             rank(consulta, list(IDENTIFICADORES.items()), lambda kv: (norm(kv[0]), norm([kv[1].get("format"), kv[1].get("issuer")])), 2)],
     }
+    out["almacen"] = _almacen_cargado(consulta)
     return {k: v for k, v in out.items() if v} or {"nota": NADA}
 
 
