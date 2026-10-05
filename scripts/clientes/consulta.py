@@ -588,6 +588,64 @@ def ubicar(texto: str) -> dict:
     return out
 
 
+VUT_CAT = "https://analisi.transparenciacatalunya.cat/resource/t2h3-cgys.json"  # Registre de Turisme de Catalunya
+VUT_MAD = "260e80ac-2062-41f6-9f96-4902675b1078"  # alojamientos_turisticos de la Comunidad de Madrid
+VUT_GVA = "b1bdc28e-9813-422a-ab7a-63c21290493d"  # tur-gestur-vt de la Generalitat Valenciana
+
+
+def viviendas_turisticas(m: dict, mid: int | None = None) -> dict:
+    """Viviendas turísticas de un municipio (fila de municipios()): las del INE (VTE, tabla 39363: anuncios en plataformas,
+    todos los municipios) y las inscritas en el registro autonómico (Cataluña, Madrid y Comunitat Valenciana; Andalucía
+    solo en descarga completa). No miden lo mismo: Barcelona 10.651 inscritas frente a 8.231 del INE en 2026, Madrid
+    4.865 frente a 10.836; la diferencia es el dato (licencias sin anuncio o anuncios sin licencia)."""
+    try:
+        from . import ine_tempus
+    except ImportError:
+        import ine_tempus
+    mid = mid or (int(m["ine_tempus_id"]) if m.get("ine_tempus_id") else ine_tempus.id_municipio(m["ine"]))
+    out: dict = {}
+    ine = {}
+    for s in ine_tempus.datos_tabla(39363, tv={19: mid}, nult=1):
+        d = (s.get("Data") or [{}])[-1]
+        clave = "viviendas" if "Viviendas turísticas" in s["Nombre"] else "plazas" if ". Plazas." in s["Nombre"] else None
+        if clave and d.get("Valor") is not None:
+            ine.update({clave: d["Valor"], "anio": d.get("Anyo")})
+    if ine:
+        out["ine"] = {**ine, "fuente": "ine-api-tempus, tabla 39363 (VTE: anuncios en plataformas)"}
+    s, cpro = _sesion(), m["cpro"]
+    if cpro in ("08", "17", "25", "43"):
+        r = s.get(VUT_CAT, params={"$select": "count(*)", "codi_municipi_idescat": m["ine"] + m["dc"],
+                                   "tipus_establiment": "Habitatges d'ús turístic"}, timeout=60).json()
+        out["registro"] = {"viviendas": int(r[0]["count"]), "fuente": "Registre de Turisme de Catalunya (t2h3-cgys), solo altas"}
+    elif cpro == "28":
+        base, _, art = m["nombre"].rpartition(", ")
+        variantes = {m["nombre"], f"{art} {base}" if base else m["nombre"]}  # «Rozas de Madrid, Las» es «Las Rozas de Madrid»
+        lista = ", ".join("'" + v.replace("'", "''") + "'" for v in variantes)
+        sql = (f'SELECT count(*) AS n FROM "{VUT_MAD}" WHERE alojamiento_tipo LIKE \'VIVIENDAS DE USO TU%\' '
+               f"AND localidad IN ({lista})")  # el tipo llega cortado y con espacio: «VIVIENDAS DE USO TU »
+        r = s.get(f"{ckan.base('comunidad-madrid')}/datastore_search_sql", params={"sql": sql}, timeout=60).json()
+        out["registro"] = {"viviendas": int(r["result"]["records"][0]["n"]),
+                           "fuente": "Comunidad de Madrid, alojamientos_turisticos (registro de empresas turísticas)"}
+    elif cpro in ("03", "12", "46"):
+        r = s.get(f"{ckan.base('gva')}/datastore_search", timeout=60, params={
+            "resource_id": VUT_GVA, "limit": 0, "filters": _json.dumps({"cod_provincia": int(cpro), "cod_municipio": int(m["ine"][2:])})}).json()
+        out["registro"] = {"viviendas": r["result"]["total"], "fuente": "Generalitat Valenciana, tur-gestur-vt (registro de turismo)"}
+    elif cpro in ("04", "11", "14", "18", "21", "23", "29", "41"):
+        import unicodedata
+
+        def clave(x: str) -> str:
+            return unicodedata.normalize("NFKD", x).encode("ascii", "ignore").decode().upper().strip()
+        stats = _memo("openrta-municipios", 6 * 3600, lambda: s.get(
+            "https://datos.juntadeandalucia.es/api/v0/openrta/option-values/municipalities", timeout=60).json().get("stats") or [])
+        cuentas = {clave(x["key"]): x["doc_count"] for x in stats}
+        base, _, art = m["nombre"].rpartition(", ")
+        n = next((cuentas[clave(v)] for v in (m["nombre"], f"{art} {base}" if base else m["nombre"]) if clave(v) in cuentas), None)
+        out["registro"] = {"inscripciones_todos_los_tipos": n, "fuente": "Registro de Turismo de Andalucía (OpenRTA)",
+                           "nota": "por municipio solo hay el total de inscripciones (hoteles incluidos); en toda Andalucía las "
+                                   "viviendas de uso turístico son 153.506 de 175.443 (87 %)"}
+    return out
+
+
 def perfil_municipio(municipio: str) -> dict:
     """Un municipio (o el de una dirección o unas coordenadas, con ubicar) en una llamada: códigos en cada sistema (INE, SIGPAC y Catastro, DIR3, NIF, NUTS3, coordenadas),
     población del padrón, renta neta media por persona, paro registrado y contratos del año por mes y criminalidad. Cada
@@ -644,7 +702,8 @@ def perfil_municipio(municipio: str) -> dict:
         return {"nota": "Interior solo publica municipios de más de 20.000 habitantes"}
 
     tareas = {"poblacion": poblacion, "renta": renta, "paro_registrado": lambda: empleo("paro"),
-              "contratos": lambda: empleo("contratos"), "criminalidad": criminalidad}
+              "contratos": lambda: empleo("contratos"), "criminalidad": criminalidad,
+              "viviendas_turisticas": lambda: viviendas_turisticas(m, mid)}
     with ThreadPoolExecutor(len(tareas)) as ex:  # bloques independientes: el perfil tarda lo que el más lento
         futuros = {k: ex.submit(bloque, k, f) for k, f in tareas.items()}
     for k in tareas:

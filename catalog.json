@@ -5,7 +5,7 @@
  "repo": "https://github.com/BquantFinance/Administracion-fuentes-publicas",
  "schema": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json",
  "vocab": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml",
- "count": 95,
+ "count": 96,
  "sectors": {
   "legislacion-boletines": "Legislación y boletines oficiales",
   "economia-finanzas": "Economía, finanzas y mercados",
@@ -9642,6 +9642,124 @@
    ],
    "status": "active",
    "verified": "2026-10-01"
+  },
+  {
+   "id": "viviendas-uso-turistico",
+   "name": "Viviendas de uso turístico – registros autonómicos e INE",
+   "org": "Registros de turismo de la Generalitat de Catalunya, la Comunidad de Madrid, la Junta de Andalucía y la Generalitat Valenciana; INE",
+   "level": "ccaa",
+   "sector": "vivienda-urbanismo",
+   "tags": [
+    "vivienda",
+    "turismo",
+    "viviendas-turisticas",
+    "vut",
+    "hut",
+    "registro",
+    "alquiler-turistico",
+    "proptech",
+    "catastro",
+    "municipios"
+   ],
+   "summary": "Viviendas de uso turístico inscritas en los registros de Cataluña, Madrid, Andalucía y Comunitat Valenciana (dirección y, según el caso, referencia catastral, plazas y alta) y las anunciadas en plataformas por municipio según el INE. No miden lo mismo.",
+   "alerts": [
+    "Registro e INE no miden lo mismo (licencias frente a anuncios en plataformas): en 2026 Barcelona 10.651 inscritas y 8.231 en el INE, Madrid 4.865 y 10.836, Torrevieja 10.220 y 3.887. Dar las dos cifras con su fuente.",
+    "Cataluña (t2h3-cgys): total_places viene vacío en 79.567 de 104.502 HUT y referencia_cadastral en 87.762; sumar plazas da 8.196 en Barcelona para 10.651 viviendas. Contar viviendas, no sumar plazas.",
+    "Madrid (alojamientos_turisticos): alojamiento_tipo llega cortado y con espacio, «VIVIENDAS DE USO TU »; filtrar = 'VIVIENDAS DE USO TURISTICO' da 0 en vez de 6.246. Usar LIKE 'VIVIENDAS DE USO TU%'."
+   ],
+   "access": [
+    "api-rest",
+    "download"
+   ],
+   "auth": "none",
+   "formats": [
+    "json",
+    "csv"
+   ],
+   "update": "daily",
+   "coverage": "Registros vigentes (solo altas); INE VTE 2025 y 2026 por municipio",
+   "sync": {
+    "since": "registros, situación actual sin histórico de bajas; INE VTE desde 2020 en las tablas de comunidad",
+    "full": "Cataluña t2h3-cgys.csv (112.696 filas); Madrid datastore alojamientos_turisticos (8.701); GVA lista-de-viviendas-turisticas.csv (15 MB, 90.091); Andalucía dataset-openrta.csv (68 MB, 175.443)",
+    "size": "medido el 2026-10-05; Andalucía baja a unos 170 KB/s y cortó dos veces la conexión",
+    "new": "Cataluña y GVA por fecha (fecha_alta en GVA); Madrid y Andalucía sin fecha de alta en el fichero: comparar signatura o registration_code con la copia anterior"
+   },
+   "license": "CC BY 4.0 en los cuatro portales (cita de la fuente); INE con cita",
+   "base_url": "https://analisi.transparenciacatalunya.cat/resource/t2h3-cgys.json",
+   "docs_url": "https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/VTE",
+   "endpoints": [
+    {
+     "path": "https://analisi.transparenciacatalunya.cat/resource/t2h3-cgys.json?$where={filtro}&$select={campos}",
+     "desc": "Registre de Turisme de Catalunya (Socrata), todos los establecimientos en alta; tipus_establiment «Habitatges d'ús turístic»",
+     "example": "curl -sG \"https://analisi.transparenciacatalunya.cat/resource/t2h3-cgys.json\" --data-urlencode '$select=count(*)' --data-urlencode \"codi_municipi_idescat=080193\" --data-urlencode \"tipus_establiment=Habitatges d'ús turístic\"",
+     "returns": "[{n_mero_inscripci (HUTB-000001), tipus_establiment, estat Alta, tipus_de_via, nom_de_la_via, numero, pis, porta, codi_postal, municipi, codi_municipi_idescat (INE+control, 6 cifras), referencia_cadastral, total_places, cif, ra_social_del_titular}]; count(*) da [{count:'10651'}]"
+    },
+    {
+     "path": "https://datos.comunidad.madrid/api/3/action/datastore_search_sql?sql={sql}",
+     "desc": "Registro de empresas turísticas de la Comunidad de Madrid (recurso 260e80ac-2062-41f6-9f96-4902675b1078 de alojamientos_turisticos)",
+     "example": "curl -sG \"https://datos.comunidad.madrid/api/3/action/datastore_search_sql\" --data-urlencode \"sql=SELECT localidad, count(*) FROM \\\"260e80ac-2062-41f6-9f96-4902675b1078\\\" WHERE alojamiento_tipo LIKE 'VIVIENDAS DE USO TU%' GROUP BY 1 ORDER BY 2 DESC LIMIT 3\"",
+     "returns": "{result:{records:[{localidad 'Madrid', count '4865'}]}}; columnas alojamiento_tipo, categoria, denominacion, via_tipo, via_nombre, numero, planta, puerta, cdpostal (entero), localidad, signatura"
+    },
+    {
+     "path": "https://dadesobertes.gva.es/api/3/action/datastore_search?resource_id=b1bdc28e-9813-422a-ab7a-63c21290493d&filters={json}&limit={n}",
+     "desc": "Viviendas de uso turístico de la Comunitat Valenciana (tur-gestur-vt), con referencia catastral, plazas y fecha de alta",
+     "example": "curl -sG \"https://dadesobertes.gva.es/api/3/action/datastore_search\" --data-urlencode \"resource_id=b1bdc28e-9813-422a-ab7a-63c21290493d\" --data-urlencode 'filters={\"cod_provincia\":3,\"cod_municipio\":133}' --data-urlencode \"limit=1\"",
+     "returns": "{result:{total 10220, records:[{cod_municipio y cod_provincia enteros, cp entero, direccion, fecha_alta ISO, plazas_totales, ref_catastral, signatura CV-VUT..., superficie texto}]}}"
+    },
+    {
+     "path": "https://datos.juntadeandalucia.es/api/v0/openrta/option-values/{groups|objects_type|municipalities}",
+     "desc": "Registro de Turismo de Andalucía (OpenRTA), recuentos agregados por grupo, tipo de objeto y municipio (todos los tipos juntos)",
+     "example": "curl -s -A \"Mozilla/5.0\" \"https://datos.juntadeandalucia.es/api/v0/openrta/option-values/objects_type\"",
+     "returns": "{result:[...], stats:[{key 'Vivienda de uso turístico', doc_count 153506}]}; municipalities da 908 municipios en mayúsculas, con o sin tilde (MÁLAGA 13115, BENALMADENA 8718)"
+    },
+    {
+     "path": "https://datos.juntadeandalucia.es/api/v0/openrta/all?format=csv",
+     "desc": "Descarga completa de OpenRTA (redirige a www.juntadeandalucia.es/ssdigitales/festa/download-pro/dataset-openrta.csv), regenerada cada noche",
+     "example": "curl -sL -A \"Mozilla/5.0\" -o openrta.csv \"https://datos.juntadeandalucia.es/api/v0/openrta/all?format=csv\"",
+     "returns": "CSV de 68 MB separado por | con 72 columnas (registration_code, registration_date AAAAMMDD, group Completa o Por habitaciones, municipalities, municipality_id interno, catastral_ref, coord_x y coord_y en EPSG:25830, holder, email, phone...)"
+    },
+    {
+     "path": "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/39363?tv=19:{id_municipio}&nult={n}",
+     "desc": "INE, Viviendas turísticas en España (VTE, estadística experimental), viviendas, plazas y plazas por vivienda por municipio",
+     "example": "curl -s \"https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/39363?tv=19:887&nult=1\"",
+     "returns": "Tres series por municipio (Viviendas turísticas, Plazas, Plazas por vivienda turística) con Data[{Anyo 2026, Valor}]; 39366 da el porcentaje sobre las viviendas censadas y 39364 comunidades y provincias"
+    }
+   ],
+   "rate_limit": "No documentado; la descarga de OpenRTA cortó la conexión dos veces el 2026-10-05",
+   "quirks": [
+    "user-agent-browser",
+    "connection-reset-intermittent"
+   ],
+   "ids": [
+    "ine-municipio",
+    "referencia-catastral",
+    "nif"
+   ],
+   "gotchas": [
+    "Madrid declaraciones_actividad_viviendas_uso_turistico no es el registro (1.156 viviendas en septiembre de 2026, 95 % repetidas entre meses, sin número ni fecha); el registro es alojamientos_turisticos.",
+    "En la API CKAN de la GVA los códigos son enteros y pierden el cero (cp 3786, cod_provincia 3, cod_municipio 1); el CSV los trae como texto (03786, 03, 001) y el INE es cod_provincia + cod_municipio.",
+    "El datastore de la GVA no admite datastore_search_sql (responde HTML); contar por municipio con filters y limit=0, que da total.",
+    "Cataluña publica solo las altas, sin fecha de alta ni bajas; codi_municipi_idescat lleva el dígito de control del INE (080193 es 08019) y los titulares personas físicas salen como «No aplica».",
+    "OpenRTA: /search exige los nueve parámetros (id, object_type, category, group, modality, province, municipality, order_by, mode) con valores de una lista cerrada; en la práctica, descarga completa u option-values.",
+    "OpenRTA en JSON pesa 325 MB; el CSV de 68 MB tiene campos con saltos de línea que desalinean columnas con un lector ingenuo, municipality_id es interno (no el INE) y trae holder, email y teléfono (datos personales).",
+    "INE VTE cuenta anuncios en plataformas en un periodo de referencia, no licencias: una vivienda inscrita sin anuncio no sale y un anuncio sin licencia sí.",
+    "En la GVA dos fechas de alta son de 1913 y 1916 (errores de origen); 2024 es el año con más altas (12.897)."
+   ],
+   "tips": [
+    "perfil_municipio da las dos cifras de un municipio en una llamada: INE en toda España y registro en Cataluña, Madrid y Comunitat Valenciana (en Andalucía, inscripciones de todos los tipos).",
+    "Las referencias catastrales de Cataluña (cuando vienen) y de la GVA cruzan con perfil_municipio de una dirección, que da la del portal por CartoCiudad.",
+    "Andalucía: la proporción de viviendas en el registro es 153.506 de 175.443 inscripciones (87 %); el grupo Completa (vivienda entera) suma 148.311 y Por habitaciones 5.149."
+   ],
+   "related": [
+    "ine-api-tempus",
+    "gencat-dades-obertes",
+    "comunidad-madrid-datos-abiertos",
+    "gva-dadesobertes-api",
+    "junta-andalucia-datos-abiertos",
+    "cnig-centro-descargas"
+   ],
+   "status": "active",
+   "verified": "2026-10-05"
   }
  ],
  "indices": {
@@ -9865,6 +9983,25 @@
     "licencia": "CC BY 4.0",
     "trampa": "el municipio de SIGPAC es el del Catastro, no el del INE (capitales 900); traducir con datos/municipios.csv",
     "verified": "2026-10-01"
+   },
+   {
+    "id": "viviendas-turisticas",
+    "producto": "Mapa y censo de viviendas turísticas por municipio, barrio o calle, con licencia frente a anuncios en plataformas",
+    "cliente": "proptech, ayuntamientos, asociaciones vecinales, gestores de alquiler, hoteleros",
+    "fuentes": [
+     "viviendas-uso-turistico",
+     "ine-api-tempus",
+     "cnig-centro-descargas"
+    ],
+    "recetas": [
+     "viviendas-turisticas-municipio"
+    ],
+    "piezas": "perfil_municipio (bloque viviendas_turisticas: INE en toda España y registro en Cataluña, Madrid y Comunitat Valenciana); los listados con dirección y referencia catastral de Socrata y CKAN; ubicar para cruzar por referencia catastral",
+    "frescura": "registros diarios (Cataluña y Madrid el 2026-10-05, GVA el 04/10); INE anual",
+    "volumen": "Cataluña 104.502 viviendas, Comunitat Valenciana 90.091, Andalucía 153.506 (CSV de 68 MB), Madrid 6.246",
+    "licencia": "CC BY 4.0 en los cuatro registros; INE con cita",
+    "trampa": "registro e INE no miden lo mismo (Barcelona 10.651 inscritas y 8.231 anunciadas); en Cataluña faltan plazas en el 76 % y referencia catastral en el 84 %",
+    "verified": "2026-10-05"
    }
   ],
   "recetas": [
@@ -11447,6 +11584,52 @@
      }
     ],
     "verified": "2026-09-30"
+   },
+   {
+    "id": "viviendas-turisticas-municipio",
+    "intent": "Viviendas turísticas de un municipio, inscritas en el registro y anunciadas en plataformas, con su dirección",
+    "inputs": [
+     "ine-municipio"
+    ],
+    "steps": [
+     {
+      "source": "viviendas-uso-turistico",
+      "do": "INE VTE tabla 39363 con tv=19:{Id interno del municipio} (ine-api-tempus): viviendas, plazas y plazas por vivienda anunciadas en plataformas, todos los municipios",
+      "example": "curl -s \"https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/39363?tv=19:887&nult=1\""
+     },
+     {
+      "source": "viviendas-uso-turistico",
+      "do": "Registro autonómico por municipio: Cataluña por codi_municipi_idescat (INE con control) en Socrata, Madrid por localidad con LIKE 'VIVIENDAS DE USO TU%', GVA con filters cod_provincia y cod_municipio enteros; Andalucía solo inscripciones de todos los tipos (option-values) o el CSV completo",
+      "example": "curl -sG \"https://dadesobertes.gva.es/api/3/action/datastore_search\" --data-urlencode \"resource_id=b1bdc28e-9813-422a-ab7a-63c21290493d\" --data-urlencode 'filters={\"cod_provincia\":3,\"cod_municipio\":133}' --data-urlencode \"limit=0\""
+     },
+     {
+      "source": "cnig-centro-descargas",
+      "do": "Para una dirección concreta, perfil_municipio con la dirección da la referencia catastral del portal, que cruza con referencia_cadastral (Cataluña) o ref_catastral (GVA) por sus 14 primeros caracteres"
+     }
+    ],
+    "output": "Dos cifras por municipio con su fuente (registro e INE) y, en Cataluña y la GVA, el listado con dirección y referencia catastral",
+    "checks": [
+     {
+      "url": "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/39363?tv=19:887&nult=1",
+      "contains": "Viviendas turísticas"
+     },
+     {
+      "url": "https://analisi.transparenciacatalunya.cat/resource/t2h3-cgys.json?$select=count(*)&codi_municipi_idescat=080193",
+      "contains": "count"
+     },
+     {
+      "url": "https://dadesobertes.gva.es/api/3/action/datastore_search?resource_id=b1bdc28e-9813-422a-ab7a-63c21290493d&limit=0",
+      "contains": "\"total\""
+     },
+     {
+      "url": "https://datos.juntadeandalucia.es/api/v0/openrta/option-values/objects_type",
+      "headers": {
+       "User-Agent": "Mozilla/5.0"
+      },
+      "contains": "Vivienda de uso turístico"
+     }
+    ],
+    "verified": "2026-10-05"
    }
   ],
   "necesidades": [
@@ -12183,6 +12366,11 @@
     "need": "NIF de una empresa a partir de su nombre, o el nombre de un NIF (también para cruzar el BORME, que no trae NIF)",
     "source": "bdns-api",
     "note": "terceros?ambito=C&busqueda={nombre} (sin documentar) cubre a quien ha recibido alguna ayuda; empresa_nif con un nombre lo usa y añade los adjudicatarios del almacén; tope silencioso de 150 filas"
+   },
+   {
+    "need": "Viviendas turísticas (de uso turístico) de un municipio o una calle, con licencia o anunciadas",
+    "source": "viviendas-uso-turistico",
+    "note": "registros de Cataluña, Madrid, Andalucía y Comunitat Valenciana más el INE (VTE) en todos los municipios; registro e INE dan cifras distintas (Madrid 4.865 inscritas y 10.836 anunciadas); perfil_municipio trae las dos"
    }
   ],
   "identificadores": {
@@ -12268,7 +12456,8 @@
      "ine-cartografia-censal",
      "dgt-estadisticas",
      "mitma-opendata-movilidad",
-     "mivau-precios-vivienda-alquiler"
+     "mivau-precios-vivienda-alquiler",
+     "viviendas-uso-turistico"
     ]
    },
    "ine-provincia": {
@@ -12476,7 +12665,8 @@
      "mapa-sigpac",
      "gva-dadesobertes-api",
      "catastro-ovc",
-     "cnig-centro-descargas"
+     "cnig-centro-descargas",
+     "viviendas-uso-turistico"
     ]
    },
    "referencia-sigpac": {
@@ -12545,7 +12735,8 @@
      "gencat-dades-obertes",
      "gva-dadesobertes-api",
      "junta-andalucia-datos-abiertos",
-     "igae-ejecucion-presupuestaria"
+     "igae-ejecucion-presupuestaria",
+     "viviendas-uso-turistico"
     ]
    },
    "dir3": {

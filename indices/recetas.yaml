@@ -945,3 +945,28 @@
       contains: IPVA
       read_bytes: 200000
   verified: "2026-09-30"
+
+- id: viviendas-turisticas-municipio
+  intent: Viviendas turísticas de un municipio, inscritas en el registro y anunciadas en plataformas, con su dirección
+  inputs: [ine-municipio]
+  steps:
+    - source: viviendas-uso-turistico
+      do: "INE VTE tabla 39363 con tv=19:{Id interno del municipio} (ine-api-tempus): viviendas, plazas y plazas por vivienda anunciadas en plataformas, todos los municipios"
+      example: curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/39363?tv=19:887&nult=1"
+    - source: viviendas-uso-turistico
+      do: "Registro autonómico por municipio: Cataluña por codi_municipi_idescat (INE con control) en Socrata, Madrid por localidad con LIKE 'VIVIENDAS DE USO TU%', GVA con filters cod_provincia y cod_municipio enteros; Andalucía solo inscripciones de todos los tipos (option-values) o el CSV completo"
+      example: curl -sG "https://dadesobertes.gva.es/api/3/action/datastore_search" --data-urlencode "resource_id=b1bdc28e-9813-422a-ab7a-63c21290493d" --data-urlencode 'filters={"cod_provincia":3,"cod_municipio":133}' --data-urlencode "limit=0"
+    - source: cnig-centro-descargas
+      do: "Para una dirección concreta, perfil_municipio con la dirección da la referencia catastral del portal, que cruza con referencia_cadastral (Cataluña) o ref_catastral (GVA) por sus 14 primeros caracteres"
+  output: "Dos cifras por municipio con su fuente (registro e INE) y, en Cataluña y la GVA, el listado con dirección y referencia catastral"
+  checks:
+    - url: https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/39363?tv=19:887&nult=1
+      contains: Viviendas turísticas
+    - url: "https://analisi.transparenciacatalunya.cat/resource/t2h3-cgys.json?$select=count(*)&codi_municipi_idescat=080193"
+      contains: count
+    - url: "https://dadesobertes.gva.es/api/3/action/datastore_search?resource_id=b1bdc28e-9813-422a-ab7a-63c21290493d&limit=0"
+      contains: '"total"'
+    - url: https://datos.juntadeandalucia.es/api/v0/openrta/option-values/objects_type
+      headers: {"User-Agent": "Mozilla/5.0"}
+      contains: Vivienda de uso turístico
+  verified: "2026-10-05"

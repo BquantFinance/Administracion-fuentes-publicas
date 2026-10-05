@@ -429,3 +429,6 @@
 - need: NIF de una empresa a partir de su nombre, o el nombre de un NIF (también para cruzar el BORME, que no trae NIF)
   source: bdns-api
   note: "terceros?ambito=C&busqueda={nombre} (sin documentar) cubre a quien ha recibido alguna ayuda; empresa_nif con un nombre lo usa y añade los adjudicatarios del almacén; tope silencioso de 150 filas"
+- need: Viviendas turísticas (de uso turístico) de un municipio o una calle, con licencia o anunciadas
+  source: viviendas-uso-turistico
+  note: "registros de Cataluña, Madrid, Andalucía y Comunitat Valenciana más el INE (VTE) en todos los municipios; registro e INE dan cifras distintas (Madrid 4.865 inscritas y 10.836 anunciadas); perfil_municipio trae las dos"

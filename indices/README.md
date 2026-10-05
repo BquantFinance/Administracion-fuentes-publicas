@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 12 productos, 43 recetas, 154 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 13 productos, 44 recetas, 155 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
 
 ## Productos que se pueden construir hoy
 
@@ -102,6 +102,14 @@ Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras med
 - licencia: CC BY 4.0
 - trampa: el municipio de SIGPAC es el del Catastro, no el del INE (capitales 900); traducir con datos/municipios.csv
 
+**viviendas-turisticas** · Mapa y censo de viviendas turísticas por municipio, barrio o calle, con licencia frente a anuncios en plataformas
+- para: proptech, ayuntamientos, asociaciones vecinales, gestores de alquiler, hoteleros
+- fichas: viviendas-uso-turistico, ine-api-tempus, cnig-centro-descargas · recetas: viviendas-turisticas-municipio
+- piezas: perfil_municipio (bloque viviendas_turisticas: INE en toda España y registro en Cataluña, Madrid y Comunitat Valenciana); los listados con dirección y referencia catastral de Socrata y CKAN; ubicar para cruzar por referencia catastral
+- frescura: registros diarios (Cataluña y Madrid el 2026-10-05, GVA el 04/10); INE anual · volumen: Cataluña 104.502 viviendas, Comunitat Valenciana 90.091, Andalucía 153.506 (CSV de 68 MB), Madrid 6.246
+- licencia: CC BY 4.0 en los cuatro registros; INE con cita
+- trampa: registro e INE no miden lo mismo (Barcelona 10.651 inscritas y 8.231 anunciadas); en Cataluña faltan plazas en el 76 % y referencia catastral en el 84 %
+
 ## Recetas por intención
 
 Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.py` ejecuta las comprobaciones de cada receta contra los servidores reales (batería de regresión).
@@ -151,6 +159,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 | `horarios-tren-gtfs` | Horarios y paradas de Cercanías y de alta velocidad en GTFS, con las coordenadas de las estaciones | renfe-datos-abiertos | 2026-10-01 |
 | `comercio-exterior-por-producto` | Exportaciones o importaciones de un producto TARIC por país y provincia, mensuales o anuales desde 1995 | datacomex, aeat-estadisticas | 2026-09-30 |
 | `poblacion-renta-alquiler-por-municipio` | Población, renta media y precio del alquiler de un municipio con las tablas concretas del INE | ine-api-tempus, ine-cartografia-censal | 2026-09-30 |
+| `viviendas-turisticas-municipio` | Viviendas turísticas de un municipio, inscritas en el registro y anunciadas en plataformas, con su dirección | viviendas-uso-turistico, cnig-centro-descargas | 2026-10-05 |
 
 ### Pasos
 
@@ -680,6 +689,19 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - salida: series JSON con MetaData (variable, nombre y Codigo INE) y Data por año
 - nota: Alternativa sin buscar la tabla provincial: la tabla nacional 30824 con tv=19:{Id municipio}&tv=482:284048 (renta neta media por persona; 284052 por hogar) devuelve la serie 2015-2023; sin filtro responde 200 con status de restricciones de volumen. Verificado el 2026-10-01.
 
+**viviendas-turisticas-municipio** · Viviendas turísticas de un municipio, inscritas en el registro y anunciadas en plataformas, con su dirección
+- entrada: ine-municipio
+1. `viviendas-uso-turistico`: INE VTE tabla 39363 con tv=19:{Id interno del municipio} (ine-api-tempus): viviendas, plazas y plazas por vivienda anunciadas en plataformas, todos los municipios
+   ```
+   curl -s "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/39363?tv=19:887&nult=1"
+   ```
+2. `viviendas-uso-turistico`: Registro autonómico por municipio: Cataluña por codi_municipi_idescat (INE con control) en Socrata, Madrid por localidad con LIKE 'VIVIENDAS DE USO TU%', GVA con filters cod_provincia y cod_municipio enteros; Andalucía solo inscripciones de todos los tipos (option-values) o el CSV completo
+   ```
+   curl -sG "https://dadesobertes.gva.es/api/3/action/datastore_search" --data-urlencode "resource_id=b1bdc28e-9813-422a-ab7a-63c21290493d" --data-urlencode 'filters={"cod_provincia":3,"cod_municipio":133}' --data-urlencode "limit=0"
+   ```
+3. `cnig-centro-descargas`: Para una dirección concreta, perfil_municipio con la dirección da la referencia catastral del portal, que cruza con referencia_cadastral (Cataluña) o ref_catastral (GVA) por sus 14 primeros caracteres
+- salida: Dos cifras por municipio con su fuente (registro e INE) y, en Cataluña y la GVA, el listado con dirección y referencia catastral
+
 ## Dónde está cada cosa
 
 **Legislación y boletines oficiales**
@@ -868,6 +890,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 **Vivienda y urbanismo**
 - Precios de vivienda, transacciones, alquiler (SERPAVI) y suelo → `mivau-precios-vivienda-alquiler`
+- Viviendas turísticas (de uso turístico) de un municipio o una calle, con licencia o anunciadas → `viviendas-uso-turistico` (registros de Cataluña, Madrid, Andalucía y Comunitat Valenciana más el INE (VTE) en todos los municipios; registro e INE dan cifras distintas (Madrid 4.865 inscritas y 10.836 anunciadas); perfil_municipio trae las dos)
 
 **Telecomunicaciones y sociedad digital**
 - Cobertura de fibra, HFC y 5G por municipio → `mtdfp-cobertura-banda-ancha` (fracciones 0-1 por hogares o por viviendas, no comparables entre bases; la CNMC da líneas, no cobertura)
@@ -888,16 +911,16 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 | id | formato | regex | ejemplo | emisor | lo usan |
 |---|---|---|---|---|---|
-| ine-municipio | 5 dígitos, provincia (2) + municipio (3); algunos ficheros añaden un sexto dígito de control | `^\d{5}$` | 28079 | ine-codigos-territoriales | cis-estudios, segsocial-estadisticas, sepe-estadisticas, comunidad-madrid-estadistica-api, idescat-api, ieca-api-badea, ine-codigos-territoriales, ive-pegv-bancos-datos, ayuntamiento-madrid-datos-abiertos, comunidad-madrid-datos-abiertos, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, hacienda-ovef, interior-criminalidad, miteco-calidad-aire, aemet-opendata, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas, mitma-opendata-movilidad, mivau-precios-vivienda-alquiler |
+| ine-municipio | 5 dígitos, provincia (2) + municipio (3); algunos ficheros añaden un sexto dígito de control | `^\d{5}$` | 28079 | ine-codigos-territoriales | cis-estudios, segsocial-estadisticas, sepe-estadisticas, comunidad-madrid-estadistica-api, idescat-api, ieca-api-badea, ine-codigos-territoriales, ive-pegv-bancos-datos, ayuntamiento-madrid-datos-abiertos, comunidad-madrid-datos-abiertos, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, hacienda-ovef, interior-criminalidad, miteco-calidad-aire, aemet-opendata, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas, mitma-opendata-movilidad, mivau-precios-vivienda-alquiler, viviendas-uso-turistico |
 | ine-provincia | 2 dígitos, 01 a 52 | `^(0[1-9]|[1-4]\d|5[0-2])$` | 28 | ine-codigos-territoriales | mapa-sigpac, datacomex, cis-estudios, segsocial-estadisticas, minetur-precios-carburantes, miteco-energia-estadisticas, idescat-api, ieca-api-badea, ine-codigos-territoriales, ine-microdatos, dir3-directorio, gva-dadesobertes-api, aeat-estadisticas, hacienda-ovef, miteco-calidad-aire, aemps-otros-registros, isciii-cne, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas, mivau-precios-vivienda-alquiler |
 | ine-entidad-singular | 11 dígitos, municipio INE (5) + entidad colectiva (2) + entidad singular (2) + núcleo o diseminado (2) | `^\d{11}$` | 01001000100 | ine-codigos-territoriales | ine-codigos-territoriales, mtdfp-cobertura-banda-ancha, idee-servicios |
 | ccaa | 2 dígitos, 01 Andalucía a 19 Melilla, en el orden del INE | `^(0[1-9]|1\d)$` | 13 | ine-codigos-territoriales | educacion-estadisticas-ruct, ine-codigos-territoriales, ine-microdatos, aeat-estadisticas, aemps-otros-registros, isciii-cne, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, mivau-precios-vivienda-alquiler |
 | nuts | ES más 1 a 3 caracteres (ES1, ES11, ES111) | `^ES[1-7]\d{0,2}$` | ES300 | — | placsp-datos-abiertos, comunidad-madrid-estadistica-api, mtdfp-cobertura-banda-ancha, idee-servicios, ine-cartografia-censal |
 | seccion-censal | 10 dígitos, municipio (5) + distrito (2) + sección (3) | `^\d{10}$` | 2807901001 | ine-cartografia-censal | idescat-api, ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, ine-cartografia-censal, mivau-precios-vivienda-alquiler |
-| referencia-catastral | 14 caracteres alfanuméricos (parcela) o 20 (inmueble, con 4 dígitos y 2 letras de control) | `^[0-9A-Z]{14}(\d{4}[A-Z]{2})?$` | 9872023VH5797S0001WX | catastro-ovc | mapa-sigpac, gva-dadesobertes-api, catastro-ovc, cnig-centro-descargas |
+| referencia-catastral | 14 caracteres alfanuméricos (parcela) o 20 (inmueble, con 4 dígitos y 2 letras de control) | `^[0-9A-Z]{14}(\d{4}[A-Z]{2})?$` | 9872023VH5797S0001WX | catastro-ovc | mapa-sigpac, gva-dadesobertes-api, catastro-ovc, cnig-centro-descargas, viviendas-uso-turistico |
 | referencia-sigpac | provincia:municipio:agregado:zona:polígono:parcela:recinto, números separados por dos puntos | `^\d{1,2}:\d{1,3}:\d+:\d+:\d+:\d+:\d+$` | 28:15:0:0:3:9000:6 | mapa-sigpac | mapa-sigpac |
 | idema | 4 o 5 caracteres alfanuméricos | `^[0-9A-Z]{4,5}$` | 3195 | aemet-opendata | aemet-opendata |
-| nif | DNI (8 dígitos y letra), NIE (X, Y o Z, 7 dígitos y letra) o NIF de persona jurídica (letra, 7 dígitos y control) | `^(\d{8}[A-Z]|[XYZ]\d{7}[A-Z]|[A-HJ-NP-SUVW]\d{7}[0-9A-J])$` | Q1132001G | — | fega-beneficiarios-pac, aei-convocatorias, bdns-api, placsp-datos-abiertos, ayuntamiento-barcelona-datos-abiertos, dir3-directorio, face-facturas, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, igae-ejecucion-presupuestaria |
+| nif | DNI (8 dígitos y letra), NIE (X, Y o Z, 7 dígitos y letra) o NIF de persona jurídica (letra, 7 dígitos y control) | `^(\d{8}[A-Z]|[XYZ]\d{7}[A-Z]|[A-HJ-NP-SUVW]\d{7}[0-9A-J])$` | Q1132001G | — | fega-beneficiarios-pac, aei-convocatorias, bdns-api, placsp-datos-abiertos, ayuntamiento-barcelona-datos-abiertos, dir3-directorio, face-facturas, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, igae-ejecucion-presupuestaria, viviendas-uso-turistico |
 | dir3 | letra (E, L, A, U, I) y 8 dígitos, o dos letras (LA, EA) y 7 dígitos | `^([A-Z]\d{8}|[A-Z]{2}\d{7})$` | E00003901 | dir3-directorio | placsp-datos-abiertos, ayuntamiento-madrid-datos-abiertos, datos-gob-es-api, dir3-directorio, face-facturas, gencat-dades-obertes, pag-administracion-gob-es, transparencia-portal, igae-ejecucion-presupuestaria |
 | sia | 6 o 7 dígitos | `^\d{6,7}$` | 010170 | pag-administracion-gob-es | pag-administracion-gob-es |
 | invente | INV y 8 dígitos, código del Inventario de Entes del Sector Público | `^INV\d{8}$` | INV00000102 | igae-ejecucion-presupuestaria | bdns-api, igae-ejecucion-presupuestaria |

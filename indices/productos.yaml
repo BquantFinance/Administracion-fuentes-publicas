@@ -140,3 +140,15 @@
   licencia: "CC BY 4.0"
   trampa: "el municipio de SIGPAC es el del Catastro, no el del INE (capitales 900); traducir con datos/municipios.csv"
   verified: "2026-10-01"
+
+- id: viviendas-turisticas
+  producto: Mapa y censo de viviendas turísticas por municipio, barrio o calle, con licencia frente a anuncios en plataformas
+  cliente: proptech, ayuntamientos, asociaciones vecinales, gestores de alquiler, hoteleros
+  fuentes: [viviendas-uso-turistico, ine-api-tempus, cnig-centro-descargas]
+  recetas: [viviendas-turisticas-municipio]
+  piezas: "perfil_municipio (bloque viviendas_turisticas: INE en toda España y registro en Cataluña, Madrid y Comunitat Valenciana); los listados con dirección y referencia catastral de Socrata y CKAN; ubicar para cruzar por referencia catastral"
+  frescura: "registros diarios (Cataluña y Madrid el 2026-10-05, GVA el 04/10); INE anual"
+  volumen: "Cataluña 104.502 viviendas, Comunitat Valenciana 90.091, Andalucía 153.506 (CSV de 68 MB), Madrid 6.246"
+  licencia: "CC BY 4.0 en los cuatro registros; INE con cita"
+  trampa: "registro e INE no miden lo mismo (Barcelona 10.651 inscritas y 8.231 anunciadas); en Cataluña faltan plazas en el 76 % y referencia catastral en el 84 %"
+  verified: "2026-10-05"

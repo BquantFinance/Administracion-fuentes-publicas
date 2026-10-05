@@ -2,7 +2,7 @@
 
 > Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. Contenido en castellano, claves en inglés.
 
-Fuentes: 95 · Productos: 12 · Recetas: 43 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Generado: 2026-10-05
+Fuentes: 96 · Productos: 13 · Recetas: 44 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Generado: 2026-10-05
 
 ## Empieza aquí
 
@@ -27,6 +27,7 @@ Detalle (frescura, volumen, licencia, trampa) en https://raw.githubusercontent.c
 - precio-electricidad: Precio de la electricidad por cuarto de hora para apps de ahorro, domótica y recarga de vehículos → omie-mercado · ficha omie-mercado (ficheros marginalpdbc por día y ZIP anual)
 - buscador-medicamentos: Buscador de medicamentos con presentaciones, prospecto y problemas de suministro → aemps-cima-api · ficha aemps-cima-api (API REST JSON sin clave)
 - agritech-parcelas: Información de una parcela agrícola por coordenadas (uso, superficie, Red Natura, zonas vulnerables a nitratos) → mapa-sigpac, catastro-ovc · perfil_municipio con «lat,lon» (recinto, uso, superficie y referencia catastral de la parcela, municipio INE); scripts/clientes/ogc.py (recintos por bbox siguiendo next)
+- viviendas-turisticas: Mapa y censo de viviendas turísticas por municipio, barrio o calle, con licencia frente a anuncios en plataformas → viviendas-uso-turistico, ine-api-tempus, cnig-centro-descargas · perfil_municipio (bloque viviendas_turisticas: INE en toda España y registro en Cataluña, Madrid y Comunitat Valenciana); los listados con dirección y referencia catastral de Socrata y CKAN; ubicar para cruzar por referencia catastral
 
 ## Reglas rápidas antes de programar contra una fuente
 
@@ -88,6 +89,9 @@ Datos incompletos, distintos o a cero sin ningún error; están en `alerts` de c
 - segsocial-estadisticas: En MUNCNAE el 56 % de las filas son «<5» (1 a 4): sumar sin ellas subestima; dar intervalo con cada «<5» entre 1 y 4 (Abengibre agosto 2026, 332 sin ellas y 354 a 420 con sus 22). COD MUNICIPIO va sin cero inicial.
 - sepe-estadisticas: «<5» es secreto (1 a 4), no cero: un sexo sale restando el otro del TOTAL (Abengibre agosto 2026, hombres 18 - 13 = 5) y la provincia, de su fila de total (Albacete 20.710, no los 20.698 de sumar municipios).
 - sepe-estadisticas: En el CSV, Oza-Cesuras (15902) sale con 0 y Cerdedo-Cotobade (36902) sin fila; su dato va en los códigos previos a la fusión. Agosto 2026, 15026 + 15063 = 46 + 95 = 141 parados; 36011 + 36012 = 35 + 134 = 169.
+- viviendas-uso-turistico: Registro e INE no miden lo mismo (licencias frente a anuncios en plataformas): en 2026 Barcelona 10.651 inscritas y 8.231 en el INE, Madrid 4.865 y 10.836, Torrevieja 10.220 y 3.887. Dar las dos cifras con su fuente.
+- viviendas-uso-turistico: Cataluña (t2h3-cgys): total_places viene vacío en 79.567 de 104.502 HUT y referencia_cadastral en 87.762; sumar plazas da 8.196 en Barcelona para 10.651 viviendas. Contar viviendas, no sumar plazas.
+- viviendas-uso-turistico: Madrid (alojamientos_turisticos): alojamiento_tipo llega cortado y con espacio, «VIVIENDAS DE USO TU »; filtrar = 'VIVIENDAS DE USO TURISTICO' da 0 en vez de 6.246. Usar LIKE 'VIVIENDAS DE USO TU%'.
 
 ## Dónde está cada cosa
 
@@ -245,6 +249,7 @@ Datos incompletos, distintos o a cero sin ningún error; están en `alerts` de c
 - Población empadronada por código postal en la Comunitat Valenciana → ninguna (el IVE la muestra solo en Tableau Public; sin descarga estructurada localizada el 2026-10-01)
 - Prohibiciones de contratar vigentes → hacienda-registro-licitadores (XML público del visor del ROLECE; el NIF va oculto, cruzar por nombre)
 - NIF de una empresa a partir de su nombre, o el nombre de un NIF (también para cruzar el BORME, que no trae NIF) → bdns-api (terceros?ambito=C&busqueda={nombre} (sin documentar) cubre a quien ha recibido alguna ayuda; empresa_nif con un nombre lo usa y añade los adjudicatarios del almacén; tope silencioso de 150 filas)
+- Viviendas turísticas (de uso turístico) de un municipio o una calle, con licencia o anunciadas → viviendas-uso-turistico (registros de Cataluña, Madrid, Andalucía y Comunitat Valenciana más el INE (VTE) en todos los municipios; registro e INE dan cifras distintas (Madrid 4.865 inscritas y 10.836 anunciadas); perfil_municipio trae las dos)
 
 ## Recetas por intención
 
@@ -293,6 +298,7 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 - horarios-tren-gtfs: Horarios y paradas de Cercanías y de alta velocidad en GTFS, con las coordenadas de las estaciones → renfe-datos-abiertos
 - comercio-exterior-por-producto: Exportaciones o importaciones de un producto TARIC por país y provincia, mensuales o anuales desde 1995 → datacomex, aeat-estadisticas
 - poblacion-renta-alquiler-por-municipio: Población, renta media y precio del alquiler de un municipio con las tablas concretas del INE → ine-api-tempus, ine-cartografia-censal
+- viviendas-turisticas-municipio: Viviendas turísticas de un municipio, inscritas en el registro y anunciadas en plataformas, con su dirección → viviendas-uso-turistico, cnig-centro-descargas
 
 ## Sectores
 
@@ -316,7 +322,7 @@ Pasos, ejemplos y comprobaciones en https://raw.githubusercontent.com/BquantFina
 - [Justicia, interior y seguridad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/justicia-interior-seguridad/README.md): interior-criminalidad
 - [Cultura y patrimonio](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/cultura-patrimonio/README.md): bne-datos, cultura-culturabase
 - [Demografía, migraciones y sociedad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/demografia-migraciones-sociedad/README.md): cis-estudios, igualdad-estadisticas-violencia-genero, imserso-dependencia, inmujeres-mujeres-cifras
-- [Vivienda y urbanismo](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/vivienda-urbanismo/README.md): mivau-precios-vivienda-alquiler
+- [Vivienda y urbanismo](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/vivienda-urbanismo/README.md): mivau-precios-vivienda-alquiler, viviendas-uso-turistico
 - [Telecomunicaciones y sociedad digital](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/telecomunicaciones-digital/README.md): mtdfp-cobertura-banda-ancha
 - [Consumo y seguridad alimentaria](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/consumo-seguridad-alimentaria/README.md): aesan-alertas-registros
 

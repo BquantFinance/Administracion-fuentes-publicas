@@ -38,6 +38,7 @@ Cada producto con piezas que ya funcionan; frescura, volumen medido, licencia y 
 | **precio-electricidad** · Precio de la electricidad por cuarto de hora para apps de ahorro, domótica y recarga de vehículos | apps de consumo, domótica, puntos de recarga | omie-mercado | ficha omie-mercado (ficheros marginalpdbc por día y ZIP anual) |
 | **buscador-medicamentos** · Buscador de medicamentos con presentaciones, prospecto y problemas de suministro | farmacias, healthtech, apps de pacientes | aemps-cima-api | ficha aemps-cima-api (API REST JSON sin clave) |
 | **agritech-parcelas** · Información de una parcela agrícola por coordenadas (uso, superficie, Red Natura, zonas vulnerables a nitratos) | agritech, cooperativas, aseguradoras agrarias | mapa-sigpac, catastro-ovc | perfil_municipio con «lat,lon» (recinto, uso, superficie y referencia catastral de la parcela, municipio INE); scripts/clientes/ogc.py (recintos por bbox siguiendo next) |
+| **viviendas-turisticas** · Mapa y censo de viviendas turísticas por municipio, barrio o calle, con licencia frente a anuncios en plataformas | proptech, ayuntamientos, asociaciones vecinales, gestores de alquiler, hoteleros | viviendas-uso-turistico, ine-api-tempus, cnig-centro-descargas | perfil_municipio (bloque viviendas_turisticas: INE en toda España y registro en Cataluña, Madrid y Comunitat Valenciana); los listados con dirección y referencia catastral de Socrata y CKAN; ubicar para cruzar por referencia catastral |
 <!-- /AUTO:productos -->
 
 ## Lo que no dice la documentación oficial
@@ -52,7 +53,7 @@ Algunos ejemplos, comprobados con llamadas reales:
 - Los CSV de los portales PC-Axis llegan en UTF-8 aunque la cabecera diga ISO-8859-15, y el del SEPE en Windows-1252 aunque diga UTF-8.
 - En GBIF la encina ibérica es sobre todo *Quercus rotundifolia* (1,3 millones de registros en España); preguntar por *Quercus ilex*, que es lo que devuelve el buscador de nombres, da 21.322 sin ningún aviso. Y 41,6 de sus 95,8 millones de registros en España son CC BY-NC.
 
-Fuentes catalogadas: <!-- AUTO:count -->95<!-- /AUTO:count -->. Alcance actual: Administración General del Estado y, desde octubre de 2026, las cuatro comunidades más pobladas (Madrid, Cataluña, Andalucía y Comunitat Valenciana) y los ayuntamientos de Madrid y Barcelona. Después: resto de comunidades y entidades locales, Cortes y Poder Judicial, Unión Europea.
+Fuentes catalogadas: <!-- AUTO:count -->96<!-- /AUTO:count -->. Alcance actual: Administración General del Estado y, desde octubre de 2026, las cuatro comunidades más pobladas (Madrid, Cataluña, Andalucía y Comunitat Valenciana) y los ayuntamientos de Madrid y Barcelona. Después: resto de comunidades y entidades locales, Cortes y Poder Judicial, Unión Europea.
 
 ## Principios
 
@@ -87,7 +88,7 @@ Fuentes catalogadas: <!-- AUTO:count -->95<!-- /AUTO:count -->. Alcance actual: 
 | [justicia-interior-seguridad](sources/justicia-interior-seguridad/README.md) | Justicia, interior y seguridad | 1 |
 | [cultura-patrimonio](sources/cultura-patrimonio/README.md) | Cultura y patrimonio | 2 |
 | [demografia-migraciones-sociedad](sources/demografia-migraciones-sociedad/README.md) | Demografía, migraciones y sociedad | 4 |
-| [vivienda-urbanismo](sources/vivienda-urbanismo/README.md) | Vivienda y urbanismo | 1 |
+| [vivienda-urbanismo](sources/vivienda-urbanismo/README.md) | Vivienda y urbanismo | 2 |
 | [telecomunicaciones-digital](sources/telecomunicaciones-digital/README.md) | Telecomunicaciones y sociedad digital | 1 |
 | `exterior-cooperacion` | Acción exterior y cooperación | 0 |
 | [consumo-seguridad-alimentaria](sources/consumo-seguridad-alimentaria/README.md) | Consumo y seguridad alimentaria | 1 |
