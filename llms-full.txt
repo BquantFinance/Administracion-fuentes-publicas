@@ -232,6 +232,7 @@ related: igae-ejecucion-presupuestaria, bde-estadisticas
 Banco de España – API de estadísticas y CSV de series | Banco de España
 summary: Unas 12.800 series (tipos de interés y de cambio, euríbor, crédito, deuda pública, balanza de pagos, cuentas financieras) por API JSON, por CSV de cada cuadro del Boletín Estadístico y por ZIP de capítulo. Los códigos de serie se localizan en catálogos CSV.
 !! rango=MAX da como mucho las 1.000 observaciones más recientes: el paro registrado D_1JA0D000 (1.118 desde 1933-07) llega solo desde 1943-05; pedir los años previos con rango=1933 a rango=1943, uno por llamada.
+code: fuentes_publicas.clientes.consulta | consulta.coyuntura(): último Euríbor, dólar, deuda PDE, bono a 10 años y paro registrado con periodo y serie, y la prima de riesgo en el último mes común | mcp: coyuntura
 access: api-rest, download | auth: none | formats: json, csv, xlsx, zip | update: daily | status: active | verified: 2026-10-01
 coverage: Desde 1933 en la serie más antigua (paro registrado); cada serie trae su primera observación en el catálogo
 sync.since: 1933 en la serie más antigua; la primera observación de cada serie está en el catálogo
@@ -736,6 +737,7 @@ summary: Acceso programático a las 112 operaciones estadísticas del INE: metad
 !! En DATOS_TABLA nult cuenta periodos de la tabla, publicados o no: 24077 ya trae 2026M09 vacío; pedir nult=2 y quedarse con el último Valor no nulo (2026M08, 104,638), o usar DATOS_SERIE, que con nult=1 da 2026M08.
 !! El último dato puede ser avance y se revisa: IPC290750 da 4,9 en 2026M09 con FK_TipoDato 3 (avance; T3_TipoDato con tip=AM) y 4,3 en 2026M08 definitivo (1); pedir tip=AM y decir el tipo.
 !! PIB, usar las series corregidas de estacionalidad y calendario: 2026T2 da 0,68 % trimestral en CNTR6653 y 4,79 % en la sin corregir CNTR6722 (tabla 67822); la que se publica es la corregida.
+code: fuentes_publicas.clientes.ine_tempus | ine_tempus.datos_tabla(29005, tv={19: ine_tempus.id_municipio('02001')}, nult=2): series sin periodos vacíos; id_municipio da el Id (6124) que pide tv | pcaxis.tabla(24077): una tabla jaxiT3 en filas con los números convertidos; el periodo aún sin publicar sale None, no cero | consulta.coyuntura(): último IPC con su tipo (avance o definitivo), paro EPA y PIB corregido de estacionalidad, cada uno con periodo y serie | mcp: tabla_pcaxis, perfil_municipio, coyuntura
 access: api-rest | auth: none | formats: json, csv | update: daily | status: active | verified: 2026-10-01
 coverage: Según operación; IPC general: índice desde 2002M01 (tabla 24077), variación mensual desde 1961M02 y anual desde 1962M01 (76134)
 sync.since: Según tabla (Anyo_Periodo_ini en TABLAS_OPERACION); en el IPC, variación mensual desde 1961
@@ -798,6 +800,7 @@ related: ine-codigos-territoriales, ine-microdatos
 ## ine-codigos-territoriales
 INE – Códigos de municipios, provincias, comunidades e islas | Instituto Nacional de Estadística (INE)
 summary: Relación oficial anual de los 8.132 municipios con código INE (provincia, municipio y dígito de control), comunidades autónomas, provincias e islas, y Nomenclátor de entidades singulares, núcleos y diseminados con su población. Es la clave para cruzar cualquier dataset territorial español.
+code: fuentes_publicas.clientes.consulta | consulta.buscar_municipio('Coruña, A'): su fila de datos/municipios.csv (ine, dc, SIGPAC con capitales 900, DIR3, NIF, NUTS3, Id de Tempus) por nombre o código | mcp: perfil_municipio
 access: download | auth: none | formats: xlsx, xls, csv, txt, zip, html | update: annual | status: active | verified: 2026-10-01
 coverage: Relación a 1 de enero desde 2001 y modificaciones desde 2000; Nomenclátor de 1981, 1991, 1996 y 1998 a 2025
 license: Reutilización libre con cita de la fuente
@@ -1115,10 +1118,11 @@ SEPE – Paro registrado, contratos y prestaciones | Servicio Público de Empleo
 summary: Paro registrado, contratos, demandantes y prestaciones, mensuales: todos los municipios con código INE en un CSV anual desde 2006, avances en xls con URL fija y series desde 2001, y desglose por CNAE, sexo y edad de capitales y municipios de más de 20.000.
 !! «<5» es secreto (1 a 4), no cero: un sexo sale restando el otro del TOTAL (Abengibre agosto 2026, hombres 18 - 13 = 5) y la provincia, de su fila de total (Albacete 20.710, no los 20.698 de sumar municipios).
 !! En el CSV, Oza-Cesuras (15902) sale con 0 y Cerdedo-Cotobade (36902) sin fila; su dato va en los códigos previos a la fusión. Agosto 2026, 15026 + 15063 = 46 + 95 = 141 parados; 36011 + 36012 = 35 + 134 = 169.
+code: fuentes_publicas.clientes.sepe | sepe.municipio('15902'): serie mensual del año de un municipio por código INE; suma los códigos previos a la fusión (141 parados en 2026-08) y «<5» da None | sepe.filas('contratos', 2025): las 97.620 filas del año (mes, ine, municipio y medidas en enteros) del CSV en cp1252 con línea de título; caché con ETag | mcp: perfil_municipio
 access: download, portal | auth: none | formats: csv, xls, pdf, html, rss | update: monthly | status: active | verified: 2026-10-01
 coverage: Todos los municipios desde mayo de 2005 en xls y enero de 2006 en CSV; por actividad, capitales y más de 45.000 habitantes desde 2009 y de 20.000 a 45.000 desde 2017; series nacionales desde enero de 2001
 sync.since: Enero de 2006 en los CSV de datos abiertos (el de 2005 da 404); mayo de 2005 en el xls mensual
-sync.full: Un CSV por año y conjunto (Paro, Contratos, Dtes_empleo), 21 por conjunto de 2006 a 2026; scripts/clientes/sepe.py los lee y cachea.
+sync.full: Un CSV por año y conjunto (Paro, Contratos, Dtes_empleo), 21 por conjunto de 2006 a 2026.
 sync.size: De 9,7 a 10,1 MB un año entero de paro (2006, 2007, 2015) y 6,7 MB el de 2026 con ocho meses; unos 200 MB por conjunto.
 sync.new: El CSV del año en curso se reescribe al publicar cada mes (Last-Modified 07/09/2026 con agosto) y responde 304 a If-None-Match; la página xls del mes siguiente da 404 hasta que sale.
 license: Reutilización libre con cita de la fuente
@@ -1152,7 +1156,6 @@ ids: ine-municipio, cnae
 ! Desde 2020 los ficheros municipales cuelgan de /HomeSepe/dam/jcr:{uuid}/ con uuid nuevo cada mes y hay páginas con nombre irregular (2025/Octubre.html, 2019/noviembre.html); tomar los enlaces de la página.
 ! Los xls de avance se sobreescriben cada mes en la misma URL; guardar copia fechada para el histórico de publicaciones.
 ! Paro registrado no es lo mismo que desempleo EPA (INE); no comparar niveles.
-+ Paro, contratos o demandantes de un municipio con código INE, del CSV anual de datos abiertos, sin leer xls; scripts/clientes/sepe.py municipio('28005') da la serie del año y suma los códigos fusionados.
 related: ine-api-tempus, segsocial-estadisticas, ine-codigos-territoriales, mites-estadisticas
 
 # SECTOR gobierno-abierto-administracion: Gobierno abierto, transparencia y organización administrativa
@@ -3350,6 +3353,7 @@ related: educacion-estadisticas-ruct, ine-microdatos
 Ministerio del Interior – Portal Estadístico de Criminalidad (balances y series anuales) | Secretaría de Estado de Seguridad
 summary: Balances trimestrales acumulados de infracciones penales por tipología (CCAA, provincia, isla y municipio) desde 2016, con comparación interanual, y series anuales 2010-2025 de hechos conocidos, esclarecidos, detenciones y victimizaciones por CCAA y provincia; PC-Axis con descarga CSV, px y xlsx.
 !! Los balances son acumulados desde enero; abril-junio es 09006 (enero-junio) menos 09003 (enero-marzo) en la fila III. TOTAL INFRACCIONES PENALES (Barcelona 2026, 75.461 - 37.913 = 37.548).
+code: fuentes_publicas.clientes.pcaxis | pcaxis.tabla(url_tabla_htm): el balance en filas (28.842 en enero-junio) con números convertidos, leído en UTF-8 aunque diga ISO-8859-15 | consulta.perfil_municipio('08019')['criminalidad']: infracciones penales del municipio por periodo, acumuladas desde enero | mcp: tabla_pcaxis, perfil_municipio
 access: download, portal | auth: none | formats: csv, px, xlsx, html | update: quarterly | status: active | verified: 2026-10-01
 coverage: Balances 2016-1 a 2026-2 (acumulados desde enero); series anuales 2010-2025
 license: Reutilización libre con cita de la fuente

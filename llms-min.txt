@@ -35,11 +35,11 @@ Lee sus alerts antes de dar una cifra: aemps-cima-api, ayuntamiento-barcelona-da
 Con * las que traen code: módulo, llamada y herramienta que ya las resuelven.
 
 - Legislación y boletines oficiales: bocyl-rss, boe-api-legislacion-consolidada*, boe-api-sumario*, boe-eli, boe-feeds, borme-api-sumario*
-- Economía, finanzas y mercados: airef-datos, bde-estadisticas, cnmv-registros, ico-datos, tesoro-estadisticas
+- Economía, finanzas y mercados: airef-datos, bde-estadisticas*, cnmv-registros, ico-datos, tesoro-estadisticas
 - Hacienda, tributos y presupuestos: aeat-estadisticas, aeat-servicios-web, hacienda-central-informacion, hacienda-ovef, igae-ejecucion-presupuestaria, sepg-presupuestos-generales-estado
-- Estadística oficial: comunidad-madrid-estadistica-api, idescat-api, ieca-api-badea, ine-api-tempus, ine-codigos-territoriales, ine-microdatos, ive-pegv-bancos-datos
+- Estadística oficial: comunidad-madrid-estadistica-api, idescat-api, ieca-api-badea, ine-api-tempus*, ine-codigos-territoriales*, ine-microdatos, ive-pegv-bancos-datos
 - Contratación pública y subvenciones: bdns-api*, hacienda-registro-licitadores, placsp-datos-abiertos*
-- Empleo y Seguridad Social: mites-estadisticas, segsocial-estadisticas, sepe-estadisticas
+- Empleo y Seguridad Social: mites-estadisticas, segsocial-estadisticas, sepe-estadisticas*
 - Gobierno abierto, transparencia y organización administrativa: ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, comunidad-madrid-datos-abiertos, datos-gob-es-api, dir3-directorio, face-facturas, gencat-dades-obertes, gva-dadesobertes-api, jcyl-datos-abiertos, junta-andalucia-datos-abiertos, pag-administracion-gob-es, transparencia-portal
 - Territorio, catastro y cartografía: catastro-ovc, cnig-centro-descargas, idecyl-servicios, idee-servicios, ine-cartografia-censal
 - Meteorología y clima: aemet-opendata, aemet-otros-servicios
@@ -51,7 +51,7 @@ Con * las que traen code: módulo, llamada y herramienta que ya las resuelven.
 - Transporte y movilidad: aesa-aviacion, dgt-datex-trafico, dgt-estadisticas, mitma-boletin-estadistico-online, mitma-opendata-movilidad, puertos-estado-datos, renfe-datos-abiertos
 - Comercio exterior, industria y propiedad industrial: datacomex, datainvex, mincotur-industria-turismo, oepm-invenes
 - Educación y universidades: centros-docentes-ccaa, educacion-estadisticas-ruct, inee-bases-datos
-- Justicia, interior y seguridad: interior-criminalidad
+- Justicia, interior y seguridad: interior-criminalidad*
 - Cultura y patrimonio: bne-datos, cultura-culturabase
 - Demografía, migraciones y sociedad: cis-estudios, igualdad-estadisticas-violencia-genero, imserso-dependencia, inmujeres-mujeres-cifras
 - Vivienda y urbanismo: certificados-eficiencia-energetica, mivau-precios-vivienda-alquiler, viviendas-uso-turistico

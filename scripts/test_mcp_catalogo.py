@@ -63,7 +63,10 @@ async def main() -> None:
             fuentes = b["fichas"]
             assert fuentes and fuentes[0]["id"] == "sepe-estadisticas", [f["id"] for f in fuentes]
             base = {"id", "name", "sector", "access", "auth", "status", "verified", "summary"}
-            assert set(fuentes[0]) == base | {"alerts"} and fuentes[0]["alerts"], fuentes[0]  # sepe-estadisticas tiene alerts
+            assert set(fuentes[0]) == base | {"alerts", "code"} and fuentes[0]["alerts"], fuentes[0]  # sepe-estadisticas tiene alerts
+            assert fuentes[0]["code"] == "clientes.sepe", fuentes[0]  # y cliente propio: el puntero es el módulo
+            con_code = {s["id"] for s in catalog["sources"] if s.get("code")}
+            assert all(("code" in f) == (f["id"] in con_code) for f in fuentes), fuentes  # code solo si la ficha lo tiene
             assert b["recetas"] and b["necesidades"] and b["identificadores"], list(b)
             print("buscar('paro municipio'):", {k: len(v) for k, v in b.items()})
             filtradas = payload(await session.call_tool("buscar", {"consulta": "precios", "sector": "energia", "limite": 3}))["fichas"]

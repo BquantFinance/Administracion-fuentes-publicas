@@ -11,6 +11,12 @@ summary: >-
   detenciones y victimizaciones por CCAA y provincia; PC-Axis con descarga CSV, px y xlsx.
 alerts:
   - Los balances son acumulados desde enero; abril-junio es 09006 (enero-junio) menos 09003 (enero-marzo) en la fila III. TOTAL INFRACCIONES PENALES (Barcelona 2026, 75.461 - 37.913 = 37.548).
+code:
+  module: fuentes_publicas.clientes.pcaxis
+  use:
+    - "pcaxis.tabla(url_tabla_htm): el balance en filas (28.842 en enero-junio) con números convertidos, leído en UTF-8 aunque diga ISO-8859-15"
+    - "consulta.perfil_municipio('08019')['criminalidad']: infracciones penales del municipio por periodo, acumuladas desde enero"
+  mcp: [tabla_pcaxis, perfil_municipio]
 access: [download, portal]
 auth: none
 formats: [csv, px, xlsx, html]
