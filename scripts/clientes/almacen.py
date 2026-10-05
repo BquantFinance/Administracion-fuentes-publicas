@@ -581,6 +581,12 @@ def cobertura(dir: str | os.PathLike | None = None) -> dict:
     return out
 
 
+PISTA_VERSIONES = ("placsp y placsp_adjudicaciones tienen una fila por versión (cada cambio de estado) y las bajas como filas "
+                   "borrado: para contar o sumar expedientes, placsp_ultimo (una por id, con anulada y anulada_el) y adjudicaciones_ultimo")
+PISTA_FEED = ("las tablas de PLACSP juntan las tres sindicaciones: feed '643' son los perfiles alojados, '1044' las plataformas "
+              "autonómicas agregadas y '1143' los contratos menores; filtrar por feed")
+
+
 def sql(consulta: str, dir: str | os.PathLike | None = None, limite: int = 200) -> dict:
     """Ejecuta una consulta de solo lectura y devuelve columnas y filas (fechas como texto)."""
     con = conectar(dir)
@@ -589,9 +595,17 @@ def sql(consulta: str, dir: str | os.PathLike | None = None, limite: int = 200) 
     filas = cur.fetchmany(limite + 1)
     out = {"columnas": cols, "filas": [[v if isinstance(v, (int, float, str, bool, list)) or v is None else str(v) for v in f]
                                        for f in filas[:limite]], "truncado": len(filas) > limite}
+    pistas = []
     if out["truncado"]:  # sexta tanda: un agente contó constituciones sobre 500 de 626 filas sin mirar truncado
         out["filas_totales"] = con.execute(f"SELECT count(*) FROM ({consulta.strip().rstrip(';')})").fetchone()[0]
-        out["pista"] = "faltan filas: contar o sumar en el propio SQL (count, sum, group by) en vez de traerlas"
+        pistas.append("faltan filas: contar o sumar en el propio SQL (count, sum, group by) en vez de traerlas")
+    if re.search(r"\bplacsp(_adjudicaciones)?\b", consulta, re.I):  # sexta tanda: sumaban versiones y anuladas
+        pistas.append(PISTA_VERSIONES)
+    if re.search(r"\b(placsp|placsp_adjudicaciones|placsp_ultimo|adjudicaciones_ultimo)\b", consulta, re.I) \
+            and not re.search(r"\bfeed\b", consulta, re.I):  # séptima tanda: 163 obras del 01/10 por 126 al sumar los tres feeds
+        pistas.append(PISTA_FEED)
+    if pistas:
+        out["pista"] = "; ".join(pistas)
     return out
 
 
@@ -704,6 +718,8 @@ def main(argv: list[str] | None = None) -> int:
         print("\t".join(r["columnas"]))
         for f in r["filas"]:
             print("\t".join("" if v is None else str(v) for v in f))
+        if r.get("pista"):
+            print("pista:", r["pista"], file=sys.stderr)
     elif a.orden == "empresa":
         print(json.dumps(empresa(a.nif, a.dir), ensure_ascii=False, indent=1, default=str))
     elif a.orden == "estado":

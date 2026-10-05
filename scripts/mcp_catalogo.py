@@ -518,9 +518,10 @@ def perfil_municipio(municipio: str | list[str], solo_codigos: bool = False) -> 
 @herramienta
 def almacen_sql(consulta: str, limite: int = 100) -> dict:
     """SQL de solo lectura (DuckDB) sobre el almacén local en Parquet si existe: tablas boe, borme, bdns, placsp,
-    placsp_adjudicaciones y carburantes (PLACSP con una fila por versión), y vistas placsp_ultimo (una por id, con
-    anulada) y adjudicaciones_ultimo; borme.actos es lista (list_contains(actos, 'Constitución')). Devuelve columnas,
-    filas y cobertura; sin almacén, cómo crearlo."""
+    placsp_adjudicaciones y carburantes (PLACSP con una fila por versión y columna feed: 643 perfiles alojados, 1044
+    plataformas agregadas, 1143 menores), y vistas placsp_ultimo (una por id, con anulada) y adjudicaciones_ultimo;
+    borme.actos es lista (list_contains(actos, 'Constitución')). Devuelve columnas, filas y cobertura; sin almacén,
+    cómo crearlo."""
     def _ejecutar():
         try:
             from .clientes import almacen
@@ -532,13 +533,11 @@ def almacen_sql(consulta: str, limite: int = 100) -> dict:
                     "--desde AAAA-MM-DD (guides/almacen.md); FUENTES_ALMACEN apunta a otra carpeta"}
         r = dict(almacen.sql(consulta, d, limite), cobertura=almacen.cobertura(d))
         if re.search(r"\bunnest\b", consulta, re.I) and re.search(r"\b(sum|avg|count)\s*\(", consulta, re.I):
-            # sexta tanda: SUM con CROSS JOIN UNNEST(cpv) contó cada expediente una vez por código CPV (767 M€ por 395,7)
+            # sexta tanda: SUM con CROSS JOIN UNNEST(cpv) contó cada expediente una vez por código CPV (767 M€ por 395,7);
+            # las pistas de versiones y de feed las pone almacen.sql
             r["pista"] = ("UNNEST repite la fila por cada elemento de la lista y las sumas cuentan varias veces cada "
-                          "expediente: filtrar con list_filter(cpv, x -> x LIKE '45%') <> [] y agregar sin UNNEST")
-        elif re.search(r"\bplacsp(_adjudicaciones)?\b", consulta, re.I):  # sexta tanda: sumaban versiones y anuladas
-            r["pista"] = ("placsp y placsp_adjudicaciones tienen una fila por versión (cada cambio de estado) y las bajas como "
-                          "filas borrado: para contar o sumar expedientes, placsp_ultimo (una por id, con anulada y anulada_el) "
-                          "y adjudicaciones_ultimo")
+                          "expediente: filtrar con list_filter(cpv, x -> x LIKE '45%') <> [] y agregar sin UNNEST"
+                          + ("; " + r["pista"] if r.get("pista") else ""))
         return r
     return _datos(_ejecutar)
 

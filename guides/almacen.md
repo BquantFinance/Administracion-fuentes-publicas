@@ -28,7 +28,8 @@ deja huecos y repetir no baja nada dos veces. Con `pip install` el comando es `f
 | `placsp_adjudicaciones` | lote y adjudicatario (NIF, nombre, importes, pyme, ofertas) | id, updated, n | updated (UTC) |
 | `carburantes` | estación y día, con los 23 productos en columnas | fecha, ideess | fecha |
 
-`placsp_ultimo` y `adjudicaciones_ultimo` dejan solo el último estado de cada expediente: el feed trae una entrada por
+Las tablas de PLACSP juntan los tres feeds con la columna `feed` (643 perfiles alojados, 1044 plataformas agregadas, 1143
+menores): contar sin filtrar mezcla las tres (el 01/10/2026, 163 licitaciones de obras por 126 del 643). `placsp_ultimo` y `adjudicaciones_ultimo` dejan solo el último estado de cada expediente: el feed trae una entrada por
 cambio de estado. Desde la 0.9.0, `fecha_publicacion` es la del anuncio de licitación (DOC_CN); un almacén anterior
 la tenía del primer anuncio, a menudo el de adjudicación, y relee PLACSP en la siguiente `sync` (los ZIP quedan en
 `zips_por_releer` de estado.json; la cobertura lo avisa hasta entonces). `placsp_ultimo` es la última versión no anulada, con `anulada`, `anulada_el` y `motivo_baja` (las bajas

@@ -73,7 +73,7 @@
     },
     {
       "name": "almacen_sql",
-      "description": "SQL de solo lectura (DuckDB) sobre el almacén local en Parquet si existe: tablas boe, borme, bdns, placsp, placsp_adjudicaciones y carburantes (PLACSP con una fila por versión), y vistas placsp_ultimo (una por id, con anulada) y adjudicaciones_ultimo; borme.actos es lista (list_contains(actos, 'Constitución'))."
+      "description": "SQL de solo lectura (DuckDB) sobre el almacén local en Parquet si existe: tablas boe, borme, bdns, placsp, placsp_adjudicaciones y carburantes (PLACSP con una fila por versión y columna feed: 643 perfiles alojados, 1044 plataformas agregadas, 1143 menores), y vistas placsp_ultimo (una por id, con anulada) y adjudicaciones_ultimo; borme.actos es lista (list_contains(actos, 'Constitución'))."
     },
     {
       "name": "ckan_buscar",

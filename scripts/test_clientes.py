@@ -339,6 +339,9 @@ def almacen_volcado_y_solo_lectura():
             {"feed": "643", "id": "B", "updated": "2026-10-01 11:00:00", "borrado": False, "estado": "PUB", "importe_sin_iva": 50.0}]})
         alm.volcar()
         u = almacen.sql("select id, importe_sin_iva, anulada, motivo_baja from placsp_ultimo order by id", d)["filas"]
+        p = almacen.sql("select count(*) from placsp", d)["pista"]  # séptima tanda: los tres feeds juntos y las versiones
+        assert "feed '643'" in p and "una fila por versión" in p
+        assert "pista" not in almacen.sql("select count(*) from placsp_ultimo where feed = '643'", d)
         assert u == [["A", 110.0, True, "ANULADA"], ["B", 50.0, False, None]], u
         r = almacen.sql("select * from range(5);", d, 3)  # truncado con el total, y no truncado si caben justas
         assert r["truncado"] and r["filas_totales"] == 5 and len(r["filas"]) == 3
