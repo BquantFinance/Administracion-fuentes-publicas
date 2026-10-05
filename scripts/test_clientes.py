@@ -314,6 +314,18 @@ def almacen_volcado_y_solo_lectura():
             raise AssertionError("leyó fuera del almacén")
         except duckdb.Error as exc:
             assert "disabled" in str(exc)
+    with tempfile.TemporaryDirectory() as d:  # almacén de la versión 1: relee PLACSP y la cobertura avisa mientras tanto
+        Path(d, "placsp").mkdir()
+        Path(d, "estado.json").write_text(json.dumps({"version": 1, "placsp": {"paginas": {"643": ["u1"]}, "zips": ["643_202609"]}}))
+        with contextlib.redirect_stderr(io.StringIO()):
+            alm = almacen.Almacen(d)
+        assert alm.estado["version"] == 2 and "paginas" not in alm.estado["placsp"]
+        assert alm.estado["placsp"]["zips_por_releer"] == ["643_202609"] and "zips" not in alm.estado["placsp"]
+        alm.añadir({"placsp": [{"feed": "643", "id": "X", "updated": "2026-09-30 10:00:00", "borrado": False}]})
+        alm.volcar()
+        alm.guardar_estado()
+        assert almacen.cobertura(d)["placsp"]["aviso"] == almacen.AVISO_V1
+    assert almacen.Almacen(tempfile.mkdtemp()).estado == {"version": 2}  # uno nuevo nace en la 2, sin aviso
     with tempfile.TemporaryDirectory() as d:  # solo BDNS, sin PLACSP: la vista empresas rompía toda consulta (tanda 6)
         alm = almacen.Almacen(d)
         alm.añadir({"bdns": [almacen.fila_bdns({"idConcesion": 7, "beneficiario": "B12345678 EJEMPLO SL", "importe": 100,

@@ -307,12 +307,25 @@ def _mes(tabla: str, fila: dict) -> str | None:
     return str(v)[:7] if v else None
 
 
+# 2 (2026-10-05): fecha_publicacion de PLACSP es la del anuncio de licitación (DOC_CN); en la 1 era la del primer
+# anuncio, a menudo el de adjudicación. Un almacén de la 1 relee PLACSP en la siguiente sync (las filas nuevas ganan).
+ESQUEMA = 2
+AVISO_V1 = ("fecha_publicacion de PLACSP de una versión anterior (primer anuncio, a menudo el de adjudicación, no la "
+            "licitación): sync o zip-placsp para releer")
+
+
 class Almacen:
     def __init__(self, dir: str | os.PathLike | None = None):
         self.dir = directorio(dir)
         self.dir.mkdir(parents=True, exist_ok=True)
         self.ruta_estado = self.dir / "estado.json"
-        self.estado = json.loads(self.ruta_estado.read_text()) if self.ruta_estado.exists() else {"version": 1}
+        self.estado = json.loads(self.ruta_estado.read_text()) if self.ruta_estado.exists() else {"version": ESQUEMA}
+        if self.estado.get("version", 1) < 2 and self.estado.get("placsp"):
+            p = self.estado["placsp"]
+            p["zips_por_releer"] = sorted(set(p.get("zips_por_releer", [])) | set(p.pop("zips", [])))
+            p.pop("paginas", None)
+            print(f"almacén: {AVISO_V1}; ZIP por releer: {', '.join(p['zips_por_releer']) or 'ninguno'}", file=sys.stderr)
+        self.estado["version"] = max(self.estado.get("version", 1), ESQUEMA)
         self.buffer: dict[tuple[str, str], list[dict]] = {}
         self.filas_en_buffer = 0
 
@@ -461,6 +474,9 @@ class Almacen:
                             self.volcar()
                 self.volcar()
                 hechos.append(nombre)
+                por_releer = self.estado["placsp"].get("zips_por_releer", [])
+                if nombre in por_releer:
+                    por_releer.remove(nombre)
                 self.guardar_estado()
                 log(f"placsp {feed} {periodo}: {n} entradas")
             finally:
@@ -546,6 +562,8 @@ def cobertura(dir: str | os.PathLike | None = None) -> dict:
             out.setdefault(f, {})["dias_cargados"] = f"{len(dias)} ({dias[0]}..{dias[-1]})"
     if est.get("placsp"):
         out.setdefault("placsp", {})["zips"] = est["placsp"].get("zips", [])
+    if "placsp" in out and (est.get("version", 1) < 2 or est.get("placsp", {}).get("zips_por_releer")):
+        out["placsp"]["aviso"] = AVISO_V1
     # Las tablas que no se cargan por días (PLACSP por páginas del feed o ZIP) solo decían el mes: un almacén que empieza
     # el 30/09 decía «2026-09..2026-10» y una suma de septiembre salía con un solo día sin aviso.
     sin_dias = [t for t in out if t not in POR_DIA and TABLAS[t].orden and "dias_cargados" not in out[t]]
