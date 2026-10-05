@@ -22,11 +22,12 @@ TOOLS = {"buscar", "ficha", "codigos", "descargar", "tabla_pcaxis", "boe_sumario
 PRESUPUESTO = {"definiciones": 6500, "buscar": 7000, "empresa_nif": 9000, "perfil_municipio": 4000, "tabla_pcaxis": 4000}
 
 
-def medir(nombre: str, result) -> None:
+def medir(nombre: str, result) -> int:
     texto = "".join(c.text for c in result.content if hasattr(c, "text"))
     assert "\n  " not in texto, f"{nombre} devuelve JSON con sangría"
     if nombre in PRESUPUESTO:
         assert len(texto) < PRESUPUESTO[nombre], f"{nombre} ocupa {len(texto)} caracteres (presupuesto {PRESUPUESTO[nombre]})"
+    return len(texto)
 
 
 def payload(result):
@@ -57,7 +58,7 @@ async def main() -> None:
 
             assert names == TOOLS, f"herramientas distintas: sobran {names - TOOLS}, faltan {TOOLS - names}"
             res = await session.call_tool("buscar", {"consulta": "paro municipio"})
-            medir("buscar", res)
+            print(f"buscar('paro municipio'): {medir('buscar', res)} caracteres (presupuesto {PRESUPUESTO['buscar']})")
             b = payload(res)
             fuentes = b["fichas"]
             assert fuentes and fuentes[0]["id"] == "sepe-estadisticas", [f["id"] for f in fuentes]
@@ -77,6 +78,12 @@ async def main() -> None:
             assert f["id"] == "ine-api-tempus" and f["endpoints"] and f["gotchas"]
             assert next(iter(f)) == "alerts" and f["alerts"], list(f)[:3]  # las alertas, lo primero
             print(f"ficha('ine-api-tempus'): {len(f['endpoints'])} endpoints, {len(f['gotchas'])} gotchas, verified {f['verified']}")
+            # el código que ya trae la fuente, justo tras las alertas en ficha y como puntero corto en buscar
+            pl = payload(await session.call_tool("ficha", {"id": "placsp-datos-abiertos"}))
+            assert list(pl)[:2] == ["alerts", "code"] and pl["code"]["module"] == "fuentes_publicas.clientes.placsp", list(pl)[:3]
+            bo = payload(await session.call_tool("buscar", {"consulta": "sociedades constituidas BORME"}))["fichas"][0]
+            assert bo["id"] == "borme-api-sumario" and bo["code"] == "clientes.boe", bo
+            print(f"ficha('placsp-datos-abiertos').code: {pl['code']['module']}, {len(pl['code']['use'])} llamadas; buscar BORME: {bo['code']}")
 
             missing = payload(await session.call_tool("ficha", {"id": "ine-tempus"}))
             assert "error" in missing and "ine-api-tempus" in missing["sugerencias"], missing

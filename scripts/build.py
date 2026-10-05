@@ -13,30 +13,14 @@ Salidas (no editar a mano):
 """
 from __future__ import annotations
 
-import ast
 import json
 import re
 from collections import defaultdict
 from datetime import date
 
-from common import REPO_RAW, ROOT, load_indices, load_sources, load_vocab
+from common import REPO_RAW, ROOT, herramientas_mcp, load_indices, load_sources, load_vocab, puntero_code
 
 REPO_URL = "https://github.com/BquantFinance/Administracion-fuentes-publicas"
-
-
-def herramientas_mcp() -> list[dict]:
-    """Nombre, firma y descripción de cada @mcp.tool() de scripts/mcp_catalogo.py, leídos sin importar el servidor."""
-    tree = ast.parse((ROOT / "scripts" / "mcp_catalogo.py").read_text(encoding="utf-8"))
-    out = []
-    for n in tree.body:
-        if isinstance(n, ast.FunctionDef) and any(ast.unparse(d) in ("herramienta", "mcp.tool()") for d in n.decorator_list):
-            args = n.args.args
-            defaults = [None] * (len(args) - len(n.args.defaults)) + list(n.args.defaults)
-            firma = ", ".join(a.arg + (f"={ast.unparse(d)}" if d is not None else "") for a, d in zip(args, defaults))
-            doc = " ".join((ast.get_docstring(n) or "").split())
-            primera = doc.split(". ")[0].rstrip(".") + "."
-            out.append({"name": n.name, "firma": f"{n.name}({firma})", "doc": doc, "resumen": primera})
-    return out
 
 
 def auto(texto: str, marca: str, contenido: str) -> str:
@@ -65,6 +49,9 @@ def render_source_compact(s: dict) -> str:
     lines.append(f"summary: {s['summary'].strip()}")
     for a in s.get("alerts", []) or []:
         lines.append(f"!! {a}")
+    c = s.get("code")
+    if c:  # tras las alertas, como en ficha(): el código que ya trae la fuente, antes de endpoints y trampas
+        lines.append("code: " + " | ".join([c["module"], *c["use"]] + ([f"mcp: {', '.join(c['mcp'])}"] if c.get("mcp") else [])))
     lines.append(
         f"access: {fmt_list(s['access'])} | auth: {s['auth']} | formats: {fmt_list(s['formats'])} "
         f"| update: {s['update']} | status: {s['status']} | verified: {s.get('verified') or 'pending'}"
@@ -351,7 +338,7 @@ def main() -> None:
         "",
         f"- Con MCP: uvx --from git+{REPO_URL} mcp-catalogo. buscar(texto) mira a la vez fichas, recetas, necesidades, productos e identificadores; ficha(id) da endpoints, ejemplos y trampas. Herramientas: " + ", ".join(h["name"] for h in tools) + f" ({REPO_RAW}/guides/servidor-mcp.md).",
         f"- Sin MCP: este fichero para orientarse y la ficha entera antes de llamar: {REPO_RAW}/sources/<sector>/<id>.yaml (alerts primero, endpoints con example y returns, sync, quirks, gotchas). Todo junto en {REPO_RAW}/catalog.json o en texto en {REPO_RAW}/llms-full.txt.",
-        f"- Código: pip install \"fuentes-publicas-mcp @ git+{REPO_URL}\". scripts/clientes trae la sesión HTTP con las CA de FNMT y detección de WAF, clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC sin topes silenciosos, cargadores de BOE, BDNS, INE, SEPE y PLACSP, y el almacén local en Parquet (almacen.py). Proyectos que funcionan en ejemplos/.",
+        f"- Código: pip install \"fuentes-publicas-mcp @ git+{REPO_URL}\". El campo code de una ficha da el módulo, la llamada y la herramienta MCP que ya la traen resuelta: úsalo antes de escribir un parser. scripts/clientes trae la sesión HTTP con las CA de FNMT y detección de WAF, clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC sin topes silenciosos, cargadores de BOE, BDNS, INE, SEPE y PLACSP, y el almacén local en Parquet (almacen.py). Proyectos que funcionan en ejemplos/.",
         f"- Recursos: municipios con su código en cada sistema ({REPO_RAW}/datos/municipios.csv), códigos que son parámetros ({REPO_RAW}/indices/codigos.yaml), licencias y datos personales ({REPO_RAW}/guides/reutilizacion.md), almacén local ({REPO_RAW}/guides/almacen.md), cliente HTTP ({REPO_RAW}/guides/cliente-http.md).",
         "",
         "## Qué se puede construir hoy",
@@ -398,12 +385,12 @@ def main() -> None:
             if s["source"] not in srcs:
                 srcs.append(s["source"])
         llms.append(f"- {r['id']}: {r['intent']} → {', '.join(srcs)}")
-    llms += ["", "## Sectores", ""]
+    llms += ["", "## Sectores", "", "Entre paréntesis, el módulo o la herramienta que ya trae la fuente (code de su ficha).", ""]
     for sector, title in vocab["sector"].items():
         items = by_sector.get(sector)
         if not items:
             continue
-        ids = ", ".join(s["id"] for s in items)
+        ids = ", ".join(s["id"] + (f" ({p})" if (p := puntero_code(s.get("code"))) else "") for s in items)
         llms.append(f"- [{title}]({REPO_RAW}/sources/{sector}/README.md): {ids}")
     llms += ["", "## Guías transversales", ""]
     for g in sorted((ROOT / "guides").glob("*.md")):
@@ -420,16 +407,17 @@ def main() -> None:
     mini += llms[llms.index("## Reglas rápidas antes de programar contra una fuente"): llms.index("## Trampas silenciosas")]
     con_alertas = [s["id"] for s in sorted(sources, key=lambda x: x["id"]) if s.get("alerts")]
     mini += ["## Fichas con trampas silenciosas", "", "Lee sus alerts antes de dar una cifra: " + ", ".join(con_alertas) + ".", ""]
-    mini += ["## Fichas por sector", ""]
+    # una sola línea de más: el * marca las fichas con code (módulo y llamada en la ficha), sin repetir sus ids
+    mini += ["## Fichas por sector", "", "Con * las que traen code: módulo, llamada y herramienta que ya las resuelven.", ""]
     for sector, title in vocab["sector"].items():
         items = by_sector.get(sector)
         if items:
-            mini.append(f"- {title}: " + ", ".join(s["id"] for s in items))
+            mini.append(f"- {title}: " + ", ".join(s["id"] + ("*" if s.get("code") else "") for s in items))
     mini.append("")
     (ROOT / "llms-min.txt").write_text("\n".join(mini), encoding="utf-8")
 
     # llms-full.txt
-    full = [llms[0], "", llms[2], "", f"Fuentes: {len(sources)} · Generado: {date.today().isoformat()} · Formato: un bloque por fuente; '!!' marca trampas silenciosas (datos incompletos o distintos sin error); '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.", ""]
+    full = [llms[0], "", llms[2], "", f"Fuentes: {len(sources)} · Generado: {date.today().isoformat()} · Formato: un bloque por fuente; '!!' marca trampas silenciosas (datos incompletos o distintos sin error); 'code:' es el módulo de fuentes_publicas.clientes, las llamadas y las herramientas MCP que ya traen la fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.", ""]
     for sector, title in vocab["sector"].items():
         items = by_sector.get(sector)
         if not items:

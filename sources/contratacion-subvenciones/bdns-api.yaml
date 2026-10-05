@@ -13,6 +13,14 @@ alerts:
   - "terceros corta en 150 filas sin aviso y cuenta una por cada forma del nombre: busqueda=indra dio 150 (27 empresas y 109 personas físicas), así que un NIF puede faltar; afinar el texto o buscar por NIF."
   - La exportación sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso; pedir page=0&pageSize=10000 (tope) y seguir con page=1, 2... hasta una página con menos filas.
   - Las concesiones caducan a los 4 años naturales y las de personas físicas tras el siguiente (RD 130/2019 art. 7.8); hoy fechaDesde=01/01/2021&fechaHasta=31/12/2021 da totalElements 0. Para series, copia propia.
+code:
+  module: fuentes_publicas.clientes.bdns
+  use:
+    - "bdns.altas('2026-10-02'): las 12.447 concesiones dadas de alta ese día, de cualquier fecha de concesión; no pierde las tardías"
+    - "bdns.buscar('concesiones', nifCif='Q1132001G'): las 516 filas de todas las páginas con Accept JSON, fechas dd/mm/aaaa y reintento en mantenimiento"
+    - "bdns.exportar('concesiones', fechaDesde='2026-10-01', fechaHasta='2026-10-01'): las 816 filas del CSV en cp1252 (sin pageSize, 50)"
+    - "bdns.terceros('el albercial'): NIF y nombres sin personas físicas; tope=True si cortó en 150"
+  mcp: [empresa_nif, almacen_sql]
 access: [api-rest, download, portal]
 auth: none
 formats: [json, csv, xlsx]
@@ -71,7 +79,6 @@ gotchas:
   - "Responde a veces 200 con codigo ERR_MANTENIMIENTO_BBDD (Aplicación en Mantenimiento) y sin content tras 60 s (ayudasestado de un día, 2026-10-05); leerlo como página vacía da 0 filas: comprobar content y reintentar."
 tips:
   - numeroConvocatoria (código BDNS) es el identificador estable y público; id es interno y significa cosas distintas en cada colección.
-  - scripts/clientes/bdns.py pagina hasta el final, convierte fechas a dd/mm/aaaa, separa NIF y nombre, exporta con pageSize y trae lo dado de alta en un día (altas).
 related: [placsp-datos-abiertos, dir3-directorio, boe-api-sumario]
 status: active
 verified: "2026-10-05"

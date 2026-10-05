@@ -1560,6 +1560,19 @@
     "La exportación sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso; pedir page=0&pageSize=10000 (tope) y seguir con page=1, 2... hasta una página con menos filas.",
     "Las concesiones caducan a los 4 años naturales y las de personas físicas tras el siguiente (RD 130/2019 art. 7.8); hoy fechaDesde=01/01/2021&fechaHasta=31/12/2021 da totalElements 0. Para series, copia propia."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.bdns",
+    "use": [
+     "bdns.altas('2026-10-02'): las 12.447 concesiones dadas de alta ese día, de cualquier fecha de concesión; no pierde las tardías",
+     "bdns.buscar('concesiones', nifCif='Q1132001G'): las 516 filas de todas las páginas con Accept JSON, fechas dd/mm/aaaa y reintento en mantenimiento",
+     "bdns.exportar('concesiones', fechaDesde='2026-10-01', fechaHasta='2026-10-01'): las 816 filas del CSV en cp1252 (sin pageSize, 50)",
+     "bdns.terceros('el albercial'): NIF y nombres sin personas físicas; tope=True si cortó en 150"
+    ],
+    "mcp": [
+     "empresa_nif",
+     "almacen_sql"
+    ]
+   },
    "access": [
     "api-rest",
     "download",
@@ -1650,8 +1663,7 @@
     "Responde a veces 200 con codigo ERR_MANTENIMIENTO_BBDD (Aplicación en Mantenimiento) y sin content tras 60 s (ayudasestado de un día, 2026-10-05); leerlo como página vacía da 0 filas: comprobar content y reintentar."
    ],
    "tips": [
-    "numeroConvocatoria (código BDNS) es el identificador estable y público; id es interno y significa cosas distintas en cada colección.",
-    "scripts/clientes/bdns.py pagina hasta el final, convierte fechas a dd/mm/aaaa, separa NIF y nombre, exporta con pageSize y trae lo dado de alta en un día (altas)."
+    "numeroConvocatoria (código BDNS) es el identificador estable y público; id es interno y significa cosas distintas en cada colección."
    ],
    "related": [
     "placsp-datos-abiertos",
@@ -1755,6 +1767,18 @@
     "Una licitación sale en cada cambio de estado y el ZIP repite entradas: en 157 páginas del ZIP de 2026-09, 77.948 entradas para 34.895 ids; sumarlas todas da ×2,61 el importe. Una fila por id, la de updated mayor.",
     "Con la IP rechazada por el WAF, atom y ZIP dan 200 con un HTML de 187 bytes que un parser XML lee como feed vacío; el 2026-10-01 desde GitHub placsp.py salió con código 0 y «0 expedientes». Comprobar que la raíz es feed."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.placsp",
+    "use": [
+     "placsp.entradas(max_paginas=1): un dict por entry (estado, órgano con DIR3 y NIF, importes en texto, CPV, adjudicaciones por lote) y las bajas con deleted",
+     "placsp.parse_feed(contenido): (entradas, URL rel=next) de un .atom o de cada fichero de los ZIP; la página del WAF da error, no un feed vacío",
+     "fuentes-almacen sync --fuentes placsp --desde 2026-10-04: Parquet con placsp_ultimo (una fila por id, con anulada) y adjudicaciones_ultimo"
+    ],
+    "mcp": [
+     "almacen_sql",
+     "empresa_nif"
+    ]
+   },
    "access": [
     "feed",
     "download"
@@ -6882,6 +6906,14 @@
     "materias"
    ],
    "summary": "Textos consolidados de normas estatales y autonómicas por bloques (artículos, disposiciones) con todas las versiones de cada bloque, metadatos, análisis (materias, referencias) y vigencia. Listado filtrable por fecha de actualización, búsqueda por título y tablas auxiliares de códigos.",
+   "code": {
+    "module": "fuentes_publicas.clientes.boe",
+    "use": [
+     "boe.normas(desde='2026-09-28', hasta='2026-09-30'): las 60 normas actualizadas en esas fechas, paginando con offset; sin resultados data llega como cadena vacía",
+     "boe.version_vigente(boe.bloque('BOE-A-1978-31229', 'a135')): la versión del bloque vigente hoy y la norma que la introdujo; el bloque solo responde en XML",
+     "boe.metadatos('BOE-A-2026-20250'): vigencia, estado de consolidación y url_eli; None si la disposición no tiene texto consolidado (404)"
+    ]
+   },
    "access": [
     "api-rest"
    ],
@@ -6978,7 +7010,6 @@
    "tips": [
     "Para un artículo concreto, indice para localizar el id de bloque y luego texto/bloque/{id}.",
     "Los códigos numéricos de rango, materia y departamento se traducen con datos-auxiliares.",
-    "scripts/clientes/boe.py pagina el listado (normas), lee metadatos e índice y elige la versión vigente de un bloque (bloque y version_vigente).",
     "El OpenAPI 3.1 está embebido en api.php (variable openApiFile); el documento técnico es APIconsolidada.pdf en /datosabiertos/documentos/."
    ],
    "related": [
@@ -7004,6 +7035,18 @@
     "anuncios"
    ],
    "summary": "Sumario diario del BOE en JSON o XML: todas las disposiciones y anuncios publicados cada día con identificador, título, sección, departamento, epígrafe y URLs de PDF, HTML y XML del texto completo de cada uno.",
+   "code": {
+    "module": "fuentes_publicas.clientes.boe",
+    "use": [
+     "boe.items(boe.sumario('2026-10-03')): un dict por disposición con sección, departamento y url_xml, sea cada nivel objeto o lista; sumario es None sin BOE",
+     "boe.sumarios('2026-09-01', '2026-09-30'): (fecha, sumario) de los 26 días con boletín, saltando domingos (404) y avisando de los 500 de fechas antiguas",
+     "boe.documento('BOE-A-2026-20264'): metadatos, materias, referencias y texto plano del XML de una disposición; KeyError si el id no existe (200 con error)"
+    ],
+    "mcp": [
+     "boe_sumario",
+     "almacen_sql"
+    ]
+   },
    "access": [
     "api-rest"
    ],
@@ -7018,7 +7061,7 @@
    "coverage": "1960-09-",
    "sync": {
     "since": "1960-09-01, primer sumario de la API (1960-08-31 y anteriores dan 404)",
-    "full": "Recorrer /boe/sumario/{AAAAMMDD} de lunes a sábado desde 19600901, unos 20.000 sumarios, y el url_xml de cada item si hace falta el texto; scripts/clientes/boe.py sumarios() salta domingos y trata 404 como día sin boletín.",
+    "full": "Recorrer /boe/sumario/{AAAAMMDD} de lunes a sábado desde 19600901, unos 20.000 sumarios, y el url_xml de cada item si hace falta el texto.",
     "size": "2025 entero medido, 313 sumarios, 97 MB de JSON y 75.720 entradas, con 17,2 GB de PDF (szBytes) y unos 0,5 GB de XML (media de 7,4 KB en 40). Desde 1960, unos 4 GB de sumarios y 3 millones de entradas (un día por trimestre); 0,23 s por sumario.",
     "new": "Pedir el sumario del día; 404 es día sin boletín (domingos). Para avisar sin descargar, los RSS de boe-feeds."
    },
@@ -7072,8 +7115,7 @@
     "xml.php con un id inexistente responde 200 con raíz error (descripcion No se encontró el documento original) y Content-Type text/html; comprobar la raíz."
    ],
    "tips": [
-    "El OpenAPI 3.1 completo está embebido en api.php (variable openApiFile); el documento técnico es APIsumarioBOE.pdf en /datosabiertos/documentos/.",
-    "scripts/clientes/boe.py aplana el sumario con todas sus variantes (items), lee el XML de cada disposición (documento) y recorre días saltando domingos (sumarios)."
+    "El OpenAPI 3.1 completo está embebido en api.php (variable openApiFile); el documento técnico es APIsumarioBOE.pdf en /datosabiertos/documentos/."
    ],
    "related": [
     "boe-api-legislacion-consolidada",
@@ -7239,6 +7281,19 @@
    "alerts": [
     "Situación concursal llega con meses de retraso y mezcla resoluciones viejas (el BORME del 02/10/2026 trae una declaración del 11/05/2026 y revocaciones de 2022): usar la fecha de resolución y la última por procedimiento."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.boe",
+    "use": [
+     "boe.borme_empresas('BORME-A-2026-189-28'): 621 empresas (denominación, registro, actos por tipo, datos registrales) de una provincia; el sufijo 99 es el índice",
+     "boe.parse_concursal(texto): procedimiento, fecha de resolución ISO, resolución, clase, calificación y juzgado de un acto Situación concursal, sin nombres",
+     "fuentes-almacen sync --fuentes borme --desde 2026-10-02: tabla borme, una empresa por fila con actos en lista (list_contains(actos, 'Constitución'))"
+    ],
+    "mcp": [
+     "boe_sumario",
+     "almacen_sql",
+     "empresa_nif"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -7304,8 +7359,7 @@
    ],
    "tips": [
     "Los tipos de acto en el parrafo son un vocabulario fijo (Constitución, Nombramientos, Ceses/Dimisiones, Revocaciones, Ampliación de capital, Disolución...) y sirven de separador al parsear.",
-    "Para buscar una empresa en un día, el XML BORME-A-AAAA-NNN-99 es una tabla con denominación, id del documento de provincia y número de asiento; evita bajar las 52 provincias.",
-    "scripts/clientes/boe.py (borme_empresas) separa número, denominación, registro, actos y datos registrales de cada empresa; un acto fuera de su lista queda con tipo None."
+    "Para buscar una empresa en un día, el XML BORME-A-AAAA-NNN-99 es una tabla con denominación, id del documento de provincia y número de asiento; evita bajar las 52 provincias."
    ],
    "related": [
     "boe-api-sumario",

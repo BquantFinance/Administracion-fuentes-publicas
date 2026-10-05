@@ -2,19 +2,94 @@
 """Valida las fichas (esquema JSON, vocabulario, id/fichero/sector, unicidad, referencias) y los índices de indices/."""
 from __future__ import annotations
 
+import ast
 import json
 import re
 import sys
 
 from jsonschema import Draft202012Validator
 
-from common import INDEX_FILES, ROOT, SCHEMA, load_indices, load_sources, load_vocab
+from common import INDEX_FILES, ROOT, SCHEMA, comandos_paquete, herramientas_mcp, load_indices, load_sources, load_vocab
 
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 URL_RE = re.compile(r"^https?://\S+$")
 DEAD_STATUS = {"404", "400", "403", "500", "503", "redirect", "moved", "reset", "blocked", "dns", "error", "empty"}
 CHECK_KEYS = {"url", "method", "headers", "status", "contains", "min_bytes", "read_bytes", "retries", "fnmt"}
+CLIENTES = ROOT / "scripts" / "clientes"
+CODE_MAX = 600  # caracteres del bloque code en JSON compacto, lo que paga ficha() en cada llamada
+
+
+def nombres_modulo(nombre: str) -> set[str] | None:
+    """Funciones, clases y variables de primer nivel de scripts/clientes/<nombre>.py, sin importarlo; None si no existe."""
+    path = CLIENTES / f"{nombre}.py"
+    if not path.is_file() or nombre.startswith("_"):
+        return None
+    out = set()
+    for n in ast.parse(path.read_text(encoding="utf-8")).body:
+        if isinstance(n, (ast.FunctionDef, ast.ClassDef)):
+            out.add(n.name)
+        elif isinstance(n, ast.Assign):
+            out |= {t.id for t in n.targets if isinstance(t, ast.Name)}
+        elif isinstance(n, ast.AnnAssign) and isinstance(n.target, ast.Name):
+            out.add(n.target.id)
+    return out
+
+
+def partir_use(linea: str) -> tuple[str, str]:
+    """«llamada: qué devuelve» partido en el primer «: » fuera de paréntesis, corchetes, llaves y comillas (una llamada
+    puede llevar un dict: ckan.filas('gva', rid, filters={'a': 1}))."""
+    nivel, comilla = 0, None
+    for i, ch in enumerate(linea):
+        if comilla:
+            comilla = None if ch == comilla else comilla
+        elif ch in "'\"":
+            comilla = ch
+        elif ch in "([{":
+            nivel += 1
+        elif ch in ")]}":
+            nivel -= 1
+        elif ch == ":" and nivel == 0 and linea[i + 1:i + 2] == " ":
+            return linea[:i], linea[i + 2:].strip()
+    return linea, ""
+
+
+def validate_code(path: str, code: dict, herramientas: set[str], comandos: set[str]) -> list[str]:
+    """code de una ficha: módulo que existe, cada use con una llamada a una función que existe en su módulo (o una
+    orden del paquete) y una descripción, mcp solo con herramientas del servidor y el bloque entero en CODE_MAX."""
+    errors = []
+    w = f"{path}: code"
+    modulo = str(code.get("module", "")).rsplit(".", 1)[-1]
+    if nombres_modulo(modulo) is None:
+        errors.append(f"{w}: module {code.get('module')} no está en scripts/clientes")
+    for linea in code.get("use") or []:
+        llamada, que = partir_use(linea)
+        if not que:
+            errors.append(f"{w}: use sin «llamada: qué devuelve»: {linea[:60]}")
+        if llamada.split(" ", 1)[0] in comandos:
+            continue
+        try:
+            arbol = ast.parse(llamada, mode="eval")
+        except SyntaxError:
+            errors.append(f"{w}: use no es una llamada de Python ni una orden de {sorted(comandos)}: {llamada[:60]}")
+            continue
+        refs = [(n.value.id, n.attr) for n in ast.walk(arbol)
+                if isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name)]
+        if not isinstance(arbol.body, (ast.Call, ast.Subscript)) or not refs:
+            errors.append(f"{w}: use debe empezar por modulo.funcion(...): {llamada[:60]}")
+        for mod, attr in refs:
+            nombres = nombres_modulo(mod)
+            if nombres is None:
+                errors.append(f"{w}: {mod} no es un módulo de scripts/clientes ({llamada[:60]})")
+            elif attr not in nombres:
+                errors.append(f"{w}: {mod}.{attr} no existe en scripts/clientes/{mod}.py")
+    for h in code.get("mcp") or []:
+        if h not in herramientas:
+            errors.append(f"{w}: mcp '{h}' no es una herramienta de mcp_catalogo.py ({', '.join(sorted(herramientas))})")
+    largo = len(json.dumps(code, ensure_ascii=False, separators=(",", ":")))
+    if largo > CODE_MAX:
+        errors.append(f"{w}: {largo} caracteres en JSON (máximo {CODE_MAX})")
+    return errors
 
 
 def _str(errors: list[str], where: str, obj: dict, key: str, max_len: int, required: bool = True) -> None:
@@ -239,6 +314,8 @@ def main() -> int:
     sources = load_sources()
     errors: list[str] = []
     ids = {}
+    herramientas = {h["name"] for h in herramientas_mcp()}
+    comandos = comandos_paquete()
 
     for s in sources:
         path = s.pop("_path")
@@ -273,6 +350,8 @@ def main() -> int:
         summary = s.get("summary", "")
         if summary and summary.strip().endswith(":"):
             errors.append(f"{path}: summary termina en ':'")
+        if isinstance(s.get("code"), dict):
+            errors += validate_code(path, s["code"], herramientas, comandos)
 
     for s in sources:
         for r in s.get("related", []):

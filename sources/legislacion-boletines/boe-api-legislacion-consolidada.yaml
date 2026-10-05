@@ -9,6 +9,12 @@ summary: >-
   Textos consolidados de normas estatales y autonómicas por bloques (artículos, disposiciones) con todas las
   versiones de cada bloque, metadatos, análisis (materias, referencias) y vigencia. Listado filtrable por fecha
   de actualización, búsqueda por título y tablas auxiliares de códigos.
+code:
+  module: fuentes_publicas.clientes.boe
+  use:
+    - "boe.normas(desde='2026-09-28', hasta='2026-09-30'): las 60 normas actualizadas en esas fechas, paginando con offset; sin resultados data llega como cadena vacía"
+    - "boe.version_vigente(boe.bloque('BOE-A-1978-31229', 'a135')): la versión del bloque vigente hoy y la norma que la introdujo; el bloque solo responde en XML"
+    - "boe.metadatos('BOE-A-2026-20250'): vigencia, estado de consolidación y url_eli; None si la disposición no tiene texto consolidado (404)"
 access: [api-rest]
 auth: none
 formats: [json, xml]
@@ -71,7 +77,6 @@ gotchas:
 tips:
   - Para un artículo concreto, indice para localizar el id de bloque y luego texto/bloque/{id}.
   - Los códigos numéricos de rango, materia y departamento se traducen con datos-auxiliares.
-  - scripts/clientes/boe.py pagina el listado (normas), lee metadatos e índice y elige la versión vigente de un bloque (bloque y version_vigente).
   - El OpenAPI 3.1 está embebido en api.php (variable openApiFile); el documento técnico es APIconsolidada.pdf en /datosabiertos/documentos/.
 related: [boe-api-sumario, boe-eli]
 status: active

@@ -18,9 +18,9 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 try:
-    from .common import REPO_RAW, ROOT  # instalado como paquete (pip, uvx)
+    from .common import REPO_RAW, ROOT, puntero_code  # instalado como paquete (pip, uvx)
 except ImportError:
-    from common import REPO_RAW, ROOT  # ejecutado como script desde el repo
+    from common import REPO_RAW, ROOT, puntero_code  # ejecutado como script desde el repo
 
 try:
     from mcp.server.mcpserver import MCPServer as FastMCP  # mcp 2.x
@@ -67,7 +67,9 @@ INSTRUCTIONS = (
     "productos e identificadores y devuelve un índice ligero; ficha(id) da el detalle de cualquiera de ellos (de una "
     "fuente: endpoints, ejemplos y trampas verificadas, alerts primero porque cambian la cifra sin dar error). Datos ya resueltos: perfil_municipio, coyuntura, empresa_nif, "
     "boe_sumario, tabla_pcaxis, ckan_buscar, ckan_filas, socrata_filas, almacen_sql y descargar(url) para cualquier "
-    "otra URL pública. Lee catalogo://reglas antes de programar contra una fuente."
+    "otra URL pública. code en una ficha (en buscar y en ficha) es código que ya la trae resuelta: el módulo Python "
+    "(fuentes_publicas.clientes, pip install del repo), la llamada exacta y la herramienta; úsalo antes de escribir un "
+    "parser o un cliente. Lee catalogo://reglas antes de programar contra una fuente."
 )
 
 
@@ -248,8 +250,11 @@ def _fichas(consulta: str, sector: str | None, limite: int) -> list[dict]:
         if sector not in SECTORES:
             raise ValueError(f"sector desconocido: {sector}; válidos: {', '.join(SECTORES)}")
         items = [s for s in SOURCES if s["sector"] == sector]
+    # code solo si la ficha lo tiene: en las evaluaciones los agentes parseaban a mano el XML del BORME y el feed de PLACSP
+    # teniendo boe.borme_empresas y placsp.parse_feed, porque el puntero al código solo estaba en tips
     return [
-        {**{k: s.get(k) for k in ("id", "name", "sector", "access", "auth", "status", "verified", "summary")},
+        {"id": s["id"], "name": s["name"], **({"code": puntero_code(s["code"])} if s.get("code") else {}),
+         **{k: s.get(k) for k in ("sector", "access", "auth", "status", "verified", "summary")},
          **({"alerts": s["alerts"]} if s.get("alerts") else {})}
         for s in rank(consulta, items, lambda s: SOURCE_FIELDS[s["id"]], limite)
     ]
@@ -290,8 +295,9 @@ NADA = ("nada casa; probar con otras palabras o leer catalogo://llms.txt. Si la 
 
 @herramienta
 def buscar(consulta: str, sector: str | None = None, limite: int = 5) -> dict:
-    """Busca a la vez fichas (resumen y alerts), recetas que cruzan fuentes, necesidades con la ficha que las resuelve,
-    productos que se pueden construir e identificadores. Devuelve un índice ligero; el detalle, con ficha(id)."""
+    """Busca a la vez fichas (resumen, alerts y code si hay código que ya la trae), recetas que cruzan fuentes,
+    necesidades con la ficha que las resuelve, productos que se pueden construir e identificadores. Devuelve un índice
+    ligero; el detalle, con ficha(id)."""
     out = {
         "fichas": _fichas(consulta, sector, limite),
         "recetas": [{"id": r["id"], "intent": r["intent"], "sources": list(dict.fromkeys(st["source"] for st in r["steps"])),
@@ -312,12 +318,14 @@ PRODUCTO_BY_ID = {p["id"]: p for p in PRODUCTOS}
 
 @herramienta
 def ficha(id: str) -> dict:
-    """Detalle de cualquier id de buscar: fuente (alerts primero, endpoints con ejemplo y respuesta, sync, gotchas),
-    receta (pasos), producto (piezas, frescura, licencia, trampa) o identificador (regex, cruces). Si no existe, ids
-    parecidos."""
+    """Detalle de cualquier id de buscar: fuente (alerts y code primero, endpoints con ejemplo y respuesta, sync,
+    gotchas), receta (pasos), producto (piezas, frescura, licencia, trampa) o identificador (regex, cruces). Si no
+    existe, ids parecidos."""
     if id in BY_ID:
         s = BY_ID[id]
-        return {"alerts": s["alerts"], **s} if s.get("alerts") else s
+        # lo primero que lee el agente: las trampas silenciosas y el código que ya trae la fuente
+        primero = {k: s[k] for k in ("alerts", "code") if s.get(k)}
+        return {**primero, **s}
     if id in RECETA_BY_ID:
         return {"tipo": "receta", **{k: v for k, v in RECETA_BY_ID[id].items() if k != "checks"}}
     if id in PRODUCTO_BY_ID:

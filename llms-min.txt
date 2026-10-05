@@ -8,7 +8,7 @@ Fuentes: 102 · Productos: 14 · Recetas: 47 · Alcance: Administración General
 
 - Con MCP: uvx --from git+https://github.com/BquantFinance/Administracion-fuentes-publicas mcp-catalogo. buscar(texto) mira a la vez fichas, recetas, necesidades, productos e identificadores; ficha(id) da endpoints, ejemplos y trampas. Herramientas: buscar, ficha, codigos, descargar, tabla_pcaxis, boe_sumario, empresa_nif, coyuntura, perfil_municipio, almacen_sql, ckan_buscar, ckan_filas, socrata_filas (https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/servidor-mcp.md).
 - Sin MCP: este fichero para orientarse y la ficha entera antes de llamar: https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/<sector>/<id>.yaml (alerts primero, endpoints con example y returns, sync, quirks, gotchas). Todo junto en https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/catalog.json o en texto en https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/llms-full.txt.
-- Código: pip install "fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas". scripts/clientes trae la sesión HTTP con las CA de FNMT y detección de WAF, clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC sin topes silenciosos, cargadores de BOE, BDNS, INE, SEPE y PLACSP, y el almacén local en Parquet (almacen.py). Proyectos que funcionan en ejemplos/.
+- Código: pip install "fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas". El campo code de una ficha da el módulo, la llamada y la herramienta MCP que ya la traen resuelta: úsalo antes de escribir un parser. scripts/clientes trae la sesión HTTP con las CA de FNMT y detección de WAF, clientes CKAN, Socrata, PC-Axis, ArcGIS y OGC sin topes silenciosos, cargadores de BOE, BDNS, INE, SEPE y PLACSP, y el almacén local en Parquet (almacen.py). Proyectos que funcionan en ejemplos/.
 - Recursos: municipios con su código en cada sistema (https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/datos/municipios.csv), códigos que son parámetros (https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/indices/codigos.yaml), licencias y datos personales (https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/reutilizacion.md), almacén local (https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/almacen.md), cliente HTTP (https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/guides/cliente-http.md).
 
 ## Qué se puede construir hoy
@@ -32,11 +32,13 @@ Lee sus alerts antes de dar una cifra: aemps-cima-api, ayuntamiento-barcelona-da
 
 ## Fichas por sector
 
-- Legislación y boletines oficiales: bocyl-rss, boe-api-legislacion-consolidada, boe-api-sumario, boe-eli, boe-feeds, borme-api-sumario
+Con * las que traen code: módulo, llamada y herramienta que ya las resuelven.
+
+- Legislación y boletines oficiales: bocyl-rss, boe-api-legislacion-consolidada*, boe-api-sumario*, boe-eli, boe-feeds, borme-api-sumario*
 - Economía, finanzas y mercados: airef-datos, bde-estadisticas, cnmv-registros, ico-datos, tesoro-estadisticas
 - Hacienda, tributos y presupuestos: aeat-estadisticas, aeat-servicios-web, hacienda-central-informacion, hacienda-ovef, igae-ejecucion-presupuestaria, sepg-presupuestos-generales-estado
 - Estadística oficial: comunidad-madrid-estadistica-api, idescat-api, ieca-api-badea, ine-api-tempus, ine-codigos-territoriales, ine-microdatos, ive-pegv-bancos-datos
-- Contratación pública y subvenciones: bdns-api, hacienda-registro-licitadores, placsp-datos-abiertos
+- Contratación pública y subvenciones: bdns-api*, hacienda-registro-licitadores, placsp-datos-abiertos*
 - Empleo y Seguridad Social: mites-estadisticas, segsocial-estadisticas, sepe-estadisticas
 - Gobierno abierto, transparencia y organización administrativa: ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, comunidad-madrid-datos-abiertos, datos-gob-es-api, dir3-directorio, face-facturas, gencat-dades-obertes, gva-dadesobertes-api, jcyl-datos-abiertos, junta-andalucia-datos-abiertos, pag-administracion-gob-es, transparencia-portal
 - Territorio, catastro y cartografía: catastro-ovc, cnig-centro-descargas, idecyl-servicios, idee-servicios, ine-cartografia-censal
