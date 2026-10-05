@@ -449,6 +449,48 @@ def _punto(c: dict) -> dict:
             "ref_catastral": c.get("refCatastral")}
 
 
+SIGPAC = "https://sigpac-hubcloud.es/servicioconsultassigpac/query"
+
+
+def _ubicar_punto(lat: float, lon: float) -> dict:
+    """Coordenadas a portal más cercano (CartoCiudad) y recinto SIGPAC. En el campo el geocoder da un portal lejano o 204
+    (sin dirección), y la referencia catastral del punto es la de la parcela rústica, que da SIGPAC: por eso, si el
+    recinto no es urbano (uso ZU), va sigpac con el recinto, el uso y la referencia de la parcela."""
+    import math
+    s = _sesion()
+    r = s.get(f"{GEOCODER}/reverseGeocode", params={"lon": lon, "lat": lat}, timeout=30)
+    portal = r.json() if r.status_code == 200 and r.content.strip() else None
+    try:
+        rec = s.get(f"{SIGPAC}/recinfobypoint/4326/{lon}/{lat}.json", timeout=30).json()
+        rec = rec[0] if isinstance(rec, list) and rec else None
+    except Exception:  # noqa: BLE001  (SIGPAC caído no impide dar el portal)
+        rec = None
+    if not portal and not rec:
+        return {"error": f"sin dirección ni recinto SIGPAC en {lat},{lon} (mar o fuera de España)"}
+    out: dict = {"consulta": {"lat": lat, "lon": lon}}
+    if portal:
+        out.update(_punto(portal))
+        d = 6371000 * math.hypot(math.radians(portal["lat"] - lat),
+                                 math.radians(portal["lng"] - lon) * math.cos(math.radians(lat)))
+        out["distancia_m"] = round(d)
+        out["nota"] = "portal más cercano" + (": su referencia catastral no es la del punto" if d > 50 else "")
+    if rec:
+        sig = ":".join(str(rec[k]) for k in ("provincia", "municipio", "agregado", "zona", "poligono", "parcela", "recinto"))
+        if not portal:  # el municipio sale del SIGPAC, que numera como el Catastro (capitales 900), no como el INE
+            muni = buscar_municipio(f"{rec['provincia']}:{rec['municipio']}", 1)
+            out.update({"ine": muni[0]["ine"], "municipio": muni[0]["nombre"]} if muni else {})
+        if rec.get("uso_sigpac") != "ZU":
+            out["sigpac"] = {"recinto": sig, "uso": rec.get("uso_sigpac"), "superficie_ha": rec.get("superficie"),
+                             "pendiente": rec.get("pendiente_media"), "regadio": rec.get("coef_regadio")}
+            try:
+                rc = s.get(f"{SIGPAC}/refcatparcela/{sig.rsplit(':', 1)[0].replace(':', '/')}.json", timeout=30).json()
+                out["sigpac"]["ref_catastral_parcela"] = rc[0]["referencia_cat"] if rc else None
+            except Exception:  # noqa: BLE001
+                pass
+    out["fuente"] = "cnig-centro-descargas (CartoCiudad) y mapa-sigpac"
+    return out
+
+
 def ubicar(texto: str) -> dict:
     """Dirección («calle Alcalá 50, Madrid») o coordenadas («40.4185,-3.696», en cualquier orden) a municipio INE,
     código postal, coordenadas y referencia catastral del portal, con el geocoder de CartoCiudad (cnig-centro-descargas),
@@ -462,11 +504,7 @@ def ubicar(texto: str) -> dict:
     if m:
         a, b = float(m.group(1)), float(m.group(2))
         lat, lon = (a, b) if 27 <= a <= 44.5 else (b, a)  # España: latitud 27 a 44, longitud -19 a 5
-        r = s.get(f"{GEOCODER}/reverseGeocode", params={"lon": lon, "lat": lat}, timeout=30)
-        if r.status_code == 204 or not r.content.strip():
-            return {"error": f"sin dirección en {lat},{lon} (mar o fuera de España)"}
-        return {"consulta": {"lat": lat, "lon": lon}, **_punto(r.json()), "exacta": None,
-                "nota": "portal más cercano al punto", "fuente": "cnig-centro-descargas (CartoCiudad reverseGeocode)"}
+        return _ubicar_punto(lat, lon)
     calle, _, muni_txt = (texto or "").rpartition(",") if "," in (texto or "") else (texto, "", "")
     muni = buscar_municipio(muni_txt.strip(), 1) if muni_txt.strip() else []
     if muni_txt.strip() and not muni:

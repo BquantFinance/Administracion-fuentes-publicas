@@ -49,7 +49,7 @@ Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras med
 **informe-ubicacion** · Informe de una localización (población, renta, paro, alquiler, criminalidad) para inmobiliarias, retail y franquicias
 - para: inmobiliarias, cadenas de retail y franquicias, proptech
 - fichas: ine-api-tempus, sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler, catastro-ovc · recetas: poblacion-renta-alquiler-por-municipio, criminalidad-municipio, paro-registrado-por-municipio
-- piezas: herramienta perfil_municipio y ejemplos/mi_municipio.py; datos/municipios.csv para pasar entre códigos
+- piezas: herramienta perfil_municipio con el municipio, una dirección o «lat,lon» (CP, referencia catastral del portal) y ejemplos/mi_municipio.py; datos/municipios.csv para pasar entre códigos
 - frescura: paro mensual, padrón anual, renta con dos años de retraso (2023), criminalidad trimestral
 - licencia: libre con cita
 - trampa: SIGPAC y Catastro numeran los municipios distinto que el INE; la criminalidad es acumulada desde enero y solo de municipios de más de 20.000 habitantes
@@ -97,7 +97,7 @@ Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras med
 **agritech-parcelas** · Información de una parcela agrícola por coordenadas (uso, superficie, Red Natura, zonas vulnerables a nitratos)
 - para: agritech, cooperativas, aseguradoras agrarias
 - fichas: mapa-sigpac, catastro-ovc · recetas: parcela-a-red-natura-y-nitratos, coordenadas-a-referencia-catastral
-- piezas: scripts/clientes/ogc.py (recintos por bbox siguiendo next); consultas SIGPAC por punto de la ficha
+- piezas: perfil_municipio con «lat,lon» (recinto, uso, superficie y referencia catastral de la parcela, municipio INE); scripts/clientes/ogc.py (recintos por bbox siguiendo next)
 - frescura: anual, con la campaña de la PAC
 - licencia: CC BY 4.0
 - trampa: el municipio de SIGPAC es el del Catastro, no el del INE (capitales 900); traducir con datos/municipios.csv
