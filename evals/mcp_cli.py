@@ -9,6 +9,7 @@ Uso:
   python evals/mcp_cli.py HERRAMIENTA [clave=valor ...]     llama a la herramienta (los enteros se convierten)
   python evals/mcp_cli.py recurso NOMBRE                    lee catalogo://NOMBRE (llms.txt o reglas)
 Ejemplo: python evals/mcp_cli.py buscar consulta="paro municipio" limite=5
+EVAL_SIN=h1,h2 oculta esas herramientas (condición sin las piezas que se miden; cuarta tanda).
 """
 import asyncio
 import json
@@ -21,6 +22,7 @@ from mcp.client.stdio import stdio_client
 
 ROOT = Path(__file__).resolve().parent.parent
 SERVER = ROOT / "scripts" / "mcp_catalogo.py"
+SIN = {h for h in os.environ.get("EVAL_SIN", "").split(",") if h}
 
 
 def argumentos(pares: list[str]) -> dict:
@@ -32,12 +34,14 @@ def argumentos(pares: list[str]) -> dict:
 
 
 async def main(argv: list[str]) -> None:
+    if argv and argv[0] in SIN:
+        sys.exit(f"herramienta desconocida: {argv[0]}")
     params = StdioServerParameters(command=sys.executable, args=[str(SERVER)], cwd=str(ROOT), env=dict(os.environ))
     async with stdio_client(params) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
             if not argv:
-                tools = (await session.list_tools()).tools
+                tools = [t for t in (await session.list_tools()).tools if t.name not in SIN]
                 print(json.dumps([{"herramienta": t.name, "descripcion": t.description,
                                    "parametros": t.inputSchema.get("properties", {})} for t in tools],
                                  ensure_ascii=False, indent=1))

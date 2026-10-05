@@ -224,3 +224,42 @@
     url: "https://datos.comunidad.madrid/api/3/action/datastore_search?resource_id=bc69f395-1f96-4fc2-a115-025c55b905ad&limit=1"
     contains: "5000"
   trap: "datastore_search responde sin error con una tabla recortada y antigua; el dato vigente está en el fichero CSV del recurso"
+
+# Cuarta tanda (2026-10-05): herramientas que traen el dato resuelto (perfil_municipio, coyuntura, empresa_nif).
+# Condiciones M (MCP completo) y B (EVAL_SIN=perfil_municipio,coyuntura,empresa_nif). Referencias tomadas el 2026-10-05.
+
+- id: informe-ubicacion
+  ask: "Prepárame los datos básicos para un informe de ubicación de Talavera de la Reina: población empadronada, renta neta media por persona, paro registrado del último mes disponible y número de infracciones penales del último periodo publicado."
+  expected: "83.803 habitantes (padrón a 1-1-2025, INE 29005); 11.820 € (renta neta media por persona 2023, Atlas de renta); 7.264 parados (agosto de 2026, SEPE; septiembre aún sin publicar por municipio); 1.767 infracciones penales en enero-junio de 2026 (acumulado, Interior)"
+  sources: [ine-api-tempus, sepe-estadisticas, interior-criminalidad]
+  check:
+    url: "https://sede.sepe.gob.es/es/portaltrabaja/resources/sede/datos_abiertos/datos/Paro_por_municipios_2026_csv.csv"
+    contains: "45165"
+  trap: "Cuatro fuentes con códigos de municipio distintos (Id interno del INE, código INE, nombre en Interior); paro registrado no es EPA y la criminalidad es acumulada"
+
+- id: comparar-municipios
+  ask: "Compara la población empadronada y el paro registrado del último mes disponible en Getafe, Leganés, Alcorcón y Fuenlabrada, y di cuál tiene la mayor proporción de paro registrado sobre la población."
+  expected: "Agosto de 2026 y padrón 2025: Getafe 8.305 / 193.238 (4,30 %), Leganés 8.119 / 195.734 (4,15 %), Alcorcón 7.056 / 175.719 (4,02 %), Fuenlabrada 8.914 / 190.076 (4,69 %); la mayor, Fuenlabrada"
+  sources: [ine-api-tempus, sepe-estadisticas]
+  check:
+    url: "https://sede.sepe.gob.es/es/portaltrabaja/resources/sede/datos_abiertos/datos/Paro_por_municipios_2026_csv.csv"
+    contains: "28058"
+  trap: "Cuatro municipios multiplican las llamadas; perfil_municipio acepta la lista en una"
+
+- id: coyuntura-hoy
+  ask: "Dame el último dato publicado de: IPC general (variación anual, mes y si es definitivo o avance), tasa de paro de la EPA, crecimiento trimestral del PIB, Euríbor a 12 meses y prima de riesgo española frente a Alemania a 10 años."
+  expected: "IPC 4,9 % en septiembre de 2026 (avance); paro EPA 9,87 % (2026T2); PIB +0,68 % trimestral en 2026T2 (corregido de estacionalidad); Euríbor 3,247 % (media de septiembre de 2026); prima 46 pb (julio de 2026, último mes con los dos bonos en el BdE)"
+  sources: [ine-api-tempus, bde-estadisticas]
+  check:
+    url: "https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/IPC290750?nult=1"
+    contains: "IPC290750"
+  trap: "El IPC del último mes es avance; el PIB publicado es el corregido; el bono alemán va un mes por detrás del español en el BdE"
+
+- id: empresa-nif-perfil
+  ask: "Perfil público de la empresa con NIF B86566304: nombre, cuántas subvenciones ha recibido según la BDNS y por qué importe total, ayudas de Estado y minimis, y si tiene prohibición de contratar."
+  expected: "EL ALBERCIAL, S.L.; 9 concesiones por 10.074,23 €; 1 ayuda de Estado (717,38 €); 0 minimis; sin prohibiciones de contratar vigentes"
+  sources: [bdns-api, hacienda-registro-licitadores]
+  check:
+    url: "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=50&nifCif=B86566304"
+    contains: "B86566304"
+  trap: "La BDNS separa concesiones, ayudas de Estado y minimis en tres búsquedas; las prohibiciones de contratar están en otra fuente"
