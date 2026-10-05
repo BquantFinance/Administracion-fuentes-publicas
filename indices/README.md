@@ -20,7 +20,7 @@ Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras med
 - piezas: almacen.py (tabla placsp_adjudicaciones y vista adjudicaciones_ultimo); ejemplos/adjudicaciones.py; herramienta almacen_sql
 - frescura: diaria · volumen: un mes de contratos menores (feed 1143), 28.091 entradas cargadas en 40 s; día y medio de los tres feeds, 8.434 en 2,5 minutos
 - licencia: libre con cita; adjudicatarios personas físicas sin NIF ni nombre en el almacén
-- trampa: una fila por lote y adjudicatario; el NIF llega con guiones, en minúscula o enmascarado y el feed no se puede consultar por NIF
+- trampa: en acuerdos marco el importe del lote se repite en cada adjudicatario (×3,4 al sumar por fila en el 1044 de agosto de 2026; importe_compartido en el almacén); el 1044 no trae fecha de adjudicación
 
 **radar-ayudas** · Convocatorias de subvenciones nuevas que encajan con el perfil de una empresa (sector, región, tipo de beneficiario)
 - para: pymes, gestorías y consultoras de financiación pública

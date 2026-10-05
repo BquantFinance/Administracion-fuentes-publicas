@@ -11,7 +11,7 @@ python scripts/clientes/almacen.py sync --fuentes boe,borme,bdns,placsp,carburan
 python scripts/clientes/almacen.py sync                 # cada día (cron): solo lo nuevo hasta ayer
 python scripts/clientes/almacen.py zip-placsp 202608 202607 --feeds 643,1143   # meses que ya no están en la cadena del feed
 python scripts/clientes/almacen.py empresa B37033297    # contratos, subvenciones y BORME de un NIF
-python scripts/clientes/almacen.py sql "select nif, nombre, sum(importe_sin_iva) from adjudicaciones_ultimo group by all order by 3 desc limit 10"
+python scripts/clientes/almacen.py sql "select nif, nombre, sum(importe_sin_iva) from adjudicaciones_ultimo where not importe_compartido group by all order by 3 desc limit 10"
 ```
 
 La carpeta es `./almacen` o la que diga `FUENTES_ALMACEN`. `estado.json` guarda lo cargado: un corte (`--minutos`) no
@@ -29,7 +29,10 @@ deja huecos y repetir no baja nada dos veces. Con `pip install` el comando es `f
 | `carburantes` | estación y día, con los 23 productos en columnas | fecha, ideess | fecha |
 
 `placsp_ultimo` y `adjudicaciones_ultimo` dejan solo el último estado de cada expediente: el feed trae una entrada por
-cambio de estado. En la BDNS, minimis no trae `importe`; su cifra es `ayuda_equivalente`.
+cambio de estado. `adjudicaciones_ultimo` añade `adjudicatarios` (del lote) e `importe_compartido`: en los acuerdos marco
+el importe del lote se repite en cada adjudicatario (en el 1044 de agosto de 2026, sumar por fila daba 33.302 M€ y contando
+cada lote una vez 9.709 M€); para totales, `importe_sin_iva / adjudicatarios` si es compartido. El 1044 no trae fecha de
+adjudicación: `coalesce(fecha_adjudicacion, fecha_contrato)`. En la BDNS, minimis no trae `importe`; su cifra es `ayuda_equivalente`.
 
 ## Lo medido el 2026-10-01
 

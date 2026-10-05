@@ -12,7 +12,8 @@ identificar a nadie. Del BORME se guarda el tipo de cada acto y solo el texto de
 
 Tablas: boe (un item del sumario por fila), borme (una empresa de la sección A por fila), bdns (concesiones, minimis y
 ayudas de Estado por fecha de alta; en minimis el importe va en ayuda_equivalente), placsp y placsp_adjudicaciones (una
-fila por versión de cada expediente y por adjudicatario, updated en UTC; vistas placsp_ultimo y adjudicaciones_ultimo con
+fila por versión de cada expediente y por adjudicatario, updated en UTC; vistas placsp_ultimo y adjudicaciones_ultimo (con
+adjudicatarios e importe_compartido: en acuerdos marco el importe del lote se repite en cada adjudicatario) con
 el último estado) y carburantes (precio por estación y día).
 
 Uso: python scripts/clientes/almacen.py sync [--fuentes boe,borme,bdns,placsp,carburantes] [--desde AAAA-MM-DD]
@@ -479,8 +480,12 @@ def conectar(dir: str | os.PathLike | None = None, solo_lectura: bool = True):
         con.execute("CREATE VIEW placsp_ultimo AS SELECT * FROM placsp "
                     "QUALIFY row_number() OVER (PARTITION BY id ORDER BY updated DESC) = 1")
     if "placsp_adjudicaciones" in presentes:
-        con.execute("CREATE VIEW adjudicaciones_ultimo AS SELECT * FROM placsp_adjudicaciones "
-                    "QUALIFY rank() OVER (PARTITION BY id ORDER BY updated DESC) = 1")
+        # acuerdos marco: el importe del lote se repite en cada adjudicatario (agosto de 2026, feed 1044: 521 de 574 lotes
+        # con varios; sumar por fila daba 33.302 M€ frente a 9.709 M€ contando cada lote una vez)
+        con.execute("CREATE VIEW adjudicaciones_ultimo AS SELECT *, count(*) OVER w AS adjudicatarios, "
+                    "(count(*) OVER w > 1 AND min(importe_sin_iva) OVER w = max(importe_sin_iva) OVER w) AS importe_compartido "
+                    "FROM (SELECT * FROM placsp_adjudicaciones QUALIFY rank() OVER (PARTITION BY id ORDER BY updated DESC) = 1) "
+                    "WINDOW w AS (PARTITION BY id, updated, lote)")
     return con
 
 
@@ -534,10 +539,15 @@ def empresa(nif: str, dir: str | os.PathLike | None = None, nombre: str | None =
                 for f in cur.fetchall()]
 
     if "adjudicaciones_ultimo" in vistas:
-        out["contratos"] = filas("""SELECT count(*) AS n, round(sum(importe_sin_iva), 2) AS importe_sin_iva,
+        out["contratos"] = filas("""SELECT count(*) AS n,
+                                    round(sum(importe_sin_iva) FILTER (WHERE NOT coalesce(importe_compartido, false)), 2) AS importe_sin_iva,
+                                    count(*) FILTER (WHERE importe_compartido) AS lotes_compartidos,
+                                    round(sum(importe_sin_iva) FILTER (WHERE importe_compartido), 2) AS importe_compartido_sin_iva,
                                     min(fecha_adjudicacion) AS primera, max(fecha_adjudicacion) AS ultima
                                     FROM adjudicaciones_ultimo WHERE nif = ?""", nif)[0]
-        out["contratos"]["recientes"] = filas(f"""SELECT a.fecha_adjudicacion, a.importe_sin_iva, a.lote, p.expediente,
+        out["contratos"]["nota"] = ("importe_compartido_sin_iva: lotes de acuerdos marco cuyo importe se repite en cada "
+                                    "adjudicatario; es un techo compartido, no lo adjudicado a esta empresa")
+        out["contratos"]["recientes"] = filas(f"""SELECT a.fecha_adjudicacion, a.importe_sin_iva, a.adjudicatarios, a.lote, p.expediente,
                                     p.objeto, p.organo, p.estado, p.link FROM adjudicaciones_ultimo a
                                     JOIN placsp_ultimo p USING (id, updated) WHERE a.nif = ?
                                     ORDER BY a.fecha_adjudicacion DESC NULLS LAST LIMIT {int(max_filas)}""", nif)

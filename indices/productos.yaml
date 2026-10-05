@@ -23,7 +23,7 @@
   frescura: "diaria"
   volumen: "un mes de contratos menores (feed 1143), 28.091 entradas cargadas en 40 s; día y medio de los tres feeds, 8.434 en 2,5 minutos"
   licencia: "libre con cita; adjudicatarios personas físicas sin NIF ni nombre en el almacén"
-  trampa: "una fila por lote y adjudicatario; el NIF llega con guiones, en minúscula o enmascarado y el feed no se puede consultar por NIF"
+  trampa: "en acuerdos marco el importe del lote se repite en cada adjudicatario (×3,4 al sumar por fila en el 1044 de agosto de 2026; importe_compartido en el almacén); el 1044 no trae fecha de adjudicación"
   verified: "2026-10-01"
 
 - id: radar-ayudas

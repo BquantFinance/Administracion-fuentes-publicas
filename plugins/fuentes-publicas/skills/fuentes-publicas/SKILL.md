@@ -39,7 +39,7 @@ consulta.empresa_nif("A02066116")               # sector público, BDNS, AEI, pr
 pcaxis.tabla(24077)                             # tablas PC-Axis con números convertidos (None es sin dato, no cero)
 list(ckan.filas("cnmc", resource_id))           # todas las filas aunque el portal recorte limit
 list(bdns.altas("2026-09-29"))                  # concesiones dadas de alta ese día, cualquiera que sea su fecha
-almacen.sql("select nif, nombre, sum(importe_sin_iva) from adjudicaciones_ultimo group by all order by 3 desc limit 5")
+almacen.sql("select nif, nombre, sum(importe_sin_iva) from adjudicaciones_ultimo where not importe_compartido group by all order by 3 desc limit 5")
 ```
 
 El almacén necesita duckdb y una carga previa: `fuentes-almacen sync --fuentes placsp,borme --desde AAAA-MM-DD`.

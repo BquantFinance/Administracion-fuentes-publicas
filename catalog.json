@@ -1741,6 +1741,7 @@
    ],
    "summary": "Todas las licitaciones, adjudicaciones y contratos menores publicados en la Plataforma (Estado y perfiles alojados) y los agregados de plataformas autonómicas, como feeds ATOM diarios con el documento CODICE (XML basado en UBL) de cada expediente, y ZIP anuales y mensuales del histórico.",
    "alerts": [
+    "En acuerdos marco el importe del lote se repite en cada WinningParty; en el 1044 de agosto de 2026, 521 de 574 lotes con varios adjudicatarios, y sumar por fila dio 33.302 M€ frente a 9.709 M€ contando cada lote una vez.",
     "La adjudicación va en un cac:TenderResult por lote con uno o varios WinningParty; el 2026-10-05, 38 de 198 entradas adjudicadas tenían varios lotes (SAS_CGIPC-2026-50002, 20 filas). Recorrerlos todos.",
     "Con la IP rechazada por el WAF, atom y ZIP dan 200 con un HTML de 187 bytes que un parser XML lee como feed vacío; el 2026-10-01 desde GitHub placsp.py salió con código 0 y «0 expedientes». Comprobar que la raíz es feed."
    ],
@@ -1805,7 +1806,7 @@
     "TotalAmount lleva IVA y TaxExclusiveAmount no; EstimatedOverallContractAmount es el valor estimado con prórrogas previstas, no lo adjudicado; prórrogas y modificados reales en cac:ContractModification.",
     "Espacios de nombres propios; cbc y cac en urn:dgpe:names:draft:codice:schema:xsd, extensiones cbc-place-ext y cac-place-ext en urn:dgpe:names:draft:codice-place-ext y at en http://purl.org/atompub/tombstones/1.0.",
     "El DIR3 del órgano falta en el 29 % del 643 (116 de 452 el 2026-10-05), así que se elige el cbc:ID por schemeName; el NIF del adjudicatario llega con schemeName OTROS, guion, minúscula o enmascarado (***1234**).",
-    "En el 1044 el órgano solo trae ID con schemeName ID_OC_PLAT (que contiene su NIF) y no hay TotalAmount; el link apunta a la plataforma de origen y el summary cambia de formato (coma decimal, sin Estado).",
+    "En el 1044 el órgano solo trae ID_OC_PLAT (contiene su NIF), no hay TotalAmount ni AwardDate (0 de 17.222 adjudicaciones de agosto de 2026; usar cac:Contract/cbc:IssueDate) y el summary usa coma decimal.",
     "Ni ZIP ni atom responden a HEAD, Range se ignora y no hay Content-Length (el tamaño asoma en el ETag, en hexadecimal); un fichero inexistente da 200 con un HTML de 521 bytes, así que comprobar que empieza por PK.",
     "updated es la fecha del último cambio del expediente, no la de publicación; la fecha de cada anuncio va en ValidNoticeInfo/AdditionalPublicationStatus/AdditionalPublicationDocumentReference/IssueDate.",
     "Lo de hoy solo está en el buscador JSF del portal (sin API localizada; el link de cada entry es un deeplink HTML)."
@@ -9666,7 +9667,7 @@
     "frescura": "diaria",
     "volumen": "un mes de contratos menores (feed 1143), 28.091 entradas cargadas en 40 s; día y medio de los tres feeds, 8.434 en 2,5 minutos",
     "licencia": "libre con cita; adjudicatarios personas físicas sin NIF ni nombre en el almacén",
-    "trampa": "una fila por lote y adjudicatario; el NIF llega con guiones, en minúscula o enmascarado y el feed no se puede consultar por NIF",
+    "trampa": "en acuerdos marco el importe del lote se repite en cada adjudicatario (×3,4 al sumar por fila en el 1044 de agosto de 2026; importe_compartido en el almacén); el 1044 no trae fecha de adjudicación",
     "verified": "2026-10-01"
    },
    {
