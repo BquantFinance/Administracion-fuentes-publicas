@@ -1,7 +1,7 @@
 {
   "name": "fuentes-publicas",
   "displayName": "Fuentes públicas de España",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Skill y servidor MCP del catálogo de fuentes públicas de España: dónde está cada dato, sus trampas y herramientas que lo traen ya resuelto",
   "author": {
     "name": "BquantFinance",
