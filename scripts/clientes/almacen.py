@@ -538,6 +538,20 @@ def cobertura(dir: str | os.PathLike | None = None) -> dict:
             out.setdefault(f, {})["dias_cargados"] = f"{len(dias)} ({dias[0]}..{dias[-1]})"
     if est.get("placsp"):
         out.setdefault("placsp", {})["zips"] = est["placsp"].get("zips", [])
+    # Las tablas que no se cargan por días (PLACSP por páginas del feed o ZIP) solo decían el mes: un almacén que empieza
+    # el 30/09 decía «2026-09..2026-10» y una suma de septiembre salía con un solo día sin aviso.
+    sin_dias = [t for t in out if t not in POR_DIA and TABLAS[t].orden and "dias_cargados" not in out[t]]
+    if sin_dias:
+        try:
+            con = _duckdb().connect()
+            for t in sin_dias:
+                o = TABLAS[t].orden
+                mn, mx = con.execute(f"SELECT min({o}), max({o}) FROM read_parquet({_lit(d / t / '*.parquet')}, "
+                                     "union_by_name=true)").fetchone()
+                if mn:
+                    out[t]["desde"], out[t]["hasta"] = str(mn)[:19], str(mx)[:19]
+        except Exception:  # noqa: BLE001 - sin duckdb, solo los meses
+            pass
     return out
 
 
