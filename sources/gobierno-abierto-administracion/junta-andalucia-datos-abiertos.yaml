@@ -11,6 +11,7 @@ summary: >-
 alerts:
   - datastore_active true no garantiza la tabla; 6 de 173 recursos dieron 404 Resource not found y las plantillas orgánicas tienen 1000 filas en el datastore frente a 36260 en el CSV. Contrastar total con el fichero.
   - "Se pierden ceros a la izquierda: el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine llega como 44001 o '04001'; normalizar con str(x).zfill(5) antes de cruzar."
+  - "datastore_search del censo de instalaciones deportivas (8e8e1b8f) trae cada fila dos veces: total 65526 frente a 32763 en el CSV, _id 1 a 65526; contar sobre el CSV o quitar duplicados sin _id."
 code:
   module: fuentes_publicas.clientes.ckan
   use:

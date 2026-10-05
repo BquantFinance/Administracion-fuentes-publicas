@@ -41,8 +41,12 @@ def _get(ruta: str, params: dict):
     """Accept application/json explícito: con el de un navegador responde XML (raíz ObjectNode)."""
     s = session(accept="application/json")
     r = s.get(f"{BASE}/{ruta}", params=params, timeout=180, verify=s.verify)
-    if r.status_code != 200:  # 400 con JSON {codigo, errores}; 404 con HTML de Tomcat
-        detalle = r.json().get("errores") if r.headers.get("Content-Type", "").startswith("application/json") else r.text[:80]
+    if r.status_code != 200:  # 400 con JSON {codigo, errores}; 404 con HTML de Tomcat; Content-Type JSON con cuerpo que no lo es
+        try:
+            cuerpo = r.json()
+            detalle = cuerpo.get("errores", cuerpo) if isinstance(cuerpo, dict) else cuerpo
+        except ValueError:
+            detalle = r.text[:80]
         raise RuntimeError(f"BDNS {r.status_code} en {ruta}: {detalle}")
     return r
 

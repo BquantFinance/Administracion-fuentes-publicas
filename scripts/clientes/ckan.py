@@ -147,11 +147,13 @@ def contar_csv(datos: bytes | str) -> int:
 
 
 def comparar(portal: str, recurso: dict) -> dict:
-    """Total del datastore frente a las filas del CSV original; completo es False si el datastore se queda corto."""
+    """Total del datastore frente a las filas del CSV original: completo es False si el datastore se queda corto y sobran
+    son las filas de más (el censo de instalaciones deportivas de Andalucía está cargado dos veces: 65.526 por 32.763)."""
     datastore = total_datastore(portal, recurso["id"]) if recurso.get("datastore_active") else None
     fichero = contar_csv(descargar(recurso)) if str(recurso.get("format", "")).upper() == "CSV" else None
-    return {"datastore": datastore, "fichero": fichero,
-            "completo": None if None in (datastore, fichero) else datastore >= fichero}
+    sin_dato = None in (datastore, fichero)
+    return {"datastore": datastore, "fichero": fichero, "completo": None if sin_dato else datastore >= fichero,
+            "sobran": None if sin_dato else max(datastore - fichero, 0)}
 
 
 if __name__ == "__main__":
