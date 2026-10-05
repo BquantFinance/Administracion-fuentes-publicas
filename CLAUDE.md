@@ -66,6 +66,7 @@ python scripts/check_recetas.py   # comprobaciones de las recetas (red; --only, 
 python scripts/check_ejemplos.py  # example de cada endpoint de las fichas (red; --only, --report, --fail)
 python scripts/check_links.py     # informe de URLs (red)
 python scripts/check_formas.py    # campos que desaparecen de 25 fuentes de los clientes (red; --report, --actualizar ids tras comprobar)
+python scripts/check_cifras.py    # 24 cifras de datos pasados leídas con los clientes y confirmadas por otra vía (red; --only, --report)
 python scripts/ronda_residencial.py  # desde casa: fichas de hosts que rechazan la nube (red; deja ronda-residencial.md)
 python scripts/municipios.py      # regenera datos/municipios.csv (red, un par de minutos)
 python scripts/fnmt_bundle.py     # ca-age.pem con las CA de FNMT para los hosts con cadena incompleta
@@ -147,8 +148,9 @@ Judicial o UE, solo cuando lo indique el propietario.
   publicada el 2026-10-05 sobre 08fa35c: registro en 0.9.0, sha256 del .mcpb coincide y `pip install ...@v0.9.0` da
   los cuatro comandos y las correcciones; la plantilla del radar instala @v0.9.0. Sin PyPI (propietario, 2026-10-05).
 - **CI**: `ci.yml` (validate, build al día y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC,
-  manual y al cambiar el flujo: recetas, ejemplos de fichas, cargadores, ejemplos, forma de las fuentes y enlaces desde
-  la IP de GitHub; comenta en el issue de verificación si algo falla). Secreto `AEMET_KEY` en el repositorio.
+  manual y al cambiar el flujo: recetas, ejemplos de fichas, cargadores, ejemplos, forma de las fuentes, cifras de control
+  (`scripts/cifras.yaml`: una cifra que deja de cuadrar falla aunque la URL responda) y enlaces desde la IP de GitHub;
+  comenta en el issue de verificación si algo falla). Secreto `AEMET_KEY` en el repositorio.
 - **Credenciales fuera del repo**: cuenta de DataComex con el correo del propietario y clave de AEMET (secreto de
   GitHub); ESIOS sin token. Nunca en fichas ni commits.
 - **Ramas**: `main` por defecto; `claude/vibrant-bell-jwqfvl` de trabajo, igual que main.
