@@ -120,7 +120,8 @@ def resumen_json(o) -> dict:
 
 def descargar(url: str, max_caracteres: int = 20000, desde: int = 0) -> dict:
     """GET con las reglas del catálogo. Devuelve estado, tipo, bytes, resumen según formato y el texto desde el
-    carácter `desde` hasta `max_caracteres` (truncado dice si queda más). Los binarios no traen texto."""
+    carácter `desde` hasta `max_caracteres`; si queda más, truncado y siguiente (desde y quedan) para pedir el resto.
+    Los binarios no traen texto."""
     r = _get_publica(url)
     partes, total = [], 0
     for trozo in r.iter_content(1 << 16):
@@ -131,7 +132,9 @@ def descargar(url: str, max_caracteres: int = 20000, desde: int = 0) -> dict:
     r.close()
     bruto = contenido(b"".join(partes)) if not urlparse(r.url).path.lower().endswith((".gz", ".tgz")) else b"".join(partes)
     tipo = r.headers.get("Content-Type", "")
-    out = {"url": r.url, "estado": r.status_code, "tipo": tipo, "bytes": len(bruto), "completo": total < TOPE_BYTES}
+    out = {"url": r.url, "estado": r.status_code, "tipo": tipo, "bytes": len(bruto)}
+    if total >= TOPE_BYTES:  # solo cuando se corta: un "completo": true junto al texto truncado se leía como texto entero
+        out["descarga_cortada"] = f"más de {TOPE_BYTES // 1_000_000} MB: el fichero sigue en el servidor"
     motivo = _bloqueo(bruto, tipo, r.status_code)
     if motivo:
         out["bloqueado"] = motivo
@@ -166,6 +169,8 @@ def descargar(url: str, max_caracteres: int = 20000, desde: int = 0) -> dict:
     out["texto"] = t[desde:desde + max_caracteres]
     out["caracteres"] = len(t)
     out["truncado"] = desde + max_caracteres < len(t)
+    if out["truncado"]:  # en la sexta tanda un agente parseó 20.000 de 52.076 caracteres de un XML del BORME como si fuera todo
+        out["siguiente"] = {"desde": desde + max_caracteres, "quedan": len(t) - desde - max_caracteres}
     return out
 
 
