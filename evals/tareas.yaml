@@ -311,3 +311,42 @@
     url: https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/39363?tv=19:887&nult=1
     contains: Viviendas turísticas
   trap: "El tipo llega cortado («VIVIENDAS DE USO TU »): el filtro exacto da 0; el conjunto de declaraciones mensuales (1.156) no es el registro"
+
+# Sexta tanda (2026-10-05): almacén local (almacen_sql) y productos (bloque productos de buscar), medidos frente al
+# mismo MCP sin ellos (EVAL_SIN=almacen_sql,buscar.productos). Almacén de la condición M sincronizado ese día.
+
+- id: sociedades-valencia-semana
+  ask: "¿Cuántas sociedades se constituyeron en la provincia de Valencia según el BORME publicado entre el lunes 28 de septiembre y el viernes 2 de octubre de 2026, y cuál de ellas declaró el mayor capital social?"
+  expected: "174 constituciones (32, 35, 28 y 79 del 28/09 al 01/10; el 02/10 el BORME no trae sección de Valencia); mayor capital ACTIVOS E INVERSIONES MV SOCIEDAD LIMITADA, 24.448.370 € (BORME-A-2026-190-46)"
+  sources: [borme-api-sumario]
+  check:
+    url: "https://www.boe.es/diario_borme/xml.php?id=BORME-A-2026-190-46"
+    contains: "ACTIVOS E INVERSIONES MV"
+  trap: "pdftotext desordena el PDF y cuenta de menos (162); el 02/10 no hay Valencia; el capital de la constitución va en el texto del acto"
+
+- id: bdns-altas-tres-dias
+  ask: "¿Cuántas concesiones de subvenciones se dieron de alta en la BDNS entre el lunes 28 y el miércoles 30 de septiembre de 2026, por qué importe total, y qué órgano concedente suma más importe?"
+  expected: "37.420 concesiones por 395.511.451,37 € (5.407, 19.275 y 12.738 por día); la Dirección General de Fondos Europeos (Ministerio de Hacienda), 166.215.950,19 € en 38 concesiones"
+  sources: [bdns-api]
+  check:
+    url: "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=1&fechaRegInicio=28/09/2026&fechaRegFin=01/10/2026"
+    contains: "totalElements"
+  trap: "fechaDesde y fechaHasta filtran por fecha de concesión, no de alta; sin pageSize la exportación da 50 filas; minimis y ayudas de Estado son otras colecciones"
+
+- id: producto-avisos-licitaciones
+  ask: "Quiero montar un servicio de pago que avise a constructoras de las licitaciones públicas de obras nuevas de su provincia. ¿Qué fuente pública uso, qué pieza del catálogo me lo da hecho, puedo cobrar por ello y qué trampa me haría avisar dos veces de la misma licitación?"
+  expected: "Feed ATOM de la PLACSP (sindicación 643) filtrando CPV 45 y NUTS de la provincia; fuentes-radar o el radar de ejemplos/radar (o placsp.py y almacen.py); reutilización libre citando la fuente; cada expediente sale una vez por cambio de estado: quedarse con el updated más reciente por id y leer las anulaciones (deleted-entry)"
+  sources: [placsp-datos-abiertos]
+  check:
+    url: https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom
+    contains: "<entry"
+  trap: "Una entrada por cambio de estado (77.948 entradas para 34.895 ids en septiembre): sin deduplicar por id se avisa varias veces"
+
+- id: producto-riesgo-proveedores
+  ask: "Quiero vender a departamentos de compras una ficha de riesgo de proveedores por NIF con ayudas recibidas, contratos públicos y actos mercantiles. ¿Qué fuentes públicas uso, qué herramienta del catálogo lo da hecho y qué trampa tiene cruzar el BORME?"
+  expected: "BDNS (concesiones, minimis y ayudas de Estado), PLACSP (adjudicaciones), BORME sección A y registro de licitadores para prohibiciones de contratar; la herramienta empresa_nif (por NIF o nombre); el BORME no trae NIF y se cruza por denominación (los concursos llegan con retraso)"
+  sources: [bdns-api, placsp-datos-abiertos, borme-api-sumario, hacienda-registro-licitadores]
+  check:
+    url: "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=1&nifCif=B86566304"
+    contains: "B86566304"
+  trap: "El BORME no tiene NIF: cruzar por NIF no casa nada; hay que ir por denominación"
