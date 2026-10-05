@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "catalogo-fuentes-publicas",
   "display_name": "Catálogo de fuentes públicas de España",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Fuentes de datos públicos de España verificadas: endpoints, trampas, recetas, identificadores y códigos que exigen las APIs.",
   "author": {
     "name": "BquantFinance",

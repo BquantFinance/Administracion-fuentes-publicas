@@ -29,7 +29,9 @@ jobs:
           import json, os
           tag = os.environ["GITHUB_REF_NAME"]; v = tag.removeprefix("v"); repo = os.environ["GITHUB_REPOSITORY"]
           s = json.load(open("server.json", encoding="utf-8"))
-          assert s["version"] == v, f"server.json lleva {s['version']} y la etiqueta es {tag}"
+          assert s["version"] == v, (f"server.json lleva {s['version']} y la etiqueta es {tag}: subir la versión en server.json, "
+                                     "pyproject.toml, mcpb/manifest.json y los dos ficheros del plugin en main, borrar la release "
+                                     "y la etiqueta y crearlas de nuevo desde main (la release usa el código de la etiqueta)")
           m = json.load(open("mcpb/manifest.json", encoding="utf-8"))
           m["version"] = v
           m["server"]["mcp_config"]["args"] = ["--from", f"git+https://github.com/{repo}@{tag}", "mcp-catalogo"]

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fuentes-publicas-mcp"
-version = "0.5.0"
+version = "0.6.0"
 description = "Servidor MCP del catálogo de fuentes de datos de la Administración pública española"
 readme = "guides/servidor-mcp.md"
 license = "CC0-1.0"
