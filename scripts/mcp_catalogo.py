@@ -371,6 +371,10 @@ def _datos(fn, *args, **kwargs) -> dict:
                      "EXTRA_CA_BUNDLE o REQUESTS_CA_BUNDLE con la CA del proxy (en env de la configuración del cliente)")
         elif tipo in ("ConnectionError", "ReadTimeout", "ConnectTimeout"):
             pista = "sin respuesta del servidor tras varios reintentos; puede rechazar IP de centros de datos"
+        elif tipo in ("BinderException", "ParserException", "ConversionException", "CatalogException"):
+            # sexta tanda: un agente escribió fechas entre comillas dobles, leyó «column not found» y dejó el almacén
+            pista = ("SQL de DuckDB: textos y fechas entre comillas simples ('2026-09-28'), las dobles son nombres de "
+                     "columna; columnas de una tabla con SELECT * FROM tabla LIMIT 1")
         else:
             pista = "revisar parámetros con ficha() de la fuente"
         return {"error": f"{tipo}: {str(exc)[:400]}", "pista": pista}
@@ -405,7 +409,25 @@ def boe_sumario(fecha: str, diario: str = "boe", seccion: str | None = None, tex
                 max_items: int = 200) -> dict:
     """Disposiciones de un día del BOE (diario=boe) o del BORME (diario=borme); fecha AAAA-MM-DD. Filtra por código de
     sección (1, 2A, 2B, 3, 4, 5A) y por texto en el título. Domingos y festivos no hay boletín."""
-    return _datos(_consulta().boe_sumario, fecha, diario, seccion, texto, max_items)
+    r = _datos(_consulta().boe_sumario, fecha, diario, seccion, texto, max_items)
+    if isinstance(r, dict) and "error" not in r and _dia_en_almacen(diario, fecha):
+        r["almacen"] = f"este {diario.upper()} ya está en el almacén local (tabla {diario}): almacen_sql, sin bajar ni parsear"
+    return r
+
+
+def _dia_en_almacen(fuente: str, fecha: str) -> bool:
+    """Si el almacén local tiene cargado ese día de esa fuente (sexta tanda: agentes con el BORME en local lo bajaban y
+    parseaban a mano desde boe_sumario, sin pasar por buscar)."""
+    try:
+        try:
+            from .clientes import almacen
+        except ImportError:
+            from clientes import almacen
+        d = almacen.existe()
+        est = json.loads((d / "estado.json").read_text(encoding="utf-8")) if d else {}
+        return str(fecha)[:10] in (est.get(fuente) or {}).get("dias", [])
+    except Exception:  # noqa: BLE001
+        return False
 
 
 CAMPOS_BDNS = ("fechaConcesion", "importe", "ayudaEquivalente", "instrumento", "numeroConvocatoria", "convocatoria",
