@@ -1165,6 +1165,7 @@ Ayuntamiento de Barcelona – Open Data BCN (API CKAN y DataStore) | Ayuntamient
 summary: 555 datasets del Ayuntamiento de Barcelona (padrón por sección censal desde 1997, accidentes de la Guardia Urbana, movilidad, vivienda, IBI, subvenciones, presupuesto) sobre CKAN 2.6. La API de acciones y el DataStore (búsqueda y SQL) responden sin clave; las descargas pasan por un reto anti-bot.
 !! El padrón municipal que publica el Ayuntamiento no es la cifra oficial; Barcelona a 1-1-2025 suma 1.732.066 frente a 1.731.649 del padrón oficial (idescat-api) y 1.713.247 del Censo anual del INE.
 !! El datastore puede no coincidir con el fichero; esm-bcn-evo 2024 tiene 1.250 filas en el datastore para un CSV declarado de 539 MB. Comparar COUNT(*) con size antes de fiarse.
+code: fuentes_publicas.clientes.ckan | ckan.filas('barcelona', '3057b89d-9713-4001-8f07-a6fb122a152b'): las 2.136 filas paginando por _id; los números llegan como texto ('682') | mcp: ckan_filas, ckan_buscar
 access: api-rest, download | auth: none | formats: json, csv, xml, geojson, gpkg, shp, zip | update: daily | status: active | verified: 2026-10-01
 coverage: Según dataset; padrón por sección censal 1997-2026 con un recurso por año, accidentes de la Guardia Urbana desde 2010
 license: CC BY 4.0 en los 555 datasets (license_id CC-BY-4.0)
@@ -1206,6 +1207,7 @@ Ayuntamiento de Madrid – Portal de datos abiertos (API CKAN y API dinámica) |
 summary: 673 conjuntos del Ayuntamiento en CKAN 2.9.11: padrón mensual por sección y edad, accidentes, censo de locales, presupuestos, calidad del aire y tráfico en tiempo real. API JSON, datastore con filtros, DCAT, feed Atom y una API dinámica con filtros por campo en ciudadesabiertas.madrid.es.
 !! En el datastore todos los campos son text: sort da 1, 10, 11... 2 y filters exige el valor como texto ({"COD_DISTRITO":"21"}); convertir tipos en local.
 !! En calidad del aire en tiempo real las horas aún no medidas llegan como 0 con validación N; filtrar por Vnn igual a V. Los filtros por campo de calair_tiemporeal devolvieron 0 registros.
+code: fuentes_publicas.clientes.ckan | ckan.filas('madrid', '200076-2-padron-csv', filters={'COD_DISTRITO': '21'}): las 3.114 filas del distrito; el valor va como texto, como todos los campos | mcp: ckan_filas, ckan_buscar
 access: api-rest, download, feed | auth: none | formats: json, csv, xml, xlsx, xls, zip, txt, kml, shp, ttl, atom | update: realtime | status: active | verified: 2026-10-01
 coverage: Según conjunto; calidad del aire desde 2001, accidentes desde 2010, padrón del mes en curso
 license: CC BY 4.0 en cada conjunto (license_id cc-by) y condiciones de uso del portal
@@ -1255,6 +1257,7 @@ related: comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, dato
 Comunidad de Madrid – Catálogo de datos abiertos (API CKAN) | Comunidad de Madrid
 summary: CKAN 2.9 con 177 conjuntos de las consejerías (calidad del aire diaria, polen, centros educativos, farmacias, registros, GTFS del Consorcio, elecciones autonómicas) y 2086 tablas del Instituto de Estadística (bancos Almudena municipal, Baco y Desvan). API JSON, datastore y DCAT sin clave.
 !! El datastore no refleja el CSV: padron_por_sexo tenía el 01/10 5.000 de 18.718 filas (hasta 2022) y desde la actualización del 04/10 da 404; el 2025 solo está en el CSV. Mirar datastore_active y leer el CSV.
+code: fuentes_publicas.clientes.ckan | ckan.filas('comunidad-madrid', '532735ad-4ce6-4a29-ad11-bb86916c0cf4'): las 41.230 filas del datastore paginando por _id, sin el tope silencioso de limit | ckan.comparar('comunidad-madrid', recurso): con el recurso de package_show, filas del datastore frente a las del CSV; completo False si se queda corto | mcp: ckan_filas, ckan_buscar
 access: api-rest, download | auth: none | formats: json, csv, zip, ttl, rdf | update: daily | status: active | verified: 2026-10-05
 coverage: Según conjunto; padrón municipal por sexo desde 1985, calidad del aire del día y del mes en curso
 license: CC BY 4.0 en cada conjunto (license_id cc-by)
@@ -1386,6 +1389,7 @@ related: dir3-directorio, placsp-datos-abiertos
 Generalitat de Catalunya – Dades obertes (API Socrata SODA) | Generalitat de Catalunya
 summary: Unos 1.100 datasets de la Generalitat en Socrata (registro de entidades, contratación pública, subvenciones RAISC, alojamientos turísticos, meteorología XEMA, embalses, normativa del DOGC). API SODA con consultas SoQL en servidor, salida JSON, CSV y GeoJSON y exportación completa, sin clave.
 !! Sin $limit devuelve 1000 filas (JSON y CSV) sin avisar; paginar con $limit, $offset y $order=:id, porque el orden por defecto lo fija la vista (dia DESC en gn9e-3qhr) y no es único.
+code: fuentes_publicas.clientes.socrata | socrata.filas('gn9e-3qhr'): las 87.975 filas paginando con $order=:id (sin $limit da 1.000) y los números tipados según x-soda2-types | socrata.columnas('gn9e-3qhr'): el fieldName que va en SoQL, sin caracteres no ASCII (estaci por Estació), con el nombre visible y el tipo | socrata.conjuntos('municipi'): conjuntos del dominio, con domains= puesto porque sin él la API de catálogo mezcla toda la red Socrata | mcp: socrata_filas
 access: api-rest, download | auth: none | formats: json, csv, geojson | update: daily | status: active | verified: 2026-10-01
 coverage: Según dataset; el 2026-10-01 el RAISC tenía 22,8 M de concesiones, contratación 1,98 M de publicaciones y el registro de entidades 90.751
 license: Cada dataset declara See Terms of Use (condiciones de uso del portal); citar la fuente
@@ -1432,6 +1436,7 @@ GVA – Portal de datos abiertos de la Generalitat Valenciana (API CKAN) | Gener
 summary: Catálogo CKAN de la Generalitat Valenciana (1310 conjuntos de la GVA, el Institut Cartogràfic Valencià y la Universidad de Alicante): contratos, ERTE, turismo, cultura, cartografía. API JSON con datastore para consultar filas de los CSV, volcado CSV y DCAT-AP, sin autenticación.
 !! rows se recorta en silencio a 1000 (10 por defecto) en package_search y limit a 32000 (100 por defecto) en datastore_search; paginar con start u offset hasta count o total.
 !! Los recursos que enlazan a bdo.gva.es (IVE) tienen copia en el datastore atrasada y con columnas fantasma (Anos, 2017, 14); para esos datos descargar la url original (ive-pegv-bancos-datos).
+code: fuentes_publicas.clientes.ckan | ckan.filas('gva', '6b244ece-3ced-459f-a2a6-5cc4bfccd577'): las 27.099 filas sin fiarse de limit (32.000) ni de _links.next, que sigue tras la última | ckan.buscar('gva', 'contratos'): los 54 conjuntos de package_search, paginando aunque rows se recorte a 1.000 | mcp: ckan_filas, ckan_buscar
 access: api-rest, download | auth: none | formats: json, csv, rdf, ttl, jsonld | update: daily | status: active | verified: 2026-10-01
 coverage: Catálogo desde 2019; contratos de la Generalitat desde 2013
 license: Creative Commons Attribution (license_id cc-by) en los 1310 conjuntos
@@ -1521,6 +1526,7 @@ Junta de Andalucía – Portal de datos abiertos (API CKAN y API v0 con BOJA) | 
 summary: Catálogo CKAN 2.10 de la Junta de Andalucía (832 conjuntos de 72 organismos, 260 del IECA): presupuestos, tesorería, educación, medio ambiente, cultura. API JSON con datastore en 173 recursos y una API v0 aparte con OpenAPI (BOJA desde 1979, RPT, agenda, subvenciones), sin autenticación.
 !! datastore_active true no garantiza la tabla; 6 de 173 recursos dieron 404 Resource not found y las plantillas orgánicas tienen 1000 filas en el datastore frente a 36260 en el CSV. Contrastar total con el fichero.
 !! Se pierden ceros a la izquierda: el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine llega como 44001 o '04001'; normalizar con str(x).zfill(5) antes de cruzar.
+code: fuentes_publicas.clientes.ckan | ckan.url_descarga(recurso): la URL del fichero con el host interno sin DNS (gdc-pdpopendata-ckan.paas.junta-andalucia.es) cambiado por el público | ckan.comparar('andalucia', recurso): filas del datastore y del CSV; el censo de instalaciones deportivas da 65.526 frente a 32.763 (cargado dos veces) | mcp: ckan_filas, ckan_buscar
 access: api-rest, download | auth: none | formats: json, csv, xls, xlsx, ods, kml, rdf, txt | update: daily | status: active | verified: 2026-10-01
 coverage: Catálogo desde 2017; BOJA desde 1979 en la API v0
 license: CC BY 4.0 en 786 de 832 conjuntos; 19 en CC BY-NC 4.0 y unos pocos «Consultar a la Consejería»
@@ -2086,6 +2092,7 @@ related: aemet-opendata, miteco-banco-datos-naturaleza
 CNMC Data – Estadísticas de energía, telecomunicaciones, audiovisual y postal | Comisión Nacional de los Mercados y la Competencia (CNMC)
 summary: 210 datasets de la CNMC en un CKAN con datastore: electricidad y gas (cuotas de comercializadoras, cambios de suministrador, precios, garantías de origen, bono social), precios provinciales de carburantes, telecomunicaciones, audiovisual, transporte, postal y comercio electrónico.
 !! datastore_search recorta limit a 32.000 sin error (limit=50000 en ds_1915_1 da 32.000 de 75.553; result.limit dice el aplicado): paginar con offset sobre el host, no con _links.next, o usar /datastore/dump/{id}.
+code: fuentes_publicas.clientes.ckan | ckan.filas('cnmc', 'b5a89db0-239f-4c8a-bd98-6575858359ae', por_pagina=50000): las 75.553 filas de ds_1915_1 aunque limit se corte en 32.000 sin aviso | mcp: ckan_filas, ckan_buscar
 access: api-rest, download, portal | auth: none | formats: csv, json, xml | update: quarterly | status: active | verified: 2026-10-01
 coverage: Según dataset (extras periodo y frecuenciaActualizacion); series anuales, trimestrales y mensuales
 license: CC BY-SA 4.0 (license_title de los datasets; condiciones en data.cnmc.es/condiciones-de-uso)
@@ -3100,6 +3107,7 @@ related: mapa-pesca, aemet-opendata, mitma-boletin-estadistico-online
 ## renfe-datos-abiertos
 Renfe – Datos abiertos (GTFS, GTFS-RT, estaciones, viajeros) | Renfe Viajeros (Grupo Renfe)
 summary: CKAN con 44 datasets: horarios GTFS de Cercanías y de alta velocidad, larga y media distancia, feeds GTFS-RT (alertas, viajes y posiciones de trenes) en protobuf y JSON, 1.035 estaciones con coordenadas y viajeros por franja horaria y núcleo (año 2018). CC BY 4.0, sin clave.
+code: fuentes_publicas.clientes.ckan | ckan.buscar('renfe', 'cercanias', fl=['name', 'title']): los 38 conjuntos; fl va como parámetro repetido (separado por comas da «No es una lista») | mcp: ckan_buscar, ckan_filas
 access: api-rest, download, feed | auth: none | formats: zip, csv, xlsx, json, protobuf | update: realtime | status: active | verified: 2026-10-01
 coverage: GTFS vigentes (AV y LD generado el 30-9-2026, Cercanías el 24-9-2026); viajeros por franja de 2018 y demás datasets estáticos sin cambios desde 2020-2021
 license: CC BY 4.0 (license_title de los datasets)

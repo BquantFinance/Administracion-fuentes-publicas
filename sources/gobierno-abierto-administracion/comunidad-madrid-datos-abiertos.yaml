@@ -10,6 +10,12 @@ summary: >-
   municipal, Baco y Desvan). API JSON, datastore y DCAT sin clave.
 alerts:
   - "El datastore no refleja el CSV: padron_por_sexo tenía el 01/10 5.000 de 18.718 filas (hasta 2022) y desde la actualización del 04/10 da 404; el 2025 solo está en el CSV. Mirar datastore_active y leer el CSV."
+code:
+  module: fuentes_publicas.clientes.ckan
+  use:
+    - "ckan.filas('comunidad-madrid', '532735ad-4ce6-4a29-ad11-bb86916c0cf4'): las 41.230 filas del datastore paginando por _id, sin el tope silencioso de limit"
+    - "ckan.comparar('comunidad-madrid', recurso): con el recurso de package_show, filas del datastore frente a las del CSV; completo False si se queda corto"
+  mcp: [ckan_filas, ckan_buscar]
 access: [api-rest, download]
 auth: none
 formats: [json, csv, zip, ttl, rdf]

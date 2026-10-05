@@ -12,6 +12,12 @@ summary: >-
 alerts:
   - rows se recorta en silencio a 1000 (10 por defecto) en package_search y limit a 32000 (100 por defecto) en datastore_search; paginar con start u offset hasta count o total.
   - Los recursos que enlazan a bdo.gva.es (IVE) tienen copia en el datastore atrasada y con columnas fantasma (Anos, 2017, 14); para esos datos descargar la url original (ive-pegv-bancos-datos).
+code:
+  module: fuentes_publicas.clientes.ckan
+  use:
+    - "ckan.filas('gva', '6b244ece-3ced-459f-a2a6-5cc4bfccd577'): las 27.099 filas sin fiarse de limit (32.000) ni de _links.next, que sigue tras la última"
+    - "ckan.buscar('gva', 'contratos'): los 54 conjuntos de package_search, paginando aunque rows se recorte a 1.000"
+  mcp: [ckan_filas, ckan_buscar]
 access: [api-rest, download]
 auth: none
 formats: [json, csv, rdf, ttl, jsonld]

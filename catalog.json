@@ -3566,6 +3566,16 @@
    "alerts": [
     "datastore_search recorta limit a 32.000 sin error (limit=50000 en ds_1915_1 da 32.000 de 75.553; result.limit dice el aplicado): paginar con offset sobre el host, no con _links.next, o usar /datastore/dump/{id}."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ckan",
+    "use": [
+     "ckan.filas('cnmc', 'b5a89db0-239f-4c8a-bd98-6575858359ae', por_pagina=50000): las 75.553 filas de ds_1915_1 aunque limit se corte en 32.000 sin aviso"
+    ],
+    "mcp": [
+     "ckan_filas",
+     "ckan_buscar"
+    ]
+   },
    "access": [
     "api-rest",
     "download",
@@ -4929,6 +4939,16 @@
     "El padrón municipal que publica el Ayuntamiento no es la cifra oficial; Barcelona a 1-1-2025 suma 1.732.066 frente a 1.731.649 del padrón oficial (idescat-api) y 1.713.247 del Censo anual del INE.",
     "El datastore puede no coincidir con el fichero; esm-bcn-evo 2024 tiene 1.250 filas en el datastore para un CSV declarado de 539 MB. Comparar COUNT(*) con size antes de fiarse."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ckan",
+    "use": [
+     "ckan.filas('barcelona', '3057b89d-9713-4001-8f07-a6fb122a152b'): las 2.136 filas paginando por _id; los números llegan como texto ('682')"
+    ],
+    "mcp": [
+     "ckan_filas",
+     "ckan_buscar"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -5038,6 +5058,16 @@
     "En el datastore todos los campos son text: sort da 1, 10, 11... 2 y filters exige el valor como texto ({\"COD_DISTRITO\":\"21\"}); convertir tipos en local.",
     "En calidad del aire en tiempo real las horas aún no medidas llegan como 0 con validación N; filtrar por Vnn igual a V. Los filtros por campo de calair_tiemporeal devolvieron 0 registros."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ckan",
+    "use": [
+     "ckan.filas('madrid', '200076-2-padron-csv', filters={'COD_DISTRITO': '21'}): las 3.114 filas del distrito; el valor va como texto, como todos los campos"
+    ],
+    "mcp": [
+     "ckan_filas",
+     "ckan_buscar"
+    ]
+   },
    "access": [
     "api-rest",
     "download",
@@ -5172,6 +5202,17 @@
    "alerts": [
     "El datastore no refleja el CSV: padron_por_sexo tenía el 01/10 5.000 de 18.718 filas (hasta 2022) y desde la actualización del 04/10 da 404; el 2025 solo está en el CSV. Mirar datastore_active y leer el CSV."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ckan",
+    "use": [
+     "ckan.filas('comunidad-madrid', '532735ad-4ce6-4a29-ad11-bb86916c0cf4'): las 41.230 filas del datastore paginando por _id, sin el tope silencioso de limit",
+     "ckan.comparar('comunidad-madrid', recurso): con el recurso de package_show, filas del datastore frente a las del CSV; completo False si se queda corto"
+    ],
+    "mcp": [
+     "ckan_filas",
+     "ckan_buscar"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -5544,6 +5585,17 @@
    "alerts": [
     "Sin $limit devuelve 1000 filas (JSON y CSV) sin avisar; paginar con $limit, $offset y $order=:id, porque el orden por defecto lo fija la vista (dia DESC en gn9e-3qhr) y no es único."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.socrata",
+    "use": [
+     "socrata.filas('gn9e-3qhr'): las 87.975 filas paginando con $order=:id (sin $limit da 1.000) y los números tipados según x-soda2-types",
+     "socrata.columnas('gn9e-3qhr'): el fieldName que va en SoQL, sin caracteres no ASCII (estaci por Estació), con el nombre visible y el tipo",
+     "socrata.conjuntos('municipi'): conjuntos del dominio, con domains= puesto porque sin él la API de catálogo mezcla toda la red Socrata"
+    ],
+    "mcp": [
+     "socrata_filas"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -5660,6 +5712,17 @@
     "rows se recorta en silencio a 1000 (10 por defecto) en package_search y limit a 32000 (100 por defecto) en datastore_search; paginar con start u offset hasta count o total.",
     "Los recursos que enlazan a bdo.gva.es (IVE) tienen copia en el datastore atrasada y con columnas fantasma (Anos, 2017, 14); para esos datos descargar la url original (ive-pegv-bancos-datos)."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ckan",
+    "use": [
+     "ckan.filas('gva', '6b244ece-3ced-459f-a2a6-5cc4bfccd577'): las 27.099 filas sin fiarse de limit (32.000) ni de _links.next, que sigue tras la última",
+     "ckan.buscar('gva', 'contratos'): los 54 conjuntos de package_search, paginando aunque rows se recorte a 1.000"
+    ],
+    "mcp": [
+     "ckan_filas",
+     "ckan_buscar"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -5892,6 +5955,17 @@
     "datastore_active true no garantiza la tabla; 6 de 173 recursos dieron 404 Resource not found y las plantillas orgánicas tienen 1000 filas en el datastore frente a 36260 en el CSV. Contrastar total con el fichero.",
     "Se pierden ceros a la izquierda: el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine llega como 44001 o '04001'; normalizar con str(x).zfill(5) antes de cruzar."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ckan",
+    "use": [
+     "ckan.url_descarga(recurso): la URL del fichero con el host interno sin DNS (gdc-pdpopendata-ckan.paas.junta-andalucia.es) cambiado por el público",
+     "ckan.comparar('andalucia', recurso): filas del datastore y del CSV; el censo de instalaciones deportivas da 65.526 frente a 32.763 (cargado dos veces)"
+    ],
+    "mcp": [
+     "ckan_filas",
+     "ckan_buscar"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -10035,6 +10109,16 @@
     "ckan"
    ],
    "summary": "CKAN con 44 datasets: horarios GTFS de Cercanías y de alta velocidad, larga y media distancia, feeds GTFS-RT (alertas, viajes y posiciones de trenes) en protobuf y JSON, 1.035 estaciones con coordenadas y viajeros por franja horaria y núcleo (año 2018). CC BY 4.0, sin clave.",
+   "code": {
+    "module": "fuentes_publicas.clientes.ckan",
+    "use": [
+     "ckan.buscar('renfe', 'cercanias', fl=['name', 'title']): los 38 conjuntos; fl va como parámetro repetido (separado por comas da «No es una lista»)"
+    ],
+    "mcp": [
+     "ckan_buscar",
+     "ckan_filas"
+    ]
+   },
    "access": [
     "api-rest",
     "download",

@@ -9,6 +9,11 @@ summary: >-
   CKAN con 44 datasets: horarios GTFS de Cercanías y de alta velocidad, larga y media distancia, feeds GTFS-RT
   (alertas, viajes y posiciones de trenes) en protobuf y JSON, 1.035 estaciones con coordenadas y viajeros por
   franja horaria y núcleo (año 2018). CC BY 4.0, sin clave.
+code:
+  module: fuentes_publicas.clientes.ckan
+  use:
+    - "ckan.buscar('renfe', 'cercanias', fl=['name', 'title']): los 38 conjuntos; fl va como parámetro repetido (separado por comas da «No es una lista»)"
+  mcp: [ckan_buscar, ckan_filas]
 access: [api-rest, download, feed]
 auth: none
 formats: [zip, csv, xlsx, json, protobuf]

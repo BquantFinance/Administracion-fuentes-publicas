@@ -10,6 +10,13 @@ summary: >-
   consultas SoQL en servidor, salida JSON, CSV y GeoJSON y exportación completa, sin clave.
 alerts:
   - Sin $limit devuelve 1000 filas (JSON y CSV) sin avisar; paginar con $limit, $offset y $order=:id, porque el orden por defecto lo fija la vista (dia DESC en gn9e-3qhr) y no es único.
+code:
+  module: fuentes_publicas.clientes.socrata
+  use:
+    - "socrata.filas('gn9e-3qhr'): las 87.975 filas paginando con $order=:id (sin $limit da 1.000) y los números tipados según x-soda2-types"
+    - "socrata.columnas('gn9e-3qhr'): el fieldName que va en SoQL, sin caracteres no ASCII (estaci por Estació), con el nombre visible y el tipo"
+    - "socrata.conjuntos('municipi'): conjuntos del dominio, con domains= puesto porque sin él la API de catálogo mezcla toda la red Socrata"
+  mcp: [socrata_filas]
 access: [api-rest, download]
 auth: none
 formats: [json, csv, geojson]
