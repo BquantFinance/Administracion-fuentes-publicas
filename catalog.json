@@ -2988,7 +2988,7 @@
    "code": {
     "module": "fuentes_publicas.clientes.cerca",
     "use": [
-     "cerca.cargar_colegios('cat'): los 5.434 centros del último curso con coordenadas buenas (no geo_1); 'mad' solo de alta (3.851), 'gva' y 'and' con coma resuelta",
+     "cerca.cargar_colegios('cat'): los 5.434 centros del último curso con las coordenadas buenas (no geo_1); también 'mad' (3.851, solo de alta), 'gva' y 'and'",
      "cerca.cercanos(cerca.cargar_colegios('mad'), 40.4818, -3.3635, 1000): cuántos hay a menos de 1 km (28) y los tres más cercanos con su distancia"
     ],
     "mcp": [
