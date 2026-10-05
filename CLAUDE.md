@@ -142,7 +142,10 @@ Judicial o UE, solo cuando lo indique el propietario.
   `fuentes-radar` comprobados. v0.8.0 (concursos, viviendas turísticas, compraventa, certificados energéticos, cerca y
   radar con fallos aislados por fuente) publicada el 2026-10-05 sobre 2ed6e10, tras un primer intento sobre 9bb74be que
   falló en la comprobación de versión (ficheros en 0.7.0): registro en 0.8.0, sha256 del .mcpb coincide y
-  `pip install ...@v0.8.0` da fuentes-radar y perfil_municipio con cerca. La plantilla del radar instala @v0.8.0.
+  `pip install ...@v0.8.0` da fuentes-radar y perfil_municipio con cerca. La plantilla del radar instala @v0.8.0. La 0.9.0
+  (fecha_publicacion de PLACSP, placsp_ultimo con anuladas, avisos del almacén, BDNS en mantenimiento, Castilla y León)
+  está en los ficheros de distribución desde el 2026-10-05; falta crear la release v0.9.0 desde la web y, publicada,
+  subir la plantilla del radar a @v0.9.0.
 - **CI**: `ci.yml` (validate, build al día y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC,
   manual y al cambiar el flujo: recetas, ejemplos de fichas, cargadores, ejemplos, forma de las fuentes y enlaces desde
   la IP de GitHub; comenta en el issue de verificación si algo falla). Secreto `AEMET_KEY` en el repositorio.
