@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 13 productos, 44 recetas, 155 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 13 productos, 45 recetas, 155 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
 
 ## Productos que se pueden construir hoy
 
@@ -46,13 +46,13 @@ Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras med
 - licencia: libre con cita; administradores y socios son datos personales y el almacén no los guarda
 - trampa: sin NIF ni CNAE (el NIF sale por denominación con empresa_nif cuando la sociedad ha recibido alguna ayuda o contrato); el objeto social es texto libre y la denominación cambia con los actos
 
-**informe-ubicacion** · Informe de una localización (población, renta, paro, alquiler, criminalidad) para inmobiliarias, retail y franquicias
+**informe-ubicacion** · Informe de una localización (población, renta, paro, compraventa y valor tasado de vivienda, criminalidad) para inmobiliarias, retail y franquicias
 - para: inmobiliarias, cadenas de retail y franquicias, proptech
-- fichas: ine-api-tempus, sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler, catastro-ovc · recetas: poblacion-renta-alquiler-por-municipio, criminalidad-municipio, paro-registrado-por-municipio
+- fichas: ine-api-tempus, sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler, catastro-ovc · recetas: poblacion-renta-alquiler-por-municipio, criminalidad-municipio, paro-registrado-por-municipio, compraventa-vivienda-municipio
 - piezas: herramienta perfil_municipio con el municipio, una dirección o «lat,lon» (CP, referencia catastral del portal) y ejemplos/mi_municipio.py; datos/municipios.csv para pasar entre códigos
-- frescura: paro mensual, padrón anual, renta con dos años de retraso (2023), criminalidad trimestral
+- frescura: paro mensual, padrón anual, renta con dos años de retraso (2023), criminalidad y compraventas trimestrales (el último trimestre, provisional)
 - licencia: libre con cita
-- trampa: SIGPAC y Catastro numeran los municipios distinto que el INE; la criminalidad es acumulada desde enero y solo de municipios de más de 20.000 habitantes
+- trampa: SIGPAC y Catastro numeran los municipios distinto que el INE y el Ministerio de Vivienda no da código; la criminalidad es acumulada desde enero y solo de municipios de más de 20.000 habitantes
 
 **comparador-carburantes** · Gasolineras más baratas cerca y evolución de precios por estación para conductores y flotas
 - para: apps de movilidad, gestores de flotas, comparadores
@@ -160,6 +160,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 | `comercio-exterior-por-producto` | Exportaciones o importaciones de un producto TARIC por país y provincia, mensuales o anuales desde 1995 | datacomex, aeat-estadisticas | 2026-09-30 |
 | `poblacion-renta-alquiler-por-municipio` | Población, renta media y precio del alquiler de un municipio con las tablas concretas del INE | ine-api-tempus, ine-cartografia-censal | 2026-09-30 |
 | `viviendas-turisticas-municipio` | Viviendas turísticas de un municipio, inscritas en el registro y anunciadas en plataformas, con su dirección | viviendas-uso-turistico, cnig-centro-descargas | 2026-10-05 |
+| `compraventa-vivienda-municipio` | Compraventas de vivienda por trimestre y valor tasado en €/m² de un municipio, con su código INE | mivau-precios-vivienda-alquiler, ine-codigos-territoriales | 2026-10-05 |
 
 ### Pasos
 
@@ -702,6 +703,19 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 3. `cnig-centro-descargas`: Para una dirección concreta, perfil_municipio con la dirección da la referencia catastral del portal, que cruza con referencia_cadastral (Cataluña) o ref_catastral (GVA) por sus 14 primeros caracteres
 - salida: Dos cifras por municipio con su fuente (registro e INE) y, en Cataluña y la GVA, el listado con dirección y referencia catastral
 
+**compraventa-vivienda-municipio** · Compraventas de vivienda por trimestre y valor tasado en €/m² de un municipio, con su código INE
+- entrada: ine-municipio
+1. `mivau-precios-vivienda-alquiler`: 34010210.XLS (6,4 MB, una hoja): transacciones por municipio desde 2004 en columnas por trimestre, el último con (*) provisional; las filas sin cifras son cabeceras de comunidad o provincia y en las uniprovinciales la comunidad hace de provincia («MADRID (COMUNIDAD DE)»)
+   ```
+   curl -sS -o transacciones.xls "https://apps.fomento.gob.es/BoletinOnline2/sedal/34010210.XLS"
+   ```
+2. `mivau-precios-vivienda-alquiler`: 35103500.XLS: valor tasado de los 306 municipios de más de 25.000 habitantes, una hoja por trimestre (la última es la más reciente) con €/m² total, hasta cinco años y más de cinco años y número de tasaciones; n.r es no representativo
+   ```
+   curl -sS -o valor_tasado.xls "https://apps.fomento.gob.es/BoletinOnline2/sedal/35103500.XLS"
+   ```
+3. `ine-codigos-territoriales`: Casar cada fila con el código INE por nombre dentro de su provincia: mivau.indice (scripts/clientes/mivau.py) casa 8.131 de 8.131 y 306 de 306 con nombres antiguos (Palma de Mallorca, Villadecanes), en otra lengua y con erratas; perfil_municipio lo hace en una llamada
+- salida: Por código INE, transacciones de los últimos trimestres y €/m² tasados con el número de tasaciones del último trimestre
+
 ## Dónde está cada cosa
 
 **Legislación y boletines oficiales**
@@ -889,7 +903,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Indicadores de igualdad por sexo (empleo, salarios, poder, salud) → `inmujeres-mujeres-cifras` (un xls por indicador en inmujeres.gob.es aunque el HTML enlace al host antiguo inmujer.es)
 
 **Vivienda y urbanismo**
-- Precios de vivienda, transacciones, alquiler (SERPAVI) y suelo → `mivau-precios-vivienda-alquiler`
+- Precios de vivienda, transacciones, alquiler (SERPAVI) y suelo → `mivau-precios-vivienda-alquiler` (por municipio, perfil_municipio da las transacciones de los últimos cinco trimestres y el valor tasado (más de 25.000 habitantes) con el código INE ya casado; las tablas solo traen nombres)
 - Viviendas turísticas (de uso turístico) de un municipio o una calle, con licencia o anunciadas → `viviendas-uso-turistico` (registros de Cataluña, Madrid, Andalucía y Comunitat Valenciana más el INE (VTE) en todos los municipios; registro e INE dan cifras distintas (Madrid 4.865 inscritas y 10.836 anunciadas); perfil_municipio trae las dos)
 
 **Telecomunicaciones y sociedad digital**
@@ -942,7 +956,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - vía `sanidad-portal-estadistico`: el Catálogo de Hospitales lo guarda con dígito de control (6 dígitos)
 - vía `ine-cartografia-censal`: CUMUN en el shapefile de secciones censales; disolver por CUMUN da el contorno municipal del año
 - vía `interior-criminalidad`: prefijo de 5 dígitos en la columna Geografía de la tabla municipal desde 2024 (antes solo el nombre)
-- vía `mivau-precios-vivienda-alquiler`: CUMUN como texto en el xlsx de SERPAVI y CodINE en su GeoJSON municipal (allí CUMUN es entero)
+- vía `mivau-precios-vivienda-alquiler`: CUMUN como texto en el xlsx de SERPAVI y CodINE en su GeoJSON municipal (allí CUMUN es entero); las tablas XLS de transacciones y valor tasado solo traen el nombre (mivau.indice)
 - vía `segsocial-estadisticas`: COD MUNICIPIO de MUNCNAE{MM}{AA}.xlsx, entero sin cero inicial; rellenar a cinco dígitos
 - vía `sepe-estadisticas`: código como número (28001.0) en ESTADISTICA_MUNICIPIOS.xls
 - vía `ine-api-tempus`: el filtro tv=19 pide el Id interno, no el código (02001 es tv=19:6124); columna ine_tempus_id de datos/municipios.csv

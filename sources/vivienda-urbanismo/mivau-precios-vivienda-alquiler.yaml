@@ -9,6 +9,9 @@ summary: >-
   Transacciones de vivienda, valor tasado, parque, vivienda libre y protegida y suelo urbano en XLS trimestrales
   del Boletín Estadístico Online, y SERPAVI, alquiler de vivienda habitual de fuentes tributarias 2011-2024
   por CCAA, provincia, municipio, distrito y sección censal en xlsx y GeoJSON.
+alerts:
+  - "Normalizando tildes y artículos, 79 de los 8.131 municipios de 34010210 no casan por nombre con el INE (Palma sale «Palma de Mallorca», Toral de los Vados «Villadecanes»); mivau.indice casa los 8.131."
+  - "35103500 pone la provincia en una sola fila del grupo y no siempre la primera: rellenar hacia abajo deja 7 de 306 municipios en otra (Almuñécar en Córdoba, Illescas en Guadalajara). Casar por nombre, no por provincia."
 access: [download, portal]
 auth: none
 formats: [xls, xlsx, geojson, shp, zip, pdf, html]
@@ -44,7 +47,7 @@ gotchas:
   - www.mivau.gob.es da 403 «Página web bloqueada» sin un User-Agent de navegador con plataforma (Mozilla/5.0 a secas no basta); /vivienda/estadisticas da 404 y los XLS siguen en apps.fomento.gob.es.
   - Los XLS son de Excel 97 (BIFF); xlrd o calamine los leen y openpyxl falla con BadZipFile. Las series largas reparten los años en hojas (de hasta 5 años en 34010110, una por trimestre en 35103500).
   - El Boletín no trae código INE; CCAA y provincias comparten la columna B con nombres rellenos de espacios, y en la tabla municipal la fila de la provincia Almería, sin datos, precede al municipio Almería.
-  - 35103500 tiene 86 hojas (T1A2005 a T2A2026) con espacios finales irregulares en el nombre, la provincia solo en su primera fila y n.r como texto en celdas numéricas.
+  - 35103500 tiene 86 hojas (T1A2005 a T2A2026) con espacios finales irregulares en el nombre y n.r como texto en celdas numéricas; «Santa Cruz de» y «Tenerife» van en dos filas.
   - Los indicadores de SERPAVI solo se publican con 10 o más alquileres en la tipología; por debajo quedan vacíos o null (5.540 de 8.095 municipios sin mediana en vivienda colectiva en 2024).
   - SERPAVI sale del IRPF cruzado con catastro y excluye arrendamientos a parientes; Navarra entra desde 2021, Gipuzkoa desde 2022 y Álava y Bizkaia solo en 2024.
   - Las cabeceras reales del xlsx (ALQM2_LV_M_VC_24) no coinciden con la hoja Metadatos (ALQM2mes_LV_M_VC_AA); VC es vivienda colectiva, VU unifamiliar, M mediana y 25 y 75 percentiles.
@@ -53,7 +56,8 @@ gotchas:
   - Las transacciones son escrituras ante notario remitidas por ANCERT (Consejo General del Notariado) y el valor tasado sale de las sociedades de tasación de la AEV, según las metodologías en PDF.
 tips:
   - "pd.read_excel(url, engine='calamine', header=None, skiprows=13) sobre 34010210.XLS da los 8.131 municipios con datos de 2004 a 2026; descartar las 60 filas de CCAA y provincia, que no tienen valores."
+  - "perfil_municipio da por código INE las transacciones de los últimos cinco trimestres y el valor tasado del último (receta compraventa-vivienda-municipio)."
   - Para alquiler por sección censal, la hoja Secciones censales del xlsx de SERPAVI se cruza por CUSEC con ine-cartografia-censal o con el shapefile SECC_CE_20210101_INE_WM.zip de la misma página.
 related: [catastro-ovc, ine-api-tempus, ine-codigos-territoriales, ine-cartografia-censal, mitma-boletin-estadistico-online]
 status: active
-verified: "2026-10-01"
+verified: "2026-10-05"

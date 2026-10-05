@@ -300,6 +300,7 @@
   note: afiliados extranjeros en EST292; las estadísticas de extranjería del Ministerio de Inclusión no están aún en el catálogo
 - need: Precios de vivienda, transacciones, alquiler (SERPAVI) y suelo
   source: mivau-precios-vivienda-alquiler
+  note: "por municipio, perfil_municipio da las transacciones de los últimos cinco trimestres y el valor tasado (más de 25.000 habitantes) con el código INE ya casado; las tablas solo traen nombres"
 - need: Índice de precios de vivienda y de alquiler
   source: ine-api-tempus
 - need: Telecomunicaciones (líneas, operadores, audiovisual)

@@ -9551,6 +9551,10 @@
     "secciones-censales"
    ],
    "summary": "Transacciones de vivienda, valor tasado, parque, vivienda libre y protegida y suelo urbano en XLS trimestrales del Boletín Estadístico Online, y SERPAVI, alquiler de vivienda habitual de fuentes tributarias 2011-2024 por CCAA, provincia, municipio, distrito y sección censal en xlsx y GeoJSON.",
+   "alerts": [
+    "Normalizando tildes y artículos, 79 de los 8.131 municipios de 34010210 no casan por nombre con el INE (Palma sale «Palma de Mallorca», Toral de los Vados «Villadecanes»); mivau.indice casa los 8.131.",
+    "35103500 pone la provincia en una sola fila del grupo y no siempre la primera: rellenar hacia abajo deja 7 de 306 municipios en otra (Almuñécar en Córdoba, Illescas en Guadalajara). Casar por nombre, no por provincia."
+   ],
    "access": [
     "download",
     "portal"
@@ -9621,7 +9625,7 @@
     "www.mivau.gob.es da 403 «Página web bloqueada» sin un User-Agent de navegador con plataforma (Mozilla/5.0 a secas no basta); /vivienda/estadisticas da 404 y los XLS siguen en apps.fomento.gob.es.",
     "Los XLS son de Excel 97 (BIFF); xlrd o calamine los leen y openpyxl falla con BadZipFile. Las series largas reparten los años en hojas (de hasta 5 años en 34010110, una por trimestre en 35103500).",
     "El Boletín no trae código INE; CCAA y provincias comparten la columna B con nombres rellenos de espacios, y en la tabla municipal la fila de la provincia Almería, sin datos, precede al municipio Almería.",
-    "35103500 tiene 86 hojas (T1A2005 a T2A2026) con espacios finales irregulares en el nombre, la provincia solo en su primera fila y n.r como texto en celdas numéricas.",
+    "35103500 tiene 86 hojas (T1A2005 a T2A2026) con espacios finales irregulares en el nombre y n.r como texto en celdas numéricas; «Santa Cruz de» y «Tenerife» van en dos filas.",
     "Los indicadores de SERPAVI solo se publican con 10 o más alquileres en la tipología; por debajo quedan vacíos o null (5.540 de 8.095 municipios sin mediana en vivienda colectiva en 2024).",
     "SERPAVI sale del IRPF cruzado con catastro y excluye arrendamientos a parientes; Navarra entra desde 2021, Gipuzkoa desde 2022 y Álava y Bizkaia solo en 2024.",
     "Las cabeceras reales del xlsx (ALQM2_LV_M_VC_24) no coinciden con la hoja Metadatos (ALQM2mes_LV_M_VC_AA); VC es vivienda colectiva, VU unifamiliar, M mediana y 25 y 75 percentiles.",
@@ -9631,6 +9635,7 @@
    ],
    "tips": [
     "pd.read_excel(url, engine='calamine', header=None, skiprows=13) sobre 34010210.XLS da los 8.131 municipios con datos de 2004 a 2026; descartar las 60 filas de CCAA y provincia, que no tienen valores.",
+    "perfil_municipio da por código INE las transacciones de los últimos cinco trimestres y el valor tasado del último (receta compraventa-vivienda-municipio).",
     "Para alquiler por sección censal, la hoja Secciones censales del xlsx de SERPAVI se cruza por CUSEC con ine-cartografia-censal o con el shapefile SECC_CE_20210101_INE_WM.zip de la misma página."
    ],
    "related": [
@@ -9641,7 +9646,7 @@
     "mitma-boletin-estadistico-online"
    ],
    "status": "active",
-   "verified": "2026-10-01"
+   "verified": "2026-10-05"
   },
   {
    "id": "viviendas-uso-turistico",
@@ -9857,7 +9862,7 @@
    },
    {
     "id": "informe-ubicacion",
-    "producto": "Informe de una localización (población, renta, paro, alquiler, criminalidad) para inmobiliarias, retail y franquicias",
+    "producto": "Informe de una localización (población, renta, paro, compraventa y valor tasado de vivienda, criminalidad) para inmobiliarias, retail y franquicias",
     "cliente": "inmobiliarias, cadenas de retail y franquicias, proptech",
     "fuentes": [
      "ine-api-tempus",
@@ -9869,13 +9874,14 @@
     "recetas": [
      "poblacion-renta-alquiler-por-municipio",
      "criminalidad-municipio",
-     "paro-registrado-por-municipio"
+     "paro-registrado-por-municipio",
+     "compraventa-vivienda-municipio"
     ],
     "piezas": "herramienta perfil_municipio con el municipio, una dirección o «lat,lon» (CP, referencia catastral del portal) y ejemplos/mi_municipio.py; datos/municipios.csv para pasar entre códigos",
-    "frescura": "paro mensual, padrón anual, renta con dos años de retraso (2023), criminalidad trimestral",
+    "frescura": "paro mensual, padrón anual, renta con dos años de retraso (2023), criminalidad y compraventas trimestrales (el último trimestre, provisional)",
     "licencia": "libre con cita",
-    "trampa": "SIGPAC y Catastro numeran los municipios distinto que el INE; la criminalidad es acumulada desde enero y solo de municipios de más de 20.000 habitantes",
-    "verified": "2026-10-01"
+    "trampa": "SIGPAC y Catastro numeran los municipios distinto que el INE y el Ministerio de Vivienda no da código; la criminalidad es acumulada desde enero y solo de municipios de más de 20.000 habitantes",
+    "verified": "2026-10-05"
    },
    {
     "id": "comparador-carburantes",
@@ -11630,6 +11636,43 @@
      }
     ],
     "verified": "2026-10-05"
+   },
+   {
+    "id": "compraventa-vivienda-municipio",
+    "intent": "Compraventas de vivienda por trimestre y valor tasado en €/m² de un municipio, con su código INE",
+    "inputs": [
+     "ine-municipio"
+    ],
+    "steps": [
+     {
+      "source": "mivau-precios-vivienda-alquiler",
+      "do": "34010210.XLS (6,4 MB, una hoja): transacciones por municipio desde 2004 en columnas por trimestre, el último con (*) provisional; las filas sin cifras son cabeceras de comunidad o provincia y en las uniprovinciales la comunidad hace de provincia («MADRID (COMUNIDAD DE)»)",
+      "example": "curl -sS -o transacciones.xls \"https://apps.fomento.gob.es/BoletinOnline2/sedal/34010210.XLS\""
+     },
+     {
+      "source": "mivau-precios-vivienda-alquiler",
+      "do": "35103500.XLS: valor tasado de los 306 municipios de más de 25.000 habitantes, una hoja por trimestre (la última es la más reciente) con €/m² total, hasta cinco años y más de cinco años y número de tasaciones; n.r es no representativo",
+      "example": "curl -sS -o valor_tasado.xls \"https://apps.fomento.gob.es/BoletinOnline2/sedal/35103500.XLS\""
+     },
+     {
+      "source": "ine-codigos-territoriales",
+      "do": "Casar cada fila con el código INE por nombre dentro de su provincia: mivau.indice (scripts/clientes/mivau.py) casa 8.131 de 8.131 y 306 de 306 con nombres antiguos (Palma de Mallorca, Villadecanes), en otra lengua y con erratas; perfil_municipio lo hace en una llamada"
+     }
+    ],
+    "output": "Por código INE, transacciones de los últimos trimestres y €/m² tasados con el número de tasaciones del último trimestre",
+    "checks": [
+     {
+      "url": "https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden=34000000",
+      "contains": "sedal/34010210.XLS",
+      "read_bytes": 100000
+     },
+     {
+      "url": "https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden=35000000",
+      "contains": "sedal/35103500.XLS",
+      "read_bytes": 100000
+     }
+    ],
+    "verified": "2026-10-05"
    }
   ],
   "necesidades": [
@@ -12152,7 +12195,8 @@
    },
    {
     "need": "Precios de vivienda, transacciones, alquiler (SERPAVI) y suelo",
-    "source": "mivau-precios-vivienda-alquiler"
+    "source": "mivau-precios-vivienda-alquiler",
+    "note": "por municipio, perfil_municipio da las transacciones de los últimos cinco trimestres y el valor tasado (más de 25.000 habitantes) con el código INE ya casado; las tablas solo traen nombres"
    },
    {
     "need": "Índice de precios de vivienda y de alquiler",
@@ -12411,7 +12455,7 @@
      },
      {
       "via": "mivau-precios-vivienda-alquiler",
-      "how": "CUMUN como texto en el xlsx de SERPAVI y CodINE en su GeoJSON municipal (allí CUMUN es entero)"
+      "how": "CUMUN como texto en el xlsx de SERPAVI y CodINE en su GeoJSON municipal (allí CUMUN es entero); las tablas XLS de transacciones y valor tasado solo traen el nombre (mivau.indice)"
      },
      {
       "via": "segsocial-estadisticas",

@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """Ficha de un municipio con datos oficiales: sus códigos en cada sistema, población del padrón, renta media, paro
-registrado y contratos del año y criminalidad (consulta.perfil_municipio; fichas ine-api-tempus, sepe-estadisticas,
-interior-criminalidad y datos/municipios.csv). La herramienta MCP perfil_municipio devuelve lo mismo en JSON.
+registrado y contratos del año, criminalidad y compraventa de vivienda (consulta.perfil_municipio; fichas ine-api-tempus,
+sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler y datos/municipios.csv). La herramienta MCP perfil_municipio devuelve lo mismo en JSON.
 
 Uso: python ejemplos/mi_municipio.py "Alcalá de Henares"      (nombre, código INE o código SIGPAC como 28:900)
 
 Trampas que resuelve: el INE no filtra por el código de municipio sino por un Id interno (tv=19:Id); con nult=1 el
 último periodo puede venir vacío; SIGPAC y Catastro numeran distinto que el INE; el CSV del SEPE llega en windows-1252,
 con «<5» por secreto y con Oza-Cesuras y Cerdedo-Cotobade bajo sus códigos de antes de la fusión; la criminalidad solo
-existe para municipios de más de 20.000 habitantes y es acumulada desde enero.
+existe para municipios de más de 20.000 habitantes y es acumulada desde enero; las tablas de vivienda del ministerio no
+traen código INE y escriben nombres antiguos («Palma de Mallorca»).
 """
 import importlib
 import sys
@@ -42,6 +43,13 @@ def main(q: str) -> None:
         print("  Infracciones penales: " + ", ".join(f"{k} {n(v)}" for k, v in crim["infracciones_penales"].items()) + " (acumulado desde enero)")
     else:
         print(f"  Criminalidad: {crim.get('nota') or crim.get('error')}")
+    cv = p["compraventa"]
+    if cv.get("transacciones"):
+        print("  Compraventas de vivienda: " + ", ".join(f"{k} {n(v)}" for k, v in cv["transacciones"].items())
+              + f" ({cv['provisional']} provisional)")
+    vt = cv.get("valor_tasado")
+    print(f"  Valor tasado ({vt['trimestre']}): {n(vt['euros_m2'])} €/m² con {n(vt['tasaciones'])} tasaciones" if vt
+          else f"  Valor tasado: {cv.get('nota') or cv.get('error')}")
 
 
 if __name__ == "__main__":

@@ -95,9 +95,11 @@ Judicial o UE, solo cuando lo indique el propietario.
 
 ## Estado (2026-10-01)
 
-- **Catálogo**: 95 fichas, 88 verificadas el 2026-10-01. En 2026-09-30 siguen datacomex (sin token), ree-redata y
-  datos-gob-es-api (Incapsula) y bne-datos (Cloudflare); en `null`, fega-beneficiarios-pac, oepm-invenes y
-  mitma-opendata-movilidad. 43 recetas, 12 productos.
+- **Catálogo**: 96 fichas, 89 verificadas entre el 2026-10-01 y el 2026-10-05. En 2026-09-30 siguen datacomex (sin
+  token), ree-redata y datos-gob-es-api (Incapsula) y bne-datos (Cloudflare); en `null`, fega-beneficiarios-pac,
+  oepm-invenes y mitma-opendata-movilidad. 45 recetas, 13 productos. Desde el 2026-10-05, concursos de acreedores
+  (BORME) en empresa_nif y el radar, y viviendas turísticas y compraventa de vivienda (mivau.indice casa por nombre las
+  8.131 filas sin código INE) en perfil_municipio.
 - **Hosts que rechazan IP de centros de datos**: Catastro, REData, www.ree.es, ESIOS, datos.gob.es, BNE, FEGA, OEPM,
   movilidad-opendata.mitma.es, geoserver.iepnb.es, sivira.isciii.es, analisis.cis.es y www.inmujer.es; intermitentes
   Seguridad Social, renfe, DATAESTUR, indicadores.fecyt.es e IECA; desde GitHub, MINETUR y Catastro. PLACSP

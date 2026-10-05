@@ -432,7 +432,8 @@ def coyuntura() -> dict:
 def perfil_municipio(municipio: str | list[str], solo_codigos: bool = False) -> dict:
     """Un municipio (nombre, código INE, SIGPAC, DIR3 o NIF) o el de una dirección («calle Alcalá 50, Madrid») o
     «lat,lon» en una llamada: sus códigos en cada sistema (SIGPAC y Catastro numeran distinto que el INE), padrón, renta
-    media, paro y contratos del año por mes, criminalidad y viviendas turísticas (INE y registro autonómico); con dirección
+    media, paro y contratos del año por mes, criminalidad, viviendas turísticas (INE y registro autonómico) y compraventas
+    y valor tasado de vivienda; con dirección
     o coordenadas, además ubicacion (CP, coordenadas y
     referencia catastral del portal; exacta=false si la calle hallada no es la pedida; en el campo, recinto SIGPAC, uso y
     referencia de la parcela). solo_codigos=True da solo los códigos y la ubicación. Con una lista de hasta 20, en una llamada."""

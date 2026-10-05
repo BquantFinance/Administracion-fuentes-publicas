@@ -970,3 +970,25 @@
       headers: {"User-Agent": "Mozilla/5.0"}
       contains: Vivienda de uso turístico
   verified: "2026-10-05"
+
+- id: compraventa-vivienda-municipio
+  intent: Compraventas de vivienda por trimestre y valor tasado en €/m² de un municipio, con su código INE
+  inputs: [ine-municipio]
+  steps:
+    - source: mivau-precios-vivienda-alquiler
+      do: "34010210.XLS (6,4 MB, una hoja): transacciones por municipio desde 2004 en columnas por trimestre, el último con (*) provisional; las filas sin cifras son cabeceras de comunidad o provincia y en las uniprovinciales la comunidad hace de provincia («MADRID (COMUNIDAD DE)»)"
+      example: curl -sS -o transacciones.xls "https://apps.fomento.gob.es/BoletinOnline2/sedal/34010210.XLS"
+    - source: mivau-precios-vivienda-alquiler
+      do: "35103500.XLS: valor tasado de los 306 municipios de más de 25.000 habitantes, una hoja por trimestre (la última es la más reciente) con €/m² total, hasta cinco años y más de cinco años y número de tasaciones; n.r es no representativo"
+      example: curl -sS -o valor_tasado.xls "https://apps.fomento.gob.es/BoletinOnline2/sedal/35103500.XLS"
+    - source: ine-codigos-territoriales
+      do: "Casar cada fila con el código INE por nombre dentro de su provincia: mivau.indice (scripts/clientes/mivau.py) casa 8.131 de 8.131 y 306 de 306 con nombres antiguos (Palma de Mallorca, Villadecanes), en otra lengua y con erratas; perfil_municipio lo hace en una llamada"
+  output: "Por código INE, transacciones de los últimos trimestres y €/m² tasados con el número de tasaciones del último trimestre"
+  checks:
+    - url: https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden=34000000
+      contains: sedal/34010210.XLS
+      read_bytes: 100000
+    - url: https://apps.fomento.gob.es/BoletinOnline2/?nivel=2&orden=35000000
+      contains: sedal/35103500.XLS
+      read_bytes: 100000
+  verified: "2026-10-05"

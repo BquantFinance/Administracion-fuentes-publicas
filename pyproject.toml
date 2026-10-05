@@ -9,7 +9,7 @@ description = "Servidor MCP del catálogo de fuentes de datos de la Administraci
 readme = "guides/servidor-mcp.md"
 license = "CC0-1.0"
 requires-python = ">=3.10"
-dependencies = ["mcp>=1.0", "pyyaml>=6.0", "requests>=2.31", "certifi>=2024.2", "openpyxl>=3.1"]
+dependencies = ["mcp>=1.0", "pyyaml>=6.0", "requests>=2.31", "certifi>=2024.2", "openpyxl>=3.1", "xlrd>=2.0"]
 
 [project.optional-dependencies]
 clientes = []  # compatibilidad: los clientes ya van en la instalación base

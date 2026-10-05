@@ -24,7 +24,7 @@ ine-municipio:
     - via: interior-criminalidad
       how: prefijo de 5 dígitos en la columna Geografía de la tabla municipal desde 2024 (antes solo el nombre)
     - via: mivau-precios-vivienda-alquiler
-      how: CUMUN como texto en el xlsx de SERPAVI y CodINE en su GeoJSON municipal (allí CUMUN es entero)
+      how: CUMUN como texto en el xlsx de SERPAVI y CodINE en su GeoJSON municipal (allí CUMUN es entero); las tablas XLS de transacciones y valor tasado solo traen el nombre (mivau.indice)
     - via: segsocial-estadisticas
       how: COD MUNICIPIO de MUNCNAE{MM}{AA}.xlsx, entero sin cero inicial; rellenar a cinco dígitos
     - via: sepe-estadisticas

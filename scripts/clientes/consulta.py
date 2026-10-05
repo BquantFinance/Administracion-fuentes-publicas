@@ -646,9 +646,39 @@ def viviendas_turisticas(m: dict, mid: int | None = None) -> dict:
     return out
 
 
+def compraventa_vivienda(m: dict) -> dict:
+    """Transacciones de vivienda (escrituras ante notario) de un municipio (fila de municipios()) en los últimos cinco
+    trimestres, el último provisional, y valor tasado medio en €/m² del último trimestre, solo en los 306 municipios de
+    más de 25.000 habitantes; Ministerio de Vivienda, tablas 34010210 y 35103500. Las tablas no traen código INE y
+    mivau.indice casa los nombres (8.131 de 8.131 y 306 de 306 el 2026-10-05). None en el valor tasado es «n.r», no
+    representativo."""
+    try:
+        from . import mivau
+    except ImportError:
+        import mivau
+
+    def cargar(fn):
+        t = fn()
+        return t, mivau.indice(t, municipios())
+    c, ic = _memo(("mivau", mivau.COMPRAVENTAS), 86400, lambda: cargar(mivau.compraventas))
+    v, iv = _memo(("mivau", mivau.VALOR_TASADO), 86400, lambda: cargar(mivau.valor_tasado))
+    fila = ic.get(m["ine"])
+    out: dict = {"transacciones": {k: fila[k] for k in c["trimestres"][-5:]} if fila else None,
+                 "provisional": c["trimestres"][-1]}
+    tasado = iv.get(m["ine"])
+    out["valor_tasado"] = {"trimestre": v["trimestre"], **tasado} if tasado else None
+    if not fila:
+        out["nota"] = "sin fila en la tabla del ministerio (Usansolo, segregado de Galdakao, aún no sale)"
+    elif not tasado:
+        out["nota"] = "valor tasado solo en municipios de más de 25.000 habitantes"
+    out["fuente"] = "mivau-precios-vivienda-alquiler, tablas 34010210 y 35103500"
+    return out
+
+
 def perfil_municipio(municipio: str) -> dict:
     """Un municipio (o el de una dirección o unas coordenadas, con ubicar) en una llamada: códigos en cada sistema (INE, SIGPAC y Catastro, DIR3, NIF, NUTS3, coordenadas),
-    población del padrón, renta neta media por persona, paro registrado y contratos del año por mes y criminalidad. Cada
+    población del padrón, renta neta media por persona, paro registrado y contratos del año por mes, criminalidad,
+    viviendas turísticas y compraventa de vivienda (transacciones y valor tasado). Cada
     bloque falla por separado (clave error) sin tumbar el resto. None en una cifra es secreto o sin dato, no cero."""
     try:
         from . import ine_tempus, sepe
@@ -703,7 +733,7 @@ def perfil_municipio(municipio: str) -> dict:
 
     tareas = {"poblacion": poblacion, "renta": renta, "paro_registrado": lambda: empleo("paro"),
               "contratos": lambda: empleo("contratos"), "criminalidad": criminalidad,
-              "viviendas_turisticas": lambda: viviendas_turisticas(m, mid)}
+              "viviendas_turisticas": lambda: viviendas_turisticas(m, mid), "compraventa": lambda: compraventa_vivienda(m)}
     with ThreadPoolExecutor(len(tareas)) as ex:  # bloques independientes: el perfil tarda lo que el más lento
         futuros = {k: ex.submit(bloque, k, f) for k, f in tareas.items()}
     for k in tareas:

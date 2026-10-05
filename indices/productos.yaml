@@ -62,15 +62,15 @@
   verified: "2026-10-01"
 
 - id: informe-ubicacion
-  producto: Informe de una localización (población, renta, paro, alquiler, criminalidad) para inmobiliarias, retail y franquicias
+  producto: Informe de una localización (población, renta, paro, compraventa y valor tasado de vivienda, criminalidad) para inmobiliarias, retail y franquicias
   cliente: inmobiliarias, cadenas de retail y franquicias, proptech
   fuentes: [ine-api-tempus, sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler, catastro-ovc]
-  recetas: [poblacion-renta-alquiler-por-municipio, criminalidad-municipio, paro-registrado-por-municipio]
+  recetas: [poblacion-renta-alquiler-por-municipio, criminalidad-municipio, paro-registrado-por-municipio, compraventa-vivienda-municipio]
   piezas: "herramienta perfil_municipio con el municipio, una dirección o «lat,lon» (CP, referencia catastral del portal) y ejemplos/mi_municipio.py; datos/municipios.csv para pasar entre códigos"
-  frescura: "paro mensual, padrón anual, renta con dos años de retraso (2023), criminalidad trimestral"
+  frescura: "paro mensual, padrón anual, renta con dos años de retraso (2023), criminalidad y compraventas trimestrales (el último trimestre, provisional)"
   licencia: "libre con cita"
-  trampa: "SIGPAC y Catastro numeran los municipios distinto que el INE; la criminalidad es acumulada desde enero y solo de municipios de más de 20.000 habitantes"
-  verified: "2026-10-01"
+  trampa: "SIGPAC y Catastro numeran los municipios distinto que el INE y el Ministerio de Vivienda no da código; la criminalidad es acumulada desde enero y solo de municipios de más de 20.000 habitantes"
+  verified: "2026-10-05"
 
 - id: comparador-carburantes
   producto: Gasolineras más baratas cerca y evolución de precios por estación para conductores y flotas

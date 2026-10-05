@@ -2,7 +2,7 @@
 
 > Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. Contenido en castellano, claves en inglés.
 
-Fuentes: 96 · Productos: 13 · Recetas: 44 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Entrada ligera; la completa es llms.txt · Generado: 2026-10-05
+Fuentes: 96 · Productos: 13 · Recetas: 45 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Entrada ligera; la completa es llms.txt · Generado: 2026-10-05
 
 ## Empieza aquí
 
@@ -28,7 +28,7 @@ radar-licitaciones, inteligencia-competidores, radar-ayudas, kyb-proveedores, le
 
 ## Fichas con trampas silenciosas
 
-Lee sus alerts antes de dar una cifra: aemps-cima-api, ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, bde-estadisticas, bdns-api, borme-api-sumario, cnig-centro-descargas, cnmc-data, comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, datacomex, face-facturas, gbif-es, gencat-dades-obertes, gva-dadesobertes-api, idee-servicios, idescat-api, igae-ejecucion-presupuestaria, ign-sismologia, ine-api-tempus, ine-cartografia-censal, interior-criminalidad, ive-pegv-bancos-datos, junta-andalucia-datos-abiertos, mapa-sigpac, mites-estadisticas, placsp-datos-abiertos, puertos-estado-datos, segsocial-estadisticas, sepe-estadisticas, viviendas-uso-turistico.
+Lee sus alerts antes de dar una cifra: aemps-cima-api, ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, bde-estadisticas, bdns-api, borme-api-sumario, cnig-centro-descargas, cnmc-data, comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, datacomex, face-facturas, gbif-es, gencat-dades-obertes, gva-dadesobertes-api, idee-servicios, idescat-api, igae-ejecucion-presupuestaria, ign-sismologia, ine-api-tempus, ine-cartografia-censal, interior-criminalidad, ive-pegv-bancos-datos, junta-andalucia-datos-abiertos, mapa-sigpac, mites-estadisticas, mivau-precios-vivienda-alquiler, placsp-datos-abiertos, puertos-estado-datos, segsocial-estadisticas, sepe-estadisticas, viviendas-uso-turistico.
 
 ## Fichas por sector
 

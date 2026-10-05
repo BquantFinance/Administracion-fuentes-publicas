@@ -31,6 +31,7 @@ import ckan  # noqa: E402
 import consulta  # noqa: E402
 import datacomex  # noqa: E402
 import ine_tempus  # noqa: E402
+import mivau  # noqa: E402
 import ogc  # noqa: E402
 import pcaxis  # noqa: E402
 import placsp  # noqa: E402
@@ -583,6 +584,56 @@ def borme_situacion_concursal_sin_personas():
     assert "Auto de conclusión del concurso" in fila["detalle"] and "PICAZO" not in fila["detalle"]
     xs = [{"documento": "BORME-A-2026-189-28", "provincia": "MADRID", "fecha": "2026-09-30", "empresa": x} for x in emp]
     assert len(radar.filtrar_concursos(xs, {})) == 2 and radar.filtrar_concursos(xs, {}, ["OTRA EMPRESA SL"]) == []
+
+
+@test
+def mivau_compraventas_y_valor_tasado():
+    # Filas reales de 34010210 y 35103500 (T2A2026) recortadas a los dos últimos años, 2026-10-05
+    c = mivau.parse_compraventas([
+        ["", "Número total de transacciones inmobiliarias de viviendas por municipios."],
+        ["", "", "", "Año 2025", "", "", "", "Año 2026", ""], ["", "", "", " (trimestre)", "", "", "", "(trimestre)", ""],
+        ["", "", "", "1º", "2º", "3º", "4º", "1º", "2º (*)"],
+        ["", "ANDALUCÍA", "", "", "", "", "", "", ""], ["", "Granada", "", "", "", "", "", "", ""],
+        ["", "Almuñécar", "", 172.0, 177.0, 176.0, 195.0, 177.0, 161.0],
+        ["", "Granada", "", 921.0, 996.0, 797.0, 1280.0, 853.0, 877.0],
+        ["", "BALEARS (ILLES)", "", "", "", "", "", "", ""],
+        ["", "Palma de Mallorca", "", 1378.0, 1287.0, 1182.0, 1287.0, 1080.0, 1152.0],
+        ["", "Zamora", "", "", "", "", "", "", ""], ["", "Corrales", "", 1.0, 4.0, 4.0, 4.0, 6.0, 2.0],
+        ["", "CATALUÑA", "", "", "", "", "", "", ""], ["", "Barcelona", "", "", "", "", "", "", ""],
+        ["", "Barcelona", "", 4516.0, 4773.0, 3649.0, 4373.0, 4061.0, 4625.0], ["", "Font-rubí", "", 3.0, 4.0, 4.0, 5.0, 5.0, 5.0],
+        ["", "Granada (La)", "", 2.0, 6.0, 8.0, 14.0, 6.0, 10.0], ["", "Rubí", "", 252.0, 315.0, 229.0, 289.0, 275.0, 254.0],
+        ["", "MADRID (COMUNIDAD DE)", "", "", "", "", "", "", ""],
+        ["", "Madrid", "", 11344.0, 11462.0, 9051.0, 10654.0, 10038.0, 10343.0],
+        ["", "RIOJA (LA)", "", "", "", "", "", "", ""], ["", "CEUTA", "", 171.0, 197.0, 173.0, 192.0, 174.0, 165.0]])
+    assert c["trimestres"] == ["2025-T1", "2025-T2", "2025-T3", "2025-T4", "2026-T1", "2026-T2"]
+    assert len(c["municipios"]) == 10 and c["municipios"][("Barcelona", "Barcelona")]["2026-T2"] == 4625
+    t = mivau.parse_valor_tasado([
+        ["", "Provincia", "Municipio", "Valor tasado de vivienda", "", "", "", "Número de tasaciones", "", ""],
+        ["", "Almería", "Nijar", "n.r", 1311.0, 1328.7, "", 3.0, 77.0, 80.0],
+        ["", "Córdoba", "Córdoba", 2426.4, 1744.0, 1783.8, "", 117.0, 1085.0, 1202.0],
+        ["", "", "Almuñecar", "n.r", 3020.7, 3015.8, "", 10.0, 134.0, 144.0],  # de Granada, antes de la fila «Granada»
+        ["", "Granada", "Granada", 3010.2, 2429.8, 2446.5, "", 63.0, 726.0, 789.0],
+        ["", "ILLES BALEARS", "Palma de Mallorca", 4410.9, 3791.6, 3814.5, "", 79.0, 1195.0, 1274.0],
+        ["", "Santa Cruz de", "Adeje", "n.r", 3773.8, 3775.9, "", 6.0, 193.0, 199.0],
+        ["", "Tenerife", "San Cristóbal Laguna", 2160.2, 2040.9, 2041.9, "", 25.0, 390.0, 415.0],
+        ["", "", "Santa Cruz deTenerife", 2653.3, 2326.2, 2330.0, "", 54.0, 594.0, 648.0],
+        ["", "n.r: el dato no es representativo o no existen observaciones"]], "T2A2026 ")
+    assert t["trimestre"] == "2026-T2" and t["municipios"][("Almería", "Nijar")]["euros_m2_hasta_5_anios"] is None
+    ms = [dict(zip(("ine", "nombre", "provincia"), x), cpro=x[0][:2]) for x in (
+        ("04066", "Níjar", "Almería"), ("07040", "Palma", "Illes Balears"), ("08019", "Barcelona", "Barcelona"),
+        ("08085", "Font-rubí", "Barcelona"), ("08094", "Granada, La", "Barcelona"), ("08184", "Rubí", "Barcelona"),
+        ("14021", "Córdoba", "Córdoba"), ("18017", "Almuñécar", "Granada"), ("18087", "Granada", "Granada"),
+        ("28079", "Madrid", "Madrid"), ("38001", "Adeje", "Santa Cruz de Tenerife"),
+        ("38023", "San Cristóbal de La Laguna", "Santa Cruz de Tenerife"), ("38038", "Santa Cruz de Tenerife", "Santa Cruz de Tenerife"),
+        ("49054", "Corrales del Vino", "Zamora"), ("51001", "Ceuta", "Ceuta"))]
+    ic = mivau.indice(c, ms)
+    assert {k: f["2026-T2"] for k, f in ic.items()} == {
+        "18017": 161, "18087": 877, "07040": 1152, "49054": 2, "08019": 4625, "08085": 5, "08094": 10, "08184": 254,
+        "28079": 10343, "51001": 165}  # Rubí no cae en Font-rubí ni Granada en La Granada; Ceuta sin provincia
+    it = mivau.indice(t, ms)
+    assert sorted(it) == ["04066", "07040", "14021", "18017", "18087", "38001", "38023", "38038"]
+    assert it["18017"]["euros_m2"] == 3015.8 and it["38038"]["tasaciones"] == 648 and it["38023"]["euros_m2"] == 2041.9
+    assert mivau.clave("Línea de la Concepción (La)") == mivau.clave("Línea de la Concepción, La") == "la linea de la concepcion"
 
 
 def main() -> int:
