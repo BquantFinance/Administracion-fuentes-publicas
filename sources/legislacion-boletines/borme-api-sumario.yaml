@@ -10,6 +10,13 @@ summary: >-
   nombramientos, ceses, ampliaciones, disoluciones), otros actos y anuncios, con XML y PDF de cada documento.
 alerts:
   - "Situación concursal llega con meses de retraso y mezcla resoluciones viejas (el BORME del 02/10/2026 trae una declaración del 11/05/2026 y revocaciones de 2022): usar la fecha de resolución y la última por procedimiento."
+code:
+  module: fuentes_publicas.clientes.boe
+  use:
+    - "boe.borme_empresas('BORME-A-2026-189-28'): 621 empresas (denominación, registro, actos por tipo, datos registrales) de una provincia; el sufijo 99 es el índice"
+    - "boe.parse_concursal(texto): procedimiento, fecha de resolución ISO, resolución, clase, calificación y juzgado de un acto Situación concursal, sin nombres"
+    - "fuentes-almacen sync --fuentes borme --desde 2026-10-02: tabla borme, una empresa por fila con actos en lista (list_contains(actos, 'Constitución'))"
+  mcp: [boe_sumario, almacen_sql, empresa_nif]
 access: [api-rest, download]
 auth: none
 formats: [json, xml, pdf, html]
@@ -51,7 +58,6 @@ gotchas:
 tips:
   - Los tipos de acto en el parrafo son un vocabulario fijo (Constitución, Nombramientos, Ceses/Dimisiones, Revocaciones, Ampliación de capital, Disolución...) y sirven de separador al parsear.
   - Para buscar una empresa en un día, el XML BORME-A-AAAA-NNN-99 es una tabla con denominación, id del documento de provincia y número de asiento; evita bajar las 52 provincias.
-  - scripts/clientes/boe.py (borme_empresas) separa número, denominación, registro, actos y datos registrales de cada empresa; un acto fuera de su lista queda con tipo None.
 related: [boe-api-sumario, boe-feeds]
 status: active
 verified: "2026-10-05"

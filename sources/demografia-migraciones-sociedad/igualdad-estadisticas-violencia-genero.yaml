@@ -9,6 +9,10 @@ summary: >-
   Portal OLAP (Saiku 2.5) con 17 cubos consultables sin clave por API REST: feminicidios desde 2003, menores,
   llamadas al 016, ATENPRO, VioGén, denuncias, órdenes de protección y ayudas, por CCAA, provincia, año y
   mes, con exportación CSV y xlsx. Boletines mensuales en PDF y DERA en xlsx.
+code:
+  module: fuentes_publicas.clientes.saiku
+  use:
+    - "saiku.Saiku().consulta('040 Servicio 016', mdx): el cellset en filas, cabecera primero, tras fijar con discover la cookie sin la que se pierde la consulta"
 access: [api-rest, download, portal]
 auth: none
 formats: [json, csv, xlsx, pdf, html]
@@ -58,7 +62,7 @@ gotchas:
   - wp-json de violenciagenero.igualdad.gob.es está restringido (401 rest_login_required); los PDF de víctimas llevan la fecha de actualización en el nombre y cambian, rascar la página.
   - VioGén (cubo 090, casos activos y protección policial) y denuncias (110) proceden del Ministerio del Interior; la criminalidad general está en interior-criminalidad.
 tips:
-  - Flujo en cuatro llamadas con el mismo tarro (discover, POST query, POST result, GET export), implementado en scripts/clientes/saiku.py; un CrossJoin de año por CCAA en feminicidios dio 331 filas en 31 ms.
+  - Flujo en cuatro llamadas con el mismo tarro (discover, POST query, POST result, GET export); un CrossJoin de año por CCAA en feminicidios dio 331 filas en 31 ms.
   - "pd.read_csv(io.BytesIO(r.content)) lee el CSV directo; en el JSON, cellset[0] son cabeceras y cellset[1:] filas con c['value']."
   - El cubo 010 tiene 14 dimensiones (edad y nacionalidad de víctima y agresor, suicidio, relación, convivencia, denuncia previa) y las medidas feminicidios y huérfanos menores.
 related: [interior-criminalidad, ine-api-tempus, mites-estadisticas]

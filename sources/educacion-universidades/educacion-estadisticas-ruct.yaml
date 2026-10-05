@@ -9,6 +9,12 @@ summary: >-
   Estadísticas de enseñanza no universitaria en EDUCAbase (PC-Axis idéntico al del INE, con descarga CSV, px
   y xlsx por tabla), estadísticas universitarias SIIU en xlsx (matriculados y egresados por titulación
   2015-2024), y RUCT y Registro Estatal de Centros Docentes con exportación xls sin sesión.
+code:
+  module: fuentes_publicas.clientes.pcaxis
+  use:
+    - "pcaxis.tablas_de_indice(url_indice): las URL csv_bdsc de las tablas de un índice EducaDynPx (13 en adultos 2024-2025), con el &amp; ya limpio"
+    - "pcaxis.tabla(url): una tabla en filas (9.072 en adul_01) con los números convertidos, leída en UTF-8 aunque la cabecera diga ISO-8859-15"
+  mcp: [tabla_pcaxis]
 access: [download, portal]
 auth: none
 formats: [csv, px, xlsx, xls, html]

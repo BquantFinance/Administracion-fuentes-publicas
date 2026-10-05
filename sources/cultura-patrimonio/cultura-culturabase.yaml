@@ -9,6 +9,12 @@ summary: >-
   Sistema PC-Axis (el mismo software que INEbase) con las estadísticas culturales: empleo cultural,
   bibliotecas, museos, cine, comercio exterior, bono cultural, fundaciones y asuntos taurinos; cada tabla se
   descarga en CSV, px o xlsx con URL deducible. Más el Anuario en PDF.
+code:
+  module: fuentes_publicas.clientes.pcaxis
+  use:
+    - "pcaxis.tablas_de_indice(url_indice): las URL csv_bdsc de las tablas de un índice CulturaDynPx (/t1/p1f/M_Anuales/), con el &amp; ya limpio"
+    - "pcaxis.tabla(url): una tabla en filas (156 en T1FM1001) con coma decimal y punto de miles convertidos, leída en UTF-8 aunque diga ISO-8859-15"
+  mcp: [tabla_pcaxis]
 access: [download, portal]
 auth: none
 formats: [csv, px, xlsx, pdf, html]

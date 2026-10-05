@@ -65,6 +65,41 @@
       "maxItems": 3,
       "description": "Trampas silenciosas: el servidor devuelve datos incompletos, distintos o cero sin error. Se leen antes que nada; no se repiten en gotchas."
     },
+    "code": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "module",
+        "use"
+      ],
+      "description": "Código del repo que ya trae la fuente resuelta. validate.py comprueba que cada llamada existe, que mcp solo nombra herramientas del servidor y que el bloque entero no pasa de 600 caracteres.",
+      "properties": {
+        "module": {
+          "type": "string",
+          "pattern": "^fuentes_publicas\\.clientes\\.[a-z_]+$",
+          "description": "Módulo instalable con pip; en el repo, scripts/clientes/<nombre>.py."
+        },
+        "use": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "minItems": 1,
+          "maxItems": 4,
+          "description": "Una línea por llamada, ejecutada con una llamada real antes de escribirla: «modulo.funcion(args): qué devuelve y la trampa que resuelve», o una orden del paquete (fuentes-almacen ...)."
+        },
+        "mcp": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "Herramientas del servidor MCP que traen esta fuente resuelta, la principal primero."
+        }
+      }
+    },
     "access": {
       "type": "array",
       "items": {

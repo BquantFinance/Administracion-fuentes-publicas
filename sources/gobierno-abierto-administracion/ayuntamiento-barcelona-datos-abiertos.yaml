@@ -11,6 +11,11 @@ summary: >-
 alerts:
   - El padrón municipal que publica el Ayuntamiento no es la cifra oficial; Barcelona a 1-1-2025 suma 1.732.066 frente a 1.731.649 del padrón oficial (idescat-api) y 1.713.247 del Censo anual del INE.
   - El datastore puede no coincidir con el fichero; esm-bcn-evo 2024 tiene 1.250 filas en el datastore para un CSV declarado de 539 MB. Comparar COUNT(*) con size antes de fiarse.
+code:
+  module: fuentes_publicas.clientes.ckan
+  use:
+    - "ckan.filas('barcelona', '3057b89d-9713-4001-8f07-a6fb122a152b'): las 2.136 filas paginando por _id; los números llegan como texto ('682')"
+  mcp: [ckan_filas, ckan_buscar]
 access: [api-rest, download]
 auth: none
 formats: [json, csv, xml, geojson, gpkg, shp, zip]

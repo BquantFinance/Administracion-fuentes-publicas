@@ -866,5 +866,23 @@ def main() -> int:
     return 1 if fallos else 0
 
 
+@test
+def code_valida_llamadas_y_herramientas():
+    # validate.py sobre code: las fichas reales solo prueban el caso bueno; esto comprueba que rechaza lo que debe
+    sys.path.insert(0, str(DIR.parent))
+    import validate
+    from common import comandos_paquete, herramientas_mcp
+    h, c = {x["name"] for x in herramientas_mcp()}, comandos_paquete()
+    bueno = {"module": "fuentes_publicas.clientes.ckan", "mcp": ["ckan_filas"], "use": [
+        "ckan.filas('gva', rid, filters={'a': 1}): filas", "fuentes-almacen sync --fuentes borme --desde 2026-10-02: tabla"]}
+    assert validate.validate_code("f", bueno, h, c) == []
+    malo = {"module": "fuentes_publicas.clientes.nada", "use": ["ckan.no_existe(1): x", "ckan.filas(1)"], "mcp": ["inventada"]}
+    errores = " | ".join(validate.validate_code("f", malo, h, c))
+    assert all(x in errores for x in ("clientes.nada", "ckan.no_existe", "sin «llamada", "'inventada'")), errores
+    assert validate.partir_use("ckan.filas('gva', r, filters={'a': 1}): filas: todas") == ("ckan.filas('gva', r, filters={'a': 1})", "filas: todas")
+    largo = {"module": "fuentes_publicas.clientes.boe", "use": ["boe.sumario('2026-10-05'): " + "x" * 130] * 4}
+    assert "máximo 600" in " ".join(validate.validate_code("f", largo, h, c))
+
+
 if __name__ == "__main__":
     sys.exit(main())

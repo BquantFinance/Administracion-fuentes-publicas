@@ -13,6 +13,13 @@ alerts:
   - "La adjudicación va en un cac:TenderResult por lote, con uno o varios WinningParty, y en acuerdos marco el importe del lote se repite en cada uno: en el 1044 de 2026-08, por fila 33.302 M€ y por lote 9.709."
   - "Una licitación sale en cada cambio de estado y el ZIP repite entradas: en 157 páginas del ZIP de 2026-09, 77.948 entradas para 34.895 ids; sumarlas todas da ×2,61 el importe. Una fila por id, la de updated mayor."
   - "Con la IP rechazada por el WAF, atom y ZIP dan 200 con un HTML de 187 bytes que un parser XML lee como feed vacío; el 2026-10-01 desde GitHub placsp.py salió con código 0 y «0 expedientes». Comprobar que la raíz es feed."
+code:
+  module: fuentes_publicas.clientes.placsp
+  use:
+    - "placsp.entradas(max_paginas=1): un dict por entry (estado, órgano con DIR3 y NIF, importes en texto, CPV, adjudicaciones por lote) y las bajas con deleted"
+    - "placsp.parse_feed(contenido): (entradas, URL rel=next) de un .atom o de cada fichero de los ZIP; la página del WAF da error, no un feed vacío"
+    - "fuentes-almacen sync --fuentes placsp --desde 2026-10-04: Parquet con placsp_ultimo (una fila por id, con anulada) y adjudicaciones_ultimo"
+  mcp: [almacen_sql, empresa_nif]
 access: [feed, download]
 auth: none
 formats: [atom, xml, zip, xlsx]

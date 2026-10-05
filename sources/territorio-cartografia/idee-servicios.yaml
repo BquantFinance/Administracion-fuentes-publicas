@@ -12,6 +12,11 @@ summary: >-
 alerts:
   - En WMS 1.3.0 con CRS=EPSG:4258 el BBOX va en orden lat,lon; en orden lon,lat responde 200 con una imagen en blanco de 2 KB, sin error.
   - En los WFS de servicios.idee.es, numberMatched repite numberReturned mientras quedan páginas (count=5 da 5; hits da 1381 en el mismo bbox); el total solo sale con resultType=hits y el final, cuando falta next.
+code:
+  module: fuentes_publicas.clientes.ogc
+  use:
+    - "ogc.entidades('https://api-features.idee.es/collections/address/items', bbox=bbox): todas las entidades siguiendo next (349 portales en un bbox de Madrid)"
+    - "ogc.colecciones('https://api-features.idee.es'): id y título de sus 38 colecciones (address, roadlink, watercourse...)"
 access: [ogc, api-rest, portal]
 auth: none
 formats: [xml, json, gml, geojson, png, jpg, geotiff]

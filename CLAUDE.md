@@ -31,7 +31,9 @@ antes de darlo por bueno. Mejor pocas piezas que funcionan que muchas a medias.
 4. **`tips` solo si acelera**, como mucho seis. Histórico y sincronización van en `sync` (since, full, size, new), solo
    con medidas propias y la muestra dicha si la cifra es estimada.
 5. **Ejemplos copiables y respuesta descrita.** Cada endpoint principal lleva `example` que funciona al pegarlo y
-   `returns` con la forma vista en esa llamada. Con claves, variable de entorno (`$AEMET_KEY`), nunca la clave.
+   `returns` con la forma vista en esa llamada. Con claves, variable de entorno (`$AEMET_KEY`), nunca la clave. Si un
+   cliente de `scripts/clientes` o una herramienta MCP ya trae la fuente, va en `code` (module, de 1 a 4 `use`
+   ejecutados con una llamada real y `mcp`), no en tips: `ficha` lo da tras alerts y `buscar` lo marca.
 6. **Vocabulario cerrado** (`schema/vocab.yaml`) para sector, acceso, auth, periodicidad, formatos, estado, quirks e ids;
    si falta un valor, se añade en el mismo commit.
 7. **Castellano en valores, inglés en claves.** Sin markdown dentro de los valores ni dos puntos seguidos de espacio en
@@ -99,7 +101,8 @@ Judicial o UE, solo cuando lo indique el propietario.
 ## Estado (2026-10-01)
 
 - **Catálogo**: 102 fichas, 95 verificadas entre el 2026-10-01 y el 2026-10-05; las tres de Castilla y León llegaron por
-  la comunidad (PR 13, issue 6) y el portal ganó al revisarlo su API Opendatasoft (442 de 840 conjuntos).
+  la comunidad (PR 13, issue 6) y el portal ganó al revisarlo su API Opendatasoft (442 de 840 conjuntos). 37 llevan
+  `code` con las llamadas ejecutadas el 2026-10-05 (aemet-opendata no: sin clave no se pudo ejecutar).
   En 2026-09-30 siguen datacomex (sin token), ree-redata y datos-gob-es-api (Incapsula) y bne-datos (Cloudflare); en
   `null`, fega-beneficiarios-pac, oepm-invenes y mitma-opendata-movilidad. 47 recetas, 14 productos. Desde el 2026-10-05, concursos de acreedores
   (BORME) en empresa_nif y el radar; en perfil_municipio, viviendas turísticas, compraventa de vivienda (mivau.indice

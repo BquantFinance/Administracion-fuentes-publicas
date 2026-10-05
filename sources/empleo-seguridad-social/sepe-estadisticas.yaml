@@ -12,6 +12,12 @@ summary: >-
 alerts:
   - "«<5» es secreto (1 a 4), no cero: un sexo sale restando el otro del TOTAL (Abengibre agosto 2026, hombres 18 - 13 = 5) y la provincia, de su fila de total (Albacete 20.710, no los 20.698 de sumar municipios)."
   - En el CSV, Oza-Cesuras (15902) sale con 0 y Cerdedo-Cotobade (36902) sin fila; su dato va en los códigos previos a la fusión. Agosto 2026, 15026 + 15063 = 46 + 95 = 141 parados; 36011 + 36012 = 35 + 134 = 169.
+code:
+  module: fuentes_publicas.clientes.sepe
+  use:
+    - "sepe.municipio('15902'): serie mensual del año de un municipio por código INE; suma los códigos previos a la fusión (141 parados en 2026-08) y «<5» da None"
+    - "sepe.filas('contratos', 2025): las 97.620 filas del año (mes, ine, municipio y medidas en enteros) del CSV en cp1252 con línea de título; caché con ETag"
+  mcp: [perfil_municipio]
 access: [download, portal]
 auth: none
 formats: [csv, xls, pdf, html, rss]
@@ -19,7 +25,7 @@ update: monthly
 coverage: "Todos los municipios desde mayo de 2005 en xls y enero de 2006 en CSV; por actividad, capitales y más de 45.000 habitantes desde 2009 y de 20.000 a 45.000 desde 2017; series nacionales desde enero de 2001"
 sync:
   since: "Enero de 2006 en los CSV de datos abiertos (el de 2005 da 404); mayo de 2005 en el xls mensual"
-  full: "Un CSV por año y conjunto (Paro, Contratos, Dtes_empleo), 21 por conjunto de 2006 a 2026; scripts/clientes/sepe.py los lee y cachea."
+  full: "Un CSV por año y conjunto (Paro, Contratos, Dtes_empleo), 21 por conjunto de 2006 a 2026."
   size: "De 9,7 a 10,1 MB un año entero de paro (2006, 2007, 2015) y 6,7 MB el de 2026 con ocho meses; unos 200 MB por conjunto."
   new: "El CSV del año en curso se reescribe al publicar cada mes (Last-Modified 07/09/2026 con agosto) y responde 304 a If-None-Match; la página xls del mes siguiente da 404 hasta que sale."
 license: Reutilización libre con cita de la fuente
@@ -61,8 +67,6 @@ gotchas:
   - Desde 2020 los ficheros municipales cuelgan de /HomeSepe/dam/jcr:{uuid}/ con uuid nuevo cada mes y hay páginas con nombre irregular (2025/Octubre.html, 2019/noviembre.html); tomar los enlaces de la página.
   - Los xls de avance se sobreescriben cada mes en la misma URL; guardar copia fechada para el histórico de publicaciones.
   - Paro registrado no es lo mismo que desempleo EPA (INE); no comparar niveles.
-tips:
-  - Paro, contratos o demandantes de un municipio con código INE, del CSV anual de datos abiertos, sin leer xls; scripts/clientes/sepe.py municipio('28005') da la serie del año y suma los códigos fusionados.
 related: [ine-api-tempus, segsocial-estadisticas, ine-codigos-territoriales, mites-estadisticas]
 status: active
 verified: "2026-10-01"

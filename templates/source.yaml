@@ -11,6 +11,8 @@ tags: [tema1, tema2]
 summary: >-
   Qué datos contiene y para qué sirve. Máx. 300 caracteres.
 alerts: []   # solo trampas silenciosas (datos incompletos, distintos o cero sin error), máximo tres; no repetir en gotchas
+# code (opcional, si scripts/clientes o el servidor MCP ya la traen): module fuentes_publicas.clientes.<nombre>, use con 1 a 4
+#   «modulo.funcion(args): qué devuelve y qué trampa resuelve» ejecutadas antes de escribirlas, y mcp con sus herramientas.
 access: [api-rest]
 auth: none
 formats: [json]

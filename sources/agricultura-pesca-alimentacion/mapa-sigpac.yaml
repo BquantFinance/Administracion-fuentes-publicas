@@ -11,6 +11,12 @@ summary: >-
   vectoriales, listas de códigos y GeoPackage por provincia y campaña. Sin clave, licencia CC BY 4.0.
 alerts:
   - El municipio es el código del Catastro, no el del INE; las capitales son 900 (Madrid 28:900, INE 28079) y otros 4.448 municipios cambian de número (Tórtoles 05246 es 5:247); traducir con datos/municipios.csv.
+code:
+  module: fuentes_publicas.clientes.ogc
+  use:
+    - "ogc.entidades(ogc.SIGPAC + '/collections/recintos/items', bbox='-4.10,39.80,-4.00,39.90'): los 4.938 recintos siguiendo next (limit se corta a 250)"
+    - "consulta.ubicar('39.85,-4.05'): recinto SIGPAC del punto, uso, superficie y referencia catastral de la parcela, con el municipio INE (no el del Catastro)"
+  mcp: [perfil_municipio]
 access: [api-rest, ogc, download, portal]
 auth: none
 formats: [json, geojson, gpkg, zip, xml, protobuf, pdf]

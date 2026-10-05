@@ -9,6 +9,11 @@ summary: >-
   Relación oficial anual de los 8.132 municipios con código INE (provincia, municipio y dígito de control),
   comunidades autónomas, provincias e islas, y Nomenclátor de entidades singulares, núcleos y diseminados con su
   población. Es la clave para cruzar cualquier dataset territorial español.
+code:
+  module: fuentes_publicas.clientes.consulta
+  use:
+    - "consulta.buscar_municipio('Coruña, A'): su fila de datos/municipios.csv (ine, dc, SIGPAC con capitales 900, DIR3, NIF, NUTS3, Id de Tempus) por nombre o código"
+  mcp: [perfil_municipio]
 access: [download]
 auth: none
 formats: [xlsx, xls, csv, txt, zip, html]

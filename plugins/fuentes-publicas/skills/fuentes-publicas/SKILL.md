@@ -19,7 +19,8 @@ Catálogo verificado con llamadas reales: https://github.com/BquantFinance/Admin
    y `ckan_filas`, `socrata_filas`, `almacen_sql` si hay almacén local y `descargar(url)` para cualquier otra URL
    pública (certificados FNMT, codificación, bloqueos, rutas muertas). `perfil_municipio` y `empresa_nif` aceptan una
    lista y resuelven todo en una llamada; para comparar, mejor una llamada con la lista que una por elemento. En
-   Python, los mismos clientes (abajo).
+   Python, los mismos clientes (abajo). `ficha(id).code` da el cliente de cada fuente (módulo y llamada exacta) y su
+   herramienta: úsalo antes de escribir un parser.
 4. Si el usuario quiere montar un producto, mira `productos` en `buscar` (o `indices/productos.yaml`): fuentes, piezas
    de código, frescura, volumen, licencia y la trampa principal de cada uno.
 

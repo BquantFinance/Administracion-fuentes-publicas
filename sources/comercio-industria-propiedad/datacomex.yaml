@@ -11,6 +11,10 @@ summary: >-
   cuadros de mando. Definitivos hasta 2023 y provisionales después.
 alerts:
   - pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error.
+code:
+  module: fuentes_publicas.clientes.datacomex
+  use:
+    - "datacomex.catalogo('ObtenerPaises'): los 292 países con el código de Aduanas de 3 cifras que exige pa (un ISO como FR da vacío), sin token"
 access: [api-rest, portal, download]
 auth: registration
 formats: [json, csv, xlsx, html]

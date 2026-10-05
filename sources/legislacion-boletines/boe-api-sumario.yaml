@@ -8,6 +8,13 @@ tags: [boe, diario-oficial, legislacion, sumario, disposiciones, anuncios]
 summary: >-
   Sumario diario del BOE en JSON o XML: todas las disposiciones y anuncios publicados cada día con identificador,
   título, sección, departamento, epígrafe y URLs de PDF, HTML y XML del texto completo de cada uno.
+code:
+  module: fuentes_publicas.clientes.boe
+  use:
+    - "boe.items(boe.sumario('2026-10-03')): un dict por disposición con sección, departamento y url_xml, sea cada nivel objeto o lista; sumario es None sin BOE"
+    - "boe.sumarios('2026-09-01', '2026-09-30'): (fecha, sumario) de los 26 días con boletín, saltando domingos (404) y avisando de los 500 de fechas antiguas"
+    - "boe.documento('BOE-A-2026-20264'): metadatos, materias, referencias y texto plano del XML de una disposición; KeyError si el id no existe (200 con error)"
+  mcp: [boe_sumario, almacen_sql]
 access: [api-rest]
 auth: none
 formats: [json, xml, pdf, html]
@@ -15,7 +22,7 @@ update: daily
 coverage: "1960-09-"
 sync:
   since: "1960-09-01, primer sumario de la API (1960-08-31 y anteriores dan 404)"
-  full: "Recorrer /boe/sumario/{AAAAMMDD} de lunes a sábado desde 19600901, unos 20.000 sumarios, y el url_xml de cada item si hace falta el texto; scripts/clientes/boe.py sumarios() salta domingos y trata 404 como día sin boletín."
+  full: "Recorrer /boe/sumario/{AAAAMMDD} de lunes a sábado desde 19600901, unos 20.000 sumarios, y el url_xml de cada item si hace falta el texto."
   size: "2025 entero medido, 313 sumarios, 97 MB de JSON y 75.720 entradas, con 17,2 GB de PDF (szBytes) y unos 0,5 GB de XML (media de 7,4 KB en 40). Desde 1960, unos 4 GB de sumarios y 3 millones de entradas (un día por trimestre); 0,23 s por sumario."
   new: "Pedir el sumario del día; 404 es día sin boletín (domingos). Para avisar sin descargar, los RSS de boe-feeds."
 license: Reutilización libre con cita de la fuente (aviso legal AEBOE)
@@ -51,7 +58,6 @@ gotchas:
   - xml.php con un id inexistente responde 200 con raíz error (descripcion No se encontró el documento original) y Content-Type text/html; comprobar la raíz.
 tips:
   - El OpenAPI 3.1 completo está embebido en api.php (variable openApiFile); el documento técnico es APIsumarioBOE.pdf en /datosabiertos/documentos/.
-  - scripts/clientes/boe.py aplana el sumario con todas sus variantes (items), lee el XML de cada disposición (documento) y recorre días saltando domingos (sumarios).
 related: [boe-api-legislacion-consolidada, borme-api-sumario, boe-feeds]
 status: active
 verified: "2026-10-01"

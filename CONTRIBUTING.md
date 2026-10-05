@@ -29,6 +29,7 @@ Las fichas las leen agentes con presupuesto de tokens. Por eso:
 - `quirks`: peculiaridades técnicas del vocabulario cerrado (certificado sin cadena, User-Agent obligatorio, gzip sin cabecera...). Permiten a un agente configurar el cliente HTTP filtrando `catalog.json`. Detalle en `guides/cliente-http.md`.
 - `ids`: identificadores que de verdad aparecen en los datos (código INE, NIF, DIR3, CPV, CNAE...), del vocabulario cerrado. Es lo que permite a un agente saber con qué otras fuentes puede cruzar sin abrir el fichero.
 - `alerts`: como mucho tres trampas silenciosas, las que dan datos incompletos, distintos o a cero sin ningún error (topes que recortan sin aviso, acumulados que parecen mensuales, códigos que no son los del INE). Van tras `summary` y no se repiten en `gotchas`.
+- `code` (opcional): si un módulo de `scripts/clientes` o una herramienta del servidor MCP ya trae la fuente, `module`, de 1 a 4 `use` («modulo.funcion(args): qué devuelve y qué trampa resuelve», cada una ejecutada antes de escribirla) y `mcp`. `validate.py` comprueba que la función y la herramienta existen y que el bloque no pasa de 600 caracteres.
 - `sync` (opcional): `since`, `full`, `size` y `new`, solo con medidas propias: desde cuándo hay datos hoy, cómo bajarlo todo, cuánto ocupa y tarda (con la muestra si es estimado) y cómo detectar lo nuevo sin bajarlo todo otra vez.
 - `gotchas`: una frase por trampa. Cabeceras obligatorias, codificaciones, límites, cambios de URL, campos engañosos. Es el campo más valioso del repo.
 - Nada que ya esté en otra ficha: usa `related`.

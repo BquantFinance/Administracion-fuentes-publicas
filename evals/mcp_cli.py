@@ -5,16 +5,18 @@ Arranca scripts/mcp_catalogo.py por stdio, llama a una herramienta o lee un recu
 el mismo que recibe cualquier cliente MCP. Sirve para dar el catálogo a un agente que solo tiene Bash.
 
 Uso:
-  python evals/mcp_cli.py                                   lista herramientas, parámetros y recursos
+  python evals/mcp_cli.py                                   instrucciones del servidor, herramientas, parámetros y recursos
   python evals/mcp_cli.py HERRAMIENTA [clave=valor ...]     llama a la herramienta (los enteros se convierten)
   python evals/mcp_cli.py recurso NOMBRE                    lee catalogo://NOMBRE (llms.txt o reglas)
 Ejemplo: python evals/mcp_cli.py buscar consulta="paro municipio" limite=5
 EVAL_SIN=h1,h2 oculta esas herramientas (condición sin las piezas que se miden; cuarta tanda) y EVAL_SIN=h.bloque quita ese
-bloque de la respuesta de h (perfil_municipio.cerca; quinta tanda).
+bloque de la respuesta de h (perfil_municipio.cerca; quinta tanda; sin el código de las fichas, ficha.code,buscar.code).
+Las instrucciones salen sin las frases que nombran algo oculto, como haría un cliente MCP con un servidor sin esas piezas.
 """
 import asyncio
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -49,6 +51,17 @@ def sin_bloques(herramienta: str, texto: str) -> str:
     return json.dumps(limpia(d), ensure_ascii=False, separators=(",", ":"))
 
 
+def sin_frases(texto: str) -> str:
+    """Instrucciones sin lo oculto: el nombre se quita de las enumeraciones («perfil_municipio, coyuntura» da «coyuntura»)
+    y la frase que aún lo nombre se quita entera (con EVAL_SIN=ficha.code no se anuncia code)."""
+    ocultos = SIN | {b for bs in BLOQUES.values() for b in bs}
+    texto = texto or ""
+    for o in ocultos:
+        texto = re.sub(rf"\b{re.escape(o)}, |, {re.escape(o)}\b", "", texto)
+    frases = re.split(r"(?<=\.) ", texto)
+    return " ".join(f for f in frases if not any(re.search(rf"\b{re.escape(o)}\b", f) for o in ocultos))
+
+
 def argumentos(pares: list[str]) -> dict:
     args = {}
     for p in pares:
@@ -63,8 +76,11 @@ async def main(argv: list[str]) -> None:
     params = StdioServerParameters(command=sys.executable, args=[str(SERVER)], cwd=str(ROOT), env=dict(os.environ))
     async with stdio_client(params) as (read, write):
         async with ClientSession(read, write) as session:
-            await session.initialize()
+            init = await session.initialize()
             if not argv:
+                # lo primero que ve un cliente MCP real: las instrucciones del servidor (antes no salían y la evaluación
+                # medía el descubrimiento peor de lo que es)
+                print(json.dumps({"instrucciones": sin_frases(init.instructions)}, ensure_ascii=False))
                 tools = [t for t in (await session.list_tools()).tools if t.name not in SIN]
                 print(json.dumps([{"herramienta": t.name, "descripcion": t.description + (
                                    f" (En esta sesión no devuelve: {', '.join(sorted(BLOQUES[t.name]))}.)" if t.name in BLOQUES else ""),

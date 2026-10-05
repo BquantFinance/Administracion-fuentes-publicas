@@ -324,6 +324,16 @@
    "alerts": [
     "El municipio es el código del Catastro, no el del INE; las capitales son 900 (Madrid 28:900, INE 28079) y otros 4.448 municipios cambian de número (Tórtoles 05246 es 5:247); traducir con datos/municipios.csv."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ogc",
+    "use": [
+     "ogc.entidades(ogc.SIGPAC + '/collections/recintos/items', bbox='-4.10,39.80,-4.00,39.90'): los 4.938 recintos siguiendo next (limit se corta a 250)",
+     "consulta.ubicar('39.85,-4.05'): recinto SIGPAC del punto, uso, superficie y referencia catastral de la parcela, con el municipio INE (no el del Catastro)"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "api-rest",
     "ogc",
@@ -449,6 +459,15 @@
     "referencias-proyecto"
    ],
    "summary": "Todas las ayudas concedidas por la AEI desde 2008 (130.388 filas) en CSV con año de convocatoria, convocatoria, referencia, género del IP, área, título, CIF y entidad, CCAA, provincia e importe, filtrable por URL y con resumen del proyecto, más el buscador de convocatorias y sus resoluciones en PDF.",
+   "code": {
+    "module": "fuentes_publicas.clientes.consulta",
+    "use": [
+     "consulta.empresa_nif('Q1132001G')['aei']: las 970 ayudas de la AEI al NIF con el importe total (coma decimal convertida), de la más reciente a la más antigua"
+    ],
+    "mcp": [
+     "empresa_nif"
+    ]
+   },
    "access": [
     "download",
     "portal"
@@ -912,6 +931,13 @@
     "arcgis-rest"
    ],
    "summary": "Mapa geológico continuo GEODE 1:50.000, MAGNA 50 vectorial y decenas de capas más (puntos de agua, minería, movimientos del terreno, fallas activas, geoquímica, catálogo sísmico IGN-UPM) consultables por ArcGIS REST (JSON y GeoJSON) y WMS, más las hojas MAGNA 50 en imagen, PDF y memoria.",
+   "code": {
+    "module": "fuentes_publicas.clientes.arcgis",
+    "use": [
+     "arcgis.entidades(url_capa, where=\"PROVINCIA='MADRID'\"): los 5.747 puntos de agua de Madrid paginando por OID, aunque cada consulta dé 1.000",
+     "arcgis.entidades(url_capa): en capas sin paginación (terremotos, MAGNA 50) pide los objectIds y los consulta por POST en lotes; 6.609 de 6.609 terremotos"
+    ]
+   },
    "access": [
     "api-rest",
     "ogc",
@@ -1131,6 +1157,12 @@
    "alerts": [
     "pa exige el código numérico de Aduanas (001 Francia, 003 Países Bajos, 004 Alemania, 010 Portugal, 039 Suiza); un ISO como FR devuelve Resultados vacío sin error."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.datacomex",
+    "use": [
+     "datacomex.catalogo('ObtenerPaises'): los 292 países con el código de Aduanas de 3 cifras que exige pa (un ISO como FR da vacío), sin token"
+    ]
+   },
    "access": [
     "api-rest",
     "portal",
@@ -1560,6 +1592,19 @@
     "La exportación sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso; pedir page=0&pageSize=10000 (tope) y seguir con page=1, 2... hasta una página con menos filas.",
     "Las concesiones caducan a los 4 años naturales y las de personas físicas tras el siguiente (RD 130/2019 art. 7.8); hoy fechaDesde=01/01/2021&fechaHasta=31/12/2021 da totalElements 0. Para series, copia propia."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.bdns",
+    "use": [
+     "bdns.altas('2026-10-02'): las 12.447 concesiones dadas de alta ese día, de cualquier fecha de concesión; no pierde las tardías",
+     "bdns.buscar('concesiones', nifCif='Q1132001G'): las 516 filas de todas las páginas con Accept JSON, fechas dd/mm/aaaa y reintento en mantenimiento",
+     "bdns.exportar('concesiones', fechaDesde='2026-10-01', fechaHasta='2026-10-01'): las 816 filas del CSV en cp1252 (sin pageSize, 50)",
+     "bdns.terceros('el albercial'): NIF y nombres sin personas físicas; tope=True si cortó en 150"
+    ],
+    "mcp": [
+     "empresa_nif",
+     "almacen_sql"
+    ]
+   },
    "access": [
     "api-rest",
     "download",
@@ -1650,8 +1695,7 @@
     "Responde a veces 200 con codigo ERR_MANTENIMIENTO_BBDD (Aplicación en Mantenimiento) y sin content tras 60 s (ayudasestado de un día, 2026-10-05); leerlo como página vacía da 0 filas: comprobar content y reintentar."
    ],
    "tips": [
-    "numeroConvocatoria (código BDNS) es el identificador estable y público; id es interno y significa cosas distintas en cada colección.",
-    "scripts/clientes/bdns.py pagina hasta el final, convierte fechas a dd/mm/aaaa, separa NIF y nombre, exporta con pageSize y trae lo dado de alta en un día (altas)."
+    "numeroConvocatoria (código BDNS) es el identificador estable y público; id es interno y significa cosas distintas en cada colección."
    ],
    "related": [
     "placsp-datos-abiertos",
@@ -1678,6 +1722,15 @@
     "prohibiciones-contratar"
    ],
    "summary": "Registro de empresas inscritas para contratar con el sector público y su clasificación. La consulta por empresa exige certificado; sin él solo hay el XML de prohibiciones de contratar vigentes, los esquemas XSD del certificado, el visor de certificados ROLECE y DEUC y el generador del DEUC.",
+   "code": {
+    "module": "fuentes_publicas.clientes.consulta",
+    "use": [
+     "consulta.empresa_nif('B87601571')['prohibiciones_contratar']: prohibiciones vigentes de la empresa, casadas por denominación normalizada (el XML no trae el NIF)"
+    ],
+    "mcp": [
+     "empresa_nif"
+    ]
+   },
    "access": [
     "portal",
     "download"
@@ -1755,6 +1808,18 @@
     "Una licitación sale en cada cambio de estado y el ZIP repite entradas: en 157 páginas del ZIP de 2026-09, 77.948 entradas para 34.895 ids; sumarlas todas da ×2,61 el importe. Una fila por id, la de updated mayor.",
     "Con la IP rechazada por el WAF, atom y ZIP dan 200 con un HTML de 187 bytes que un parser XML lee como feed vacío; el 2026-10-01 desde GitHub placsp.py salió con código 0 y «0 expedientes». Comprobar que la raíz es feed."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.placsp",
+    "use": [
+     "placsp.entradas(max_paginas=1): un dict por entry (estado, órgano con DIR3 y NIF, importes en texto, CPV, adjudicaciones por lote) y las bajas con deleted",
+     "placsp.parse_feed(contenido): (entradas, URL rel=next) de un .atom o de cada fichero de los ZIP; la página del WAF da error, no un feed vacío",
+     "fuentes-almacen sync --fuentes placsp --desde 2026-10-04: Parquet con placsp_ultimo (una fila por id, con anulada) y adjudicaciones_ultimo"
+    ],
+    "mcp": [
+     "almacen_sql",
+     "empresa_nif"
+    ]
+   },
    "access": [
     "feed",
     "download"
@@ -1935,6 +2000,16 @@
     "anuario"
    ],
    "summary": "Sistema PC-Axis (el mismo software que INEbase) con las estadísticas culturales: empleo cultural, bibliotecas, museos, cine, comercio exterior, bono cultural, fundaciones y asuntos taurinos; cada tabla se descarga en CSV, px o xlsx con URL deducible. Más el Anuario en PDF.",
+   "code": {
+    "module": "fuentes_publicas.clientes.pcaxis",
+    "use": [
+     "pcaxis.tablas_de_indice(url_indice): las URL csv_bdsc de las tablas de un índice CulturaDynPx (/t1/p1f/M_Anuales/), con el &amp; ya limpio",
+     "pcaxis.tabla(url): una tabla en filas (156 en T1FM1001) con coma decimal y punto de miles convertidos, leída en UTF-8 aunque diga ISO-8859-15"
+    ],
+    "mcp": [
+     "tabla_pcaxis"
+    ]
+   },
    "access": [
     "download",
     "portal"
@@ -2147,6 +2222,12 @@
     "boletines"
    ],
    "summary": "Portal OLAP (Saiku 2.5) con 17 cubos consultables sin clave por API REST: feminicidios desde 2003, menores, llamadas al 016, ATENPRO, VioGén, denuncias, órdenes de protección y ayudas, por CCAA, provincia, año y mes, con exportación CSV y xlsx. Boletines mensuales en PDF y DERA en xlsx.",
+   "code": {
+    "module": "fuentes_publicas.clientes.saiku",
+    "use": [
+     "saiku.Saiku().consulta('040 Servicio 016', mdx): el cellset en filas, cabecera primero, tras fijar con discover la cookie sin la que se pierde la consulta"
+    ]
+   },
    "access": [
     "api-rest",
     "download",
@@ -2229,7 +2310,7 @@
     "VioGén (cubo 090, casos activos y protección policial) y denuncias (110) proceden del Ministerio del Interior; la criminalidad general está en interior-criminalidad."
    ],
    "tips": [
-    "Flujo en cuatro llamadas con el mismo tarro (discover, POST query, POST result, GET export), implementado en scripts/clientes/saiku.py; un CrossJoin de año por CCAA en feminicidios dio 331 filas en 31 ms.",
+    "Flujo en cuatro llamadas con el mismo tarro (discover, POST query, POST result, GET export); un CrossJoin de año por CCAA en feminicidios dio 331 filas en 31 ms.",
     "pd.read_csv(io.BytesIO(r.content)) lee el CSV directo; en el JSON, cellset[0] son cabeceras y cellset[1:] filas con c['value'].",
     "El cubo 010 tiene 14 dimensiones (edad y nacionalidad de víctima y agresor, suicidio, relación, convivencia, denuncia previa) y las medidas feminicidios y huérfanos menores."
    ],
@@ -2529,6 +2610,15 @@
    "alerts": [
     "rango=MAX da como mucho las 1.000 observaciones más recientes: el paro registrado D_1JA0D000 (1.118 desde 1933-07) llega solo desde 1943-05; pedir los años previos con rango=1933 a rango=1943, uno por llamada."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.consulta",
+    "use": [
+     "consulta.coyuntura(): último Euríbor, dólar, deuda PDE, bono a 10 años y paro registrado con periodo y serie, y la prima de riesgo en el último mes común"
+    ],
+    "mcp": [
+     "coyuntura"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -2895,6 +2985,16 @@
     "Cataluña repite cada centro en cada curso: 32.680 filas para 5.434 centros en 2025/2026. Filtrar curs (el último con $select=max(curs)) antes de contar o de buscar cercanos.",
     "Madrid (centros_educativos): 7.757 filas y solo 3.906 en ALTA; 3.552 son BAJA, 193 INACTIVO y 76 ANULACIÓN. Filtrar SITUACIÓN = ALTA o se cuentan casi el doble de colegios."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.cerca",
+    "use": [
+     "cerca.cargar_colegios('cat'): los 5.434 centros del último curso con las coordenadas buenas (no geo_1); también 'mad' (3.851, solo de alta), 'gva' y 'and'",
+     "cerca.cercanos(cerca.cargar_colegios('mad'), 40.4818, -3.3635, 1000): cuántos hay a menos de 1 km (28) y los tres más cercanos con su distancia"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -2953,9 +3053,6 @@
     "Cataluña: codi_municipi es el INE de 5 cifras y codi_municipi_6 lleva el dígito de control; la Comunitat Valenciana no da código de municipio, solo localidad y provincia en mayúsculas.",
     "Los cuatro directorios dan teléfono y correo del centro (datos de la institución, no personales) y ningún dato de alumnos; las plazas y el alumnado van en otros conjuntos."
    ],
-   "tips": [
-    "perfil_municipio con una dirección o «lat,lon» da los colegios a menos de 1 km con los tres más cercanos (scripts/clientes/cerca.py)."
-   ],
    "related": [
     "educacion-estadisticas-ruct",
     "gencat-dades-obertes",
@@ -2987,6 +3084,16 @@
     "pc-axis"
    ],
    "summary": "Estadísticas de enseñanza no universitaria en EDUCAbase (PC-Axis idéntico al del INE, con descarga CSV, px y xlsx por tabla), estadísticas universitarias SIIU en xlsx (matriculados y egresados por titulación 2015-2024), y RUCT y Registro Estatal de Centros Docentes con exportación xls sin sesión.",
+   "code": {
+    "module": "fuentes_publicas.clientes.pcaxis",
+    "use": [
+     "pcaxis.tablas_de_indice(url_indice): las URL csv_bdsc de las tablas de un índice EducaDynPx (13 en adultos 2024-2025), con el &amp; ya limpio",
+     "pcaxis.tabla(url): una tabla en filas (9.072 en adul_01) con los números convertidos, leída en UTF-8 aunque la cabecera diga ISO-8859-15"
+    ],
+    "mcp": [
+     "tabla_pcaxis"
+    ]
+   },
    "access": [
     "download",
     "portal"
@@ -3392,6 +3499,16 @@
     "«<5» es secreto (1 a 4), no cero: un sexo sale restando el otro del TOTAL (Abengibre agosto 2026, hombres 18 - 13 = 5) y la provincia, de su fila de total (Albacete 20.710, no los 20.698 de sumar municipios).",
     "En el CSV, Oza-Cesuras (15902) sale con 0 y Cerdedo-Cotobade (36902) sin fila; su dato va en los códigos previos a la fusión. Agosto 2026, 15026 + 15063 = 46 + 95 = 141 parados; 36011 + 36012 = 35 + 134 = 169."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.sepe",
+    "use": [
+     "sepe.municipio('15902'): serie mensual del año de un municipio por código INE; suma los códigos previos a la fusión (141 parados en 2026-08) y «<5» da None",
+     "sepe.filas('contratos', 2025): las 97.620 filas del año (mes, ine, municipio y medidas en enteros) del CSV en cp1252 con línea de título; caché con ETag"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "download",
     "portal"
@@ -3408,7 +3525,7 @@
    "coverage": "Todos los municipios desde mayo de 2005 en xls y enero de 2006 en CSV; por actividad, capitales y más de 45.000 habitantes desde 2009 y de 20.000 a 45.000 desde 2017; series nacionales desde enero de 2001",
    "sync": {
     "since": "Enero de 2006 en los CSV de datos abiertos (el de 2005 da 404); mayo de 2005 en el xls mensual",
-    "full": "Un CSV por año y conjunto (Paro, Contratos, Dtes_empleo), 21 por conjunto de 2006 a 2026; scripts/clientes/sepe.py los lee y cachea.",
+    "full": "Un CSV por año y conjunto (Paro, Contratos, Dtes_empleo), 21 por conjunto de 2006 a 2026.",
     "size": "De 9,7 a 10,1 MB un año entero de paro (2006, 2007, 2015) y 6,7 MB el de 2026 con ocho meses; unos 200 MB por conjunto.",
     "new": "El CSV del año en curso se reescribe al publicar cada mes (Last-Modified 07/09/2026 con agosto) y responde 304 a If-None-Match; la página xls del mes siguiente da 404 hasta que sale."
    },
@@ -3473,9 +3590,6 @@
     "Los xls de avance se sobreescriben cada mes en la misma URL; guardar copia fechada para el histórico de publicaciones.",
     "Paro registrado no es lo mismo que desempleo EPA (INE); no comparar niveles."
    ],
-   "tips": [
-    "Paro, contratos o demandantes de un municipio con código INE, del CSV anual de datos abiertos, sin leer xls; scripts/clientes/sepe.py municipio('28005') da la serie del año y suma los códigos fusionados."
-   ],
    "related": [
     "ine-api-tempus",
     "segsocial-estadisticas",
@@ -3509,6 +3623,16 @@
    "alerts": [
     "datastore_search recorta limit a 32.000 sin error (limit=50000 en ds_1915_1 da 32.000 de 75.553; result.limit dice el aplicado): paginar con offset sobre el host, no con _links.next, o usar /datastore/dump/{id}."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ckan",
+    "use": [
+     "ckan.filas('cnmc', 'b5a89db0-239f-4c8a-bd98-6575858359ae', por_pagina=50000): las 75.553 filas de ds_1915_1 aunque limit se corte en 32.000 sin aviso"
+    ],
+    "mcp": [
+     "ckan_filas",
+     "ckan_buscar"
+    ]
+   },
    "access": [
     "api-rest",
     "download",
@@ -3607,6 +3731,15 @@
     "postes-maritimos"
    ],
    "summary": "Precios vigentes de todos los carburantes en 11.484 estaciones terrestres y 149 postes marítimos, con coordenadas, dirección, horario, rótulo y margen, actualizados cada media hora, e histórico diario desde 2007. JSON o XML sin autenticación, filtros por CCAA, provincia, municipio y producto.",
+   "code": {
+    "module": "fuentes_publicas.clientes.almacen",
+    "use": [
+     "fuentes-almacen sync --fuentes carburantes --desde 2026-10-03: tabla carburantes, una fila por estación y día (11.475 el 03/10) con la coma decimal convertida"
+    ],
+    "mcp": [
+     "almacen_sql"
+    ]
+   },
    "access": [
     "api-rest"
    ],
@@ -4379,6 +4512,19 @@
     "El último dato puede ser avance y se revisa: IPC290750 da 4,9 en 2026M09 con FK_TipoDato 3 (avance; T3_TipoDato con tip=AM) y 4,3 en 2026M08 definitivo (1); pedir tip=AM y decir el tipo.",
     "PIB, usar las series corregidas de estacionalidad y calendario: 2026T2 da 0,68 % trimestral en CNTR6653 y 4,79 % en la sin corregir CNTR6722 (tabla 67822); la que se publica es la corregida."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ine_tempus",
+    "use": [
+     "ine_tempus.datos_tabla(29005, tv={19: ine_tempus.id_municipio('02001')}, nult=2): series sin periodos vacíos; id_municipio da el Id (6124) que pide tv",
+     "pcaxis.tabla(24077): una tabla jaxiT3 en filas con los números convertidos; el periodo aún sin publicar sale None, no cero",
+     "consulta.coyuntura(): último IPC con su tipo (avance o definitivo), paro EPA y PIB corregido de estacionalidad, cada uno con periodo y serie"
+    ],
+    "mcp": [
+     "tabla_pcaxis",
+     "perfil_municipio",
+     "coyuntura"
+    ]
+   },
    "access": [
     "api-rest"
    ],
@@ -4511,6 +4657,15 @@
     "nomenclator"
    ],
    "summary": "Relación oficial anual de los 8.132 municipios con código INE (provincia, municipio y dígito de control), comunidades autónomas, provincias e islas, y Nomenclátor de entidades singulares, núcleos y diseminados con su población. Es la clave para cruzar cualquier dataset territorial español.",
+   "code": {
+    "module": "fuentes_publicas.clientes.consulta",
+    "use": [
+     "consulta.buscar_municipio('Coruña, A'): su fila de datos/municipios.csv (ine, dc, SIGPAC con capitales 900, DIR3, NIF, NUTS3, Id de Tempus) por nombre o código"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "download"
    ],
@@ -4850,6 +5005,16 @@
     "El padrón municipal que publica el Ayuntamiento no es la cifra oficial; Barcelona a 1-1-2025 suma 1.732.066 frente a 1.731.649 del padrón oficial (idescat-api) y 1.713.247 del Censo anual del INE.",
     "El datastore puede no coincidir con el fichero; esm-bcn-evo 2024 tiene 1.250 filas en el datastore para un CSV declarado de 539 MB. Comparar COUNT(*) con size antes de fiarse."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ckan",
+    "use": [
+     "ckan.filas('barcelona', '3057b89d-9713-4001-8f07-a6fb122a152b'): las 2.136 filas paginando por _id; los números llegan como texto ('682')"
+    ],
+    "mcp": [
+     "ckan_filas",
+     "ckan_buscar"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -4959,6 +5124,16 @@
     "En el datastore todos los campos son text: sort da 1, 10, 11... 2 y filters exige el valor como texto ({\"COD_DISTRITO\":\"21\"}); convertir tipos en local.",
     "En calidad del aire en tiempo real las horas aún no medidas llegan como 0 con validación N; filtrar por Vnn igual a V. Los filtros por campo de calair_tiemporeal devolvieron 0 registros."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ckan",
+    "use": [
+     "ckan.filas('madrid', '200076-2-padron-csv', filters={'COD_DISTRITO': '21'}): las 3.114 filas del distrito; el valor va como texto, como todos los campos"
+    ],
+    "mcp": [
+     "ckan_filas",
+     "ckan_buscar"
+    ]
+   },
    "access": [
     "api-rest",
     "download",
@@ -5093,6 +5268,17 @@
    "alerts": [
     "El datastore no refleja el CSV: padron_por_sexo tenía el 01/10 5.000 de 18.718 filas (hasta 2022) y desde la actualización del 04/10 da 404; el 2025 solo está en el CSV. Mirar datastore_active y leer el CSV."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ckan",
+    "use": [
+     "ckan.filas('comunidad-madrid', '532735ad-4ce6-4a29-ad11-bb86916c0cf4'): las 41.230 filas del datastore paginando por _id, sin el tope silencioso de limit",
+     "ckan.comparar('comunidad-madrid', recurso): con el recurso de package_show, filas del datastore frente a las del CSV; completo False si se queda corto"
+    ],
+    "mcp": [
+     "ckan_filas",
+     "ckan_buscar"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -5465,6 +5651,17 @@
    "alerts": [
     "Sin $limit devuelve 1000 filas (JSON y CSV) sin avisar; paginar con $limit, $offset y $order=:id, porque el orden por defecto lo fija la vista (dia DESC en gn9e-3qhr) y no es único."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.socrata",
+    "use": [
+     "socrata.filas('gn9e-3qhr'): las 87.975 filas paginando con $order=:id (sin $limit da 1.000) y los números tipados según x-soda2-types",
+     "socrata.columnas('gn9e-3qhr'): el fieldName que va en SoQL, sin caracteres no ASCII (estaci por Estació), con el nombre visible y el tipo",
+     "socrata.conjuntos('municipi'): conjuntos del dominio, con domains= puesto porque sin él la API de catálogo mezcla toda la red Socrata"
+    ],
+    "mcp": [
+     "socrata_filas"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -5581,6 +5778,17 @@
     "rows se recorta en silencio a 1000 (10 por defecto) en package_search y limit a 32000 (100 por defecto) en datastore_search; paginar con start u offset hasta count o total.",
     "Los recursos que enlazan a bdo.gva.es (IVE) tienen copia en el datastore atrasada y con columnas fantasma (Anos, 2017, 14); para esos datos descargar la url original (ive-pegv-bancos-datos)."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ckan",
+    "use": [
+     "ckan.filas('gva', '6b244ece-3ced-459f-a2a6-5cc4bfccd577'): las 27.099 filas sin fiarse de limit (32.000) ni de _links.next, que sigue tras la última",
+     "ckan.buscar('gva', 'contratos'): los 54 conjuntos de package_search, paginando aunque rows se recorte a 1.000"
+    ],
+    "mcp": [
+     "ckan_filas",
+     "ckan_buscar"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -5813,6 +6021,17 @@
     "datastore_active true no garantiza la tabla; 6 de 173 recursos dieron 404 Resource not found y las plantillas orgánicas tienen 1000 filas en el datastore frente a 36260 en el CSV. Contrastar total con el fichero.",
     "Se pierden ceros a la izquierda: el datastore tipa Código postal como numeric (4007 por 04007) y municipality_ine llega como 44001 o '04001'; normalizar con str(x).zfill(5) antes de cruzar."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ckan",
+    "use": [
+     "ckan.url_descarga(recurso): la URL del fichero con el host interno sin DNS (gdc-pdpopendata-ckan.paas.junta-andalucia.es) cambiado por el público",
+     "ckan.comparar('andalucia', recurso): filas del datastore y del CSV; el censo de instalaciones deportivas da 65.526 frente a 32.763 (cargado dos veces)"
+    ],
+    "mcp": [
+     "ckan_filas",
+     "ckan_buscar"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -6723,6 +6942,17 @@
    "alerts": [
     "Los balances son acumulados desde enero; abril-junio es 09006 (enero-junio) menos 09003 (enero-marzo) en la fila III. TOTAL INFRACCIONES PENALES (Barcelona 2026, 75.461 - 37.913 = 37.548)."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.pcaxis",
+    "use": [
+     "pcaxis.tabla(url_tabla_htm): el balance en filas (28.842 en enero-junio) con números convertidos, leído en UTF-8 aunque diga ISO-8859-15",
+     "consulta.perfil_municipio('08019')['criminalidad']: infracciones penales del municipio por periodo, acumuladas desde enero"
+    ],
+    "mcp": [
+     "tabla_pcaxis",
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "download",
     "portal"
@@ -6882,6 +7112,14 @@
     "materias"
    ],
    "summary": "Textos consolidados de normas estatales y autonómicas por bloques (artículos, disposiciones) con todas las versiones de cada bloque, metadatos, análisis (materias, referencias) y vigencia. Listado filtrable por fecha de actualización, búsqueda por título y tablas auxiliares de códigos.",
+   "code": {
+    "module": "fuentes_publicas.clientes.boe",
+    "use": [
+     "boe.normas(desde='2026-09-28', hasta='2026-09-30'): las 60 normas actualizadas en esas fechas, paginando con offset; sin resultados data llega como cadena vacía",
+     "boe.version_vigente(boe.bloque('BOE-A-1978-31229', 'a135')): la versión del bloque vigente hoy y la norma que la introdujo; el bloque solo responde en XML",
+     "boe.metadatos('BOE-A-2026-20250'): vigencia, estado de consolidación y url_eli; None si la disposición no tiene texto consolidado (404)"
+    ]
+   },
    "access": [
     "api-rest"
    ],
@@ -6978,7 +7216,6 @@
    "tips": [
     "Para un artículo concreto, indice para localizar el id de bloque y luego texto/bloque/{id}.",
     "Los códigos numéricos de rango, materia y departamento se traducen con datos-auxiliares.",
-    "scripts/clientes/boe.py pagina el listado (normas), lee metadatos e índice y elige la versión vigente de un bloque (bloque y version_vigente).",
     "El OpenAPI 3.1 está embebido en api.php (variable openApiFile); el documento técnico es APIconsolidada.pdf en /datosabiertos/documentos/."
    ],
    "related": [
@@ -7004,6 +7241,18 @@
     "anuncios"
    ],
    "summary": "Sumario diario del BOE en JSON o XML: todas las disposiciones y anuncios publicados cada día con identificador, título, sección, departamento, epígrafe y URLs de PDF, HTML y XML del texto completo de cada uno.",
+   "code": {
+    "module": "fuentes_publicas.clientes.boe",
+    "use": [
+     "boe.items(boe.sumario('2026-10-03')): un dict por disposición con sección, departamento y url_xml, sea cada nivel objeto o lista; sumario es None sin BOE",
+     "boe.sumarios('2026-09-01', '2026-09-30'): (fecha, sumario) de los 26 días con boletín, saltando domingos (404) y avisando de los 500 de fechas antiguas",
+     "boe.documento('BOE-A-2026-20264'): metadatos, materias, referencias y texto plano del XML de una disposición; KeyError si el id no existe (200 con error)"
+    ],
+    "mcp": [
+     "boe_sumario",
+     "almacen_sql"
+    ]
+   },
    "access": [
     "api-rest"
    ],
@@ -7018,7 +7267,7 @@
    "coverage": "1960-09-",
    "sync": {
     "since": "1960-09-01, primer sumario de la API (1960-08-31 y anteriores dan 404)",
-    "full": "Recorrer /boe/sumario/{AAAAMMDD} de lunes a sábado desde 19600901, unos 20.000 sumarios, y el url_xml de cada item si hace falta el texto; scripts/clientes/boe.py sumarios() salta domingos y trata 404 como día sin boletín.",
+    "full": "Recorrer /boe/sumario/{AAAAMMDD} de lunes a sábado desde 19600901, unos 20.000 sumarios, y el url_xml de cada item si hace falta el texto.",
     "size": "2025 entero medido, 313 sumarios, 97 MB de JSON y 75.720 entradas, con 17,2 GB de PDF (szBytes) y unos 0,5 GB de XML (media de 7,4 KB en 40). Desde 1960, unos 4 GB de sumarios y 3 millones de entradas (un día por trimestre); 0,23 s por sumario.",
     "new": "Pedir el sumario del día; 404 es día sin boletín (domingos). Para avisar sin descargar, los RSS de boe-feeds."
    },
@@ -7072,8 +7321,7 @@
     "xml.php con un id inexistente responde 200 con raíz error (descripcion No se encontró el documento original) y Content-Type text/html; comprobar la raíz."
    ],
    "tips": [
-    "El OpenAPI 3.1 completo está embebido en api.php (variable openApiFile); el documento técnico es APIsumarioBOE.pdf en /datosabiertos/documentos/.",
-    "scripts/clientes/boe.py aplana el sumario con todas sus variantes (items), lee el XML de cada disposición (documento) y recorre días saltando domingos (sumarios)."
+    "El OpenAPI 3.1 completo está embebido en api.php (variable openApiFile); el documento técnico es APIsumarioBOE.pdf en /datosabiertos/documentos/."
    ],
    "related": [
     "boe-api-legislacion-consolidada",
@@ -7239,6 +7487,19 @@
    "alerts": [
     "Situación concursal llega con meses de retraso y mezcla resoluciones viejas (el BORME del 02/10/2026 trae una declaración del 11/05/2026 y revocaciones de 2022): usar la fecha de resolución y la última por procedimiento."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.boe",
+    "use": [
+     "boe.borme_empresas('BORME-A-2026-189-28'): 621 empresas (denominación, registro, actos por tipo, datos registrales) de una provincia; el sufijo 99 es el índice",
+     "boe.parse_concursal(texto): procedimiento, fecha de resolución ISO, resolución, clase, calificación y juzgado de un acto Situación concursal, sin nombres",
+     "fuentes-almacen sync --fuentes borme --desde 2026-10-02: tabla borme, una empresa por fila con actos en lista (list_contains(actos, 'Constitución'))"
+    ],
+    "mcp": [
+     "boe_sumario",
+     "almacen_sql",
+     "empresa_nif"
+    ]
+   },
    "access": [
     "api-rest",
     "download"
@@ -7305,8 +7566,7 @@
    ],
    "tips": [
     "Los tipos de acto en el parrafo son un vocabulario fijo (Constitución, Nombramientos, Ceses/Dimisiones, Revocaciones, Ampliación de capital, Disolución...) y sirven de separador al parsear.",
-    "Para buscar una empresa en un día, el XML BORME-A-AAAA-NNN-99 es una tabla con denominación, id del documento de provincia y número de asiento; evita bajar las 52 provincias.",
-    "scripts/clientes/boe.py (borme_empresas) separa número, denominación, registro, actos y datos registrales de cada empresa; un acto fuera de su lista queda con tipo None."
+    "Para buscar una empresa en un día, el XML BORME-A-AAAA-NNN-99 es una tabla con denominación, id del documento de provincia y número de asiento; evita bajar las 52 provincias."
    ],
    "related": [
     "boe-api-sumario",
@@ -8261,6 +8521,15 @@
     "Madrid (centros_servicios_establecimientos_sanitarios): una fila por centro y especialidad, 45.961 filas para 15.867 centros (Hospital general, 3.801 filas para 59). Contar centro_nro_registro distintos.",
     "Equipaments de Catalunya (8gmd-gz7i): 70 equipamientos con latitud y longitud 0 y categoria con varias separadas por «||» en 3.214; descartar el 0 y filtrar con categoria like '%Salut|Centres sanitaris|1.%'."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.cerca",
+    "use": [
+     "cerca.cargar_salud('mad'): 506 hospitales, centros de salud y consultorios, uno por centro y no por especialidad, con lat y lon desde UTM; también 'cat' y 'gva'"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "api-rest",
     "ogc"
@@ -8307,13 +8576,10 @@
    "gotchas": [
     "Madrid no da el nombre del centro (tipo y dirección) y escribe «Dato personal» en el NIF de 6.413 centros (consultas y clínicas de personas físicas).",
     "Madrid: datastore_search_sql da 500 con tildes en un literal («Consultorio de atención primaria»); filtrar con filters en JSON, que sí las admite (7.317 filas de los seis tipos de primaria y hospitales).",
-    "Madrid y la Comunitat Valenciana dan UTM ETRS89 huso 30 (localizacion_coordenada_x/y y x_coord/y_coord); scripts/clientes/cerca.py las pasa a latitud y longitud.",
+    "Madrid y la Comunitat Valenciana dan UTM ETRS89 huso 30 (localizacion_coordenada_x/y y x_coord/y_coord), no latitud y longitud.",
     "La capa CentrosSanitarios.CentrosEspecialidades de la GVA devolvió un CSV vacío el 2026-10-05; centros de salud y hospitales sí.",
     "Andalucía, no conseguido el 2026-10-05: ise:eq_02_salud del WFS del Inventario de Sedes y Equipamientos (ideandalucia.es/services/ise/wfs) cortó a los 48 s con 25 KB; sin otro conjunto con coordenadas localizado.",
     "Equipaments de Catalunya: cpostal y codi_municipi pierden el cero inicial (8612, 81326 es 081326, INE 08132 con dígito de control)."
-   ],
-   "tips": [
-    "perfil_municipio con una dirección o «lat,lon» da centros de salud, consultorios y hospitales a menos de 1 km con los tres más cercanos."
    ],
    "related": [
     "sanidad-portal-estadistico",
@@ -8651,6 +8917,12 @@
     "arcgis"
    ],
    "summary": "Dos xlsx con la fracción de hogares o viviendas con cobertura por tecnología (FTTH, HFC, inalámbrico, 4G, 5G) y velocidad (30 Mbps a 1 Gbps) por municipio (código INE), provincia y CCAA de 2013 a 2025 y por entidad singular hasta 2020, capas ArcGIS consultables del último año e informes en PDF.",
+   "code": {
+    "module": "fuentes_publicas.clientes.arcgis",
+    "use": [
+     "arcgis.entidades(arcgis.COBERTURA_FTTH): las 8.132 filas de cobertura FTTH por municipio paginando por OID; una consulta sola se queda en 2.000 sin error"
+    ]
+   },
    "access": [
     "download",
     "api-rest"
@@ -8867,6 +9139,16 @@
     "El geocoder ignora el municipio de q («calle mayor 1, getafe» dio Corera, La Rioja); municipio_filter con el nombre INE entero y el artículo delante («A Coruña», «Alacant/Alicante»; «Alicante» da 0) y filtrar muniCode.",
     "state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.consulta",
+    "use": [
+     "consulta.ubicar('calle Alcalá 50, Madrid'): CP, coordenadas, INE y referencia catastral del portal; filtra el municipio, que el geocoder ignora en el texto",
+     "consulta.ubicar('calle mayor 1, getafe'): exacta=false y aviso si la calle hallada no es la pedida (da CALLE LAGO MAYARA 1), con otros candidatos"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "ogc",
     "api-rest",
@@ -9072,6 +9354,13 @@
     "En WMS 1.3.0 con CRS=EPSG:4258 el BBOX va en orden lat,lon; en orden lon,lat responde 200 con una imagen en blanco de 2 KB, sin error.",
     "En los WFS de servicios.idee.es, numberMatched repite numberReturned mientras quedan páginas (count=5 da 5; hits da 1381 en el mismo bbox); el total solo sale con resultType=hits y el final, cuando falta next."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ogc",
+    "use": [
+     "ogc.entidades('https://api-features.idee.es/collections/address/items', bbox=bbox): todas las entidades siguiendo next (349 portales en un bbox de Madrid)",
+     "ogc.colecciones('https://api-features.idee.es'): id y título de sus 38 colecciones (address, roadlink, watercourse...)"
+    ]
+   },
    "access": [
     "ogc",
     "api-rest",
@@ -9232,6 +9521,12 @@
    "alerts": [
     "Cada colección anual de la API mezcla secciones (TIPO SECCIONADO, 36554 en 2025) y distritos (TIPO DISTRITO, CSEC 000, 10457); filtrar TIPO='SECCIONADO', porque TIPO='SECCION' devuelve 0 sin error."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.ogc",
+    "use": [
+     "ogc.entidades(url_items, filter=\"CUMUN='28079' AND TIPO='SECCIONADO'\"): las 2.462 secciones de Madrid de Secciones_2025 en GeoJSON siguiendo next"
+    ]
+   },
    "access": [
     "download",
     "ogc",
@@ -9442,6 +9737,15 @@
     "electrolineras.xml da la potencia en vatios (maxPowerAtSocket 22000.0 son 22 kW) y postcode sin el cero inicial en 3.370 de 12.038 emplazamientos (7011 es 07011): dividir entre 1000 y rellenar a cinco cifras.",
     "Un emplazamiento (energyInfrastructureSite) tiene varios puntos (refillPoint): a 1 km de Torres Quevedo 42, Alicante, hay 5 emplazamientos y 17 puntos. Contar sitios si se piden emplazamientos."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.cerca",
+    "use": [
+     "cerca.cercanos(cerca.cargar_recarga(), 38.3452, -0.4810, 1000): 15 emplazamientos de recarga a menos de 1 km con kW (el fichero da vatios), puntos y conectores"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "download"
    ],
@@ -9509,11 +9813,11 @@
     "Las incidencias de la DGT apenas cubren Cataluña (11 puntos el 1-10-2026) y nada del País Vasco; usar los ficheros sct y dt-gv del mismo servidor.",
     "En detectores el index de measuredValue no fija la magnitud (el 0 es velocidad o flujo según el punto); leer xsi:type. Velocidad 0.0 llega siempre con vehicleFlow 0, sin vehículos, no es atasco.",
     "Municipio, provincia y comunidad de las incidencias van por nombre (Ontígola, Toledo), sin código INE; para cruzar con otras fuentes usar las coordenadas.",
-    "Recarga sin disponibilidad en tiempo real (no hay estado por punto) y con fac:lastUpdated de 2023 en 596 emplazamientos; scripts/clientes/cerca.py lo lee en 4 s y da los cercanos a un punto.",
+    "Recarga sin disponibilidad en tiempo real (no hay estado por punto) y con fac:lastUpdated de 2023 en 596 emplazamientos.",
     "877 emplazamientos de electrolineras.xml comparten coordenadas con otro (356 puntos) y fac:name es a menudo un código del operador (C6E06BCC22ZMPMAKWJ): mostrar la dirección, no el nombre."
    ],
    "tips": [
-    "Recarga cerca de una dirección: perfil_municipio con la dirección (bloque cerca) la geocodifica con CartoCiudad y da los de 1 km en una llamada; Nominatim pone «Torres Quevedo 42 Alicante» en Elche.",
+    "Para la recarga cerca de una dirección, geocodificar con CartoCiudad (perfil_municipio lo hace): Nominatim pone «Torres Quevedo 42 Alicante» en Elche.",
     "Pedir gzip (curl --compressed; requests lo hace solo) reduce detectores de 18,7 MB a 255 KB, incidencias de 6,8 MB a 208 KB, cámaras a 95 KB y radares a 62 KB.",
     "lxml.etree.iterparse sobre el XML de detectores buscando siteMeasurements: measurementSiteReference (GUID_DET_nnnnnn) enlaza con PredefinedLocationsPublication/detectores para las coordenadas."
    ],
@@ -9891,6 +10195,16 @@
     "ckan"
    ],
    "summary": "CKAN con 44 datasets: horarios GTFS de Cercanías y de alta velocidad, larga y media distancia, feeds GTFS-RT (alertas, viajes y posiciones de trenes) en protobuf y JSON, 1.035 estaciones con coordenadas y viajeros por franja horaria y núcleo (año 2018). CC BY 4.0, sin clave.",
+   "code": {
+    "module": "fuentes_publicas.clientes.ckan",
+    "use": [
+     "ckan.buscar('renfe', 'cercanias', fl=['name', 'title']): los 38 conjuntos; fl va como parámetro repetido (separado por comas da «No es una lista»)"
+    ],
+    "mcp": [
+     "ckan_buscar",
+     "ckan_filas"
+    ]
+   },
    "access": [
     "api-rest",
     "download",
@@ -9993,6 +10307,16 @@
     "Cataluña (j6ii-t3w2) mezcla catalán y castellano en las categorías: motiu = 'Compravenda' da 583.662 y deja fuera 110.339 'Compraventa'; us_edifici igual. Agrupar las dos lenguas antes de contar.",
     "Los CSV del IVACE (med-eficiencia-energetica-edificis-ivace, 340.582 en Valencia) se quedaron en abril de 2024: registros de 2014 a 2023 y nada después. El WFS 26_GCEE del ICV sí trae 2025 (984.839 certificados)."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.consulta",
+    "use": [
+     "consulta.certificados_energeticos('9723410DF2892D', '08'): el último certificado de cada inmueble (8) y el reparto de letras; Cataluña y C. Valenciana",
+     "consulta.perfil_municipio('carrer Aragó 201, Barcelona'): lo mismo desde una dirección, con la referencia catastral del portal por CartoCiudad"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "api-rest",
     "ogc",
@@ -10067,7 +10391,6 @@
     "Ningún registro da el titular; Andalucía deja en DatosDelCertificador solo la fecha. La validez es de 10 años, 5 si la letra es G (E2025VV020502, G, hasta 2030)."
    ],
    "tips": [
-    "perfil_municipio con una dirección de Cataluña o la Comunitat Valenciana da los certificados de su parcela, el último por inmueble, en una llamada.",
     "Para el reparto de letras de un municipio catalán, $select=qualificaci_de_consum_d,count(*) con $group y codi_poblacio en Socrata, sin descargar nada."
    ],
    "related": [
@@ -10105,6 +10428,16 @@
     "35103500 pone la provincia en una sola fila del grupo y no siempre la primera: rellenar hacia abajo deja 7 de 306 municipios en otra (Almuñécar en Córdoba, Illescas en Guadalajara). Casar por nombre, no por provincia.",
     "34010210 pone el año en una fila y el trimestre en otra (1º a 4º); la última columna es 2026-T2 (*), provisional: Palma 1.152, y la anterior 2026-T1, 1.080. Leer las dos filas de cabecera, no contar columnas."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.mivau",
+    "use": [
+     "mivau.indice(mivau.compraventas(), consulta.municipios()): transacciones por trimestre de cada código INE (8.131 de 8.131) en una tabla que solo trae nombres",
+     "mivau.valor_tasado(): €/m² y tasaciones del último trimestre (la última hoja) en los 306 municipios de más de 25.000 habitantes; «n.r» da None, no cero"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "download",
     "portal"
@@ -10185,7 +10518,6 @@
    ],
    "tips": [
     "pd.read_excel(url, engine='calamine', header=None, skiprows=13) sobre 34010210.XLS da los 8.131 municipios con datos de 2004 a 2026; descartar las 60 filas de CCAA y provincia, que no tienen valores.",
-    "perfil_municipio da por código INE las transacciones de los últimos cinco trimestres y el valor tasado del último (receta compraventa-vivienda-municipio).",
     "Para alquiler por sección censal, la hoja Secciones censales del xlsx de SERPAVI se cruza por CUSEC con ine-cartografia-censal o con el shapefile SECC_CE_20210101_INE_WM.zip de la misma página."
    ],
    "related": [
@@ -10222,6 +10554,15 @@
     "Cataluña (t2h3-cgys): total_places viene vacío en 79.567 de 104.502 HUT y referencia_cadastral en 87.762; sumar plazas da 8.196 en Barcelona para 10.651 viviendas. Contar viviendas, no sumar plazas.",
     "Madrid (alojamientos_turisticos): alojamiento_tipo llega cortado y con espacio, «VIVIENDAS DE USO TU »; filtrar = 'VIVIENDAS DE USO TURISTICO' da 0 en vez de 6.246. Usar LIKE 'VIVIENDAS DE USO TU%'."
    ],
+   "code": {
+    "module": "fuentes_publicas.clientes.consulta",
+    "use": [
+     "consulta.perfil_municipio('Benidorm')['viviendas_turisticas']: las del INE (anuncios) y las del registro de su comunidad, por vivienda y no por plazas"
+    ],
+    "mcp": [
+     "perfil_municipio"
+    ]
+   },
    "access": [
     "api-rest",
     "download"

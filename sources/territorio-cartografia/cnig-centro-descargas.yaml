@@ -12,6 +12,12 @@ summary: >-
 alerts:
   - "El geocoder ignora el municipio de q («calle mayor 1, getafe» dio Corera, La Rioja); municipio_filter con el nombre INE entero y el artículo delante («A Coruña», «Alacant/Alicante»; «Alicante» da 0) y filtrar muniCode."
   - state vale siempre 0 y stateMsg va vacío según la documentación, así que un portal inexistente devuelve otro de la misma vía sin aviso (Alcalá 9999 dio el 1); comparar portalNumber con el pedido.
+code:
+  module: fuentes_publicas.clientes.consulta
+  use:
+    - "consulta.ubicar('calle Alcalá 50, Madrid'): CP, coordenadas, INE y referencia catastral del portal; filtra el municipio, que el geocoder ignora en el texto"
+    - "consulta.ubicar('calle mayor 1, getafe'): exacta=false y aviso si la calle hallada no es la pedida (da CALLE LAGO MAYARA 1), con otros candidatos"
+  mcp: [perfil_municipio]
 access: [ogc, api-rest, download, portal]
 auth: none
 formats: [shp, gpkg, geotiff, laz, gml, geojson, json, png]

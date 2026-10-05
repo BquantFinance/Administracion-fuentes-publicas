@@ -9,6 +9,11 @@ summary: >-
   Todas las ayudas concedidas por la AEI desde 2008 (130.388 filas) en CSV con año de convocatoria, convocatoria,
   referencia, género del IP, área, título, CIF y entidad, CCAA, provincia e importe, filtrable por URL y con resumen
   del proyecto, más el buscador de convocatorias y sus resoluciones en PDF.
+code:
+  module: fuentes_publicas.clientes.consulta
+  use:
+    - "consulta.empresa_nif('Q1132001G')['aei']: las 970 ayudas de la AEI al NIF con el importe total (coma decimal convertida), de la más reciente a la más antigua"
+  mcp: [empresa_nif]
 access: [download, portal]
 auth: none
 formats: [csv, html, pdf]

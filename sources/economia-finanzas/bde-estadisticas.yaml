@@ -11,6 +11,11 @@ summary: >-
   de serie se localizan en catálogos CSV.
 alerts:
   - "rango=MAX da como mucho las 1.000 observaciones más recientes: el paro registrado D_1JA0D000 (1.118 desde 1933-07) llega solo desde 1943-05; pedir los años previos con rango=1933 a rango=1943, uno por llamada."
+code:
+  module: fuentes_publicas.clientes.consulta
+  use:
+    - "consulta.coyuntura(): último Euríbor, dólar, deuda PDE, bono a 10 años y paro registrado con periodo y serie, y la prima de riesgo en el último mes común"
+  mcp: [coyuntura]
 access: [api-rest, download]
 auth: none
 formats: [json, csv, xlsx, zip]

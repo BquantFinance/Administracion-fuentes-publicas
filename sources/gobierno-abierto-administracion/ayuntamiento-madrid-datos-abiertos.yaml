@@ -11,6 +11,11 @@ summary: >-
 alerts:
   - "En el datastore todos los campos son text: sort da 1, 10, 11... 2 y filters exige el valor como texto ({\"COD_DISTRITO\":\"21\"}); convertir tipos en local."
   - En calidad del aire en tiempo real las horas aún no medidas llegan como 0 con validación N; filtrar por Vnn igual a V. Los filtros por campo de calair_tiemporeal devolvieron 0 registros.
+code:
+  module: fuentes_publicas.clientes.ckan
+  use:
+    - "ckan.filas('madrid', '200076-2-padron-csv', filters={'COD_DISTRITO': '21'}): las 3.114 filas del distrito; el valor va como texto, como todos los campos"
+  mcp: [ckan_filas, ckan_buscar]
 access: [api-rest, download, feed]
 auth: none
 formats: [json, csv, xml, xlsx, xls, zip, txt, kml, shp, ttl, atom]
