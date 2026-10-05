@@ -31,7 +31,7 @@ def main(cpv: str = "", palabra: str = "", paginas: int = 1) -> None:
     print(f"{len(nuevas)} licitaciones nuevas" + (f" con CPV {cpv}*" if cpv else "") + (f" y «{palabra}»" if palabra else ""))
     for e in sorted(nuevas, key=lambda e: e.get("importe_sin_iva") and float(e["importe_sin_iva"]) or 0, reverse=True)[:25]:
         importe = f"{float(e['importe_sin_iva']):>14,.2f} €" if e.get("importe_sin_iva") else " " * 16
-        print(f"{e.get('fecha_publicacion', '')[:10]} {e.get('estado', ''):4} {importe}  {e.get('organo', '')[:45]} | {(e.get('objeto') or '')[:90]}")
+        print(f"{(e.get('fecha_publicacion') or e.get('updated') or '')[:10]} {e.get('estado', ''):4} {importe}  {e.get('organo', '')[:45]} | {(e.get('objeto') or '')[:90]}")
     ESTADO.parent.mkdir(parents=True, exist_ok=True)
     ESTADO.write_text(json.dumps(sorted(vistas | set(ultimas))))
 

@@ -33,6 +33,16 @@ def _t(el, path: str):
     return n.text.strip() if n is not None and n.text else None
 
 
+def fecha_anuncio(cfs, tipo: str = "DOC_CN") -> str | None:
+    """Fecha del anuncio de un tipo (DOC_CN licitación, DOC_CAN_ADJ adjudicación, DOC_FORM formalización...). Cada tipo va
+    en su ValidNoticeInfo sin orden fijo: tomar el primero daba la fecha de adjudicación como fecha de publicación (el
+    01/10/2026, 274 expedientes de obras «publicados» frente a 127 anuncios de licitación de ese día)."""
+    fechas = [d.text.strip() for v in cfs.findall("ext:ValidNoticeInfo", NS) if _t(v, "extb:NoticeTypeCode") == tipo
+              for d in v.findall("ext:AdditionalPublicationStatus/ext:AdditionalPublicationDocumentReference/cbc:IssueDate", NS)
+              if d.text]
+    return min(fechas) if fechas else None
+
+
 def _ids(party) -> dict:
     """IDs de una parte por schemeName (DIR3, NIF, ID_PLATAFORMA, ID_OC_PLAT, OTROS)."""
     if party is None:
@@ -103,7 +113,7 @@ def parse_entry(entry) -> dict:
         "cpv": [c.text for c in cfs.findall("cac:ProcurementProject/cac:RequiredCommodityClassification/cbc:ItemClassificationCode", NS)],
         "nuts": _t(cfs, "cac:ProcurementProject/cac:RealizedLocation/cbc:CountrySubentityCode"),
         "plazo_presentacion": _t(cfs, "cac:TenderingProcess/cac:TenderSubmissionDeadlinePeriod/cbc:EndDate"),
-        "fecha_publicacion": _t(cfs, "ext:ValidNoticeInfo/ext:AdditionalPublicationStatus/ext:AdditionalPublicationDocumentReference/cbc:IssueDate"),
+        "fecha_publicacion": fecha_anuncio(cfs, "DOC_CN"),
         "adjudicaciones": adjudicaciones(cfs),
         "modificaciones": [{"n": _t(m, "cbc:ID"), "contrato": _t(m, "cbc:ContractID"), "nota": _t(m, "cbc:Note"),
                             "importe_sin_iva": _t(m, "cac:ContractModificationLegalMonetaryTotal/cbc:TaxExclusiveAmount"),

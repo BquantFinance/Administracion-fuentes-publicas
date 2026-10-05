@@ -265,6 +265,16 @@ def bdns_mantenimiento_con_200_no_es_pagina_vacia():
     finally:
         bdns._get, bdns.time.sleep = viejo_get, viejo_sleep
 
+
+@test
+def placsp_fecha_de_publicacion_es_la_del_anuncio_de_licitacion():
+    # Entrada real del 643 (2026-10-01): DOC_CAN_ADJ del 01/10 delante del DOC_CN del 18/08
+    entradas, _ = placsp.parse_feed((M / "placsp-entry-dos-anuncios.atom").read_bytes())
+    e = [x for x in entradas if not x.get("deleted")][0]
+    assert e["fecha_publicacion"] == "2026-08-18", e["fecha_publicacion"]
+    e2 = [x for x in placsp.parse_feed((M / "placsp-feed-643.atom").read_bytes())[0] if not x.get("deleted")]
+    assert all(x["fecha_publicacion"] is None for x in e2)  # solo traen DOC_CAN_ADJ: sin anuncio de licitación en el feed
+
 @test
 def almacen_filas_sin_datos_personales():
     entradas, _ = placsp.parse_feed((M / "placsp-feed-643.atom").read_bytes())

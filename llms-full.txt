@@ -1026,7 +1026,7 @@ ids: dir3, nif, cpv, nuts
 ! El DIR3 del órgano falta en el 29 % del 643 (116 de 452 el 2026-10-05), así que se elige el cbc:ID por schemeName; el NIF del adjudicatario llega con schemeName OTROS, guion, minúscula o enmascarado (***1234**).
 ! En el 1044 el órgano solo trae ID_OC_PLAT (contiene su NIF), no hay TotalAmount ni AwardDate (0 de 17.222 adjudicaciones de agosto de 2026; usar cac:Contract/cbc:IssueDate) y el summary usa coma decimal.
 ! Ni ZIP ni atom responden a HEAD, Range se ignora y no hay Content-Length (el tamaño asoma en el ETag, en hexadecimal); un fichero inexistente da 200 con un HTML de 521 bytes, así que comprobar que empieza por PK.
-! updated es la fecha del último cambio del expediente, no la de publicación; la fecha de cada anuncio va en ValidNoticeInfo/AdditionalPublicationStatus/AdditionalPublicationDocumentReference/IssueDate.
+! updated es el último cambio, no la publicación; cada anuncio (DOC_CN licitación, DOC_CAN_ADJ, DOC_FORM...) va en su ValidNoticeInfo sin orden fijo: el primero dio el 01/10/2026 274 obras «publicadas» y DOC_CN 127.
 ! Lo de hoy solo está en el buscador JSF del portal (sin API localizada; el link de cada entry es un deeplink HTML).
 + Identificadores útiles en cada entry. cbc:ContractFolderID (expediente), cbc:ItemClassificationCode (CPV), cbc:ID del órgano con schemeName DIR3 (p. ej. L01120022), NIF o ID_PLATAFORMA y cbc:TypeCode (tipo de contrato).
 + OpenPLACSP, la herramienta oficial, pasa los feeds a hoja de cálculo.
