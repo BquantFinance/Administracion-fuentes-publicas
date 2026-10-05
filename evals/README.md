@@ -54,5 +54,5 @@ Sexta tanda (`resultados-2026-10-05-tanda6.md`): almacén local (`almacen_sql`) 
 MCP completo frente al mismo MCP sin ellos (`EVAL_SIN=almacen_sql,buscar.productos`). Productos, 4 de 4 frente a 2 de 4 y
 un 38 % menos de tokens: sin él no se encuentra la pieza que ya hace un producto. El almacén no se descubría solo (0 de 4
 en el BORME hasta avisar desde `buscar`, `boe_sumario` y los errores SQL); con los avisos, 4 de 4 en BORME y BDNS igual
-que sin él, pero con un 36 % menos de tokens y en 69 s frente a 170 s. Licitaciones de obras de un día, 0 de 4 con y sin
-almacén. Sacó siete fallos de código, entre ellos la fecha de publicación de PLACSP (274 obras frente a 126).
+que sin él, pero con un 36 % menos de tokens y en 69 s frente a 170 s. Licitaciones de obras de un día, 1 de 2 con almacén y
+todas las correcciones frente a 0 de 2 sin él. Sacó siete fallos de código, entre ellos la fecha de publicación de PLACSP (274 obras frente a 126).

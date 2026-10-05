@@ -129,8 +129,8 @@ Judicial o UE, solo cuando lo indique el propietario.
   (2026-10-05): bloques compraventa, certificados energéticos, cerca y viviendas turísticas, 9 de 10 frente a 7 de 10,
   un 59 % menos de tokens y un 60 % menos de tiempo (se quedan). Sexta tanda (2026-10-05): productos 4 de 4 frente a 2
   de 4 (se queda); almacén, 4 de 4 en BORME y BDNS como sin él pero con un 36 % menos de tokens y menos de la mitad de
-  tiempo, solo tras avisar desde buscar, boe_sumario y los errores SQL (se queda), y 0 de 4 con y sin él en licitaciones
-  de obras de un día; siete fallos de código corregidos, entre ellos fecha_publicacion de PLACSP.
+  tiempo, solo tras avisar desde buscar, boe_sumario y los errores SQL (se queda), y en licitaciones de obras de un día
+  1 de 2 con todas las correcciones frente a 0 de 2 sin él; siete fallos de código corregidos, entre ellos fecha_publicacion de PLACSP.
 - **Publicación**: releases v0.1.0 a v0.3.0 y entrada `io.github.BquantFinance/catalogo-fuentes-publicas` en el registro
   oficial de MCP. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` (y en
   los dos ficheros del plugin) y crear la release vX.Y.Z desde la web; `publicar-mcp.yml` empaqueta, adjunta y publica.
@@ -155,8 +155,8 @@ Judicial o UE, solo cuando lo indique el propietario.
 
 ## Siguiente
 
-1. Medido todo lo que había (tandas 4 a 6, se queda todo). Pendiente: repetir la tarea de licitaciones de obras de un
-   día con la vista placsp_ultimo nueva y la pista de UNNEST, y medir cada pieza nueva antes de darla por buena.
+1. Medido todo lo que había (tandas 4 a 6, se queda todo). Medir cada pieza nueva antes de darla por buena; la tarea
+   del importe con la coma perdida (issue 3) está en tareas.yaml sin ejecutar.
 2. Ronda desde una IP residencial para los hosts bloqueados (necesita al propietario): `python
    scripts/ronda_residencial.py` desde casa deja `ronda-residencial.md` (ejemplos de 18 fichas, recetas que las citan y
    carburantes, sin IP ni claves); con él se fechan los `verified` o se anota en `gotchas` lo que falle también desde casa.
@@ -165,8 +165,7 @@ Judicial o UE, solo cuando lo indique el propietario.
    (proyecto fuentes-publicas-mcp, flujo publicar-pypi.yml, entorno pypi) y cree la variable PYPI=si; luego Run workflow
    sube la versión de main, cada release la suya, y server.json puede llevar la entrada pypi.
 4. Necesidades sin ficha: `buscar` sin resultados enlaza la plantilla `nueva-fuente` (2026-10-05); revisar qué se pide.
-5. Issues abiertos: 3 (importe inflado de PLACSP en una tarea de evaluación; falta localizar el expediente en el
-   histórico) y 4 (fuentes de la comunidad, a la espera de su PR).
+5. Issues abiertos: 4 (fuentes de la comunidad, a la espera de su PR). El 3 y el 6 se cerraron el 2026-10-05.
 6. Productos nuevos solo con piezas que ya funcionen; fuentes nuevas solo si desbloquean un producto. Un cliente
    Opendatasoft solo si una segunda fuente lo usa (hoy solo la Junta de Castilla y León).
 

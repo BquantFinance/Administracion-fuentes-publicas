@@ -276,7 +276,8 @@ def _almacen_cargado(consulta: str) -> dict | None:
             return None
         q = norm(consulta)
         cob = almacen.cobertura(d)
-        tablas = {t: c.get("dias_cargados") or c.get("meses") for t, c in cob.items()
+        tablas = {t: c.get("dias_cargados") or (f"{c['desde'][:10]}..{c['hasta'][:10]}" if c.get("desde") else c.get("meses"))
+                  for t, c in cob.items()
                   if any(k in q for k in ALMACEN_TEMAS.get(t, ()))}
         return {"tablas": tablas, "usa": "almacen_sql (ya en local; sin bajar ni parsear)"} if tablas else None
     except Exception:  # noqa: BLE001 - la pista nunca rompe buscar

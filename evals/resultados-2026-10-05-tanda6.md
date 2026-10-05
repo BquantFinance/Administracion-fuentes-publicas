@@ -22,6 +22,7 @@ T20 producto-avisos-licitaciones y T21 producto-riesgo-proveedores.
 | T18 | B | 2/2 | 13 | 704.951 | 159 | (uno con el importe 294.628 € corto, 0,07 %) |
 | T19 | M, vista anterior | 0/2 | 19 | 998.621 | 107 | consultaron la tabla por versiones: 126 bien, «todas vigentes», 767 y 398,7 M€ |
 | T19 | M final | 0/2 | 21,5 | 1.129.549 | 125 | uno con vigentes e importe exactos pero 125 publicadas (eran 126); otro sumó con UNNEST (767 M€) |
+| T19 | M + pista de UNNEST | 1/2 | 27 | 1.679.837 | 199 | uno exacto en las tres cifras (89 s); el otro vio el aviso de buscar, bajó el ZIP a mano (567) y se saltó las reglas (leyó ficheros del repo) |
 | T19 | B | 0/2 | 18,5 | 1.092.602 | 393 | filtraron el feed por updated: 521 y 530 publicadas, 1.344 y 979 M€ |
 | T20 | M | 2/2 | 8,5 | 413.337 | 52 | |
 | T20 | B | 0/2 | 14 | 762.878 | 110 | no encuentran la pieza (fuentes-radar): «no hay producto hecho»; uno inventa que el id ATOM cambia por estado |
@@ -39,9 +40,9 @@ licitaciones de obras con su primer anuncio DOC_CN el 01/10, una anulada el 02/1
   no había nada hecho cuando `fuentes-radar` lo hace. En T21 la herramienta (`empresa_nif`) se descubre por su nombre.
 - **El almacén se queda, con lo que enseñó la tanda**: por sí solo no se descubría (T17, 0 de 4 hasta que `buscar`,
   `boe_sumario` y los errores SQL avisan de que el dato ya está en local). Con la versión final, T17 y T18 dan 4 de 4 con
-  almacén y 4 de 4 sin él, pero con un 36 % menos de tokens y en 69 s frente a 170 s. En T19 nadie acierta: sin almacén
-  los agentes filtran el feed por updated y se van a 521 o 530; con almacén, la mejor respuesta da vigentes e importe
-  exactos. El SQL que propone la pista de UNNEST da la cifra exacta, pero no se ha medido con agentes.
+  almacén y 4 de 4 sin él, pero con un 36 % menos de tokens y en 69 s frente a 170 s. En T19, sin almacén nadie acierta
+  (los agentes filtran el feed por updated y se van a 521 o 530); con almacén y todas las correcciones, uno de dos da las
+  tres cifras exactas en 89 s, y el otro ignora el aviso y lo hace a mano.
 - La tanda sacó siete fallos de código, corregidos el mismo día:
   - la vista `empresas` rompía cualquier consulta en un almacén sin PLACSP;
   - la BDNS respondía 200 con `ERR_MANTENIMIENTO_BBDD` y sin content;
