@@ -56,3 +56,10 @@ un 38 % menos de tokens: sin él no se encuentra la pieza que ya hace un product
 en el BORME hasta avisar desde `buscar`, `boe_sumario` y los errores SQL); con los avisos, 4 de 4 en BORME y BDNS igual
 que sin él, pero con un 36 % menos de tokens y en 69 s frente a 170 s. Licitaciones de obras de un día, 1 de 2 con almacén y
 todas las correcciones frente a 0 de 2 sin él. Sacó siete fallos de código, entre ellos la fecha de publicación de PLACSP (274 obras frente a 126).
+
+Séptima tanda (`resultados-2026-10-05-tanda7.md`): el campo `code` de las fichas (módulo, llamadas ejecutadas y herramienta
+MCP) con Haiku y el paquete instalado, frente al mismo catálogo con `code` oculto. En BORME y BDNS, 4 de 4 frente a 3 de
+4 con un 16 % menos de tokens y la mitad de tiempo: lo que ahorra es leer la llamada exacta (`bdns.altas(fechaRegInicio=...)`),
+no ejecutarla. En licitaciones de obras de un día, 0 de 8 con tres versiones de las líneas (cada agente cae en una trampa
+distinta) y 2 de 2 en 125 s cuando la primera línea es `placsp.publicadas(fecha)`, escrita para la tanda: una pregunta
+que encadena tres trampas se resuelve con una función, no con tres frases.

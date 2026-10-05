@@ -19,7 +19,7 @@ de `code`, se corrigió la línea y se repitió (C+, C++), cada versión en su f
 | T19 | C | 0/2 | 22 | 1.447.556 | 531 | 1 de 2 | `placsp.entradas(max_paginas=30)` filtrando por `updated`: 530 publicadas y 1.238 M€; ZIP a mano por PublicationDate sin quedarse con la última versión: 479 y 445 M€ |
 | T19 | C+ (línea con la fecha) | 0/2 | 18,5 | 1.097.935 | 569 | 2 de 2 | los dos filtraron bien por `fecha_publicacion`, pero `entradas(max_paginas=30)` son 450 MB y pasó de los 120 s del Bash; siguieron a mano con las cinco instantáneas del 01/10: 93 y 92 |
 | T19 | C++ (almacén primero, `sync --feeds 643` y la consulta SQL) | 0/2 | 26 | 1.651.706 | 420 | 1 de 2 | ninguno montó el almacén (10 min desde esta nube); uno fue al ZIP de octubre pero solo a las instantáneas del 01/10 (91), el otro al feed a mano por PublicationDate sin última versión ni bajas (130) |
-| T19 | C+++ (`placsp.publicadas` primero) | PENDIENTE | | | | | |
+| T19 | C+++ (`placsp.publicadas` primero) | 2/2 | 10 | 517.354 | 125 | 2 de 2 | |
 | T19 | S | 0/2 | 24,5 | 1.420.888 | 302 | 1 de 2 | feed filtrado por `updated`: 93; `fuentes-almacen sync` por su cuenta y cuenta sobre las tres sindicaciones juntas: 163 (37 del 1044) |
 
 Referencias (sexta tanda): T17, 174 constituciones en Valencia y ACTIVOS E INVERSIONES MV con 24.448.370 €; T18, 37.420
@@ -41,17 +41,25 @@ sobre él (los almacenes de pruebas se sacaron del alcance de los agentes para e
   filtraron por `updated` (530); con la fecha pero `max_paginas=30`, descargaron 450 MB que no caben en los 120 s de un
   Bash y se fueron a mano (93). Por eso la línea tiene que llevar la trampa y la medida (páginas de 15 MB, tres por
   día) y mandar al almacén para días atrás; lo que no diga la línea, el agente lo improvisa mal.
-- **T19 sigue siendo la tarea que no sale sin almacén**: 0 de 6 en C y C+ y 0 de 2 en S, cada uno por una trampa
-  distinta (filtrar por `updated`, cinco instantáneas de un día, versiones sin deduplicar, los tres feeds juntos). En la
-  sexta tanda, con el almacén por MCP, 1 de 2.
+- **T19 no sale con instrucciones, sale con una función**: 0 de 8 en C, C+ y C++ y 0 de 2 en S, cada uno por una
+  trampa distinta (filtrar por `updated`, las instantáneas de un solo día, versiones sin deduplicar, bajas ignoradas, los
+  tres feeds juntos), y ni la línea que mandaba al almacén hizo que nadie lo montase (10 minutos desde esta nube). Con
+  `placsp.publicadas('2026-10-01')` en la primera línea de `code` (ZIP del mes, última versión por id, anuladas), 2 de
+  2 exactos en 10 usos, 517.354 tokens y 125 s: frente a los fallos de C, C+ y C++, un 63 % menos de tokens y un
+  cuarto del tiempo. En la sexta tanda, con el almacén por MCP, 1 de 2. La regla que queda: cuando una pregunta habitual
+  encadena tres trampas, la pieza es una función que la responde, no tres frases que las describen.
 - Fallos sacados por la tanda y corregidos el mismo día:
   - `fuentes-almacen sync --fuentes placsp` cargaba las tres sindicaciones y nada avisaba: ahora `almacen.sql` añade la
     pista de la columna `feed` (y la de versiones) por el MCP y por el CLI, `sync` admite `--feeds 643` y la ficha y la
     guía lo dicen con la cifra (163 por 126);
-  - la línea de `code` de `placsp.entradas` (fecha y tamaño) y el bloque entero reordenado: almacén para días atrás,
-    consulta SQL de un día y `entradas` solo para lo último;
+  - la línea de `code` de `placsp.entradas` (fecha y tamaño) y el bloque entero reordenado, primero con el almacén y
+    al final con `placsp.publicadas(fecha)` (nueva: `zip_mes` recorre todas las instantáneas del ZIP mensual, `FEEDS`
+    reúne las tres sindicaciones; 477 licitaciones del 01/10, 126 de obras, una anulada, en 23 s con el ZIP de 18 MB,
+    que el 05/10 llegaba hasta el 03/10);
   - del agente que escribió `code` (Opus): `ckan.comparar` daba `completo` con el datastore cargado dos veces (censo de
     instalaciones deportivas de Andalucía, 65.526 por 32.763) y ahora devuelve `sobran`, con alerta en la ficha;
     `bdns._get` rompía con JSONDecodeError si un error venía con Content-Type JSON y cuerpo que no lo era.
-- Lo que no mide esta tanda: el paquete instalado desde el repo en vez de la release (0.9.0 no tiene `--feeds`); se
-  reinstaló en el venv desde el árbol de trabajo para C++.
+- Para C++ y C+++ el paquete del venv se reinstaló desde el árbol de trabajo: la 0.9.0 no tiene `--feeds`,
+  `publicadas` ni las pistas de `feed`; van en la siguiente release. Y un detalle del montaje que cuesta usos: dos
+  agentes ejecutaron sus scripts con el python del sistema y no con el del venv, y perdieron el paquete hasta que
+  cayeron en la cuenta.

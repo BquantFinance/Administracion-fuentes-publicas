@@ -135,6 +135,11 @@ Judicial o UE, solo cuando lo indique el propietario.
   de 4 (se queda); almacén, 4 de 4 en BORME y BDNS como sin él pero con un 36 % menos de tokens y menos de la mitad de
   tiempo, solo tras avisar desde buscar, boe_sumario y los errores SQL (se queda), y en licitaciones de obras de un día
   1 de 2 con todas las correcciones frente a 0 de 2 sin él; siete fallos de código corregidos, entre ellos fecha_publicacion de PLACSP.
+  Séptima tanda (2026-10-05): campo `code`, en BORME y BDNS 4 de 4 frente a 3 de 4 sin él, un 16 % menos de tokens y la
+  mitad de tiempo (se queda; lo que ahorra es leer la llamada exacta); licitaciones de obras de un día, 0 de 8 con tres
+  versiones de las líneas y 2 de 2 en 125 s con `placsp.publicadas(fecha)` en la primera línea: una pregunta que encadena
+  tres trampas pide una función, no frases. Salieron y se corrigieron: las tablas de PLACSP del almacén juntan los tres
+  feeds sin aviso (ahora columna `feed` en las pistas y `sync --feeds 643`), `ckan.comparar` sin `sobran` y `bdns._get`.
 - **Publicación**: releases v0.1.0 a v0.3.0 y entrada `io.github.BquantFinance/catalogo-fuentes-publicas` en el registro
   oficial de MCP. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` (y en
   los dos ficheros del plugin) y crear la release vX.Y.Z desde la web; `publicar-mcp.yml` empaqueta, adjunta y publica.
@@ -160,8 +165,10 @@ Judicial o UE, solo cuando lo indique el propietario.
 
 ## Siguiente
 
-1. Medido todo lo que había (tandas 4 a 6, se queda todo). Medir cada pieza nueva antes de darla por buena; la tarea
-   del importe con la coma perdida (issue 3) está en tareas.yaml sin ejecutar.
+1. Medido todo lo que había (tandas 4 a 7, se queda todo). Medir cada pieza nueva antes de darla por buena; la tarea
+   del importe con la coma perdida (issue 3) está en tareas.yaml sin ejecutar. Release v0.10.0 pendiente: la 0.9.0 no
+   tiene `placsp.publicadas`, `sync --feeds`, las pistas de `feed` ni `ckan.comparar` con `sobran`, y las fichas ya los
+   citan en `code`.
 2. Ronda desde una IP residencial para los hosts bloqueados (necesita al propietario): `python
    scripts/ronda_residencial.py` desde casa deja `ronda-residencial.md` (ejemplos de 18 fichas, recetas que las citan y
    carburantes, sin IP ni claves); con él se fechan los `verified` o se anota en `gotchas` lo que falle también desde casa.
