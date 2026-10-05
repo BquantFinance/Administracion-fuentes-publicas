@@ -350,3 +350,12 @@
     url: "https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=1&nifCif=B86566304"
     contains: "B86566304"
   trap: "El BORME no tiene NIF: cruzar por NIF no casa nada; hay que ir por denominación"
+
+- id: licitaciones-obras-dia
+  ask: "¿Cuántas licitaciones de obras (CPV que empieza por 45) se publicaron el jueves 1 de octubre de 2026 en la Plataforma de Contratación del Sector Público (perfiles alojados en ella, sin las plataformas autonómicas agregadas), cuántas siguen vigentes y cuánto suman los presupuestos base de licitación sin impuestos de las vigentes?"
+  expected: "126 con su primer anuncio de licitación (DOC_CN) el 01/10 en el feed 643; una anulada el 02/10 (deleted-entry), 125 vigentes por 395.669.253,39 € sin IVA; almacén y XML crudo coinciden"
+  sources: [placsp-datos-abiertos]
+  check:
+    url: https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom
+    contains: "ValidNoticeInfo"
+  trap: "Una entrada por cambio de estado; la publicación es el primer DOC_CN, no updated ni el primer ValidNoticeInfo (que daba 274 con 147 ya adjudicadas); las anulaciones van en deleted-entry"
