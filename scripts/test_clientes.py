@@ -676,6 +676,21 @@ def cerca_recarga_colegios_y_salud():
     assert r["en_radio"] == 1 and r["cercanos"][0]["m"] == 0 and "lat" not in r["cercanos"][0]
 
 
+@test
+def radar_una_fuente_caida_no_tumba_las_demas():
+    # Sin red, cada fuente lanza: el radar anota el error por fuente, no avanza la fecha y no sale con error parcial
+    errores: dict = {}
+    assert radar.recoger({"licitaciones": {}, "ayudas": {}}, date(2026, 10, 3), date(2026, 10, 5), lambda m: None, errores) == []
+    assert set(errores) == {"licitaciones", "ayudas"} and "AssertionError" in errores["licitaciones"]
+    with tempfile.TemporaryDirectory() as d:
+        estado = Path(d, "estado.json")
+        estado.write_text(json.dumps({"ultima": "2026-10-04", "vistos": {}, "recientes": []}), encoding="utf-8")
+        r = radar.ejecutar({"ayudas": {}}, estado, Path(d, "salida"), hoy=date(2026, 10, 5), log=lambda m: None)
+        assert r["errores"] and json.loads(estado.read_text(encoding="utf-8"))["ultima"] == "2026-10-04"
+        assert "Fuentes con error" in Path(d, "salida", "ultimo.md").read_text(encoding="utf-8")
+    assert "Fuentes con error" not in radar.markdown([], date(2026, 10, 5), {})
+
+
 def main() -> int:
     fallos = 0
     for t in TESTS:

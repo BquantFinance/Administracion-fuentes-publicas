@@ -128,7 +128,10 @@ Judicial o UE, solo cuando lo indique el propietario.
   comprobados); un primer intento sobre 46911a0 falló porque los ficheros seguían en 0.5.0: la versión se sube en main
   antes de crear la release, que usa el código de la etiqueta. v0.7.0 (radar, directorio NIF y nombre, SIGPAC en
   ubicaciones, PR 5 de seguridad) publicada el 2026-10-05 sobre f9bcc8a: registro, sha256 y `pip install ...@v0.7.0` con
-  `fuentes-radar` comprobados; es la versión que instala la plantilla ejemplos/radar/radar-workflow.yml.
+  `fuentes-radar` comprobados. v0.8.0 (concursos, viviendas turísticas, compraventa, certificados energéticos, cerca y
+  radar con fallos aislados por fuente): un primer intento el 2026-10-05 sobre 9bb74be falló en la comprobación de
+  versión (ficheros en 0.7.0); versión subida después en main, hay que borrar la release y la etiqueta y crearlas de
+  nuevo. La plantilla ejemplos/radar/radar-workflow.yml instala ya @v0.8.0.
 - **CI**: `ci.yml` (validate, build al día y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC,
   manual y al cambiar el flujo: recetas, ejemplos de fichas, cargadores, ejemplos y enlaces desde la IP de GitHub;
   comenta en el issue de verificación si algo falla). Secreto `AEMET_KEY` en el repositorio.

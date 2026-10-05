@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 import unicodedata
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -189,49 +190,77 @@ def _dias(desde: date, hasta: date) -> list[date]:
     return [desde + timedelta(days=i) for i in range((hasta - desde).days + 1)]
 
 
-def recoger(cfg: dict, desde: date, hasta: date, log=print) -> list[dict]:
-    """Llama a las fuentes configuradas y devuelve los candidatos filtrados (sin quitar aún lo ya visto)."""
+def recoger(cfg: dict, desde: date, hasta: date, log=print, errores: dict | None = None) -> list[dict]:
+    """Llama a las fuentes configuradas y devuelve los candidatos filtrados (sin quitar aún lo ya visto). Con errores (un
+    dict), una fuente que falla (PLACSP bloqueado, BDNS caída) se anota ahí y las demás siguen; sin él, el error sube."""
     out: list[dict] = []
-    if "licitaciones" in cfg:
+
+    def aparte(fuentes: tuple, fn) -> None:
+        if errores is None:
+            return fn()
+        try:
+            fn()
+        except Exception as exc:  # noqa: BLE001
+            for f in fuentes:
+                errores.setdefault(f, f"{type(exc).__name__}: {str(exc)[:200]}")
+            log(f"{', '.join(fuentes)}: {type(exc).__name__}: {str(exc)[:200]}")
+
+    def licitaciones() -> None:
         c = cfg["licitaciones"] or {}
         entradas = []
         for feed in _lista(c, "feeds") or ["643", "1044"]:
             entradas += list(placsp.entradas(FEEDS[feed] + ".atom", max_paginas=int(c.get("paginas") or 1)))
-        out += filtrar_licitaciones(entradas, c)
+        out.extend(filtrar_licitaciones(entradas, c))
         log(f"licitaciones: {len(entradas)} entradas leídas")
-    if "ayudas" in cfg:
+
+    def ayudas() -> None:
         c = cfg["ayudas"] or {}
         convs = list(bdns.buscar("convocatorias", fechaDesde=bdns.fecha_bdns(desde), fechaHasta=bdns.fecha_bdns(hasta),
                                  order="fechaRecepcion", direccion="desc"))
-        out += filtrar_ayudas(convs, c)
+        out.extend(filtrar_ayudas(convs, c))
         log(f"ayudas: {len(convs)} convocatorias desde {desde}")
-    nombres = vigiladas(cfg["concursos"] or {}, log) if "concursos" in cfg else []
+
+    if "licitaciones" in cfg:
+        aparte(("licitaciones",), licitaciones)
+    if "ayudas" in cfg:
+        aparte(("ayudas",), ayudas)
+    nombres: list[str] = []
+    if "concursos" in cfg:
+        aparte(("concursos",), lambda: nombres.extend(vigiladas(cfg["concursos"] or {}, log)))
     for dia in _dias(desde, hasta) if ("boe" in cfg or "sociedades" in cfg or "concursos" in cfg) else []:
         if "boe" in cfg:
-            s = boe.sumario(dia)
-            if s:
-                out += filtrar_boe(list(boe.items(s)), cfg["boe"] or {})
-        if "sociedades" in cfg or "concursos" in cfg:
-            s = boe.sumario(dia, "borme")
-            # una sola descarga por provincia para los dos bloques; si uno no filtra provincias, se bajan todas
-            prov = [_lista(cfg[b] or {}, "provincias") for b in ("sociedades", "concursos") if b in cfg]
-            provincias = [] if any(not p for p in prov) else [norm(x) for p in prov for x in p]
-            empresas = []
-            for it in boe.items(s) if s else []:
-                ident = it["identificador"]
-                if not ident.startswith("BORME-A") or ident.endswith("-99"):  # el 99 es el índice alfabético
-                    continue
-                if provincias and ident.rsplit("-", 1)[1] not in provincias and norm(it.get("titulo")) not in provincias:
-                    continue
-                empresas += [{"documento": ident, "provincia": it.get("titulo"), "fecha": dia.isoformat(), "empresa": e}
-                             for e in boe.borme_empresas(ident)]
-            for b, f in (("sociedades", filtrar_sociedades), ("concursos", None)):
-                if b not in cfg:
-                    continue
-                c = cfg[b] or {}
-                propias = [x for x in empresas if not _lista(c, "provincias") or
-                           x["documento"].rsplit("-", 1)[1] in _lista(c, "provincias") or norm(x["provincia"]) in [norm(p) for p in _lista(c, "provincias")]]
-                out += f(propias, c) if f else filtrar_concursos(propias, c, nombres)
+            aparte(("boe",), lambda dia=dia: out.extend(filtrar_boe(list(boe.items(s)), cfg["boe"] or {})
+                                                        if (s := boe.sumario(dia)) else []))
+        borme = tuple(b for b in ("sociedades", "concursos") if b in cfg)
+        if borme:
+            aparte(borme, lambda dia=dia: out.extend(_borme_dia(cfg, dia, nombres)))
+    return out
+
+
+def _borme_dia(cfg: dict, dia: date, nombres: list[str]) -> list[dict]:
+    """Constituciones y concursos de un día del BORME A, con una sola descarga por provincia para los dos bloques."""
+    out: list[dict] = []
+    if "sociedades" in cfg or "concursos" in cfg:
+        s = boe.sumario(dia, "borme")
+        # si uno de los dos bloques no filtra provincias, se bajan todas
+        prov = [_lista(cfg[b] or {}, "provincias") for b in ("sociedades", "concursos") if b in cfg]
+        provincias = [] if any(not p for p in prov) else [norm(x) for p in prov for x in p]
+        empresas = []
+        for it in boe.items(s) if s else []:
+            ident = it["identificador"]
+            if not ident.startswith("BORME-A") or ident.endswith("-99"):  # el 99 es el índice alfabético
+                continue
+            if provincias and ident.rsplit("-", 1)[1] not in provincias and norm(it.get("titulo")) not in provincias:
+                continue
+            empresas += [{"documento": ident, "provincia": it.get("titulo"), "fecha": dia.isoformat(), "empresa": e}
+                         for e in boe.borme_empresas(ident)]
+        for b, f in (("sociedades", filtrar_sociedades), ("concursos", None)):
+            if b not in cfg:
+                continue
+            c = cfg[b] or {}
+            propias = [x for x in empresas if not _lista(c, "provincias") or
+                       x["documento"].rsplit("-", 1)[1] in _lista(c, "provincias") or norm(x["provincia"]) in [norm(p) for p in _lista(c, "provincias")]]
+            out += f(propias, c) if f else filtrar_concursos(propias, c, nombres)
     return out
 
 
@@ -249,9 +278,11 @@ def rss(items: list[dict], titulo: str) -> str:
     return "".join(partes) + "</channel></rss>\n"
 
 
-def markdown(nuevos: list[dict], fecha: date) -> str:
+def markdown(nuevos: list[dict], fecha: date, errores: dict | None = None) -> str:
+    aviso = "".join(f"- {f}: {e}\n" for f, e in (errores or {}).items())
+    aviso = f"\n## Fuentes con error (se reintentan en la próxima ejecución)\n\n{aviso}" if aviso else ""
     if not nuevos:
-        return f"Radar {fecha}: nada nuevo.\n"
+        return f"Radar {fecha}: nada nuevo.\n{aviso}"
     lineas = [f"Radar {fecha}: {len(nuevos)} novedades.\n"]
     for f in FUENTES:
         grupo = [i for i in nuevos if i["fuente"] == f]
@@ -262,7 +293,7 @@ def markdown(nuevos: list[dict], fecha: date) -> str:
                 lineas.append(f"- [{(i.get('titulo') or '')[:160]}]({i.get('url') or ''}){importe}  \n  {(i.get('detalle') or '')[:240]}")
             if len(grupo) > 100:
                 lineas.append(f"- … y {len(grupo) - 100} más en ultimo.json")
-    return "\n".join(lineas) + "\n"
+    return "\n".join(lineas) + "\n" + aviso
 
 
 def ejecutar(cfg: dict, estado_path: Path, salida: Path, dias: int = 3, hoy: date | None = None, log=print) -> dict:
@@ -270,22 +301,25 @@ def ejecutar(cfg: dict, estado_path: Path, salida: Path, dias: int = 3, hoy: dat
     estado = json.loads(estado_path.read_text(encoding="utf-8")) if estado_path.is_file() else {}
     ultima = date.fromisoformat(estado["ultima"]) if estado.get("ultima") else None
     desde = max(ultima, hoy - timedelta(days=dias)) if ultima else hoy - timedelta(days=dias)
-    candidatos = recoger(cfg, desde, hoy, log)
+    errores: dict = {}
+    candidatos = recoger(cfg, desde, hoy, log, errores)
     vistos = {f: set(estado.get("vistos", {}).get(f, [])) for f in FUENTES}
     nuevos = [i for i in candidatos if i["id"] not in vistos[i["fuente"]]]
     nuevos = list({(i["fuente"], i["id"]): i for i in nuevos}.values())
     for i in nuevos:
         vistos[i["fuente"]].add(i["id"])
     recientes = (nuevos + estado.get("recientes", []))[:MAX_RSS]
-    estado = {"ultima": hoy.isoformat(), "vistos": {f: sorted(v)[-MAX_VISTOS:] for f, v in vistos.items() if v},
-              "recientes": recientes}
+    # con una fuente caída no se avanza la fecha: la próxima pasada vuelve a cubrir esos días (lo visto no se repite)
+    estado = {"ultima": (estado.get("ultima") if errores and ultima else hoy.isoformat()),
+              "vistos": {f: sorted(v)[-MAX_VISTOS:] for f, v in vistos.items() if v}, "recientes": recientes}
     salida.mkdir(parents=True, exist_ok=True)
     estado_path.parent.mkdir(parents=True, exist_ok=True)
     estado_path.write_text(json.dumps(estado, ensure_ascii=False, indent=1), encoding="utf-8")
     resumen = {"fecha": hoy.isoformat(), "desde": desde.isoformat(), "nuevos": len(nuevos),
-               "por_fuente": {f: sum(1 for i in nuevos if i["fuente"] == f) for f in FUENTES if f in cfg}, "items": nuevos}
+               "por_fuente": {f: sum(1 for i in nuevos if i["fuente"] == f) for f in FUENTES if f in cfg},
+               "errores": errores, "items": nuevos}
     (salida / "ultimo.json").write_text(json.dumps(resumen, ensure_ascii=False, indent=1), encoding="utf-8")
-    (salida / "ultimo.md").write_text(markdown(nuevos, hoy), encoding="utf-8")
+    (salida / "ultimo.md").write_text(markdown(nuevos, hoy, errores), encoding="utf-8")
     (salida / "feed.xml").write_text(rss(recientes, cfg.get("titulo") or "Radar de datos públicos"), encoding="utf-8")
     return resumen
 
@@ -299,10 +333,14 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--dias", type=int, default=3, help="días hacia atrás en la primera ejecución o tras un hueco")
     a = p.parse_args(argv)
     cfg = yaml.safe_load(Path(a.config).read_text(encoding="utf-8")) or {}
-    r = ejecutar(cfg, Path(a.estado), Path(a.salida), a.dias, log=lambda m: print(m, file=sys.stderr))
+    t0 = time.monotonic()
+    r = ejecutar(cfg, Path(a.estado), Path(a.salida), a.dias, log=lambda m: print(m, file=sys.stderr, flush=True))
     print(Path(a.salida, "ultimo.md").read_text(encoding="utf-8"))
-    print(f"{r['nuevos']} nuevos {r['por_fuente']}", file=sys.stderr)
-    return 0
+    # el resumen va al final de stdout: un tail del log lo conserva (en stderr salía antes del informe)
+    print(f"radar: {r['nuevos']} nuevos {r['por_fuente']} en {time.monotonic() - t0:.0f} s"
+          + (f"; con error {sorted(r['errores'])}" if r["errores"] else ""))
+    configuradas = [f for f in FUENTES if f in cfg]
+    return 1 if configuradas and set(configuradas) <= set(r["errores"]) else 0  # solo si fallan todas
 
 
 if __name__ == "__main__":

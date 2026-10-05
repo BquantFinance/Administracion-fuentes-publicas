@@ -1,8 +1,8 @@
 # Radar de datos públicos en tu propio repositorio, sin servidores ni coste:
 #   1. Copia este fichero a .github/workflows/radar.yml y radar.yaml a la raíz de tu repositorio; ajusta los filtros.
 #   2. Actions -> radar -> Run workflow para la primera pasada (o espera al cron de las 06:41 UTC).
-# Cada mañana abre un issue con solo lo nuevo y deja en radar/ el estado (lo ya visto), ultimo.json y feed.xml (RSS;
-# con GitHub Pages, o en https://raw.githubusercontent.com/<usuario>/<repo>/main/radar/feed.xml).
+# Cada mañana abre un issue con solo lo nuevo (y las fuentes caídas, si las hay) y deja en radar/ el estado (lo ya visto),
+# ultimo.json y feed.xml (RSS; con GitHub Pages, o en https://raw.githubusercontent.com/<usuario>/<repo>/main/radar/feed.xml).
 name: radar
 
 on:
@@ -28,16 +28,16 @@ jobs:
         with:
           python-version: "3.12"
       - name: Instalar el cliente (fijado a una versión publicada)
-        run: pip install "fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas@v0.7.0"
+        run: pip install "fuentes-publicas-mcp @ git+https://github.com/BquantFinance/Administracion-fuentes-publicas@v0.8.0"
       - name: Radar
         run: fuentes-radar radar.yaml --estado radar/estado.json --salida radar
-      - name: Aviso con lo nuevo
+      - name: Aviso con lo nuevo (y con las fuentes que fallaron, que se reintentan al día siguiente)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          n=$(python -c "import json; print(json.load(open('radar/ultimo.json'))['nuevos'])")
-          if [ "$n" -gt 0 ]; then
-            gh issue create --title "Radar $(date -u +%F): $n novedades" --body-file radar/ultimo.md
+          read n e < <(python -c "import json; d = json.load(open('radar/ultimo.json')); print(d['nuevos'], len(d.get('errores') or {}))")
+          if [ "$n" -gt 0 ] || [ "$e" -gt 0 ]; then
+            gh issue create --title "Radar $(date -u +%F): $n novedades$( [ "$e" -gt 0 ] && echo ", fuentes con error: $e")" --body-file radar/ultimo.md
           fi
       - name: Guardar estado y RSS
         run: |
