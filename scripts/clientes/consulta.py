@@ -352,13 +352,54 @@ def _numero_es(v: str) -> float:
     return float(v.replace(".", "").replace(",", ".")) if v and v.strip() else 0.0
 
 
+NIF_RE = r"[A-HJ-NP-SUVW]\d{7}[0-9A-J]|\d{8}[A-Z]|[XYZ]\d{7}[A-Z]"
+
+
+def buscar_empresa(texto: str, limite: int = 10) -> dict:
+    """Nombre (o parte) a NIF con el directorio de beneficiarios de la BDNS (bdns.terceros: concesiones y, si no hay, ayudas
+    de Estado y minimis), ordenado por parecido; sin personas físicas. Ninguna fuente abierta da el NIF de una empresa por
+    su nombre ni el BORME trae NIF: esto cubre a quien ha recibido alguna ayuda; el almacén añade los adjudicatarios."""
+    clave = normalizar_nombre(texto)
+    res = {"empresas": [], "personas_fisicas_omitidas": 0, "tope": False}
+    for ambito in ("C", "A", "M"):
+        r = bdns.terceros(texto, ambito)
+        if r["empresas"]:
+            res = r
+            break
+    def orden(e):
+        ns = [normalizar_nombre(n) for n in e["nombres"]]
+        return (0 if clave in ns else 1 if any(n.startswith(clave) for n in ns) else 2, min(len(n) for n in ns) if ns else 99)
+    empresas = sorted(res["empresas"], key=orden)
+    out = {"busqueda": texto, "candidatos": [{"nif": e["nif"], "nombre": e["nombres"][0], "variantes": len(e["nombres"])}
+                                             for e in empresas[:limite]],
+           "total": len(empresas), "fuente": "bdns-api (terceros)"}
+    if res.get("tope"):
+        out["aviso"] = "la BDNS corta en 150 resultados: afinar el nombre"
+    try:
+        from . import almacen
+    except ImportError:
+        import almacen
+    d = almacen.existe()
+    if d:
+        out["almacen"] = almacen.buscar_empresa(texto, d, limite)
+    return out
+
+
 def empresa_nif(nif: str, max_filas: int = 10) -> dict:
-    """Lo que las fuentes públicas dicen de un NIF sin certificado: si es sector público (Invente), subvenciones,
+    """Lo que las fuentes públicas dicen de un NIF (o de un nombre, que se resuelve con buscar_empresa) sin certificado: si es sector público (Invente), subvenciones,
     ayudas de Estado y minimis (BDNS), ayudas de la AEI y prohibiciones de contratar vigentes (por denominación, porque
     el XML oculta el NIF). Contratos y actos del BORME no tienen consulta por NIF: salen del almacén local si existe
     (FUENTES_ALMACEN o ./almacen, clave almacen) y si no, no_cubierto dice cómo cargarlos."""
+    import re
     import xml.etree.ElementTree as ET
-    nif = nif.upper().strip()
+    nif = nif.upper().strip().replace("-", "").replace(" ", "") if re.fullmatch(r"[\w\- ]{9,11}", nif.strip()) else nif.strip()
+    if not re.fullmatch(NIF_RE, nif):  # un nombre: candidatos con su NIF; si uno coincide exacto, su perfil
+        b = buscar_empresa(nif)
+        exactos = [c for c in b["candidatos"] if normalizar_nombre(c["nombre"]) == normalizar_nombre(nif)]
+        if len(exactos) != 1:
+            return {**b, "nota": "no es un NIF: elegir uno de candidatos y repetir con él"}
+        perfil = empresa_nif(exactos[0]["nif"], max_filas)
+        return {**perfil, "resuelto_desde": nif}
     out: dict = {"nif": nif}
     r = _sesion().get(INVENTE, params={"nif": nif})
     entes = _json.loads(texto(r)).get("EntidadesSPI", []) if r.status_code == 200 and r.content.strip() else []

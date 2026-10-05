@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 12 productos, 43 recetas, 153 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 12 productos, 43 recetas, 154 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
 
 ## Productos que se pueden construir hoy
 
@@ -33,7 +33,7 @@ Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras med
 **kyb-proveedores** · Ficha de riesgo de un proveedor o cliente por NIF (ayudas, contratos, actos mercantiles, prohibiciones de contratar)
 - para: departamentos de compras, fintech de crédito, compliance
 - fichas: bdns-api, placsp-datos-abiertos, borme-api-sumario, hacienda-registro-licitadores · recetas: empresa-nif-a-ayudas-y-contratos, actos-mercantiles-borme
-- piezas: herramienta empresa_nif y ejemplos/empresa_nif.py; con almacén local añade contratos adjudicados y actos del BORME
+- piezas: herramienta empresa_nif (por NIF o por nombre, que resuelve el NIF con el directorio de la BDNS) y ejemplos/empresa_nif.py; con almacén local añade contratos adjudicados y actos del BORME
 - frescura: diaria
 - licencia: BDNS con fines limitados para personas físicas; BORME con RGPD (guides/reutilizacion.md)
 - trampa: el BORME no trae NIF y se cruza por denominación; la lista de deudores de la AEAT solo es accesible tres meses y el Registro Público Concursal exige CAPTCHA
@@ -44,7 +44,7 @@ Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras med
 - piezas: almacen.py sync --fuentes borme (actos Constitución con objeto, domicilio y capital en detalle)
 - frescura: diaria, de lunes a viernes · volumen: 2025, 249 sumarios y unos 300 MB de XML de la sección A; un día, 1.785 empresas en 100 KB de Parquet
 - licencia: libre con cita; administradores y socios son datos personales y el almacén no los guarda
-- trampa: sin NIF ni CNAE; el objeto social es texto libre y la denominación cambia con los actos
+- trampa: sin NIF ni CNAE (el NIF sale por denominación con empresa_nif cuando la sociedad ha recibido alguna ayuda o contrato); el objeto social es texto libre y la denominación cambia con los actos
 
 **informe-ubicacion** · Informe de una localización (población, renta, paro, alquiler, criminalidad) para inmobiliarias, retail y franquicias
 - para: inmobiliarias, cadenas de retail y franquicias, proptech
@@ -740,6 +740,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Convocatorias y concesiones de subvenciones, ayudas de Estado, minimis, grandes beneficiarios → `bdns-api`
 - Empresas clasificadas para contratar (ROLECE) → `hacienda-registro-licitadores` (solo con certificado electrónico)
 - Prohibiciones de contratar vigentes → `hacienda-registro-licitadores` (XML público del visor del ROLECE; el NIF va oculto, cruzar por nombre)
+- NIF de una empresa a partir de su nombre, o el nombre de un NIF (también para cruzar el BORME, que no trae NIF) → `bdns-api` (terceros?ambito=C&busqueda={nombre} (sin documentar) cubre a quien ha recibido alguna ayuda; empresa_nif con un nombre lo usa y añade los adjudicatarios del almacén; tope silencioso de 150 filas)
 
 **Empleo y Seguridad Social**
 - Paro registrado, demandantes y contratos por municipio → `sepe-estadisticas` (CSV anual de datos abiertos con todos los municipios y meses desde 2006 (Paro, Contratos, Dtes_empleo); Oza-Cesuras y Cerdedo-Cotobade van con sus códigos anteriores a la fusión)

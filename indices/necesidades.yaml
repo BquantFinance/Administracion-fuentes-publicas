@@ -426,3 +426,6 @@
 - need: Prohibiciones de contratar vigentes
   source: hacienda-registro-licitadores
   note: XML público del visor del ROLECE; el NIF va oculto, cruzar por nombre
+- need: NIF de una empresa a partir de su nombre, o el nombre de un NIF (también para cruzar el BORME, que no trae NIF)
+  source: bdns-api
+  note: "terceros?ambito=C&busqueda={nombre} (sin documentar) cubre a quien ha recibido alguna ayuda; empresa_nif con un nombre lo usa y añade los adjudicatarios del almacén; tope silencioso de 150 filas"

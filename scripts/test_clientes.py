@@ -526,6 +526,16 @@ def ubicar_reconoce_direcciones_y_vias():
     assert consulta._palabras("Rúa do Vilar 1") == {"vilar"}  # partículas y número fuera
 
 
+@test
+def bdns_terceros_directorio_nif_nombre():
+    filas = js("bdns-terceros-universidad-de-cadiz.json")["terceros"]
+    r = bdns.parse_terceros(filas + [{"id": 1, "descripcion": "***0747** - JUAN GARCIA LOPEZ"}])
+    uca = next(e for e in r["empresas"] if e["nif"] == "Q1132001G")
+    assert uca["id_persona"] == 5958646 and uca["nombres"] == ["UNIVERSIDAD DE CADIZ", "UNIVERSIDAD DE CÁDIZ"]  # 4 filas, espacios fuera
+    assert r["personas_fisicas_omitidas"] == 1 and len(r["empresas"]) == 4 and not r["tope"]
+    assert bdns.parse_terceros([{"id": i, "descripcion": f"B{i:08d} - X"} for i in range(150)])["tope"]
+
+
 def main() -> int:
     fallos = 0
     for t in TESTS:

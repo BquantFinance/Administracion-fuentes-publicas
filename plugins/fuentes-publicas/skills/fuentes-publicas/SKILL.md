@@ -36,6 +36,8 @@ from fuentes_publicas.clientes.sesion import sesion   # requests.Session con FNM
 consulta.perfil_municipio("Alcalá de Henares")  # códigos, padrón, renta, paro, contratos y criminalidad
 consulta.coyuntura()                            # IPC (avance o definitivo), paro, PIB, Euríbor, prima de riesgo
 consulta.empresa_nif("A02066116")               # sector público, BDNS, AEI, prohibiciones; contratos y BORME con almacén
+consulta.empresa_nif("el albercial")            # con un nombre: su NIF (directorio de la BDNS) y el perfil, o candidatos
+consulta.perfil_municipio("calle Alcalá 50, Madrid")  # dirección o «lat,lon»: CP, referencia catastral, SIGPAC
 pcaxis.tabla(24077)                             # tablas PC-Axis con números convertidos (None es sin dato, no cero)
 list(ckan.filas("cnmc", resource_id))           # todas las filas aunque el portal recorte limit
 list(bdns.altas("2026-09-29"))                  # concesiones dadas de alta ese día, cualquiera que sea su fecha

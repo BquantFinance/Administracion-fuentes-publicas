@@ -78,6 +78,38 @@ def separar_beneficiario(texto: str | None) -> tuple[str | None, str | None]:
     return nif, nombre.removeprefix("- ").strip() or None
 
 
+AMBITOS = {"C": "concesiones", "A": "ayudasestado", "M": "minimis", "G": "grandesbeneficiarios", "S": "sanciones",
+           "P": "partidospoliticos"}
+TOPE_TERCEROS = 150  # terceros corta a 150 sin aviso («garcia», «indra»)
+
+
+def terceros(texto: str, ambito: str = "C") -> dict:
+    """Beneficiarios por nombre o NIF (desde 3 caracteres, sin distinguir tildes) con el servicio que usa el
+    autocompletado de la web: NIF, cada forma del nombre e idPersona (vale como beneficiario= en las búsquedas). No está
+    documentado; un ambito fuera de AMBITOS devuelve vacío sin error. Las personas físicas salen con el DNI enmascarado y
+    el nombre completo: aquí se descartan (datos personales). tope=True si llegó a 150 y faltan resultados."""
+    if ambito not in AMBITOS:
+        raise ValueError(f"ambito {ambito!r}: uno de {sorted(AMBITOS)}")
+    filas = _get("terceros", {"ambito": ambito, "busqueda": texto}).json().get("terceros") or []
+    return {"busqueda": texto, "ambito": AMBITOS[ambito], **parse_terceros(filas)}
+
+
+def parse_terceros(filas: list[dict]) -> dict:
+    """[{id, descripcion 'NIF - NOMBRE'}] a empresas únicas por NIF con sus variantes de nombre, sin personas físicas."""
+    empresas: dict[str, dict] = {}
+    personas = 0
+    for f in filas:
+        nif, _, nombre = (f.get("descripcion") or "").partition(" - ")
+        nif = nif.strip().upper()
+        if "*" in nif or re.fullmatch(r"\d{8}[A-Z]|[XYZ]\d{7}[A-Z]", nif):
+            personas += 1
+            continue
+        e = empresas.setdefault(nif, {"nif": nif, "nombres": [], "id_persona": f.get("id")})
+        if nombre.strip() and nombre.strip() not in e["nombres"]:
+            e["nombres"].append(nombre.strip())
+    return {"empresas": list(empresas.values()), "personas_fisicas_omitidas": personas, "tope": len(filas) >= TOPE_TERCEROS}
+
+
 def exportar(coleccion: str, tipo: str = "csv", page: int = 0, page_size: int = TOPE, **filtros) -> list[dict] | bytes:
     """Exportación con los filtros de la búsqueda. Pagina igual: sin pageSize devuelve 50 filas sin aviso, con tope de
     10000. Exige vpd (GE, portal general). El CSV llega en windows-1252, separado por comas; xlsx se devuelve en bytes."""

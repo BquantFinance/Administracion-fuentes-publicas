@@ -486,7 +486,36 @@ def conectar(dir: str | os.PathLike | None = None, solo_lectura: bool = True):
                     "(count(*) OVER w > 1 AND min(importe_sin_iva) OVER w = max(importe_sin_iva) OVER w) AS importe_compartido "
                     "FROM (SELECT * FROM placsp_adjudicaciones QUALIFY rank() OVER (PARTITION BY id ORDER BY updated DESC) = 1) "
                     "WINDOW w AS (PARTITION BY id, updated, lote)")
+    partes = []
+    if "placsp_adjudicaciones" in presentes:
+        partes.append("SELECT nif, nombre, 'contrato' AS fuente, coalesce(fecha_adjudicacion, fecha_contrato) AS fecha "
+                      "FROM placsp_adjudicaciones WHERE nif IS NOT NULL AND nombre IS NOT NULL AND NOT coalesce(persona_fisica, false)")
+    if "bdns" in presentes:
+        partes.append("SELECT nif, beneficiario, 'ayuda', fecha_concesion FROM bdns "
+                      "WHERE nif IS NOT NULL AND beneficiario IS NOT NULL AND NOT coalesce(persona_fisica, false)")
+    if partes:  # directorio NIF y nombre: el BORME no trae NIF y ninguna fuente abierta lo da por nombre
+        con.execute("CREATE VIEW empresas AS SELECT nif, mode(nombre) AS nombre, list(DISTINCT nombre) AS nombres, "
+                    "count(*) FILTER (WHERE fuente = 'contrato') AS contratos, count(*) FILTER (WHERE fuente = 'ayuda') AS ayudas, "
+                    f"min(fecha) AS primera, max(fecha) AS ultima FROM ({' UNION ALL '.join(partes)}) GROUP BY nif")
     return con
+
+
+def buscar_empresa(texto: str, dir: str | os.PathLike | None = None, limite: int = 10) -> list[dict]:
+    """NIF por nombre (o parte, sin tildes ni forma jurídica) en la vista empresas del almacén: adjudicatarios y
+    beneficiarios cargados, sin personas físicas. Exactos primero."""
+    con = conectar(dir)
+    if not con.execute("SELECT count(*) FROM duckdb_views() WHERE view_name = 'empresas'").fetchone()[0]:
+        return []
+    clave = _norm_nombre(texto)
+    filas = con.execute("SELECT nif, nombre, nombres, contratos, ayudas, primera, ultima FROM empresas").fetchall()
+    out = []
+    for nif, nombre, nombres, contratos, ayudas, primera, ultima in filas:
+        ns = {_norm_nombre(n) for n in nombres or []}
+        if nif == texto.upper().strip() or any(clave in n for n in ns):
+            out.append({"nif": nif, "nombre": nombre, "contratos": contratos, "ayudas": ayudas,
+                        "ultima": str(ultima) if ultima else None, "_exacto": clave in ns})
+    out.sort(key=lambda e: (not e.pop("_exacto"), -(e["contratos"] + e["ayudas"])))
+    return out[:limite]
 
 
 def cobertura(dir: str | os.PathLike | None = None) -> dict:

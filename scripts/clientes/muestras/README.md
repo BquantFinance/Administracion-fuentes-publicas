@@ -53,3 +53,4 @@ sirven los servidores; los de PC-Axis en UTF-8 con BOM.
 | ine-datos-serie-IPC290750.json | DATOS_SERIE del IPC general, variación anual, nult=2 y tip=AM: 2026M08 definitivo y 2026M09 avance |
 
 Faltan, porque necesitan credenciales: el fichero de datos de AEMET (ISO-8859-15) y ObtenerDatos de DataComex.
+| bdns-terceros-universidad-de-cadiz.json | terceros?ambito=C&busqueda=universidad de cadiz del 2026-10-05: directorio NIF y nombre con variantes |

@@ -10,6 +10,7 @@ summary: >-
   estratégicos y subvenciones a partidos políticos de todas las Administraciones (Estado, CCAA, EELL). API REST
   JSON paginada sin autenticación y exportación a CSV y xlsx.
 alerts:
+  - "terceros corta en 150 filas sin aviso y cuenta una por cada forma del nombre: busqueda=indra dio 150 (27 empresas y 109 personas físicas), así que un NIF puede faltar; afinar el texto o buscar por NIF."
   - La exportación sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso; pedir page=0&pageSize=10000 (tope) y seguir con page=1, 2... hasta una página con menos filas.
   - Las concesiones caducan a los 4 años naturales y las de personas físicas tras el siguiente (RD 130/2019 art. 7.8); hoy fechaDesde=01/01/2021&fechaHasta=31/12/2021 da totalElements 0. Para series, copia propia.
 access: [api-rest, download, portal]
@@ -50,6 +51,11 @@ endpoints:
     returns: "CSV separado por comas con cabecera en castellano (Administración, Código BDNS, Convocatoria, Beneficiario, Importe...); fechas dd/mm/aaaa, punto decimal, título de convocatoria cortado a 128 caracteres"
   - path: /convocatorias/ultimas?page={n}&pageSize={n}
     desc: Últimas convocatorias registradas
+  - path: /terceros?ambito={C|A|M|G|S|P}&busqueda={texto}
+    desc: NIF de un beneficiario por su nombre o al revés (autocompletado de la web, sin documentar); ambito C, A, M, G, S o P como las colecciones
+    example: curl -s "https://www.infosubvenciones.es/bdnstrans/api/terceros?ambito=C&busqueda=el%20albercial"
+    params: "busqueda desde 3 caracteres, sin distinguir tildes, por nombre o NIF; un ambito desconocido devuelve vacío sin error"
+    returns: "{terceros:[{id (idPersona, vale como beneficiario= en las búsquedas), descripcion 'NIF - NOMBRE'}]}, una fila por cada forma del nombre (Q1132001G sale 4 veces); personas físicas con DNI enmascarado y nombre completo"
 rate_limit: No documentado; pageSize se limita en silencio a 10000 (unos 9 MB y 7 s por página de concesiones en JSON). El aviso legal se reserva bloquear usos abusivos.
 quirks: [latin1, errors-html-or-xml]
 ids: [bdns, nif, invente]
@@ -67,4 +73,4 @@ tips:
   - scripts/clientes/bdns.py pagina hasta el final, convierte fechas a dd/mm/aaaa, separa NIF y nombre, exporta con pageSize y trae lo dado de alta en un día (altas).
 related: [placsp-datos-abiertos, dir3-directorio, boe-api-sumario]
 status: active
-verified: "2026-10-01"
+verified: "2026-10-05"

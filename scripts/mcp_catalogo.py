@@ -413,7 +413,8 @@ def _empresa_compacta(r: dict) -> dict:
 def empresa_nif(nif: str | list[str], max_filas: int = 5) -> dict:
     """Lo público de una empresa o entidad por NIF: si es sector público (con DIR3), subvenciones, ayudas de Estado y
     minimis con totales (BDNS), ayudas de la AEI y prohibiciones de contratar; con almacén local, contratos adjudicados
-    y actos del BORME. no_cubierto dice dónde mirar lo demás. Con una lista de hasta 10 NIF, todos en una llamada."""
+    y actos del BORME. Con un nombre en vez de NIF, candidatos con su NIF (directorio de la BDNS y del almacén, sin
+    personas físicas), o el perfil si uno coincide exacto. Con una lista de hasta 10, todos en una llamada."""
     if isinstance(nif, list):
         c = _consulta()
         return {"empresas": [_empresa_compacta(r) for r in c.en_lote(lambda n: c.empresa_nif(n, max_filas), nif[:10], 3)]}
