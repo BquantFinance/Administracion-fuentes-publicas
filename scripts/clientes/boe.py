@@ -34,7 +34,9 @@ ACTOS_BORME = (
     "Página web de la sociedad", "Fe de erratas", "Escisión total", "Desembolso de dividendos pasivos", "Modificación de poderes",
     "Empresario Individual", "Adaptación Ley 2/95", "Articulo 378.5 del Reglamento del Registro Mercantil",
 )
-_ACTO_RE = re.compile(r"(?:^|(?<=\.)\s+)(" + "|".join(re.escape(a) for a in ACTOS_BORME) + r")(?=[.:\s])")
+# Un acto empieza tras «. » o tras «.- » (así encadena el BORME las resoluciones concursales: sin el guion opcional, el
+# segundo «Situación concursal» de una empresa quedaba dentro del texto del primero; BORME-A-2026-189-28, 2026-10-05)
+_ACTO_RE = re.compile(r"(?:^|(?<=\.)-?\s+)(" + "|".join(re.escape(a) for a in ACTOS_BORME) + r")(?=[.:\s])")
 
 
 def _aaaammdd(fecha) -> str:

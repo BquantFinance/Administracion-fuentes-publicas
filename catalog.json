@@ -7300,7 +7300,8 @@
     "En JSON, item y apartado son objeto si hay un elemento y lista si hay varios; normalizar antes de iterar.",
     "El XML de la sección A no tiene campos por acto. Cada empresa es un p class articulo (número - denominación) seguido de un p class parrafo con los actos separados por punto y los Datos registrales al final.",
     "El sufijo del id de las secciones A y B es el código de provincia (01 Álava ... 52 Melilla), no un correlativo; el 99 de la sección A es el índice alfabético de sociedades del día.",
-    "El BORME no incluye cuentas anuales ni socios; eso está en el Registro Mercantil (Colegio de Registradores, de pago)."
+    "El BORME no incluye cuentas anuales ni socios; eso está en el Registro Mercantil (Colegio de Registradores, de pago).",
+    "Los actos de una empresa van separados por punto, y las resoluciones concursales encadenadas además con «.- »: cortar solo por «. » funde dos Situación concursal en una (BORME-A-2026-189-28, 2026-10-05)."
    ],
    "tips": [
     "Los tipos de acto en el parrafo son un vocabulario fijo (Constitución, Nombramientos, Ceses/Dimisiones, Revocaciones, Ampliación de capital, Disolución...) y sirven de separador al parsear.",

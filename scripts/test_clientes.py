@@ -841,6 +841,18 @@ def cifras_de_control():
             p.stem for p in DIR.glob("*.py")} | set(sys.stdlib_module_names), c["id"]  # un import mal escrito sería error cada lunes
 
 
+@test
+def borme_actos_encadenados_con_punto_y_guion():
+    # BORME-A-2026-189-28 (2026-10-05): tres «Situación concursal» de una empresa, el segundo tras «.- »; con el corte solo
+    # por «. » quedaban dos y el segundo se perdía dentro del texto del primero (8 actos concursales en el boletín, no 9)
+    emp = boe.parse_borme_a(xml("borme-A-2026-189-28-concursal.xml"))
+    actos = emp[0]["actos"]
+    assert [a["tipo"] for a in actos] == ["Situación concursal"] * 3, [a["tipo"] for a in actos]
+    assert actos[0]["texto"].endswith("sustituido por la administración concursal")  # sin el «.-» final
+    r = [boe.parse_concursal(a["texto"]) for a in actos]
+    assert [x["resolucion"][:28] for x in r] == ["Auto de declaración de conc", "Resoluciones acordando la in", "Nombramiento de administrado"]
+    assert r[0]["clase"] == "Necesario" and r[0]["firme"] is False and r[0]["procedimiento"] == "148/2026"
+
 def main() -> int:
     fallos = 0
     for t in TESTS:
