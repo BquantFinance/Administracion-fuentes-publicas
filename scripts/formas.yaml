@@ -1,0 +1,193 @@
+# Sondas de forma: para cada fuente de la que tiran los clientes, dónde están los registros y qué campos se miran.
+# check_formas.py compara los campos de hoy con scripts/formas-base.json: un campo que desaparece es un fallo (el
+# cliente leería None sin error); uno nuevo solo se informa. tipo json (ruta con puntos, * para recorrer una lista),
+# csv (salta líneas, codificación), xml (elemento registro, nombres locales de sus descendientes) o xls (filas de
+# cabecera); clave toma ese campo de cada registro en vez de sus claves (CKAN fields, Socrata columns). Para regenerar la base tras un cambio comprobado: python scripts/check_formas.py --actualizar [ids].
+
+- id: ine-datos-tabla
+  ficha: ine-api-tempus
+  usa: perfil_municipio (padrón, renta, viviendas turísticas)
+  url: https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/29005?nult=1&tv=19:6124
+  tipo: json
+  rutas: ["*", "*.Data.*"]
+
+- id: ine-vte-39363
+  ficha: viviendas-uso-turistico
+  usa: perfil_municipio (viviendas turísticas, INE)
+  url: https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/39363?tv=19:887&nult=1
+  tipo: json
+  rutas: ["*", "*.Data.*"]
+
+- id: sepe-paro-municipios
+  ficha: sepe-estadisticas
+  usa: perfil_municipio (paro registrado)
+  url: https://sede.sepe.gob.es/es/portaltrabaja/resources/sede/datos_abiertos/datos/Paro_por_municipios_2026_csv.csv
+  tipo: csv
+  salta: 1
+  codificacion: cp1252
+
+- id: bdns-concesiones
+  ficha: bdns-api
+  usa: empresa_nif, subvenciones_nif
+  url: https://www.infosubvenciones.es/bdnstrans/api/concesiones/busqueda?page=0&pageSize=5&nifCif=Q1132001G
+  tipo: json
+  rutas: ["content.*"]
+
+- id: bdns-terceros
+  ficha: bdns-api
+  usa: empresa_nif con nombre, radar (concursos por NIF)
+  url: https://www.infosubvenciones.es/bdnstrans/api/terceros?ambito=C&busqueda=universidad%20de%20cadiz
+  tipo: json
+  rutas: ["terceros.*"]
+
+- id: bdns-convocatorias
+  ficha: bdns-api
+  usa: radar (ayudas)
+  url: https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda?page=0&pageSize=5&fechaDesde=01/09/2026&fechaHasta=30/09/2026
+  tipo: json
+  rutas: ["content.*"]
+
+- id: boe-sumario
+  ficha: boe-api-sumario
+  usa: radar (BOE), boe_sumario
+  url: https://www.boe.es/datosabiertos/api/boe/sumario/20260930
+  cabeceras: {Accept: application/json}
+  tipo: json
+  rutas: ["data.sumario.diario.*.seccion.*.departamento.*.epigrafe.*.item.*", "data.sumario.diario.*.seccion.*.departamento.*.item.*"]
+
+- id: borme-sumario
+  ficha: borme-api-sumario
+  usa: radar (sociedades, concursos), almacén
+  url: https://www.boe.es/datosabiertos/api/borme/sumario/20260930
+  cabeceras: {Accept: application/json}
+  tipo: json
+  rutas: ["data.sumario.diario.*.seccion.*.item.*"]
+
+- id: placsp-643
+  ficha: placsp-datos-abiertos
+  usa: radar (licitaciones), almacén, adjudicaciones
+  url: https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom
+  tipo: xml
+  registro: entry
+
+- id: cartociudad-candidates
+  ficha: cnig-centro-descargas
+  usa: ubicar (direcciones de perfil_municipio)
+  url: https://www.cartociudad.es/geocoder/api/geocoder/candidates?q=calle%20alcala%2050&municipio_filter=Madrid&limit=1
+  tipo: json
+  rutas: ["*"]
+
+- id: mivau-valor-tasado
+  ficha: mivau-precios-vivienda-alquiler
+  usa: perfil_municipio (compraventa)
+  url: https://apps.fomento.gob.es/BoletinOnline2/sedal/35103500.XLS
+  tipo: xls
+  hoja: -1
+  filas: [14, 15]
+
+- id: mivau-transacciones
+  ficha: mivau-precios-vivienda-alquiler
+  usa: perfil_municipio (compraventa)
+  url: https://apps.fomento.gob.es/BoletinOnline2/sedal/34010210.XLS
+  tipo: xls
+  hoja: 0
+  filas: [7, 9, 10, 11]
+
+- id: vut-cataluna
+  ficha: viviendas-uso-turistico
+  usa: perfil_municipio (viviendas turísticas, Cataluña)
+  url: https://analisi.transparenciacatalunya.cat/api/views/t2h3-cgys.json
+  tipo: json
+  rutas: ["columns.*"]
+  clave: fieldName
+
+- id: vut-madrid
+  ficha: viviendas-uso-turistico
+  usa: perfil_municipio (viviendas turísticas, Madrid)
+  url: https://datos.comunidad.madrid/api/3/action/datastore_search?resource_id=260e80ac-2062-41f6-9f96-4902675b1078&limit=1
+  tipo: json
+  rutas: ["result.fields.*"]
+  clave: id
+
+- id: vut-gva
+  ficha: viviendas-uso-turistico
+  usa: perfil_municipio (viviendas turísticas, Comunitat Valenciana)
+  url: https://dadesobertes.gva.es/api/3/action/datastore_search?resource_id=b1bdc28e-9813-422a-ab7a-63c21290493d&limit=1
+  tipo: json
+  rutas: ["result.fields.*"]
+  clave: id
+
+- id: cee-cataluna
+  ficha: certificados-eficiencia-energetica
+  usa: perfil_municipio con dirección (certificados, Cataluña)
+  url: https://analisi.transparenciacatalunya.cat/api/views/j6ii-t3w2.json
+  tipo: json
+  rutas: ["columns.*"]
+  clave: fieldName
+
+- id: cee-gva-wfs
+  ficha: certificados-eficiencia-energetica
+  usa: perfil_municipio con dirección (certificados, Comunitat Valenciana)
+  url: https://terramapas.icv.gva.es/26_GCEE?service=WFS&version=1.1.0&request=GetFeature&typeName=ms:CEEEdificios&maxFeatures=1
+  tipo: xml
+  registro: CEEEdificios
+
+- id: recarga-dgt
+  ficha: dgt-datex-trafico
+  usa: perfil_municipio con dirección (cerca, recarga)
+  url: https://infocar.dgt.es/datex2/v3/miterd/EnergyInfrastructureTablePublication/electrolineras.xml
+  tipo: xml
+  registro: energyInfrastructureSite
+
+- id: colegios-cataluna
+  ficha: centros-docentes-ccaa
+  usa: perfil_municipio con dirección (cerca, colegios)
+  url: https://analisi.transparenciacatalunya.cat/api/views/kvmv-ahh4.json
+  tipo: json
+  rutas: ["columns.*"]
+  clave: fieldName
+
+- id: colegios-madrid
+  ficha: centros-docentes-ccaa
+  usa: perfil_municipio con dirección (cerca, colegios)
+  url: https://datos.comunidad.madrid/api/3/action/datastore_search?resource_id=28d60557-1d73-4281-ab08-6cfd3b2f5f83&limit=1
+  tipo: json
+  rutas: ["result.fields.*"]
+  clave: id
+
+- id: colegios-gva
+  ficha: centros-docentes-ccaa
+  usa: perfil_municipio con dirección (cerca, colegios)
+  url: https://dadesobertes.gva.es/api/3/action/datastore_search?resource_id=1aa53c3a-4639-41aa-ac85-d58254c428c0&limit=1
+  tipo: json
+  rutas: ["result.fields.*"]
+  clave: id
+
+- id: salud-cataluna
+  ficha: centros-sanitarios-ccaa
+  usa: perfil_municipio con dirección (cerca, salud)
+  url: https://analisi.transparenciacatalunya.cat/api/views/8gmd-gz7i.json
+  tipo: json
+  rutas: ["columns.*"]
+  clave: fieldName
+
+- id: salud-madrid
+  ficha: centros-sanitarios-ccaa
+  usa: perfil_municipio con dirección (cerca, salud)
+  url: https://datos.comunidad.madrid/api/3/action/datastore_search?resource_id=2948b4da-8b39-42b7-b667-779a5284f39d&limit=1
+  tipo: json
+  rutas: ["result.fields.*"]
+  clave: id
+
+- id: salud-gva
+  ficha: centros-sanitarios-ccaa
+  usa: perfil_municipio con dirección (cerca, salud)
+  url: https://terramapas.icv.gva.es/15_SistemaValencianoSalud?request=GetFeature&service=WFS&version=2.0.0&typename=CentrosSanitarios.Hospitales&outputformat=csv
+  tipo: csv
+
+- id: carburantes-minetur
+  ficha: minetur-precios-carburantes
+  usa: carburante_cerca, comparador de carburantes
+  url: https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroMunicipio/4354
+  tipo: json
+  rutas: ["ListaEESSPrecio.*"]

@@ -65,6 +65,7 @@ python scripts/test_mcp_catalogo.py  # el servidor MCP por stdio llamando a toda
 python scripts/check_recetas.py   # comprobaciones de las recetas (red; --only, --report, --fail)
 python scripts/check_ejemplos.py  # example de cada endpoint de las fichas (red; --only, --report, --fail)
 python scripts/check_links.py     # informe de URLs (red)
+python scripts/check_formas.py    # campos que desaparecen de 25 fuentes de los clientes (red; --report, --actualizar ids tras comprobar)
 python scripts/municipios.py      # regenera datos/municipios.csv (red, un par de minutos)
 python scripts/fnmt_bundle.py     # ca-age.pem con las CA de FNMT para los hosts con cadena incompleta
 ```
@@ -136,8 +137,8 @@ Judicial o UE, solo cuando lo indique el propietario.
   falló en la comprobación de versión (ficheros en 0.7.0): registro en 0.8.0, sha256 del .mcpb coincide y
   `pip install ...@v0.8.0` da fuentes-radar y perfil_municipio con cerca. La plantilla del radar instala @v0.8.0.
 - **CI**: `ci.yml` (validate, build al día y `test_clientes.py` en cada push) y `verificacion.yml` (lunes 06:17 UTC,
-  manual y al cambiar el flujo: recetas, ejemplos de fichas, cargadores, ejemplos y enlaces desde la IP de GitHub;
-  comenta en el issue de verificación si algo falla). Secreto `AEMET_KEY` en el repositorio.
+  manual y al cambiar el flujo: recetas, ejemplos de fichas, cargadores, ejemplos, forma de las fuentes y enlaces desde
+  la IP de GitHub; comenta en el issue de verificación si algo falla). Secreto `AEMET_KEY` en el repositorio.
 - **Credenciales fuera del repo**: cuenta de DataComex con el correo del propietario y clave de AEMET (secreto de
   GitHub); ESIOS sin token. Nunca en fichas ni commits.
 - **Ramas**: `main` por defecto; `claude/vibrant-bell-jwqfvl` de trabajo, igual que main.

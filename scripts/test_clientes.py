@@ -691,6 +691,31 @@ def radar_una_fuente_caida_no_tumba_las_demas():
     assert "Fuentes con error" not in radar.markdown([], date(2026, 10, 5), {})
 
 
+@test
+def formas_de_las_fuentes():
+    # check_formas.py: rutas con * (un objeto suelto cuenta como lista de uno), clave de CKAN y Socrata, cabecera CSV
+    sys.path.insert(0, str(DIR.parent))
+    import check_formas as cf
+    boe_ = {"seccion": [{"item": {"id": "A", "titulo": "t"}}, {"item": [{"id": "B", "url_pdf": "u"}]}]}
+    assert cf.campos_json(boe_, ["seccion.*.item.*"]) == ["id", "titulo", "url_pdf"]
+    ckan_ = {"result": {"fields": [{"id": "_id", "type": "int"}, {"id": "municipio", "type": "text"}]}}
+    assert cf.campos_json(ckan_, ["result.fields.*"], "id") == ["_id", "municipio"]
+    ine = [{"Nombre": "x", "Data": [{"Valor": 1, "Anyo": 2025}]}]
+    assert cf.campos_json(ine, ["*", "*.Data.*"]) == ["*.Data.*:Anyo", "*.Data.*:Valor", "Data", "Nombre"]
+    assert cf.campos_csv("Título del fichero\nCódigo mes;Municipio;Paro total\n202608;Abegondo;214\n", 1) == ["Código mes", "Municipio", "Paro total"]
+    assert cf.campos_xml(io.BytesIO(b'<f xmlns:a="u"><a:r><a:x/><a:y><a:z/></a:y></a:r><a:r/></f>'), "r") == ["x", "y", "z"]
+    assert cf.comparar(["a", "b"], ["b", "c"]) == {"faltan": ["a"], "nuevos": ["c"]}
+    assert cf._html(b"\n <!DOCTYPE html><html>") and not cf._html(b"<?xml version=\"1.0\"?><feed>")  # WAF: error, no cambio
+    # Toda sonda cita una ficha que existe y tiene forma guardada en la base
+    import yaml
+    sondas = yaml.safe_load(cf.SONDAS.read_text(encoding="utf-8"))
+    base = json.loads(cf.BASE.read_text(encoding="utf-8"))
+    fichas = {f.stem for f in (DIR.parent.parent / "sources").rglob("*.yaml")}
+    assert len({x["id"] for x in sondas}) == len(sondas)
+    assert all(x["ficha"] in fichas for x in sondas), [x["ficha"] for x in sondas if x["ficha"] not in fichas]
+    assert all(base.get(x["id"]) for x in sondas), [x["id"] for x in sondas if not base.get(x["id"])]
+
+
 def main() -> int:
     fallos = 0
     for t in TESTS:
