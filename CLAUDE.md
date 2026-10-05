@@ -89,7 +89,9 @@ salvo petición expresa o para evaluaciones.
 
 AGE con organismos independientes (BdE, CNMV, CNMC, AIReF) y empresas públicas con datos únicos (Aena, Puertos);
 Madrid, Cataluña, Andalucía y Comunitat Valenciana (portal e instituto de estadística) y los ayuntamientos de Madrid y
-Barcelona. Más comunidades, entidades locales, Cortes, Poder Judicial o UE solo cuando lo indique el propietario.
+Barcelona. Desde el 2026-10-05 (propietario): entran también comunidades y ayuntamientos que aporte la comunidad si
+llegan verificados con llamadas reales, con alertas explícitas y validate y build limpios (issues 4 y 6). Cortes, Poder
+Judicial o UE, solo cuando lo indique el propietario.
 
 ## Estado (2026-10-01)
 
