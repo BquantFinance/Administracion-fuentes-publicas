@@ -27,6 +27,7 @@ import almacen  # noqa: E402
 import arcgis  # noqa: E402
 import bdns  # noqa: E402
 import boe  # noqa: E402
+import cerca  # noqa: E402
 import ckan  # noqa: E402
 import consulta  # noqa: E402
 import datacomex  # noqa: E402
@@ -647,6 +648,32 @@ def certificados_energeticos_por_parcela():
     assert len(filas) == 4 and gva["inmuebles"] == 3 and gva["consumo_por_letra"] == {"E": 3}  # un piso con dos certificados
     assert gva["recientes"][0]["valido_hasta"] == "2030-10-18" and gva["recientes"][0]["registro"].startswith("E2020")
     assert consulta.certificados_energeticos("05900570129", "01")["nota"].startswith("hace falta")  # catastro foral, sin red
+
+
+@test
+def cerca_recarga_colegios_y_salud():
+    # Muestras reales del 2026-10-05: dos emplazamientos de electrolineras.xml y filas de cada directorio autonómico
+    sitios = cerca.parse_recarga((M / "dgt-electrolineras-dos-sitios.xml").read_bytes())
+    assert len(sitios) == 2 and sitios[0]["cp"] == "07011" and sitios[0]["kw"] == 350.0  # 7011 y 350000.0 W en origen
+    assert sitios[0]["operador"] == "Motor Box Mallorca SL" and sitios[0]["direccion"] == "Camí dels Reis 166"
+    lat, lon = cerca.utm_a_geo(410649, 4591896, 31)  # La Mercè (Martorell) trae UTM y geográficas: 41.4736, 1.929887
+    assert abs(lat - 41.4736) < 1e-3 and abs(lon - 1.929887) < 1e-4
+    d = js("cerca-directorios.json")
+    cat = cerca.colegios_cataluna(d["colegios_cataluna"])
+    assert cat[0]["lat"] == 41.4736 and d["colegios_cataluna"][0]["geo_1"]["coordinates"] == [1929887, 414736]  # sin punto
+    mad = cerca.colegios_madrid(d["colegios_madrid"])
+    assert len(mad) == 2 and all(abs(p["lat"] - 40.48) < 0.02 for p in mad)  # la baja de La Acebeda fuera; Alcalá en UTM
+    assert len(cerca.colegios_valencia(d["colegios_valencia"])) == 2
+    andalucia = cerca.colegios_andalucia(d["colegios_andalucia"])
+    assert andalucia[0]["lat"] == 37.1408963  # «37,1408963» en origen
+    sc = cerca.salud_cataluna(d["salud_cataluna"])
+    assert {p["tipo"] for p in sc} <= {"Centres d'atenció primària (CAP)", "Hospitals"} and len(sc) == 2
+    sm = cerca.salud_madrid(d["salud_madrid"])
+    assert len(d["salud_madrid"]) == 4 and len(sm) == 1 and sm[0]["nombre"] == "CALLE de Arturo Soria 17"  # una fila por especialidad
+    sv = cerca.salud_valencia(d["salud_valencia"])
+    assert len(sv) == 2 and abs(sv[0]["lat"] - 38.018) < 0.01
+    r = cerca.cercanos(cat + sc, 41.4736, 1.929887, 500)
+    assert r["en_radio"] == 1 and r["cercanos"][0]["m"] == 0 and "lat" not in r["cercanos"][0]
 
 
 def main() -> int:

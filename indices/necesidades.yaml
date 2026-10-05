@@ -436,3 +436,12 @@
 - need: Certificado y etiqueta energética de un edificio o vivienda, letras por municipio
   source: certificados-eficiencia-energetica
   note: "por parcela en Cataluña y la Comunitat Valenciana (perfil_municipio con la dirección); Madrid y Andalucía solo en descarga y el datastore de Madrid se corta en 1.000 filas"
+- need: Colegios e institutos cerca de una dirección o de unas coordenadas
+  source: centros-docentes-ccaa
+  note: "Cataluña, Madrid, Comunitat Valenciana y Andalucía; perfil_municipio con la dirección da los de 1 km; el registro estatal no trae coordenadas"
+- need: Centros de salud, consultorios y hospitales cerca de una dirección
+  source: centros-sanitarios-ccaa
+  note: "Cataluña, Madrid y Comunitat Valenciana con coordenadas; el Catálogo Nacional de Hospitales solo trae municipio"
+- need: Puntos de recarga eléctrica cerca de un punto, con operador, potencia y conector
+  source: dgt-datex-trafico
+  note: "electrolineras.xml de la DGT con datos del MITERD, toda España, sin disponibilidad en tiempo real; perfil_municipio con la dirección da los de 1 km"

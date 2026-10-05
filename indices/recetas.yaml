@@ -1013,3 +1013,28 @@
       contains: ref_parcela
   verified: "2026-10-05"
 
+- id: que-hay-cerca
+  intent: Colegios, centros de salud y hospitales y puntos de recarga a menos de un radio de una dirección o unas coordenadas
+  inputs: [ine-municipio]
+  steps:
+    - source: cnig-centro-descargas
+      do: "Dirección a latitud y longitud con candidates de CartoCiudad (municipio_filter con el nombre INE entero); perfil_municipio con la dirección lo hace y añade el bloque cerca"
+    - source: dgt-datex-trafico
+      do: "electrolineras.xml (83 MB, a diario): un energyInfrastructureSite por emplazamiento con coordenadas, operador, refillPoint y maxPowerAtSocket en vatios; postcode sin el cero inicial"
+      example: curl -s "https://infocar.dgt.es/datex2/v3/miterd/EnergyInfrastructureTablePublication/electrolineras.xml" | head -c 2000
+    - source: centros-docentes-ccaa
+      do: "Directorio de la comunidad: Cataluña con coordenades_geo_x/y del último curs (geo_1 no sirve), Madrid solo SITUACIÓN = ALTA con UTM huso 30, Comunitat Valenciana con latitud y longitud, Andalucía con coma decimal"
+      example: curl -s "https://dadesobertes.gva.es/api/3/action/datastore_search?resource_id=1aa53c3a-4639-41aa-ac85-d58254c428c0&limit=1"
+    - source: centros-sanitarios-ccaa
+      do: "Cataluña, categorías de CAP y hospitales de Equipaments; Madrid, los seis tipos de primaria y hospital con filters y un registro por centro; Comunitat Valenciana, capas CentrosSalud y Hospitales en CSV con UTM"
+  output: "Por tipo, cuántos hay a menos del radio y los tres más cercanos con su distancia en metros"
+  note: "scripts/clientes/cerca.py hace los cuatro pasos y cachea las listas; Andalucía no tiene centros sanitarios con coordenadas conseguidos y fuera de las cuatro comunidades solo hay recarga."
+  checks:
+    - url: https://infocar.dgt.es/datex2/v3/miterd/EnergyInfrastructureTablePublication/electrolineras.xml
+      contains: energyInfrastructureSite
+    - url: "https://analisi.transparenciacatalunya.cat/resource/kvmv-ahh4.json?$select=max(curs)"
+      contains: max_curs
+    - url: https://terramapas.icv.gva.es/15_SistemaValencianoSalud?request=GetFeature&service=WFS&version=2.0.0&typename=CentrosSanitarios.Hospitales&outputformat=csv
+      contains: cen_desclar
+  verified: "2026-10-05"
+

@@ -62,11 +62,11 @@
   verified: "2026-10-01"
 
 - id: informe-ubicacion
-  producto: Informe de una localización (población, renta, paro, compraventa y valor tasado de vivienda, criminalidad) para inmobiliarias, retail y franquicias
+  producto: Informe de una localización (población, renta, paro, vivienda, criminalidad y colegios, salud y recarga a 1 km) para inmobiliarias, retail y franquicias
   cliente: inmobiliarias, cadenas de retail y franquicias, proptech
-  fuentes: [ine-api-tempus, sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler, catastro-ovc]
-  recetas: [poblacion-renta-alquiler-por-municipio, criminalidad-municipio, paro-registrado-por-municipio, compraventa-vivienda-municipio]
-  piezas: "herramienta perfil_municipio con el municipio, una dirección o «lat,lon» (CP, referencia catastral del portal) y ejemplos/mi_municipio.py; datos/municipios.csv para pasar entre códigos"
+  fuentes: [ine-api-tempus, sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler, catastro-ovc, centros-docentes-ccaa, centros-sanitarios-ccaa, dgt-datex-trafico]
+  recetas: [poblacion-renta-alquiler-por-municipio, criminalidad-municipio, paro-registrado-por-municipio, compraventa-vivienda-municipio, que-hay-cerca]
+  piezas: "herramienta perfil_municipio con el municipio, una dirección o «lat,lon» (CP, referencia catastral del portal y, con dirección, el bloque cerca) y ejemplos/mi_municipio.py; datos/municipios.csv para pasar entre códigos"
   frescura: "paro mensual, padrón anual, renta con dos años de retraso (2023), criminalidad y compraventas trimestrales (el último trimestre, provisional)"
   licencia: "libre con cita"
   trampa: "SIGPAC y Catastro numeran los municipios distinto que el INE y el Ministerio de Vivienda no da código; la criminalidad es acumulada desde enero y solo de municipios de más de 20.000 habitantes"

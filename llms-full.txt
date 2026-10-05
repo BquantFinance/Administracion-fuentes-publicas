@@ -2,7 +2,7 @@
 
 > Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. Contenido en castellano, claves en inglés.
 
-Fuentes: 97 · Generado: 2026-10-05 · Formato: un bloque por fuente; '!!' marca trampas silenciosas (datos incompletos o distintos sin error); '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
+Fuentes: 99 · Generado: 2026-10-05 · Formato: un bloque por fuente; '!!' marca trampas silenciosas (datos incompletos o distintos sin error); '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
 
 # SECTOR legislacion-boletines: Legislación y boletines oficiales
 
@@ -2276,6 +2276,37 @@ ids: ine-provincia, ccaa
 + Para datos masivos de ensayos usar CTIS o EU CTR, que incluyen los españoles; el REEC sirve el detalle de un estudio por sesión.
 related: aemps-cima-api
 
+## centros-sanitarios-ccaa
+Centros sanitarios con coordenadas – Cataluña, Madrid y Comunitat Valenciana | Generalitat de Catalunya (Equipaments de Catalunya), Comunidad de Madrid (registro de centros, servicios y establecimientos sanitarios) y Generalitat Valenciana (ICV)
+summary: Centros de salud, consultorios y hospitales con coordenadas: equipamientos de Cataluña, registro de centros sanitarios de Madrid (todos los tipos, por especialidad) y capas del Sistema Valenciano de Salud. El Catálogo Nacional de Hospitales no trae coordenadas.
+!! Madrid (centros_servicios_establecimientos_sanitarios): una fila por centro y especialidad, 45.961 filas para 15.867 centros (Hospital general, 3.801 filas para 59). Contar centro_nro_registro distintos.
+!! Equipaments de Catalunya (8gmd-gz7i): 70 equipamientos con latitud y longitud 0 y categoria con varias separadas por «||» en 3.214; descartar el 0 y filtrar con categoria like '%Salut|Centres sanitaris|1.%'.
+access: api-rest, ogc | auth: none | formats: json, csv, gml | update: daily | status: active | verified: 2026-10-05
+coverage: Cataluña 730 CAP y consultorios y 70 hospitales (8gmd-gz7i, al día); Madrid 15.867 centros de todos los tipos; Comunitat Valenciana 248 centros de salud y 35 hospitales; Andalucía no conseguido
+license: Llicència oberta d'ús d'informació – Catalunya (cita); CC BY en Madrid y la Comunitat Valenciana
+base_url: https://analisi.transparenciacatalunya.cat/resource/8gmd-gz7i.json
+docs_url: https://datos.comunidad.madrid/catalogo/dataset/centros_servicios_establecimientos_sanitarios
+- https://analisi.transparenciacatalunya.cat/resource/8gmd-gz7i.json?$where={filtro} :: Equipaments de Catalunya (Socrata, 33.512 equipamientos de todos los tipos); los sanitarios van en Salut|Centres sanitaris|1. (CAP) y |3. (hospitales)
+  ej: curl -sG "https://analisi.transparenciacatalunya.cat/resource/8gmd-gz7i.json" --data-urlencode '$select=nom,categoria,latitud,longitud' --data-urlencode '$where=categoria like "%Salut|Centres sanitaris|3.%"' --data-urlencode '$limit=3'
+  devuelve: [{idequipament, nom, categoria (Salut|Centres sanitaris|3. Hospitals|), via, cpostal sin cero, poblacio, codi_municipi (INE con control y sin cero, 81326), latitud y longitud como texto, data_modificacio, localitzacio}]
+- https://datos.comunidad.madrid/api/3/action/datastore_search?resource_id=2948b4da-8b39-42b7-b667-779a5284f39d&filters={json} :: Registro de centros, servicios y establecimientos sanitarios de la Comunidad de Madrid, una fila por centro y oferta asistencial
+  ej: curl -sG -A "Mozilla/5.0" "https://datos.comunidad.madrid/api/3/action/datastore_search" --data-urlencode "resource_id=2948b4da-8b39-42b7-b667-779a5284f39d" --data-urlencode 'filters={"centro_tipo":["Centro de salud"]}' --data-urlencode "limit=1"
+  devuelve: {result:{total 2196, records:[{centro_nro_registro, centro_tipo, dependecia_funcional, oferta_asistecial, municipio_nombre, direccion_vial_tipo, _nombre y _nro, direccion_codigo_postal entero, localizacion_coordenada_x e _y (UTM huso 30), NIF}]}}; sin nombre del centro
+- https://terramapas.icv.gva.es/15_SistemaValencianoSalud?request=GetFeature&service=WFS&version=2.0.0&typename=CentrosSanitarios.{CentrosSalud|Hospitales}&outputformat=csv :: Capas del Sistema Valenciano de Salud (ICV) en CSV; también departamentos y zonas básicas (MapaSanitario)
+  ej: curl -s "https://terramapas.icv.gva.es/15_SistemaValencianoSalud?request=GetFeature&service=WFS&version=2.0.0&typename=CentrosSanitarios.Hospitales&outputformat=csv"
+  devuelve: CSV con WKT, cen_cod, cen_desclar (nombre), cod_ine_mun (5), municipio, cen_nombcall, cen_numcall, cen_codpos, nombre_departamento, nombre_zona, x_coord e y_coord (UTM huso 30) y tipo; 35 hospitales y 248 centros de salud
+rate_limit: No documentado
+quirks: user-agent-browser
+ids: ine-municipio, nif
+! Madrid no da el nombre del centro (tipo y dirección) y escribe «Dato personal» en el NIF de 6.413 centros (consultas y clínicas de personas físicas).
+! Madrid: datastore_search_sql da 500 con tildes en un literal («Consultorio de atención primaria»); filtrar con filters en JSON, que sí las admite (7.317 filas de los seis tipos de primaria y hospitales).
+! Madrid y la Comunitat Valenciana dan UTM ETRS89 huso 30 (localizacion_coordenada_x/y y x_coord/y_coord); scripts/clientes/cerca.py las pasa a latitud y longitud.
+! La capa CentrosSanitarios.CentrosEspecialidades de la GVA devolvió un CSV vacío el 2026-10-05; centros de salud y hospitales sí.
+! Andalucía, no conseguido el 2026-10-05: ise:eq_02_salud del WFS del Inventario de Sedes y Equipamientos (ideandalucia.es/services/ise/wfs) cortó a los 48 s con 25 KB; sin otro conjunto con coordenadas localizado.
+! Equipaments de Catalunya: cpostal y codi_municipi pierden el cero inicial (8612, 81326 es 081326, INE 08132 con dígito de control).
++ perfil_municipio con una dirección o «lat,lon» da centros de salud, consultorios y hospitales a menos de 1 km con los tres más cercanos.
+related: sanidad-portal-estadistico, gencat-dades-obertes, comunidad-madrid-datos-abiertos, gva-dadesobertes-api, junta-andalucia-datos-abiertos
+
 ## isciii-cne
 ISCIII – Centro Nacional de Epidemiología (RENAVE, MoMo, SiVIRA, COVID-19) | Instituto de Salud Carlos III (ISCIII)
 summary: Vigilancia epidemiológica: exceso de mortalidad diario MoMo en CSV (nacional, CCAA y provincia por sexo y edad desde 2015), histórico COVID-19 por provincia, sexo y edad en CSV (2020-2023), tablas xlsx del informe semanal SiVIRA (gripe, COVID-19, VRS) y boletines e informes anuales RENAVE en PDF.
@@ -2821,7 +2852,9 @@ related: mitma-boletin-estadistico-online, dgt-estadisticas, ine-api-tempus, min
 ## dgt-datex-trafico
 DGT – NAP de tráfico y ficheros DATEX II (incidencias, detectores, cámaras, ZBE) | Dirección General de Tráfico (DGT)
 summary: Ficheros DATEX II públicos sin clave: incidencias en tiempo real (versión 3.7, cada minuto) y 1.952 cámaras en el NAP; en infocar.dgt.es, medidas de unos 5.560 detectores cada minuto, radares, tramos, 47 zonas de bajas emisiones, puntos de recarga eléctrica e incidencias de Cataluña y País Vasco.
-access: download | auth: none | formats: xml, rdf | update: realtime | status: active | verified: 2026-10-01
+!! electrolineras.xml da la potencia en vatios (maxPowerAtSocket 22000.0 son 22 kW) y postcode sin el cero inicial en 3.370 de 12.038 emplazamientos (7011 es 07011): dividir entre 1000 y rellenar a cinco cifras.
+!! En electrolineras.xml 877 emplazamientos comparten coordenadas con otro (356 puntos) y fac:name es a menudo un código del operador (C6E06BCC22ZMPMAKWJ); contar refillPoint por punto y mostrar la dirección, no el nombre.
+access: download | auth: none | formats: xml, rdf | update: realtime | status: active | verified: 2026-10-05
 coverage: Situación actual; sin histórico
 license: Licencia gratuita con condiciones en el aviso legal de la DGT
 base_url: https://infocar.dgt.es/datex2/
@@ -2849,6 +2882,7 @@ quirks: url-drift, static-html
 ! Las incidencias de la DGT apenas cubren Cataluña (11 puntos el 1-10-2026) y nada del País Vasco; usar los ficheros sct y dt-gv del mismo servidor.
 ! En detectores el index de measuredValue no fija la magnitud (el 0 es velocidad o flujo según el punto); leer xsi:type. Velocidad 0.0 llega siempre con vehicleFlow 0, sin vehículos, no es atasco.
 ! Municipio, provincia y comunidad de las incidencias van por nombre (Ontígola, Toledo), sin código INE; para cruzar con otras fuentes usar las coordenadas.
+! Recarga sin disponibilidad en tiempo real (no hay estado por punto) y con fac:lastUpdated de 2023 en 596 emplazamientos; scripts/clientes/cerca.py lo lee en 4 s y da los cercanos a un punto.
 + Pedir gzip (curl --compressed; requests lo hace solo) reduce detectores de 18,7 MB a 255 KB, incidencias de 6,8 MB a 208 KB, cámaras a 95 KB y radares a 62 KB.
 + lxml.etree.iterparse sobre el XML de detectores buscando siteMeasurements: measurementSiteReference (GUID_DET_nnnnnn) enlaza con PredefinedLocationsPublication/detectores para las coordenadas.
 related: dgt-estadisticas
@@ -3116,6 +3150,42 @@ quirks: waf-blocks-bots, waf-intermittent-403, url-drift
 related: borme-api-sumario
 
 # SECTOR educacion-universidades: Educación y universidades
+
+## centros-docentes-ccaa
+Centros docentes con coordenadas – directorios autonómicos | Departament d'Educació (Generalitat de Catalunya), Comunidad de Madrid, Conselleria de Educación (GVA) y Consejería de Desarrollo Educativo (Junta de Andalucía)
+summary: Centros docentes no universitarios con coordenadas, titularidad y enseñanzas en los directorios de Cataluña, Madrid, Comunitat Valenciana y Andalucía. El registro estatal (educacion-estadisticas-ruct) no trae coordenadas.
+!! Cataluña (kvmv-ahh4): geo_1 pierde el punto decimal ([1929887, 414736]) y within_circle(geo_1, 41.388, 2.1592, 500) da 0 sin error; con coordenades_geo_x/y hay 14 a menos de 500 m. Usar esos dos campos.
+!! Cataluña repite cada centro en cada curso: 32.680 filas para 5.434 centros en 2025/2026. Filtrar curs (el último con $select=max(curs)) antes de contar o de buscar cercanos.
+!! Madrid (centros_educativos): 7.757 filas y solo 3.906 en ALTA; 3.552 son BAJA, 193 INACTIVO y 76 ANULACIÓN. Filtrar SITUACIÓN = ALTA o se cuentan casi el doble de colegios.
+access: api-rest, download | auth: none | formats: json, csv | update: irregular | status: active | verified: 2026-10-05
+coverage: Cataluña por curso desde 2020/2021 (kvmv-ahh4, 2025/2026 publicado el 2025-10-17); Madrid 2026-05; Comunitat Valenciana 2026-10-04; Andalucía por curso, el último 2024/2025 (2026-08-11)
+license: Llicència oberta d'ús d'informació – Catalunya (cita); CC BY en Madrid y la Comunitat Valenciana; CC BY 4.0 en Andalucía
+base_url: https://analisi.transparenciacatalunya.cat/resource/kvmv-ahh4.json
+docs_url: https://datos.comunidad.madrid/catalogo/dataset/centros_educativos
+- https://analisi.transparenciacatalunya.cat/resource/kvmv-ahh4.json?$where={filtro} :: Directori de centres docents anual de Cataluña (Socrata), una fila por centro y curso
+  ej: curl -sG "https://analisi.transparenciacatalunya.cat/resource/kvmv-ahh4.json" --data-urlencode '$where=curs="2025/2026" AND codi_municipi="08114"' --data-urlencode '$select=codi_centre,denominaci_completa,nom_naturalesa,coordenades_geo_x,coordenades_geo_y'
+  devuelve: [{curs 2025/2026, codi_centre (8), denominaci_completa, nom_naturalesa Públic o Privat, adre_a, codi_municipi (INE de 5), coordenades_geo_x y _y como texto, coordenades_utm_x/_y (huso 31), einf1c, einf2c, epri, eso, batx, cfpm, cfps, geo_1}]
+- https://datos.comunidad.madrid/api/3/action/datastore_search?resource_id=28d60557-1d73-4281-ab08-6cfd3b2f5f83 :: Centros educativos de la Comunidad de Madrid (datastore completo, 7.757 filas con bajas)
+  ej: curl -s -A "Mozilla/5.0" "https://datos.comunidad.madrid/api/3/action/datastore_search?resource_id=28d60557-1d73-4281-ab08-6cfd3b2f5f83&limit=1"
+  devuelve: {result:{total 7757, records:[{CODIGO entero, CENTRO, TIPO_ABRV (CP INF-PRI, IES...), TITULARIDAD, DOMICILIO, CDPOSTAL entero, CDMUNI, MUNICIPIO, UTM_X y UTM_Y (ETRS89 huso 30) o null, SITUACIÓN}]}}
+- https://dadesobertes.gva.es/api/3/action/datastore_search?resource_id=1aa53c3a-4639-41aa-ac85-d58254c428c0 :: Centros docentes de la Comunitat Valenciana (edu-centros), con latitud y longitud
+  ej: curl -s "https://dadesobertes.gva.es/api/3/action/datastore_search?resource_id=1aa53c3a-4639-41aa-ac85-d58254c428c0&limit=1"
+  devuelve: {result:{total 3668, records:[{codigo (8, texto), denominacion, regimen PÚB. o PRIV., direccion, codigo_postal, localidad, provincia, latitud y longitud como texto, titular, cif, url_es}]}}
+- https://www.juntadeandalucia.es/datosabiertos/portal/dataset/e039df22-4b82-4d0d-9884-0ab5952e24e4/resource/{id}/download/{fichero}.csv :: Directorio de centros docentes no universitarios de Andalucía, un CSV por curso (b5924e81-0b53-4418-9d93-b1f39ba1ef65 es 2024/2025)
+  ej: curl -sSL -A "Mozilla/5.0" -o centros_and.csv "https://www.juntadeandalucia.es/datosabiertos/portal/dataset/e039df22-4b82-4d0d-9884-0ab5952e24e4/resource/b5924e81-0b53-4418-9d93-b1f39ba1ef65/download/da_centros.csv"
+  devuelve: CSV UTF-8 separado por ; de 4 MB con 7.106 centros: curso 24, codigo, D_DENOMINA, D_ESPECIFICA, D_TIPO Público o Privado, cod_municipio (INE), N_LATITUD y N_LONGITUD con coma decimal, N_COUTMX/Y y una columna por enseñanza
+rate_limit: No documentado
+quirks: user-agent-browser, url-drift
+ids: ine-municipio, nif
+! Madrid da UTM ETRS89 huso 30 (UTM_X, UTM_Y) y 55 centros en ALTA sin coordenadas; Cataluña trae también UTM, del huso 31.
+! En el datastore de Madrid, datastore_search_sql da 500 si la consulta lleva tildes (la columna SITUACIÓN o un literal como «atención»); filtrar con filters en JSON o descargar.
+! Andalucía: N_LATITUD y N_LONGITUD con coma decimal (37,1408963), curso escrito 24 y los dos últimos cursos fuera del datastore.
+! Andalucía: package_show da URLs en gdc-pdpopendata-ckan.paas.junta-andalucia.es, que no respondió desde la nube el 2026-10-05; la misma ruta bajo www.juntadeandalucia.es/datosabiertos/portal descarga.
+! El recurso de Andalucía cambia cada curso (el nombre lleva «Curso 2024/2025»): elegir el último en package_show, no fijar el id.
+! Cataluña: codi_municipi es el INE de 5 cifras y codi_municipi_6 lleva el dígito de control; la Comunitat Valenciana no da código de municipio, solo localidad y provincia en mayúsculas.
+! Los cuatro directorios dan teléfono y correo del centro (datos de la institución, no personales) y ningún dato de alumnos; las plazas y el alumnado van en otros conjuntos.
++ perfil_municipio con una dirección o «lat,lon» da los colegios a menos de 1 km con los tres más cercanos (scripts/clientes/cerca.py).
+related: educacion-estadisticas-ruct, gencat-dades-obertes, comunidad-madrid-datos-abiertos, gva-dadesobertes-api, junta-andalucia-datos-abiertos, cnig-centro-descargas
 
 ## educacion-estadisticas-ruct
 Educación y Universidades – EDUCAbase (PC-Axis), SIIU, RUCT y registro de centros | Subdirección General de Estadística y Estudios y Secretaría General de Universidades

@@ -729,6 +729,33 @@ def certificados_energeticos(ref_catastral: str, cpro: str) -> dict:
     return {"nota": "por parcela solo Cataluña y Comunitat Valenciana; Madrid y Andalucía publican descargas completas "
                     "(ficha certificados-eficiencia-energetica)"}
 
+def cerca(lat: float, lon: float, cpro: str, radio: float = 1000) -> dict:
+    """Qué hay a menos de radio metros de un punto: puntos de recarga eléctrica (toda España), centros docentes (Cataluña,
+    Madrid, Comunitat Valenciana y Andalucía) y centros de salud, consultorios y hospitales públicos (Cataluña, Madrid y
+    Comunitat Valenciana), con los tres más cercanos de cada uno. Las listas completas se bajan una vez y se cachean
+    (recarga 6 h, el resto 24 h); scripts/clientes/cerca.py resuelve las trampas de cada fuente."""
+    try:
+        from . import cerca as c
+    except ImportError:
+        import cerca as c
+    ccaa = c.comunidad(cpro)
+    out: dict = {"radio_m": radio}
+    fuentes = {"recarga": (lambda: _memo(("cerca", "recarga"), 6 * 3600, c.cargar_recarga), "dgt-datex-trafico (MITERD)"),
+               "colegios": (lambda: _memo(("cerca", "colegios", ccaa), 86400, lambda: c.cargar_colegios(ccaa)), "centros-docentes-ccaa"),
+               "salud": (lambda: _memo(("cerca", "salud", ccaa), 86400, lambda: c.cargar_salud(ccaa)), "centros-sanitarios-ccaa")}
+    for clave, (cargar, fuente) in fuentes.items():
+        if clave == "colegios" and ccaa is None or clave == "salud" and ccaa in (None, "and"):
+            out[clave] = {"nota": "solo en Cataluña, Madrid, Comunitat Valenciana" + (" y Andalucía" if clave == "colegios" else "")}
+            continue
+        try:
+            out[clave] = {**c.cercanos(cargar(), lat, lon, radio), "fuente": fuente}
+            if clave == "recarga":  # el nombre suele ser un código del operador: con dirección sobra, y el CP también
+                out[clave]["cercanos"] = [{k: v for k, v in x.items() if k not in ("cp", "nombre" if x.get("direccion") else "")}
+                                          for x in out[clave]["cercanos"]]
+        except Exception as exc:  # noqa: BLE001
+            out[clave] = {"error": f"{type(exc).__name__}: {str(exc)[:200]}"}
+    return out
+
 def compraventa_vivienda(m: dict) -> dict:
     """Transacciones de vivienda (escrituras ante notario) de un municipio (fila de municipios()) en los últimos cinco
     trimestres, el último provisional, y valor tasado medio en €/m² del último trimestre, solo en los 306 municipios de
@@ -762,7 +789,7 @@ def perfil_municipio(municipio: str) -> dict:
     """Un municipio (o el de una dirección o unas coordenadas, con ubicar) en una llamada: códigos en cada sistema (INE, SIGPAC y Catastro, DIR3, NIF, NUTS3, coordenadas),
     población del padrón, renta neta media por persona, paro registrado y contratos del año por mes, criminalidad,
     viviendas turísticas y compraventa de vivienda (transacciones y valor tasado); con una dirección, además los
-    certificados energéticos de la parcela (Cataluña y Comunitat Valenciana). Cada
+    certificados energéticos de la parcela (Cataluña y Comunitat Valenciana) y qué hay a menos de 1 km (cerca). Cada
     bloque falla por separado (clave error) sin tumbar el resto. None en una cifra es secreto o sin dato, no cero."""
     try:
         from . import ine_tempus, sepe
@@ -820,6 +847,8 @@ def perfil_municipio(municipio: str) -> dict:
               "viviendas_turisticas": lambda: viviendas_turisticas(m, mid), "compraventa": lambda: compraventa_vivienda(m)}
     if ubicacion and ubicacion.get("ref_catastral"):  # con una dirección, los certificados energéticos de su parcela
         tareas["certificados_energeticos"] = lambda: certificados_energeticos(ubicacion["ref_catastral"], m["cpro"])
+    if ubicacion and ubicacion.get("lat") is not None:  # con una dirección o unas coordenadas, qué hay a menos de 1 km
+        tareas["cerca"] = lambda: cerca(ubicacion["lat"], ubicacion["lon"], m["cpro"])
     with ThreadPoolExecutor(len(tareas)) as ex:  # bloques independientes: el perfil tarda lo que el más lento
         futuros = {k: ex.submit(bloque, k, f) for k, f in tareas.items()}
     for k in tareas:

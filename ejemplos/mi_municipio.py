@@ -4,7 +4,7 @@ registrado y contratos del año, criminalidad y compraventa de vivienda (consult
 sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler y datos/municipios.csv). La herramienta MCP perfil_municipio devuelve lo mismo en JSON.
 
 Uso: python ejemplos/mi_municipio.py "Alcalá de Henares"      (nombre, código INE, SIGPAC como 28:900 o una dirección
-     como "calle Torres Quevedo 42, Alicante", que añade los certificados energéticos de la parcela)
+     como "calle Torres Quevedo 42, Alicante", que añade los certificados energéticos de la parcela y qué hay a 1 km)
 
 Trampas que resuelve: el INE no filtra por el código de municipio sino por un Id interno (tv=19:Id); con nult=1 el
 último periodo puede venir vacío; SIGPAC y Catastro numeran distinto que el INE; el CSV del SEPE llega en windows-1252,
@@ -57,6 +57,13 @@ def main(q: str) -> None:
               + ", ".join(f"{k} {v}" for k, v in cee["consumo_por_letra"].items()))
     elif cee:
         print(f"  Certificados energéticos: {cee.get('nota') or cee.get('error')}")
+    for clave, rotulo in (("recarga", "Puntos de recarga"), ("colegios", "Colegios"), ("salud", "Centros de salud y hospitales")):
+        b = (p.get("cerca") or {}).get(clave)  # solo con una dirección o unas coordenadas
+        if b and "en_radio" in b:
+            print(f"  {rotulo} a menos de 1 km: {b['en_radio']}" + "".join(
+                f"; {c['nombre'] if clave != 'recarga' else c.get('direccion') or c['nombre']} ({c['m']} m)" for c in b["cercanos"]))
+        elif b:
+            print(f"  {rotulo}: {b.get('nota') or b.get('error')}")
 
 
 if __name__ == "__main__":

@@ -12,11 +12,12 @@ Sector `transporte-movilidad` · 7 fuentes · índice generado por `scripts/buil
 - Tráfico portuario mensual por autoridad portuaria → `puertos-estado-datos`
 - Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra → `mitma-boletin-estadistico-online` (XLS con URL fija pero solo el total y 16 aeropuertos, sin otras clases de tráfico; la red completa de Aena en aesa-aviacion)
 - Registro de aeronaves y operadores de drones → `aesa-aviacion` (matrículas activas en un PDF de AESA; operadores UAS sin listado público)
+- Puntos de recarga eléctrica cerca de un punto, con operador, potencia y conector → `dgt-datex-trafico` (electrolineras.xml de la DGT con datos del MITERD, toda España, sin disponibilidad en tiempo real; perfil_municipio con la dirección da los de 1 km)
 
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [aesa-aviacion](aesa-aviacion.yaml) | Aena y AESA – Estadísticas de tráfico aéreo, registro de aeronaves y operadores UAS | download, portal | none | xlsx, xls, pdf, html | monthly | static-html, url-drift, overwritten-in-place | 2026-10-01 |
-| [dgt-datex-trafico](dgt-datex-trafico.yaml) | DGT – NAP de tráfico y ficheros DATEX II (incidencias, detectores, cámaras, ZBE) | download | none | xml, rdf | realtime | url-drift, static-html | 2026-10-01 |
+| [dgt-datex-trafico](dgt-datex-trafico.yaml) | DGT – NAP de tráfico y ficheros DATEX II (incidencias, detectores, cámaras, ZBE) | download | none | xml, rdf | realtime | url-drift, static-html | 2026-10-05 |
 | [dgt-estadisticas](dgt-estadisticas.yaml) | DGT en cifras – Parque, matriculaciones, bajas, conductores, siniestralidad y microdatos | download, portal | none | xlsx, txt, zip, pdf, html | daily | latin1, url-drift, tls-chain-incomplete | 2026-10-01 |
 | [mitma-boletin-estadistico-online](mitma-boletin-estadistico-online.yaml) | Transportes – Boletín estadístico online (aviación, puertos, carretera, ferrocarril) | download, portal | none | xls, html | monthly | static-html | 2026-10-01 |
 | [mitma-opendata-movilidad](mitma-opendata-movilidad.yaml) | Ministerio de Transportes – Estudio de movilidad con big data (Open Data) | download | none | csv, zip, shp, geojson | irregular | waf-blocks-bots | — |

@@ -77,6 +77,7 @@ jobs:
           ejecutar ejemplos/carburante_cerca.py "Alcalá de Henares" gasoleo 8
           ejecutar ejemplos/boe_hoy.py
           ejecutar ejemplos/mi_municipio.py 28005
+          ejecutar ejemplos/mi_municipio.py "calle Torres Quevedo 42, Alicante"   # dirección: certificados energéticos y cerca
           ejecutar ejemplos/subvenciones_empresa.py Q1132001G
           ejecutar ejemplos/empresa_nif.py A02066116
           ejecutar ejemplos/licitaciones.py 45

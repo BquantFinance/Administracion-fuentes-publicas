@@ -1,0 +1,54 @@
+id: centros-docentes-ccaa
+name: Centros docentes con coordenadas – directorios autonómicos
+org: Departament d'Educació (Generalitat de Catalunya), Comunidad de Madrid, Conselleria de Educación (GVA) y Consejería de Desarrollo Educativo (Junta de Andalucía)
+level: ccaa
+sector: educacion-universidades
+tags: [educacion, colegios, institutos, centros-docentes, escuelas-infantiles, coordenadas, geolocalizacion, proptech, que-hay-cerca]
+summary: >-
+  Centros docentes no universitarios con coordenadas, titularidad y enseñanzas en los directorios de Cataluña,
+  Madrid, Comunitat Valenciana y Andalucía. El registro estatal (educacion-estadisticas-ruct) no trae coordenadas.
+alerts:
+  - "Cataluña (kvmv-ahh4): geo_1 pierde el punto decimal ([1929887, 414736]) y within_circle(geo_1, 41.388, 2.1592, 500) da 0 sin error; con coordenades_geo_x/y hay 14 a menos de 500 m. Usar esos dos campos."
+  - "Cataluña repite cada centro en cada curso: 32.680 filas para 5.434 centros en 2025/2026. Filtrar curs (el último con $select=max(curs)) antes de contar o de buscar cercanos."
+  - "Madrid (centros_educativos): 7.757 filas y solo 3.906 en ALTA; 3.552 son BAJA, 193 INACTIVO y 76 ANULACIÓN. Filtrar SITUACIÓN = ALTA o se cuentan casi el doble de colegios."
+access: [api-rest, download]
+auth: none
+formats: [json, csv]
+update: irregular
+coverage: "Cataluña por curso desde 2020/2021 (kvmv-ahh4, 2025/2026 publicado el 2025-10-17); Madrid 2026-05; Comunitat Valenciana 2026-10-04; Andalucía por curso, el último 2024/2025 (2026-08-11)"
+license: "Llicència oberta d'ús d'informació – Catalunya (cita); CC BY en Madrid y la Comunitat Valenciana; CC BY 4.0 en Andalucía"
+base_url: https://analisi.transparenciacatalunya.cat/resource/kvmv-ahh4.json
+docs_url: https://datos.comunidad.madrid/catalogo/dataset/centros_educativos
+endpoints:
+  - path: https://analisi.transparenciacatalunya.cat/resource/kvmv-ahh4.json?$where={filtro}
+    desc: Directori de centres docents anual de Cataluña (Socrata), una fila por centro y curso
+    example: curl -sG "https://analisi.transparenciacatalunya.cat/resource/kvmv-ahh4.json" --data-urlencode '$where=curs="2025/2026" AND codi_municipi="08114"' --data-urlencode '$select=codi_centre,denominaci_completa,nom_naturalesa,coordenades_geo_x,coordenades_geo_y'
+    returns: "[{curs 2025/2026, codi_centre (8), denominaci_completa, nom_naturalesa Públic o Privat, adre_a, codi_municipi (INE de 5), coordenades_geo_x y _y como texto, coordenades_utm_x/_y (huso 31), einf1c, einf2c, epri, eso, batx, cfpm, cfps, geo_1}]"
+  - path: https://datos.comunidad.madrid/api/3/action/datastore_search?resource_id=28d60557-1d73-4281-ab08-6cfd3b2f5f83
+    desc: Centros educativos de la Comunidad de Madrid (datastore completo, 7.757 filas con bajas)
+    example: curl -s -A "Mozilla/5.0" "https://datos.comunidad.madrid/api/3/action/datastore_search?resource_id=28d60557-1d73-4281-ab08-6cfd3b2f5f83&limit=1"
+    returns: "{result:{total 7757, records:[{CODIGO entero, CENTRO, TIPO_ABRV (CP INF-PRI, IES...), TITULARIDAD, DOMICILIO, CDPOSTAL entero, CDMUNI, MUNICIPIO, UTM_X y UTM_Y (ETRS89 huso 30) o null, SITUACIÓN}]}}"
+  - path: https://dadesobertes.gva.es/api/3/action/datastore_search?resource_id=1aa53c3a-4639-41aa-ac85-d58254c428c0
+    desc: Centros docentes de la Comunitat Valenciana (edu-centros), con latitud y longitud
+    example: curl -s "https://dadesobertes.gva.es/api/3/action/datastore_search?resource_id=1aa53c3a-4639-41aa-ac85-d58254c428c0&limit=1"
+    returns: "{result:{total 3668, records:[{codigo (8, texto), denominacion, regimen PÚB. o PRIV., direccion, codigo_postal, localidad, provincia, latitud y longitud como texto, titular, cif, url_es}]}}"
+  - path: https://www.juntadeandalucia.es/datosabiertos/portal/dataset/e039df22-4b82-4d0d-9884-0ab5952e24e4/resource/{id}/download/{fichero}.csv
+    desc: Directorio de centros docentes no universitarios de Andalucía, un CSV por curso (b5924e81-0b53-4418-9d93-b1f39ba1ef65 es 2024/2025)
+    example: curl -sSL -A "Mozilla/5.0" -o centros_and.csv "https://www.juntadeandalucia.es/datosabiertos/portal/dataset/e039df22-4b82-4d0d-9884-0ab5952e24e4/resource/b5924e81-0b53-4418-9d93-b1f39ba1ef65/download/da_centros.csv"
+    returns: "CSV UTF-8 separado por ; de 4 MB con 7.106 centros: curso 24, codigo, D_DENOMINA, D_ESPECIFICA, D_TIPO Público o Privado, cod_municipio (INE), N_LATITUD y N_LONGITUD con coma decimal, N_COUTMX/Y y una columna por enseñanza"
+rate_limit: No documentado
+quirks: [user-agent-browser, url-drift]
+ids: [ine-municipio, nif]
+gotchas:
+  - "Madrid da UTM ETRS89 huso 30 (UTM_X, UTM_Y) y 55 centros en ALTA sin coordenadas; Cataluña trae también UTM, del huso 31."
+  - "En el datastore de Madrid, datastore_search_sql da 500 si la consulta lleva tildes (la columna SITUACIÓN o un literal como «atención»); filtrar con filters en JSON o descargar."
+  - "Andalucía: N_LATITUD y N_LONGITUD con coma decimal (37,1408963), curso escrito 24 y los dos últimos cursos fuera del datastore."
+  - "Andalucía: package_show da URLs en gdc-pdpopendata-ckan.paas.junta-andalucia.es, que no respondió desde la nube el 2026-10-05; la misma ruta bajo www.juntadeandalucia.es/datosabiertos/portal descarga."
+  - "El recurso de Andalucía cambia cada curso (el nombre lleva «Curso 2024/2025»): elegir el último en package_show, no fijar el id."
+  - "Cataluña: codi_municipi es el INE de 5 cifras y codi_municipi_6 lleva el dígito de control; la Comunitat Valenciana no da código de municipio, solo localidad y provincia en mayúsculas."
+  - "Los cuatro directorios dan teléfono y correo del centro (datos de la institución, no personales) y ningún dato de alumnos; las plazas y el alumnado van en otros conjuntos."
+tips:
+  - "perfil_municipio con una dirección o «lat,lon» da los colegios a menos de 1 km con los tres más cercanos (scripts/clientes/cerca.py)."
+related: [educacion-estadisticas-ruct, gencat-dades-obertes, comunidad-madrid-datos-abiertos, gva-dadesobertes-api, junta-andalucia-datos-abiertos, cnig-centro-descargas]
+status: active
+verified: "2026-10-05"

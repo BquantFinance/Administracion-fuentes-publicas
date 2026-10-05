@@ -31,7 +31,7 @@ Cada producto con piezas que ya funcionan; frescura, volumen medido, licencia y 
 | **radar-ayudas** · Convocatorias de subvenciones nuevas que encajan con el perfil de una empresa (sector, región, tipo de beneficiario) | pymes, gestorías y consultoras de financiación pública | bdns-api, boe-api-sumario | fuentes-radar con ejemplos/radar/ (convocatorias nuevas por palabras y nivel, aviso diario); scripts/clientes/bdns.py (convocatorias y concesiones paginadas, altas por fecha de alta) |
 | **kyb-proveedores** · Ficha de riesgo de un proveedor o cliente por NIF (ayudas, contratos, actos mercantiles, prohibiciones de contratar) | departamentos de compras, fintech de crédito, compliance | bdns-api, placsp-datos-abiertos, borme-api-sumario, hacienda-registro-licitadores | herramienta empresa_nif (por NIF o por nombre, que resuelve el NIF con el directorio de la BDNS) y ejemplos/empresa_nif.py; con almacén local añade contratos adjudicados y actos del BORME |
 | **leads-sociedades-nuevas** · Sociedades recién constituidas por provincia y objeto social, con capital y domicilio | proveedores B2B (asesorías, bancos, software de gestión, seguros) | borme-api-sumario | fuentes-radar con ejemplos/radar/ (constituciones por provincia, objeto social y capital, aviso diario); almacen.py sync --fuentes borme para el histórico; empresa_nif con la denominación para el NIF |
-| **informe-ubicacion** · Informe de una localización (población, renta, paro, compraventa y valor tasado de vivienda, criminalidad) para inmobiliarias, retail y franquicias | inmobiliarias, cadenas de retail y franquicias, proptech | ine-api-tempus, sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler, catastro-ovc | herramienta perfil_municipio con el municipio, una dirección o «lat,lon» (CP, referencia catastral del portal) y ejemplos/mi_municipio.py; datos/municipios.csv para pasar entre códigos |
+| **informe-ubicacion** · Informe de una localización (población, renta, paro, vivienda, criminalidad y colegios, salud y recarga a 1 km) para inmobiliarias, retail y franquicias | inmobiliarias, cadenas de retail y franquicias, proptech | ine-api-tempus, sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler, catastro-ovc, centros-docentes-ccaa, centros-sanitarios-ccaa, dgt-datex-trafico | herramienta perfil_municipio con el municipio, una dirección o «lat,lon» (CP, referencia catastral del portal y, con dirección, el bloque cerca) y ejemplos/mi_municipio.py; datos/municipios.csv para pasar entre códigos |
 | **comparador-carburantes** · Gasolineras más baratas cerca y evolución de precios por estación para conductores y flotas | apps de movilidad, gestores de flotas, comparadores | minetur-precios-carburantes | ejemplos/carburante_cerca.py; almacen.py sync --fuentes carburantes para la serie diaria por estación |
 | **monitor-regulatorio** · Avisos de normas nuevas o modificadas por materia y del texto vigente de un artículo | despachos, compliance, legaltech | boe-api-sumario, boe-api-legislacion-consolidada, boe-eli | fuentes-radar con ejemplos/radar/ (BOE por sección, departamento y palabras, aviso diario); scripts/clientes/boe.py (normas actualizadas ayer y versión vigente de un bloque) |
 | **panel-macro** · Panel de coyuntura (IPC, paro, PIB, Euríbor, prima de riesgo) para fintech, medios y asesores | fintech, medios, asesores financieros | ine-api-tempus, bde-estadisticas | herramienta coyuntura (consulta.coyuntura); los 90 ZIP del Banco de España con descarga condicional para series completas |
@@ -54,7 +54,7 @@ Algunos ejemplos, comprobados con llamadas reales:
 - Los CSV de los portales PC-Axis llegan en UTF-8 aunque la cabecera diga ISO-8859-15, y el del SEPE en Windows-1252 aunque diga UTF-8.
 - En GBIF la encina ibérica es sobre todo *Quercus rotundifolia* (1,3 millones de registros en España); preguntar por *Quercus ilex*, que es lo que devuelve el buscador de nombres, da 21.322 sin ningún aviso. Y 41,6 de sus 95,8 millones de registros en España son CC BY-NC.
 
-Fuentes catalogadas: <!-- AUTO:count -->97<!-- /AUTO:count -->. Alcance actual: Administración General del Estado y, desde octubre de 2026, las cuatro comunidades más pobladas (Madrid, Cataluña, Andalucía y Comunitat Valenciana) y los ayuntamientos de Madrid y Barcelona. Después: resto de comunidades y entidades locales, Cortes y Poder Judicial, Unión Europea.
+Fuentes catalogadas: <!-- AUTO:count -->99<!-- /AUTO:count -->. Alcance actual: Administración General del Estado y, desde octubre de 2026, las cuatro comunidades más pobladas (Madrid, Cataluña, Andalucía y Comunitat Valenciana) y los ayuntamientos de Madrid y Barcelona. Después: resto de comunidades y entidades locales, Cortes y Poder Judicial, Unión Europea.
 
 ## Principios
 
@@ -80,12 +80,12 @@ Fuentes catalogadas: <!-- AUTO:count -->97<!-- /AUTO:count -->. Alcance actual: 
 | [meteorologia-clima](sources/meteorologia-clima/README.md) | Meteorología y clima | 2 |
 | [medio-ambiente-agua-biodiversidad](sources/medio-ambiente-agua-biodiversidad/README.md) | Medio ambiente, agua y biodiversidad | 5 |
 | [energia](sources/energia/README.md) | Energía | 5 |
-| [sanidad-medicamentos](sources/sanidad-medicamentos/README.md) | Sanidad y medicamentos | 5 |
+| [sanidad-medicamentos](sources/sanidad-medicamentos/README.md) | Sanidad y medicamentos | 6 |
 | [ciencia-investigacion](sources/ciencia-investigacion/README.md) | Ciencia e investigación (biología, química, geología, oceanografía) | 7 |
 | [agricultura-pesca-alimentacion](sources/agricultura-pesca-alimentacion/README.md) | Agricultura, pesca y alimentación | 4 |
 | [transporte-movilidad](sources/transporte-movilidad/README.md) | Transporte y movilidad | 7 |
 | [comercio-industria-propiedad](sources/comercio-industria-propiedad/README.md) | Comercio exterior, industria y propiedad industrial | 4 |
-| [educacion-universidades](sources/educacion-universidades/README.md) | Educación y universidades | 2 |
+| [educacion-universidades](sources/educacion-universidades/README.md) | Educación y universidades | 3 |
 | [justicia-interior-seguridad](sources/justicia-interior-seguridad/README.md) | Justicia, interior y seguridad | 1 |
 | [cultura-patrimonio](sources/cultura-patrimonio/README.md) | Cultura y patrimonio | 2 |
 | [demografia-migraciones-sociedad](sources/demografia-migraciones-sociedad/README.md) | Demografía, migraciones y sociedad | 4 |

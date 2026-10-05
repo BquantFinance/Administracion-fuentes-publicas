@@ -2,7 +2,7 @@
 
 > Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. Contenido en castellano, claves en inglés.
 
-Fuentes: 97 · Productos: 14 · Recetas: 46 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Entrada ligera; la completa es llms.txt · Generado: 2026-10-05
+Fuentes: 99 · Productos: 14 · Recetas: 47 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana y los ayuntamientos de Madrid y Barcelona · Entrada ligera; la completa es llms.txt · Generado: 2026-10-05
 
 ## Empieza aquí
 
@@ -28,7 +28,7 @@ radar-licitaciones, inteligencia-competidores, radar-ayudas, kyb-proveedores, le
 
 ## Fichas con trampas silenciosas
 
-Lee sus alerts antes de dar una cifra: aemps-cima-api, ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, bde-estadisticas, bdns-api, borme-api-sumario, certificados-eficiencia-energetica, cnig-centro-descargas, cnmc-data, comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, datacomex, face-facturas, gbif-es, gencat-dades-obertes, gva-dadesobertes-api, idee-servicios, idescat-api, igae-ejecucion-presupuestaria, ign-sismologia, ine-api-tempus, ine-cartografia-censal, interior-criminalidad, ive-pegv-bancos-datos, junta-andalucia-datos-abiertos, mapa-sigpac, mites-estadisticas, mivau-precios-vivienda-alquiler, placsp-datos-abiertos, puertos-estado-datos, segsocial-estadisticas, sepe-estadisticas, viviendas-uso-turistico.
+Lee sus alerts antes de dar una cifra: aemps-cima-api, ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, bde-estadisticas, bdns-api, borme-api-sumario, centros-docentes-ccaa, centros-sanitarios-ccaa, certificados-eficiencia-energetica, cnig-centro-descargas, cnmc-data, comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, datacomex, dgt-datex-trafico, face-facturas, gbif-es, gencat-dades-obertes, gva-dadesobertes-api, idee-servicios, idescat-api, igae-ejecucion-presupuestaria, ign-sismologia, ine-api-tempus, ine-cartografia-censal, interior-criminalidad, ive-pegv-bancos-datos, junta-andalucia-datos-abiertos, mapa-sigpac, mites-estadisticas, mivau-precios-vivienda-alquiler, placsp-datos-abiertos, puertos-estado-datos, segsocial-estadisticas, sepe-estadisticas, viviendas-uso-turistico.
 
 ## Fichas por sector
 
@@ -43,12 +43,12 @@ Lee sus alerts antes de dar una cifra: aemps-cima-api, ayuntamiento-barcelona-da
 - Meteorología y clima: aemet-opendata, aemet-otros-servicios
 - Medio ambiente, agua y biodiversidad: miteco-banco-datos-naturaleza, miteco-calidad-aire, miteco-inventario-emisiones, miteco-prtr, miteco-saih-boletin-hidrologico
 - Energía: cnmc-data, minetur-precios-carburantes, miteco-energia-estadisticas, omie-mercado, ree-redata
-- Sanidad y medicamentos: aemps-cima-api, aemps-otros-registros, isciii-cne, sanidad-nomenclator-facturacion, sanidad-portal-estadistico
+- Sanidad y medicamentos: aemps-cima-api, aemps-otros-registros, centros-sanitarios-ccaa, isciii-cne, sanidad-nomenclator-facturacion, sanidad-portal-estadistico
 - Ciencia e investigación (biología, química, geología, oceanografía): aei-convocatorias, csic-digital, fecyt-recolecta, gbif-es, ieo-datos-oceanograficos, igme-geologia, ign-sismologia
 - Agricultura, pesca y alimentación: fega-beneficiarios-pac, mapa-estadisticas-agrarias, mapa-pesca, mapa-sigpac
 - Transporte y movilidad: aesa-aviacion, dgt-datex-trafico, dgt-estadisticas, mitma-boletin-estadistico-online, mitma-opendata-movilidad, puertos-estado-datos, renfe-datos-abiertos
 - Comercio exterior, industria y propiedad industrial: datacomex, datainvex, mincotur-industria-turismo, oepm-invenes
-- Educación y universidades: educacion-estadisticas-ruct, inee-bases-datos
+- Educación y universidades: centros-docentes-ccaa, educacion-estadisticas-ruct, inee-bases-datos
 - Justicia, interior y seguridad: interior-criminalidad
 - Cultura y patrimonio: bne-datos, cultura-culturabase
 - Demografía, migraciones y sociedad: cis-estudios, igualdad-estadisticas-violencia-genero, imserso-dependencia, inmujeres-mujeres-cifras

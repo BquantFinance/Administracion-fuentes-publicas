@@ -54,5 +54,7 @@ sirven los servidores; los de PC-Axis en UTF-8 con BOM.
 | bdns-terceros-universidad-de-cadiz.json | terceros?ambito=C&busqueda=universidad de cadiz del 2026-10-05: directorio NIF y nombre con variantes |
 | icaen-cee-parcela.json | certificados energéticos del ICAEN (Socrata j6ii-t3w2) de la parcela 9723410DF2892D (calle Aragó 201, Barcelona) del 2026-10-05, cifras como texto |
 | gva-cee-wfs-parcela.xml | WFS 26_GCEE del ICV filtrado por ref_parcela 6021705YJ2762A (calle Colón 10, València) del 2026-10-05: cuatro certificados de tres inmuebles |
+| dgt-electrolineras-dos-sitios.xml | electrolineras.xml de la DGT (DATEX II 3, datos del MITERD) del 2026-10-05 recortado a dos emplazamientos: postcode 7011 sin cero y potencia en W |
+| cerca-directorios.json | filas reales del 2026-10-05 de colegios (Cataluña con geo_1 sin punto decimal, Madrid con una baja y UTM, Comunitat Valenciana, Andalucía con coma decimal) y centros sanitarios (Cataluña, Madrid con una fila por especialidad, Comunitat Valenciana en UTM) |
 
 Faltan, porque necesitan credenciales: el fichero de datos de AEMET (ISO-8859-15) y ObtenerDatos de DataComex.

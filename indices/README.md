@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 14 productos, 46 recetas, 156 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 14 productos, 47 recetas, 159 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
 
 ## Productos que se pueden construir hoy
 
@@ -46,10 +46,10 @@ Cada uno con las fichas, recetas y código del repo que lo resuelven, cifras med
 - licencia: libre con cita; administradores y socios son datos personales y el almacén no los guarda
 - trampa: sin NIF ni CNAE (el NIF sale por denominación con empresa_nif cuando la sociedad ha recibido alguna ayuda o contrato); el objeto social es texto libre y la denominación cambia con los actos
 
-**informe-ubicacion** · Informe de una localización (población, renta, paro, compraventa y valor tasado de vivienda, criminalidad) para inmobiliarias, retail y franquicias
+**informe-ubicacion** · Informe de una localización (población, renta, paro, vivienda, criminalidad y colegios, salud y recarga a 1 km) para inmobiliarias, retail y franquicias
 - para: inmobiliarias, cadenas de retail y franquicias, proptech
-- fichas: ine-api-tempus, sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler, catastro-ovc · recetas: poblacion-renta-alquiler-por-municipio, criminalidad-municipio, paro-registrado-por-municipio, compraventa-vivienda-municipio
-- piezas: herramienta perfil_municipio con el municipio, una dirección o «lat,lon» (CP, referencia catastral del portal) y ejemplos/mi_municipio.py; datos/municipios.csv para pasar entre códigos
+- fichas: ine-api-tempus, sepe-estadisticas, interior-criminalidad, mivau-precios-vivienda-alquiler, catastro-ovc, centros-docentes-ccaa, centros-sanitarios-ccaa, dgt-datex-trafico · recetas: poblacion-renta-alquiler-por-municipio, criminalidad-municipio, paro-registrado-por-municipio, compraventa-vivienda-municipio, que-hay-cerca
+- piezas: herramienta perfil_municipio con el municipio, una dirección o «lat,lon» (CP, referencia catastral del portal y, con dirección, el bloque cerca) y ejemplos/mi_municipio.py; datos/municipios.csv para pasar entre códigos
 - frescura: paro mensual, padrón anual, renta con dos años de retraso (2023), criminalidad y compraventas trimestrales (el último trimestre, provisional)
 - licencia: libre con cita
 - trampa: SIGPAC y Catastro numeran los municipios distinto que el INE y el Ministerio de Vivienda no da código; la criminalidad es acumulada desde enero y solo de municipios de más de 20.000 habitantes
@@ -170,6 +170,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 | `viviendas-turisticas-municipio` | Viviendas turísticas de un municipio, inscritas en el registro y anunciadas en plataformas, con su dirección | viviendas-uso-turistico, cnig-centro-descargas | 2026-10-05 |
 | `compraventa-vivienda-municipio` | Compraventas de vivienda por trimestre y valor tasado en €/m² de un municipio, con su código INE | mivau-precios-vivienda-alquiler, ine-codigos-territoriales | 2026-10-05 |
 | `certificado-energetico-direccion` | Etiqueta energética de los inmuebles de un edificio a partir de su dirección | cnig-centro-descargas, certificados-eficiencia-energetica | 2026-10-05 |
+| `que-hay-cerca` | Colegios, centros de salud y hospitales y puntos de recarga a menos de un radio de una dirección o unas coordenadas | cnig-centro-descargas, dgt-datex-trafico, centros-docentes-ccaa, centros-sanitarios-ccaa | 2026-10-05 |
 
 ### Pasos
 
@@ -738,6 +739,21 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 3. `certificados-eficiencia-energetica`: Madrid y Andalucía no tienen consulta por parcela que sirva (el datastore de Madrid se corta en 1.000 filas): descargar el CSV o el 7z y filtrar edif_refcat o ReferenciaCatastral por los 14 primeros caracteres
 - salida: Por inmueble (referencia de 20), letra y kWh/m² de energía primaria no renovable, letra y kg CO2/m², y fecha o caducidad del certificado vigente
 
+**que-hay-cerca** · Colegios, centros de salud y hospitales y puntos de recarga a menos de un radio de una dirección o unas coordenadas
+- entrada: ine-municipio
+1. `cnig-centro-descargas`: Dirección a latitud y longitud con candidates de CartoCiudad (municipio_filter con el nombre INE entero); perfil_municipio con la dirección lo hace y añade el bloque cerca
+2. `dgt-datex-trafico`: electrolineras.xml (83 MB, a diario): un energyInfrastructureSite por emplazamiento con coordenadas, operador, refillPoint y maxPowerAtSocket en vatios; postcode sin el cero inicial
+   ```
+   curl -s "https://infocar.dgt.es/datex2/v3/miterd/EnergyInfrastructureTablePublication/electrolineras.xml" | head -c 2000
+   ```
+3. `centros-docentes-ccaa`: Directorio de la comunidad: Cataluña con coordenades_geo_x/y del último curs (geo_1 no sirve), Madrid solo SITUACIÓN = ALTA con UTM huso 30, Comunitat Valenciana con latitud y longitud, Andalucía con coma decimal
+   ```
+   curl -s "https://dadesobertes.gva.es/api/3/action/datastore_search?resource_id=1aa53c3a-4639-41aa-ac85-d58254c428c0&limit=1"
+   ```
+4. `centros-sanitarios-ccaa`: Cataluña, categorías de CAP y hospitales de Equipaments; Madrid, los seis tipos de primaria y hospital con filters y un registro por centro; Comunitat Valenciana, capas CentrosSalud y Hospitales en CSV con UTM
+- salida: Por tipo, cuántos hay a menos del radio y los tres más cercanos con su distancia en metros
+- nota: scripts/clientes/cerca.py hace los cuatro pasos y cachea las listas; Andalucía no tiene centros sanitarios con coordenadas conseguidos y fuera de las cuatro comunidades solo hay recarga.
+
 ## Dónde está cada cosa
 
 **Legislación y boletines oficiales**
@@ -867,6 +883,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Ensayos clínicos (REEC) y alertas de seguridad → `aemps-otros-registros` (sin API documentada; buscador JSON por GET (arise/search), detalle por POST con cookie y alertas en la API REST de WordPress)
 - Exceso de mortalidad (MoMo), COVID-19, boletines epidemiológicos, gripe → `isciii-cne`
 - Hospitales, altas hospitalarias e indicadores del Sistema Nacional de Salud → `sanidad-portal-estadistico` (Catálogo de Hospitales en xlsx; cubos exportables a CSV por POST de WebForms; Indicadores Clave en JSON (export/data))
+- Centros de salud, consultorios y hospitales cerca de una dirección → `centros-sanitarios-ccaa` (Cataluña, Madrid y Comunitat Valenciana con coordenadas; el Catálogo Nacional de Hospitales solo trae municipio)
 
 **Ciencia e investigación (biología, química, geología, oceanografía)**
 - Presencia de especies (ocurrencias, datasets de biodiversidad) → `gbif-es`
@@ -893,6 +910,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Tráfico portuario mensual por autoridad portuaria → `puertos-estado-datos`
 - Tráfico aéreo mensual por aeropuerto, autopistas de peaje, ferrocarril, licitación y adjudicación de obra → `mitma-boletin-estadistico-online` (XLS con URL fija pero solo el total y 16 aeropuertos, sin otras clases de tráfico; la red completa de Aena en aesa-aviacion)
 - Registro de aeronaves y operadores de drones → `aesa-aviacion` (matrículas activas en un PDF de AESA; operadores UAS sin listado público)
+- Puntos de recarga eléctrica cerca de un punto, con operador, potencia y conector → `dgt-datex-trafico` (electrolineras.xml de la DGT con datos del MITERD, toda España, sin disponibilidad en tiempo real; perfil_municipio con la dirección da los de 1 km)
 
 **Comercio exterior, industria y propiedad industrial**
 - Comercio exterior por producto TARIC, país y provincia desde 1995 → `datacomex` (API verificada con cuenta gratuita; códigos de país numéricos, no ISO)
@@ -904,6 +922,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - Alumnado, profesorado y centros no universitarios → `educacion-estadisticas-ruct` (EDUCAbase con el patrón PC-Axis del INE)
 - Universidades, matriculados y egresados por titulación, títulos oficiales (RUCT) → `educacion-estadisticas-ruct`
 - Microdatos de PISA, TIMSS o PIAAC de España → `inee-bases-datos` (muestra española en rar o zip con SPSS y Stata; HEAD responde 403, usar GET con Range)
+- Colegios e institutos cerca de una dirección o de unas coordenadas → `centros-docentes-ccaa` (Cataluña, Madrid, Comunitat Valenciana y Andalucía; perfil_municipio con la dirección da los de 1 km; el registro estatal no trae coordenadas)
 
 **Justicia, interior y seguridad**
 - Criminalidad por tipología, comunidad, provincia y municipio → `interior-criminalidad` (balances acumulados desde enero; código INE de municipio solo desde 2024)
@@ -948,7 +967,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 
 | id | formato | regex | ejemplo | emisor | lo usan |
 |---|---|---|---|---|---|
-| ine-municipio | 5 dígitos, provincia (2) + municipio (3); algunos ficheros añaden un sexto dígito de control | `^\d{5}$` | 28079 | ine-codigos-territoriales | cis-estudios, segsocial-estadisticas, sepe-estadisticas, comunidad-madrid-estadistica-api, idescat-api, ieca-api-badea, ine-codigos-territoriales, ive-pegv-bancos-datos, ayuntamiento-madrid-datos-abiertos, comunidad-madrid-datos-abiertos, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, hacienda-ovef, interior-criminalidad, miteco-calidad-aire, aemet-opendata, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas, mitma-opendata-movilidad, certificados-eficiencia-energetica, mivau-precios-vivienda-alquiler, viviendas-uso-turistico |
+| ine-municipio | 5 dígitos, provincia (2) + municipio (3); algunos ficheros añaden un sexto dígito de control | `^\d{5}$` | 28079 | ine-codigos-territoriales | cis-estudios, centros-docentes-ccaa, segsocial-estadisticas, sepe-estadisticas, comunidad-madrid-estadistica-api, idescat-api, ieca-api-badea, ine-codigos-territoriales, ive-pegv-bancos-datos, ayuntamiento-madrid-datos-abiertos, comunidad-madrid-datos-abiertos, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, hacienda-ovef, interior-criminalidad, miteco-calidad-aire, aemet-opendata, centros-sanitarios-ccaa, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas, mitma-opendata-movilidad, certificados-eficiencia-energetica, mivau-precios-vivienda-alquiler, viviendas-uso-turistico |
 | ine-provincia | 2 dígitos, 01 a 52 | `^(0[1-9]|[1-4]\d|5[0-2])$` | 28 | ine-codigos-territoriales | mapa-sigpac, datacomex, cis-estudios, segsocial-estadisticas, minetur-precios-carburantes, miteco-energia-estadisticas, idescat-api, ieca-api-badea, ine-codigos-territoriales, ine-microdatos, dir3-directorio, gva-dadesobertes-api, aeat-estadisticas, hacienda-ovef, miteco-calidad-aire, aemps-otros-registros, isciii-cne, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, catastro-ovc, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, dgt-estadisticas, mivau-precios-vivienda-alquiler |
 | ine-entidad-singular | 11 dígitos, municipio INE (5) + entidad colectiva (2) + entidad singular (2) + núcleo o diseminado (2) | `^\d{11}$` | 01001000100 | ine-codigos-territoriales | ine-codigos-territoriales, mtdfp-cobertura-banda-ancha, idee-servicios |
 | ccaa | 2 dígitos, 01 Andalucía a 19 Melilla, en el orden del INE | `^(0[1-9]|1\d)$` | 13 | ine-codigos-territoriales | educacion-estadisticas-ruct, ine-codigos-territoriales, ine-microdatos, aeat-estadisticas, aemps-otros-registros, isciii-cne, sanidad-portal-estadistico, mtdfp-cobertura-banda-ancha, cnig-centro-descargas, idee-servicios, ine-cartografia-censal, mivau-precios-vivienda-alquiler |
@@ -957,7 +976,7 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 | referencia-catastral | 14 caracteres alfanuméricos (parcela) o 20 (inmueble, con 4 dígitos y 2 letras de control) | `^[0-9A-Z]{14}(\d{4}[A-Z]{2})?$` | 9872023VH5797S0001WX | catastro-ovc | mapa-sigpac, gva-dadesobertes-api, catastro-ovc, cnig-centro-descargas, certificados-eficiencia-energetica, viviendas-uso-turistico |
 | referencia-sigpac | provincia:municipio:agregado:zona:polígono:parcela:recinto, números separados por dos puntos | `^\d{1,2}:\d{1,3}:\d+:\d+:\d+:\d+:\d+$` | 28:15:0:0:3:9000:6 | mapa-sigpac | mapa-sigpac |
 | idema | 4 o 5 caracteres alfanuméricos | `^[0-9A-Z]{4,5}$` | 3195 | aemet-opendata | aemet-opendata |
-| nif | DNI (8 dígitos y letra), NIE (X, Y o Z, 7 dígitos y letra) o NIF de persona jurídica (letra, 7 dígitos y control) | `^(\d{8}[A-Z]|[XYZ]\d{7}[A-Z]|[A-HJ-NP-SUVW]\d{7}[0-9A-J])$` | Q1132001G | — | fega-beneficiarios-pac, aei-convocatorias, bdns-api, placsp-datos-abiertos, ayuntamiento-barcelona-datos-abiertos, dir3-directorio, face-facturas, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, igae-ejecucion-presupuestaria, viviendas-uso-turistico |
+| nif | DNI (8 dígitos y letra), NIE (X, Y o Z, 7 dígitos y letra) o NIF de persona jurídica (letra, 7 dígitos y control) | `^(\d{8}[A-Z]|[XYZ]\d{7}[A-Z]|[A-HJ-NP-SUVW]\d{7}[0-9A-J])$` | Q1132001G | — | fega-beneficiarios-pac, aei-convocatorias, bdns-api, placsp-datos-abiertos, centros-docentes-ccaa, ayuntamiento-barcelona-datos-abiertos, dir3-directorio, face-facturas, gencat-dades-obertes, gva-dadesobertes-api, junta-andalucia-datos-abiertos, igae-ejecucion-presupuestaria, centros-sanitarios-ccaa, viviendas-uso-turistico |
 | dir3 | letra (E, L, A, U, I) y 8 dígitos, o dos letras (LA, EA) y 7 dígitos | `^([A-Z]\d{8}|[A-Z]{2}\d{7})$` | E00003901 | dir3-directorio | placsp-datos-abiertos, ayuntamiento-madrid-datos-abiertos, datos-gob-es-api, dir3-directorio, face-facturas, gencat-dades-obertes, pag-administracion-gob-es, transparencia-portal, igae-ejecucion-presupuestaria |
 | sia | 6 o 7 dígitos | `^\d{6,7}$` | 010170 | pag-administracion-gob-es | pag-administracion-gob-es |
 | invente | INV y 8 dígitos, código del Inventario de Entes del Sector Público | `^INV\d{8}$` | INV00000102 | igae-ejecucion-presupuestaria | bdns-api, igae-ejecucion-presupuestaria |

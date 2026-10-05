@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?><d2:payload xmlns:d2="http://datex2.eu/schema/3/d2Payload" xsi:type="egi:EnergyInfrastructureTablePublication" lang="es" modelBaseVersion="3" xmlns:com="http://datex2.eu/schema/3/common" xmlns:loc="http://datex2.eu/schema/3/locationReferencing" xmlns:roa="http://datex2.eu/schema/3/roadTrafficData" xmlns:egi="http://datex2.eu/schema/3/energyInfrastructure" xmlns:prk="http://datex2.eu/schema/3/parking" xmlns:comx="http://datex2.eu/schema/3/commonExtension" xmlns:fac="http://datex2.eu/schema/3/facilities" xmlns:locx="http://datex2.eu/schema/3/locationExtension" xmlns:vms="http://datex2.eu/schema/3/vms" xmlns:sit="http://datex2.eu/schema/3/situation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <com:feedDescription>
+        <com:values>
+            <com:value lang="es">Publicación de electrolineras</com:value>
+        </com:values>
+    </com:feedDescription>
+    <com:publicationTime>2026-10-05T10:16:29.551+02:00</com:publicationTime>
+    <com:publicationCreator>
+        <com:country>ES</com:country>
+        <com:nationalIdentifier>dgt</com:nationalIdentifier>
+    </com:publicationCreator>
+    <egi:headerInformation>
+        <com:informationStatus>real</com:informationStatus>
+    </egi:headerInformation>
+    <egi:energyInfrastructureTable id="ELECTROLINERAS" version="20261005">
+        <egi:energyInfrastructureSite id="2023002088" version="">
+            <fac:name>
+                <com:values>
+                    <com:value lang="es">Centro Porsche Baleares CP2</com:value>
+                </com:values>
+            </fac:name>
+            <fac:lastUpdated>2023-11-21T11:39:04.000+01:00</fac:lastUpdated>
+            <fac:accessibility xsi:nil="true"/>
+            <fac:operatingHours xsi:type="fac:OperatingHoursSpecification" id="Horario habitual" version="">
+                <fac:label>Miercoles (08:30 - 17:30) Lunes (00:00 - 23:59) Jueves (08:30 - 17:30) Martes (08:30 - 17:30) Sabado (08:30 - 17:30) Viernes (08:30 - 17:30) Domingo (00:00 - 23:59) </fac:label>
+                <fac:overallPeriod>
+                    <com:overallStartTime>2023-01-01T00:00:00.000+01:00</com:overallStartTime>
+                </fac:overallPeriod>
+            </fac:operatingHours>
+            <fac:locationReference xsi:type="loc:PointLocation">
+                <loc:_locationReferenceExtension>
+                    <loc:facilityLocation>
+                        <locx:address>
+                            <locx:postcode>7011</locx:postcode>
+                            <locx:addressLine order="1">
+                                <locx:type>generalTextLine</locx:type>
+                                <locx:text>
+                                    <com:values>
+                                        <com:value lang="es">Dirección: Camí dels Reis 166</com:value>
+                                    </com:values>
+                                </locx:text>
+                            </locx:addressLine>
+                            <locx:addressLine order="2">
+                                <locx:type>generalTextLine</locx:type>
+                                <locx:text>
+                                    <com:values>
+                                        <com:value lang="es">Municipio: Palma</com:value>
+                                    </com:values>
+                                </locx:text>
+                            </locx:addressLine>
+                            <locx:addressLine order="3">
+                                <locx:type>generalTextLine</locx:type>
+                                <locx:text>
+                                    <com:values>
+                                        <com:value lang="es">Provincia: Balears, Illes</com:value>
+                                    </com:values>
+                                </locx:text>
+                            </locx:addressLine>
+                            <locx:addressLine order="4">
+                                <locx:type>generalTextLine</locx:type>
+                                <locx:text>
+                                    <com:values>
+                                        <com:value lang="es">Comunidad Autónoma: Balears, Illes</com:value>
+                                    </com:values>
+                                </locx:text>
+                            </locx:addressLine>
+                        </locx:address>
+                    </loc:facilityLocation>
+                </loc:_locationReferenceExtension>
+                <loc:coordinatesForDisplay>
+                    <loc:latitude>39.5948</loc:latitude>
+                    <loc:longitude>2.63586</loc:longitude>
+                </loc:coordinatesForDisplay>
+            </fac:locationReference>
+            <fac:operator xsi:type="fac:OrganisationSpecification" id="ES*915" version="">
+                <fac:name>
+                    <com:values>
+                        <com:value lang="es">Motor Box Mallorca SL</com:value>
+                    </com:values>
+                </fac:name>
+                <fac:organisationUnit/>
+            </fac:operator>
+            <egi:typeOfSite>other</egi:typeOfSite>
+            <egi:energyInfrastructureStation id="2023002088_1" version="">
+                <egi:authenticationAndIdentificationMethods>rfid</egi:authenticationAndIdentificationMethods>
+                <egi:authenticationAndIdentificationMethods>apps</egi:authenticationAndIdentificationMethods>
+                <egi:refillPoint xsi:type="egi:ElectricChargingPoint" id="COD20230000010507PR00000269" version="">
+                    <fac:name>
+                        <com:values>
+                            <com:value lang="es">ES*915*EES00025600000020000001</com:value>
+                        </com:values>
+                    </fac:name>
+                    <egi:connector>
+                        <egi:connectorType>iec62196T2COMBO</egi:connectorType>
+                        <egi:chargingMode>mode4DC</egi:chargingMode>
+                        <egi:connectorFormat>cableMode3</egi:connectorFormat>
+                        <egi:maxPowerAtSocket>350000.0</egi:maxPowerAtSocket>
+                        <egi:voltage>920.0</egi:voltage>
+                        <egi:maximumCurrent>348.0</egi:maximumCurrent>
+                    </egi:connector>
+                </egi:refillPoint>
+            </egi:energyInfrastructureStation>
+        </egi:energyInfrastructureSite>
+        <egi:energyInfrastructureSite id="2023002089" version="">
+            <fac:name>
+                <com:values>
+                    <com:value lang="es">Centro Porsche Baleares CP1</com:value>
+                </com:values>
+            </fac:name>
+            <fac:lastUpdated>2023-11-21T11:43:04.000+01:00</fac:lastUpdated>
+            <fac:accessibility xsi:nil="true"/>
+            <fac:operatingHours xsi:type="fac:OperatingHoursSpecification" id="Horario habitual" version="">
+                <fac:label>Miercoles (08:30 - 17:30) Lunes (00:00 - 23:59) Martes (08:30 - 17:30) Domingo (00:00 - 23:59) Sabado (08:30 - 17:30) Jueves (08:30 - 17:30) Viernes (08:30 - 17:30) </fac:label>
+                <fac:overallPeriod>
+                    <com:overallStartTime>2023-01-01T00:00:00.000+01:00</com:overallStartTime>
+                </fac:overallPeriod>
+            </fac:operatingHours>
+            <fac:locationReference xsi:type="loc:PointLocation">
+                <loc:_locationReferenceExtension>
+                    <loc:facilityLocation>
+                        <locx:address>
+                            <locx:postcode>7011</locx:postcode>
+                            <locx:addressLine order="1">
+                                <locx:type>generalTextLine</locx:type>
+                                <locx:text>
+                                    <com:values>
+                                        <com:value lang="es">Dirección: Camí dels Reis 166</com:value>
+                                    </com:values>
+                                </locx:text>
+                            </locx:addressLine>
+                            <locx:addressLine order="2">
+                                <locx:type>generalTextLine</locx:type>
+                                <locx:text>
+                                    <com:values>
+                                        <com:value lang="es">Municipio: Palma</com:value>
+                                    </com:values>
+                                </locx:text>
+                            </locx:addressLine>
+                            <locx:addressLine order="3">
+                                <locx:type>generalTextLine</locx:type>
+                                <locx:text>
+                                    <com:values>
+                                        <com:value lang="es">Provincia: Balears, Illes</com:value>
+                                    </com:values>
+                                </locx:text>
+                            </locx:addressLine>
+                            <locx:addressLine order="4">
+                                <locx:type>generalTextLine</locx:type>
+                                <locx:text>
+                                    <com:values>
+                                        <com:value lang="es">Comunidad Autónoma: Balears, Illes</com:value>
+                                    </com:values>
+                                </locx:text>
+                            </locx:addressLine>
+                        </locx:address>
+                    </loc:facilityLocation>
+                </loc:_locationReferenceExtension>
+                <loc:coordinatesForDisplay>
+                    <loc:latitude>39.5948</loc:latitude>
+                    <loc:longitude>2.6359</loc:longitude>
+                </loc:coordinatesForDisplay>
+            </fac:locationReference>
+            <fac:operator xsi:type="fac:OrganisationSpecification" id="ES*915" version="">
+                <fac:name>
+                    <com:values>
+                        <com:value lang="es">Motor Box Mallorca SL</com:value>
+                    </com:values>
+                </fac:name>
+                <fac:organisationUnit/>
+            </fac:operator>
+            <egi:typeOfSite>other</egi:typeOfSite>
+            <egi:energyInfrastructureStation id="2023002089_1" version="">
+                <egi:authenticationAndIdentificationMethods>rfid</egi:authenticationAndIdentificationMethods>
+                <egi:authenticationAndIdentificationMethods>apps</egi:authenticationAndIdentificationMethods>
+                <egi:refillPoint xsi:type="egi:ElectricChargingPoint" id="COD20230000010508PR00000270" version="">
+                    <fac:name>
+                        <com:values>
+                            <com:value lang="es">ES*915*EES00025600000010000001</com:value>
+                        </com:values>
+                    </fac:name>
+                    <egi:connector>
+                        <egi:connectorType>iec62196T2COMBO</egi:connectorType>
+                        <egi:chargingMode>mode4DC</egi:chargingMode>
+                        <egi:connectorFormat>cableMode3</egi:connectorFormat>
+                        <egi:maxPowerAtSocket>350000.0</egi:maxPowerAtSocket>
+                        <egi:voltage>920.0</egi:voltage>
+                        <egi:maximumCurrent>348.0</egi:maximumCurrent>
+                    </egi:connector>
+                </egi:refillPoint>
+            </egi:energyInfrastructureStation>
+        </egi:energyInfrastructureSite>
+    </egi:energyInfrastructureTable>
+</d2:payload>

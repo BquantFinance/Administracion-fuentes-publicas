@@ -95,12 +95,14 @@ Judicial o UE, solo cuando lo indique el propietario.
 
 ## Estado (2026-10-01)
 
-- **Catálogo**: 97 fichas, 90 verificadas entre el 2026-10-01 y el 2026-10-05. En 2026-09-30 siguen datacomex (sin
+- **Catálogo**: 99 fichas, 92 verificadas entre el 2026-10-01 y el 2026-10-05. En 2026-09-30 siguen datacomex (sin
   token), ree-redata y datos-gob-es-api (Incapsula) y bne-datos (Cloudflare); en `null`, fega-beneficiarios-pac,
-  oepm-invenes y mitma-opendata-movilidad. 46 recetas, 14 productos. Desde el 2026-10-05, concursos de acreedores
+  oepm-invenes y mitma-opendata-movilidad. 47 recetas, 14 productos. Desde el 2026-10-05, concursos de acreedores
   (BORME) en empresa_nif y el radar; en perfil_municipio, viviendas turísticas, compraventa de vivienda (mivau.indice
   casa por nombre las 8.131 filas sin código INE) y, con una dirección, certificados energéticos de la parcela
-  (Cataluña y Comunitat Valenciana). ubicar manda a CartoCiudad el nombre INE entero («Alacant/Alicante»).
+  (Cataluña y Comunitat Valenciana) y el bloque cerca (scripts/clientes/cerca.py: recarga en toda España, colegios en
+  las cuatro comunidades del alcance y centros de salud y hospitales en tres; Andalucía sanitaria no conseguida).
+  ubicar manda a CartoCiudad el nombre INE entero («Alacant/Alicante»).
 - **Hosts que rechazan IP de centros de datos**: Catastro, REData, www.ree.es, ESIOS, datos.gob.es, BNE, FEGA, OEPM,
   movilidad-opendata.mitma.es, geoserver.iepnb.es, sivira.isciii.es, analisis.cis.es y www.inmujer.es; intermitentes
   Seguridad Social, renfe, DATAESTUR, indicadores.fecyt.es e IECA; desde GitHub, MINETUR y Catastro. PLACSP
