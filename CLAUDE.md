@@ -118,8 +118,9 @@ Judicial o UE, solo cuando lo indique el propietario.
   MINETUR), ejemplos 369 de 381 y todos los cargadores, el radar incluido, desde la IP de GitHub.
 - **Evaluación** (`evals/`): con Haiku y trampas silenciosas, acierto 3 de 21 sin catálogo, 10 con ficheros y 13 con
   MCP, con un 30 % y un 43 % menos de tokens de entrada. Cuarta tanda (2026-10-05): con `perfil_municipio`, `coyuntura`
-  y `empresa_nif`, 8 de 8 frente a 4 de 8 sin ellas, un 75 % menos de tokens y un tercio del tiempo. Sin medir aún:
-  productos y almacén.
+  y `empresa_nif`, 8 de 8 frente a 4 de 8 sin ellas, un 75 % menos de tokens y un tercio del tiempo. Quinta tanda
+  (2026-10-05): bloques compraventa, certificados energéticos, cerca y viviendas turísticas, 9 de 10 frente a 7 de 10,
+  un 59 % menos de tokens y un 60 % menos de tiempo (se quedan). Sin medir aún: productos y almacén.
 - **Publicación**: releases v0.1.0 a v0.3.0 y entrada `io.github.BquantFinance/catalogo-fuentes-publicas` en el registro
   oficial de MCP. Para otra versión, subir la versión en `server.json`, `pyproject.toml` y `mcpb/manifest.json` (y en
   los dos ficheros del plugin) y crear la release vX.Y.Z desde la web; `publicar-mcp.yml` empaqueta, adjunta y publica.

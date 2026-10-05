@@ -9191,7 +9191,7 @@
    "summary": "Ficheros DATEX II públicos sin clave: incidencias en tiempo real (versión 3.7, cada minuto) y 1.952 cámaras en el NAP; en infocar.dgt.es, medidas de unos 5.560 detectores cada minuto, radares, tramos, 47 zonas de bajas emisiones, puntos de recarga eléctrica e incidencias de Cataluña y País Vasco.",
    "alerts": [
     "electrolineras.xml da la potencia en vatios (maxPowerAtSocket 22000.0 son 22 kW) y postcode sin el cero inicial en 3.370 de 12.038 emplazamientos (7011 es 07011): dividir entre 1000 y rellenar a cinco cifras.",
-    "En electrolineras.xml 877 emplazamientos comparten coordenadas con otro (356 puntos) y fac:name es a menudo un código del operador (C6E06BCC22ZMPMAKWJ); contar refillPoint por punto y mostrar la dirección, no el nombre."
+    "Un emplazamiento (energyInfrastructureSite) tiene varios puntos (refillPoint): a 1 km de Torres Quevedo 42, Alicante, hay 5 emplazamientos y 17 puntos. Contar sitios si se piden emplazamientos."
    ],
    "access": [
     "download"
@@ -9260,7 +9260,8 @@
     "Las incidencias de la DGT apenas cubren Cataluña (11 puntos el 1-10-2026) y nada del País Vasco; usar los ficheros sct y dt-gv del mismo servidor.",
     "En detectores el index de measuredValue no fija la magnitud (el 0 es velocidad o flujo según el punto); leer xsi:type. Velocidad 0.0 llega siempre con vehicleFlow 0, sin vehículos, no es atasco.",
     "Municipio, provincia y comunidad de las incidencias van por nombre (Ontígola, Toledo), sin código INE; para cruzar con otras fuentes usar las coordenadas.",
-    "Recarga sin disponibilidad en tiempo real (no hay estado por punto) y con fac:lastUpdated de 2023 en 596 emplazamientos; scripts/clientes/cerca.py lo lee en 4 s y da los cercanos a un punto."
+    "Recarga sin disponibilidad en tiempo real (no hay estado por punto) y con fac:lastUpdated de 2023 en 596 emplazamientos; scripts/clientes/cerca.py lo lee en 4 s y da los cercanos a un punto.",
+    "877 emplazamientos de electrolineras.xml comparten coordenadas con otro (356 puntos) y fac:name es a menudo un código del operador (C6E06BCC22ZMPMAKWJ): mostrar la dirección, no el nombre."
    ],
    "tips": [
     "Recarga cerca de una dirección: perfil_municipio con la dirección (bloque cerca) la geocodifica con CartoCiudad y da los de 1 km en una llamada; Nominatim pone «Torres Quevedo 42 Alicante» en Elche.",

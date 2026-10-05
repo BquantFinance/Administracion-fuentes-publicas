@@ -33,6 +33,11 @@ Cuarta tanda (`resultados-2026-10-05-tanda4.md`): `perfil_municipio`, `coyuntura
 frente al mismo MCP sin ellas (`EVAL_SIN` en `mcp_cli.py`). 8 de 8 frente a 4 de 8, un 75 % menos de tokens de entrada y
 un tercio del tiempo; encontró y corrigió un importe total de `empresa_nif` que faltaba con más de 5 concesiones.
 
+Quinta tanda (`resultados-2026-10-05-tanda5.md`): bloques nuevos de `perfil_municipio` (compraventa, certificados
+energéticos, cerca y viviendas turísticas) con Haiku, MCP completo frente al mismo MCP sin esos bloques
+(`EVAL_SIN=perfil_municipio.bloque`). 9 de 10 frente a 7 de 10, un 59 % menos de tokens de entrada y un 60 % menos de
+tiempo; encontró tres trampas que las fichas no decían o decían mal, corregidas el mismo día.
+
 La columna tokens de las dos primeras tandas es el contexto final de cada agente que devuelve el arnés, no el consumo: cada turno
 reenvía el contexto entero, así que los tokens procesados crecen con el número de pasos, que el catálogo reduce en las
 tareas difíciles. La tercera tanda ya suma la entrada de cada turno desde la transcripción del agente (campo usage de
