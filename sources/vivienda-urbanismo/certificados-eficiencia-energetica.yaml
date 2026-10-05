@@ -51,10 +51,10 @@ gotchas:
   - "Madrid: el fichero de un año es el de registro, no el de la fecha del certificado (el de 2026 trae 41.585 de 2025); edif_muni no es código y llega como Madrid, MADRID o madrid."
   - "Madrid: el CSV de 2026 es UTF-8 con BOM; el de 2025 (en el ZIP) mezcla latin-1 en la cabecera (edif_a\\xf1o) y UTF-8 en filas (MARAGATERÍA): decodificar línea a línea, primero UTF-8."
   - "La referencia catastral es de 20 caracteres (inmueble) o de 14 (edificio o parcela) y a veces malformada (Cataluña, 973 vacías y 21.884 de 14); cruzar con Catastro por los 14 primeros."
-  - "El WFS valenciano incluye caducados (validohasta de 2023 y 2024) y no trae fecha de registro: el año va en codigo (E2025...) y la validez es de 10 años, 5 si la letra es G (E2025VV020502, G, hasta 2030)."
+  - "El WFS valenciano trae algunos caducados (2023 y 2024) pero no todos: en 6021705YJ2762A falta el de 0011RQ (D, hasta 16/06/2025), que el CSV del IVACE tiene. El año de registro va en codigo (E2025...)."
   - "Andalucía: package_show da URLs en gdc-pdpopendata-ckan.paas.junta-andalucia.es, que rechazó la conexión desde la nube el 2026-10-05; la misma ruta bajo www.juntadeandalucia.es/datosabiertos/portal descarga."
   - "Andalucía: el XML de una provincia no cabe en memoria con un parser DOM (505 MB en Huelva): leer con iterparse; Municipio llega con espacios finales («Huelva »)."
-  - "Ningún registro da el titular; Andalucía deja en DatosDelCertificador solo la fecha."
+  - "Ningún registro da el titular; Andalucía deja en DatosDelCertificador solo la fecha. La validez es de 10 años, 5 si la letra es G (E2025VV020502, G, hasta 2030)."
 tips:
   - "perfil_municipio con una dirección de Cataluña o la Comunitat Valenciana da los certificados de su parcela, el último por inmueble, en una llamada."
   - "Para el reparto de letras de un municipio catalán, $select=qualificaci_de_consum_d,count(*) con $group y codi_poblacio en Socrata, sin descargar nada."

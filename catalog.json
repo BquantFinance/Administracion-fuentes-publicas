@@ -9263,6 +9263,7 @@
     "Recarga sin disponibilidad en tiempo real (no hay estado por punto) y con fac:lastUpdated de 2023 en 596 emplazamientos; scripts/clientes/cerca.py lo lee en 4 s y da los cercanos a un punto."
    ],
    "tips": [
+    "Recarga cerca de una dirección: perfil_municipio con la dirección (bloque cerca) la geocodifica con CartoCiudad y da los de 1 km en una llamada; Nominatim pone «Torres Quevedo 42 Alicante» en Elche.",
     "Pedir gzip (curl --compressed; requests lo hace solo) reduce detectores de 18,7 MB a 255 KB, incidencias de 6,8 MB a 208 KB, cámaras a 95 KB y radares a 62 KB.",
     "lxml.etree.iterparse sobre el XML de detectores buscando siteMeasurements: measurementSiteReference (GUID_DET_nnnnnn) enlaza con PredefinedLocationsPublication/detectores para las coordenadas."
    ],
@@ -9810,10 +9811,10 @@
     "Madrid: el fichero de un año es el de registro, no el de la fecha del certificado (el de 2026 trae 41.585 de 2025); edif_muni no es código y llega como Madrid, MADRID o madrid.",
     "Madrid: el CSV de 2026 es UTF-8 con BOM; el de 2025 (en el ZIP) mezcla latin-1 en la cabecera (edif_a\\xf1o) y UTF-8 en filas (MARAGATERÍA): decodificar línea a línea, primero UTF-8.",
     "La referencia catastral es de 20 caracteres (inmueble) o de 14 (edificio o parcela) y a veces malformada (Cataluña, 973 vacías y 21.884 de 14); cruzar con Catastro por los 14 primeros.",
-    "El WFS valenciano incluye caducados (validohasta de 2023 y 2024) y no trae fecha de registro: el año va en codigo (E2025...) y la validez es de 10 años, 5 si la letra es G (E2025VV020502, G, hasta 2030).",
+    "El WFS valenciano trae algunos caducados (2023 y 2024) pero no todos: en 6021705YJ2762A falta el de 0011RQ (D, hasta 16/06/2025), que el CSV del IVACE tiene. El año de registro va en codigo (E2025...).",
     "Andalucía: package_show da URLs en gdc-pdpopendata-ckan.paas.junta-andalucia.es, que rechazó la conexión desde la nube el 2026-10-05; la misma ruta bajo www.juntadeandalucia.es/datosabiertos/portal descarga.",
     "Andalucía: el XML de una provincia no cabe en memoria con un parser DOM (505 MB en Huelva): leer con iterparse; Municipio llega con espacios finales («Huelva »).",
-    "Ningún registro da el titular; Andalucía deja en DatosDelCertificador solo la fecha."
+    "Ningún registro da el titular; Andalucía deja en DatosDelCertificador solo la fecha. La validez es de 10 años, 5 si la letra es G (E2025VV020502, G, hasta 2030)."
    ],
    "tips": [
     "perfil_municipio con una dirección de Cataluña o la Comunitat Valenciana da los certificados de su parcela, el último por inmueble, en una llamada.",
@@ -9851,7 +9852,8 @@
    "summary": "Transacciones de vivienda, valor tasado, parque, vivienda libre y protegida y suelo urbano en XLS trimestrales del Boletín Estadístico Online, y SERPAVI, alquiler de vivienda habitual de fuentes tributarias 2011-2024 por CCAA, provincia, municipio, distrito y sección censal en xlsx y GeoJSON.",
    "alerts": [
     "Normalizando tildes y artículos, 79 de los 8.131 municipios de 34010210 no casan por nombre con el INE (Palma sale «Palma de Mallorca», Toral de los Vados «Villadecanes»); mivau.indice casa los 8.131.",
-    "35103500 pone la provincia en una sola fila del grupo y no siempre la primera: rellenar hacia abajo deja 7 de 306 municipios en otra (Almuñécar en Córdoba, Illescas en Guadalajara). Casar por nombre, no por provincia."
+    "35103500 pone la provincia en una sola fila del grupo y no siempre la primera: rellenar hacia abajo deja 7 de 306 municipios en otra (Almuñécar en Córdoba, Illescas en Guadalajara). Casar por nombre, no por provincia.",
+    "34010210 pone el año en una fila y el trimestre en otra (1º a 4º); la última columna es 2026-T2 (*), provisional: Palma 1.152, y la anterior 2026-T1, 1.080. Leer las dos filas de cabecera, no contar columnas."
    ],
    "access": [
     "download",

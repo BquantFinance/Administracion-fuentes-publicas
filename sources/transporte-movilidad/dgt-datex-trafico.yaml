@@ -56,6 +56,7 @@ gotchas:
   - Municipio, provincia y comunidad de las incidencias van por nombre (Ontígola, Toledo), sin código INE; para cruzar con otras fuentes usar las coordenadas.
   - "Recarga sin disponibilidad en tiempo real (no hay estado por punto) y con fac:lastUpdated de 2023 en 596 emplazamientos; scripts/clientes/cerca.py lo lee en 4 s y da los cercanos a un punto."
 tips:
+  - "Recarga cerca de una dirección: perfil_municipio con la dirección (bloque cerca) la geocodifica con CartoCiudad y da los de 1 km en una llamada; Nominatim pone «Torres Quevedo 42 Alicante» en Elche."
   - Pedir gzip (curl --compressed; requests lo hace solo) reduce detectores de 18,7 MB a 255 KB, incidencias de 6,8 MB a 208 KB, cámaras a 95 KB y radares a 62 KB.
   - "lxml.etree.iterparse sobre el XML de detectores buscando siteMeasurements: measurementSiteReference (GUID_DET_nnnnnn) enlaza con PredefinedLocationsPublication/detectores para las coordenadas."
 related: [dgt-estadisticas]

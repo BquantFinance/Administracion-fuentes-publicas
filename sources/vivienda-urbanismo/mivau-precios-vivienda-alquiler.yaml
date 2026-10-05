@@ -12,6 +12,7 @@ summary: >-
 alerts:
   - "Normalizando tildes y artículos, 79 de los 8.131 municipios de 34010210 no casan por nombre con el INE (Palma sale «Palma de Mallorca», Toral de los Vados «Villadecanes»); mivau.indice casa los 8.131."
   - "35103500 pone la provincia en una sola fila del grupo y no siempre la primera: rellenar hacia abajo deja 7 de 306 municipios en otra (Almuñécar en Córdoba, Illescas en Guadalajara). Casar por nombre, no por provincia."
+  - "34010210 pone el año en una fila y el trimestre en otra (1º a 4º); la última columna es 2026-T2 (*), provisional: Palma 1.152, y la anterior 2026-T1, 1.080. Leer las dos filas de cabecera, no contar columnas."
 access: [download, portal]
 auth: none
 formats: [xls, xlsx, geojson, shp, zip, pdf, html]
