@@ -1,11 +1,11 @@
 {
  "name": "Administración fuentes públicas",
  "description": "Catálogo de fuentes de datos de la Administración pública española, optimizado para agentes.",
- "generated": "2026-10-05",
+ "generated": "2026-10-06",
  "repo": "https://github.com/BquantFinance/Administracion-fuentes-publicas",
  "schema": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json",
  "vocab": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml",
- "count": 102,
+ "count": 103,
  "sectors": {
   "legislacion-boletines": "Legislación y boletines oficiales",
   "economia-finanzas": "Economía, finanzas y mercados",
@@ -9008,6 +9008,73 @@
    ],
    "status": "active",
    "verified": "2026-10-01"
+  },
+  {
+   "id": "cartografia-jcyl",
+   "name": "Cartografía de Castilla y León – Portal y FTP de descargas (ITACyL)",
+   "org": "Instituto Tecnológico Agrario de Castilla y León (ITACyL)",
+   "level": "ccaa",
+   "sector": "territorio-cartografia",
+   "tags": [
+    "cartografia",
+    "castilla-y-leon",
+    "lidar",
+    "ortofotografia",
+    "mde",
+    "ftp",
+    "descargas"
+   ],
+   "summary": "Descargas de la cartografía oficial de Castilla y León por FTP anónimo con carpetas por producto: ortofotografía, LiDAR (.laz por campaña: 2009-2014, 2017-2021, 2025), MDE, fotogramas aéreos, SIOSE, SIGPAC y edafología. El portal web es informativo; la descarga va directa al FTP.",
+   "alerts": [
+    "Licencia IGCYL-NC 2012 (no comercial): el propio FTP publica LICENCIA-IGCYL-NC-2012.pdf en la raíz; las 153 distribuciones SHP con esa licencia del catálogo jcyl-datos-abiertos apuntan aquí."
+   ],
+   "access": [
+    "download",
+    "portal"
+   ],
+   "auth": "none",
+   "formats": [
+    "laz",
+    "shp",
+    "pdf",
+    "txt"
+   ],
+   "update": "irregular",
+   "license": "IGCYL-NC 2012, no comercial (LICENCIA-IGCYL-NC-2012.pdf en la raíz del FTP)",
+   "base_url": "http://ftp.itacyl.es/cartografia",
+   "docs_url": "https://cartografia.jcyl.es/web/es/datos-servicios/servicio-descargas.html",
+   "endpoints": [
+    {
+     "path": "/",
+     "desc": "Raíz del FTP con las carpetas de producto (00_Indices a 06_Edafologia), la licencia y los léeme",
+     "example": "curl -s \"http://ftp.itacyl.es/cartografia/\"",
+     "returns": "Listado HTML con 00_Indices, 01_Ortofotografia, 02_Altimetria, 03_FotogramasAereos, 04_SIOSE, 05_SIGPAC, 06_Edafologia y LICENCIA-IGCYL-NC-2012.pdf"
+    },
+    {
+     "path": "/02_Altimetria/023_LIDAR/{campana}/Procesados_LAZ/",
+     "desc": "Nubes LiDAR .laz por hoja MTD25 con nomenclatura PNOA (campañas 2009-2014, 2017-2021 y 2025)",
+     "example": "curl -s \"http://ftp.itacyl.es/cartografia/02_Altimetria/023_LIDAR/2025/Procesados_LAZ/\"",
+     "returns": "Listado con ficheros como PNOA-LIDAR-2025-CyL_H05-0550_1-4_173-4483_NPC01.laz"
+    }
+   ],
+   "rate_limit": "No documentado",
+   "quirks": [],
+   "ids": [],
+   "gotchas": [
+    "Las carpetas van numeradas por producto (02_Altimetria, 023_LIDAR) y las campañas LiDAR por periodo (2009-2014, 2017-2021, 2025), no por año natural.",
+    "En la raíz del FTP hay ruido de escritorio (Thumbs.db, banner) junto a los Leeme.txt de cada producto."
+   ],
+   "tips": [
+    "El LiDAR lleva nomenclatura PNOA: el vuelo nacional equivalente está en cnig-centro-descargas y aquí las pasadas propias de CyL."
+   ],
+   "related": [
+    "idecyl-servicios",
+    "jcyl-datos-abiertos",
+    "mapa-sigpac",
+    "cnig-centro-descargas"
+   ],
+   "status": "active",
+   "verified": "2026-10-05"
   },
   {
    "id": "catastro-ovc",
