@@ -1,6 +1,6 @@
 # Gobierno abierto, transparencia y organización administrativa
 
-Sector `gobierno-abierto-administracion` · 12 fuentes · índice generado por `scripts/build.py`, no editar.
+Sector `gobierno-abierto-administracion` · 13 fuentes · índice generado por `scripts/build.py`, no editar.
 
 ## Dónde está cada cosa
 
@@ -16,6 +16,9 @@ Sector `gobierno-abierto-administracion` · 12 fuentes · índice generado por `
 - GTFS del Consorcio de Transportes de Madrid → `comunidad-madrid-datos-abiertos` (el conjunto enlaza a ArcGIS; el ZIP sale de /sharing/rest/content/items/{id}/data)
 - Registro de entidades, contratación o subvenciones (RAISC) de la Generalitat de Catalunya → `gencat-dades-obertes` (Socrata; sin $limit corta a 1000 filas; buscar en catalán; el RAISC trae codi_bdns)
 - Población de Barcelona por barrio o sección censal del último año → `ayuntamiento-barcelona-datos-abiertos` (padrón municipal, no cifra oficial; el Idescat por sección acaba en 2022; solo el datastore es automatizable)
+- Presupuestos, recibos de IBI o IVTM y subvenciones nominativas del Ayuntamiento de València → `ayuntamiento-valencia-datos-abiertos` (datastore CKAN con todo como texto (sort ordena como cadena); mejor /datastore/dump y convertir importes)
+- Disponibilidad de ValenBisi y estado del tráfico en València en tiempo real → `ayuntamiento-valencia-datos-abiertos` (capas ArcGIS Trafico/228 y Trafico/192; ValenBisi trae updated_at como texto, usar update_jcd)
+- GTFS de los autobuses de la EMT de València → `ayuntamiento-valencia-datos-abiertos` (el nombre del ZIP lleva la fecha; sacar la URL de package_show de google-transit-lines-stops-bus-schedules)
 - Disposiciones del BOJA por fecha con sumario y PDF → `junta-andalucia-datos-abiertos` (API v0 aparte del CKAN; ordenar por dateUTC y trocear por día)
 - Datos abiertos de la Junta de Andalucía y filas de sus CSV por API → `junta-andalucia-datos-abiertos` (cambiar el host interno de los recursos subidos por www.juntadeandalucia.es)
 - Datos abiertos de la Generalitat Valenciana (contratos, ERTE, turismo, cultura) por API → `gva-dadesobertes-api` (CKAN con datastore; el órgano real va en origen_datos, no en organization)
@@ -25,6 +28,7 @@ Sector `gobierno-abierto-administracion` · 12 fuentes · índice generado por `
 |---|---|---|---|---|---|---|---|
 | [ayuntamiento-barcelona-datos-abiertos](ayuntamiento-barcelona-datos-abiertos.yaml) | Ayuntamiento de Barcelona – Open Data BCN (API CKAN y DataStore) | api-rest, download | none | json, csv, xml, geojson, gpkg, shp, zip | daily | captcha-required, datastore-incomplete | 2026-10-01 |
 | [ayuntamiento-madrid-datos-abiertos](ayuntamiento-madrid-datos-abiertos.yaml) | Ayuntamiento de Madrid – Portal de datos abiertos (API CKAN y API dinámica) | api-rest, download, feed | none | json, csv, xml, xlsx, xls, zip, txt, kml, shp, ttl, atom | realtime | waf-intermittent-403, url-drift, overwritten-in-place, waf-temporary-ban | 2026-10-01 |
+| [ayuntamiento-valencia-datos-abiertos](ayuntamiento-valencia-datos-abiertos.yaml) | Ayuntamiento de València – Portal de datos abiertos VLCi (CKAN) y Geoportal | api-rest, ogc, download | none | json, csv, geojson, shp, kml, gml, xlsx, zip, rdf | daily | url-drift | 2026-10-06 |
 | [comunidad-madrid-datos-abiertos](comunidad-madrid-datos-abiertos.yaml) | Comunidad de Madrid – Catálogo de datos abiertos (API CKAN) | api-rest, download | none | json, csv, zip, ttl, rdf | daily | latin1, overwritten-in-place, datastore-incomplete | 2026-10-05 |
 | [datos-gob-es-api](datos-gob-es-api.yaml) | datos.gob.es – Catálogo nacional de datos abiertos (API) | api-rest, sparql, portal | none | json, xml, csv, rdf | daily | waf-intermittent-403, errors-html-or-xml, static-html | 2026-09-30 |
 | [dir3-directorio](dir3-directorio.yaml) | DIR3 – Directorio Común de Unidades Orgánicas y Oficinas | download, portal | none | xlsx, pdf | irregular | session-required, user-agent-browser, static-html | 2026-10-01 |
@@ -38,6 +42,7 @@ Sector `gobierno-abierto-administracion` · 12 fuentes · índice generado por `
 
 - **ayuntamiento-barcelona-datos-abiertos**: 555 datasets del Ayuntamiento de Barcelona (padrón por sección censal desde 1997, accidentes de la Guardia Urbana, movilidad, vivienda, IBI, subvenciones, presupuesto) sobre CKAN 2.6. La API de acciones y el DataStore (búsqueda y SQL) responden sin clave; las descargas pasan por un reto anti-bot.
 - **ayuntamiento-madrid-datos-abiertos**: 673 conjuntos del Ayuntamiento en CKAN 2.9.11: padrón mensual por sección y edad, accidentes, censo de locales, presupuestos, calidad del aire y tráfico en tiempo real. API JSON, datastore con filtros, DCAT, feed Atom y una API dinámica con filtros por campo en ciudadesabiertas.madrid.es.
+- **ayuntamiento-valencia-datos-abiertos**: CKAN del Ayuntamiento de València con 280 conjuntos: presupuestos, recibos de IBI e IVTM, tráfico, ValenBisi, EMT, calidad del aire y ruido. Filas por datastore (119 conjuntos) y capas por el Geoportal ArcGIS. Sin autenticación.
 - **comunidad-madrid-datos-abiertos**: CKAN 2.9 con 177 conjuntos de las consejerías (calidad del aire diaria, polen, centros educativos, farmacias, registros, GTFS del Consorcio, elecciones autonómicas) y 2086 tablas del Instituto de Estadística (bancos Almudena municipal, Baco y Desvan). API JSON, datastore y DCAT sin clave.
 - **datos-gob-es-api**: Catálogo federado de los datasets abiertos de todas las Administraciones (Estado, CCAA, EELL, universidades) con metadatos DCAT-AP, distribuciones con URL de descarga y publicador identificado por código DIR3. API REST JSON paginada; el endpoint SPARQL no respondió desde este entorno.
 - **dir3-directorio**: Inventario oficial de unidades orgánicas, entidades y oficinas de todas las Administraciones con código DIR3, jerarquía, NIF y estado. Descarga pública en xlsx por nivel (foto periódica, no diaria) más catálogos auxiliares; es la clave de FACe, PLACSP, BDNS y datos.gob.es.

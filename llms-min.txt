@@ -2,7 +2,7 @@
 
 > Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. Contenido en castellano, claves en inglés.
 
-Fuentes: 102 · Productos: 14 · Recetas: 47 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana, Castilla y León y los ayuntamientos de Madrid y Barcelona · Entrada ligera; la completa es llms.txt · Generado: 2026-10-05
+Fuentes: 103 · Productos: 14 · Recetas: 47 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana, Castilla y León y los ayuntamientos de Madrid y Barcelona · Entrada ligera; la completa es llms.txt · Generado: 2026-10-06
 
 ## Empieza aquí
 
@@ -28,7 +28,7 @@ radar-licitaciones, inteligencia-competidores, radar-ayudas, kyb-proveedores, le
 
 ## Fichas con trampas silenciosas
 
-Lee sus alerts antes de dar una cifra: aemps-cima-api, ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, bde-estadisticas, bdns-api, borme-api-sumario, centros-docentes-ccaa, centros-sanitarios-ccaa, certificados-eficiencia-energetica, cnig-centro-descargas, cnmc-data, comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, datacomex, dgt-datex-trafico, face-facturas, gbif-es, gencat-dades-obertes, gva-dadesobertes-api, idee-servicios, idescat-api, igae-ejecucion-presupuestaria, ign-sismologia, ine-api-tempus, ine-cartografia-censal, interior-criminalidad, ive-pegv-bancos-datos, jcyl-datos-abiertos, junta-andalucia-datos-abiertos, mapa-sigpac, mites-estadisticas, mivau-precios-vivienda-alquiler, placsp-datos-abiertos, puertos-estado-datos, segsocial-estadisticas, sepe-estadisticas, viviendas-uso-turistico.
+Lee sus alerts antes de dar una cifra: aemps-cima-api, ayuntamiento-barcelona-datos-abiertos, ayuntamiento-madrid-datos-abiertos, ayuntamiento-valencia-datos-abiertos, bde-estadisticas, bdns-api, borme-api-sumario, centros-docentes-ccaa, centros-sanitarios-ccaa, certificados-eficiencia-energetica, cnig-centro-descargas, cnmc-data, comunidad-madrid-datos-abiertos, comunidad-madrid-estadistica-api, datacomex, dgt-datex-trafico, face-facturas, gbif-es, gencat-dades-obertes, gva-dadesobertes-api, idee-servicios, idescat-api, igae-ejecucion-presupuestaria, ign-sismologia, ine-api-tempus, ine-cartografia-censal, interior-criminalidad, ive-pegv-bancos-datos, jcyl-datos-abiertos, junta-andalucia-datos-abiertos, mapa-sigpac, mites-estadisticas, mivau-precios-vivienda-alquiler, placsp-datos-abiertos, puertos-estado-datos, segsocial-estadisticas, sepe-estadisticas, viviendas-uso-turistico.
 
 ## Fichas por sector
 
@@ -40,7 +40,7 @@ Con * las que traen code: módulo, llamada y herramienta que ya las resuelven.
 - Estadística oficial: comunidad-madrid-estadistica-api, idescat-api, ieca-api-badea, ine-api-tempus*, ine-codigos-territoriales*, ine-microdatos, ive-pegv-bancos-datos
 - Contratación pública y subvenciones: bdns-api*, hacienda-registro-licitadores*, placsp-datos-abiertos*
 - Empleo y Seguridad Social: mites-estadisticas, segsocial-estadisticas, sepe-estadisticas*
-- Gobierno abierto, transparencia y organización administrativa: ayuntamiento-barcelona-datos-abiertos*, ayuntamiento-madrid-datos-abiertos*, comunidad-madrid-datos-abiertos*, datos-gob-es-api, dir3-directorio, face-facturas, gencat-dades-obertes*, gva-dadesobertes-api*, jcyl-datos-abiertos, junta-andalucia-datos-abiertos*, pag-administracion-gob-es, transparencia-portal
+- Gobierno abierto, transparencia y organización administrativa: ayuntamiento-barcelona-datos-abiertos*, ayuntamiento-madrid-datos-abiertos*, ayuntamiento-valencia-datos-abiertos, comunidad-madrid-datos-abiertos*, datos-gob-es-api, dir3-directorio, face-facturas, gencat-dades-obertes*, gva-dadesobertes-api*, jcyl-datos-abiertos, junta-andalucia-datos-abiertos*, pag-administracion-gob-es, transparencia-portal
 - Territorio, catastro y cartografía: catastro-ovc, cnig-centro-descargas*, idecyl-servicios, idee-servicios*, ine-cartografia-censal*
 - Meteorología y clima: aemet-opendata*, aemet-otros-servicios
 - Medio ambiente, agua y biodiversidad: miteco-banco-datos-naturaleza, miteco-calidad-aire, miteco-inventario-emisiones, miteco-prtr, miteco-saih-boletin-hidrologico

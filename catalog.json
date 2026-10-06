@@ -1,11 +1,11 @@
 {
  "name": "Administración fuentes públicas",
  "description": "Catálogo de fuentes de datos de la Administración pública española, optimizado para agentes.",
- "generated": "2026-10-05",
+ "generated": "2026-10-06",
  "repo": "https://github.com/BquantFinance/Administracion-fuentes-publicas",
  "schema": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json",
  "vocab": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml",
- "count": 102,
+ "count": 103,
  "sectors": {
   "legislacion-boletines": "Legislación y boletines oficiales",
   "economia-finanzas": "Economía, finanzas y mercados",
@@ -5245,6 +5245,137 @@
    ],
    "status": "active",
    "verified": "2026-10-01"
+  },
+  {
+   "id": "ayuntamiento-valencia-datos-abiertos",
+   "name": "Ayuntamiento de València – Portal de datos abiertos VLCi (CKAN) y Geoportal",
+   "org": "Ajuntament de València",
+   "level": "local",
+   "sector": "gobierno-abierto-administracion",
+   "tags": [
+    "datos-abiertos",
+    "ckan",
+    "datastore",
+    "arcgis",
+    "valencia",
+    "presupuestos",
+    "tributos",
+    "trafico",
+    "valenbisi",
+    "emt",
+    "gtfs",
+    "calidad-aire"
+   ],
+   "summary": "CKAN del Ayuntamiento de València con 280 conjuntos: presupuestos, recibos de IBI e IVTM, tráfico, ValenBisi, EMT, calidad del aire y ruido. Filas por datastore (119 conjuntos) y capas por el Geoportal ArcGIS. Sin autenticación.",
+   "alerts": [
+    "ValenBisi: updated_at es texto dd/mm/aaaa y como cadena 17/09/2026 00:42:47 va por delante de 06/10/2026 15:02:51. Usar el máximo de update_jcd (epoch ms; 1791291760000 es 2026-10-06 13:02 UTC).",
+    "Las capas ArcGIS cortan a 2000 sin error (exceededTransferLimit true): Manzanas (capa 215) tiene 4929. Pedir resultOffset=0, 2000 y 4000 con resultRecordCount=2000 y llegan 2000, 2000 y 929.",
+    "El datastore guarda todo como text y sort ordena como cadena: sort=Importe desc en subvenciones-nominativas da 99330.0 primero, y el máximo es 7807911.55. Bajar /datastore/dump y convertir antes de ordenar."
+   ],
+   "access": [
+    "api-rest",
+    "ogc",
+    "download"
+   ],
+   "auth": "none",
+   "formats": [
+    "json",
+    "csv",
+    "geojson",
+    "shp",
+    "kml",
+    "gml",
+    "xlsx",
+    "zip",
+    "rdf"
+   ],
+   "update": "daily",
+   "coverage": "Municipio de València; presupuestos y recibos 2020-2025, calidad del aire desde 2016",
+   "license": "Creative Commons Attribution 4.0 (cc-by en 279 conjuntos y cc-by-sa en uno)",
+   "base_url": "https://opendata.vlci.valencia.es/api/3/action",
+   "docs_url": "https://docs.ckan.org/en/latest/api/index.html",
+   "endpoints": [
+    {
+     "path": "/package_search?q={texto}&fq={filtro}&rows={n}&start={n}",
+     "desc": "Búsqueda de conjuntos con filtros Solr (groups, res_format) y orden; rows=300 cubre el catálogo entero",
+     "example": "curl -s \"https://opendata.vlci.valencia.es/api/3/action/package_search?fq=groups:hacienda&rows=100&sort=metadata_modified%20desc\"",
+     "params": "fq=groups:hacienda (25 conjuntos) o res_format:CSV (159); fl=name,title aligera; grupos como slug (transporte, medio-ambiente, salud...)",
+     "returns": "{success, result:{count, results:[{name, title, title_es, title_va, notes, license_id, metadata_modified ISO sin zona, resources[{id, format, url, datastore_active}], groups[{name}]}]}}; 280 conjuntos el 2026-10-01"
+    },
+    {
+     "path": "/package_show?id={name}",
+     "desc": "Conjunto completo con sus recursos; el id del recurso con datastore_active true es el que pide datastore_search",
+     "example": "curl -s \"https://opendata.vlci.valencia.es/api/3/action/package_show?id=presupuesto-de-gastos\"",
+     "returns": "{success, result:{name, title, resources[{id, format, datastore_active, url}]}}; un id inexistente da 404 con success false y error.message No encontrado"
+    },
+    {
+     "path": "/datastore_search?resource_id={id}&limit={n}&offset={n}",
+     "desc": "Filas de un recurso con datastore_active true, con filtro por igualdad, q por campo y selección de campos",
+     "example": "curl -s \"https://opendata.vlci.valencia.es/api/3/action/datastore_search?resource_id=40bfee57-c0a0-4d5b-adfc-d36888588066&filters=%7B%22Ano%22%3A%222024%22%7D\"",
+     "params": "limit 100 por defecto; filters={\"Ano\":\"2024\"} (igualdad exacta, el campo debe existir o responde 409); fields; sort",
+     "returns": "{result:{fields:[{id, type}], records:[{_id, ...}], total, _links:{start, next}}}; en presupuesto-de-gastos 4 filas, una por ejercicio, con importes como texto (386000000.0) y la cabecera larga con la clasificación entre paréntesis"
+    },
+    {
+     "path": "https://opendata.vlci.valencia.es/datastore/dump/{resource_id}?format=csv",
+     "desc": "Volcado completo de un recurso del datastore en un solo CSV, sin paginar",
+     "example": "curl -s \"https://opendata.vlci.valencia.es/datastore/dump/40bfee57-c0a0-4d5b-adfc-d36888588066?format=csv\"",
+     "returns": "CSV UTF-8 separado por coma con _id como primera columna; el CSV original del conjunto (url del recurso) va con BOM y punto y coma"
+    },
+    {
+     "path": "https://geoportal.valencia.es/server/rest/services/OPENDATA/{Carpeta}/MapServer/{capa}/query?where={sql}&outFields=*&f={geojson|json|pbf}",
+     "desc": "Capas y datos en tiempo real por ArcGIS REST (ValenBisi Trafico/228, estado del tráfico Trafico/192); la URL de cada capa está en package_show",
+     "example": "curl -s \"https://geoportal.valencia.es/server/rest/services/OPENDATA/Trafico/MapServer/228/query?where=1=1&outFields=*&f=geojson\"",
+     "params": "where SQL (available>5); outFields; returnGeometry=false; returnCountOnly=true; resultOffset y resultRecordCount para paginar; f=geojson, json, pbf o html",
+     "returns": "FeatureCollection GeoJSON con 273 estaciones de ValenBisi y properties gid, name, number, address, open (T o F), available, free, total, ticket, updated_at (texto dd/mm/aaaa hh:mm:ss) y update_jcd (epoch en milisegundos)"
+    },
+    {
+     "path": "https://geoportal.valencia.es/server/services/OPENDATA/{Carpeta}/MapServer/WFSServer?service=WFS&version=1.1.0&request=GetFeature&typename={capa}",
+     "desc": "Mismas capas por WFS 1.1.0 (GML 3.1.1); sin GetFeature devuelve las capacidades",
+     "example": "curl -s \"https://geoportal.valencia.es/server/services/OPENDATA/UrbanismoEInfraestructuras/MapServer/WFSServer?service=WFS&version=1.1.0&request=GetFeature&typename=Manzanas&maxfeatures=1\"",
+     "returns": "XML wfs:FeatureCollection con numberOfFeatures (4929 manzanas catastrales) y las geometrías en GML 3.1.1"
+    },
+    {
+     "path": "https://opendata.vlci.valencia.es/dataset/{id}/resource/{rid}/download/google_transit{AAAA-MM-DD}.zip",
+     "desc": "GTFS de la EMT de València (conjunto google-transit-lines-stops-bus-schedules), con fecha de generación en el nombre del fichero",
+     "example": "curl -sL -o emt_gtfs.zip \"https://opendata.vlci.valencia.es/dataset/ab058cf8-ad3e-4d9c-ac89-0c6367ecf351/resource/c81b69e6-c082-44dc-acc6-66fc417b4e66/download/google_transit2026-09-28.zip\"",
+     "returns": "ZIP de 7 MB con agency, calendar, calendar_dates, feed_info, routes, shapes, stop_times (57 MB descomprimido), stops y trips"
+    },
+    {
+     "path": "https://opendata.vlci.valencia.es/catalog.rdf",
+     "desc": "Catálogo DCAT completo en RDF/XML",
+     "example": "curl -s \"https://opendata.vlci.valencia.es/catalog.rdf\"",
+     "returns": "rdf:RDF con dcat:Dataset; catalog.json responde 404"
+    }
+   ],
+   "rate_limit": "No documentado; sin 429 en unas 40 peticiones secuenciales el 2026-10-01",
+   "quirks": [
+    "url-drift"
+   ],
+   "ids": [],
+   "gotchas": [
+    "El catálogo entero cabe en una sola respuesta de package_search (rows=300 devolvió los 280 conjuntos con success true); no hace falta paginar.",
+    "Los nombres de columna del datastore son frases largas con paréntesis, a veces truncadas (GASTOS CORRIENTES EN BIENES Y SERVICIOS (operaciones corrientes); usar datastore_info o fields para leerlos tal cual.",
+    "datastore_search_sql no existe (400 Action name not known); usar filters o /datastore/dump.",
+    "Un filtro sobre una columna que no existe responde 409 con el campo en error.filters, no una lista vacía.",
+    "Las capas del Geoportal no pasan por el datastore; la URL de cada capa está en los recursos de package_show y paginan con resultOffset.",
+    "El GTFS de la EMT lleva la fecha en el nombre del fichero y cambia con cada publicación; sacar la URL del recurso de package_show cada vez.",
+    "Las URL WFS de los metadatos usan /server/services/; con /server/rest/services/ la ruta WFSServer devuelve la página HTML del directorio REST.",
+    "El conjunto punts-mesura-trafic-espires-electromagnetiques lleva TEMPORALMENTE CON ERRORES en el título; comprobar el título antes de usar las espiras de tráfico."
+   ],
+   "tips": [
+    "Presupuestos, recibos y estados de liquidación están en el grupo hacienda (25 conjuntos con datastore); los recibos de IBI e IAE están en sector-publico y los de IVTM, vados y mesas y sillas en hacienda.",
+    "Con fq=res_format:CSV se listan los 159 conjuntos con CSV y con datastore_active se saben cuáles admiten datastore_search sin descargar el fichero."
+   ],
+   "related": [
+    "ayuntamiento-madrid-datos-abiertos",
+    "ayuntamiento-barcelona-datos-abiertos",
+    "gva-dadesobertes-api",
+    "datos-gob-es-api",
+    "ive-pegv-bancos-datos",
+    "renfe-datos-abiertos"
+   ],
+   "status": "active",
+   "verified": "2026-10-06"
   },
   {
    "id": "comunidad-madrid-datos-abiertos",
@@ -13366,6 +13497,21 @@
     "need": "Población de Barcelona por barrio o sección censal del último año",
     "source": "ayuntamiento-barcelona-datos-abiertos",
     "note": "padrón municipal, no cifra oficial; el Idescat por sección acaba en 2022; solo el datastore es automatizable"
+   },
+   {
+    "need": "Presupuestos, recibos de IBI o IVTM y subvenciones nominativas del Ayuntamiento de València",
+    "source": "ayuntamiento-valencia-datos-abiertos",
+    "note": "datastore CKAN con todo como texto (sort ordena como cadena); mejor /datastore/dump y convertir importes"
+   },
+   {
+    "need": "Disponibilidad de ValenBisi y estado del tráfico en València en tiempo real",
+    "source": "ayuntamiento-valencia-datos-abiertos",
+    "note": "capas ArcGIS Trafico/228 y Trafico/192; ValenBisi trae updated_at como texto, usar update_jcd"
+   },
+   {
+    "need": "GTFS de los autobuses de la EMT de València",
+    "source": "ayuntamiento-valencia-datos-abiertos",
+    "note": "el nombre del ZIP lleva la fecha; sacar la URL de package_show de google-transit-lines-stops-bus-schedules"
    },
    {
     "need": "Disposiciones del BOJA por fecha con sumario y PDF",
