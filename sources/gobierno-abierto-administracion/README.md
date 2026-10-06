@@ -1,6 +1,6 @@
 # Gobierno abierto, transparencia y organización administrativa
 
-Sector `gobierno-abierto-administracion` · 12 fuentes · índice generado por `scripts/build.py`, no editar.
+Sector `gobierno-abierto-administracion` · 13 fuentes · índice generado por `scripts/build.py`, no editar.
 
 ## Dónde está cada cosa
 
@@ -33,6 +33,7 @@ Sector `gobierno-abierto-administracion` · 12 fuentes · índice generado por `
 | [gva-dadesobertes-api](gva-dadesobertes-api.yaml) | GVA – Portal de datos abiertos de la Generalitat Valenciana (API CKAN) | api-rest, download | none | json, csv, rdf, ttl, jsonld | daily | overwritten-in-place, datastore-incomplete, connection-reset-intermittent | 2026-10-01 |
 | [jcyl-datos-abiertos](jcyl-datos-abiertos.yaml) | Junta de Castilla y León – Portal de datos abiertos | api-rest, download, portal | none | csv, xls, xlsx, json, geojson, xml, shp, kml, rdf | daily | static-html, latin1 | 2026-10-05 |
 | [junta-andalucia-datos-abiertos](junta-andalucia-datos-abiertos.yaml) | Junta de Andalucía – Portal de datos abiertos (API CKAN y API v0 con BOJA) | api-rest, download | none | json, csv, xls, xlsx, ods, kml, rdf, txt | daily | latin1, datastore-incomplete | 2026-10-01 |
+| [opendata-euskadi](opendata-euskadi.yaml) | Open Data Euskadi – Catálogo, índice de APIs y punto SPARQL | api-rest, sparql, portal | none | json, rdf | irregular | — | 2026-10-05 |
 | [pag-administracion-gob-es](pag-administracion-gob-es.yaml) | Punto de Acceso General – Trámites, SIA, empleo público y ayudas | portal, download | none | html, pdf, xlsx | weekly | static-html, url-drift, user-agent-browser, session-required | 2026-10-01 |
 | [transparencia-portal](transparencia-portal.yaml) | Portal de la Transparencia de la AGE | portal, download | none | html, xlsx, ods, zip, pdf | monthly | static-html, url-drift | 2026-10-01 |
 
@@ -46,5 +47,6 @@ Sector `gobierno-abierto-administracion` · 12 fuentes · índice generado por `
 - **gva-dadesobertes-api**: Catálogo CKAN de la Generalitat Valenciana (1310 conjuntos de la GVA, el Institut Cartogràfic Valencià y la Universidad de Alicante): contratos, ERTE, turismo, cultura, cartografía. API JSON con datastore para consultar filas de los CSV, volcado CSV y DCAT-AP, sin autenticación.
 - **jcyl-datos-abiertos**: Catálogo de datos abiertos de la Junta de Castilla y León: 840 conjuntos en un CSV regenerado a diario, 442 de ellos en una API Opendatasoft (Explore v2.1) con registros filtrables y exportación completa. La estadística autonómica (SIE, app SAS) no tiene API.
 - **junta-andalucia-datos-abiertos**: Catálogo CKAN 2.10 de la Junta de Andalucía (832 conjuntos de 72 organismos, 260 del IECA): presupuestos, tesorería, educación, medio ambiente, cultura. API JSON con datastore en 173 recursos y una API v0 aparte con OpenAPI (BOJA desde 1979, RPT, agenda, subvenciones), sin autenticación.
+- **opendata-euskadi**: Portal de datos abiertos del Gobierno Vasco y sus organismos con catálogo clasificado por ODS e índice de APIs REST servidas en api.euskadi.eus: BOPV, contratos públicos (KontratazioA), indicadores municipales (Udalmap), Euskalmet, eventos culturales, certificados energéticos, ITE y tráfico.
 - **pag-administracion-gob-es**: Portal ciudadano de la AGE: boletín semanal de empleo público y quincenal de ayudas y becas en PDF, buscadores de trámites, empleo, becas y oficinas y directorio de sedes electrónicas, sin API localizada. Los códigos SIA de procedimientos se descargan en xlsx por nivel desde el área pública del CTT.
 - **transparencia-portal**: Publicidad activa de la AGE: buscador con exportación a xlsx de contratos (835607, menores incluidos), convenios, retribuciones y actividad privada de altos cargos, filtrable por DIR3, y estadísticas del derecho de acceso y resoluciones denegatorias en xlsx y ods. Sin API localizada.

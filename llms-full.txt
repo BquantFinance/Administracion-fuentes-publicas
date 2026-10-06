@@ -2,7 +2,7 @@
 
 > Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. Contenido en castellano, claves en inglés.
 
-Fuentes: 102 · Generado: 2026-10-05 · Formato: un bloque por fuente; '!!' marca trampas silenciosas (datos incompletos o distintos sin error); 'code:' es el módulo de fuentes_publicas.clientes, las llamadas y las herramientas MCP que ya traen la fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
+Fuentes: 105 · Generado: 2026-10-06 · Formato: un bloque por fuente; '!!' marca trampas silenciosas (datos incompletos o distintos sin error); 'code:' es el módulo de fuentes_publicas.clientes, las llamadas y las herramientas MCP que ya traen la fuente; '!' marca trampas; '+' marca consejos; 'ej:' es una llamada lista para copiar. Recetas, identificadores y rutas muertas en indices/README.md.
 
 # SECTOR legislacion-boletines: Legislación y boletines oficiales
 
@@ -161,6 +161,28 @@ quirks: latin1
 ! La lista completa de canales y divisiones CPV está en el HTML de https://www.boe.es/rss/ (no hay índice legible por máquina).
 ! Las alertas personalizadas por correo (Mi BOE) no tienen API.
 related: boe-api-sumario, borme-api-sumario
+
+## bopv-api
+EHAA/BOPV – API de actos administrativos (api.euskadi.eus) | Gobierno Vasco (Servicio Web del Gobierno Vasco)
+summary: API REST JSON del Boletín Oficial del País Vasco (EHAA): actos por año, mes y número de orden con paginación, estado de vigencia, correcciones de error y ámbito territorial. Sin autenticación; estrenada en diciembre de 2024.
+!! Los parámetros de query no documentados se ignoran sin error: startDate=2026-10-01&endDate=2026-10-01 devuelve con 200 la primera página del archivo histórico (actos de 2008).
+access: api-rest | auth: none | formats: json | update: daily | status: active | verified: 2026-10-05
+license: Sin condiciones específicas visibles en la documentación
+base_url: https://api.euskadi.eus
+docs_url: https://opendata.euskadi.eus/api-bopv/?api=bopv
+- /bopv/administrative-acts/{year}/{month}?itemsOfPage={n}&currentPage={n} :: Actos de un mes con paginación; cada acto trae id, name, publishDate, state y numBulletin
+  ej: curl -s "https://api.euskadi.eus/bopv/administrative-acts/2026/10?itemsOfPage=2"
+  devuelve: {totalItems 27, totalPages 14, items:[{id '2026/10/4071', name, publishDate '2026-09-30T22:00:00Z', isErrorCorrection false, normativeRange, state Vigente, territorialScope, numBulletin, numOrder, disposalDate}]}
+- /bopv/administrative-acts/{year}/{month}/{num-order} :: Un acto concreto por su número de orden dentro del mes
+  ej: curl -s "https://api.euskadi.eus/bopv/administrative-acts/2026/10/4071"
+  devuelve: El acto completo en JSON (12 KB en la prueba)
+- https://opendata.euskadi.eus/contenidos/recurso_tecnico/data_apirest/es_def/adjuntos/bopv.json :: Descriptor OpenAPI 3.0 de la API (rutas, parámetros y esquemas)
+  ej: curl -s "https://opendata.euskadi.eus/contenidos/recurso_tecnico/data_apirest/es_def/adjuntos/bopv.json"
+rate_limit: No documentado
+! No hay endpoint por día: solo año, año/mes y año/mes/número de orden; el día se filtra en cliente por publishDate.
+! publishDate llega como 22:00:00Z del día anterior: es la medianoche española en UTC, no un desfase real.
+! La paginación usa currentPage e itemsOfPage; el endpoint sin fecha pagina todo el archivo histórico desde el principio.
+related: boe-api-sumario, bocyl-rss, junta-andalucia-datos-abiertos, opendata-euskadi
 
 ## borme-api-sumario
 BORME – API de sumarios y actos mercantiles | Agencia Estatal Boletín Oficial del Estado (AEBOE)
@@ -626,6 +648,31 @@ ids: ine-municipio, nuts
 + Los municipios con código INE de 5 dígitos casan directamente con ine-api-tempus e ine-codigos-territoriales.
 + El barrio BARRIO_20010101_28079_B044 equivale a COD_DIST_BARRIO 404 de ayuntamiento-madrid-datos-abiertos (Guindalera); el distrito 28079_D04 a COD_DISTRITO 4.
 related: ine-api-tempus, ine-codigos-territoriales, comunidad-madrid-datos-abiertos, ayuntamiento-madrid-datos-abiertos
+
+## eustat-api
+EUSTAT – API del banco de datos (PxWeb JSON-stat) | Instituto Vasco de Estadística (EUSTAT)
+summary: API del banco de datos de EUSTAT (2.326 tablas PC-Axis): listado por idioma, metadatos con variables y consulta POST en JSON-stat 2.0. Convención PxWeb con interfaz de selección y Swagger propios.
+!! response.format 'json' (válido en el PxWeb estándar) aquí responde 400 Bad Request; el formato admitido es 'json-stat'.
+access: api-rest | auth: none | formats: json | update: irregular | status: active | verified: 2026-10-05
+license: Sin condiciones específicas visibles
+base_url: https://www.eustat.eus/bankupx/api/v1
+docs_url: https://es.eustat.eus/ayuda_API.html
+- /{es|eu|en}/DB :: Listado completo de tablas con id, tipo, título y última actualización
+  ej: curl -s "https://www.eustat.eus/bankupx/api/v1/es/DB"
+  devuelve: JSON de 503 KB con 2.326 tablas [{id 'PX__fe_inem06.px', type 't', text 'Paro registrado de la C.A. de Euskadi...', updated}]
+- /es/DB/{tabla}.px :: Metadatos de la tabla (título y variables con values y valueTexts) por GET; los datos van por POST
+  ej: curl -s "https://www.eustat.eus/bankupx/api/v1/es/DB/PX_050403_cpra_tab_a_25.px"
+  devuelve: {title, variables:[{code 'territorio histórico', values ['_T','01','48','20'], valueTexts [C.A. de Euskadi, Araba/Álava, Bizkaia, Gipuzkoa]}...]}
+- POST /es/DB/{tabla}.px :: Datos en JSON-stat 2.0 con selección de valores (filter item o top); query vacío devuelve toda la tabla
+  ej: curl -s -X POST -H "Content-Type: application/json" -d '{"query":[],"response":{"format":"json-stat"}}' "https://www.eustat.eus/bankupx/api/v1/es/DB/PX_050403_cpra_tab_a_25.px"
+  devuelve: {dataset:{dimension (territorio histórico, sexo, sector económico, trimestre, periodo), value [30.8, 30.8, 30.5...], role, updated}}
+rate_limit: No documentado
+ids: ine-provincia
+! Los code de las variables son nombres humanos con espacios y tildes ('territorio histórico'); hay que copiarlos del metadato tal cual.
+! El GET de una tabla devuelve metadatos, no datos; los datos solo llegan por POST con la selección.
+! 01, 48 y 20 en territorio histórico son los códigos INE de provincia y _T el total de la C.A.
++ Interfaz de selección tipo PxWeb en /bankupx/pxweb/es/DB/-/{tabla}.px, Swagger en es.eustat.eus/openapi/openapi.html y tutoriales oficiales en github.com/eustat/API-Eustat.
+related: ine-api-tempus, idescat-api, ieca-api-badea, opendata-euskadi
 
 ## idescat-api
 Idescat – API de tablas (JSON-stat), El municipio en cifras y búsqueda de población | Institut d'Estadística de Catalunya (Idescat)
@@ -1572,6 +1619,23 @@ ids: ine-municipio, nif
 + Para el BOJA de un año entero, /api/v0/boja/all?year=AAAA&format=csv con -L; para seguir lo publicado, get/search_pagination por día con date_from y date_to iguales.
 + cod_municipio de Educación y municipality_ine de la API v0 son códigos INE de 5 dígitos; leerlos como texto y cruzarlos con ine-codigos-territoriales.
 related: ieca-api-badea, datos-gob-es-api, ine-codigos-territoriales, boe-api-sumario, bdns-api
+
+## opendata-euskadi
+Open Data Euskadi – Catálogo, índice de APIs y punto SPARQL | Gobierno Vasco
+summary: Portal de datos abiertos del Gobierno Vasco y sus organismos con catálogo clasificado por ODS e índice de APIs REST servidas en api.euskadi.eus: BOPV, contratos públicos (KontratazioA), indicadores municipales (Udalmap), Euskalmet, eventos culturales, certificados energéticos, ITE y tráfico.
+!! El SPARQL sin la cabecera Accept: application/sparql-results+json responde 502 Bad Gateway, igual que si el servicio estuviera caído.
+access: api-rest, sparql, portal | auth: none | formats: json, rdf | update: irregular | status: active | verified: 2026-10-05
+license: Sin licencia única; condiciones en la información legal del portal
+base_url: https://opendata.euskadi.eus
+docs_url: https://opendata.euskadi.eus/apis/-/apis-open-data/
+- /apis/-/apis-open-data/ :: Índice de las APIs disponibles con su documentación (BOPV, KontratazioA, Udalmap, Euskalmet...)
+  ej: curl -s "https://opendata.euskadi.eus/apis/-/apis-open-data/"
+- https://api.euskadi.eus/sparql/ :: Punto SPARQL del grafo de datos enlazados del portal
+  ej: curl -s -H "Accept: application/sparql-results+json" --data-urlencode "query=SELECT ?s WHERE { ?s ?p ?o } LIMIT 1" "https://api.euskadi.eus/sparql/"
+  devuelve: JSON de resultados SPARQL (head.vars y results.bindings)
+! El catálogo va sobre el buscador del CMS vasco (parámetros r01kQry) sin API de catálogo documentada; los datasets se sirven bajo rutas /contenidos/ds_*/.
+! La portada y secciones alternan euskera y castellano según la ruta (/hasiera frente a /inicio); los contenidos duales existen en ambos idiomas.
+related: bopv-api, eustat-api, datos-gob-es-api, junta-andalucia-datos-abiertos
 
 ## pag-administracion-gob-es
 Punto de Acceso General – Trámites, SIA, empleo público y ayudas | Secretaría General de Administración Digital

@@ -1,6 +1,6 @@
 # Estadística oficial
 
-Sector `estadistica` · 7 fuentes · índice generado por `scripts/build.py`, no editar.
+Sector `estadistica` · 8 fuentes · índice generado por `scripts/build.py`, no editar.
 
 ## Dónde está cada cosa
 
@@ -29,6 +29,7 @@ Sector `estadistica` · 7 fuentes · índice generado por `scripts/build.py`, no
 | id | fuente | acceso | auth | formatos | actualización | quirks | verificada |
 |---|---|---|---|---|---|---|---|
 | [comunidad-madrid-estadistica-api](comunidad-madrid-estadistica-api.yaml) | Instituto de Estadística de la Comunidad de Madrid – API eDatos | api-rest | none | json, xml, csv, zip | monthly | soft-errors-200 | 2026-10-01 |
+| [eustat-api](eustat-api.yaml) | EUSTAT – API del banco de datos (PxWeb JSON-stat) | api-rest | none | json | irregular | — | 2026-10-05 |
 | [idescat-api](idescat-api.yaml) | Idescat – API de tablas (JSON-stat), El municipio en cifras y búsqueda de población | api-rest | none | json, xml | daily | json-object-or-list, soft-errors-200 | 2026-10-01 |
 | [ieca-api-badea](ieca-api-badea.yaml) | IECA – API de BADEA e INDEA (Instituto de Estadística y Cartografía de Andalucía) | api-rest, download | none | json, txt, px, xls, xlsx, pdf, csv, zip, html | irregular | errors-html-or-xml, soft-errors-200 | 2026-10-01 |
 | [ine-api-tempus](ine-api-tempus.yaml) | INE – API JSON (Tempus3) | api-rest | none | json, csv | daily | errors-html-or-xml, soft-errors-200 | 2026-10-01 |
@@ -37,6 +38,7 @@ Sector `estadistica` · 7 fuentes · índice generado por `scripts/build.py`, no
 | [ive-pegv-bancos-datos](ive-pegv-bancos-datos.yaml) | IVE – Bancos de datos del Portal Estadístico de la GV (BDT y BDO) | download, portal | none | csv, xlsx, xls, px | annual | latin1, errors-html-or-xml, overwritten-in-place, soft-errors-200, connection-reset-intermittent | 2026-10-01 |
 
 - **comunidad-madrid-estadistica-api**: API REST de la plataforma eDatos del Instituto (agencia IECM): 278 operaciones y 858 datasets con datos propios de Madrid (PIB municipal, contabilidad trimestral, nacimientos y defunciones por municipio, barrio o zona de salud, afiliación). JSON o XML, exportación a CSV, sin clave.
+- **eustat-api**: API del banco de datos de EUSTAT (2.326 tablas PC-Axis): listado por idioma, metadatos con variables y consulta POST en JSON-stat 2.0. Convención PxWeb con interfaz de selección y Swagger propios.
 - **idescat-api**: APIs REST sin clave del Idescat. Tablas de 33 estadísticas (padrón, censo, PIB trimestral, renta, afiliación, proyecciones) en JSON-stat por Cataluña, provincia, comarca, municipio, distrito y sección censal; ficha municipal EMEX con unos 230 indicadores y población por entidad.
 - **ieca-api-badea**: BADEA, banco de datos del IECA, por API REST JSON: cada consulta (padrón municipal desde 1996, Contabilidad Regional Trimestral, condiciones de vida) con metadatos, jerarquías y datos, exportable a txt, px, xls y pdf; e INDEA, indicadores por provincia. Sin autenticación.
 - **ine-api-tempus**: Acceso programático a las 112 operaciones estadísticas del INE: metadatos (operaciones, tablas, variables, valores) y datos de tablas y series (IPC, EPA, PIB, padrón, natalidad, empresas). JSON y CSV, sin autenticación.

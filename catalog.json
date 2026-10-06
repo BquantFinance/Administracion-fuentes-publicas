@@ -1,11 +1,11 @@
 {
  "name": "Administración fuentes públicas",
  "description": "Catálogo de fuentes de datos de la Administración pública española, optimizado para agentes.",
- "generated": "2026-10-05",
+ "generated": "2026-10-06",
  "repo": "https://github.com/BquantFinance/Administracion-fuentes-publicas",
  "schema": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/source.schema.json",
  "vocab": "https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/schema/vocab.yaml",
- "count": 102,
+ "count": 105,
  "sectors": {
   "legislacion-boletines": "Legislación y boletines oficiales",
   "economia-finanzas": "Economía, finanzas y mercados",
@@ -4236,6 +4236,78 @@
    "verified": "2026-10-01"
   },
   {
+   "id": "eustat-api",
+   "name": "EUSTAT – API del banco de datos (PxWeb JSON-stat)",
+   "org": "Instituto Vasco de Estadística (EUSTAT)",
+   "level": "ccaa",
+   "sector": "estadistica",
+   "tags": [
+    "estadistica",
+    "euskadi",
+    "eustat",
+    "pxweb",
+    "json-stat",
+    "bankupx",
+    "municipios"
+   ],
+   "summary": "API del banco de datos de EUSTAT (2.326 tablas PC-Axis): listado por idioma, metadatos con variables y consulta POST en JSON-stat 2.0. Convención PxWeb con interfaz de selección y Swagger propios.",
+   "access": [
+    "api-rest"
+   ],
+   "auth": "none",
+   "formats": [
+    "json"
+   ],
+   "update": "irregular",
+   "license": "Sin condiciones específicas visibles",
+   "base_url": "https://www.eustat.eus/bankupx/api/v1",
+   "docs_url": "https://es.eustat.eus/ayuda_API.html",
+   "endpoints": [
+    {
+     "path": "/{es|eu|en}/DB",
+     "desc": "Listado completo de tablas con id, tipo, título y última actualización",
+     "example": "curl -s \"https://www.eustat.eus/bankupx/api/v1/es/DB\"",
+     "returns": "JSON de 503 KB con 2.326 tablas [{id 'PX__fe_inem06.px', type 't', text 'Paro registrado de la C.A. de Euskadi...', updated}]"
+    },
+    {
+     "path": "/es/DB/{tabla}.px",
+     "desc": "Metadatos de la tabla (título y variables con values y valueTexts) por GET; los datos van por POST",
+     "example": "curl -s \"https://www.eustat.eus/bankupx/api/v1/es/DB/PX_050403_cpra_tab_a_25.px\"",
+     "returns": "{title, variables:[{code 'territorio histórico', values ['_T','01','48','20'], valueTexts [C.A. de Euskadi, Araba/Álava, Bizkaia, Gipuzkoa]}...]}"
+    },
+    {
+     "path": "POST /es/DB/{tabla}.px",
+     "desc": "Datos en JSON-stat 2.0 con selección de valores (filter item o top); query vacío devuelve toda la tabla",
+     "example": "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"query\":[],\"response\":{\"format\":\"json-stat\"}}' \"https://www.eustat.eus/bankupx/api/v1/es/DB/PX_050403_cpra_tab_a_25.px\"",
+     "returns": "{dataset:{dimension (territorio histórico, sexo, sector económico, trimestre, periodo), value [30.8, 30.8, 30.5...], role, updated}}"
+    }
+   ],
+   "alerts": [
+    "response.format 'json' (válido en el PxWeb estándar) aquí responde 400 Bad Request; el formato admitido es 'json-stat'."
+   ],
+   "rate_limit": "No documentado",
+   "quirks": [],
+   "ids": [
+    "ine-provincia"
+   ],
+   "gotchas": [
+    "Los code de las variables son nombres humanos con espacios y tildes ('territorio histórico'); hay que copiarlos del metadato tal cual.",
+    "El GET de una tabla devuelve metadatos, no datos; los datos solo llegan por POST con la selección.",
+    "01, 48 y 20 en territorio histórico son los códigos INE de provincia y _T el total de la C.A."
+   ],
+   "tips": [
+    "Interfaz de selección tipo PxWeb en /bankupx/pxweb/es/DB/-/{tabla}.px, Swagger en es.eustat.eus/openapi/openapi.html y tutoriales oficiales en github.com/eustat/API-Eustat."
+   ],
+   "related": [
+    "ine-api-tempus",
+    "idescat-api",
+    "ieca-api-badea",
+    "opendata-euskadi"
+   ],
+   "status": "active",
+   "verified": "2026-10-05"
+  },
+  {
    "id": "idescat-api",
    "name": "Idescat – API de tablas (JSON-stat), El municipio en cifras y búsqueda de población",
    "org": "Institut d'Estadística de Catalunya (Idescat)",
@@ -6135,6 +6207,64 @@
    "verified": "2026-10-01"
   },
   {
+   "id": "opendata-euskadi",
+   "name": "Open Data Euskadi – Catálogo, índice de APIs y punto SPARQL",
+   "org": "Gobierno Vasco",
+   "level": "ccaa",
+   "sector": "gobierno-abierto-administracion",
+   "tags": [
+    "datos-abiertos",
+    "catalogo",
+    "euskadi",
+    "apis",
+    "sparql",
+    "gateway"
+   ],
+   "summary": "Portal de datos abiertos del Gobierno Vasco y sus organismos con catálogo clasificado por ODS e índice de APIs REST servidas en api.euskadi.eus: BOPV, contratos públicos (KontratazioA), indicadores municipales (Udalmap), Euskalmet, eventos culturales, certificados energéticos, ITE y tráfico.",
+   "access": [
+    "api-rest",
+    "sparql",
+    "portal"
+   ],
+   "auth": "none",
+   "formats": [
+    "json",
+    "rdf"
+   ],
+   "update": "irregular",
+   "license": "Sin licencia única; condiciones en la información legal del portal",
+   "base_url": "https://opendata.euskadi.eus",
+   "docs_url": "https://opendata.euskadi.eus/apis/-/apis-open-data/",
+   "endpoints": [
+    {
+     "path": "/apis/-/apis-open-data/",
+     "desc": "Índice de las APIs disponibles con su documentación (BOPV, KontratazioA, Udalmap, Euskalmet...)",
+     "example": "curl -s \"https://opendata.euskadi.eus/apis/-/apis-open-data/\""
+    },
+    {
+     "path": "https://api.euskadi.eus/sparql/",
+     "desc": "Punto SPARQL del grafo de datos enlazados del portal",
+     "example": "curl -s -H \"Accept: application/sparql-results+json\" --data-urlencode \"query=SELECT ?s WHERE { ?s ?p ?o } LIMIT 1\" \"https://api.euskadi.eus/sparql/\"",
+     "returns": "JSON de resultados SPARQL (head.vars y results.bindings)"
+    }
+   ],
+   "alerts": [
+    "El SPARQL sin la cabecera Accept: application/sparql-results+json responde 502 Bad Gateway, igual que si el servicio estuviera caído."
+   ],
+   "gotchas": [
+    "El catálogo va sobre el buscador del CMS vasco (parámetros r01kQry) sin API de catálogo documentada; los datasets se sirven bajo rutas /contenidos/ds_*/.",
+    "La portada y secciones alternan euskera y castellano según la ruta (/hasiera frente a /inicio); los contenidos duales existen en ambos idiomas."
+   ],
+   "related": [
+    "bopv-api",
+    "eustat-api",
+    "datos-gob-es-api",
+    "junta-andalucia-datos-abiertos"
+   ],
+   "status": "active",
+   "verified": "2026-10-05"
+  },
+  {
    "id": "pag-administracion-gob-es",
    "name": "Punto de Acceso General – Trámites, SIA, empleo público y ayudas",
    "org": "Secretaría General de Administración Digital",
@@ -7468,6 +7598,71 @@
    ],
    "status": "active",
    "verified": "2026-10-01"
+  },
+  {
+   "id": "bopv-api",
+   "name": "EHAA/BOPV – API de actos administrativos (api.euskadi.eus)",
+   "org": "Gobierno Vasco (Servicio Web del Gobierno Vasco)",
+   "level": "ccaa",
+   "sector": "legislacion-boletines",
+   "tags": [
+    "boletines",
+    "euskadi",
+    "bopv",
+    "ehaa",
+    "api-rest",
+    "disposiciones"
+   ],
+   "summary": "API REST JSON del Boletín Oficial del País Vasco (EHAA): actos por año, mes y número de orden con paginación, estado de vigencia, correcciones de error y ámbito territorial. Sin autenticación; estrenada en diciembre de 2024.",
+   "alerts": [
+    "Los parámetros de query no documentados se ignoran sin error: startDate=2026-10-01&endDate=2026-10-01 devuelve con 200 la primera página del archivo histórico (actos de 2008)."
+   ],
+   "access": [
+    "api-rest"
+   ],
+   "auth": "none",
+   "formats": [
+    "json"
+   ],
+   "update": "daily",
+   "license": "Sin condiciones específicas visibles en la documentación",
+   "base_url": "https://api.euskadi.eus",
+   "docs_url": "https://opendata.euskadi.eus/api-bopv/?api=bopv",
+   "endpoints": [
+    {
+     "path": "/bopv/administrative-acts/{year}/{month}?itemsOfPage={n}&currentPage={n}",
+     "desc": "Actos de un mes con paginación; cada acto trae id, name, publishDate, state y numBulletin",
+     "example": "curl -s \"https://api.euskadi.eus/bopv/administrative-acts/2026/10?itemsOfPage=2\"",
+     "returns": "{totalItems 27, totalPages 14, items:[{id '2026/10/4071', name, publishDate '2026-09-30T22:00:00Z', isErrorCorrection false, normativeRange, state Vigente, territorialScope, numBulletin, numOrder, disposalDate}]}"
+    },
+    {
+     "path": "/bopv/administrative-acts/{year}/{month}/{num-order}",
+     "desc": "Un acto concreto por su número de orden dentro del mes",
+     "example": "curl -s \"https://api.euskadi.eus/bopv/administrative-acts/2026/10/4071\"",
+     "returns": "El acto completo en JSON (12 KB en la prueba)"
+    },
+    {
+     "path": "https://opendata.euskadi.eus/contenidos/recurso_tecnico/data_apirest/es_def/adjuntos/bopv.json",
+     "desc": "Descriptor OpenAPI 3.0 de la API (rutas, parámetros y esquemas)",
+     "example": "curl -s \"https://opendata.euskadi.eus/contenidos/recurso_tecnico/data_apirest/es_def/adjuntos/bopv.json\""
+    }
+   ],
+   "rate_limit": "No documentado",
+   "quirks": [],
+   "ids": [],
+   "gotchas": [
+    "No hay endpoint por día: solo año, año/mes y año/mes/número de orden; el día se filtra en cliente por publishDate.",
+    "publishDate llega como 22:00:00Z del día anterior: es la medianoche española en UTC, no un desfase real.",
+    "La paginación usa currentPage e itemsOfPage; el endpoint sin fecha pagina todo el archivo histórico desde el principio."
+   ],
+   "related": [
+    "boe-api-sumario",
+    "bocyl-rss",
+    "junta-andalucia-datos-abiertos",
+    "opendata-euskadi"
+   ],
+   "status": "active",
+   "verified": "2026-10-05"
   },
   {
    "id": "borme-api-sumario",
@@ -13556,6 +13751,7 @@
      "segsocial-estadisticas",
      "minetur-precios-carburantes",
      "miteco-energia-estadisticas",
+     "eustat-api",
      "idescat-api",
      "ieca-api-badea",
      "ine-codigos-territoriales",

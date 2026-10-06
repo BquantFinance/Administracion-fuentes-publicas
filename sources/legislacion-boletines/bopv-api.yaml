@@ -1,0 +1,41 @@
+id: bopv-api
+name: EHAA/BOPV – API de actos administrativos (api.euskadi.eus)
+org: Gobierno Vasco (Servicio Web del Gobierno Vasco)
+level: ccaa
+sector: legislacion-boletines
+tags: [boletines, euskadi, bopv, ehaa, api-rest, disposiciones]
+summary: >-
+  API REST JSON del Boletín Oficial del País Vasco (EHAA): actos por año, mes y número de orden con
+  paginación, estado de vigencia, correcciones de error y ámbito territorial. Sin autenticación;
+  estrenada en diciembre de 2024.
+alerts:
+  - "Los parámetros de query no documentados se ignoran sin error: startDate=2026-10-01&endDate=2026-10-01 devuelve con 200 la primera página del archivo histórico (actos de 2008)."
+access: [api-rest]
+auth: none
+formats: [json]
+update: daily
+license: Sin condiciones específicas visibles en la documentación
+base_url: https://api.euskadi.eus
+docs_url: https://opendata.euskadi.eus/api-bopv/?api=bopv
+endpoints:
+  - path: /bopv/administrative-acts/{year}/{month}?itemsOfPage={n}&currentPage={n}
+    desc: Actos de un mes con paginación; cada acto trae id, name, publishDate, state y numBulletin
+    example: curl -s "https://api.euskadi.eus/bopv/administrative-acts/2026/10?itemsOfPage=2"
+    returns: "{totalItems 27, totalPages 14, items:[{id '2026/10/4071', name, publishDate '2026-09-30T22:00:00Z', isErrorCorrection false, normativeRange, state Vigente, territorialScope, numBulletin, numOrder, disposalDate}]}"
+  - path: /bopv/administrative-acts/{year}/{month}/{num-order}
+    desc: Un acto concreto por su número de orden dentro del mes
+    example: curl -s "https://api.euskadi.eus/bopv/administrative-acts/2026/10/4071"
+    returns: "El acto completo en JSON (12 KB en la prueba)"
+  - path: https://opendata.euskadi.eus/contenidos/recurso_tecnico/data_apirest/es_def/adjuntos/bopv.json
+    desc: Descriptor OpenAPI 3.0 de la API (rutas, parámetros y esquemas)
+    example: curl -s "https://opendata.euskadi.eus/contenidos/recurso_tecnico/data_apirest/es_def/adjuntos/bopv.json"
+rate_limit: No documentado
+quirks: []
+ids: []
+gotchas:
+  - "No hay endpoint por día: solo año, año/mes y año/mes/número de orden; el día se filtra en cliente por publishDate."
+  - "publishDate llega como 22:00:00Z del día anterior: es la medianoche española en UTC, no un desfase real."
+  - "La paginación usa currentPage e itemsOfPage; el endpoint sin fecha pagina todo el archivo histórico desde el principio."
+related: [boe-api-sumario, bocyl-rss, junta-andalucia-datos-abiertos, opendata-euskadi]
+status: active
+verified: "2026-10-05"
