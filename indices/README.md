@@ -1,6 +1,6 @@
 # Índices para agentes
 
-Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 14 productos, 47 recetas, 160 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
+Generado por `scripts/build.py` a partir de `indices/*.yaml`, no editar. 14 productos, 47 recetas, 163 necesidades, 21 identificadores, 24 grupos de códigos, 99 rutas muertas.
 
 ## Productos que se pueden construir hoy
 
@@ -839,6 +839,9 @@ Procedimientos verificados que encadenan fichas. `python scripts/check_recetas.p
 - GTFS del Consorcio de Transportes de Madrid → `comunidad-madrid-datos-abiertos` (el conjunto enlaza a ArcGIS; el ZIP sale de /sharing/rest/content/items/{id}/data)
 - Registro de entidades, contratación o subvenciones (RAISC) de la Generalitat de Catalunya → `gencat-dades-obertes` (Socrata; sin $limit corta a 1000 filas; buscar en catalán; el RAISC trae codi_bdns)
 - Población de Barcelona por barrio o sección censal del último año → `ayuntamiento-barcelona-datos-abiertos` (padrón municipal, no cifra oficial; el Idescat por sección acaba en 2022; solo el datastore es automatizable)
+- Presupuestos, recibos de IBI o IVTM y subvenciones nominativas del Ayuntamiento de València → `ayuntamiento-valencia-datos-abiertos` (datastore CKAN con todo como texto (sort ordena como cadena); mejor /datastore/dump y convertir importes)
+- Disponibilidad de ValenBisi y estado del tráfico en València en tiempo real → `ayuntamiento-valencia-datos-abiertos` (capas ArcGIS Trafico/228 y Trafico/192; ValenBisi trae updated_at como texto, usar update_jcd)
+- GTFS de los autobuses de la EMT de València → `ayuntamiento-valencia-datos-abiertos` (el nombre del ZIP lleva la fecha; sacar la URL de package_show de google-transit-lines-stops-bus-schedules)
 - Disposiciones del BOJA por fecha con sumario y PDF → `junta-andalucia-datos-abiertos` (API v0 aparte del CKAN; ordenar por dateUTC y trocear por día)
 - Datos abiertos de la Junta de Andalucía y filas de sus CSV por API → `junta-andalucia-datos-abiertos` (cambiar el host interno de los recursos subidos por www.juntadeandalucia.es)
 - Datos abiertos de la Generalitat Valenciana (contratos, ERTE, turismo, cultura) por API → `gva-dadesobertes-api` (CKAN con datastore; el órgano real va en origen_datos, no en organization)
