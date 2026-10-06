@@ -1,0 +1,45 @@
+id: eustat-api
+name: EUSTAT – API del banco de datos (PxWeb JSON-stat)
+org: Instituto Vasco de Estadística (EUSTAT)
+level: ccaa
+sector: estadistica
+tags: [estadistica, euskadi, eustat, pxweb, json-stat, bankupx, municipios]
+summary: >-
+  API del banco de datos de EUSTAT (2.326 tablas PC-Axis): listado por idioma, metadatos con variables y
+  consulta POST en JSON-stat 2.0. Convención PxWeb con interfaz de selección y Swagger propios.
+access: [api-rest]
+auth: none
+formats: [json]
+update: irregular
+license: Sin condiciones específicas visibles
+base_url: https://www.eustat.eus/bankupx/api/v1
+docs_url: https://es.eustat.eus/ayuda_API.html
+endpoints:
+  - path: /{es|eu|en}/DB
+    desc: Listado completo de tablas con id, tipo, título y última actualización
+    example: curl -s "https://www.eustat.eus/bankupx/api/v1/es/DB"
+    returns: "JSON de 503 KB con 2.326 tablas [{id 'PX__fe_inem06.px', type 't', text 'Paro registrado de la C.A. de Euskadi...', updated}]"
+  - path: /es/DB/{tabla}.px
+    desc: Metadatos de la tabla (título y variables con values y valueTexts) por GET; los datos van por POST
+    example: curl -s "https://www.eustat.eus/bankupx/api/v1/es/DB/PX_050403_cpra_tab_a_25.px"
+    returns: "{title, variables:[{code 'territorio histórico', values ['_T','01','48','20'], valueTexts [C.A. de Euskadi, Araba/Álava, Bizkaia, Gipuzkoa]}...]}"
+  - path: POST /es/DB/{tabla}.px
+    desc: Datos en JSON-stat 2.0 con selección de valores (filter item o top); query vacío devuelve toda la tabla
+    example: >-
+      curl -s -X POST -H "Content-Type: application/json" -d '{"query":[],"response":{"format":"json-stat"}}'
+      "https://www.eustat.eus/bankupx/api/v1/es/DB/PX_050403_cpra_tab_a_25.px"
+    returns: "{dataset:{dimension (territorio histórico, sexo, sector económico, trimestre, periodo), value [30.8, 30.8, 30.5...], role, updated}}"
+alerts:
+  - "response.format 'json' (válido en el PxWeb estándar) aquí responde 400 Bad Request; el formato admitido es 'json-stat'."
+rate_limit: No documentado
+quirks: []
+ids: [ine-provincia]
+gotchas:
+  - "Los code de las variables son nombres humanos con espacios y tildes ('territorio histórico'); hay que copiarlos del metadato tal cual."
+  - "El GET de una tabla devuelve metadatos, no datos; los datos solo llegan por POST con la selección."
+  - "01, 48 y 20 en territorio histórico son los códigos INE de provincia y _T el total de la C.A."
+tips:
+  - "Interfaz de selección tipo PxWeb en /bankupx/pxweb/es/DB/-/{tabla}.px, Swagger en es.eustat.eus/openapi/openapi.html y tutoriales oficiales en github.com/eustat/API-Eustat."
+related: [ine-api-tempus, idescat-api, ieca-api-badea, opendata-euskadi]
+status: active
+verified: "2026-10-05"

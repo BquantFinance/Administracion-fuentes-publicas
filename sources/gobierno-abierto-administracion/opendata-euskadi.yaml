@@ -1,0 +1,35 @@
+id: opendata-euskadi
+name: Open Data Euskadi – Catálogo, índice de APIs y punto SPARQL
+org: Gobierno Vasco
+level: ccaa
+sector: gobierno-abierto-administracion
+tags: [datos-abiertos, catalogo, euskadi, apis, sparql, gateway]
+summary: >-
+  Portal de datos abiertos del Gobierno Vasco y sus organismos con catálogo clasificado por ODS e índice
+  de APIs REST servidas en api.euskadi.eus: BOPV, contratos públicos (KontratazioA), indicadores
+  municipales (Udalmap), Euskalmet, eventos culturales, certificados energéticos, ITE y tráfico.
+access: [api-rest, sparql, portal]
+auth: none
+formats: [json, rdf]
+update: irregular
+license: Sin licencia única; condiciones en la información legal del portal
+base_url: https://opendata.euskadi.eus
+docs_url: https://opendata.euskadi.eus/apis/-/apis-open-data/
+endpoints:
+  - path: /apis/-/apis-open-data/
+    desc: Índice de las APIs disponibles con su documentación (BOPV, KontratazioA, Udalmap, Euskalmet...)
+    example: curl -s "https://opendata.euskadi.eus/apis/-/apis-open-data/"
+  - path: https://api.euskadi.eus/sparql/
+    desc: Punto SPARQL del grafo de datos enlazados del portal
+    example: >-
+      curl -s -H "Accept: application/sparql-results+json" --data-urlencode "query=SELECT ?s WHERE { ?s ?p ?o } LIMIT 1"
+      "https://api.euskadi.eus/sparql/"
+    returns: "JSON de resultados SPARQL (head.vars y results.bindings)"
+alerts:
+  - "El SPARQL sin la cabecera Accept: application/sparql-results+json responde 502 Bad Gateway, igual que si el servicio estuviera caído."
+gotchas:
+  - "El catálogo va sobre el buscador del CMS vasco (parámetros r01kQry) sin API de catálogo documentada; los datasets se sirven bajo rutas /contenidos/ds_*/."
+  - "La portada y secciones alternan euskera y castellano según la ruta (/hasiera frente a /inicio); los contenidos duales existen en ambos idiomas."
+related: [bopv-api, eustat-api, datos-gob-es-api, junta-andalucia-datos-abiertos]
+status: active
+verified: "2026-10-05"
