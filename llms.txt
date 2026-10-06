@@ -2,7 +2,7 @@
 
 > Datos públicos de España listos para construir productos: dónde está cada dato, cómo pedirlo, qué devuelve, qué trampas tiene (verificadas con llamadas reales) y código que ya lo trae resuelto. Para agentes y desarrolladores. Contenido en castellano, claves en inglés.
 
-Fuentes: 102 · Productos: 14 · Recetas: 47 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana, Castilla y León y los ayuntamientos de Madrid y Barcelona · Generado: 2026-10-05
+Fuentes: 103 · Productos: 14 · Recetas: 47 · Alcance: Administración General del Estado, Madrid, Cataluña, Andalucía, Comunitat Valenciana, Castilla y León y los ayuntamientos de Madrid y Barcelona · Generado: 2026-10-06
 
 ## Empieza aquí
 
@@ -55,6 +55,7 @@ Datos incompletos, distintos o a cero sin ningún error; están en `alerts` de c
 - bdns-api: La exportación sin pageSize devuelve 50 filas aunque haya miles (50 de 968 concesiones de un día), sin aviso; pedir page=0&pageSize=10000 (tope) y seguir con page=1, 2... hasta una página con menos filas.
 - bdns-api: Las concesiones caducan a los 4 años naturales y las de personas físicas tras el siguiente (RD 130/2019 art. 7.8); hoy fechaDesde=01/01/2021&fechaHasta=31/12/2021 da totalElements 0. Para series, copia propia.
 - borme-api-sumario: Situación concursal llega con meses de retraso y mezcla resoluciones viejas (el BORME del 02/10/2026 trae una declaración del 11/05/2026 y revocaciones de 2022): usar la fecha de resolución y la última por procedimiento.
+- cartografia-jcyl: Licencia IGCYL-NC 2012 (no comercial): el propio FTP publica LICENCIA-IGCYL-NC-2012.pdf en la raíz; las 153 distribuciones SHP con esa licencia del catálogo jcyl-datos-abiertos apuntan aquí.
 - centros-docentes-ccaa: Cataluña (kvmv-ahh4): geo_1 pierde el punto decimal ([1929887, 414736]) y within_circle(geo_1, 41.388, 2.1592, 500) da 0 sin error; con coordenades_geo_x/y hay 14 a menos de 500 m. Usar esos dos campos.
 - centros-docentes-ccaa: Cataluña repite cada centro en cada curso: 32.680 filas para 5.434 centros en 2025/2026. Filtrar curs (el último con $select=max(curs)) antes de contar o de buscar cercanos.
 - centros-docentes-ccaa: Madrid (centros_educativos): 7.757 filas y solo 3.906 en ALTA; 3.552 son BAJA, 193 INACTIVO y 76 ANULACIÓN. Filtrar SITUACIÓN = ALTA o se cuentan casi el doble de colegios.
@@ -337,7 +338,7 @@ Entre paréntesis, el módulo o la herramienta que ya trae la fuente (code de su
 - [Contratación pública y subvenciones](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/contratacion-subvenciones/README.md): bdns-api (clientes.bdns), hacienda-registro-licitadores (empresa_nif), placsp-datos-abiertos (clientes.placsp)
 - [Empleo y Seguridad Social](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/empleo-seguridad-social/README.md): mites-estadisticas, segsocial-estadisticas, sepe-estadisticas (clientes.sepe)
 - [Gobierno abierto, transparencia y organización administrativa](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/gobierno-abierto-administracion/README.md): ayuntamiento-barcelona-datos-abiertos (clientes.ckan), ayuntamiento-madrid-datos-abiertos (clientes.ckan), comunidad-madrid-datos-abiertos (clientes.ckan), datos-gob-es-api, dir3-directorio, face-facturas, gencat-dades-obertes (clientes.socrata), gva-dadesobertes-api (clientes.ckan), jcyl-datos-abiertos, junta-andalucia-datos-abiertos (clientes.ckan), pag-administracion-gob-es, transparencia-portal
-- [Territorio, catastro y cartografía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/territorio-cartografia/README.md): catastro-ovc, cnig-centro-descargas (perfil_municipio), idecyl-servicios, idee-servicios (clientes.ogc), ine-cartografia-censal (clientes.ogc)
+- [Territorio, catastro y cartografía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/territorio-cartografia/README.md): cartografia-jcyl, catastro-ovc, cnig-centro-descargas (perfil_municipio), idecyl-servicios, idee-servicios (clientes.ogc), ine-cartografia-censal (clientes.ogc)
 - [Meteorología y clima](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/meteorologia-clima/README.md): aemet-opendata (clientes.aemet), aemet-otros-servicios
 - [Medio ambiente, agua y biodiversidad](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/medio-ambiente-agua-biodiversidad/README.md): miteco-banco-datos-naturaleza, miteco-calidad-aire, miteco-inventario-emisiones, miteco-prtr, miteco-saih-boletin-hidrologico
 - [Energía](https://raw.githubusercontent.com/BquantFinance/Administracion-fuentes-publicas/main/sources/energia/README.md): cnmc-data (clientes.ckan), minetur-precios-carburantes (clientes.almacen), miteco-energia-estadisticas, omie-mercado, ree-redata
