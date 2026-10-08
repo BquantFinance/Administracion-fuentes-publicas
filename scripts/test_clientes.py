@@ -902,5 +902,51 @@ def code_valida_llamadas_y_herramientas():
     assert "máximo 600" in " ".join(validate.validate_code("f", largo, h, c))
 
 
+class _RespuestaFalsa:
+    def __init__(self, status: int, cuerpo: bytes = b"", headers: dict | None = None):
+        self.status_code, self._cuerpo, self.headers = status, cuerpo, headers or {}
+
+    def iter_content(self, _n):
+        yield self._cuerpo
+
+    def close(self):
+        pass
+
+
+class _SesionFalsa:
+    def __init__(self, respuestas):
+        self.respuestas = list(respuestas)
+
+    def request(self, *a, **k):
+        return self.respuestas.pop(0)
+
+
+@test
+def check_recetas_429_es_blocked_y_respeta_retry_after():
+    # Un 429 (como los de AEMET en la verificación semanal) no es que la receta haya cambiado: va como blocked, no como fail
+    sys.path.insert(0, str(DIR.parent))
+    import check_recetas
+    esperas = []
+    dormir, check_recetas.time.sleep = check_recetas.time.sleep, esperas.append
+    try:
+        c = {"url": "https://opendata.aemet.es/x", "contains": "exito", "retries": 1}
+        res = check_recetas.run_check(_SesionFalsa([_RespuestaFalsa(429, b"{}", {"Retry-After": "30"})] * 2), c, 5, 4.0, True)
+        assert res["result"] == "blocked" and res["status"] == 429 and "límite de peticiones" in res["detail"], res
+        assert esperas == [30.0], esperas  # Retry-After en vez de --sleep
+        esperas.clear()
+        res = check_recetas.run_check(_SesionFalsa([_RespuestaFalsa(429, headers={"Retry-After": "3600"}),
+                                                    _RespuestaFalsa(200, b'"estado": 200, "exito"')]), c, 5, 4.0, True)
+        assert res["result"] == "ok" and res["attempt"] == 2 and esperas == [check_recetas.MAX_RETRY_AFTER], (res, esperas)
+        esperas.clear()
+        # Sin Retry-After, la espera de siempre; y un 500 sigue siendo fail
+        res = check_recetas.run_check(_SesionFalsa([_RespuestaFalsa(429), _RespuestaFalsa(500)]), c, 5, 4.0, True)
+        assert res["result"] == "fail" and res["status"] == 500 and esperas == [4.0], (res, esperas)
+        # Una receta que espera 429 a propósito no se reclasifica
+        res = check_recetas.run_check(_SesionFalsa([_RespuestaFalsa(429)]), {"url": "https://x", "status": 429}, 5, 4.0, True)
+        assert res["result"] == "ok", res
+    finally:
+        check_recetas.time.sleep = dormir
+
+
 if __name__ == "__main__":
     sys.exit(main())
