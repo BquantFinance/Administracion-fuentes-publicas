@@ -8,7 +8,9 @@ y comprueba status (200 por defecto), contains y min_bytes (Content-Length si ex
 Resultado: ok | fail (código o contenido distinto del esperado) | blocked (WAF, filtro antibots o bloqueo por
 IP reconocido en la respuesta) | error (sin respuesta) | skipped (la url o una cabecera usa ${VARIABLE} y la
 variable de entorno no está definida; así se pasan claves como AEMET_KEY sin escribirlas en el repo). Con --fail devuelve 1 si hay fail o error; blocked
-se informa pero no rompe, porque depende de la red desde la que se ejecuta.
+se informa pero no rompe, porque depende de la red desde la que se ejecuta. Un 429 (límite de peticiones) también
+cuenta como blocked salvo que la receta espere 429, y el reintento espera lo que diga Retry-After (como mucho
+MAX_RETRY_AFTER segundos) en vez de --sleep.
 El bundle de CA sale de --ca, de la variable CA_BUNDLE o de ca-age.pem (scripts/fnmt_bundle.py) si existe.
 """
 from __future__ import annotations
@@ -39,6 +41,14 @@ BLOCK_MARKERS = (
     "Incapsula",
     "_Incapsula_Resource",
 )
+# Tope a la espera que pida Retry-After: la verificación semanal no debe quedarse parada si un servidor pide horas.
+MAX_RETRY_AFTER = 65.0
+
+
+def retry_after(r: requests.Response) -> float | None:
+    """Segundos de Retry-After si viene en segundos (no se interpreta la forma de fecha HTTP), con tope."""
+    valor = (r.headers.get("Retry-After") or "").strip()
+    return min(float(valor), MAX_RETRY_AFTER) if valor.isdigit() else None
 
 
 def ca_bundle(arg: str | None) -> str | bool:
@@ -83,6 +93,7 @@ def run_check(session: requests.Session, c: dict, timeout: float, sleep: float, 
     last: dict = {}
     for n in range(attempts):
         t0 = time.time()
+        wait = sleep
         try:
             r = session.request(method, c["url"], headers=headers, timeout=timeout, stream=True, verify=verify)
             length = r.headers.get("Content-Length")
@@ -106,7 +117,13 @@ def run_check(session: requests.Session, c: dict, timeout: float, sleep: float, 
                 reasons.append(f"no contiene {c['contains']!r}")
             if c.get("min_bytes") and size < c["min_bytes"]:
                 reasons.append(f"{size} bytes, esperados >= {c['min_bytes']}")
-            result = "ok" if not reasons else ("blocked" if blocked else "fail")
+            # Un 429 es un límite de peticiones del servidor, no un cambio de la fuente: depende de la red y del momento,
+            # como el WAF, así que cuenta como blocked y no rompe --fail (salvo que la receta espere 429 a propósito).
+            limited = r.status_code == 429 and want_status != 429
+            if limited:
+                reasons.append("límite de peticiones")
+                wait = retry_after(r) or sleep
+            result = "ok" if not reasons else ("blocked" if blocked or limited else "fail")
             last = {"result": result, "status": r.status_code, "bytes": size, "ms": int((time.time() - t0) * 1000),
                     "detail": "; ".join(reasons), "attempt": n + 1}
         except requests.RequestException as exc:
@@ -115,7 +132,7 @@ def run_check(session: requests.Session, c: dict, timeout: float, sleep: float, 
         if last["result"] == "ok":
             break
         if n + 1 < attempts:
-            time.sleep(sleep)
+            time.sleep(wait)
     return last
 
 
